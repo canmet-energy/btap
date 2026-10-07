@@ -150,7 +150,7 @@ annual-dominant — satisfies (5)(a). A capacity-dominant election was built,
 measured and abandoned for that reason (`118`). Computing the ratio and
 verifying it IS tool-side work and is not excused by this entry.
 
-## AHJ-2 — whether 8.4.4.13 displaces (5) for a heat-pump group, and what (2)(g) elects on
+## AHJ-2 — the annual-energy basis (2)(g) compares, and an irreconcilable Article 13 case
 
 **Article.** 8.4.4.13 and Table 8.4.4.13; 8.4.5.13 and its table; with
 8.4.x.9.(5).
@@ -582,7 +582,7 @@ materially different scope.
 **What the tool does meanwhile.** It applies D-55's reading, which adds
 reference humidification the other reading would not.
 
-## AHJ-13 — Path A or Path B for chiller efficiency
+## AHJ-13 — Path B is permitted; whether we meet its IPLV is unverified
 
 **Article.** Table 5.2.12.1.-K.
 

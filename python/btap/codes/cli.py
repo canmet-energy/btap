@@ -564,37 +564,55 @@ def verdict_block(result, rep):
             "  Run with --simulate annual for an 8.4.1.2 determination.", rule])
     verdict = "COMPLIANT" if result.compliant else "NOT COMPLIANT"
     if rep.get("compliance_determination") == "conditional":
+        # GENERIC, per D-100. This block used to describe the multi-energy
+        # capacity ratio in hardcoded prose, so an AHJ-11 System-5 condition
+        # would have been rendered as a boiler-capacity condition. Everything
+        # specific now comes from the resolved condition records, which carry
+        # each question's own status, title, article, target and the deciding
+        # entry's own account.
         reason = rep.get("compliance_determination_reason") or {}
-        article = reason.get("article") or "the capacity-ratio sentence"
-        systems = reason.get("serving_systems") or []
+        conditions = reason.get("conditions") or []
         approve = reason.get("ahj_must_approve") or []
+        targets = [c["target"] for c in conditions if c.get("target")]
+        seen, where = set(), []
+        for target in targets:
+            if target not in seen:
+                seen.add(target)
+                where.append(target)
+        # SPLIT on ';' first: a condition's article may itself be compound
+        # ("8.4.4.9.(5); 8.4.4.9.(6)"), and deduping whole strings printed
+        # "8.4.4.9.(5); 8.4.4.9.(5); 8.4.4.9.(6)".
+        articles = sorted({part.strip()
+                           for c in conditions if c.get("article")
+                           for part in str(c["article"]).split(";")
+                           if part.strip()})
+        ids = reason.get("ahj_ids") or []
         return "\n".join([
             "", "  *** NOT A CODE-COMPLIANT DETERMINATION ***",
-            f"  {article} governs the {len(systems)} multi-energy serving "
-            "system(s) below and its",
-            "  capacity-ratio requirement is neither computed nor enforced. "
-            "What the",
-            "  reference's final heating equipment carries is NOT established "
-            "by this tool,",
-            "  so the comparison above is INFORMATIONAL only and is not "
+            f"  {len(ids)} question(s) in the AHJ register "
+            f"({', '.join(ids)}) were raised by this",
+            "  run's modelling choices and require approval before the "
+            "comparison above",
+            "  can support compliance. It is INFORMATIONAL only and is not "
             "evidence of",
             "  compliance.",
-            *[f"    - {s}" for s in systems],
+            *([f"  Governing: {'; '.join(articles)}"] if articles else []),
+            *([f"    - {s}" for s in where] if where else []),
             "",
             "  CONDITIONAL: the authority having jurisdiction must accept the "
             "conditions",
-            "  below before this comparison can support compliance. Each says "
-            "whether it is",
-            "  an ALTERNATIVE SOLUTION — the text decides the requirement and "
-            "this tool does",
-            "  not meet it — or an INTERPRETATION the text does not settle.",
+            "  below. Each says whether it is an ALTERNATIVE SOLUTION — the "
+            "text decides",
+            "  the requirement and this tool does not meet it — or an "
+            "INTERPRETATION the",
+            "  text does not settle.",
             *[f"    - {_wrap_condition(a)}" for a in approve],
             "",
             f"  VERDICT: {verdict} - INFORMATIONAL, AND CONDITIONAL ON "
             "APPROVAL BY THE",
             "           AUTHORITY HAVING JURISDICTION",
             f"  ({rep.get('code_label')}, Division B, Article 8.4.1.2; "
-            f"{article} unimplemented)", rule])
+            f"see {reason.get('ahj_register')})", rule])
     return "\n".join([
         "", f"  VERDICT: {verdict}   ({rep.get('code_label')}, Division B, "
             "Article 8.4.1.2)", rule])

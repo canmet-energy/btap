@@ -226,8 +226,8 @@ usefully, for each partial article's specific gap.
 ## Decisions and assumptions
 
 Where the code needs interpreting, the interpretation is written down rather than
-buried in the source. **99 decisions** are recorded in
-**[necb_decisions.md](docs/necb_decisions.md)** — 50 of them
+buried in the source. **100 decisions** are recorded in
+**[necb_decisions.md](docs/necb_decisions.md)** — 51 of them
 active at runtime, tagging the audit entries they govern.
 
 A decision records what the code says, how we read it, what we rejected, and why.
@@ -237,7 +237,7 @@ energy is represented.
 
 The HTML report's **"Decisions and assumptions applied"** appendix lists the ones
 that actually fired in *your* run — so a reviewer sees the judgement calls that
-affected this building, not all 99.
+affected this building, not all 100.
 
 ---
 
@@ -271,27 +271,33 @@ names what your authority must accept:
 
 ```
   *** NOT A CODE-COMPLIANT DETERMINATION ***
-  8.4.4.9.(5) governs the 1 multi-energy serving system(s) below and its
-  capacity-ratio requirement is neither computed nor enforced. What the
-  reference's final heating equipment carries is NOT established by this tool,
-  so the comparison above is INFORMATIONAL only and is not evidence of
+  2 question(s) in the AHJ register (AHJ-1, AHJ-3) were raised by this
+  run's modelling choices and require approval before the comparison above
+  can support compliance. It is INFORMATIONAL only and is not evidence of
   compliance.
+  Governing: 8.4.4.9.(5); 8.4.4.9.(6)
     - Hot Water Loop
 
   CONDITIONAL: the authority having jurisdiction must accept the conditions
-  below before this comparison can support compliance. Each says whether it is
-  an ALTERNATIVE SOLUTION — the text decides the requirement and this tool does
-  not meet it — or an INTERPRETATION the text does not settle.
-    - an ALTERNATIVE SOLUTION: 8.4.4.9.(5)(a) requires the reference
-      heating capacities to MATCH THE RATIO of the proposed
-      allocation per energy type, and this tool computes no ratio
-    - how 8.4.4.9.(5)'s allocation is to be REPRESENTED against
-      8.4.4.9.(6) on Hot Water Loop, which the acceptable-solution
-      text does not settle
+  below. Each says whether it is an ALTERNATIVE SOLUTION — the text decides
+  the requirement and this tool does not meet it — or an INTERPRETATION the
+  text does not settle.
+    - AHJ-1 (alternative-solution): a single-fuel reference is a
+      NON-CONFORMING substitution — an ALTERNATIVE SOLUTION, which
+      the text DECIDES and this tool does not meet — accepting it
+      means accepting an explicitly identified non-conforming
+      substitution. Applies to: Hot Water Loop — what the
+      reference's final heating equipment carries is NOT established
+      by this tool
+    - AHJ-3 (referral): whether 8.4.4.9.(6)(d) permits more than one
+      boiler — an INTERPRETATION the acceptable-solution text does
+      not settle. Applies to: Hot Water Loop — whether that
+      conflicts with the boiler-count sentence is NOT established
+      here
 
   VERDICT: COMPLIANT - INFORMATIONAL, AND CONDITIONAL ON APPROVAL BY THE
            AUTHORITY HAVING JURISDICTION
-  (NECB 2020, Division B, Article 8.4.1.2; 8.4.4.9.(5) unimplemented)
+  (NECB 2020, Division B, Article 8.4.1.2; see docs/NECB_AHJ_QUESTIONS.md)
 ```
 
 **The other fifteen do not change the verdict, and not all of them reach you

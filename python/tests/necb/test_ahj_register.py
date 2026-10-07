@@ -151,17 +151,53 @@ class TestTheStatusTaxonomyIsHonoured(unittest.TestCase):
 
     def test_a_tool_gap_or_ruled_entry_does_not_set_a_run_conditional(self):
         """The whole point of the taxonomy: a defect must not be dressed as an
-        interpretation that blocks a verdict."""
+        interpretation that blocks a verdict.
+
+        REWRITTEN for Sol's `127`. This used to scan `path.py` for ids and
+        demand every one be approval-required, which assumed CITED meant
+        CONDITIONAL. That is now exactly the distinction the design draws: a
+        rule site cites every applicable disposition, including `ruled` and
+        `tool-gap`, because a reader wants to know AHJ-5 is why a WSHP group
+        entered multi-energy scope. Only the resolved STATUS decides the
+        verdict, and nothing but the generated register may say what a status
+        is.
+
+        So the property is now about the collector, not about which ids appear
+        in a source file.
+        """
+        from btap.codes import ahj as registry
+
+        self.assertEqual(
+            ("referral", "alternative-solution"),
+            registry.approval_required_statuses(),
+            "only these two may require approval")
         rows = self._rows()
-        product = (PRODUCT / "codes" / "necb" / "path.py").read_text(
-            encoding="utf-8")
-        cited = set(ID_RE.findall(product))
-        for ident in cited:
-            self.assertIn(
-                rows.get(ident), {"referral", "alternative-solution"},
-                f"{ident} is cited by the conditional determination but its "
-                f"status is {rows.get(ident)!r}; only a referral or an "
-                f"alternative solution may set a run conditional")
+        for ident, status in sorted(rows.items()):
+            record = registry.by_id().get(ident)
+            self.assertIsNotNone(
+                record, f"{ident} is in the register but not the projection")
+            self.assertEqual(
+                status, record["status"],
+                f"{ident}: the authored register and the generated projection "
+                f"disagree")
+
+    def test_every_cited_id_RESOLVES_in_the_generated_projection(self):
+        """A citation that resolves to nothing would turn a missing disclosure
+        into a clean non-conditional success — AHJ-5's defect, one layer up."""
+        from btap.codes import ahj as registry
+
+        sources = [PRODUCT / "codes" / "necb" / "path.py",
+                   PRODUCT / "codes" / "necb" / "hvac" / "reference.py"]
+        table = registry.by_id()
+        found = set()
+        for source in sources:
+            for ident in ID_RE.findall(source.read_text(encoding="utf-8")):
+                found.add(ident)
+                self.assertIn(
+                    ident, table,
+                    f"{ident} is cited in {source.name} but is not in the "
+                    f"generated register")
+        self.assertTrue(found, "no citations found — the scan is vacuous")
 
 
 class TestEveryEntrySaysWhichEditionsItAffects(unittest.TestCase):
@@ -339,24 +375,16 @@ class TestTheREADMEQuotesRealOutput(unittest.TestCase):
 
     def setUp(self):
         from btap.codes import cli
-        reason = {
-            "article": "8.4.4.9.(5)",
-            "serving_systems": ["Hot Water Loop"],
-            "hydronic_serving_systems": ["Hot Water Loop"],
-            "ahj_ids": ["AHJ-1", "AHJ-3"],
-            "ahj_must_approve": [
-                "an ALTERNATIVE SOLUTION: 8.4.4.9.(5)(a) requires the "
-                "reference heating capacities to MATCH THE RATIO of the "
-                "proposed allocation per energy type, and this tool computes "
-                "no ratio",
-                "how 8.4.4.9.(5)'s allocation is to be REPRESENTED against "
-                "8.4.4.9.(6) on Hot Water Loop, which the acceptable-solution "
-                "text does not settle"],
-            "if_not_approved": "the comparison does not support a "
-                               "Code-compliance determination"}
-        report = {"compliant": True, "annual": True, "code_label": "NECB 2020",
-                  "compliance_determination": "conditional",
-                  "compliance_determination_reason": reason}
+
+        from .support import CARDINALITY_CONDITION, MULTI_ENERGY_CONDITION, real_conditional_report
+
+        # The SAME builder and the SAME conditions the README block was
+        # rendered from, so the two cannot drift apart by construction. The
+        # earlier version hand-built its own report, so this test could fail
+        # while the README matched the CLI perfectly — or pass while it did
+        # not.
+        report = real_conditional_report(
+            [MULTI_ENERGY_CONDITION, CARDINALITY_CONDITION])
 
         class Result:
             compliant = True

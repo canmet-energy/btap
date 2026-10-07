@@ -2112,6 +2112,30 @@ def service_set_heating_fuels(group, facts):
     return fuels | added, added
 
 
+def _disclosure_ahj(source_loop_fuels, covers):
+    """The register ids this multi-energy disclosure branch owns.
+
+    SITE-OWNED applicability (Sol's `127`): this branch has the selected
+    topology, so it declares which dispositions apply rather than letting the
+    final collector re-characterize the model to guess. `path.py` previously
+    recomputed `multi_energy_serving_systems` for exactly that, which was a
+    second source of truth beside the branch that already knew.
+
+    * AHJ-1 always — an affected run's single-fuel reference is the
+      non-conforming substitution an authority must accept.
+    * AHJ-3 only where ONE hydronic plant carries the group's fuels, because
+      the (6) cardinality question needs such a plant to exist.
+    * AHJ-5 only where the SOURCE LOOP contributed a fuel, as the `ruled`
+      explanation of why this group entered scope. It adds no condition.
+    """
+    ids = ['AHJ-1']
+    if covers:
+        ids.append('AHJ-3')
+    if source_loop_fuels:
+        ids.append('AHJ-5')
+    return ' '.join(ids)
+
+
 def multi_energy_serving_groups(facts):
     """Serving groups whose PROPOSED heating system uses more than one energy
     type, excluding the purchased-energy route.
@@ -2241,7 +2265,8 @@ def _disclose_multi_energy(group, selection, facts, audit, ruleset=None,
             'the reference happens to match the proposed allocation is '
             'therefore NOT VERIFIED here, in either direction, and a '
             'passing annual result is not evidence that it does',
-            target=target, inputs=inputs, article=ratio_article)
+            target=target, inputs=inputs, article=ratio_article,
+            ahj=_disclosure_ahj(source_loop_fuels, covers=False))
         return
 
     allocation = _heating_allocation(group, facts)
@@ -2308,7 +2333,8 @@ def _disclose_multi_energy(group, selection, facts, audit, ruleset=None,
         'so the allocation is NOT VERIFIED in either direction, and a '
         'passing annual result is not evidence that it is satisfied',
         target=target, inputs=inputs,
-        article=f'{ratio_article}; {sentence_six}')
+        article=f'{ratio_article}; {sentence_six}',
+        ahj=_disclosure_ahj(source_loop_fuels, covers=True))
 
 
 def _reference_energy_type(group, selection, facts, audit):

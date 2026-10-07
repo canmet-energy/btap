@@ -43,6 +43,7 @@ import re
 
 from btap._compat import opt, ruby_div, ruby_round, ruby_str
 from btap.audit import AuditLog
+from btap.codes import ahj as _ahj
 from btap.codes import compliance, pipeline, resolve
 from btap.codes.necb import tiers
 from btap.codes.pipeline import Verdict
@@ -372,140 +373,164 @@ def _compare_and_iterate(run):
                             step=opts["capacity_step"], audit=audit)
         run.compliant = compliance._evaluate(run.report, run.ruleset,
                                              opts["run_period"], audit)
-        _mark_informational_if_multi_energy(run, audit)
+        _resolve_ahj_conditions(run, audit)
     elif opts["simulate"] == "sizing":
         audit.info("compliance",
                    "simulate: :sizing — both models generated and sized; no "
                    "energy comparison performed (compliance undetermined)")
 
 
-def _mark_informational_if_multi_energy(run, audit):
-    """8.4.x.9.(5): a reference that does not implement the multi-energy
-    capacity ratio cannot support an UNQUALIFIED Code-compliance
-    determination (Sol, `119`, on fetched normative text, citing 8.4.1.2, the
-    Division A building-energy-target definition, 8.4.2.10 and Division C
-    2.2.2.8).
+def _resolve_ahj_conditions(run, audit):
+    """Collect the AHJ dispositions the rule sites CITED, and set the
+    determination from their registry statuses.
 
-    phylroy's decision on the treatment is INFORMATIONAL: the comparison and
-    its verdict are still reported, and the exit code is unchanged, but the
-    determination is labelled as not a Code determination wherever it is
-    emitted. `run.compliant` keeps the raw comparison result; what changes is
-    that `report['compliance_determination']` says the comparison is not a
-    certification, and the CLI prints that above the verdict.
+    Ownership, per Sol's `127`: the deciding rule site owns APPLICABILITY,
+    because it has the selected system, topology, equipment and branch
+    outcome. This function owns POLICY only — resolve the cited ids, keep the
+    ones whose status requires approval, and make an annual determination
+    conditional when that set is non-empty.
 
-    The predicate is computed from the PROPOSED model here rather than read
-    out of the audit, so the determination does not depend on warning wording.
+    It therefore does NOT: inspect the proposed model, re-characterize HVAC,
+    parse audit action text, infer anything from `level`, or know any
+    individual question's predicate. The previous
+    `_mark_informational_if_multi_energy` recomputed
+    `multi_energy_serving_systems` here to decide whether AHJ-1 and AHJ-3 had
+    fired, which was a second source of truth beside the branch that already
+    knew — the drift this design removes.
+
+    All four statuses are collected for traceability. Only `referral` and
+    `alternative-solution` change the verdict: a `tool-gap` stays a defect and
+    a `ruled` question stays settled, and neither may be described as
+    something an authority must accept.
     """
-    from btap.codes.necb.hvac import reference as _hvac_reference
-    from btap.modeling.hvac import classify
-
-    facts = classify.characterize(run.proposed)
-    # DEDUPED serving systems, not the raw group list: five thermal blocks on
-    # one plant are one finding, and the label must agree with the findings.
-    groups = _hvac_reference.multi_energy_serving_systems(facts)
-    if not groups:
-        run.report["compliance_determination"] = "code"
+    code = getattr(run.ruleset, "code", None) or run.report.get("code")
+    fired, conditions = [], []
+    for index, entry in enumerate(audit.entries):
+        citation = entry.get("ahj")
+        if not citation:
+            continue
+        malformed = _ahj.malformed_ids_in(citation)
+        if malformed:
+            raise _ahj.UnknownAHJ(
+                "audit entry {} cites {!r}, which is not a well-formed AHJ "
+                "citation; expected space-separated ids like "
+                "'AHJ-1 AHJ-5'".format(index, malformed))
+        for record in _ahj.resolve(citation, code=code):
+            fired.append(record["id"])
+            conditions.append({
+                "id": record["id"],
+                "status": record["status"],
+                "title": record["title"],
+                "article": entry.get("article"),
+                "target": entry.get("target"),
+                # The firing entry's own words, QUOTED not parsed. Sol's `127`
+                # forbids inferring POLICY from action text, and this infers
+                # nothing — it carries the site's substance to the reader.
+                # Without it the report would lose the disclosure wording eight
+                # review rounds produced, including that what the reference's
+                # final equipment carries is NOT established by this tool.
+                "detail": entry.get("action"),
+                "entry_index": index,
+            })
+    if not fired:
         return
 
-    prefix = run.ruleset.article("reference_subsection")
-    article = f"{prefix}.9.(5)"
-    names = list(groups)
-    six = f"{prefix}.9.(6)"
-    # Only the systems a BOILER question can reach. Sentence (6) governs
-    # "where a hydronic system is modeled", so a mixed group with no plant
-    # carrying its fuels raises the ratio question but NOT the cardinality
-    # one (Sol, `122`.3).
-    hydronic = _hvac_reference.multi_energy_serving_systems(
-        facts, hydronic_only=True)
+    order = {record["id"]: position for position, record
+             in enumerate(_ahj.registry()["entries"])}
+    unique = sorted(set(fired), key=lambda ident: order.get(ident, 10**6))
+    run.report["ahj_applied"] = [
+        {"id": ident,
+         "status": _ahj.by_id()[ident]["status"],
+         "title": _ahj.by_id()[ident]["title"],
+         "count": fired.count(ident)}
+        for ident in unique]
+    run.report["ahj_register"] = "docs/NECB_AHJ_QUESTIONS.md"
+
+    approval = tuple(_ahj.approval_required_statuses())
+    required = [ident for ident in unique
+                if _ahj.by_id()[ident]["status"] in approval]
+    if not required:
+        # Citations still travel as provenance; nothing is conditional.
+        return
+    if not run.report.get("annual"):
+        # A `none`, `sizing` or shortened run has no determination to qualify.
+        # Turning "no determination" into a conditional verdict would invent a
+        # determination the run never reached.
+        return
+    _set_conditional(run, audit, required, conditions, approval)
+
+
+def _set_conditional(run, audit, required, conditions, approval):
+    """Write the conditional determination from the FIRED condition records.
+
+    Generic by construction: the condition text is built from each record's
+    status, title, article and target, so an AHJ-11 System-5 condition is not
+    rendered as a boiler-capacity condition (Sol, `127`).
+    """
+    active = [record for record in conditions
+              if record["id"] in set(required)]
     run.report["compliance_determination"] = "conditional"
-    reason = {
-        "article": article,
-        # NOTHING about the reference's final equipment is asserted here. The
-        # previous wording said "the reference elects ONE energy type", which
-        # is false for outcomes already reproduced: an equal role-labelled
-        # pair can survive 50/50, generic boilers can remain unstaged, and a
-        # selected variant can remove the plant entirely. That was the SIXTH
-        # instance of this overclaim, and I put it here while removing it from
-        # the disclosure (Sol, `122`.1).
-        "why": (f"the proposed heating system uses MORE THAN ONE ENERGY TYPE "
-                f"on {len(groups)} serving system(s), and {article}'s "
-                f"capacity-ratio requirement is neither computed nor "
-                f"enforced. What the reference's final heating equipment "
-                f"carries is not established by this tool, so the comparison "
-                f"is INFORMATIONAL and is NOT a Code-compliance "
-                f"determination."),
-        "serving_systems": names,
-        "hydronic_serving_systems": hydronic,
-        # phylroy's decision: informational AND conditional. The report must
-        # SAY what an authority has to accept rather than leave it to be
-        # inferred.
+    must_approve = []
+    for record in active:
+        if record["status"] == "alternative-solution":
+            kind = ("an ALTERNATIVE SOLUTION, which the text DECIDES and this "
+                    "tool does not meet — accepting it means accepting an "
+                    "explicitly identified non-conforming substitution")
+        else:
+            kind = ("an INTERPRETATION the acceptable-solution text does not "
+                    "settle")
+        where = " Applies to: {}".format(record["target"]) if record.get(
+            "target") else ""
+        # " — " not " ": without a separator the quoted detail ran straight
+        # into "Applies to: Hot Water Loop", which an authority has to read.
+        detail = (" — " + record["detail"]) if record.get("detail") else ""
+        must_approve.append("{} ({}): {} — {}.{}{}".format(
+            record["id"], record["status"], record["title"], kind, where,
+            detail))
+    seen, deduped = set(), []
+    for text in must_approve:
+        if text not in seen:
+            seen.add(text)
+            deduped.append(text)
+    run.report["compliance_determination_reason"] = {
+        "why": ("{} register question(s) requiring approval were raised by "
+                "this run's modelling choices, so the comparison is "
+                "INFORMATIONAL and is NOT a Code-compliance determination. "
+                "Each condition below names the question, its register status "
+                "and the deciding entry's own account of what was and was not "
+                "established.".format(len(set(required)))),
         "condition": "approval by the authority having jurisdiction",
         "if_not_approved": (
             "the comparison does not establish compliance and no verdict "
             "from it may be submitted as a determination"),
-        "ahj_ids": ["AHJ-1"],
+        "ahj_ids": list(required),
         "ahj_register": "docs/NECB_AHJ_QUESTIONS.md",
+        "ahj_must_approve": deduped,
+        "conditions": active,
     }
-    # The capacity ratio itself is NOT an ambiguity: (5)(a) says the
-    # capacities "shall match the ratio". A single-fuel reference is a
-    # NON-CONFORMING substitution an authority could accept only as an
-    # explicitly identified alternative solution, never as an unresolved
-    # reading of the acceptable solution. Stating it as a question was Sol's
-    # `122`.2 blocker.
-    approve = [
-        (f"an ALTERNATIVE SOLUTION: {article} clause (a) requires the "
-         f"reference heating capacities to MATCH THE RATIO of the proposed "
-         f"capacity allocation, and clause (b) requires the proposed "
-         f"operating priority. This tool satisfies neither. Accepting this "
-         f"comparison means accepting a non-conforming modelling "
-         f"substitution, identified as such — not resolving an ambiguity."),
-    ]
-    if hydronic:
-        approve.append(
-            f"how {article}'s capacity allocation is to be REPRESENTED on a "
-            f"hydronic plant, where {six} bands the reference plant's boiler "
-            f"count and each simulation boiler object carries ONE fixed fuel. "
-            f"The acceptable-solution text does not resolve that, so it is an "
-            f"interpretation an authority must accept. Applies to: "
-            + ", ".join(hydronic))
-        reason["ahj_ids"] = ["AHJ-1", "AHJ-3"]
-    reason["ahj_must_approve"] = approve
-    run.report["compliance_determination_reason"] = reason
-    # The (6) clause is named ONLY where a hydronic plant carries the group's
-    # fuels. The report was already conditional on that; this warning was not,
-    # so a non-hydronic group still received the boiler interpretation in
-    # `audit.json` and `audit.txt` (Sol, clearance review of be2118d).
-    cardinality = (
-        f" It is also CONDITIONAL on how the allocation is represented "
-        f"against {six} on {', '.join(hydronic)}, which the "
-        f"acceptable-solution text does not settle." if hydronic else "")
-    audit.warn("compliance",
-               "INFORMATIONAL AND CONDITIONAL: this comparison is NOT a "
-               f"Code-compliance determination. {article} governs the "
-               f"{len(groups)} multi-energy serving system(s) listed, and its "
-               "capacity-ratio requirement is neither computed nor enforced, "
-               "so a passing result is not evidence of compliance. Accepting "
-               "it is an ALTERNATIVE SOLUTION the authority having "
-               f"jurisdiction must approve: {article} clause (a) decides the "
-               "requirement and this tool does not meet it."
-               + cardinality,
-               target=";".join(names),
-               inputs={"serving_systems": names,
-                       "determination": "conditional",
-                       # NOT "of the interpretation". AHJ-1 is an
-                       # alternative-solution: the capacity-ratio clause
-                       # DECIDES the requirement and this tool does not meet
-                       # it. The visible action was corrected and this
-                       # structured input was not, so the wrong word stayed in
-                       # `audit.json` and in the frozen baseline (Sol,
-                       # `124`.2).
-                       "condition": "approval by the authority having "
-                                    "jurisdiction"},
-               article=article, ruling="D-99")
+    # Warnings are never silent (the AuditLog contract), and the determination
+    # must be visible in the audit as well as the report. Generic by
+    # construction: it enumerates the resolved ids and statuses rather than
+    # naming any one question, so an AHJ-11 condition does not arrive wearing
+    # multi-energy wording.
+    audit.warn(
+        'compliance',
+        'INFORMATIONAL AND CONDITIONAL: {} register question(s) requiring '
+        'approval by the authority having jurisdiction were raised by this '
+        "run's modelling choices, so the verdict below is NOT a "
+        'Code-compliance determination. {}'.format(
+            len(set(required)),
+            '; '.join('{} ({})'.format(record['id'], record['status'])
+                      for record in active[:8])),
+        target=', '.join(sorted({str(record['target']) for record in active
+                                 if record.get('target')})) or None,
+        inputs={'ahj_ids': list(required),
+                'ahj_register': 'docs/NECB_AHJ_QUESTIONS.md'},
+        article=', '.join(sorted({str(record['article']) for record in active
+                                  if record.get('article')})) or None,
+        ruling='D-99 D-100')
 
 
-# 8. Part 11 operational GHG performance level, for the editions that have
-#    one (NECB 2025 today) — needs a province
 def _score_ghg(run):
     opts = run.opts
     report = run.report

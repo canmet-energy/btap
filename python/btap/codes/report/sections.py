@@ -164,11 +164,23 @@ def verdict_banner(ctx):
                  "simulated year).</p>")
     if report.get("compliance_determination") == "conditional":
         reason = report.get("compliance_determination_reason") or {}
-        article = reason.get("article") or "the capacity-ratio sentence"
-        systems = reason.get("serving_systems") or []
+        conditions = reason.get("conditions") or []
         approve = reason.get("ahj_must_approve") or []
         items = "".join(f"<li>{esc(a)}</li>" for a in approve)
-        named = ", ".join(esc(s) for s in systems)
+        ids = ", ".join(esc(i) for i in (reason.get("ahj_ids") or []))
+        # Split on ';' before deduping — a compound article otherwise
+        # printed its first part twice.
+        articles = "; ".join(sorted({
+            esc(part.strip())
+            for c in conditions if c.get("article")
+            for part in str(c["article"]).split(";") if part.strip()}))
+        seen, targets = set(), []
+        for condition in conditions:
+            target = condition.get("target")
+            if target and target not in seen:
+                seen.add(target)
+                targets.append(esc(str(target)))
+        named = ", ".join(targets)
         # The equipment claim is NOT repeated here. "the reference elects ONE
         # energy type" was withdrawn from `path.py` and `cli.py` and survived
         # on THIS surface, because the HTML test asserted the conditional text
@@ -189,16 +201,23 @@ def verdict_banner(ctx):
         # explain itself, then the rewrite that still spelled it out. The
         # clause is identified by name in the data and in `path.py`; here it
         # travels in `reason["article"]`.
+        # GENERIC, per D-100. This said "governs the multi-energy serving
+        # system(s)" in hardcoded prose, so a System-5 heating-presence
+        # condition would have been shown as a capacity-ratio one. Each
+        # question's own substance now arrives on its condition record.
         strip += (
             '<p class="warnstrip">▲ NOT A CODE-COMPLIANT DETERMINATION — '
-            f"{esc(article)} governs the multi-energy serving system(s) "
-            f"{named} and its capacity-ratio requirement is neither computed "
-            "nor enforced. What the reference's final heating equipment "
-            "carries is NOT established by this tool, so the comparison is "
-            "INFORMATIONAL only.</p>"
+            f"{len(reason.get('ahj_ids') or [])} question(s) in the AHJ "
+            f"register ({ids}) were raised by this run's modelling choices, "
+            "so the comparison is INFORMATIONAL only and is not evidence of "
+            "compliance."
+            + (f" Governing: {articles}." if articles else "")
+            + (f" Applies to: {named}." if named else "")
+            + "</p>"
             '<p class="warnstrip">▲ CONDITIONAL — the authority having '
             "jurisdiction must accept the following conditions before this "
-            "comparison can support compliance.</p>"
+            "comparison can support compliance. Each names whether it is an "
+            "alternative solution or an interpretation.</p>"
             f'<ul class="meta">{items}</ul>')
     if report.get("tier") and eui_tier and report["tier"] != eui_tier:
         bet = _dig(report, "eui_path", "bet_kwh")

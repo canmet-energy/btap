@@ -147,6 +147,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-97** — 8.4.x.14.(2) combines pumps within one hydronic system, not across consolidated ones _(runtime)_
 - **D-98** — A baseline records its producer; freezing stays local until an image digest is obtainable _(process)_
 - **D-99** — A reference that cannot satisfy a requirement yields a CONDITIONAL result, not a certification _(runtime)_
+- **D-100** — AHJ dispositions are cited by the deciding rule site; the determination owns only policy _(runtime)_
 
 <!-- TOC END -->
 
@@ -6629,3 +6630,65 @@ This decision does **not** excuse the gap. Computing the allocation and
 verifying it is tool-side work, as is carrying Table 4.2.1.6's A and B control
 marks (AHJ-8) and the air-cooled chiller curves (AHJ-17). A conditional result
 is the honest interim state, not a destination.
+
+<a id="d-100"></a>
+
+## D-100 — the deciding site declares, the determination decides
+
+A question an authority must answer is raised by a MODELLING CHOICE, and the
+code that makes that choice is the only place that knows it was made.
+
+`_mark_informational_if_multi_energy` did not work that way. It ran at the end
+of the annual path and re-characterized the proposed model to ask, in effect,
+"would the disclosure branch have fired?" That worked while there was exactly
+one question. It was still a second implementation of a predicate that already
+existed, and the branch and the determination could disagree without anything
+noticing.
+
+Sol's `126` then established reachability conditions for seven more referrals,
+and every one turned out to be a property of the SELECTION rather than of the
+characterized facts: System 6 assigned with more than four storeys and a
+multi-facade external block; System 5 assigned with a heated proposed block; an
+ordinary fuel-fired reference boiler at or below 352 kW. Writing those as seven
+predicates beside the determination would have duplicated the selection logic
+seven more times.
+
+So the ownership inverts. Each deciding site cites the dispositions that apply
+on **its own narrowed branch** — not merely "this function ran" — and the
+determination resolves what it finds.
+
+### What the axis means, and what it does not
+
+`ahj` says a register disposition applies to this choice. It does not say
+approval is required. All four statuses ride on applicable entries, because a
+reader wants to know that AHJ-5 is the settled reason a water-loop heat-pump
+group entered multi-energy scope at all. Only `referral` and
+`alternative-solution` change a verdict.
+
+That distinction has to survive into the report, and it is the reason the
+condition records carry status and title: an AHJ-11 System-5 condition must not
+render as a boiler-capacity condition, which is what hardcoded multi-energy
+prose in the CLI and HTML would have done.
+
+### Why the floor stays neutral
+
+`btap.audit` is the code-family-neutral, SDK-free floor. It stores the string,
+serializes it, and appends it to the narrative beside `article` and `ruling`.
+It does not import the NECB register, know what a status is, or decide whether
+a citation is conditional. A future code family brings its own register and its
+own resolver; the axis is the only shared thing.
+
+### Why the register is generated, and rejects rather than drops
+
+`docs/NECB_AHJ_QUESTIONS.md` is canonical and authored. Repository
+documentation is not a wheel dependency, so the runtime reads a generated
+projection — `{id, title, status, editions}` — exactly as the decision registry
+reads `decisions.json`. A second `{id: status}` map in `path.py` would be the
+drift this whole decision exists to remove, and no `sets_conditional` boolean
+is serialized because a boolean can contradict the status it came from.
+
+The resolver raises on an unknown id, an unknown status, or an id whose
+editions do not include the run's code. Dropping any of those would convert a
+missing disclosure into a clean non-conditional success, which is precisely the
+failure AHJ-5's predicate defect was: a question with a settled answer that
+nothing ever asked.

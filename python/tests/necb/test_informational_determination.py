@@ -17,11 +17,19 @@ unaffected single-fuel building is completely untouched.
 
 from __future__ import annotations
 
+import re
 import unittest
 
 from btap.codes import cli
 from btap.codes.necb.hvac import reference
 from tests.support import needs_sdk
+
+from .support import (
+    CARDINALITY_CONDITION,
+    MULTI_ENERGY_CONDITION,
+    SYSTEM_5_CONDITION,
+    real_conditional_report,
+)
 
 
 def _group(zones, fuels):
@@ -79,17 +87,11 @@ class TestThePredicate(unittest.TestCase):
 
 
 class TestTheLabel(unittest.TestCase):
-    AFFECTED = {"compliance_determination": "conditional",
-                "code_label": "NECB 2020",
-                "compliance_determination_reason": {
-                    "article": "8.4.4.9.(5)",
-                    "serving_systems": ["Hot Water Loop"],
-                    "condition": "approval by the authority having jurisdiction",
-                    "ahj_must_approve": [
-                        "how 8.4.4.9.(5)'s multi-energy capacity allocation is "
-                        "to be REPRESENTED when 8.4.4.9.(6) bands the boiler "
-                        "count and each boiler object carries ONE fixed fuel."],
-                    "why": "..."}}
+    #: Built by the REAL `_set_conditional`, so these renderer tests
+    #: cannot pass against a shape the builder no longer produces. The
+    #: hand-written version omitted what the builder appends, which is
+    #: how the surface lost the condition's substance.
+    AFFECTED = real_conditional_report([MULTI_ENERGY_CONDITION])
 
     def test_the_one_line_determination_carries_the_qualification(self):
         """The qualification must be INSIDE the string, because this is the
@@ -116,9 +118,13 @@ class TestTheLabel(unittest.TestCase):
         — the seventh instance of one overclaim, surviving in another layer
         because the test only looked at the first."""
         block = cli.verdict_block(_Result(True), self.AFFECTED)
-        self.assertIn("NOT established by this tool", block)
+        # Whitespace-normalized: `_wrap_condition` breaks at 62 columns, so a
+        # raw `assertIn` fails on a phrase a line break happens to split —
+        # which says nothing about whether the claim reached the reader.
+        flat = re.sub(r"\s+", " ", block)
+        self.assertIn("NOT established by this tool", flat)
         for overclaim in ("elects ONE energy type", "no single-fuel"):
-            self.assertNotIn(overclaim, block)
+            self.assertNotIn(overclaim, flat)
 
     def test_the_block_opens_with_the_NOT_A_DETERMINATION_banner(self):
         """The same banner the --quick path uses, so the two read alike."""
@@ -131,13 +137,16 @@ class TestTheLabel(unittest.TestCase):
         block = cli.verdict_block(_Result(True), self.AFFECTED)
         self.assertIn("CONDITIONAL", block)
         self.assertIn("authority having jurisdiction must accept", block)
-        self.assertIn("conditions", block,
+        flat = re.sub(r"\s+", " ", block)
+        self.assertIn("conditions", flat,
                       "the wrapper must not call them all interpretations: "
                       "an ALTERNATIVE SOLUTION is a requirement the text DOES "
                       "decide and this tool does not meet")
-        self.assertIn("ALTERNATIVE SOLUTION", block,
+        self.assertIn("ALTERNATIVE SOLUTION", flat,
                       "and the block must distinguish the two kinds")
-        self.assertIn("REPRESENTED", block, "the condition itself is listed")
+        self.assertIn("NON-CONFORMING substitution", flat,
+                      "the condition's own title is listed, not prose this "
+                      "renderer invents")
 
     def test_the_block_NAMES_the_article_and_each_serving_system(self):
         """A reader must be able to see WHICH systems are unresolved, not just
@@ -184,18 +193,15 @@ class TestTheREPORTCarriesTheCondition(unittest.TestCase):
         return sections.verdict_banner({"report": report})
 
     def test_the_banner_badges_and_states_the_condition(self):
-        html = self._banner({
-            "compliant": True, "annual": True, "code_label": "NECB 2020",
-            "compliance_determination": "conditional",
-            "compliance_determination_reason": {
-                "article": "8.4.4.9.(5)",
-                "serving_systems": ["Hot Water Loop"],
-                "ahj_must_approve": ["how the allocation is REPRESENTED"]}})
+        html = self._banner(
+            real_conditional_report([MULTI_ENERGY_CONDITION,
+                                     CARDINALITY_CONDITION]))
         self.assertIn("CONDITIONAL", html)
         self.assertIn("AHJ APPROVAL REQUIRED", html)
         self.assertIn("NOT A CODE-COMPLIANT DETERMINATION", html)
         self.assertIn("authority having jurisdiction must accept", html)
-        self.assertIn("how the allocation is REPRESENTED", html)
+        self.assertIn("permits more than one boiler", html,
+                      "AHJ-3's own title carries the cardinality question")
         self.assertIn("Hot Water Loop", html)
 
     def test_the_banner_asserts_NOTHING_about_the_reference_equipment(self):
@@ -204,13 +210,8 @@ class TestTheREPORTCarriesTheCondition(unittest.TestCase):
         conditional text was PRESENT and never that the withdrawn claim was
         ABSENT. The frozen scenario could not catch it either: the annual tier
         runs `--quick --no-report`, so no HTML is rendered at all."""
-        html = self._banner({
-            "compliant": True, "annual": True, "code_label": "NECB 2020",
-            "compliance_determination": "conditional",
-            "compliance_determination_reason": {
-                "article": "8.4.4.9.(5)",
-                "serving_systems": ["Hot Water Loop"],
-                "ahj_must_approve": ["how the allocation is REPRESENTED"]}})
+        html = self._banner(
+            real_conditional_report([MULTI_ENERGY_CONDITION]))
         for withdrawn in ("elects ONE energy type", "no single-fuel basis",
                           "reference elects"):
             self.assertNotIn(withdrawn, html)
@@ -226,7 +227,15 @@ class TestTheREPORTCarriesTheCondition(unittest.TestCase):
             "compliance_determination": "conditional",
             "compliance_determination_reason": {
                 "article": "8.4.4.9.(5)",
-                "serving_systems": ["Hot Water Loop"],
+                "conditions": [
+                    {"id": "AHJ-1", "status": "alternative-solution",
+                     "title": "a single-fuel reference is a NON-CONFORMING "
+                              "substitution",
+                     "article": "8.4.4.9.(5)", "target": "Hot Water Loop",
+                     "detail": "what the reference's final heating equipment "
+                               "carries is NOT established by this tool"}],
+                "ahj_ids": ["AHJ-1"],
+                "ahj_register": "docs/NECB_AHJ_QUESTIONS.md",
                 "ahj_must_approve": ["an ALTERNATIVE SOLUTION: ..."]}})
         self.assertIn("conditions", html)
         self.assertNotIn("does not resolve it", html)
@@ -278,19 +287,43 @@ class TestTheREALHelperOnRealModels(unittest.TestCase):
         return m
 
     def _run_helper(self, model):
+        """Drive the REAL path now that applicability is site-owned.
+
+        `_mark_informational_if_multi_energy` is gone. It re-characterized the
+        model HERE to decide whether AHJ-1 and AHJ-3 had fired, which was a
+        second source of truth beside the disclosure branch that already knew
+        (Sol, `127`). So this helper runs the two halves in the order the
+        pipeline does: the rule site emits citations onto the audit, then the
+        collector resolves them.
+
+        That makes this a stronger test than before — it now proves the two
+        halves AGREE, where previously a determination could be reached with
+        no disclosure having fired at all.
+        """
         from btap.audit import AuditLog
         from btap.codes import resolve
         from btap.codes.necb import path as necb_path
+        from btap.codes.necb.hvac import reference as hvac_reference
+        from btap.modeling.hvac import classify
 
         class _Run:
             pass
 
         run = _Run()
         run.proposed = model
-        run.report = {}
         run.ruleset = resolve("necb2020")
+        run.report = {"annual": True, "code": "necb2020"}
         audit = AuditLog()
-        necb_path._mark_informational_if_multi_energy(run, audit)
+
+        facts = classify.characterize(model)
+        selection = {"special_rules": {
+            "purchased_heating": {"article": "8.4.4.6.(1)"}}}
+        disclosed = set()
+        for group in facts.get("zone_groups") or ():
+            hvac_reference._disclose_multi_energy(
+                group, selection, facts, audit, ruleset=run.ruleset,
+                disclosed=disclosed)
+        necb_path._resolve_ahj_conditions(run, audit)
         return run.report, audit
 
     @needs_sdk
@@ -299,22 +332,44 @@ class TestTheREALHelperOnRealModels(unittest.TestCase):
             self._model(("NaturalGas", "Electricity")))
         self.assertEqual("conditional", report["compliance_determination"])
         reason = report["compliance_determination_reason"]
-        self.assertEqual(["Hot Water Loop"], reason["hydronic_serving_systems"])
+        # The ids are now whatever the SITE cited, resolved through the
+        # generated register — not recomputed here from the model.
         self.assertEqual(["AHJ-1", "AHJ-3"], reason["ahj_ids"])
+        statuses = {c["id"]: c["status"] for c in reason["conditions"]}
+        self.assertEqual("alternative-solution", statuses["AHJ-1"])
+        self.assertEqual("referral", statuses["AHJ-3"])
+        targets = {c["target"] for c in reason["conditions"]}
+        self.assertEqual(
+            {"Hot Water Loop"}, targets,
+            "the condition names the PLANT, because that is what the firing "
+            "entry targets when one plant carries every fuel — more useful to "
+            "a reviewer than the zone list")
         joined = " ".join(reason["ahj_must_approve"])
         self.assertIn("ALTERNATIVE SOLUTION", joined)
-        self.assertIn("REPRESENTED", joined, "the cardinality question applies")
-        warned = [e for e in audit.entries
-                  if "INFORMATIONAL AND CONDITIONAL" in str(e.get("action"))]
-        self.assertEqual(1, len(warned))
+        # The cardinality question now arrives as AHJ-3's own TITLE, not as
+        # hardcoded prose in `path.py`. The word "REPRESENTED" lived in that
+        # prose, which Sol's `127` required removing so an AHJ-11 System-5
+        # condition would not be rendered as a boiler condition.
+        self.assertIn("more than one boiler", joined,
+                      "the cardinality question reaches the reader")
+        self.assertIn("INTERPRETATION", joined,
+                      "and is labelled a referral, not an alternative solution")
+        self.assertEqual(
+            ["AHJ-1", "AHJ-3"],
+            [entry["id"] for entry in report["ahj_applied"]],
+            "every fired id is listed for traceability, conditional or not")
 
     @needs_sdk
     def test_a_SINGLE_fuel_plant_is_not_conditional_at_all(self):
         report, audit = self._run_helper(self._model(("NaturalGas",)))
-        self.assertEqual("code", report["compliance_determination"])
+        # Nothing cited, so nothing resolves and no determination is written.
+        # The old helper SET "code" here; the collector leaves the key absent
+        # because it owns only the conditional case — the unqualified verdict
+        # is the comparison's own result and is not this function's to assert.
         self.assertNotIn("compliance_determination_reason", report)
-        self.assertEqual([], [e for e in audit.entries
-                              if "CONDITIONAL" in str(e.get("action"))])
+        self.assertNotIn("ahj_applied", report)
+        self.assertEqual([], [e for e in audit.entries if e.get("ahj")],
+                         "a single-fuel plant raises no register question")
 
     @needs_sdk
     def test_the_prose_asserts_NOTHING_about_the_reference_equipment(self):
@@ -322,10 +377,17 @@ class TestTheREALHelperOnRealModels(unittest.TestCase):
         energy type", which is false for outcomes already reproduced."""
         report, _audit = self._run_helper(
             self._model(("NaturalGas", "Electricity")))
-        why = report["compliance_determination_reason"]["why"]
-        self.assertIn("not established by this tool", why)
-        for overclaim in ("elects ONE energy type", "no single-fuel basis"):
-            self.assertNotIn(overclaim, why)
+        reason = report["compliance_determination_reason"]
+        # The hard-won wording now travels on the CONDITION, quoted from the
+        # entry that fired, because the generic `why` cannot know any one
+        # question's substance. It must still reach the reader.
+        surface = " ".join(
+            [reason["why"]] + reason["ahj_must_approve"]
+            + [str(c.get("detail")) for c in reason["conditions"]])
+        self.assertIn("not established", surface)
+        for overclaim in ("reference elects ONE energy type",
+                          "no single-fuel basis satisfies"):
+            self.assertNotIn(overclaim, surface)
 
     def test_a_NON_hydronic_mixed_group_omits_the_boiler_question(self):
         """`122` blocker 3: a bare dual-fuel group with no plant carrying its
@@ -342,6 +404,147 @@ class TestTheREALHelperOnRealModels(unittest.TestCase):
         self.assertEqual(
             1, len(reference.multi_energy_serving_systems(facts)),
             "but the ratio question still applies to the group")
+
+
+class TestANonMultiEnergyConditionRendersTruthfully(unittest.TestCase):
+    """Sol's `127`: "An AHJ-11 System-5 condition must not be rendered as a
+    boiler-capacity condition."
+
+    Before D-100 the CLI block and HTML banner described the multi-energy
+    capacity ratio in hardcoded prose, so ANY conditional run would have been
+    reported as a multi-energy one. These assert the absence of that
+    vocabulary, not merely the presence of the new text — the distinction that
+    let the withdrawn claim survive on the HTML surface for eight rounds.
+    """
+
+    MULTI_ENERGY_VOCABULARY = (
+        "multi-energy", "capacity-ratio", "capacity ratio",
+        "final heating equipment", "boiler",
+    )
+
+    def _surfaces(self, conditions):
+        from btap.codes import cli
+        from btap.codes.report import sections
+
+        report = real_conditional_report(conditions)
+
+        class _Run:
+            compliant = True
+            report = {"annual": True}
+
+        return {
+            "CLI block": cli.verdict_block(_Run(), report),
+            "HTML banner": sections.verdict_banner({"report": report}),
+        }
+
+    def test_a_SYSTEM_5_condition_names_itself(self):
+        for name, text in self._surfaces([SYSTEM_5_CONDITION]).items():
+            with self.subTest(name):
+                flat = re.sub(r"\s+", " ", text)
+                self.assertIn("AHJ-11", flat)
+                self.assertIn("two-pipe System 5", flat)
+                self.assertIn("8.4.4.1.(5)", flat, "its OWN article")
+
+    def test_a_SYSTEM_5_condition_borrows_no_multi_energy_vocabulary(self):
+        for name, text in self._surfaces([SYSTEM_5_CONDITION]).items():
+            flat = re.sub(r"\s+", " ", text).lower()
+            for word in self.MULTI_ENERGY_VOCABULARY:
+                with self.subTest(name, word=word):
+                    self.assertNotIn(
+                        word, flat,
+                        "a System-5 heating-presence question was described "
+                        "in multi-energy terms")
+
+    def test_the_MULTI_ENERGY_condition_still_names_itself(self):
+        """The control. If the renderers had simply lost all substance, the
+        test above would pass for the wrong reason."""
+        for name, text in self._surfaces([MULTI_ENERGY_CONDITION]).items():
+            with self.subTest(name):
+                flat = re.sub(r"\s+", " ", text)
+                self.assertIn("AHJ-1", flat)
+                self.assertIn("NON-CONFORMING substitution", flat)
+                self.assertIn("NOT established by this tool", flat)
+
+
+class TestTheResolverPolicy(unittest.TestCase):
+    """The collector owns POLICY only, and these pin every branch of it."""
+
+    def _report(self, citations, *, annual=True, code="necb2020"):
+        from btap.audit import AuditLog
+        from btap.codes.necb import path as necb_path
+
+        class _Run:
+            pass
+
+        run = _Run()
+        run.report = {"annual": annual, "code": code}
+        run.ruleset = type("R", (), {"code": code})()
+        audit = AuditLog()
+        for citation in citations:
+            audit.warn("selection", "a choice was made", target="Z1",
+                       article="8.4.4.9.(5)", ahj=citation)
+        necb_path._resolve_ahj_conditions(run, audit)
+        return run.report
+
+    def test_several_ids_on_ONE_entry_all_resolve(self):
+        report = self._report(["AHJ-1 AHJ-5"])
+        self.assertEqual(["AHJ-1", "AHJ-5"],
+                         [e["id"] for e in report["ahj_applied"]])
+        self.assertEqual(["AHJ-1"],
+                         report["compliance_determination_reason"]["ahj_ids"],
+                         "only the approval-required subset")
+
+    def test_a_repeated_id_across_entries_is_counted_and_deduped(self):
+        report = self._report(["AHJ-1", "AHJ-1", "AHJ-1"])
+        applied = report["ahj_applied"]
+        self.assertEqual(1, len(applied))
+        self.assertEqual(3, applied[0]["count"], "the count is kept")
+
+    def test_ids_are_ordered_NUMERICALLY_not_lexically(self):
+        report = self._report(["AHJ-11 AHJ-2 AHJ-1"])
+        self.assertEqual(["AHJ-1", "AHJ-2", "AHJ-11"],
+                         [e["id"] for e in report["ahj_applied"]],
+                         "AHJ-11 sorts after AHJ-2, not between AHJ-1 and 2")
+
+    def test_a_RULED_or_TOOL_GAP_id_alone_sets_no_determination(self):
+        for citation in ("AHJ-5", "AHJ-6", "AHJ-13", "AHJ-5 AHJ-6"):
+            with self.subTest(citation):
+                report = self._report([citation])
+                self.assertNotIn("compliance_determination", report)
+                self.assertTrue(report["ahj_applied"],
+                                "but it is still recorded as applied")
+
+    def test_an_UNKNOWN_id_is_refused_not_dropped(self):
+        from btap.codes import ahj
+
+        with self.assertRaises(ahj.UnknownAHJ):
+            self._report(["AHJ-9999"])
+
+    def test_a_MALFORMED_citation_is_refused(self):
+        from btap.codes import ahj
+
+        for bad in ("ahj-1", "AHJ_1", "AHJ-"):
+            with self.subTest(bad), self.assertRaises(ahj.UnknownAHJ):
+                self._report([bad])
+
+    def test_a_citation_whose_EDITION_excludes_the_run_is_refused(self):
+        from btap.codes import ahj
+
+        original = ahj.by_id
+        try:
+            narrowed = {k: dict(v) for k, v in original().items()}
+            narrowed["AHJ-1"]["editions"] = ["necb2025"]
+            ahj.by_id = lambda: narrowed
+            with self.assertRaises(ahj.UnknownAHJ):
+                self._report(["AHJ-1"], code="necb2020")
+        finally:
+            ahj.by_id = original
+
+    def test_a_NON_annual_run_keeps_the_citations_but_invents_no_verdict(self):
+        report = self._report(["AHJ-1"], annual=False)
+        self.assertEqual(["AHJ-1"], [e["id"] for e in report["ahj_applied"]])
+        self.assertNotIn("compliance_determination", report,
+                         "a run with no determination has none to qualify")
 
 
 if __name__ == "__main__":

@@ -1471,6 +1471,29 @@
         "necb2025"
       ],
       "summary": "Decided: phylroy, 2026-10-07, on Sol's ruling against fetched normative text. Sentence 8.4.x.9.(4) opens 'Except as provided in Sentence (5)', so it does NOT govern a group whose proposed heating system uses more than one energy type; (5) does, requiring the reference heating capacities to MATCH THE RATIO of the proposed capacity allocation per energy type and to carry its operating schedule and priority of use. This tool elects one energy type for the reference SELECTION and computes no ratio, so it satisfies neither clause, and Sol ruled on fetched text that NO single-fuel basis can - not the fossil-first cascade, not capacity-dominant, not lead-fuel, not annual-dominant. A capacity-dominant election was built, measured and abandoned for that reason: it moved the reference total by about 6% and percent_of_target by five points, enough to flip any building within ~6% of target, while no frozen scenario exercised it. Because a knowingly non-conforming reference cannot support an unqualified Code-compliance determination (8.4.1.2, Division A's building-energy-target definition, 8.4.2.10, Division C 2.2.2.8), an affected run is labelled INFORMATIONAL AND CONDITIONAL: the comparison and its verdict are still reported, the EXIT CODE IS UNCHANGED, and the qualification travels INSIDE the verdict string rather than beside it, because a one-line verdict is what gets quoted alone. The report - the AHJ-facing artifact - carries a CONDITIONAL badge beside the pass/fail badge, names the serving systems, states what the authority must accept and what follows if it does not. Two things are named separately because they are different in kind: accepting the comparison at all is an ALTERNATIVE SOLUTION, since (5)(a) decides the question and we do not comply; whereas how a two-fuel ratio may be REPRESENTED when (6) bands the reference plant's boiler count and each simulation boiler object carries one fixed fuel is a genuine interpretation the acceptable-solution text does not settle, raised only where one plant carries the group's fuels. NOTHING about the reference's final equipment is asserted: four outcomes are reachable - the proposed plant adopted, replaced by a plant the selected variant builds, torn down where the variant needs no boiler, or staged by primary/secondary role blind to fuel, which preserves an equal pair in the two-boiler band, stubs a recognised secondary below the single-boiler threshold, and does nothing to a plant whose devices take no recognised role. Six successive reviews each found this entry claiming one of those as general. The AHJ register docs/NECB_AHJ_QUESTIONS.md records the questions with four statuses, only 'referral' and 'alternative-solution' may set a run conditional, and a tool gap is never dressed as an interpretation. The requirement remains UNIMPLEMENTED and this decision does not excuse it: computing the allocation, verifying it and carrying the air-cooled chiller curves are tool-side work."
+    },
+    {
+      "id": "D-100",
+      "title": "AHJ dispositions are cited by the deciding rule site; the determination owns only policy",
+      "kind": "runtime",
+      "articles": {
+        "reference_conformity": {
+          "label": "Performance-compliance reference conformity",
+          "necb2020": [
+            "8.4.1.2.",
+            "8.4.2.10."
+          ],
+          "necb2025": [
+            "8.4.1.2.",
+            "8.4.2.10."
+          ]
+        }
+      },
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ],
+      "summary": "Decided: Sol's 127, 2026-10-07, adopting a THIRD audit citation axis. `ahj` joins `article` (what the Code requires) and `ruling` (our adjudicated reading) and carries the AHJ-NN register dispositions that apply to one runtime choice. The DECIDING RULE SITE declares applicability, because it holds the selected system, topology, equipment and branch outcome; the final determination owns POLICY only — resolve the cited ids against the generated register, keep those whose status is `referral` or `alternative-solution`, and make an ANNUAL determination conditional when that set is non-empty. It does not inspect the model, re-characterize HVAC, parse audit action text or infer from `level`. This replaced `_mark_informational_if_multi_energy`, which re-characterized the proposed model inside the determination to decide whether AHJ-1 and AHJ-3 had fired — a second source of truth beside the disclosure branch that already knew, and the drift this design removes. Writing seven standalone predicates for the seven narrowed referrals was rejected for the same reason: their reachability conditions are properties of the SELECTION, so reimplementing them would duplicate selection logic. All four statuses may be cited, for traceability: `ahj` means THIS DISPOSITION APPLIES HERE, not approval is required, so a `ruled` entry explains why a choice was made and a `tool-gap` entry marks a defect, and neither may be described as something an authority must accept. `btap.audit` stores, serializes and renders the field and decides nothing about it, because it is the SDK-free code-family-neutral floor; the status mapping lives in `btap.codes.ahj`, read from `btap/codes/data/ahj.json`, which is GENERATED from the authored register by `generate_ahj_registry.py`. No `sets_conditional` boolean is serialized, so nothing can contradict a status. The resolver REJECTS an unknown id, an unknown status and an id whose editions exclude the run's code id, rather than dropping them, because a citation that resolves to nothing turns a missing disclosure into a clean non-conditional success. A static coverage-manifest entry may never carry `ahj`: a warning emitted on every run is not evidence a building reached the question."
     }
   ]
 }

@@ -1,4 +1,4 @@
-"""The family-wide decision/audit trail (port of btap-audit's log.rb).
+r"""The family-wide decision/audit trail (port of btap-audit's log.rb).
 
 Every consequential step records WHAT was decided, the INPUTS it was decided
 from, the model EVIDENCE behind it, and (where applicable) the NECB ARTICLE or
@@ -6,7 +6,7 @@ data-table citation that mandates it — so QAQC can answer "why did zone X get
 System 6?" from the log instead of diffing models.
 
 Entry schema (all optional except step/action/level):
-    {step, target, action, inputs, value, article, ruling, evidence,
+    {step, target, action, inputs, value, article, ruling, ahj, evidence,
      building, level}     level: 'decision' | 'info' | 'warning'
 
 ruling: WHICH adjudicated project decision(s) govern this code path — the D-XX
@@ -15,6 +15,26 @@ mandates a value, `ruling` cites OUR judgement call about how that code was
 read. Multiple ids are ONE space-separated string ('D-19 D-21'); consumers
 scan r'\\bD-\\d+\\b'. Unbounded: `D-01` through `D-99` are all taken, so
 the next decision is `D-100` and a two-digit scan would not see it.
+
+ahj: WHICH register disposition applies to THIS runtime choice — the AHJ-NN
+ids of `docs/NECB_AHJ_QUESTIONS.md`. The third citation axis: `article` cites
+the Code requirement, `ruling` cites our adjudicated reading of it, and `ahj`
+cites a question the Code does not settle, a requirement we knowingly do not
+meet, a settled ruling that explains this choice, or a tool gap this path
+reaches. Multiple ids are ONE space-separated string ('AHJ-1 AHJ-5'), the same
+shape as `ruling`; consumers scan r'\bAHJ-\d+\b', de-duplicate, and sort
+numerically.
+
+It means "this disposition applies here", NOT "approval is required". All four
+register statuses may be cited; only `referral` and `alternative-solution`
+make a run conditional, and THIS MODULE DOES NOT KNOW WHICH IS WHICH. That
+mapping lives in `btap.codes.ahj`, generated from the authored register:
+`btap.audit` is the SDK-free, code-family-neutral floor, so it stores,
+serializes and renders the field and decides nothing about it (Sol's `127`).
+
+A static coverage-manifest entry must NOT carry `ahj`. A warning emitted on
+every run is not evidence that a building reached the question; only an
+executed choice may cite one.
 
 building: WHICH model the entry is about ('input model', 'proposed building',
 'reference building'), stamped from the current building context a pipeline
@@ -53,19 +73,19 @@ class AuditLog:
             self.building = previous
 
     def decision(self, step, action, *, target=None, inputs=None, value=None,
-                 article=None, ruling=None, evidence=None):
+                 article=None, ruling=None, ahj=None, evidence=None):
         return self._add("decision", step, action, target, inputs, value,
-                         article, ruling, evidence)
+                         article, ruling, ahj, evidence)
 
     def info(self, step, action, *, target=None, inputs=None, value=None,
-             article=None, ruling=None, evidence=None):
+             article=None, ruling=None, ahj=None, evidence=None):
         return self._add("info", step, action, target, inputs, value,
-                         article, ruling, evidence)
+                         article, ruling, ahj, evidence)
 
     def warn(self, step, action, *, target=None, inputs=None, value=None,
-             article=None, ruling=None, evidence=None):
+             article=None, ruling=None, ahj=None, evidence=None):
         return self._add("warning", step, action, target, inputs, value,
-                         article, ruling, evidence)
+                         article, ruling, ahj, evidence)
 
     @property
     def warnings(self):
@@ -98,14 +118,16 @@ class AuditLog:
                 line += f" | per {e['article']}"
             if _truthy(e.get("ruling")):
                 line += f" | ruling {e['ruling']}"
+            if _truthy(e.get("ahj")):
+                line += f" | AHJ {e['ahj']}"
             lines.append(line)
         return "\n".join(lines)
 
     def _add(self, level, step, action, target, inputs, value, article,
-             ruling, evidence):
+             ruling, ahj, evidence):
         entry = {"step": step, "target": target, "action": action,
                  "inputs": inputs, "value": value, "article": article,
-                 "ruling": ruling, "evidence": evidence,
+                 "ruling": ruling, "ahj": ahj, "evidence": evidence,
                  "building": self.building, "level": level}
         self.entries.append({k: v for k, v in entry.items() if v is not None})
         return self
