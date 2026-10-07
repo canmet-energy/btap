@@ -397,19 +397,21 @@ class TestTheDisclosureSurvivesTheHeatPumpPath(unittest.TestCase):
         self.assertEqual(1, len(warnings))
 
 
-class TestTheEntryDescribesTheADOPTEDPlant(_Fixture):
-    """Fable's `117` B1: the entry said "the reference retains one boiler per
-    energy type", and the reference does no such thing.
+class TestTheEntryAssertsNothingAboutTheReferencePlant(_Fixture):
+    """The entry must describe the PROPOSED plant and claim nothing about the
+    reference one, because four outcomes are reachable (Sol, `120`/`121`):
 
-    It ADOPTS the proposed hot-water plant whole — a three-boiler proposed
-    plant gives a three-boiler reference — and then the post-sizing staging
-    pass sets the plant's live capacity by primary/secondary ROLE, blind to
-    fuel, driving a secondary under the single-boiler threshold to ~0 W. So
-    the installed allocation is NOT carried into the annual reference, and
-    the surviving fuel need not be the elected one. Confirmed in the
-    repository's own committed baselines, where the reference building's
-    Secondary Boiler carries `capacity_kw: 0.0` against a
-    `design_capacity_kw` of 64.4 or 83.6.
+    * the proposed plant is adopted;
+    * it is torn down and REPLACED by a newly built plant of the selected
+      variant, holding none of its devices;
+    * it is torn down and not rebuilt, where the variant needs no boiler;
+    * a hydronic plant results and the post-sizing staging pass acts on
+      primary/secondary ROLE blind to fuel — preserving an equal pair in the
+      two-boiler band, stubbing a recognised secondary below the
+      single-boiler threshold, and doing nothing at all to a plant whose
+      devices take no recognised role.
+
+    Each earlier version of this class asserted one of those as general.
     """
 
     def _selection(self):
@@ -470,6 +472,15 @@ class TestTheEntryDescribesTheADOPTEDPlant(_Fixture):
         """A heat-pump variant with `needs_boiler: false` has the plant
         removed, so the reference plant may not exist at all."""
         self.assertIn("torn down", self._outcome_text())
+
+    def test_the_outcome_lists_the_REPLACED_possibility(self):
+        """Sol's `121`: a one-group mixed gas/electric loop was torn down and
+        the selected gas variant built a DIFFERENT two-boiler NaturalGas
+        plant, with no proposed handle on either boiler. "Adopted or absent"
+        omitted that third case."""
+        out = self._outcome_text()
+        self.assertIn("DIFFERENT", out)
+        self.assertIn("holding none of these devices", out)
 
     def test_the_outcome_lists_the_PRESERVED_band(self):
         """Measured: two role-labelled 200 kW boilers become 100/100 kW in the
@@ -632,6 +643,71 @@ class TestPurchasedEnergyDoesNotSuppressUNRELATEDGroups(_Fixture):
         facts["purchased_energy"] = {"heating": True}
         _r, warnings, _a = self._call(group, facts)
         self.assertEqual([], warnings)
+
+
+class TestTheSINGLEEnergyElectionIsNotAlwaysIdentical(_Fixture):
+    """Sol's `121` blocker 2: my new (4) coverage said the energy type is
+    identical "for a SINGLE-energy heating system". It is not. The cascade
+    maps FuelOilNo2 and PropaneGas to the GAS catalog variant, so an
+    oil-heated proposed building gets a natural-gas reference, which (4)'s
+    "identical" and Division A's same-energy-SOURCES definition both refuse.
+    `110` had already ruled the sources stay distinct.
+    """
+
+    def _elect(self, fuel):
+        from btap.codes.necb.hvac import reference
+
+        group = self._group((fuel,))
+        energy, _curve = reference._reference_energy_type(
+            group, self._selection(), self._facts(), self._audit())
+        return energy
+
+    def test_oil_and_propane_are_NOT_identical_in_the_reference(self):
+        self.assertEqual("gas", self._elect("FuelOilNo2"),
+                         "the collapse is real; the coverage must disclose it")
+        self.assertEqual("gas", self._elect("PropaneGas"))
+
+    def test_the_sources_the_catalog_DOES_preserve(self):
+        self.assertEqual("gas", self._elect("NaturalGas"))
+        self.assertEqual("electric", self._elect("Electricity"))
+
+    def test_an_ELECTRIC_group_elects_cleanly_without_the_fallback_warning(self):
+        """Disabling the electricity branch still returns 'electric', because
+        the final fallback does too — so the returned value alone cannot tell
+        the two apart. What distinguishes them is the fallback's warning,
+        which says no energy type was DETECTED. A mutation that survives on
+        the return value is caught here."""
+        from btap.codes.necb.hvac import reference
+
+        audit = self._audit()
+        energy, _curve = reference._reference_energy_type(
+            self._group(("Electricity",)), self._selection(),
+            self._facts(), audit)
+        self.assertEqual("electric", energy)
+        detected = [e for e in audit.entries
+                    if "no proposed heating energy type detected"
+                    in str(e.get("action"))]
+        self.assertEqual(
+            [], detected,
+            "an Electricity-only group is DETECTED, so the fallback warning "
+            "must not fire; if it does, the election branch is not running")
+
+    def test_the_coverage_discloses_the_collapse_rather_than_claiming_identity(self):
+        """The claim and the behaviour must agree, in BOTH editions."""
+        import json
+        import pathlib
+
+        root = pathlib.Path(__file__).resolve().parents[2]
+        for ed, a9 in (("necb2020", "8.4.4.9"), ("necb2025", "8.4.5.9")):
+            d = json.loads((root / "btap" / "codes" / "necb" / "data" / ed
+                            / "reference_rules.json").read_text(encoding="utf-8"))
+            entry = next(a for a in d["article_coverage"]["articles"]
+                         if str(a.get("article")) == f"{a9}.(4)")
+            self.assertEqual("partial", entry["status"],
+                             f"{ed}: (4) cannot be `implemented` while oil "
+                             f"and propane collapse to gas")
+            self.assertIn("PropaneGas", entry["gaps"])
+            self.assertIn("FuelOilNo2", entry["gaps"])
 
 
 class TestTheEditionComesFromTheManifest(unittest.TestCase):

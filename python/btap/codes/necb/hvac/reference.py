@@ -2159,28 +2159,23 @@ def _disclose_multi_energy(group, selection, facts, audit, ruleset=None,
         f'NOT ESTABLISHED: {sentence_six} bands the requirement by the '
         f'reference plant capacity, which is not known at selection time, '
         f'so no subclause is claimed')
-    # The reference ADOPTS this plant, so its device count is the proposed
-    # count — any number, not one per energy type. After sizing, the staging
-    # pass sets the plant's live capacity by primary/secondary ROLE, resolved
-    # from the builder feature then the name then supply order, and blind to
-    # fuel: a secondary under the single-boiler threshold is driven to ~0 W.
-    # So the installed allocation is NOT carried into the annual reference,
-    # and on a plant whose primary is the non-elected fuel the surviving
-    # capacity is the fuel the election rejected (Fable, `117`).
-    # What the staging pass does depends on things NOT established at
-    # selection time, and Sol reproduced three outcomes (`120`): in the
-    # two-boiler band a role-labelled equal pair is PRESERVED; below the
-    # single-boiler threshold a recognised secondary is driven to ~0 W blind
-    # to fuel; and a plant whose devices take no recognised role at all --
-    # `_plant_role` returns None unless there are exactly two boilers -- is
-    # not staged, so every device keeps full capacity. The reference may also
-    # not adopt this plant: a heat-pump variant with `needs_boiler: false`
-    # has its plant torn down. So the entry states the possibilities and
-    # claims none of them.
+    # NOTHING about the reference plant is asserted here. Sol reproduced four
+    # outcomes (`120`, `121`), and the entry lists them rather than choosing:
+    # the proposed plant may be adopted; it may be torn down and REPLACED by
+    # a newly built plant of the selected variant (a one-group mixed
+    # gas/electric loop became a different two-boiler NaturalGas plant, with
+    # no proposed handle on either boiler); it may be torn down and not
+    # rebuilt where the variant needs no boiler; and if a hydronic plant does
+    # result, the post-sizing staging pass acts on primary/secondary ROLE
+    # blind to fuel, whose effect differs by capacity band and by whether any
+    # role is recognised at all -- `_plant_role` returns None unless there
+    # are exactly two boilers.
     inputs['live_capacity_outcome'] = (
         'NOT ESTABLISHED at selection time. The reference plant may be this '
-        'plant or may not exist at all (a heat-pump variant needing no '
-        'boiler has it torn down). If it is hydronic, the post-sizing '
+        'plant adopted; may be a DIFFERENT plant, built by the selected '
+        'variant after this one is torn down, holding none of these devices; '
+        'or may not exist at all, where the variant needs no boiler. If a '
+        'hydronic plant does result, the post-sizing '
         'staging pass acts on primary/secondary ROLE and is blind to energy '
         'type: an equal role-labelled pair in the two-boiler band is '
         'PRESERVED, a recognised secondary below the single-boiler threshold '
