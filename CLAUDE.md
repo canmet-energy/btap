@@ -108,12 +108,32 @@ mostly against one edition's text, and asserting a list for them would be a
 guess. That is a DECLARED gap where it used to be a silent one; establishing
 them is open work.
 
-`articles` is a MAP from code id to that edition's own citations, never a flat
-list: the same number can name a DIFFERENT requirement in each edition
-(`8.4.5.9` is Heating System in NECB 2025 and Fuel-Fired Service Water Heater
-in NECB 2020), so one list spanning editions cites the wrong article in one of
-them. The generator validates that every Section 8.4 id exists in the edition
-it is listed under.
+`articles` groups citations by an AUTHORED REQUIREMENT IDENTITY, then by code
+id inside it. A flat list was ambiguous — the same number can name a DIFFERENT
+requirement in each edition (`8.4.5.9` is Heating System in NECB 2025 and
+Fuel-Fired Service Water Heater in NECB 2020) — but per-edition nesting alone
+was necessary and insufficient: it left correspondence to be INFERRED, and
+inferring it from shared title vocabulary accepted "Service Water Heating
+Systems" as 2025's counterpart to "Heating System" because both contain
+"heating" (Sol, clearance review of `be2118d`). Semantic matching on
+vocabulary cannot be made safe, so correspondence is authored:
+
+```toml
+[articles.multi_energy_heating]
+label = "Multi-energy heating capacity allocation and operating priority"
+necb2020 = ["8.4.4.9.(4)", "8.4.4.9.(5)", "8.4.4.9.(6)"]
+necb2025 = ["8.4.5.9.(4)", "8.4.5.9.(5)", "8.4.5.9.(6)"]
+```
+
+The requirement key and its `label` ARE the cross-edition equivalence
+assertion, so the generator checks structure instead of guessing meaning, and
+PER REQUIREMENT rather than across the file — a global coverage check let one
+requirement's missing edition hide behind another that listed it. Four rules:
+a non-empty label; every edition in `editions` present in EVERY requirement;
+each Section 8.4 id existing in the edition it is listed under; and the
+per-edition lists CORRESPONDING, same sentence suffixes in each edition's
+numbering. The `unverified` holding key may not be mixed with authored
+requirements.
 
 **The id grammar is `^D-\d+$`, unbounded.** `^D-\d{2}$` allowed exactly 100
 ids and D-01 through D-99 all exist, so the registry had run out; a fixed three
