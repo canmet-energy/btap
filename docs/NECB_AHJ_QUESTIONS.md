@@ -87,7 +87,6 @@ nonconformity with 8.4.x.9.(6)(e).
 | AHJ-7 | Table 8.4.5.5.-C / 8.4.6.5.-C chiller EIR_FT | referral | necb2020, necb2025 | **no — see the entry; phylroy's call** |
 | AHJ-8 | Table 4.2.1.6 Note (1) A/B control marks | tool-gap | necb2020, necb2025 | no |
 | AHJ-9 | Table A-8.4.3.2.(1)-G and the '12' column heads | ruled | necb2020, necb2025 | no |
-| AHJ-17 | no air-cooled chiller curve is shipped | tool-gap | necb2020, necb2025 | no |
 | AHJ-10 | Table 8.4.x.7.-B Note (3) corner-block grouping | referral | unverified | not yet |
 | AHJ-11 | 8.4.x.1.(5) vs Table 8.4.x.7.-B System 5 heating | referral | unverified | not yet |
 | AHJ-12 | Table 8.4.x.7.-B Note (1) "where present" humidification | referral | unverified | not yet |
@@ -95,6 +94,7 @@ nonconformity with 8.4.x.9.(6)(e).
 | AHJ-14 | boiler/furnace part-load class selection | referral | unverified | not yet |
 | AHJ-15 | 8.4.x.9.(3) terminal-vs-plant dispatch priority | referral | unverified | not yet |
 | AHJ-16 | 8.4.x.14 N:1 system correspondence | referral | unverified | not yet |
+| AHJ-17 | no air-cooled chiller curve is shipped | tool-gap | necb2020, necb2025 | no |
 
 ---
 

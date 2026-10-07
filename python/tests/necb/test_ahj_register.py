@@ -272,5 +272,115 @@ class TestEveryEntryDeclaresItsOwnStatus(unittest.TestCase):
                                    "ruled", "tool-gap"})
 
 
+class TestTheREADMEMatchesTheRegister(unittest.TestCase):
+    """The README's claim about how many entries change a run must be the
+    register's own answer.
+
+    The first version said "If your building hits one, the run says so", which
+    AHJ-5 contradicts — nothing fires for its shape. Correcting that to "for
+    most of them" replaced one false claim with a different one: TWO of
+    seventeen set a run conditional. A prose hedge cannot be checked, so the
+    README names the ids and this test holds them to the table.
+    """
+
+    def setUp(self):
+        self.readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+        text = REGISTER.read_text(encoding="utf-8")
+        self.conditional = {
+            ident for ident, sets in re.findall(
+                r"^\| (AHJ-\d+) \|(?:[^|]*\|){3}([^|]*)\|", text, re.M)
+            if sets.strip().lower().startswith("yes")}
+
+    def test_the_register_still_marks_some_entry_as_conditional(self):
+        """Guards the parse: an empty set would make the next test vacuous."""
+        self.assertTrue(
+            self.conditional,
+            "no row sets a run conditional — either the table changed shape "
+            "or the conditional determination was withdrawn")
+
+    def test_the_README_names_exactly_those_ids(self):
+        named = {m for m in re.findall(r"AHJ-\d+", self._claim_sentence())}
+        self.assertEqual(
+            self.conditional, named,
+            "the README says {} change a run; the register says {}".format(
+                sorted(named), sorted(self.conditional)))
+
+    def test_the_README_does_not_hedge_with_a_quantity_word(self):
+        sentence = self._claim_sentence().lower()
+        for hedge in ("most of them", "all of them", "each of them"):
+            self.assertNotIn(
+                hedge, sentence,
+                "a quantity word cannot be checked against the register; "
+                "name the ids instead")
+
+    def _claim_sentence(self):
+        match = re.search(r"\*\*([^*]*change what a run reports[^*]*)\*\*",
+                          self.readme)
+        self.assertIsNotNone(
+            match, "the README no longer states which entries change a run")
+        return match.group(1)
+
+
+class TestTheREADMEQuotesRealOutput(unittest.TestCase):
+    """Every line the README shows as CLI output must be a line the CLI emits.
+
+    The README quoted a verdict block saying the authority must accept "the
+    interpretation". That word was removed from the CLI two commits earlier,
+    because AHJ-1 is an alternative solution and the clause DOES decide the
+    requirement. Nothing noticed: the README is prose to every test that
+    existed, so a hand-maintained copy of program output drifted silently.
+    This is the same failure as the withdrawn claim surviving on the HTML
+    surface, one document further out.
+    """
+
+    def setUp(self):
+        from btap.codes import cli
+        reason = {
+            "article": "8.4.4.9.(5)",
+            "serving_systems": ["Hot Water Loop"],
+            "hydronic_serving_systems": ["Hot Water Loop"],
+            "ahj_ids": ["AHJ-1", "AHJ-3"],
+            "ahj_must_approve": [
+                "an ALTERNATIVE SOLUTION: 8.4.4.9.(5)(a) requires the "
+                "reference heating capacities to MATCH THE RATIO of the "
+                "proposed allocation per energy type, and this tool computes "
+                "no ratio",
+                "how 8.4.4.9.(5)'s allocation is to be REPRESENTED against "
+                "8.4.4.9.(6) on Hot Water Loop, which the acceptable-solution "
+                "text does not settle"],
+            "if_not_approved": "the comparison does not support a "
+                               "Code-compliance determination"}
+        report = {"compliant": True, "annual": True, "code_label": "NECB 2020",
+                  "compliance_determination": "conditional",
+                  "compliance_determination_reason": reason}
+
+        class Result:
+            compliant = True
+            report = {"annual": True}
+
+        self.rendered = cli.verdict_block(Result(), report)
+        readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+        marker = "*** NOT A CODE-COMPLIANT DETERMINATION ***"
+        start = readme.index(marker)
+        self.quoted = readme[start:readme.index("```", start)]
+
+    def test_the_quoted_block_is_not_empty(self):
+        """Guards the parse, so the next test cannot pass vacuously."""
+        lines = [ln for ln in self.quoted.splitlines() if ln.strip()]
+        self.assertGreater(len(lines), 8, self.quoted)
+
+    def test_every_quoted_line_is_a_line_the_CLI_emits(self):
+        emitted = {ln.strip() for ln in self.rendered.splitlines()}
+        for line in self.quoted.splitlines():
+            stripped = line.strip()
+            if not stripped:
+                continue
+            with self.subTest(stripped[:60]):
+                self.assertIn(
+                    stripped, emitted,
+                    "the README shows a line the CLI does not emit; "
+                    "re-render the block rather than editing it")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

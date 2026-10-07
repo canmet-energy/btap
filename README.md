@@ -252,21 +252,41 @@ Those questions are listed in
 ambiguous, who established that it is ambiguous, what this tool does in the
 meantime, and where you meet it in a run.
 
-**For most of them, the run says so.** The verdict is reported but marked as
-not a determination, and the report names what your authority must approve:
+**Two of them change what a run reports: AHJ-1 and AHJ-3.** Where they apply,
+the verdict is still reported, marked as not a determination, and the report
+names what your authority must accept:
 
 ```
   *** NOT A CODE-COMPLIANT DETERMINATION ***
-  8.4.4.9.(5) governs the 1 multi-energy serving system(s) below and is
-  NOT implemented ...
+  8.4.4.9.(5) governs the 1 multi-energy serving system(s) below and its
+  capacity-ratio requirement is neither computed nor enforced. What the
+  reference's final heating equipment carries is NOT established by this tool,
+  so the comparison above is INFORMATIONAL only and is not evidence of
+  compliance.
     - Hot Water Loop
 
-  CONDITIONAL: the authority having jurisdiction must accept the interpretation
-  below before this comparison can support compliance.
+  CONDITIONAL: the authority having jurisdiction must accept the conditions
+  below before this comparison can support compliance. Each says whether it is
+  an ALTERNATIVE SOLUTION — the text decides the requirement and this tool does
+  not meet it — or an INTERPRETATION the text does not settle.
+    - an ALTERNATIVE SOLUTION: 8.4.4.9.(5)(a) requires the reference
+      heating capacities to MATCH THE RATIO of the proposed
+      allocation per energy type, and this tool computes no ratio
+    - how 8.4.4.9.(5)'s allocation is to be REPRESENTED against
+      8.4.4.9.(6) on Hot Water Loop, which the acceptable-solution
+      text does not settle
 
   VERDICT: COMPLIANT - INFORMATIONAL, AND CONDITIONAL ON APPROVAL BY THE
            AUTHORITY HAVING JURISDICTION
+  (NECB 2020, Division B, Article 8.4.1.2; 8.4.4.9.(5) unimplemented)
 ```
+
+**The other fifteen do not change the verdict.** They are disclosed in the
+audit log and in the decision each came from, and the register's status column
+says which: `no` where the question does not bear on a run's outcome, `not yet`
+where wiring it in is follow-on work. One of them, AHJ-5, is recorded as a
+HOLE rather than a disposition — the shape it describes produces no disclosure
+at all.
 
 The HTML report carries the same thing as a **CONDITIONAL — AHJ APPROVAL
 REQUIRED** badge beside the pass/fail badge, so it travels with the submission.
