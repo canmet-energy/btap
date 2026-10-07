@@ -443,6 +443,13 @@ def _mark_informational_if_multi_energy(run, audit):
         "if_not_approved": (
             "the comparison does not establish compliance and no verdict "
             "from it may be submitted as a determination"),
+        # The register entry this condition belongs to. Cited so the runtime
+        # and the tracked register cannot drift apart:
+        # `test_ahj_register.py` fails if an id emitted here is missing from
+        # the file, which is what makes the register a record rather than a
+        # claim that one exists.
+        "ahj_ids": ["AHJ-1"],
+        "ahj_register": "docs/NECB_AHJ_QUESTIONS.md",
     }
     audit.warn("compliance",
                "INFORMATIONAL AND CONDITIONAL: this comparison is NOT a "
