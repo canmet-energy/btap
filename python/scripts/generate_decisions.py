@@ -71,14 +71,20 @@ KINDS = ("runtime", "runtime_unwired", "data", "process")
 #: The only keys _meta.json may carry.
 META_FIELDS = ("registry_comment",)
 
-ID_RE = re.compile(r"^D-\d{2}$")
+#: Unbounded digits. `^D-\d{2}$` allowed exactly 100 ids and D-01..D-99 all
+#: exist, so the registry had no id left for a new decision. Widening to a
+#: fixed three digits would only move the wall, and phylroy expects thousands
+#: once other code families arrive. Existing ids are NOT renumbered: every
+#: citation in product source, audit entries and frozen baselines keeps
+#: working, and the index already sorts numerically rather than lexically.
+ID_RE = re.compile(r"^D-\d+$")
 #: A body's first line. The heading text is authored prose and is deliberately
 #: NOT required to equal the front-matter ``title``, which is the compact
 #: runtime/index title; the two differ for most decisions on purpose.
-HEADING_RE = re.compile("^## (D-\\d{2}) " + EM_DASH + " (.+)$")
+HEADING_RE = re.compile("^## (D-\\d+) " + EM_DASH + " (.+)$")
 #: The laxer form the pre-migration document used, where D-76..D-89 carried no
 #: heading title at all. Only ``--split`` accepts it.
-SPLIT_HEADING_RE = re.compile("^## (D-\\d{2})(?: " + EM_DASH + " (.+))?$")
+SPLIT_HEADING_RE = re.compile("^## (D-\\d+)(?: " + EM_DASH + " (.+))?$")
 ANCHOR_RE = re.compile(r'^<a id="d-\d{2}"></a>$')
 
 def numeric_order(ids) -> list:
@@ -130,6 +136,137 @@ def toml_value(value) -> str:
     raise TypeError("unsupported TOML value: {!r}".format(value))
 
 
+#: The holding key for a decision whose editions are not yet established. Its
+#: articles are carried unvalidated, because validating them requires knowing
+#: which edition's numbering they are written in.
+ARTICLES_UNVERIFIED = "unverified"
+
+
+def _bare_article(value: str):
+    """The bare article number inside a citation: ``8.4.4.9.(5)`` ->
+    ``8.4.4.9``, ``Table 8.4.4.7.-A`` -> ``8.4.4.7``, ``A-8.4.5.4.(1)`` ->
+    ``8.4.5.4``. ``None`` when the string carries no number at all."""
+    text = re.sub(r"^(Table|Note|Appendix)\s+", "", str(value).strip())
+    text = re.sub(r"^A-", "", text)
+    match = re.match(r"(\d+(?:\.\d+)*)", text)
+    return match.group(1) if match else None
+
+
+def _article_titles(code: str) -> dict:
+    """Section 8.4 article number -> title, for one code id, read from that
+    edition's own coverage cache with STDLIB ONLY.
+
+    It does NOT import `btap`: `.github/workflows/decisions.yml` runs this
+    generator with no dependency install, so an import would make the gate
+    fail in CI rather than check anything. The first version of this function
+    did import it, got an ImportError, and returned `{}` — which made every
+    per-edition check silently pass. A check that cannot fail is worse than no
+    check, so a MISSING cache now raises.
+    """
+    path = (pathlib.Path(__file__).resolve().parents[1] / "btap" / "codes"
+            / "necb" / "data" / code / "coverage" / "articles_8_4.json")
+    if not path.is_file():
+        raise ValueError(
+            "cannot validate articles for {!r}: {} is missing, so the "
+            "per-edition check would silently pass".format(code, path))
+    articles = json.loads(path.read_text(encoding="utf-8"))["articles"]
+    return {number: str(record.get("title") or "").strip().lower()
+            for number, record in articles.items()
+            if record.get("title")}
+
+
+def check_articles(name: str, meta: dict) -> None:
+    """``articles`` is a MAP from code id to that edition's own citations.
+
+    A flat list was ambiguous and, worse, wrong: ``8.4.5.9`` is the Heating
+    System article in NECB 2025 and the Fuel-Fired Service Water Heater
+    article in NECB 2020, so one list spanning editions cites a different
+    requirement in each. Nesting is the fix; these checks make it verifiable.
+    """
+    articles = meta["articles"]
+    if not isinstance(articles, dict) or not articles:
+        raise ValueError(
+            "{}: articles must be a non-empty map of code id -> list of "
+            "strings (a flat list cannot say which edition's numbering it "
+            "uses)".format(name))
+    allowed = registered_codes() | {ARTICLES_UNVERIFIED}
+    for key, values in sorted(articles.items()):
+        if key not in allowed:
+            raise ValueError(
+                "{}: articles key {!r} is neither a registered code id nor "
+                "{!r}; registered are {}".format(
+                    name, key, ARTICLES_UNVERIFIED, sorted(registered_codes())))
+        if not isinstance(values, list) or not all(
+                isinstance(item, str) for item in values):
+            raise ValueError(
+                "{}: articles[{!r}] must be a list of strings".format(name, key))
+    # the keys must agree with `editions`: a decision cannot cite an edition it
+    # does not claim to govern, nor claim one it cites nothing for
+    claimed = set(meta["editions"])
+    keyed = set(articles)
+    if keyed - claimed:
+        raise ValueError(
+            "{}: articles cites {} which editions does not claim".format(
+                name, sorted(keyed - claimed)))
+
+    # Every Section 8.4 id must exist in THAT edition. Ids outside Section 8.4
+    # (other Parts, Division A, equipment tables) pass: `article_numbers` only
+    # covers Section 8.4, so a check there would reject valid citations.
+    for code, values in sorted(articles.items()):
+        if code == ARTICLES_UNVERIFIED:
+            continue
+        titles = _article_titles(code)
+        for value in values:
+            bare = _bare_article(value)
+            if bare is None or not bare.startswith("8.4"):
+                continue
+            if bare not in titles:
+                raise ValueError(
+                    "{}: articles[{!r}] cites {!r}, and Section 8.4 article "
+                    "{} does not exist in that edition".format(
+                        name, code, value, bare))
+
+    # Where a decision spans editions, the ids it lists must name the SAME
+    # requirement in each. This is the check that catches the 8.4.5.9 trap.
+    codes = [c for c in articles if c != ARTICLES_UNVERIFIED]
+    if len(codes) > 1:
+        per_code = {}
+        for code in codes:
+            titles = _article_titles(code)
+            found = set()
+            for value in articles[code]:
+                bare = _bare_article(value)
+                if bare and bare.startswith("8.4") and bare in titles:
+                    found.add(titles[bare])
+            per_code[code] = found
+        # Exact title equality is the WRONG rule: editions rename articles.
+        # 2020's 8.4.2.10 is "HVAC Systems Calculations" and 2025's is "HVAC
+        # Systems" — a rename, not a mis-citation — and requiring equality
+        # rejected a correct decision. What distinguishes a rename from the
+        # real trap is shared vocabulary: "heating system" and "fuel-fired
+        # service water heater" have none. So each title must find a
+        # counterpart in every other edition sharing a meaningful word.
+        stop = {"the", "of", "and", "a", "for", "to", "in", "system",
+                "systems", "calculations"}
+
+        def words(title):
+            return {w for w in re.split(r"[^a-z0-9]+", title) if w and w not in stop}
+
+        ordered = sorted(per_code)
+        for left, right in zip(ordered, ordered[1:]):
+            for title in sorted(per_code[left]):
+                if not words(title):
+                    continue        # title is all stopwords; nothing to match
+                if not any(words(title) & words(other)
+                           for other in per_code[right]):
+                    raise ValueError(
+                        "{}: articles[{!r}] cites {!r}, and no article listed "
+                        "for {!r} names a related requirement — so at least "
+                        "one edition's numbering is wrong. {!r} lists {}".format(
+                            name, left, title, right, right,
+                            sorted(per_code[right])))
+
+
 def registered_codes() -> set:
     """The code ids that actually exist, DISCOVERED from the edition snapshots
     rather than listed, so registering a new edition does not leave this
@@ -150,7 +287,21 @@ def front_matter(meta: dict) -> str:
             "front matter: unexpected {} / missing {}".format(extra, missing))
     lines = [FENCE]
     for field in FIELDS:
+        if field == "articles":
+            continue            # emitted as a table, after the scalars
         lines.append("{} = {}".format(field, toml_value(meta[field])))
+    # `articles` is a map, so it becomes a TOML table. It goes last because a
+    # table header captures every key that follows it. The shape is checked
+    # HERE too: emitting a flat list raised AttributeError deep in the writer
+    # instead of saying what was wrong.
+    if not isinstance(meta["articles"], dict):
+        raise ValueError(
+            "front matter: articles must be a map of code id -> list of "
+            "strings, got {}".format(type(meta["articles"]).__name__))
+    lines.append("")
+    lines.append("[articles]")
+    for code, values in sorted(meta["articles"].items()):
+        lines.append("{} = {}".format(code, toml_value(values)))
     lines.append(FENCE)
     return "\n".join(lines)
 
@@ -194,9 +345,7 @@ def validate(name: str, meta: dict, body: str) -> None:
         raise ValueError("{}: filename does not match id {!r}".format(name, meta["id"]))
     if meta["kind"] not in KINDS:
         raise ValueError("{}: unknown kind {!r}".format(name, meta["kind"]))
-    if not isinstance(meta["articles"], list) or not all(
-            isinstance(item, str) for item in meta["articles"]):
-        raise ValueError("{}: articles must be a list of strings".format(name))
+    check_articles(name, meta)
     if not isinstance(meta["editions"], list) or not meta["editions"] or not all(
             isinstance(item, str) for item in meta["editions"]):
         raise ValueError(

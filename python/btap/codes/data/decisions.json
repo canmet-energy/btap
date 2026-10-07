@@ -32,7 +32,9 @@
       "id": "D-01",
       "title": "NECB text reproduction (Crown copyright)",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -42,10 +44,12 @@
       "id": "D-02",
       "title": "Unresolvable space types are a hard error",
       "kind": "runtime",
-      "articles": [
-        "8.4.3.1.(2)",
-        "4.2.1.6."
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.3.1.(2)",
+          "4.2.1.6."
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -55,10 +59,12 @@
       "id": "D-03",
       "title": "Chiller EIR curves verified against the proposed erratum",
       "kind": "data",
-      "articles": [
-        "8.4.5.5.-C",
-        "8.4.6.5.-C"
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.5.5.-C",
+          "8.4.6.5.-C"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -68,13 +74,15 @@
       "id": "D-04",
       "title": "EUI path: two-run design with check-then-normalize",
       "kind": "runtime",
-      "articles": [
-        "8.4.4.1.(1)",
-        "8.4.4.1.(2)",
-        "8.4.4.1.(3)",
-        "8.4.4.2.(1)",
-        "Table 8.4.4.1."
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.1.(1)",
+          "8.4.4.1.(2)",
+          "8.4.4.1.(3)",
+          "8.4.4.2.(1)",
+          "Table 8.4.4.1."
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -84,10 +92,12 @@
       "id": "D-05",
       "title": "Two archetype-normalization interpretations adopted",
       "kind": "runtime",
-      "articles": [
-        "8.4.4.2.(1)",
-        "8.4.3.6.(1)(a)"
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.2.(1)",
+          "8.4.3.6.(1)(a)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -97,9 +107,11 @@
       "id": "D-06",
       "title": "Energy-recovery trigger uses the current-vintage airflow tables, post-sizing",
       "kind": "runtime",
-      "articles": [
-        "5.2.10.1."
-      ],
+      "articles": {
+        "unverified": [
+          "5.2.10.1."
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -109,9 +121,11 @@
       "id": "D-07",
       "title": "Cooling-tower part-load behaviour dispositioned to the engine",
       "kind": "process",
-      "articles": [
-        "8.4.6.6."
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.6.6."
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -121,7 +135,9 @@
       "id": "D-08",
       "title": "Batch sign-off of the remaining article dispositions",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -131,10 +147,12 @@
       "id": "D-09",
       "title": "Umbrella coverage manifest emits at runtime; modeller-scope notes split from warnings",
       "kind": "runtime_unwired",
-      "articles": [
-        "8.4.2.2.",
-        "8.4.2.3."
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.2.2.",
+          "8.4.2.3."
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -144,7 +162,9 @@
       "id": "D-10",
       "title": "Remaining adjudications delegated, with mandatory logging",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -154,9 +174,11 @@
       "id": "D-11",
       "title": "Hydronic pump power implemented as intensity transfer plus table curves",
       "kind": "runtime",
-      "articles": [
-        "8.4.4.14."
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.14."
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -166,9 +188,11 @@
       "id": "D-12",
       "title": "Space temperature control re-manifested as modeller scope",
       "kind": "data",
-      "articles": [
-        "8.4.4.16."
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.16."
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -178,9 +202,11 @@
       "id": "D-13",
       "title": "Screw and centrifugal chiller curves probed; imperfect printed normalization accepted",
       "kind": "process",
-      "articles": [
-        "8.4.6.5."
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.6.5."
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -190,9 +216,11 @@
       "id": "D-14",
       "title": "Reference air systems inherit the proposed operating schedule",
       "kind": "runtime",
-      "articles": [
-        "8.4.3.2.(1)"
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.3.2.(1)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -202,10 +230,12 @@
       "id": "D-15",
       "title": "Energy-recovery effectiveness and frost values verified against the code text",
       "kind": "runtime",
-      "articles": [
-        "5.2.10.1.(4)",
-        "5.2.10.1.(6)"
-      ],
+      "articles": {
+        "unverified": [
+          "5.2.10.1.(4)",
+          "5.2.10.1.(6)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -215,9 +245,11 @@
       "id": "D-16",
       "title": "Orphaned proposed EMS purged from the reference",
       "kind": "runtime",
-      "articles": [
-        "8.4.4.1."
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.1."
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -227,9 +259,11 @@
       "id": "D-17",
       "title": "Legacy energy-recovery diagnosis filed upstream",
       "kind": "process",
-      "articles": [
-        "5.2.10.1."
-      ],
+      "articles": {
+        "unverified": [
+          "5.2.10.1."
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -239,9 +273,11 @@
       "id": "D-18",
       "title": "Multizone system zone grouping rewritten to the table note",
       "kind": "runtime_unwired",
-      "articles": [
-        "Table 8.4.4.7.-B Note (3)"
-      ],
+      "articles": {
+        "unverified": [
+          "Table 8.4.4.7.-B Note (3)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -251,11 +287,13 @@
       "id": "D-19",
       "title": "Infiltration lineage reconciled; reference inherits proposed leakage coefficients",
       "kind": "runtime",
-      "articles": [
-        "8.4.3.3.(3)",
-        "8.4.2.9.(2)",
-        "8.4.4.3.(6)"
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.3.3.(3)",
+          "8.4.2.9.(2)",
+          "8.4.4.3.(6)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -265,10 +303,12 @@
       "id": "D-20",
       "title": "Economizer exempted on 100%-outdoor-air makeup air units",
       "kind": "runtime",
-      "articles": [
-        "8.4.4.12.",
-        "5.2.2.8."
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.12.",
+          "5.2.2.8."
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -278,10 +318,12 @@
       "id": "D-21",
       "title": "Envelope area for air leakage computed as the conditioned-space enclosure",
       "kind": "runtime",
-      "articles": [
-        "3.2.4.2.(1)(c)",
-        "8.4.2.9.(2)"
-      ],
+      "articles": {
+        "unverified": [
+          "3.2.4.2.(1)(c)",
+          "8.4.2.9.(2)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -291,15 +333,17 @@
       "id": "D-22",
       "title": "Reference-systems audit findings implemented as one batch",
       "kind": "runtime",
-      "articles": [
-        "8.4.4.8.",
-        "8.4.4.12.",
-        "8.4.4.13.(2)(c)",
-        "8.4.4.15.(1)",
-        "8.4.4.18.(3)",
-        "5.2.2.7.(1)",
-        "Table 5.2.12.2"
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.8.",
+          "8.4.4.12.",
+          "8.4.4.13.(2)(c)",
+          "8.4.4.15.(1)",
+          "8.4.4.18.(3)",
+          "5.2.2.7.(1)",
+          "Table 5.2.12.2"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -309,9 +353,11 @@
       "id": "D-23",
       "title": "Table transmittance values treated as overall, air films included",
       "kind": "runtime",
-      "articles": [
-        "1.4.1.2."
-      ],
+      "articles": {
+        "unverified": [
+          "1.4.1.2."
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -321,11 +367,13 @@
       "id": "D-24",
       "title": "Envelope scope: unconditioned spaces out, interzone assemblies in",
       "kind": "runtime",
-      "articles": [
-        "1.4.1.2.",
-        "Table 3.2.2.2.",
-        "3.1.1.7.(4)"
-      ],
+      "articles": {
+        "unverified": [
+          "1.4.1.2.",
+          "Table 3.2.2.2.",
+          "3.1.1.7.(4)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -335,7 +383,9 @@
       "id": "D-25",
       "title": "Design-day attach replaces rather than appends, filtered to annual extremes",
       "kind": "runtime",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -345,10 +395,12 @@
       "id": "D-26",
       "title": "Heat-rejection fan power sums the condenser loop; sized tower hydraulics hardened",
       "kind": "runtime",
-      "articles": [
-        "8.4.4.11.(2)-(3)",
-        "Table 5.2.12.2"
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.11.(2)-(3)",
+          "Table 5.2.12.2"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -358,9 +410,11 @@
       "id": "D-27",
       "title": "Service-water circulators are outside the hydronic pump article; transfer head reconciled",
       "kind": "runtime",
-      "articles": [
-        "8.4.4.14."
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.14."
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -370,9 +424,11 @@
       "id": "D-28",
       "title": "Multizone selection groups merge into whole-building systems",
       "kind": "runtime",
-      "articles": [
-        "Table 8.4.4.7.-B Note (3)"
-      ],
+      "articles": {
+        "unverified": [
+          "Table 8.4.4.7.-B Note (3)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -382,7 +438,9 @@
       "id": "D-29",
       "title": "Upstream issues carry explicit Claude authorship",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -392,7 +450,9 @@
       "id": "D-30",
       "title": "Legacy findings ledger cleared upstream",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -402,9 +462,11 @@
       "id": "D-31",
       "title": "Two legacy findings root-caused and closed with no defect",
       "kind": "process",
-      "articles": [
-        "5.2.12.1."
-      ],
+      "articles": {
+        "unverified": [
+          "5.2.12.1."
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -414,10 +476,12 @@
       "id": "D-32",
       "title": "Ground-floor insulation extent corrected to a perimeter strip below the coldest zone",
       "kind": "runtime",
-      "articles": [
-        "Table 3.2.3.1.",
-        "3.2.3.3.(3)"
-      ],
+      "articles": {
+        "unverified": [
+          "Table 3.2.3.1.",
+          "3.2.3.3.(3)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -427,7 +491,9 @@
       "id": "D-33",
       "title": "Variant mockups exercise the never-fleet-tested reference routes",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -437,9 +503,11 @@
       "id": "D-34",
       "title": "Residential blocks with heat pumps take the air-source redirect",
       "kind": "runtime",
-      "articles": [
-        "8.4.4.7.(4)"
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.7.(4)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -449,9 +517,11 @@
       "id": "D-35",
       "title": "Lightweight reference rebuild corrected to light-frame mass",
       "kind": "runtime",
-      "articles": [
-        "8.4.4.4.(1)"
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.4.(1)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -461,7 +531,9 @@
       "id": "D-36",
       "title": "Campus 3D renderer ported into the geometry gem",
       "kind": "runtime_unwired",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -471,11 +543,13 @@
       "id": "D-37",
       "title": "Heat-pump reference split by source, boundary per the explanatory note",
       "kind": "runtime",
-      "articles": [
-        "8.4.4.13.(1)",
-        "8.4.4.13.(2)",
-        "Note A-8.4.4.13"
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.13.(1)",
+          "8.4.4.13.(2)",
+          "Note A-8.4.4.13"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -485,10 +559,12 @@
       "id": "D-38",
       "title": "Prescriptive pump-power caps applied min-wins over the intensity transfer",
       "kind": "runtime",
-      "articles": [
-        "5.2.6.3.(1)",
-        "8.4.4.14."
-      ],
+      "articles": {
+        "unverified": [
+          "5.2.6.3.(1)",
+          "8.4.4.14."
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -498,10 +574,12 @@
       "id": "D-39",
       "title": "Two-pipe fan-coil reference heating honoured conditionally",
       "kind": "runtime",
-      "articles": [
-        "8.4.4.1.(5)",
-        "Table 8.4.4.7.-B"
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.1.(5)",
+          "Table 8.4.4.7.-B"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -511,7 +589,9 @@
       "id": "D-40",
       "title": "Reheat-coil autosizing trusted; legacy hard-size workaround rejected",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -521,9 +601,11 @@
       "id": "D-41",
       "title": "Service-water reference article machine-verified; gap refined",
       "kind": "data",
-      "articles": [
-        "8.4.4.20."
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.20."
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -533,9 +615,11 @@
       "id": "D-42",
       "title": "First full-annual fleet sweep validates reference generation",
       "kind": "process",
-      "articles": [
-        "8.4.1.2.(4)"
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.1.2.(4)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -545,9 +629,11 @@
       "id": "D-43",
       "title": "Capacity iteration made per thermal block, secant-targeted from run history",
       "kind": "runtime",
-      "articles": [
-        "8.4.1.2.(5)"
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.1.2.(5)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -557,7 +643,9 @@
       "id": "D-44",
       "title": "Decision rulings surfaced at runtime in the audit log and AHJ report",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -567,9 +655,11 @@
       "id": "D-45",
       "title": "Museum exhibition galleries take the assembly row; museum archives and restoration rooms take the collections row",
       "kind": "runtime",
-      "articles": [
-        "Table 8.4.4.7.-A"
-      ],
+      "articles": {
+        "unverified": [
+          "Table 8.4.4.7.-A"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -579,12 +669,14 @@
       "id": "D-46",
       "title": "Staged heating and cooling as unitary multispeed coils, stage count set after sizing",
       "kind": "runtime",
-      "articles": [
-        "8.4.4.9.(7)",
-        "8.4.4.10.(8)",
-        "8.4.5.9.(7)",
-        "8.4.5.10.(8)"
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.9.(7)",
+          "8.4.4.10.(8)",
+          "8.4.5.9.(7)",
+          "8.4.5.10.(8)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -594,12 +686,14 @@
       "id": "D-47",
       "title": "Stage count clamped at the simulation engine's four-stage ceiling, with a shouted warning",
       "kind": "runtime",
-      "articles": [
-        "8.4.4.9.(7)",
-        "8.4.4.10.(8)",
-        "8.4.5.9.(7)",
-        "8.4.5.10.(8)"
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.9.(7)",
+          "8.4.4.10.(8)",
+          "8.4.5.9.(7)",
+          "8.4.5.10.(8)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -609,12 +703,14 @@
       "id": "D-48",
       "title": "Staging applies to air-loop unitary equipment only; zone terminals and tempering coils stay single-speed",
       "kind": "runtime",
-      "articles": [
-        "8.4.4.9.(7)",
-        "8.4.4.10.(8)",
-        "8.4.5.9.(7)",
-        "8.4.5.10.(8)"
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.9.(7)",
+          "8.4.4.10.(8)",
+          "8.4.5.9.(7)",
+          "8.4.5.10.(8)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -624,10 +720,12 @@
       "id": "D-49",
       "title": "Electric resistance heating is not a furnace, so the furnace staging sentence does not reach it",
       "kind": "runtime",
-      "articles": [
-        "8.4.4.9.(7)",
-        "8.4.5.9.(7)"
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.9.(7)",
+          "8.4.5.9.(7)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -637,12 +735,14 @@
       "id": "D-50",
       "title": "Terminal and secondary capacity split accounted through dedicated-outdoor-air zone sizing",
       "kind": "runtime",
-      "articles": [
-        "8.4.4.9.(3)",
-        "8.4.4.10.(7)",
-        "8.4.5.9.(3)",
-        "8.4.5.10.(7)"
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.9.(3)",
+          "8.4.4.10.(7)",
+          "8.4.5.9.(3)",
+          "8.4.5.10.(7)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -652,10 +752,12 @@
       "id": "D-51",
       "title": "Reference daylighting photocontrols are built by default",
       "kind": "runtime",
-      "articles": [
-        "8.4.4.5.(9)-(12)",
-        "8.4.5.5.(9)-(12)"
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.5.(9)-(12)",
+          "8.4.5.5.(9)-(12)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -665,12 +767,14 @@
       "id": "D-52",
       "title": "The reference heat pump's auxiliary-heating energy type is elected from the proposed building's annual run",
       "kind": "runtime",
-      "articles": [
-        "8.4.4.13.(2)(b)",
-        "8.4.4.13.(2)(g)",
-        "8.4.4.13.(2)(h)",
-        "8.4.5.13.(2)(g)"
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.13.(2)(b)",
+          "8.4.4.13.(2)(g)",
+          "8.4.4.13.(2)(h)",
+          "8.4.5.13.(2)(g)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -680,10 +784,12 @@
       "id": "D-53",
       "title": "Service water heater part-load curve carries the code fuel-ratio curve transformed into the EnergyPlus part-load-factor domain",
       "kind": "runtime",
-      "articles": [
-        "8.4.5.9.(2)",
-        "8.4.6.9.(2)"
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.5.9.(2)",
+          "8.4.6.9.(2)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -693,10 +799,12 @@
       "id": "D-54",
       "title": "The proposed's demand-control ventilation strategy is carried across the reference teardown, but its peak-rate outdoor-air method is not",
       "kind": "runtime",
-      "articles": [
-        "8.4.4.15.(2)",
-        "8.4.5.15.(2)"
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.15.(2)",
+          "8.4.5.15.(2)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -706,10 +814,12 @@
       "id": "D-55",
       "title": "Reference humidification is rebuilt on the proposed's energy source with a control taken from the proposed, or it is not built at all",
       "kind": "runtime",
-      "articles": [
-        "Table 8.4.4.7.-B Note (1)",
-        "Table 8.4.5.7.-B Note (1)"
-      ],
+      "articles": {
+        "unverified": [
+          "Table 8.4.4.7.-B Note (1)",
+          "Table 8.4.5.7.-B Note (1)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -719,11 +829,13 @@
       "id": "D-56",
       "title": "Reference fan-coil systems get a real water-side economizer, and the cooling-tower setpoint reset is what makes it operate",
       "kind": "runtime",
-      "articles": [
-        "8.4.4.12.",
-        "8.4.5.12.",
-        "5.2.2.9."
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.12.",
+          "8.4.5.12.",
+          "5.2.2.9."
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -733,17 +845,19 @@
       "id": "D-57",
       "title": "Reference daylighting photocontrols follow the current daylight-responsive control requirement, not the superseded one",
       "kind": "runtime",
-      "articles": [
-        "4.2.2.1.(10)",
-        "4.2.2.1.(12)",
-        "4.2.2.1.(13)",
-        "4.2.2.1.(15)",
-        "4.2.2.3.",
-        "4.2.2.4.",
-        "4.2.2.5.",
-        "8.4.4.5.(9)-(12)",
-        "8.4.5.5.(9)-(12)"
-      ],
+      "articles": {
+        "unverified": [
+          "4.2.2.1.(10)",
+          "4.2.2.1.(12)",
+          "4.2.2.1.(13)",
+          "4.2.2.1.(15)",
+          "4.2.2.3.",
+          "4.2.2.4.",
+          "4.2.2.5.",
+          "8.4.4.5.(9)-(12)",
+          "8.4.5.5.(9)-(12)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -753,12 +867,14 @@
       "id": "D-58",
       "title": "Residential compatible-cooling and heat-pump detection are decided from facts, not family names",
       "kind": "runtime",
-      "articles": [
-        "Table 8.4.4.7.-A",
-        "8.4.4.13.(1)-(2)",
-        "Note A-8.4.4.13",
-        "8.4.4.6.(1)-(2)"
-      ],
+      "articles": {
+        "unverified": [
+          "Table 8.4.4.7.-A",
+          "8.4.4.13.(1)-(2)",
+          "Note A-8.4.4.13",
+          "8.4.4.6.(1)-(2)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -768,11 +884,13 @@
       "id": "D-59",
       "title": "The vendored NECB 2020 equipment-efficiency minimums are verified against the printed tables",
       "kind": "data",
-      "articles": [
-        "5.2.12.1.",
-        "5.2.12.2.",
-        "8.4.4.11.(2)-(3)"
-      ],
+      "articles": {
+        "unverified": [
+          "5.2.12.1.",
+          "5.2.12.2.",
+          "8.4.4.11.(2)-(3)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -782,11 +900,13 @@
       "id": "D-60",
       "title": "The NECB 2025 edition's tables are verified against the printed code: efficiencies re-checked post-extraction-fix, selection verbatim 2020",
       "kind": "data",
-      "articles": [
-        "5.2.12.1.",
-        "5.2.12.2.",
-        "Table 8.4.5.7.-A"
-      ],
+      "articles": {
+        "unverified": [
+          "5.2.12.1.",
+          "5.2.12.2.",
+          "Table 8.4.5.7.-A"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -796,18 +916,20 @@
       "id": "D-61",
       "title": "Staleness audit after the extraction-service fixes: every pre-fix vendored table re-verified against the corrected source",
       "kind": "data",
-      "articles": [
-        "5.2.10.1.",
-        "8.4.4.14.",
-        "5.2.6.3.",
-        "3.2.2.2.",
-        "3.2.2.3.",
-        "3.2.3.1.",
-        "4.2.3.1.",
-        "4.2.1.6.",
-        "11.4.1.1.",
-        "8.4.4.1."
-      ],
+      "articles": {
+        "unverified": [
+          "5.2.10.1.",
+          "8.4.4.14.",
+          "5.2.6.3.",
+          "3.2.2.2.",
+          "3.2.2.3.",
+          "3.2.3.1.",
+          "4.2.3.1.",
+          "4.2.1.6.",
+          "11.4.1.1.",
+          "8.4.4.1."
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -817,11 +939,13 @@
       "id": "D-62",
       "title": "Economizer systems' staged cooling gets the prescribed lowest-stage capacity floor",
       "kind": "runtime",
-      "articles": [
-        "5.2.2.8.(4)-(5)",
-        "8.4.4.12.",
-        "8.4.5.12."
-      ],
+      "articles": {
+        "unverified": [
+          "5.2.2.8.(4)-(5)",
+          "8.4.4.12.",
+          "8.4.5.12."
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -831,9 +955,11 @@
       "id": "D-63",
       "title": "Pool-heater and solar-thermal service-water minimums applied when present, from the printed rows the extraction lost",
       "kind": "runtime",
-      "articles": [
-        "Table 6.2.2.1"
-      ],
+      "articles": {
+        "unverified": [
+          "Table 6.2.2.1"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -843,10 +969,12 @@
       "id": "D-64",
       "title": "The SmallHotel reference's unmet-heating gate failure is morning setback-recovery lag in four micro-zones - a characteristic, not a build defect",
       "kind": "process",
-      "articles": [
-        "8.4.1.2.(3)",
-        "8.4.1.2.(5)"
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.1.2.(3)",
+          "8.4.1.2.(5)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -856,11 +984,13 @@
       "id": "D-65",
       "title": "The Hospital reference's slow annual run is the ventilation floor meeting the per-stage flow band, plus thirty required energy-recovery wheels - inherent cost, one small lead left open",
       "kind": "process",
-      "articles": [
-        "8.4.4.10.(8)",
-        "8.4.4.19.",
-        "5.2.10.1."
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.10.(8)",
+          "8.4.4.19.",
+          "5.2.10.1."
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -870,7 +1000,9 @@
       "id": "D-66",
       "title": "CBECS evap-cooler values aligned to legacy (two unsourced deviations closed)",
       "kind": "runtime_unwired",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -880,7 +1012,9 @@
       "id": "D-67",
       "title": "Clarity restructure: aliased public renames + the openstudio-audit gem",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -890,7 +1024,9 @@
       "id": "D-68",
       "title": "The nrcan merge absorbed: SHW flip, daylighting-port tracking, SHA-keyed caches",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -900,7 +1036,9 @@
       "id": "D-69",
       "title": "The legacy-parity oracle is pinned to a revision (legacy_pin)",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -910,7 +1048,9 @@
       "id": "D-70",
       "title": "Hospital and Outpatient removed from routine sweeps",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -920,7 +1060,9 @@
       "id": "D-71",
       "title": "Measured-footprint massing lands in openstudio-geometry",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -930,7 +1072,9 @@
       "id": "D-72",
       "title": "The building-stock adapter is a script, not a gem file",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -940,7 +1084,9 @@
       "id": "D-73",
       "title": "Perimeter zones merge by orientation via zone membership",
       "kind": "runtime_unwired",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -950,9 +1096,11 @@
       "id": "D-74",
       "title": "Window-to-wall ratio is a caller input; the prescriptive limit stays in openstudio-envelope",
       "kind": "process",
-      "articles": [
-        "3.2.1.4."
-      ],
+      "articles": {
+        "unverified": [
+          "3.2.1.4."
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -962,7 +1110,9 @@
       "id": "D-75",
       "title": "Correction to D-74: thermostats gate the envelope pass, not construction seeding",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -972,10 +1122,12 @@
       "id": "D-76",
       "title": "Field-test articles are declared modeller scope, and the assumed value is stated",
       "kind": "runtime",
-      "articles": [
-        "3.2.4.1.",
-        "3.2.4.2."
-      ],
+      "articles": {
+        "unverified": [
+          "3.2.4.1.",
+          "3.2.4.2."
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -985,7 +1137,9 @@
       "id": "D-77",
       "title": "The family is sliced by nature: five btap-* gems replace the nine openstudio-* gems",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -995,7 +1149,9 @@
       "id": "D-78",
       "title": "Three-way verification for the Python migration: gates, run diffs, and direct oracle goldens",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -1005,7 +1161,9 @@
       "id": "D-79",
       "title": "The Ruby to Python port: milestone order, the _compat parity contracts, and two forced divergences",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -1015,7 +1173,9 @@
       "id": "D-80",
       "title": "Retiring the Ruby gems: the python-prep / ruby-probe live Leg C, the request manifest, and the freeze-first retirement path",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -1025,7 +1185,9 @@
       "id": "D-81",
       "title": "The R3 primacy flip: the Python implementation is canonical and primary; the Ruby registry copy is generated; same-PR backports continue only until R4's verification handoff",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -1035,7 +1197,9 @@
       "id": "D-82",
       "title": "The R4 verification handoff is complete: the frozen scenario suite replaces the live Ruby-vs-Python Leg-B gates, the drivers are dormant, and Ruby backports stop",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -1045,7 +1209,9 @@
       "id": "D-83",
       "title": "R5 distribution: full PyPI publication, the canmet-energyplus engine wheel published from its own repository, and the Python Windows installer succeeding the Ruby one",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -1055,7 +1221,9 @@
       "id": "D-84",
       "title": "R6 retirement: Python is the sole product implementation while the pinned Ruby oracle survives",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -1065,9 +1233,11 @@
       "id": "D-85",
       "title": "VRF Table-I class selection and exact minimum assignment",
       "kind": "runtime",
-      "articles": [
-        "Table 5.2.12.1.-I"
-      ],
+      "articles": {
+        "unverified": [
+          "Table 5.2.12.1.-I"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -1077,7 +1247,9 @@
       "id": "D-86",
       "title": "R-B: btap.necb becomes btap.codes, and the 2025-only halves of tiers.py move beside their edition",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -1087,7 +1259,9 @@
       "id": "D-87",
       "title": "R-C: the public API selects a code edition by code id, and `vintage` leaves every argument and every output",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -1097,7 +1271,9 @@
       "id": "D-88",
       "title": "A snapshot names another edition only as its origin; source-neutral performance-curve identifiers (R-N)",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -1107,14 +1283,16 @@
       "id": "D-89",
       "title": "Each edition's reference boilers and furnaces carry its own part-load fuel curve by equipment class; electric boilers carry none; the loader validates before reuse (DF-4 closed; R-O)",
       "kind": "runtime",
-      "articles": [
-        "8.4.5.2.",
-        "8.4.5.3.",
-        "8.4.4.6.(1)",
-        "8.4.6.2.",
-        "8.4.6.3.",
-        "8.4.5.6.(1)"
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.5.2.",
+          "8.4.5.3.",
+          "8.4.4.6.(1)",
+          "8.4.6.2.",
+          "8.4.6.3.",
+          "8.4.5.6.(1)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -1124,13 +1302,15 @@
       "id": "D-90",
       "title": "The reference plant's capacity follows the reference's own sizing",
       "kind": "runtime",
-      "articles": [
-        "8.4.4.9.(6)",
-        "8.4.5.9.(6)",
-        "8.4.4.10.(6)",
-        "8.4.5.10.(6)",
-        "8.4.1.2.(5)"
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.9.(6)",
+          "8.4.5.9.(6)",
+          "8.4.4.10.(6)",
+          "8.4.5.10.(6)",
+          "8.4.1.2.(5)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -1140,13 +1320,15 @@
       "id": "D-91",
       "title": "Reference zone dispatch for one-unit-per-block Systems 3 and 4: the rooftop air terminal runs first",
       "kind": "runtime",
-      "articles": [
-        "8.4.4.9.(3)",
-        "8.4.5.9.(3)",
-        "8.4.2.10.(2)",
-        "8.4.1.2.(3)",
-        "8.4.1.2.(4)"
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.9.(3)",
+          "8.4.5.9.(3)",
+          "8.4.2.10.(2)",
+          "8.4.1.2.(3)",
+          "8.4.1.2.(4)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -1156,13 +1338,15 @@
       "id": "D-92",
       "title": "The reference pump is stated as head, efficiency and motor efficiency; EnergyPlus derives its power",
       "kind": "runtime",
-      "articles": [
-        "8.4.4.14",
-        "8.4.5.14",
-        "8.4.4.14.(3)",
-        "8.4.5.14.(3)",
-        "5.2.6.3.(1)"
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.14",
+          "8.4.5.14",
+          "8.4.4.14.(3)",
+          "8.4.5.14.(3)",
+          "5.2.6.3.(1)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -1172,16 +1356,18 @@
       "id": "D-93",
       "title": "The reference pump's value source: correspondence, then the sentence that governs it",
       "kind": "runtime",
-      "articles": [
-        "8.4.4.14",
-        "8.4.5.14",
-        "8.4.4.14.(1)",
-        "8.4.4.14.(2)",
-        "8.4.4.14.(3)",
-        "8.4.5.14.(1)",
-        "8.4.5.14.(2)",
-        "8.4.5.14.(3)"
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.14",
+          "8.4.5.14",
+          "8.4.4.14.(1)",
+          "8.4.4.14.(2)",
+          "8.4.4.14.(3)",
+          "8.4.5.14.(1)",
+          "8.4.5.14.(2)",
+          "8.4.5.14.(3)"
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -1191,7 +1377,9 @@
       "id": "D-94",
       "title": "Development and sign-off: implement, Sol, Fable, then stop",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -1201,7 +1389,9 @@
       "id": "D-95",
       "title": "Freeze-carrying PRs merge with a merge commit, not a squash or rebase",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -1211,7 +1401,9 @@
       "id": "D-96",
       "title": "The package relicenses from LGPL-3.0-or-later to GPL-3.0-or-later",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -1221,10 +1413,12 @@
       "id": "D-97",
       "title": "8.4.x.14.(2) combines pumps within one hydronic system, not across consolidated ones",
       "kind": "runtime",
-      "articles": [
-        "8.4.4.14.",
-        "8.4.5.14."
-      ],
+      "articles": {
+        "unverified": [
+          "8.4.4.14.",
+          "8.4.5.14."
+        ]
+      },
       "editions": [
         "unverified"
       ],
@@ -1234,7 +1428,9 @@
       "id": "D-98",
       "title": "A baseline records its producer; freezing stays local until an image digest is obtainable",
       "kind": "process",
-      "articles": [],
+      "articles": {
+        "unverified": []
+      },
       "editions": [
         "unverified"
       ],
@@ -1244,16 +1440,22 @@
       "id": "D-99",
       "title": "A reference that cannot satisfy a requirement yields a CONDITIONAL result, not a certification",
       "kind": "runtime",
-      "articles": [
-        "8.4.4.9.(4)",
-        "8.4.4.9.(5)",
-        "8.4.4.9.(6)",
-        "8.4.5.9.(4)",
-        "8.4.5.9.(5)",
-        "8.4.5.9.(6)",
-        "8.4.1.2.",
-        "8.4.2.10."
-      ],
+      "articles": {
+        "necb2020": [
+          "8.4.4.9.(4)",
+          "8.4.4.9.(5)",
+          "8.4.4.9.(6)",
+          "8.4.1.2.",
+          "8.4.2.10."
+        ],
+        "necb2025": [
+          "8.4.5.9.(4)",
+          "8.4.5.9.(5)",
+          "8.4.5.9.(6)",
+          "8.4.1.2.",
+          "8.4.2.10."
+        ]
+      },
       "editions": [
         "necb2020",
         "necb2025"
