@@ -1967,7 +1967,7 @@ def _heating_plant_name(group, facts):
     return None if plant is None else plant.get('name')
 
 
-def _plant_covers_group(plant, group):
+def _plant_covers_group(plant, group, facts=None):
     """True when ONE plant carries EVERY energy type the serving group uses.
 
     `len(plant.fuels) > 1` is NOT enough, and Sol built the counter-example
@@ -1980,7 +1980,14 @@ def _plant_covers_group(plant, group):
     if plant is None:
         return False
     plant_fuels = {str(f) for f in (plant.get('fuels') or ())}
-    group_fuels = {str(f) for f in (group.get('heating_energy_types') or ())}
+    # The SERVICE SET, per AHJ-5. A water-loop heat-pump group's service set
+    # includes its source-loop boiler's fuel, which the terminal hot-water
+    # plant does not carry — so this correctly reports NO coverage there and
+    # the (6) cardinality condition does not fire for that shape.
+    if facts is None:
+        group_fuels = {str(f) for f in (group.get('heating_energy_types') or ())}
+    else:
+        group_fuels, _added = service_set_heating_fuels(group, facts)
     return len(plant_fuels) > 1 and group_fuels <= plant_fuels
 
 
@@ -2065,6 +2072,46 @@ _FIXTURE_MEASUREMENT = (
     'edition and model state, NOT a property of this model.')
 
 
+def service_set_heating_fuels(group, facts):
+    """The energy types a group's HEATING SERVICE SET uses, which is not the
+    same as the energy types its own terminal equipment burns.
+
+    AHJ-5, ruled by Sol's `126` against fetched text. A water-loop heat-pump
+    group's own `heating_energy_types` carries only the compressor fuel, but
+    Division A defines a primary system as equipment converting fuel or
+    electricity to heating and distributing it to secondary systems — giving
+    boilers as the example — and the Article 13 Appendix note says a water-loop
+    heat-pump system's source loop may include an auxiliary heat source, "e.g.
+    a boiler". Article 13.(1) routes that case back to Table 7-A and does not
+    exclude Article 9. So an active fuel-fired source-loop boiler is a SECOND
+    energy type used by the heating service set, and 8.4.x.9.(5) fires.
+
+    In Sol's words: "classifying only the group-local compressor fuel and
+    ignoring the source-loop heat is a predicate defect."
+
+    **The 8.4.2.2.(5) exclusion is NOT detected.** A genuinely redundant source
+    whose controls operate it only when the primary is not operating may be
+    excluded — the mutually-exclusive-controls test AHJ-4 settled — and nothing
+    here inspects control schemes. A normal source-loop boiler that runs while
+    compressors run does not qualify for that exclusion, so including it is the
+    right default; a true standby boiler is OVER-disclosed, and that direction
+    is deliberate because it over-reports a question rather than hiding one.
+    """
+    fuels = {str(f) for f in (group.get('heating_energy_types') or ())}
+    loops = {str(n) for n in (group.get('heat_pump_source_loops') or ())}
+    if not loops:
+        return fuels, set()
+    added = set()
+    for plant in (facts.get('plants') or ()):
+        if str(plant.get('name')) not in loops:
+            continue
+        for fuel in (plant.get('fuels') or ()):
+            text = str(fuel)
+            if text and text not in fuels:
+                added.add(text)
+    return fuels | added, added
+
+
 def multi_energy_serving_groups(facts):
     """Serving groups whose PROPOSED heating system uses more than one energy
     type, excluding the purchased-energy route.
@@ -2082,7 +2129,7 @@ def multi_energy_serving_groups(facts):
     """
     out = []
     for group in facts.get('zone_groups') or ():
-        fuels = {str(f) for f in (group.get('heating_energy_types') or ())}
+        fuels, _added = service_set_heating_fuels(group, facts)
         if 'Purchased' in fuels or len(fuels) < 2:
             continue
         out.append(group)
@@ -2102,7 +2149,7 @@ def multi_energy_serving_systems(facts, *, hydronic_only=False):
     seen: dict = {}
     for group in multi_energy_serving_groups(facts):
         plant = _heating_plant(group, facts)
-        if _plant_covers_group(plant, group):
+        if _plant_covers_group(plant, group, facts):
             key = f"plant:{plant.get('name')}"
             label = plant.get('name') or 'the shared heating plant'
         elif hydronic_only:
@@ -2137,7 +2184,7 @@ def _disclose_multi_energy(group, selection, facts, audit, ruleset=None,
     * (6)(b) was cited as a demonstrated departure without any capacity to
       establish which of (6)(b)/(c)/(d) even applies.
     """
-    fuels = group.get('heating_energy_types') or ()
+    fuels, source_loop_fuels = service_set_heating_fuels(group, facts)
     # 8.4.x.6 is the separate route for THIS group only. The building-wide
     # `facts.purchased_energy.heating` flag used to suppress the diagnostic
     # everywhere, so district heat on one primary system hid the (5) finding
@@ -2153,7 +2200,7 @@ def _disclose_multi_energy(group, selection, facts, audit, ruleset=None,
     ratio_article, boiler_article = multi_energy_articles(selection, ruleset)
     sentence_six = boiler_article.split('(')[0] + '(6)'
     plant = _heating_plant(group, facts)
-    covers = _plant_covers_group(plant, group)
+    covers = _plant_covers_group(plant, group, facts)
     plant_name = (plant or {}).get('name')
     key = (f'plant:{plant_name}' if covers
            else 'group:' + ','.join(sorted(group['zones'])))
@@ -2274,6 +2321,11 @@ def _reference_energy_type(group, selection, facts, audit):
     rule file (never a literal here), so a future edition that names a
     different class changes data, not code.
     """
+    # GROUP-LOCAL on purpose. AHJ-5's service set decides whether 8.4.x.9.(5)
+    # FIRES; it does not decide the reference's energy type. Electing a
+    # source-loop boiler's gas here would change a water-loop heat-pump
+    # group's whole reference system type, which Sol's `126` ruling does not
+    # ask for and no measurement supports.
     fuels = group['heating_energy_types']
     if 'Purchased' in fuels or (facts.get('purchased_energy') or {}).get('heating'):
         purchased_heating = selection['special_rules']['purchased_heating']

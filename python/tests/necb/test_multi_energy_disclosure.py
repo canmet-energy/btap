@@ -900,6 +900,95 @@ class TestAnOILProposedBuildingsFinalREFERENCEFuel(unittest.TestCase):
         self.assertEqual({"NaturalGas"}, fuels)
 
 
+class TestAHJ5TheSourceLoopBoilerCountsAsAnEnergyType(_Fixture):
+    """AHJ-5, ruled by Sol's `126`: a water-loop heat-pump group's heating
+    SERVICE SET includes its source-loop boiler's fuel.
+
+    Until that ruling this entry said NOTHING fires for the shape, and called
+    it a hole. The group's own `heating_energy_types` carries only the
+    compressor fuel, so the predicate saw one energy type and never
+    disclosed (5). Sol: "classifying only the group-local compressor fuel and
+    ignoring the source-loop heat is a predicate defect."
+    """
+
+    def _wshp(self, loop_fuels=("NaturalGas",), loop_name="Heat Pump Loop"):
+        """An electric water-loop heat-pump group whose source loop burns
+        `loop_fuels`, in the `facts` shape `classify` produces."""
+        group = self._group(("Electricity",))
+        group["heat_pump"] = True
+        group["heat_pump_sources"] = ["water_loop"]
+        group["heat_pump_source_loops"] = [loop_name]
+        return {
+            "zone_groups": [group],
+            "plants": [{"name": loop_name, "type": "condenser",
+                        "fuels": list(loop_fuels), "purchased": False,
+                        "heat_pump": True, "hp_source_loop": True}],
+            "purchased_energy": {"heating": False, "cooling": False},
+        }
+
+    def test_the_service_set_carries_BOTH_energy_types(self):
+        from btap.codes.necb.hvac import reference
+
+        facts = self._wshp()
+        fuels, added = reference.service_set_heating_fuels(
+            facts["zone_groups"][0], facts)
+        self.assertEqual({"Electricity", "NaturalGas"}, fuels)
+        self.assertEqual({"NaturalGas"}, added,
+                         "the gas comes from the SOURCE LOOP, not the group")
+
+    def test_the_group_is_now_a_multi_energy_serving_group(self):
+        """The behaviour change. Before the ruling this returned nothing."""
+        from btap.codes.necb.hvac import reference
+
+        facts = self._wshp()
+        self.assertEqual(
+            1, len(reference.multi_energy_serving_groups(facts)),
+            "an active fuel-fired source-loop boiler is a second energy type")
+
+    def test_an_ELECTRIC_source_loop_is_still_single_energy(self):
+        """The control. If everything fired, the test above would prove
+        nothing — the predicate must still say no when there is one fuel."""
+        from btap.codes.necb.hvac import reference
+
+        facts = self._wshp(loop_fuels=("Electricity",))
+        self.assertEqual([], reference.multi_energy_serving_groups(facts))
+
+    def test_a_group_with_NO_source_loop_is_unaffected(self):
+        """The second control: the ordinary path must not acquire fuels."""
+        from btap.codes.necb.hvac import reference
+
+        facts = self._wshp()
+        facts["zone_groups"][0]["heat_pump_source_loops"] = []
+        fuels, added = reference.service_set_heating_fuels(
+            facts["zone_groups"][0], facts)
+        self.assertEqual({"Electricity"}, fuels)
+        self.assertEqual(set(), added)
+
+    def test_a_loop_whose_name_does_not_match_adds_nothing(self):
+        """Guards the join. If the name lookup silently missed, every test
+        above would pass for a group that happens to be multi-fuel anyway."""
+        from btap.codes.necb.hvac import reference
+
+        facts = self._wshp()
+        facts["plants"][0]["name"] = "Some Other Loop"
+        fuels, added = reference.service_set_heating_fuels(
+            facts["zone_groups"][0], facts)
+        self.assertEqual({"Electricity"}, fuels)
+        self.assertEqual(set(), added)
+
+    def test_the_8_4_2_2_5_backup_exclusion_is_NOT_detected(self):
+        """Stated as a limitation rather than implied. A genuinely redundant
+        source with mutually exclusive controls MAY be excluded, nothing here
+        inspects control schemes, and so a standby boiler is OVER-disclosed.
+        That direction is deliberate: it over-reports a question rather than
+        hiding one."""
+        from btap.codes.necb.hvac import reference
+
+        doc = reference.service_set_heating_fuels.__doc__ or ""
+        self.assertIn("8.4.2.2.(5) exclusion is NOT detected", doc)
+        self.assertIn("OVER-disclosed", doc)
+
+
 class TestTheEditionComesFromTheManifest(unittest.TestCase):
     """Fable's `117` O4: deriving the subsection from the heat-pump article
     had a SILENT 2020 fallback, so a 2025 run with a missing or malformed

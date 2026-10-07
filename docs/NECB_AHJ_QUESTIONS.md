@@ -82,18 +82,18 @@ nonconformity with 8.4.x.9.(6)(e).
 | AHJ-2 | 8.4.x.9.(5) vs 8.4.x.13 | referral | necb2020, necb2025 | not yet (see the entry) |
 | AHJ-3 | 8.4.x.9.(6) cardinality vs a two-fuel ratio | referral | necb2020, necb2025 | yes, where a hydronic plant carries both fuels |
 | AHJ-4 | 8.4.2.2.(5) backup exclusion | ruled | necb2020, necb2025 | no |
-| AHJ-5 | WSHP source boiler as an "energy type" | referral | necb2020, necb2025 | **no — and that is a hole, see the entry** |
+| AHJ-5 | WSHP source-loop boiler energy counts for (5) | ruled | necb2020, necb2025 | no — but see the PREDICATE DEFECT in the entry |
 | AHJ-6 | 8.4.x.9.(4) no oil or propane catalog variant | tool-gap | necb2020, necb2025 | no |
-| AHJ-7 | Table 8.4.5.5.-C / 8.4.6.5.-C chiller EIR_FT | referral | necb2020, necb2025 | **no — see the entry; phylroy's call** |
+| AHJ-7 | Table 8.4.5.5.-C / 8.4.6.5.-C chiller EIR_FT | alternative-solution | necb2020, necb2025 | not yet — see the entry |
 | AHJ-8 | Table 4.2.1.6 Note (1) A/B control marks | tool-gap | necb2020, necb2025 | no |
 | AHJ-9 | Table A-8.4.3.2.(1)-G and the '12' column heads | ruled | necb2020, necb2025 | no |
-| AHJ-10 | Table 8.4.x.7.-B Note (3) corner-block grouping | referral | unverified | not yet |
-| AHJ-11 | 8.4.x.1.(5) vs Table 8.4.x.7.-B System 5 heating | referral | unverified | not yet |
-| AHJ-12 | Table 8.4.x.7.-B Note (1) "where present" humidification | referral | unverified | not yet |
-| AHJ-13 | Table 5.2.12.1.-K Path A vs Path B | referral | unverified | not yet |
-| AHJ-14 | boiler/furnace part-load class selection | referral | unverified | not yet |
-| AHJ-15 | 8.4.x.9.(3) terminal-vs-plant dispatch priority | referral | unverified | not yet |
-| AHJ-16 | 8.4.x.14 N:1 system correspondence | referral | unverified | not yet |
+| AHJ-10 | Table 8.4.x.7.-B Note (3) corner-block grouping | referral | necb2020, necb2025 | not yet |
+| AHJ-11 | 8.4.x.1.(5) vs Table 8.4.x.7.-B System 5 heating | referral | necb2020, necb2025 | not yet |
+| AHJ-12 | Table 8.4.x.7.-B Note (1) "where present" humidification | referral | necb2020, necb2025 | not yet |
+| AHJ-13 | Table 5.2.12.1.-K Path A vs Path B | ruled | necb2020, necb2025 | no — Path B is express; the IPLV check is a tool gap |
+| AHJ-14 | boiler/furnace part-load class selection | referral | necb2020, necb2025 | not yet |
+| AHJ-15 | 8.4.x.9.(3) terminal-vs-plant dispatch priority | referral | necb2020, necb2025 | not yet |
+| AHJ-16 | 8.4.x.14 N:1 system correspondence | referral | necb2020, necb2025 | not yet |
 | AHJ-17 | no air-cooled chiller curve is shipped | tool-gap | necb2020, necb2025 | no |
 
 ---
@@ -157,6 +157,18 @@ verifying it IS tool-side work and is not excused by this entry.
 
 **Status: `referral`** — the acceptable-solution text does not decide this question.
 
+**NARROWED by Sol's `126`.** Article 13 and Article 9 operate CONCURRENTLY —
+Article 13.(2)(f) bases terminal and auxiliary capacity on the peak load *and*
+the requirements of Subsections 8.4.1, 8.4.2 and 8.4.4/8.4.5, and Article 13
+nowhere says Article 9 ceases to apply. So the referral is not "which article
+wins". Two independent live branches remain: the ANNUAL-ENERGY BASIS, because
+13.(2)(g) says "largest annual energy use" and a 33% share without saying
+whether the comparison is source/input energy or delivered heat and Division A
+defines consumption only at the whole-building aggregate; and an actual
+IRRECONCILABLE case where Article 13.(2)'s mandated capacities cannot satisfy
+(5)'s ratio. **The 33% proviso does not authorise a structural single-fuel
+fallback.**
+
 **The ambiguity.** 8.4.x.7.(4) sends heat-pump thermal blocks to Article 13
 for the reference system type. Article 13 controls the ASHP topology, its
 capacity and operating limits, the terminal/auxiliary capacity, and the
@@ -218,14 +230,42 @@ with an explicit mutually exclusive interlock could qualify, but the modeller
 must supply that control evidence. Recorded here because it was raised as a
 possible referral and is not one.
 
-## AHJ-5 — a water-loop heat pump's source boiler as an "energy type"
+## AHJ-5 — a water-loop heat pump's source-loop boiler IS an energy type
 
-**Article.** 8.4.x.9.(5)'s trigger, "where more than one energy type is used
-by the proposed building's heating system".
+**Article.** 8.4.2.2.(5); 8.4.x.9.(5); 8.4.x.13.(1); Appendix note
+A-8.4.x.13. Per-edition citations are in the register's provenance for
+Sol's `126`.
 
-**Status: `referral`** — the acceptable-solution text does not decide this question.
+**Status: `ruled`** — settled; no authority is needed.
 
-**The ambiguity.** In sample 09 `classify` types the `Heat Pump Loop` as
+**THE RULING, and the DEFECT it exposes.** Sol's `126` settled this against
+fetched text: Division A defines a primary system as equipment converting
+electricity or fuel to heating and distributing it to secondary systems,
+giving boilers as the example, and the Article 13 Appendix definition says a
+water-loop heat-pump system's source loop may include an auxiliary heat source,
+"e.g. a boiler". Article 13.(1) routes that case back to Table 7-A and does
+not exclude Article 9.
+
+So electric compressors and an active fuel-fired source-loop boiler are TWO
+energy types used by the heating service set, and 8.4.x.9.(5) fires. In Sol's
+words: **"classifying only the group-local compressor fuel and ignoring the
+source-loop heat is a predicate defect."**
+
+This entry therefore stops being an open interpretation and becomes a named
+TOOL DEFECT with a settled answer. It is not a `tool-gap` entry because the
+Code question had to be decided first and now is; the fix is to make the
+classifier count the source plant's fuels for the blocks it actually serves.
+
+**The one exclusion.** 8.4.2.2.(5) can exclude a genuinely redundant source
+whose controls operate it ONLY when the primary is not operating — the same
+mutually-exclusive-controls test AHJ-4 settled. A normal source-loop boiler
+that runs while compressors run does not qualify.
+
+**Was the hole.** Until `126` this entry said NOTHING fires for that shape and
+called it a hole rather than a disposition. It now has an answer, and the
+disclosure it implies is unimplemented rather than undecided.
+
+**The original observation.** In sample 09 `classify` types the `Heat Pump Loop` as
 hot-water with NaturalGas, while every WSHP group's heating energy types read
 `['Electricity']` alone. The proposed system therefore draws gas at the loop
 boiler and electricity at the compressors, and whether the loop boiler is an
@@ -281,9 +321,15 @@ interpretation.
 
 **Article.** Table 8.4.5.5.-C (NECB 2020); Table 8.4.6.5.-C (NECB 2025).
 
-**Status: `referral`** — the acceptable-solution text does not decide this question.
+**Status: `alternative-solution`** — the text DOES decide it and we do not
+comply. Sol's `126`: the printed coefficients are unambiguous, although
+defective, so using suspected corrected values DEPARTS from the published
+acceptable solution and needs approval when an affected row is used. It was
+previously filed as a `referral`, which was wrong — there is no ambiguity in
+the text, only an error in it.
 
-**The ambiguity.** THE DEFECT IS IN THE PUBLISHED CODE, not in our extraction.
+**The requirement, and why we do not meet it.** THE DEFECT IS IN THE PUBLISHED
+CODE, not in our extraction.
 Three electric-chiller EIR_FT rows fail the AHRI 550/590 rating-point
 normalization, which requires EIR_FT = 1.0 at 44 °F chilled water with 85 °F
 condenser water or 95 °F condenser air:
@@ -513,6 +559,12 @@ audited against both the sentence and the table row.
 
 **Status: `referral`** — the acceptable-solution text does not decide this question.
 
+**REFRAMED by Sol's `126`.** Note (1) clearly governs the energy SOURCE once
+humidification is present in the reference; it does not say whether reference
+humidification is present at all. That silence is the live question, not the
+source rule. Reachable where a proposed thermal block has humidification and
+the selected reference topology does not independently establish presence.
+
 **The ambiguity.** D-55 reads "where present" as requiring reference
 humidification wherever the PROPOSED has it. Sol reads the note as fixing the
 energy source only for humidification already present in the REFERENCE — a
@@ -527,13 +579,21 @@ reference humidification the other reading would not.
 
 **Article.** Table 5.2.12.1.-K.
 
-**Status: `referral`** — the acceptable-solution text does not decide this question.
+**Status: `ruled`** — settled; no authority is needed.
 
-**The ambiguity.** The table supplies both Path A and Path B and elects
-neither for the reference model. D-59 elects Path B and treats full-load COP
-plus the reference curves as its IPLV realisation.
+**The question, and the ruling.** The table supplies both Path A and Path B,
+and D-59 elects Path B. Sol's `126` ruled that both are EXPRESS table paths
+and Path B is permitted, so electing it needs no authority — the table offering
+two compliant paths is not the same as the Code failing to decide.
 
-**Established by.** Sol `122`.
+**What remains is a TOOL-VERIFICATION gap, not a referral.** Path B carries
+both a full-load COP and an IPLV. D-59 treats full-load COP plus the reference
+curves as the IPLV realisation, and whether the tool actually MEETS Path B's
+IPLV has not been verified. Reachable where the reference holds a packaged
+water chiller whose applicable Table K row has Path B populated and the tool
+selects Path B; rows carrying only Path A present no choice.
+
+**Established by.** Sol `122`, re-dispositioned in `126` against fetched text.
 
 **What the tool does meanwhile.** It applies Path B, recorded in D-59.
 
@@ -542,6 +602,15 @@ plus the reference curves as its IPLV realisation.
 **Article.** 8.4.x.2/.3 and Tables 5.2.12.1.-N/-O.
 
 **Status: `referral`** — the acceptable-solution text does not decide this question.
+
+**NARROWED by Sol's `126`.** Only equipment for which NO provision elects a
+curve class. A purchased boiler is explicitly modulating under Article 6, and
+an ordinary boiler above 352 kW is explicitly modulating too — neither is a
+referral. What remains: an ordinary non-purchased fuel-fired boiler at or below
+352 kW required by 9.(6)(b) or (c), where condensing versus non-condensing is
+unresolved; or a fuel-fired furnace where no provision identifies its Part 8
+curve class, since 9.(7)'s stage count does not decide atmospheric versus
+condensing. Electric equipment is not conditioned.
 
 **The ambiguity.** The Code supplies multiple part-load classes and the
 efficiency tables do not select one for the reference. D-89 assumes ordinary
@@ -562,6 +631,14 @@ scope note).
 **Article.** 8.4.x.9.(3) with 8.4.2.10.(2).
 
 **Status: `referral`** — the acceptable-solution text does not decide this question.
+
+**NARROWED by Sol's `126`.** Only where Article 9.(5)(b) does not already
+prescribe the proposed multi-energy priority — where it does, the priority is
+carried over rather than chosen. Reachable where the reference selection
+requires BOTH secondary-system heating and terminal heating under 9.(3), both
+with non-zero capacity serving overlapping demand: concretely the System 3/4
+furnace-plus-baseboard topology under D-91's current scope. A shared unit needs
+its own analysis and must not silently inherit this predicate.
 
 **The ambiguity.** Sentence (3) specifies terminal and plant CAPACITY, not an
 annual dispatch sequence. D-91 selects air-terminal-first dispatch. Other
