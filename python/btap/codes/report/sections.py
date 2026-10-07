@@ -169,17 +169,28 @@ def verdict_banner(ctx):
         approve = reason.get("ahj_must_approve") or []
         items = "".join(f"<li>{esc(a)}</li>" for a in approve)
         named = ", ".join(esc(s) for s in systems)
+        # The equipment claim is NOT repeated here. "the reference elects ONE
+        # energy type" was withdrawn from `path.py` and `cli.py` and survived
+        # on THIS surface, because the HTML test asserted the conditional text
+        # was present and never that the old claim was absent (Sol, clearance
+        # review of be2118d — the eighth instance of one overclaim, on its
+        # third surface).
+        #
+        # The wrapper no longer says "interpretation" or "does not resolve it"
+        # either. That is false when the only condition is an ALTERNATIVE
+        # SOLUTION: 8.4.x.9.(5)(a) does resolve the requirement and this tool
+        # does not meet it. The neutral word is "conditions".
         strip += (
             '<p class="warnstrip">▲ NOT A CODE-COMPLIANT DETERMINATION — '
             f"{esc(article)} governs the multi-energy serving system(s) "
-            f"{named} and is NOT implemented: the reference elects ONE energy "
-            "type, and no single-fuel basis satisfies its capacity-ratio "
-            "requirement. The comparison is INFORMATIONAL only.</p>"
+            f"{named} and its capacity-ratio requirement is neither computed "
+            "nor enforced. What the reference's final heating equipment "
+            "carries is NOT established by this tool, so the comparison is "
+            "INFORMATIONAL only.</p>"
             '<p class="warnstrip">▲ CONDITIONAL — the authority having '
-            "jurisdiction must accept the following interpretation before "
-            "this comparison can support compliance. The acceptable-solution "
-            "text does not resolve it, so it is not a calculation this tool "
-            f"can make.</p><ul class=\"meta\">{items}</ul>")
+            "jurisdiction must accept the following conditions before this "
+            "comparison can support compliance.</p>"
+            f'<ul class="meta">{items}</ul>')
     if report.get("tier") and eui_tier and report["tier"] != eui_tier:
         bet = _dig(report, "eui_path", "bet_kwh")
         strip += (

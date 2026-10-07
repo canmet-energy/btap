@@ -75,16 +75,31 @@ DF17_SEAL = ("python-only:first frozen at DF-17 — authored after the Ruby "
 
 #: The 8.4.x.9.(5) conditional determination is set AFTER the annual
 #: comparison, and no annual scenario was multi-energy: the dual-fuel samples
-#: existed only in the `none` and `sizing` tiers, which never reach a verdict.
-#: So the determination had fifteen focused tests and ZERO frozen coverage
-#: (Sol, `122`.5). Sample 11 joins the annual tier to pin it end to end.
+#: existed only in the `none` and `sizing` tiers, which never reach the
+#: determination at all. So it had focused tests and ZERO frozen coverage
+#: (Sol, `122`.5). Sample 11 joins the annual tier to pin the helper's
+#: serialised output; see the subset below for what that does NOT cover.
 MULTI_ENERGY_SEAL = ("python-only:first frozen for the 8.4.x.9.(5) conditional "
                      "determination — authored after the Ruby product "
                      "retired; no cross-language attestation exists for this "
                      "scenario")
 
-#: The dual-fuel plant whose reference cannot satisfy 8.4.x.9.(5). Annual, so
-#: the run reaches a verdict and the `conditional` determination is frozen.
+#: The dual-fuel plant whose reference cannot satisfy 8.4.x.9.(5).
+#:
+#: WHAT THIS SCENARIO DOES AND DOES NOT COVER. The annual tier runs
+#: `--simulate annual --quick --no-report`, so the baseline records
+#: `annual: false`, expects the no-determination exit, and its stdout says
+#: `VERDICT: NO DETERMINATION`. It therefore freezes the determination
+#: HELPER's output — `compliance_determination`, its reason block and the
+#: D-99 audit ruling, which is real evidence — but it never executes the
+#: conditional CLI verdict line and never renders HTML at all.
+#:
+#: That gap is why the eighth overclaim survived on the HTML surface after
+#: being removed from `path.py` and `cli.py` (Sol, clearance review of
+#: be2118d). I had called this "end to end" and said it "reaches a verdict";
+#: neither was true. The conditional verdict string and the report banner are
+#: covered by focused tests instead, which now assert the ABSENCE of the
+#: withdrawn claim and not merely the presence of the new text.
 MULTI_ENERGY_ANNUAL_SUBSET = ["11-staged-boilers-gas-lead"]
 
 CORPUS_FILES = ["audit.json", "report.json"]

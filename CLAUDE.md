@@ -106,9 +106,24 @@ decision has been checked against that edition or it has not. Of the 99
 decisions, 98 are `unverified`: they were authored before the field existed,
 mostly against one edition's text, and asserting a list for them would be a
 guess. That is a DECLARED gap where it used to be a silent one; establishing
-them is open work. **The id grammar `^D-\d{2}$` is now EXHAUSTED** — D-01
-through D-99 all exist — so a new decision needs a grammar change, which is
-itself a decision with no id available to record it.
+them is open work.
+
+`articles` is a MAP from code id to that edition's own citations, never a flat
+list: the same number can name a DIFFERENT requirement in each edition
+(`8.4.5.9` is Heating System in NECB 2025 and Fuel-Fired Service Water Heater
+in NECB 2020), so one list spanning editions cites the wrong article in one of
+them. The generator validates that every Section 8.4 id exists in the edition
+it is listed under.
+
+**The id grammar is `^D-\d+$`, unbounded.** `^D-\d{2}$` allowed exactly 100
+ids and D-01 through D-99 all exist, so the registry had run out; a fixed three
+digits would only move the wall, and thousands are expected as other code
+families arrive. Widening means FOUR patterns, and the one that matters most is
+`btap/codes/decisions.py`'s `ID_PATTERN`: `\bD-\d{2}\b` does not match
+`D-100`, so widening only the generator produces a decision whose citations are
+invisible — no audit ruling resolves and it never reaches the report appendix.
+The test files `test_decisions_registry*.py` carry the same grammar and must
+move with it.
 
 ```bash
 python3 python/scripts/generate_decisions.py        # regenerate both outputs

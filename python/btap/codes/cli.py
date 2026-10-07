@@ -582,11 +582,12 @@ def verdict_block(result, rep):
             *[f"    - {s}" for s in systems],
             "",
             "  CONDITIONAL: the authority having jurisdiction must accept the "
-            "interpretation",
-            "  below before this comparison can support compliance. The "
-            "acceptable-solution",
-            "  text does not resolve it, so it is not a calculation this tool "
-            "can make.",
+            "conditions",
+            "  below before this comparison can support compliance. Each says "
+            "whether it is",
+            "  an ALTERNATIVE SOLUTION — the text decides the requirement and "
+            "this tool does",
+            "  not meet it — or an INTERPRETATION the text does not settle.",
             *[f"    - {_wrap_condition(a)}" for a in approve],
             "",
             f"  VERDICT: {verdict} - INFORMATIONAL, AND CONDITIONAL ON "

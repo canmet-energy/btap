@@ -471,15 +471,24 @@ def _mark_informational_if_multi_energy(run, audit):
         reason["ahj_ids"] = ["AHJ-1", "AHJ-3"]
     reason["ahj_must_approve"] = approve
     run.report["compliance_determination_reason"] = reason
+    # The (6) clause is named ONLY where a hydronic plant carries the group's
+    # fuels. The report was already conditional on that; this warning was not,
+    # so a non-hydronic group still received the boiler interpretation in
+    # `audit.json` and `audit.txt` (Sol, clearance review of be2118d).
+    cardinality = (
+        f" It is also CONDITIONAL on how the allocation is represented "
+        f"against {six} on {', '.join(hydronic)}, which the "
+        f"acceptable-solution text does not settle." if hydronic else "")
     audit.warn("compliance",
                "INFORMATIONAL AND CONDITIONAL: this comparison is NOT a "
                f"Code-compliance determination. {article} governs the "
-               f"{len(groups)} multi-energy serving system(s) listed and is "
-               "not implemented, so a passing result is not evidence of "
-               "compliance. It is CONDITIONAL UPON APPROVAL BY THE AUTHORITY "
-               "HAVING JURISDICTION of how the capacity allocation is "
-               f"represented against {six}, which the acceptable-solution "
-               "text does not resolve",
+               f"{len(groups)} multi-energy serving system(s) listed, and its "
+               "capacity-ratio requirement is neither computed nor enforced, "
+               "so a passing result is not evidence of compliance. Accepting "
+               "it is an ALTERNATIVE SOLUTION the authority having "
+               f"jurisdiction must approve: {article} clause (a) decides the "
+               "requirement and this tool does not meet it."
+               + cardinality,
                target=";".join(names),
                inputs={"serving_systems": names,
                        "determination": "conditional",

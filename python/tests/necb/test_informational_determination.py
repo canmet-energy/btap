@@ -131,8 +131,12 @@ class TestTheLabel(unittest.TestCase):
         block = cli.verdict_block(_Result(True), self.AFFECTED)
         self.assertIn("CONDITIONAL", block)
         self.assertIn("authority having jurisdiction must accept", block)
-        self.assertIn("acceptable-solution", block,
-                      "and WHY it is not ours to decide")
+        self.assertIn("conditions", block,
+                      "the wrapper must not call them all interpretations: "
+                      "an ALTERNATIVE SOLUTION is a requirement the text DOES "
+                      "decide and this tool does not meet")
+        self.assertIn("ALTERNATIVE SOLUTION", block,
+                      "and the block must distinguish the two kinds")
         self.assertIn("REPRESENTED", block, "the condition itself is listed")
 
     def test_the_block_NAMES_the_article_and_each_serving_system(self):
@@ -193,6 +197,39 @@ class TestTheREPORTCarriesTheCondition(unittest.TestCase):
         self.assertIn("authority having jurisdiction must accept", html)
         self.assertIn("how the allocation is REPRESENTED", html)
         self.assertIn("Hot Water Loop", html)
+
+    def test_the_banner_asserts_NOTHING_about_the_reference_equipment(self):
+        """The eighth instance of one overclaim lived HERE, surviving its
+        removal from `path.py` and `cli.py`, because this test asserted the
+        conditional text was PRESENT and never that the withdrawn claim was
+        ABSENT. The frozen scenario could not catch it either: the annual tier
+        runs `--quick --no-report`, so no HTML is rendered at all."""
+        html = self._banner({
+            "compliant": True, "annual": True, "code_label": "NECB 2020",
+            "compliance_determination": "conditional",
+            "compliance_determination_reason": {
+                "article": "8.4.4.9.(5)",
+                "serving_systems": ["Hot Water Loop"],
+                "ahj_must_approve": ["how the allocation is REPRESENTED"]}})
+        for withdrawn in ("elects ONE energy type", "no single-fuel basis",
+                          "reference elects"):
+            self.assertNotIn(withdrawn, html)
+        self.assertIn("NOT established by this tool", html)
+
+    def test_the_banner_does_not_call_an_alternative_solution_an_interpretation(self):
+        """Saying the authority must accept an "interpretation" because the
+        text "does not resolve it" is FALSE when the condition is AHJ-1:
+        8.4.x.9.(5)(a) does resolve the requirement and this tool does not meet
+        it. The neutral word is "conditions"."""
+        html = self._banner({
+            "compliant": True, "annual": True, "code_label": "NECB 2020",
+            "compliance_determination": "conditional",
+            "compliance_determination_reason": {
+                "article": "8.4.4.9.(5)",
+                "serving_systems": ["Hot Water Loop"],
+                "ahj_must_approve": ["an ALTERNATIVE SOLUTION: ..."]}})
+        self.assertIn("conditions", html)
+        self.assertNotIn("does not resolve it", html)
 
     def test_an_unaffected_report_banner_is_untouched(self):
         html = self._banner({"compliant": True, "annual": True,

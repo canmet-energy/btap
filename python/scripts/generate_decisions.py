@@ -176,95 +176,131 @@ def _article_titles(code: str) -> dict:
 
 
 def check_articles(name: str, meta: dict) -> None:
-    """``articles`` is a MAP from code id to that edition's own citations.
+    """``articles`` groups citations by an AUTHORED requirement identity, then
+    by code id inside it.
 
-    A flat list was ambiguous and, worse, wrong: ``8.4.5.9`` is the Heating
-    System article in NECB 2025 and the Fuel-Fired Service Water Heater
-    article in NECB 2020, so one list spanning editions cites a different
-    requirement in each. Nesting is the fix; these checks make it verifiable.
+    A flat list was ambiguous and wrong: ``8.4.5.9`` is the Heating System
+    article in NECB 2025 and the Fuel-Fired Service Water Heater article in
+    NECB 2020, so one list spanning editions cites a different requirement in
+    each.
+
+    Per-edition nesting alone was NECESSARY BUT INSUFFICIENT (Sol, clearance
+    review of be2118d). Its cross-edition check inferred correspondence from
+    shared title vocabulary, and three mutations slipped through: claiming an
+    edition with no article map for it, adding an unrelated extra article, and
+    replacing "Heating System" with "Service Water Heating Systems", which
+    passed because both titles contain "heating". Semantic matching on
+    vocabulary cannot be made safe.
+
+    So correspondence is AUTHORED, not inferred. Each requirement key names one
+    requirement and lists its own article ids per edition; that grouping IS the
+    cross-edition equivalence assertion, and the validator checks structure
+    rather than guessing meaning::
+
+        [requirements.multi_energy_heating]
+        label = "Multi-energy heating capacity allocation"
+        necb2020 = ["8.4.4.9.(4)", "8.4.4.9.(5)"]
+        necb2025 = ["8.4.5.9.(4)", "8.4.5.9.(5)"]
     """
     articles = meta["articles"]
     if not isinstance(articles, dict) or not articles:
         raise ValueError(
-            "{}: articles must be a non-empty map of code id -> list of "
-            "strings (a flat list cannot say which edition's numbering it "
-            "uses)".format(name))
-    allowed = registered_codes() | {ARTICLES_UNVERIFIED}
-    for key, values in sorted(articles.items()):
-        if key not in allowed:
-            raise ValueError(
-                "{}: articles key {!r} is neither a registered code id nor "
-                "{!r}; registered are {}".format(
-                    name, key, ARTICLES_UNVERIFIED, sorted(registered_codes())))
-        if not isinstance(values, list) or not all(
-                isinstance(item, str) for item in values):
-            raise ValueError(
-                "{}: articles[{!r}] must be a list of strings".format(name, key))
-    # the keys must agree with `editions`: a decision cannot cite an edition it
-    # does not claim to govern, nor claim one it cites nothing for
+            "{}: articles must be a non-empty map of requirement key -> "
+            "{{label, <code id>: [...]}} (a flat list cannot say which "
+            "edition's numbering it uses)".format(name))
+
+    codes = registered_codes()
     claimed = set(meta["editions"])
-    keyed = set(articles)
-    if keyed - claimed:
-        raise ValueError(
-            "{}: articles cites {} which editions does not claim".format(
-                name, sorted(keyed - claimed)))
+    seen_codes: set = set()
 
-    # Every Section 8.4 id must exist in THAT edition. Ids outside Section 8.4
-    # (other Parts, Division A, equipment tables) pass: `article_numbers` only
-    # covers Section 8.4, so a check there would reject valid citations.
-    for code, values in sorted(articles.items()):
-        if code == ARTICLES_UNVERIFIED:
-            continue
-        titles = _article_titles(code)
-        for value in values:
-            bare = _bare_article(value)
-            if bare is None or not bare.startswith("8.4"):
-                continue
-            if bare not in titles:
+    for key, block in sorted(articles.items()):
+        if key == ARTICLES_UNVERIFIED:
+            # the holding pen for a decision whose editions are unestablished
+            if not isinstance(block, list) or not all(
+                    isinstance(i, str) for i in block):
                 raise ValueError(
-                    "{}: articles[{!r}] cites {!r}, and Section 8.4 article "
-                    "{} does not exist in that edition".format(
-                        name, code, value, bare))
-
-    # Where a decision spans editions, the ids it lists must name the SAME
-    # requirement in each. This is the check that catches the 8.4.5.9 trap.
-    codes = [c for c in articles if c != ARTICLES_UNVERIFIED]
-    if len(codes) > 1:
-        per_code = {}
-        for code in codes:
+                    "{}: articles[{!r}] must be a list of strings".format(
+                        name, key))
+            continue
+        if not isinstance(block, dict):
+            raise ValueError(
+                "{}: articles[{!r}] must be a table with a label and one list "
+                "per code id".format(name, key))
+        if not str(block.get("label") or "").strip():
+            raise ValueError(
+                "{}: articles[{!r}] needs a non-empty label naming the "
+                "requirement — the label IS the cross-edition equivalence "
+                "assertion".format(name, key))
+        listed = {k: v for k, v in block.items() if k != "label"}
+        if not listed:
+            raise ValueError(
+                "{}: articles[{!r}] lists no editions".format(name, key))
+        # PER REQUIREMENT, not globally. Checking coverage across the whole
+        # file let one requirement's missing edition hide behind another
+        # requirement that did list it (Sol's mutation 3).
+        missing = claimed - set(listed) - {EDITIONS_UNVERIFIED}
+        if missing:
+            raise ValueError(
+                "{}: articles[{!r}] lists no article for {}, which editions "
+                "claims — a requirement that does not apply in an edition "
+                "must not be grouped with one that does".format(
+                    name, key, sorted(missing)))
+        extra = set(listed) - claimed
+        if extra:
+            raise ValueError(
+                "{}: articles[{!r}] lists {} which editions does not "
+                "claim".format(name, key, sorted(extra)))
+        # One requirement, one shape. Its per-edition lists are the SAME
+        # requirement in different numbering, so they must correspond: equal
+        # length, and the same sentence/clause suffixes. That is structural,
+        # where the title-vocabulary rule was semantic and let "Heating
+        # System" become "Service Water Heating" (Sol's mutations 4 and 5).
+        shapes = {}
+        for code, values in sorted(listed.items()):
+            if not isinstance(values, list):
+                continue
+            shapes[code] = sorted(
+                str(v)[len(_bare_article(v) or ""):].strip(" .")
+                for v in values if isinstance(v, str))
+        if len({tuple(v) for v in shapes.values()}) > 1:
+            raise ValueError(
+                "{}: articles[{!r}] does not correspond across editions — the "
+                "same requirement must cite the same sentences in each "
+                "edition's numbering, got {}".format(name, key, shapes))
+        for code, values in sorted(listed.items()):
+            if code not in codes:
+                raise ValueError(
+                    "{}: articles[{!r}] has key {!r}, which is not a "
+                    "registered code id; registered are {}".format(
+                        name, key, code, sorted(codes)))
+            if not isinstance(values, list) or not values or not all(
+                    isinstance(i, str) for i in values):
+                raise ValueError(
+                    "{}: articles[{!r}][{!r}] must be a non-empty list of "
+                    "strings".format(name, key, code))
+            seen_codes.add(code)
             titles = _article_titles(code)
-            found = set()
-            for value in articles[code]:
+            for value in values:
                 bare = _bare_article(value)
-                if bare and bare.startswith("8.4") and bare in titles:
-                    found.add(titles[bare])
-            per_code[code] = found
-        # Exact title equality is the WRONG rule: editions rename articles.
-        # 2020's 8.4.2.10 is "HVAC Systems Calculations" and 2025's is "HVAC
-        # Systems" — a rename, not a mis-citation — and requiring equality
-        # rejected a correct decision. What distinguishes a rename from the
-        # real trap is shared vocabulary: "heating system" and "fuel-fired
-        # service water heater" have none. So each title must find a
-        # counterpart in every other edition sharing a meaningful word.
-        stop = {"the", "of", "and", "a", "for", "to", "in", "system",
-                "systems", "calculations"}
-
-        def words(title):
-            return {w for w in re.split(r"[^a-z0-9]+", title) if w and w not in stop}
-
-        ordered = sorted(per_code)
-        for left, right in zip(ordered, ordered[1:]):
-            for title in sorted(per_code[left]):
-                if not words(title):
-                    continue        # title is all stopwords; nothing to match
-                if not any(words(title) & words(other)
-                           for other in per_code[right]):
+                if bare is None or not bare.startswith("8.4"):
+                    continue
+                if bare not in titles:
                     raise ValueError(
-                        "{}: articles[{!r}] cites {!r}, and no article listed "
-                        "for {!r} names a related requirement — so at least "
-                        "one edition's numbering is wrong. {!r} lists {}".format(
-                            name, left, title, right, right,
-                            sorted(per_code[right])))
+                        "{}: articles[{!r}][{!r}] cites {!r}, and Section 8.4 "
+                        "article {} does not exist in that edition".format(
+                            name, key, code, value, bare))
+
+    if ARTICLES_UNVERIFIED in articles and len(articles) > 1:
+        raise ValueError(
+            "{}: articles may not mix the {!r} holding key with authored "
+            "requirements".format(name, ARTICLES_UNVERIFIED))
+
+    if ARTICLES_UNVERIFIED not in articles:
+        unspoken = claimed - seen_codes - {EDITIONS_UNVERIFIED}
+        if unspoken:
+            raise ValueError(
+                "{}: editions claims {} but no requirement lists any article "
+                "for it".format(name, sorted(unspoken)))
 
 
 def registered_codes() -> set:
@@ -290,18 +326,25 @@ def front_matter(meta: dict) -> str:
         if field == "articles":
             continue            # emitted as a table, after the scalars
         lines.append("{} = {}".format(field, toml_value(meta[field])))
-    # `articles` is a map, so it becomes a TOML table. It goes last because a
-    # table header captures every key that follows it. The shape is checked
-    # HERE too: emitting a flat list raised AttributeError deep in the writer
-    # instead of saying what was wrong.
+    # `articles` becomes TOML tables, after every scalar: a table header
+    # captures each key that follows it. The shape is checked here too —
+    # emitting a flat list raised AttributeError deep in the writer instead of
+    # saying what was wrong.
     if not isinstance(meta["articles"], dict):
         raise ValueError(
-            "front matter: articles must be a map of code id -> list of "
-            "strings, got {}".format(type(meta["articles"]).__name__))
-    lines.append("")
-    lines.append("[articles]")
-    for code, values in sorted(meta["articles"].items()):
-        lines.append("{} = {}".format(code, toml_value(values)))
+            "front matter: articles must be a map of requirement key -> "
+            "table, got {}".format(type(meta["articles"]).__name__))
+    for key, block in sorted(meta["articles"].items()):
+        lines.append("")
+        if key == ARTICLES_UNVERIFIED:
+            lines.append("[articles]")
+            lines.append("{} = {}".format(key, toml_value(block)))
+            continue
+        lines.append("[articles.{}]".format(key))
+        lines.append("label = {}".format(toml_string(block["label"])))
+        for code, values in sorted(
+                (k, v) for k, v in block.items() if k != "label"):
+            lines.append("{} = {}".format(code, toml_value(values)))
     lines.append(FENCE)
     return "\n".join(lines)
 

@@ -32,7 +32,12 @@ GOOD_META = {
     # flat list cannot say which numbering it uses. The fixture uses a real
     # code id and a real article so the validated path is exercised rather
     # than skipped.
-    "articles": {"necb2020": ["8.4.4.14."]},
+    # `articles` groups by an AUTHORED requirement identity, then by code id
+    # inside it. Correspondence across editions is asserted by the author,
+    # not inferred from title vocabulary, which could not be made safe.
+    "articles": {"hydronic_pumps": {
+        "label": "Hydronic pump power",
+        "necb2020": ["8.4.4.14."]}},
     "editions": ["necb2020"],
     "summary": "A paraphrase of what was decided.",
 }
@@ -100,12 +105,15 @@ class TestTomlWriter(unittest.TestCase):
         self.assertEqual(G.FENCE, lines[0])
         self.assertEqual(G.FENCE, lines[-1])
         inner = [ln for ln in lines[1:-1] if ln.strip()]
-        header = inner.index("[articles]")
+        header = next(i for i, ln in enumerate(inner)
+                      if ln.startswith("[articles"))
         scalars = [ln.split(" = ")[0] for ln in inner[:header]]
         self.assertEqual([f for f in G.FIELDS if f != "articles"], scalars)
+        allowed = G.registered_codes() | {G.ARTICLES_UNVERIFIED, "label"}
         for line in inner[header + 1:]:
-            self.assertIn(line.split(" = ")[0], G.registered_codes()
-                          | {G.ARTICLES_UNVERIFIED})
+            if line.startswith("["):
+                continue        # a further requirement table
+            self.assertIn(line.split(" = ")[0], allowed)
 
 
 class TestSourceValidation(unittest.TestCase):
@@ -158,7 +166,7 @@ class TestSourceValidation(unittest.TestCase):
                 # before the closing fence would make this an articles key
                 # rather than an unexpected top-level field
                 G.source_text(GOOD_META, GOOD_BODY).replace(
-                    "\n[articles]", '\nextra = "x"\n\n[articles]'),
+                    "\n[articles", '\nextra = "x"\n\n[articles'),
                 encoding="utf-8")
             with self.assertRaises(ValueError) as caught:
                 G.parse_source(path)
@@ -200,20 +208,38 @@ class TestSourceValidation(unittest.TestCase):
                      meta=dict(GOOD_META, articles="8.4.4.14."))
         self.rejects("articles must be",
                      meta=dict(GOOD_META, articles=["8.4.4.14."]))
-        self.rejects("must be a list of strings",
-                     meta=dict(GOOD_META, articles={"necb2020": "8.4.4.14."}))
+        self.rejects("non-empty list of strings",
+                     meta=dict(GOOD_META, articles={"hydronic_pumps": {
+                         "label": "x", "necb2020": "8.4.4.14."}}))
 
-    def test_articles_may_not_cite_an_edition_the_decision_does_not_claim(self):
-        self.rejects("editions does not claim",
+    def test_a_requirement_must_cover_every_edition_the_decision_claims(self):
+        """Checked PER REQUIREMENT. A global check let one requirement's
+        missing edition hide behind another that listed it."""
+        self.rejects("lists no article for",
                      meta=dict(GOOD_META,
-                               articles={"necb2025": ["8.4.5.14."]}))
+                               articles={"hydronic_pumps": {
+                                   "label": "Hydronic pump power",
+                                   "necb2025": ["8.4.5.14."]}}))
+
+    def test_a_requirement_must_CORRESPOND_across_the_editions(self):
+        """Same requirement, same sentences, different numbering. Structural,
+        because the title-vocabulary rule let "Heating System" become
+        "Service Water Heating Systems" — both contain "heating"."""
+        self.rejects("does not correspond across editions",
+                     meta=dict(GOOD_META, editions=["necb2020", "necb2025"],
+                               articles={"heating": {
+                                   "label": "Heating system",
+                                   "necb2020": ["8.4.4.9.(4)", "8.4.4.9.(5)"],
+                                   "necb2025": ["8.4.5.9.(4)"]}}))
 
     def test_a_Section_8_4_article_absent_from_that_edition_is_refused(self):
         """`8.4.4.9` is the Heating System article in NECB 2020 and does not
         exist in 2025 at all."""
         self.rejects("does not exist in that edition",
                      meta=dict(GOOD_META, editions=["necb2025"],
-                               articles={"necb2025": ["8.4.4.9.(5)"]}))
+                               articles={"heating": {
+                                   "label": "Heating system",
+                                   "necb2025": ["8.4.4.9.(5)"]}}))
 
     def test_a_body_without_its_own_titled_heading_is_refused(self):
         self.rejects("must open with", body="Body text.\n")
@@ -562,7 +588,9 @@ class TestTheEditionsField(unittest.TestCase):
     def test_a_registered_code_id_is_accepted(self):
         with tempfile.TemporaryDirectory() as d:
             write(d, meta=dict(GOOD_META, editions=["necb2025"],
-                               articles={"necb2025": ["8.4.5.14."]}))
+                               articles={"hydronic_pumps": {
+                                   "label": "Hydronic pump power",
+                                   "necb2025": ["8.4.5.14."]}}))
             G.parse_source(Path(d) / "D-01.md")     # must not raise
 
     def test_unverified_alone_is_accepted(self):
@@ -574,7 +602,7 @@ class TestTheEditionsField(unittest.TestCase):
     def test_an_UNREGISTERED_code_id_is_refused(self):
         with tempfile.TemporaryDirectory() as d:
             write(d, meta=dict(GOOD_META, editions=["necb2030"],
-                               articles={"necb2030": []}))
+                               articles={"unverified": []}))
             with self.assertRaises(ValueError) as caught:
                 G.parse_source(Path(d) / "D-01.md")
             self.assertIn("necb2030", str(caught.exception))

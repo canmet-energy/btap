@@ -63,14 +63,13 @@ noted NECB 2025 has an exceptional-calculation route at 8.4.2.12 with no 2020
 equivalent, which bears on how AHJ-1 could be remedied in one edition and not
 the other.
 
-**The decisions have the same gap, and it is larger.** All 99 `docs/decisions/
-D-NN.md` files carry exactly `id`, `title`, `kind`, `articles` and `summary` —
-no edition or applicability field — so a decision taken against one edition's
-text reads as applying to both. Recording applicability properly is queued work
-that would itself warrant a decision, and `^D-\d{2}$` is now exhausted at
-D-99, so that is blocked on a registry-grammar change. Until then, an
-`unverified` row here is honest and a `both` row is a claim with evidence
-behind it.
+**The decisions now carry the same field.** As of 2026-10-07 every
+`docs/decisions/D-NN.md` carries `editions`, and `articles` is nested per code
+id — because the same number can name a different requirement in each edition
+(`8.4.5.9` is Heating System in NECB 2025 and Fuel-Fired Service Water Heater
+in NECB 2020). 98 of 99 decisions hold an `unverified` key: establishing them
+means reading each decision against each edition's text, which is open work.
+The id grammar was exhausted at D-99 and is now `^D-\d+$`.
 
 Calling a tool gap a referral would launder a defect as an ambiguity. Sol
 listed twelve decisions in `122` that are tool or data gaps for exactly that

@@ -27,8 +27,9 @@ DECISIONS_DOC = REPO_ROOT / "docs" / "necb_decisions.md"
 SOURCE_DIR = REPO_ROOT / "docs" / "decisions"
 SCRIPT = PYTHON_ROOT / "scripts" / "generate_decisions.py"
 
-ID_PATTERN = re.compile(r"^D-\d{2}$")
-HEADING_PATTERN = re.compile(r"^## (D-\d{2})\b", re.MULTILINE)
+#: Unbounded digits, matching the generator: D-01..D-99 were all taken.
+ID_PATTERN = re.compile(r"^D-\d+$")
+HEADING_PATTERN = re.compile(r"^## (D-\d+)\b", re.MULTILINE)
 
 
 class TestDecisionSources(unittest.TestCase):

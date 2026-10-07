@@ -6573,7 +6573,9 @@ governs, and requires both
 - **(5)(b)** its operating schedule, priority of use and other operational
   characteristics to apply.
 
-This tool elects one reference energy type and computes no ratio. Sol ruled on
+This tool elects one energy type for the reference SELECTION and computes no
+ratio — what the reference's final equipment carries is a separate question it
+does not establish. Sol ruled on
 text fetched from the codes MCP that no single-fuel basis satisfies (5)(a):
 not the fossil-first cascade, not capacity-dominant, not lead-fuel, not
 annual-dominant. A capacity-dominant election was implemented, measured and
