@@ -78,11 +78,16 @@ class TestThePredicate(unittest.TestCase):
 
 
 class TestTheLabel(unittest.TestCase):
-    AFFECTED = {"compliance_determination": "informational",
+    AFFECTED = {"compliance_determination": "conditional",
                 "code_label": "NECB 2020",
                 "compliance_determination_reason": {
                     "article": "8.4.4.9.(5)",
                     "serving_systems": ["Hot Water Loop"],
+                    "condition": "approval by the authority having jurisdiction",
+                    "ahj_must_approve": [
+                        "how 8.4.4.9.(5)'s multi-energy capacity allocation is "
+                        "to be REPRESENTED when 8.4.4.9.(6) bands the boiler "
+                        "count and each boiler object carries ONE fixed fuel."],
                     "why": "..."}}
 
     def test_the_one_line_determination_carries_the_qualification(self):
@@ -90,19 +95,33 @@ class TestTheLabel(unittest.TestCase):
         line that gets quoted alone."""
         got = cli.determination(_Result(True), self.AFFECTED)
         self.assertIn("COMPLIANT", got)
-        self.assertIn("INFORMATIONAL ONLY", got)
-        self.assertIn("NOT A COMPLIANCE DETERMINATION", got)
+        self.assertIn("INFORMATIONAL", got)
+        self.assertIn("CONDITIONAL ON APPROVAL BY THE AUTHORITY HAVING "
+                      "JURISDICTION", got,
+                      "phylroy's decision is informational AND conditional: "
+                      "where the acceptable-solution text is ambiguous an "
+                      "authority must accept the interpretation")
 
     def test_a_FAILING_affected_run_is_also_labelled(self):
         got = cli.determination(_Result(False), self.AFFECTED)
         self.assertIn("NOT COMPLIANT", got)
-        self.assertIn("INFORMATIONAL ONLY", got)
+        self.assertIn("INFORMATIONAL", got)
+        self.assertIn("AUTHORITY HAVING JURISDICTION", got)
 
     def test_the_block_opens_with_the_NOT_A_DETERMINATION_banner(self):
         """The same banner the --quick path uses, so the two read alike."""
         block = cli.verdict_block(_Result(True), self.AFFECTED)
         self.assertIn("*** NOT A CODE-COMPLIANT DETERMINATION ***", block)
         self.assertIn("INFORMATIONAL only", block)
+
+    def test_the_block_states_the_CONDITION_and_what_must_be_approved(self):
+        """A reader must be able to act: which authority, and on what."""
+        block = cli.verdict_block(_Result(True), self.AFFECTED)
+        self.assertIn("CONDITIONAL", block)
+        self.assertIn("authority having jurisdiction must accept", block)
+        self.assertIn("acceptable-solution", block,
+                      "and WHY it is not ours to decide")
+        self.assertIn("REPRESENTED", block, "the condition itself is listed")
 
     def test_the_block_NAMES_the_article_and_each_serving_system(self):
         """A reader must be able to see WHICH systems are unresolved, not just
@@ -114,6 +133,7 @@ class TestTheLabel(unittest.TestCase):
     def test_an_UNAFFECTED_run_is_completely_untouched(self):
         """Most buildings are single-fuel and must see no change at all."""
         plain = {"compliance_determination": "code", "code_label": "NECB 2020"}
+        self.assertNotIn("CONDITIONAL", cli.determination(_Result(True), plain))
         self.assertEqual("COMPLIANT", cli.determination(_Result(True), plain))
         block = cli.verdict_block(_Result(True), plain)
         self.assertNotIn("INFORMATIONAL", block)
@@ -135,6 +155,40 @@ class TestTheLabel(unittest.TestCase):
                          cli.EXIT["compliant"])
         self.assertEqual(cli.verdict_exit(_Result(False)),
                          cli.EXIT["not_compliant"])
+
+
+class TestTheREPORTCarriesTheCondition(unittest.TestCase):
+    """phylroy: "that is a part of the report". The HTML report is the
+    AHJ-facing artifact, so the condition must be in the verdict banner, not
+    only in the CLI and the audit."""
+
+    def _banner(self, report):
+        from btap.codes.report import sections
+
+        return sections.verdict_banner({"report": report})
+
+    def test_the_banner_badges_and_states_the_condition(self):
+        html = self._banner({
+            "compliant": True, "annual": True, "code_label": "NECB 2020",
+            "compliance_determination": "conditional",
+            "compliance_determination_reason": {
+                "article": "8.4.4.9.(5)",
+                "serving_systems": ["Hot Water Loop"],
+                "ahj_must_approve": ["how the allocation is REPRESENTED"]}})
+        self.assertIn("CONDITIONAL", html)
+        self.assertIn("AHJ APPROVAL REQUIRED", html)
+        self.assertIn("NOT A CODE-COMPLIANT DETERMINATION", html)
+        self.assertIn("authority having jurisdiction must accept", html)
+        self.assertIn("how the allocation is REPRESENTED", html)
+        self.assertIn("Hot Water Loop", html)
+
+    def test_an_unaffected_report_banner_is_untouched(self):
+        html = self._banner({"compliant": True, "annual": True,
+                             "code_label": "NECB 2020",
+                             "compliance_determination": "code"})
+        self.assertNotIn("CONDITIONAL", html)
+        self.assertNotIn("AHJ APPROVAL", html)
+        self.assertIn("PERFORMANCE PATH: PASS", html)
 
 
 if __name__ == "__main__":

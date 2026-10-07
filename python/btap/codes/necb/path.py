@@ -410,7 +410,8 @@ def _mark_informational_if_multi_energy(run, audit):
     prefix = run.ruleset.article("reference_subsection")
     article = f"{prefix}.9.(5)"
     names = list(groups)
-    run.report["compliance_determination"] = "informational"
+    six = f"{prefix}.9.(6)"
+    run.report["compliance_determination"] = "conditional"
     run.report["compliance_determination_reason"] = {
         "article": article,
         "why": (f"the proposed heating system uses MORE THAN ONE ENERGY TYPE "
@@ -420,15 +421,42 @@ def _mark_informational_if_multi_energy(run, audit):
                 f"single-fuel basis satisfies clause (a). The comparison is "
                 f"INFORMATIONAL and is NOT a Code-compliance determination."),
         "serving_systems": names,
+        # phylroy's decision: informational AND conditional. Where the
+        # acceptable-solution text does not resolve the representation, the
+        # authority having jurisdiction must accept the interpretation before
+        # this result can support compliance, and the report must SAY so
+        # rather than leave the reader to infer it.
+        "condition": "approval by the authority having jurisdiction",
+        "ahj_must_approve": [
+            (f"how {article}'s multi-energy capacity allocation is to be "
+             f"REPRESENTED when {six} bands the reference plant's boiler "
+             f"count and each simulation boiler object carries ONE fixed "
+             f"fuel. The acceptable-solution text does not resolve this, so "
+             f"it is an interpretation an authority must accept, not a "
+             f"calculation this tool can make."),
+            (f"whether the single reference energy type this tool elected may "
+             f"stand in for the proposed allocation at all, given that "
+             f"{article} clause (a) requires the capacities to match the "
+             f"proposed ratio and clause (b) requires the proposed operating "
+             f"priority."),
+        ],
+        "if_not_approved": (
+            "the comparison does not establish compliance and no verdict "
+            "from it may be submitted as a determination"),
     }
     audit.warn("compliance",
-               "INFORMATIONAL ONLY: this comparison is NOT a Code-compliance "
-               f"determination. {article} governs the {len(groups)} "
-               "multi-energy serving system(s) listed and is not implemented, "
-               "so a passing result is not evidence of compliance",
+               "INFORMATIONAL AND CONDITIONAL: this comparison is NOT a "
+               f"Code-compliance determination. {article} governs the "
+               f"{len(groups)} multi-energy serving system(s) listed and is "
+               "not implemented, so a passing result is not evidence of "
+               "compliance. It is CONDITIONAL UPON APPROVAL BY THE AUTHORITY "
+               "HAVING JURISDICTION of how the capacity allocation is "
+               f"represented against {six}, which the acceptable-solution "
+               "text does not resolve",
                target=";".join(names),
                inputs={"serving_systems": names,
-                       "determination": "informational"},
+                       "determination": "conditional",
+                       "condition": "AHJ approval of the interpretation"},
                article=article)
 
 

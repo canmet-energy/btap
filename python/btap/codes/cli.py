@@ -522,6 +522,16 @@ def unmet_line(p_sec, r_sec):
         num(p_unmet.get("cooling")), num(r_unmet.get("cooling")))
 
 
+def _wrap_condition(text, width=62, indent=6):
+    """Wrap one AHJ condition for the terminal block. The conditions are
+    sentences, not labels, and a reader has to be able to act on them."""
+    import textwrap
+
+    lines = textwrap.wrap(str(text), width=width)
+    pad = " " * indent
+    return ("\n" + pad).join(lines) if lines else ""
+
+
 def determination(result, rep):
     if rep.get("annual") is False:
         return "NO DETERMINATION - run period shortened"
@@ -533,8 +543,9 @@ def determination(result, rep):
     # INFORMATIONAL: the verdict stays visible and the exit code is unchanged,
     # so the qualification travels INSIDE the verdict string rather than beside
     # it — a one-line summary is the thing most likely to be quoted alone.
-    if rep.get("compliance_determination") == "informational":
-        return f"{verdict} - INFORMATIONAL ONLY, NOT A COMPLIANCE DETERMINATION"
+    if rep.get("compliance_determination") == "conditional":
+        return (f"{verdict} - INFORMATIONAL, AND CONDITIONAL ON APPROVAL BY "
+                "THE AUTHORITY HAVING JURISDICTION")
     return verdict
 
 
@@ -552,10 +563,11 @@ def verdict_block(result, rep):
             "", f"  VERDICT: NO DETERMINATION (simulate: {rep.get('simulate')})",
             "  Run with --simulate annual for an 8.4.1.2 determination.", rule])
     verdict = "COMPLIANT" if result.compliant else "NOT COMPLIANT"
-    if rep.get("compliance_determination") == "informational":
+    if rep.get("compliance_determination") == "conditional":
         reason = rep.get("compliance_determination_reason") or {}
-        article = reason.get("article", "8.4.4.9.(5)")
+        article = reason.get("article") or "the capacity-ratio sentence"
         systems = reason.get("serving_systems") or []
+        approve = reason.get("ahj_must_approve") or []
         return "\n".join([
             "", "  *** NOT A CODE-COMPLIANT DETERMINATION ***",
             f"  {article} governs the {len(systems)} multi-energy serving "
@@ -567,8 +579,17 @@ def verdict_block(result, rep):
             "  INFORMATIONAL only and is not evidence of compliance.",
             *[f"    - {s}" for s in systems],
             "",
-            f"  VERDICT: {verdict} - INFORMATIONAL ONLY, NOT A COMPLIANCE "
-            "DETERMINATION",
+            "  CONDITIONAL: the authority having jurisdiction must accept the "
+            "interpretation",
+            "  below before this comparison can support compliance. The "
+            "acceptable-solution",
+            "  text does not resolve it, so it is not a calculation this tool "
+            "can make.",
+            *[f"    - {_wrap_condition(a)}" for a in approve],
+            "",
+            f"  VERDICT: {verdict} - INFORMATIONAL, AND CONDITIONAL ON "
+            "APPROVAL BY THE",
+            "           AUTHORITY HAVING JURISDICTION",
             f"  ({rep.get('code_label')}, Division B, Article 8.4.1.2; "
             f"{article} unimplemented)", rule])
     return "\n".join([
