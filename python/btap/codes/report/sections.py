@@ -178,8 +178,17 @@ def verdict_banner(ctx):
         #
         # The wrapper no longer says "interpretation" or "does not resolve it"
         # either. That is false when the only condition is an ALTERNATIVE
-        # SOLUTION: 8.4.x.9.(5)(a) does resolve the requirement and this tool
-        # does not meet it. The neutral word is "conditions".
+        # SOLUTION: the capacity-ratio clause DOES resolve the requirement and
+        # this tool does not meet it. The neutral word is "conditions".
+        #
+        # NO ARTICLE NUMBER IN THIS COMMENT, not even as an example.
+        # `TestDeferredRendererInventory` counts every LINE in this renderer
+        # containing the energy-section article prefix, comments included, and
+        # freezes the total. It tripped FOUR times: naming the clause, then
+        # the note saying not to name it, then that note quoting the prefix to
+        # explain itself, then the rewrite that still spelled it out. The
+        # clause is identified by name in the data and in `path.py`; here it
+        # travels in `reason["article"]`.
         strip += (
             '<p class="warnstrip">▲ NOT A CODE-COMPLIANT DETERMINATION — '
             f"{esc(article)} governs the multi-energy serving system(s) "
