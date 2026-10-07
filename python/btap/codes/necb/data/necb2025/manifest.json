@@ -225,7 +225,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "This edition carries the reference-building rules at Subsection 8.4.5 and the part-load curves at 8.4.6; the archived set is the three tables this file's provenance names plus the articles in its own `articles` list. The category keywords extending the Table 8.4.5.7.-A space lists with synonyms are a maintainer addition, not code text, and are marked as such in the file.",
-      "result_sha256": "6d0c1031d6da40843844e11a880cf7264defbd72073bb79bb10d5dd1e96c4eab"
+      "result_sha256": "ed31bbdf7e4ee7217bfd7cd0586ee996077c48bb3e0c2b11dd5aa65c5864f4b4"
     },
     "efficiencies.json": {
       "source": "mcp:necb:2025",
