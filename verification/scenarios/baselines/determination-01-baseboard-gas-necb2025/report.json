@@ -101,6 +101,7 @@
  "percent_of_target": 79.7,
  "tier": 1,
  "annual": true,
+ "compliance_determination": "code",
  "ghg": {
   "percent_of_ghg_target": 85.2,
   "level": "E"

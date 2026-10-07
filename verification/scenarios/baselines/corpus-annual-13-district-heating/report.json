@@ -99,6 +99,7 @@
  "percent_of_target": 133.9,
  "tier": null,
  "annual": false,
+ "compliance_determination": "code",
  "compliant": false,
  "warnings": [
   "cooling capacity unsized \u2014 design_cooling_kw unavailable (run a sizing run for kW-threshold rules)",
