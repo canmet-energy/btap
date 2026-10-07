@@ -87,6 +87,7 @@ nonconformity with 8.4.x.9.(6)(e).
 | AHJ-7 | Table 8.4.5.5.-C / 8.4.6.5.-C chiller EIR_FT | referral | necb2020, necb2025 | **no — see the entry; phylroy's call** |
 | AHJ-8 | Table 4.2.1.6 Note (1) A/B control marks | tool-gap | necb2020, necb2025 | no |
 | AHJ-9 | Table A-8.4.3.2.(1)-G and the '12' column heads | ruled | necb2020, necb2025 | no |
+| AHJ-17 | no air-cooled chiller curve is shipped | tool-gap | necb2020, necb2025 | no |
 | AHJ-10 | Table 8.4.x.7.-B Note (3) corner-block grouping | referral | unverified | not yet |
 | AHJ-11 | 8.4.x.1.(5) vs Table 8.4.x.7.-B System 5 heating | referral | unverified | not yet |
 | AHJ-12 | Table 8.4.x.7.-B Note (1) "where present" humidification | referral | unverified | not yet |
@@ -317,21 +318,11 @@ editions:
 So the corrections are genuinely in the product data, and the two rows the
 erratum names would be unusable without them.
 
-**The Air-cooled Screw row does not reach us, because NO air-cooled chiller
-curve is shipped at all** — which answers the erratum and exposes something
-else. `efficiencies.json` carries 19 `WaterCooled` chiller rows and ONE
-`AirCooled` row, and that row has `compressor_type: null` and `eirft: null`.
-Curves are applied from the row (`setElectricInputToCoolingOutputRatio
-FunctionOfTemperature`), so an air-cooled reference chiller keeps the
-**OpenStudio default** performance curve rather than a Table 8.4.5.5.-C one.
-Every curve reference that IS present resolves to a shipped curve — 0
-dangling of 60 checked — so this is an absence, not a broken link.
-
-That matters because 8.4.x.6.(2) represents purchased cooling with an
-air-cooled electric chiller, and 8.4.x.10.(6)(f) governs reference chiller
-type. Carrying the air-cooled rows is a `tool-gap` to close, and the Screw row
-among them is the one the erratum affects — so closing it requires adopting
-the correction deliberately.
+**The Air-cooled Screw row does not reach us, because no air-cooled chiller
+curve is shipped at all.** That answers the erratum for this entry; the
+absence itself is a separate `tool-gap` and is now **AHJ-17**, because one
+entry cannot carry a referral and a tool gap under one status without making
+the taxonomy untruthful (Sol, clearance review of be2118d).
 
 **STILL OPEN, and phylroy's call.** The deviation sets no run conditional, so a
 building with a water-cooled scroll or reciprocating chiller is modelled on
@@ -563,3 +554,33 @@ exists. D-93 and D-97 decline in those cases and retain a simulator default.
 **What the tool does meanwhile.** It DECLINES rather than guessing, emitting an
 unresolved warning per affected loop and leaving the simulator default in
 place — which is the conservative behaviour and still not a Code reading.
+
+## AHJ-17 — no air-cooled chiller performance curve is shipped
+
+**Article.** Table 8.4.5.5.-C / 8.4.6.5.-C; with 8.4.x.6.(2) and
+8.4.x.10.(6)(f).
+
+**Status: `tool-gap`, NOT a referral.** Split out of AHJ-7 so that entry
+carries only the published-table defect. The Code supplies the curves; we do
+not ship them. Nothing here needs an authority.
+
+**What is missing.** `efficiencies.json` carries 19 `WaterCooled` chiller rows
+and exactly ONE `AirCooled` row, and that row has `compressor_type: null` and
+`eirft: null`. Curves are applied from the row via
+`setElectricInputToCoolingOutputRatioFunctionOfTemperature`, so an air-cooled
+reference chiller keeps the **OpenStudio default** performance curve rather
+than a Table 8.4.5.5.-C one. Every curve reference that IS present resolves —
+0 dangling of 60 checked — so this is an absence, not a broken link.
+
+**Why it matters.** 8.4.x.6.(2) represents purchased cooling with an
+air-cooled electric chiller, and 8.4.x.10.(6)(f) governs the reference chiller
+type, so the path is reachable rather than hypothetical.
+
+**Established by.** Verified here on 2026-10-07 by evaluating the shipped
+curves at the AHRI rating point and enumerating the chiller rows; split from
+AHJ-7 on Sol's clearance review.
+
+**What the tool does meanwhile.** It uses the simulator default, with no
+warning. Closing this means carrying the air-cooled rows — and the Screw row
+among them is the one AHJ-7's erratum affects, so closing it requires adopting
+that correction deliberately rather than transcribing the printed value.
