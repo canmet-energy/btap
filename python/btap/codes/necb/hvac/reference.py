@@ -1556,6 +1556,13 @@ def _rebuild_humidification(reference, captured, rules_data, code, audit):
             if name not in served:
                 served.append(name)
         if _air_loop_humidifier(air_loop):
+            # NO AHJ-12 here, deliberately. The reference kept the proposed
+            # loop, so its identity independently settles whether
+            # humidification is present and no choice was made — Sol's `127`
+            # excludes exactly that case. A missing citation looks identical to
+            # a forgotten one, which is the risk site-owned applicability
+            # trades for removing a duplicated predicate, so the reason sits
+            # here rather than only in the register.
             audit.info('build', 'proposed humidification retained on this reference loop — the loop was not replaced',
                        target=air_loop.nameString(), article=article, ruling='D-55')
             continue
@@ -1568,7 +1575,7 @@ def _rebuild_humidification(reference, captured, rules_data, code, audit):
     audit.warn('build', f"the proposed humidification on {', '.join(sorted(missed))} has NO reference loop to carry "
                         'it — the thermal blocks it served are unconditioned or zonally served in the reference, '
                         'so it is not rebuilt',
-               article=article, ruling='D-55')
+               article=article, ruling='D-55', ahj='AHJ-12')
 
 
 def _build_reference_humidifier(air_loop, records, spec, article, audit):
@@ -1585,7 +1592,8 @@ def _build_reference_humidifier(air_loop, records, spec, article, audit):
     if not humidifier.addToNode(air_loop.supplyOutletNode()):
         humidifier.remove()
         audit.warn('build', 'the SDK REFUSED the reference humidifier on this supply path — humidification is NOT '
-                            'rebuilt on this loop', target=air_loop.nameString(), article=article, ruling='D-55')
+                            'rebuilt on this loop', target=air_loop.nameString(),
+                   article=article, ruling='D-55', ahj='AHJ-12')
         return
 
     control = _attach_humidity_control(air_loop, humidifier, records, spec)
@@ -1594,7 +1602,8 @@ def _build_reference_humidifier(air_loop, records, spec, article, audit):
         audit.warn('build', 'the proposed humidification on this thermal block has NO determinable humidity '
                             'control (no zone humidistat survives and the proposed used no scheduled minimum-humidity '
                             'setpoint) — an uncontrolled humidifier is INERT, so none is rebuilt',
-                   target=air_loop.nameString(), article=article, ruling='D-55')
+                   target=air_loop.nameString(), article=article,
+                   ruling='D-55', ahj='AHJ-12')
         return
 
     audit.decision('build', 'reference humidification rebuilt on the proposed energy source',
@@ -1602,7 +1611,8 @@ def _build_reference_humidifier(air_loop, records, spec, article, audit):
                    inputs={'energy_source': source,
                            'proposed_systems': _uniq([r['air_loop'] for r in records]),
                            'control': control, 'capacity': 'autosized'},
-                   value=humidifier.nameString(), article=article, ruling='D-55')
+                   value=humidifier.nameString(), article=article,
+                   ruling='D-55', ahj='AHJ-12')
 
 
 def _elect_humidifier_kind(air_loop, records, article, audit):

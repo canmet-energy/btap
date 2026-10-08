@@ -393,5 +393,53 @@ class TestAHJ15DispatchPriority(unittest.TestCase):
         self.assertFalse(reference._visibly_zero_capacity(real))
 
 
+class TestAHJ12HumidificationPresence(unittest.TestCase):
+    """AHJ-12: whether reference humidification is PRESENT at all.
+
+    Sol's `126` reframed it: Note (1) clearly governs the energy SOURCE once
+    humidification exists, and the live question is the Code's silence on
+    presence. `127` places the citation on the FINAL per-system outcome —
+    rebuilt, deliberately omitted, or impossible to rebuild — and excludes a
+    reference topology whose identity independently settles it.
+
+    Tested by reading the citation sites in the humidification path, because
+    each branch is one line of a single function and the AST gate already
+    proves the ids resolve. The exclusion is the point: four outcomes cite and
+    the fifth must not.
+    """
+
+    def _segment(self):
+        import pathlib as _pathlib
+
+        from btap.codes.necb.hvac import reference
+
+        source = _pathlib.Path(reference.__file__).read_text(encoding="utf-8")
+        return source[source.index("def _rebuild_humidification"):
+                      source.index("def _elect_humidifier_kind")]
+
+    def test_the_four_PRESENCE_CHOICE_outcomes_cite_AHJ_12(self):
+        """Rebuilt on a replaced topology, omitted for want of a carrying
+        loop, refused by the SDK, and inert for want of humidity control."""
+        self.assertEqual(4, self._segment().count("ahj='AHJ-12'"))
+
+    def test_the_RETAINED_branch_cites_nothing(self):
+        """The boundary negative. Where the reference kept the proposed loop,
+        its identity settles presence and no choice was made."""
+        segment = self._segment()
+        marker = "retained on this reference loop"
+        self.assertIn(marker, segment, "the retained branch still exists")
+        after = segment.split(marker, 1)[1].split("continue", 1)[0]
+        self.assertNotIn("ahj", after,
+                         "a topology that settles presence raises no question")
+
+    def test_the_exclusion_is_explained_where_it_is_made(self):
+        """A missing citation looks identical to a forgotten one, so the
+        reason has to sit at the site — this is the failure mode the
+        site-owned design trades for removing a duplicated predicate."""
+        segment = self._segment()
+        self.assertIn("NO AHJ-12 here", segment)
+        self.assertIn("independently", segment)
+
+
 if __name__ == "__main__":      # pragma: no cover
     unittest.main()

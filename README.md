@@ -265,8 +265,8 @@ That distinction is the point of the register. Calling a tool gap an
 ambiguity would launder a defect as a question for someone else, and twelve
 decisions Sol audited were rejected as referrals for exactly that reason.
 
-**Six of them change what a run reports: AHJ-1, AHJ-3, AHJ-11, AHJ-14, AHJ-15
-and AHJ-16.** Where they apply,
+**Seven of them change what a run reports: AHJ-1, AHJ-3, AHJ-11, AHJ-12,
+AHJ-14, AHJ-15 and AHJ-16.** Where they apply,
 the verdict is still reported, marked as not a determination, and the report
 names what your authority must accept:
 
@@ -301,7 +301,7 @@ names what your authority must accept:
   (NECB 2020, Division B, Article 8.4.1.2; see docs/NECB_AHJ_QUESTIONS.md)
 ```
 
-**The other fourteen do not change the verdict, and not all of them reach you
+**The other thirteen do not change the verdict, and not all of them reach you
 at all.** The register's status column says which: `no` where the question does
 not bear on a run's outcome, `not yet` where its runtime treatment is still
 being established. Read it rather than assuming a listed question surfaces.
@@ -310,9 +310,9 @@ Two cautions it states against itself. **AHJ-5 produces NO disclosure** for the
 shape it describes — a hole, not a disposition. And where an entry says the
 underlying decision is audited, that means the modelling action is recorded; it
 does NOT mean the audit tells you an authority's approval is wanted, because
-AHJ-1, AHJ-3, AHJ-5, AHJ-11, AHJ-14, AHJ-15 and AHJ-16 are cited in product
-output today, and AHJ-5 is a settled ruling that explains a choice rather than
-a condition.
+AHJ-1, AHJ-3, AHJ-5, AHJ-11, AHJ-12, AHJ-14, AHJ-15 and AHJ-16 are cited in
+product output today, and AHJ-5 is a settled ruling that explains a choice
+rather than a condition.
 
 The HTML report carries the same thing as a **CONDITIONAL — AHJ APPROVAL
 REQUIRED** badge beside the pass/fail badge, so it travels with the submission.

@@ -89,7 +89,7 @@ nonconformity with 8.4.x.9.(6)(e).
 | AHJ-9 | Table A-8.4.3.2.(1)-G and the '12' column heads | ruled | necb2020, necb2025 | no |
 | AHJ-10 | Table 8.4.x.7.-B Note (3) corner-block grouping | referral | necb2020, necb2025 | not yet |
 | AHJ-11 | 8.4.x.1.(5) vs Table 8.4.x.7.-B System 5 heating | referral | necb2020, necb2025 | yes, where a heated block is assigned System 5 |
-| AHJ-12 | Table 8.4.x.7.-B Note (1) "where present" humidification | referral | necb2020, necb2025 | not yet |
+| AHJ-12 | Table 8.4.x.7.-B Note (1) "where present" humidification | referral | necb2020, necb2025 | yes, on a presence CHOICE — not where the topology settles it |
 | AHJ-13 | Table 5.2.12.1.-K Path A vs Path B | ruled | necb2020, necb2025 | no — Path B is express; the IPLV check is a tool gap |
 | AHJ-14 | boiler/furnace part-load class selection | referral | necb2020, necb2025 | yes, where the row's own default elected the class |
 | AHJ-15 | 8.4.x.9.(3) terminal-vs-plant dispatch priority | referral | necb2020, necb2025 | yes, on the System 3/4 branch where (5)(b) does not prescribe it |
