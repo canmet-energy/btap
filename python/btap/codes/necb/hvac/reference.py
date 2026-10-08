@@ -1943,6 +1943,10 @@ def heat_pump_aux_energy_type(group, facts, hp_rules, annual, audit, article_bas
     audit = audit if audit is not None else NullAudit()
     threshold = (hp_rules or {}).get('aux_energy_type_threshold_fraction') or 0.33
     if annual is None:
+        # NO AHJ-2. Sol's `127`: the absence of annual data in a `none` or
+        # `sizing` run is a MODE limitation, not a question an authority can
+        # settle — (2)(g)'s basis is only live once the comparison is actually
+        # made.
         audit.info('selection',
                    'no proposed annual data (simulate: :sizing/:none, or the annual run predates this '
                    'feature) — the 8.4.4.13.(2)(g) auxiliary-fuel election cannot run; the structural '
@@ -1967,6 +1971,8 @@ def heat_pump_aux_energy_type(group, facts, hp_rules, annual, audit, article_bas
 
     total_j = hp_j + sum(aux_by_fuel.values())
     if not aux_by_fuel or total_j <= 0.0:
+        # NO AHJ-2 either: with no auxiliary energy there is nothing for the
+        # (2)(g) comparison to weigh, so no basis question arises.
         audit.info('selection',
                    'the proposed thermal blocks have no terminal or auxiliary heating energy in the annual '
                    'run — 8.4.4.13.(2)(g) has nothing to elect; the structural 8.4.4.9.(4) proxy elects the fuel',
@@ -1984,7 +1990,8 @@ def heat_pump_aux_energy_type(group, facts, hp_rules, annual, audit, article_bas
                        target=','.join(group['zones']),
                        inputs={'hp_gj': ruby_round(hp_j / 1e9, 2), 'total_gj': ruby_round(total_j / 1e9, 2),
                                'share': ruby_round(share, 3), 'threshold': threshold, 'sentence': sentence},
-                       article=f'{article_base}.(2){sentence}', ruling='D-52')
+                       article=f'{article_base}.(2){sentence}', ruling='D-52',
+                       ahj='AHJ-2')
         return None
 
     elected_fuel, elected_j = max(aux_by_fuel.items(), key=lambda kv: kv[1])
@@ -2008,7 +2015,8 @@ def heat_pump_aux_energy_type(group, facts, hp_rules, annual, audit, article_bas
                            'hp_gj': ruby_round(hp_j / 1e9, 2), 'share': ruby_round(share, 3),
                            'sentence': sentence, 'scope_loops': scope_loops,
                            'scope_zone_count': len(scope_zones)},
-                   value=variant, article=f'{article_base}.(2){sentence}', ruling='D-52')
+                   value=variant, article=f'{article_base}.(2){sentence}',
+                   ruling='D-52', ahj='AHJ-2')
     return variant
 
 

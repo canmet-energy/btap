@@ -441,5 +441,93 @@ class TestAHJ12HumidificationPresence(unittest.TestCase):
         self.assertIn("independently", segment)
 
 
+class TestAHJ2TheAnnualEnergyBasis(unittest.TestCase):
+    """AHJ-2: what basis 8.4.x.13.(2)(g) compares.
+
+    Sol's `126` narrowed this hard. Article 13 and Article 9 operate
+    CONCURRENTLY — 13.(2)(f) bases capacity on the peak load *and* the
+    requirements of the other subsections, and Article 13 nowhere says Article 9
+    stops applying — so the referral is not "which article wins". What remains
+    live is the undefined ANNUAL-ENERGY BASIS: (2)(g) says "largest annual
+    energy use" and a 33% share without saying whether the comparison is
+    source/input energy or delivered heat, and Division A defines consumption
+    only at the whole-building aggregate.
+
+    `127` places the citation where that comparison is actually MADE, and
+    excludes the two branches where it is not.
+    """
+
+    HP_RULES = {"aux_energy_type_threshold_fraction": 0.33}
+
+    def _elect(self, annual):
+        from btap.audit import AuditLog
+        from btap.codes.necb.hvac import reference
+
+        group = {"zones": ["Zone 1"], "air_loop": "AirLoop 1",
+                 "heating_energy_types": ["Electricity"],
+                 "heat_pump": True, "heat_pump_sources": ["air"],
+                 "heat_pump_source_loops": []}
+        facts = {"zone_groups": [group], "plants": [],
+                 "purchased_energy": {"heating": False, "cooling": False}}
+        audit = AuditLog()
+        reference.heat_pump_aux_energy_type(
+            group, facts, self.HP_RULES, annual, audit)
+        return audit
+
+    @staticmethod
+    def _cited(audit):
+        return [e for e in audit.entries
+                if "AHJ-2" in str(e.get("ahj") or "").split()]
+
+    def test_the_33_percent_comparison_cites_AHJ_2(self):
+        """Real annual data, heat-pump share BELOW the proviso: the comparison
+        was made, so its basis is the live question."""
+        audit = self._elect({
+            "loops": {"AirLoop 1": {"hp_j": 10e9,
+                                    "aux": [{"fuel": "NaturalGas", "j": 90e9}]}},
+            "zones": {}})
+        cited = self._cited(audit)
+        self.assertEqual(1, len(cited), [e.get("action") for e in audit.entries])
+        self.assertIn("8.4.4.13.(2)", cited[0]["article"])
+        self.assertEqual("D-52", cited[0]["ruling"])
+
+    def test_the_largest_aux_ELECTION_cites_AHJ_2(self):
+        """Share ABOVE the proviso, so (2)(g) elects the largest annual
+        auxiliary energy type — the same undefined basis, used the other way."""
+        audit = self._elect({
+            "loops": {"AirLoop 1": {"hp_j": 90e9,
+                                    "aux": [{"fuel": "NaturalGas", "j": 10e9}]}},
+            "zones": {}})
+        self.assertEqual(1, len(self._cited(audit)),
+                         [e.get("action") for e in audit.entries])
+
+    def test_NO_annual_data_cites_nothing(self):
+        """The boundary negative that matters most. A `none` or `sizing` run has
+        no annual data, and that is a MODE limitation — not a question an
+        authority can settle (Sol, `127`)."""
+        audit = self._elect(None)
+        self.assertEqual([], self._cited(audit))
+        self.assertTrue(audit.entries, "but the absence is still recorded")
+
+    def test_NO_auxiliary_energy_cites_nothing(self):
+        """With nothing for the comparison to weigh, no basis question arises."""
+        audit = self._elect({"loops": {"AirLoop 1": {"hp_j": 10e9, "aux": []}},
+                             "zones": {}})
+        self.assertEqual([], self._cited(audit))
+
+    def test_both_exclusions_are_EXPLAINED_at_the_site(self):
+        """Same reason as AHJ-12's: a missing citation looks identical to a
+        forgotten one, so the silence has to be deliberate on its face."""
+        import pathlib as _pathlib
+
+        from btap.codes.necb.hvac import reference
+
+        source = _pathlib.Path(reference.__file__).read_text(encoding="utf-8")
+        segment = source[source.index("def heat_pump_aux_energy_type"):
+                         source.index("def _election_scope")]
+        self.assertEqual(2, segment.count("NO AHJ-2"))
+        self.assertIn("MODE limitation", segment)
+
+
 if __name__ == "__main__":      # pragma: no cover
     unittest.main()

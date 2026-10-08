@@ -79,7 +79,7 @@ nonconformity with 8.4.x.9.(6)(e).
 | id | article | status | editions | sets a run conditional |
 | --- | --- | --- | --- | --- |
 | AHJ-1 | 8.4.x.9.(5)(a)/(b) | alternative-solution | necb2020, necb2025 | yes — `compliance_determination: conditional` |
-| AHJ-2 | 8.4.x.9.(5) vs 8.4.x.13 | referral | necb2020, necb2025 | not yet (see the entry) |
+| AHJ-2 | the annual-energy basis 8.4.x.13.(2)(g) compares | referral | necb2020, necb2025 | yes, where the (2)(g) comparison is actually made |
 | AHJ-3 | 8.4.x.9.(6) cardinality vs a two-fuel ratio | referral | necb2020, necb2025 | yes, where a hydronic plant carries both fuels |
 | AHJ-4 | 8.4.2.2.(5) backup exclusion | ruled | necb2020, necb2025 | no |
 | AHJ-5 | WSHP source-loop boiler energy counts for (5) | ruled | necb2020, necb2025 | no — but see the PREDICATE DEFECT in the entry |
