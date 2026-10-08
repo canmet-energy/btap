@@ -360,6 +360,7 @@
   "value": "the rooftop unit is offered the full zone load and the baseboard serves the residual; heating energy moves from the baseboards and hot-water plant to the rooftop coil \u2014 accepted, because the article sets installed capacities, not annual shares",
   "article": "8.4.5.9.(3); 8.4.2.10.(2)",
   "ruling": "D-91",
+  "ahj": "AHJ-15",
   "building": "reference building",
   "level": "decision"
  },
@@ -443,6 +444,7 @@
   "value": "the rooftop unit is offered the full zone load and the baseboard serves the residual; heating energy moves from the baseboards and hot-water plant to the rooftop coil \u2014 accepted, because the article sets installed capacities, not annual shares",
   "article": "8.4.5.9.(3); 8.4.2.10.(2)",
   "ruling": "D-91",
+  "ahj": "AHJ-15",
   "building": "reference building",
   "level": "decision"
  },
@@ -526,6 +528,7 @@
   "value": "the rooftop unit is offered the full zone load and the baseboard serves the residual; heating energy moves from the baseboards and hot-water plant to the rooftop coil \u2014 accepted, because the article sets installed capacities, not annual shares",
   "article": "8.4.5.9.(3); 8.4.2.10.(2)",
   "ruling": "D-91",
+  "ahj": "AHJ-15",
   "building": "reference building",
   "level": "decision"
  },
@@ -609,6 +612,7 @@
   "value": "the rooftop unit is offered the full zone load and the baseboard serves the residual; heating energy moves from the baseboards and hot-water plant to the rooftop coil \u2014 accepted, because the article sets installed capacities, not annual shares",
   "article": "8.4.5.9.(3); 8.4.2.10.(2)",
   "ruling": "D-91",
+  "ahj": "AHJ-15",
   "building": "reference building",
   "level": "decision"
  },
@@ -692,6 +696,7 @@
   "value": "the rooftop unit is offered the full zone load and the baseboard serves the residual; heating energy moves from the baseboards and hot-water plant to the rooftop coil \u2014 accepted, because the article sets installed capacities, not annual shares",
   "article": "8.4.5.9.(3); 8.4.2.10.(2)",
   "ruling": "D-91",
+  "ahj": "AHJ-15",
   "building": "reference building",
   "level": "decision"
  },
@@ -3714,15 +3719,16 @@
  },
  {
   "step": "compliance",
-  "target": "CoilHeatingGasMultiStage_gas, CoilHeatingGasMultiStage_gas 1, CoilHeatingGasMultiStage_gas 2, CoilHeatingGasMultiStage_gas 3, CoilHeatingGasMultiStage_gas 4, Primary Boiler",
-  "action": "INFORMATIONAL AND CONDITIONAL: 1 register question(s) requiring approval by the authority having jurisdiction were raised by this run's modelling choices, so the verdict below is NOT a Code-compliance determination. AHJ-14 (referral); AHJ-14 (referral); AHJ-14 (referral); AHJ-14 (referral); AHJ-14 (referral); AHJ-14 (referral)",
+  "target": "CoilHeatingGasMultiStage_gas, CoilHeatingGasMultiStage_gas 1, CoilHeatingGasMultiStage_gas 2, CoilHeatingGasMultiStage_gas 3, CoilHeatingGasMultiStage_gas 4, Primary Boiler, Thermal Zone 1, Thermal Zone 2, Thermal Zone 3, Thermal Zone 4, Thermal Zone 5",
+  "action": "INFORMATIONAL AND CONDITIONAL: 2 register question(s) requiring approval by the authority having jurisdiction were raised by this run's modelling choices, so the verdict below is NOT a Code-compliance determination. AHJ-15 (referral); AHJ-15 (referral); AHJ-15 (referral); AHJ-15 (referral); AHJ-15 (referral); AHJ-14 (referral); AHJ-14 (referral); AHJ-14 (referral)",
   "inputs": {
    "ahj_ids": [
-    "AHJ-14"
+    "AHJ-14",
+    "AHJ-15"
    ],
    "ahj_register": "docs/NECB_AHJ_QUESTIONS.md"
   },
-  "article": "NECB 2025 Table 5.2.12.1.-N; 8.4.6.2., NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
+  "article": "8.4.5.9.(3); 8.4.2.10.(2), NECB 2025 Table 5.2.12.1.-N; 8.4.6.2., NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
   "ruling": "D-99 D-100",
   "level": "warning"
  },

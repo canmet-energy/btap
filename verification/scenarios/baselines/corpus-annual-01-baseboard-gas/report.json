@@ -105,6 +105,12 @@
    "status": "referral",
    "title": "which part-load class a reference boiler or furnace takes",
    "count": 6
+  },
+  {
+   "id": "AHJ-15",
+   "status": "referral",
+   "title": "whether (3) governs dispatch priority at all",
+   "count": 5
   }
  ],
  "ahj_register": "docs/NECB_AHJ_QUESTIONS.md",

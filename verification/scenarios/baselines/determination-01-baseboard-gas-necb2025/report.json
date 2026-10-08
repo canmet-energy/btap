@@ -107,22 +107,75 @@
    "status": "referral",
    "title": "which part-load class a reference boiler or furnace takes",
    "count": 6
+  },
+  {
+   "id": "AHJ-15",
+   "status": "referral",
+   "title": "whether (3) governs dispatch priority at all",
+   "count": 5
   }
  ],
  "ahj_register": "docs/NECB_AHJ_QUESTIONS.md",
  "compliance_determination": "conditional",
  "compliance_determination_reason": {
-  "why": "1 register question(s) requiring approval were raised by this run's modelling choices, so the comparison is INFORMATIONAL and is NOT a Code-compliance determination. Each condition below names the question, its register status and the deciding entry's own account of what was and was not established.",
+  "why": "2 register question(s) requiring approval were raised by this run's modelling choices, so the comparison is INFORMATIONAL and is NOT a Code-compliance determination. Each condition below names the question, its register status and the deciding entry's own account of what was and was not established.",
   "condition": "approval by the authority having jurisdiction",
   "if_not_approved": "the comparison does not establish compliance and no verdict from it may be submitted as a determination",
   "ahj_ids": [
-   "AHJ-14"
+   "AHJ-14",
+   "AHJ-15"
   ],
   "ahj_register": "docs/NECB_AHJ_QUESTIONS.md",
   "ahj_must_approve": [
-   "AHJ-14 (referral): which part-load class a reference boiler or furnace takes \u2014 an INTERPRETATION the acceptable-solution text does not settle. Applies to: Primary Boiler, CoilHeatingGasMultiStage_gas, CoilHeatingGasMultiStage_gas 1, CoilHeatingGasMultiStage_gas 2, CoilHeatingGasMultiStage_gas 3, CoilHeatingGasMultiStage_gas 4 \u2014 boiler efficiency applied"
+   "AHJ-14 (referral): which part-load class a reference boiler or furnace takes \u2014 an INTERPRETATION the acceptable-solution text does not settle. Applies to: Primary Boiler, CoilHeatingGasMultiStage_gas, CoilHeatingGasMultiStage_gas 1, CoilHeatingGasMultiStage_gas 2, CoilHeatingGasMultiStage_gas 3, CoilHeatingGasMultiStage_gas 4 \u2014 boiler efficiency applied",
+   "AHJ-15 (referral): whether (3) governs dispatch priority at all \u2014 an INTERPRETATION the acceptable-solution text does not settle. Applies to: Thermal Zone 1, Thermal Zone 2, Thermal Zone 3, Thermal Zone 4, Thermal Zone 5 \u2014 zone dispatch: the rooftop air terminal runs before the baseboard"
   ],
   "conditions": [
+   {
+    "id": "AHJ-15",
+    "status": "referral",
+    "title": "whether (3) governs dispatch priority at all",
+    "article": "8.4.5.9.(3); 8.4.2.10.(2)",
+    "target": "Thermal Zone 1",
+    "detail": "zone dispatch: the rooftop air terminal runs before the baseboard",
+    "entry_index": 27
+   },
+   {
+    "id": "AHJ-15",
+    "status": "referral",
+    "title": "whether (3) governs dispatch priority at all",
+    "article": "8.4.5.9.(3); 8.4.2.10.(2)",
+    "target": "Thermal Zone 2",
+    "detail": "zone dispatch: the rooftop air terminal runs before the baseboard",
+    "entry_index": 34
+   },
+   {
+    "id": "AHJ-15",
+    "status": "referral",
+    "title": "whether (3) governs dispatch priority at all",
+    "article": "8.4.5.9.(3); 8.4.2.10.(2)",
+    "target": "Thermal Zone 3",
+    "detail": "zone dispatch: the rooftop air terminal runs before the baseboard",
+    "entry_index": 41
+   },
+   {
+    "id": "AHJ-15",
+    "status": "referral",
+    "title": "whether (3) governs dispatch priority at all",
+    "article": "8.4.5.9.(3); 8.4.2.10.(2)",
+    "target": "Thermal Zone 4",
+    "detail": "zone dispatch: the rooftop air terminal runs before the baseboard",
+    "entry_index": 48
+   },
+   {
+    "id": "AHJ-15",
+    "status": "referral",
+    "title": "whether (3) governs dispatch priority at all",
+    "article": "8.4.5.9.(3); 8.4.2.10.(2)",
+    "target": "Thermal Zone 5",
+    "detail": "zone dispatch: the rooftop air terminal runs before the baseboard",
+    "entry_index": 55
+   },
    {
     "id": "AHJ-14",
     "status": "referral",
@@ -247,7 +300,7 @@
   "model object named 'DXCOOL-REF-CAPFFLOW' does not state this edition's Quadratic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-CAPFFLOW (D-89)'",
   "model object named 'DXCOOL-REF-COOLEIRFT' does not state this edition's BiQuadratic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-COOLEIRFT (D-89)'",
   "model object named 'DXCOOL-REF-COOLPLFFPLR' does not state this edition's Cubic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-COOLPLFFPLR (D-89)'",
-  "INFORMATIONAL AND CONDITIONAL: 1 register question(s) requiring approval by the authority having jurisdiction were raised by this run's modelling choices, so the verdict below is NOT a Code-compliance determination. AHJ-14 (referral); AHJ-14 (referral); AHJ-14 (referral); AHJ-14 (referral); AHJ-14 (referral); AHJ-14 (referral)",
+  "INFORMATIONAL AND CONDITIONAL: 2 register question(s) requiring approval by the authority having jurisdiction were raised by this run's modelling choices, so the verdict below is NOT a Code-compliance determination. AHJ-15 (referral); AHJ-15 (referral); AHJ-15 (referral); AHJ-15 (referral); AHJ-15 (referral); AHJ-14 (referral); AHJ-14 (referral); AHJ-14 (referral)",
   "Calculation Methods \u2014 partial. Applied: the energy model accounts for the annual energy use of what the model contains. Gaps: elevators/escalators ((1)(j)) and other loads absent from the model are not added by the pipeline",
   "Operating Schedules, Internal Loads and Service Water Heating Loads (EUI path) \u2014 partial. Applied: check-then-normalize (Archetypes.conformance / normalize!): the proposed is checked against the Table 8.4.4.2. values (occupant density, receptacle W/m2, SWH L/h/occupant; schedule profiles compared hourly against the archetype letter) and, when non-conformant, REWRITTEN to them before the EUI-path annual run. Gaps: unmapped spaces keep their modeled loads (the Table applies \u201cfor the applicable building archetype\u201d); spaces with no water-use equipment warn rather than gaining a SWH system"
  ]
