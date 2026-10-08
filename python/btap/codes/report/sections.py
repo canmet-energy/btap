@@ -870,8 +870,13 @@ def ahj_appendix(ctx):
             rows.append([ident, status, title, bearing, hit["count"],
                          Html.raw(f'<a href="#audit-{hit["first_index"]}">'
                                   f'entry {hit["first_index"]}</a>')])
+        # "Times cited", not "times applied". This counts AUDIT ENTRIES, and
+        # the audit keeps every pass — the efficiency pass runs twice — while
+        # the conditions list carries one record per unique FINAL choice. On
+        # the frozen determination the two read 7 and 6 for AHJ-14, both
+        # correct and visibly different, so the column says which it is.
         body = Html.table(["Question", "Status", "What is unsettled, or was settled",
-                           "Bearing on the verdict", "Times applied",
+                           "Bearing on the verdict", "Times cited",
                            "First audit entry"], rows)
 
     note = ('<p class="meta">The acceptable-solution text does not answer every '
@@ -880,7 +885,10 @@ def ahj_appendix(ctx):
             "<code>docs/NECB_AHJ_QUESTIONS.md</code>. A row whose bearing is YES "
             "is part of the\n          conditional determination above; the "
             "others are disclosed because a reader is entitled to them, not "
-            "because they change the\n          outcome.</p>")
+            "because they change the\n          outcome. The count is of audit "
+            "citations, which include every pass over the same equipment; the "
+            "conditions above\n          carry one record per final "
+            "choice.</p>")
     return Html.section("ahj", "Code questions referred to an authority",
                         body + note, page_break=True)
 

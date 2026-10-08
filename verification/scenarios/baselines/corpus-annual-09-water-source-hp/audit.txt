@@ -5,6 +5,7 @@
 [info    ] compliance    proposed sizing run complete | building: proposed building | target: proposed
 [info    ] compliance    annual EnergyPlus run complete | building: proposed building | target: proposed_annual | inputs: run_period=1/1-1/7 (SHORTENED), clean_run=true, total_site_kwh=2544, unmet_heating_h=0.0, unmet_cooling_h=0.0
 [info    ] compliance    proposed per-equipment heating energy extracted for the 8.4.4.13.(2)(g) auxiliary-fuel election (delivered heat, weather run period only) | building: proposed building | target: proposed | inputs: air_loops=0, zones_with_heating=5, heat_pump_gj=4.35 | ruling D-52
+[info    ] build         declared above-ground storey count stamped on the reference from the supplied building data — the selector and the system builder must group on the SAME premise | building: reference building | inputs: storeys=1 | ruling D-18
 [info    ] characterize  plant loop classified | building: reference building | target: Heat Pump Loop | inputs: fuels=NaturalGas, purchased=false | value: hot_water
 [info    ] characterize  plant loop classified | building: reference building | target: Main Service Water Loop | inputs: fuels=NaturalGas, purchased=false | value: service_water
 [decision] characterize  zonal-only group characterized | building: reference building | target: Thermal Zone 1 | inputs: heated=true, cooled=true | value: zonal_heat_cool | evidence: heated: OS_ZoneHVAC_WaterToAirHeatPump in Thermal Zone 1; cooled: OS_ZoneHVAC_WaterToAirHeatPump in Thermal Zone 1

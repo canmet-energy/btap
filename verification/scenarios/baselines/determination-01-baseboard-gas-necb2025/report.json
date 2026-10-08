@@ -127,8 +127,8 @@
   ],
   "ahj_register": "docs/NECB_AHJ_QUESTIONS.md",
   "ahj_must_approve": [
-   "AHJ-14 (referral): which part-load class a reference boiler or furnace takes \u2014 an INTERPRETATION the acceptable-solution text does not settle. Applies to: Primary Boiler, CoilHeatingGasMultiStage_gas, CoilHeatingGasMultiStage_gas 1, CoilHeatingGasMultiStage_gas 2, CoilHeatingGasMultiStage_gas 3, CoilHeatingGasMultiStage_gas 4 \u2014 boiler efficiency applied",
-   "AHJ-15 (referral): whether (3) governs dispatch priority at all \u2014 an INTERPRETATION the acceptable-solution text does not settle. Applies to: Thermal Zone 1, Thermal Zone 2, Thermal Zone 3, Thermal Zone 4, Thermal Zone 5 \u2014 zone dispatch: the rooftop air terminal runs before the baseboard"
+   "AHJ-14 (referral): which part-load class a reference boiler or furnace takes \u2014 an INTERPRETATION the acceptable-solution text does not settle. Applies to: Primary Boiler, CoilHeatingGasMultiStage_gas, CoilHeatingGasMultiStage_gas 1, CoilHeatingGasMultiStage_gas 2, CoilHeatingGasMultiStage_gas 3, CoilHeatingGasMultiStage_gas 4 \u2014 each of the 6 choices above makes this same unresolved election; the conditions list carries what was established at each one",
+   "AHJ-15 (referral): whether (3) governs dispatch priority at all \u2014 an INTERPRETATION the acceptable-solution text does not settle. Applies to: Thermal Zone 1, Thermal Zone 2, Thermal Zone 3, Thermal Zone 4, Thermal Zone 5 \u2014 each of the 5 choices above makes this same unresolved election; the conditions list carries what was established at each one"
   ],
   "conditions": [
    {
@@ -138,7 +138,7 @@
     "article": "8.4.5.9.(3); 8.4.2.10.(2)",
     "target": "Thermal Zone 1",
     "detail": "zone dispatch: the rooftop air terminal runs before the baseboard",
-    "entry_index": 27
+    "entry_index": 28
    },
    {
     "id": "AHJ-15",
@@ -147,7 +147,7 @@
     "article": "8.4.5.9.(3); 8.4.2.10.(2)",
     "target": "Thermal Zone 2",
     "detail": "zone dispatch: the rooftop air terminal runs before the baseboard",
-    "entry_index": 34
+    "entry_index": 35
    },
    {
     "id": "AHJ-15",
@@ -156,7 +156,7 @@
     "article": "8.4.5.9.(3); 8.4.2.10.(2)",
     "target": "Thermal Zone 3",
     "detail": "zone dispatch: the rooftop air terminal runs before the baseboard",
-    "entry_index": 41
+    "entry_index": 42
    },
    {
     "id": "AHJ-15",
@@ -165,7 +165,7 @@
     "article": "8.4.5.9.(3); 8.4.2.10.(2)",
     "target": "Thermal Zone 4",
     "detail": "zone dispatch: the rooftop air terminal runs before the baseboard",
-    "entry_index": 48
+    "entry_index": 49
    },
    {
     "id": "AHJ-15",
@@ -174,7 +174,7 @@
     "article": "8.4.5.9.(3); 8.4.2.10.(2)",
     "target": "Thermal Zone 5",
     "detail": "zone dispatch: the rooftop air terminal runs before the baseboard",
-    "entry_index": 55
+    "entry_index": 56
    },
    {
     "id": "AHJ-14",
@@ -183,7 +183,7 @@
     "article": "NECB 2025 Table 5.2.12.1.-N; 8.4.6.2.",
     "target": "Primary Boiler",
     "detail": "boiler efficiency applied",
-    "entry_index": 233
+    "entry_index": 234
    },
    {
     "id": "AHJ-14",
@@ -192,7 +192,7 @@
     "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
     "target": "CoilHeatingGasMultiStage_gas",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 255
+    "entry_index": 256
    },
    {
     "id": "AHJ-14",
@@ -201,7 +201,7 @@
     "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
     "target": "CoilHeatingGasMultiStage_gas 1",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 256
+    "entry_index": 257
    },
    {
     "id": "AHJ-14",
@@ -210,7 +210,7 @@
     "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
     "target": "CoilHeatingGasMultiStage_gas 2",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 257
+    "entry_index": 258
    },
    {
     "id": "AHJ-14",
@@ -219,7 +219,7 @@
     "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
     "target": "CoilHeatingGasMultiStage_gas 3",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 258
+    "entry_index": 259
    },
    {
     "id": "AHJ-14",
@@ -228,7 +228,7 @@
     "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
     "target": "CoilHeatingGasMultiStage_gas 4",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 259
+    "entry_index": 260
    }
   ]
  },

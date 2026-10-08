@@ -5,6 +5,7 @@
 [decision] climate       HDD from nearest NECB Table C-1 city | building: proposed building | inputs: city=Mississauga (Lester B. Pearson Int'l Airport), ON, distance_km=0.5 | value: 3890 | per NECB Table C-1 (legacy get_necb_hdd18 convention)
 [info    ] compliance    proposed sizing run complete | building: proposed building | target: proposed
 [info    ] compliance    annual EnergyPlus run complete | building: proposed building | target: proposed_annual | inputs: run_period=full year, clean_run=true, total_site_kwh=117908, unmet_heating_h=41.75, unmet_cooling_h=1709.75
+[info    ] build         declared above-ground storey count stamped on the reference from the supplied building data — the selector and the system builder must group on the SAME premise | building: reference building | inputs: storeys=1 | ruling D-18
 [info    ] characterize  plant loop classified | building: reference building | target: Hot Water Loop | inputs: fuels=NaturalGas, purchased=false | value: hot_water
 [info    ] characterize  plant loop classified | building: reference building | target: Main Service Water Loop | inputs: fuels=NaturalGas, purchased=false | value: service_water
 [decision] characterize  zonal-only group characterized | building: reference building | target: Thermal Zone 1 | inputs: heated=true, cooled=false | value: zonal_heating_only | evidence: heated: OS_ZoneHVAC_Baseboard_Convective_Water in Thermal Zone 1

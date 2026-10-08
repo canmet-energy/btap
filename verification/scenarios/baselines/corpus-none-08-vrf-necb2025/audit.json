@@ -43,6 +43,16 @@
   "level": "warning"
  },
  {
+  "step": "build",
+  "action": "declared above-ground storey count stamped on the reference from the supplied building data \u2014 the selector and the system builder must group on the SAME premise",
+  "inputs": {
+   "storeys": 1
+  },
+  "ruling": "D-18",
+  "building": "reference building",
+  "level": "info"
+ },
+ {
   "step": "characterize",
   "target": "Main Service Water Loop",
   "action": "plant loop classified",
@@ -180,7 +190,7 @@
  {
   "step": "selection",
   "target": "Thermal Zone 1",
-  "action": "proposed heat pump -> reference is an air-source heat pump (Table 8.4.4.13)",
+  "action": "proposed heat pump -> reference is an air-source heat pump (Table 8.4.5.13)",
   "inputs": {
    "selected_system": 3,
    "heat_pump_sources": [
@@ -221,7 +231,7 @@
  {
   "step": "selection",
   "target": "Thermal Zone 2",
-  "action": "proposed heat pump -> reference is an air-source heat pump (Table 8.4.4.13)",
+  "action": "proposed heat pump -> reference is an air-source heat pump (Table 8.4.5.13)",
   "inputs": {
    "selected_system": 3,
    "heat_pump_sources": [
@@ -262,7 +272,7 @@
  {
   "step": "selection",
   "target": "Thermal Zone 3",
-  "action": "proposed heat pump -> reference is an air-source heat pump (Table 8.4.4.13)",
+  "action": "proposed heat pump -> reference is an air-source heat pump (Table 8.4.5.13)",
   "inputs": {
    "selected_system": 3,
    "heat_pump_sources": [
@@ -303,7 +313,7 @@
  {
   "step": "selection",
   "target": "Thermal Zone 4",
-  "action": "proposed heat pump -> reference is an air-source heat pump (Table 8.4.4.13)",
+  "action": "proposed heat pump -> reference is an air-source heat pump (Table 8.4.5.13)",
   "inputs": {
    "selected_system": 3,
    "heat_pump_sources": [
@@ -344,7 +354,7 @@
  {
   "step": "selection",
   "target": "Thermal Zone 5",
-  "action": "proposed heat pump -> reference is an air-source heat pump (Table 8.4.4.13)",
+  "action": "proposed heat pump -> reference is an air-source heat pump (Table 8.4.5.13)",
   "inputs": {
    "selected_system": 3,
    "heat_pump_sources": [
