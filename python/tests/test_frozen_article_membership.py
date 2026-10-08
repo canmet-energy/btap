@@ -43,31 +43,32 @@ PAIRED = re.compile(r"(8\.4\.\d+\.\d+)\.?/(8\.4\.\d+\.\d+)")
 #: verbatim as a condition's `detail`.
 FIELDS = ("article", "action", "value", "evidence")
 
-#: Citations absent from their edition's snapshot that are NOT code literals:
-#: each comes from that edition's own `necb_rules.json` article_coverage.
-#: Whether the data or the snapshot is wrong is a NORMATIVE question, referred
-#: to Sol in `136` and not settled here — and a coverage-data edit has four
-#: gates of its own. Declared so this test still fails on anything NEW.
+#: SETTLED by Sol's `137`, 2026-10-08. The list is EMPTY and stays DECLARED,
+#: because the gate fails both when a new foreign citation appears and when a
+#: declared one stops firing — so settling one has to be a deliberate edit
+#: here rather than a silent drift.
 #:
-#: The evidence, kept here because `.reviews/` is gitignored and this is the
-#: tracked home for it (Fable's `135` H2). Live codes-MCP calls, 2026-10-08:
+#: Three NECB 2020 coverage rows cited `8.4.1.5`, `8.4.2.11` and `8.4.2.12`,
+#: which that edition does not contain. Sol verified it against the official
+#: NRC NECB 2020 second printing including the 2025-02-27 errata — Division B
+#: page 8-2 ends Subsection 8.4.1 at Article 8.4.1.4; page 8-3 starts 8.4.2 at
+#: 8.4.2.1 and gives 8.4.2.2 Sentences (1)-(5) only; page 8-5 makes 8.4.2.10
+#: the last article of that subsection — and the HBIX 2020-to-2025 Part 8
+#: comparison labels all three NEW in 2025. So the packaged snapshot was
+#: right, the coverage DATA cited another edition, and there is no MCP defect
+#: to report.
 #:
-#:     2020 8.4.1.4  -> Treatment of Additions
-#:     2020 8.4.1.5  -> SERVER ERROR: get_section: empty result content
-#:     2020 8.4.2.11 -> SERVER ERROR: get_section: empty result content
-#:     2020 8.4.2.12 -> SERVER ERROR: get_section: empty result content
-#:     2025 8.4.1.5  -> Treatment of Process Loads
-#:     2025 8.4.2.11 -> Testing of Energy Modeling Software
-#:     2025 8.4.2.12 -> Exceptional Calculation Methods
+#: The rows were DELETED rather than renumbered, except `8.4.2.2.(4)`, which
+#: stays with only its "(see 8.4.2.11.)" pointer removed: NECB 2020's
+#: software-conformance requirement is in that sentence itself, naming
+#: ANSI/ASHRAE 140.
 #:
-#: All three 2020 ids come back empty and all three are titled in 2025; Sol's
-#: `126` already noted 8.4.2.12 has no 2020 counterpart. An empty MCP result
-#: is not proof of absence, which is exactly why this is a referral and not a
-#: fix: the server has shipped errata before. The 2020 `8.4.1.2` row's own
-#: prose points the other way — its `how` says "(see 8.4.2.11.)" — so whoever
-#: authored it believed those articles were available in 2020.
-PENDING_SOL_136 = {
-    "necb2020": {"8.4.1.5", "8.4.2.11", "8.4.2.12"},
+#: A fourth entry, 2025's `8.4.4.3`, was listed here by MISTAKE and was never a
+#: normative question — it is the other half of a deliberate
+#: `8.4.4.3./8.4.5.3.` cross-reference, now forgiven by the paired-form rule
+#: (Fable's `135` H2).
+PENDING_SOL_136: dict[str, set] = {
+    "necb2020": set(),
     "necb2025": set(),
 }
 
