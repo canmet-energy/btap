@@ -101,6 +101,35 @@ nonconformity with 8.4.x.9.(6)(e).
 
 ---
 
+## How often a run is conditional, measured
+
+**69% of the frozen corpus — 25 of the 36 scenarios carrying an audit — would
+return a CONDITIONAL determination if run annually.** Measured 2026-10-08 by
+resolving every `ahj` citation in every frozen audit against this register's
+own statuses. By id: AHJ-1 on 11 scenarios, AHJ-14 on 10, AHJ-15 on 10, AHJ-3
+on 3, AHJ-16 on 1.
+
+Before AHJ-14 and AHJ-15 were wired it was roughly a third. The jump is not a
+regression: both questions were always live, and wiring them only made the
+disclosure visible. Sol ruled in `128` that frequency is NOT a reason to
+suppress a referral — the gap is common because the Code commonly requires
+equipment without electing which of its published options that equipment takes.
+
+**But the number is worth phylroy's attention, because it is a product fact
+rather than a normative one.** AHJ-14 fires on every ordinary fuel-fired
+boiler or furnace and AHJ-15 on every System 3/4 one-unit-per-block topology,
+so an ordinary gas-baseboard office is conditional. A reviewer who sees the
+label on nearly every submission may learn to disregard it, which would cost
+the cases where it means something specific to that building — AHJ-1's
+non-conforming substitution, for instance.
+
+Nothing here suppresses anything. The open question is PRESENTATION, which is
+phylroy's call and not Sol's: whether the report should distinguish a
+STRUCTURAL question that applies to a whole class of buildings from a
+BUILDING-SPECIFIC one that applies because of what this submission contains.
+That would preserve the label's discriminating power without hiding a single
+question. It is not implemented.
+
 ## AHJ-1 — a single-fuel reference is a NON-CONFORMING substitution
 
 **Article.** 8.4.4.9.(5) with 8.4.4.9.(6); 8.4.5.9.(5) with 8.4.5.9.(6).
