@@ -150,12 +150,40 @@ def edition_of(code):
     return match.group(1)
 
 
+#: Corpus models whose own declared above-ground storey count is NOT 1.
+#:
+#: `BASE_ARGS` passes `--storeys 1` to every corpus scenario, so the two
+#: fixtures NAMED for their storey count were told they had one — the harness
+#: contradicting the thing the fixture exists to exercise. It was invisible
+#: while the override silently lost to the model inside the builder; D-90's
+#: successor work made the override win in BOTH the selector and the builder
+#: and WARN on a contradiction, which is how it surfaced (Fable's `135` H3).
+#:
+#: Keyed by slug rather than parsed out of the name: a name is a label, and a
+#: scenario definition should not infer its inputs from its own title.
+CORPUS_STOREYS = {
+    "14-general-2storey": 2,
+    "15-general-3storey": 3,
+}
+
+
+def _storey_args(slug, args):
+    """`args` with the storey override matching THIS model's declaration."""
+    storeys = CORPUS_STOREYS.get(slug)
+    if storeys is None:
+        return args
+    out = list(args)
+    out[out.index("--storeys") + 1] = str(storeys)
+    return out
+
+
 def _corpus(slug, tier, lane, *, code=DEFAULT_CODE, extra=(), seal=None):
     sim = (["--simulate", "annual", "--quick"] if tier == "annual"
            else ["--simulate", tier])
     epw = [] if tier == "none" else ["--epw", "<EPW>"]
     model = "<SEED>" if slug == "5zone-onramp" else f"<CORPUS>/{slug}.osm"
-    args = FIXTURE_ARGS if slug == "5zone-onramp" else BASE_ARGS
+    args = _storey_args(
+        slug, FIXTURE_ARGS if slug == "5zone-onramp" else BASE_ARGS)
     # The CLI selects an edition by CODE ID (Stage 7); the default is
     # implicit, so only a non-default edition appears in argv.
     selector = [] if code == DEFAULT_CODE else ["--code", code]
