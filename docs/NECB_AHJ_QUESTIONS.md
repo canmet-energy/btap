@@ -637,6 +637,15 @@ heating when the proposed block is heated.
 **What the tool does meanwhile.** It follows (5) and retains the heating,
 audited against both the sentence and the table row.
 
+**Where a reader meets it.** A refrigerated block is selected only where the
+caller names its zones: the model cannot express refrigerated space, so there
+is an explicit override. Until now it existed on the PYTHON API only, which
+meant the reachability stated above was true of `performance_compliance` and
+false of `btap-compliance` — every CLI run took the "ASSUMED non-refrigerated"
+branch, and a reader of this register met a referral they could not trigger
+(Fable's `131` F9). `--refrigerated-zones NAME[,NAME...]` closes that; a tool
+gap is a defect, not an interpretation. What remains open is EVIDENCE, below.
+
 ## AHJ-12 — "where present" humidification
 
 **Article.** Table 8.4.x.7.-B, Note (1).

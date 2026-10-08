@@ -6699,3 +6699,23 @@ editions do not include the run's code. Dropping any of those would convert a
 missing disclosure into a clean non-conditional success, which is precisely the
 failure AHJ-5's predicate defect was: a question with a settled answer that
 nothing ever asked.
+
+### What a reader of the report sees
+
+Three surfaces carry the axis, and they are not interchangeable. The CLI prints
+the condition INSIDE the verdict string so it cannot be read apart from it. The
+HTML report badges it beside the pass/fail badge, because the report is the
+AHJ-facing artifact that travels with a submission. And the report carries a
+"Code questions referred to an authority" appendix listing EVERY fired
+disposition with its bearing on the verdict stated per row — not only those
+that made the run conditional.
+
+The appendix is why the two non-conditional statuses are worth citing at all.
+A `ruled` citation tells a reader that a judgement call was settled and which
+way; a `tool-gap` citation tells them this tool does not implement a
+requirement, which they need whether or not the verdict moved. Without the
+appendix those citations reached `report.json` and the audit text and stopped
+there, which is the state Fable's `131` F7 found: AHJ-5 fired fifteen times
+per frozen corpus and no reader of a report saw it once.
+
+The exit code is deliberately unchanged by any of this.
