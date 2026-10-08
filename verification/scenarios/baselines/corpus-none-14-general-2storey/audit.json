@@ -6,7 +6,7 @@
    "spaces": 5,
    "thermal_zones": 5,
    "surfaces": 30,
-   "storeys_source": "building: override",
+   "storeys_source": "declared on Building",
    "zones_with_thermostats": 5,
    "openstudio_version": "3.11.0"
   },
