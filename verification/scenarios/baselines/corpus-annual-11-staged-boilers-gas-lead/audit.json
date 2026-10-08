@@ -219,6 +219,7 @@
    "fixture_measurement": "MEASURED on sample 11 only, necb2020, gas-primary, annual, on the model FED TO THE SIZING RUN (both boilers autosized, 64,396 W each) \u2014 which is NOT the model the annual pipeline runs, where the staging pass has already driven the secondary to ~0 W: (i) BOILER COUNT at sizingFactor 1.0 \u2014 two boilers 158,219.4 kWh vs one boiler 158,219.4 kWh, identical to 0.1 kWh; (ii) SIZING FACTOR at two boilers \u2014 1.0 gives 158,219.4 kWh and 0.5 gives 157,602.8 kWh, a CHANGE of -616.6 kWh (-0.39%). What held in BOTH experiments is that the secondary boiler never fired, which is NOT the same statement as the annual kWh being unchanged. These are measurements on that one fixture, edition and model state, NOT a property of this model."
   },
   "article": "8.4.4.9.(5); 8.4.4.9.(6)",
+  "ahj": "AHJ-1 AHJ-3",
   "building": "reference building",
   "level": "warning"
  },
@@ -3730,21 +3731,6 @@
  {
   "step": "compliance",
   "action": "run period is SHORTENED \u2014 the energy comparison above is not a code-compliant annual determination (8.4.1.2 requires a simulated year)",
-  "level": "warning"
- },
- {
-  "step": "compliance",
-  "target": "Hot Water Loop",
-  "action": "INFORMATIONAL AND CONDITIONAL: this comparison is NOT a Code-compliance determination. 8.4.4.9.(5) governs the 1 multi-energy serving system(s) listed, and its capacity-ratio requirement is neither computed nor enforced, so a passing result is not evidence of compliance. Accepting it is an ALTERNATIVE SOLUTION the authority having jurisdiction must approve: 8.4.4.9.(5) clause (a) decides the requirement and this tool does not meet it. It is also CONDITIONAL on how the allocation is represented against 8.4.4.9.(6) on Hot Water Loop, which the acceptable-solution text does not settle.",
-  "inputs": {
-   "serving_systems": [
-    "Hot Water Loop"
-   ],
-   "determination": "conditional",
-   "condition": "approval by the authority having jurisdiction"
-  },
-  "article": "8.4.4.9.(5)",
-  "ruling": "D-99",
   "level": "warning"
  },
  {

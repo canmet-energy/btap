@@ -99,7 +99,6 @@
  "percent_of_target": 86.8,
  "tier": 1,
  "annual": false,
- "compliance_determination": "code",
  "compliant": true,
  "warnings": [
   "CoilCoolingDXMultiSpeed_dx: staged capacity unavailable (model not sized?) \u2014 8.4.4.10.(8) stage count NOT set; run sizing first",

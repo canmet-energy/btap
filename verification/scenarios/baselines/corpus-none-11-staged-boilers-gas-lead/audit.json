@@ -180,6 +180,7 @@
    "fixture_measurement": "MEASURED on sample 11 only, necb2020, gas-primary, annual, on the model FED TO THE SIZING RUN (both boilers autosized, 64,396 W each) \u2014 which is NOT the model the annual pipeline runs, where the staging pass has already driven the secondary to ~0 W: (i) BOILER COUNT at sizingFactor 1.0 \u2014 two boilers 158,219.4 kWh vs one boiler 158,219.4 kWh, identical to 0.1 kWh; (ii) SIZING FACTOR at two boilers \u2014 1.0 gives 158,219.4 kWh and 0.5 gives 157,602.8 kWh, a CHANGE of -616.6 kWh (-0.39%). What held in BOTH experiments is that the secondary boiler never fired, which is NOT the same statement as the annual kWh being unchanged. These are measurements on that one fixture, edition and model state, NOT a property of this model."
   },
   "article": "8.4.4.9.(5); 8.4.4.9.(6)",
+  "ahj": "AHJ-1 AHJ-3",
   "building": "reference building",
   "level": "warning"
  },

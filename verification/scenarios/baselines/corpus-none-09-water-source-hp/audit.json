@@ -217,6 +217,7 @@
    "group_shares": "UNRESOLVED: no single plant carries every energy type this group uses, so a plant-only capacity split would omit the others from the denominator"
   },
   "article": "8.4.4.9.(5)",
+  "ahj": "AHJ-1 AHJ-5",
   "building": "reference building",
   "level": "warning"
  },
@@ -262,6 +263,7 @@
    "group_shares": "UNRESOLVED: no single plant carries every energy type this group uses, so a plant-only capacity split would omit the others from the denominator"
   },
   "article": "8.4.4.9.(5)",
+  "ahj": "AHJ-1 AHJ-5",
   "building": "reference building",
   "level": "warning"
  },
@@ -307,6 +309,7 @@
    "group_shares": "UNRESOLVED: no single plant carries every energy type this group uses, so a plant-only capacity split would omit the others from the denominator"
   },
   "article": "8.4.4.9.(5)",
+  "ahj": "AHJ-1 AHJ-5",
   "building": "reference building",
   "level": "warning"
  },
@@ -352,6 +355,7 @@
    "group_shares": "UNRESOLVED: no single plant carries every energy type this group uses, so a plant-only capacity split would omit the others from the denominator"
   },
   "article": "8.4.4.9.(5)",
+  "ahj": "AHJ-1 AHJ-5",
   "building": "reference building",
   "level": "warning"
  },
@@ -397,6 +401,7 @@
    "group_shares": "UNRESOLVED: no single plant carries every energy type this group uses, so a plant-only capacity split would omit the others from the denominator"
   },
   "article": "8.4.4.9.(5)",
+  "ahj": "AHJ-1 AHJ-5",
   "building": "reference building",
   "level": "warning"
  },

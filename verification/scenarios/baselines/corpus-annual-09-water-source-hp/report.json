@@ -99,28 +99,21 @@
  "percent_of_target": 88.6,
  "tier": 1,
  "annual": false,
- "compliance_determination": "conditional",
- "compliance_determination_reason": {
-  "article": "8.4.4.9.(5)",
-  "why": "the proposed heating system uses MORE THAN ONE ENERGY TYPE on 5 serving system(s), and 8.4.4.9.(5)'s capacity-ratio requirement is neither computed nor enforced. What the reference's final heating equipment carries is not established by this tool, so the comparison is INFORMATIONAL and is NOT a Code-compliance determination.",
-  "serving_systems": [
-   "Thermal Zone 1",
-   "Thermal Zone 2",
-   "Thermal Zone 3",
-   "Thermal Zone 4",
-   "Thermal Zone 5"
-  ],
-  "hydronic_serving_systems": [],
-  "condition": "approval by the authority having jurisdiction",
-  "if_not_approved": "the comparison does not establish compliance and no verdict from it may be submitted as a determination",
-  "ahj_ids": [
-   "AHJ-1"
-  ],
-  "ahj_register": "docs/NECB_AHJ_QUESTIONS.md",
-  "ahj_must_approve": [
-   "an ALTERNATIVE SOLUTION: 8.4.4.9.(5) clause (a) requires the reference heating capacities to MATCH THE RATIO of the proposed capacity allocation, and clause (b) requires the proposed operating priority. This tool satisfies neither. Accepting this comparison means accepting a non-conforming modelling substitution, identified as such \u2014 not resolving an ambiguity."
-  ]
- },
+ "ahj_applied": [
+  {
+   "id": "AHJ-1",
+   "status": "alternative-solution",
+   "title": "a single-fuel reference is a NON-CONFORMING substitution",
+   "count": 5
+  },
+  {
+   "id": "AHJ-5",
+   "status": "ruled",
+   "title": "a water-loop heat pump's source-loop boiler IS an energy type",
+   "count": 5
+  }
+ ],
+ "ahj_register": "docs/NECB_AHJ_QUESTIONS.md",
  "compliant": true,
  "warnings": [
   "UNRESOLVED: the heating equipment serving this group uses MORE THAN ONE ENERGY TYPE. 8.4.4.9.(5) requires the reference heating capacities to follow the proposed energy-type allocation, and this tool does NOT compute or enforce that allocation \u2014 it elects ONE energy type for the group. Whether the reference happens to match the proposed allocation is therefore NOT VERIFIED here, in either direction, and a passing annual result is not evidence that it does",
@@ -181,7 +174,6 @@
   "model object named 'DXCOOL-REF-COOLEIRFT' does not state this edition's BiQuadratic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-COOLEIRFT (D-89)'",
   "model object named 'DXCOOL-REF-COOLPLFFPLR' does not state this edition's Cubic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-COOLPLFFPLR (D-89)'",
   "run period is SHORTENED \u2014 the energy comparison above is not a code-compliant annual determination (8.4.1.2 requires a simulated year)",
-  "INFORMATIONAL AND CONDITIONAL: this comparison is NOT a Code-compliance determination. 8.4.4.9.(5) governs the 5 multi-energy serving system(s) listed, and its capacity-ratio requirement is neither computed nor enforced, so a passing result is not evidence of compliance. Accepting it is an ALTERNATIVE SOLUTION the authority having jurisdiction must approve: 8.4.4.9.(5) clause (a) decides the requirement and this tool does not meet it.",
   "Calculation Methods \u2014 partial. Applied: the energy model accounts for the annual energy use of what the model contains. Gaps: elevators/escalators ((1)(j)) and other loads absent from the model are not added by the pipeline"
  ]
 }

@@ -99,28 +99,21 @@
  "percent_of_target": 86.8,
  "tier": 1,
  "annual": false,
- "compliance_determination": "conditional",
- "compliance_determination_reason": {
-  "article": "8.4.4.9.(5)",
-  "why": "the proposed heating system uses MORE THAN ONE ENERGY TYPE on 1 serving system(s), and 8.4.4.9.(5)'s capacity-ratio requirement is neither computed nor enforced. What the reference's final heating equipment carries is not established by this tool, so the comparison is INFORMATIONAL and is NOT a Code-compliance determination.",
-  "serving_systems": [
-   "Hot Water Loop"
-  ],
-  "hydronic_serving_systems": [
-   "Hot Water Loop"
-  ],
-  "condition": "approval by the authority having jurisdiction",
-  "if_not_approved": "the comparison does not establish compliance and no verdict from it may be submitted as a determination",
-  "ahj_ids": [
-   "AHJ-1",
-   "AHJ-3"
-  ],
-  "ahj_register": "docs/NECB_AHJ_QUESTIONS.md",
-  "ahj_must_approve": [
-   "an ALTERNATIVE SOLUTION: 8.4.4.9.(5) clause (a) requires the reference heating capacities to MATCH THE RATIO of the proposed capacity allocation, and clause (b) requires the proposed operating priority. This tool satisfies neither. Accepting this comparison means accepting a non-conforming modelling substitution, identified as such \u2014 not resolving an ambiguity.",
-   "how 8.4.4.9.(5)'s capacity allocation is to be REPRESENTED on a hydronic plant, where 8.4.4.9.(6) bands the reference plant's boiler count and each simulation boiler object carries ONE fixed fuel. The acceptable-solution text does not resolve that, so it is an interpretation an authority must accept. Applies to: Hot Water Loop"
-  ]
- },
+ "ahj_applied": [
+  {
+   "id": "AHJ-1",
+   "status": "alternative-solution",
+   "title": "a single-fuel reference is a NON-CONFORMING substitution",
+   "count": 1
+  },
+  {
+   "id": "AHJ-3",
+   "status": "referral",
+   "title": "whether 8.4.4.9.(6)(d) permits more than one boiler",
+   "count": 1
+  }
+ ],
+ "ahj_register": "docs/NECB_AHJ_QUESTIONS.md",
  "compliant": true,
  "warnings": [
   "UNRESOLVED: the PROPOSED heating system puts MORE THAN ONE ENERGY TYPE on ONE BOILER PLANT that carries every energy type the group uses. What the REFERENCE plant ends up with is not established here: it depends on the selected system variant, on whether the plant is adopted or torn down, and on a post-sizing staging pass that acts on primary/secondary ROLE blind to energy type and whose effect differs by capacity band and by whether any role is recognised at all. Whether that conflicts with 8.4.4.9.(6) is NOT established here, because its applicable subclause depends on the reference plant capacity. NEITHER 8.4.4.9.(5)'s capacity-ratio clause (a) nor its operating-priority clause (b) is computed or enforced, so the allocation is NOT VERIFIED in either direction, and a passing annual result is not evidence that it is satisfied",
@@ -187,7 +180,6 @@
   "model object named 'DXCOOL-REF-COOLEIRFT' does not state this edition's BiQuadratic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-COOLEIRFT (D-89)'",
   "model object named 'DXCOOL-REF-COOLPLFFPLR' does not state this edition's Cubic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-COOLPLFFPLR (D-89)'",
   "run period is SHORTENED \u2014 the energy comparison above is not a code-compliant annual determination (8.4.1.2 requires a simulated year)",
-  "INFORMATIONAL AND CONDITIONAL: this comparison is NOT a Code-compliance determination. 8.4.4.9.(5) governs the 1 multi-energy serving system(s) listed, and its capacity-ratio requirement is neither computed nor enforced, so a passing result is not evidence of compliance. Accepting it is an ALTERNATIVE SOLUTION the authority having jurisdiction must approve: 8.4.4.9.(5) clause (a) decides the requirement and this tool does not meet it. It is also CONDITIONAL on how the allocation is represented against 8.4.4.9.(6) on Hot Water Loop, which the acceptable-solution text does not settle.",
   "Calculation Methods \u2014 partial. Applied: the energy model accounts for the annual energy use of what the model contains. Gaps: elevators/escalators ((1)(j)) and other loads absent from the model are not added by the pipeline"
  ]
 }

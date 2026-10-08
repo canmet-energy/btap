@@ -227,6 +227,7 @@
    "group_shares": "UNRESOLVED: no single plant carries every energy type this group uses, so a plant-only capacity split would omit the others from the denominator"
   },
   "article": "8.4.4.9.(5)",
+  "ahj": "AHJ-1 AHJ-5",
   "building": "reference building",
   "level": "warning"
  },
@@ -272,6 +273,7 @@
    "group_shares": "UNRESOLVED: no single plant carries every energy type this group uses, so a plant-only capacity split would omit the others from the denominator"
   },
   "article": "8.4.4.9.(5)",
+  "ahj": "AHJ-1 AHJ-5",
   "building": "reference building",
   "level": "warning"
  },
@@ -317,6 +319,7 @@
    "group_shares": "UNRESOLVED: no single plant carries every energy type this group uses, so a plant-only capacity split would omit the others from the denominator"
   },
   "article": "8.4.4.9.(5)",
+  "ahj": "AHJ-1 AHJ-5",
   "building": "reference building",
   "level": "warning"
  },
@@ -362,6 +365,7 @@
    "group_shares": "UNRESOLVED: no single plant carries every energy type this group uses, so a plant-only capacity split would omit the others from the denominator"
   },
   "article": "8.4.4.9.(5)",
+  "ahj": "AHJ-1 AHJ-5",
   "building": "reference building",
   "level": "warning"
  },
@@ -407,6 +411,7 @@
    "group_shares": "UNRESOLVED: no single plant carries every energy type this group uses, so a plant-only capacity split would omit the others from the denominator"
   },
   "article": "8.4.4.9.(5)",
+  "ahj": "AHJ-1 AHJ-5",
   "building": "reference building",
   "level": "warning"
  },
@@ -3535,25 +3540,6 @@
  {
   "step": "compliance",
   "action": "run period is SHORTENED \u2014 the energy comparison above is not a code-compliant annual determination (8.4.1.2 requires a simulated year)",
-  "level": "warning"
- },
- {
-  "step": "compliance",
-  "target": "Thermal Zone 1;Thermal Zone 2;Thermal Zone 3;Thermal Zone 4;Thermal Zone 5",
-  "action": "INFORMATIONAL AND CONDITIONAL: this comparison is NOT a Code-compliance determination. 8.4.4.9.(5) governs the 5 multi-energy serving system(s) listed, and its capacity-ratio requirement is neither computed nor enforced, so a passing result is not evidence of compliance. Accepting it is an ALTERNATIVE SOLUTION the authority having jurisdiction must approve: 8.4.4.9.(5) clause (a) decides the requirement and this tool does not meet it.",
-  "inputs": {
-   "serving_systems": [
-    "Thermal Zone 1",
-    "Thermal Zone 2",
-    "Thermal Zone 3",
-    "Thermal Zone 4",
-    "Thermal Zone 5"
-   ],
-   "determination": "conditional",
-   "condition": "approval by the authority having jurisdiction"
-  },
-  "article": "8.4.4.9.(5)",
-  "ruling": "D-99",
   "level": "warning"
  },
  {
