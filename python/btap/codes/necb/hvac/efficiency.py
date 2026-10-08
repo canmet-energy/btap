@@ -547,6 +547,11 @@ def _apply_pump_rules(model, ruleset, rule, audit, proposed=None):
     minimum-flow clamp at D x rated flow — the polynomial at D equals E
     within the table's rounding (riding curve 0.691 vs 0.68, VSD 0.043 vs
     0.04)."""
+    # The hydronic-pump article is 8.4.4.14 in NECB 2020 and 8.4.5.14 in 2025.
+    # The action text here spelled 2020's on every run (Fable's `133` G3),
+    # beside an `article=` field that was already correct.
+    pump_article = f"{ruleset.article('reference_subsection')}.14"
+
     if rule is None:
         return
 
@@ -563,7 +568,8 @@ def _apply_pump_rules(model, ruleset, rule, audit, proposed=None):
         # fleet passed the same code path only by arithmetic luck.
         if _swh_loop(loop_):
             audit.info('efficiency',
-                       'service water heating loop — outside 8.4.4.14 (HVAC hydronic pumps); pump left as built',
+                       f'service water heating loop — outside {pump_article} (HVAC hydronic pumps); '
+                       'pump left as built',
                        target=loop_.nameString(), ruling='D-27')
             continue
 
@@ -1187,7 +1193,7 @@ def _pump_characteristics_known(pump):
     return head_known, bool(stated and _hydraulic_efficiency(pump) is not None)
 
 
-def _corresponding_loop(reference_loop, proposed):
+def _corresponding_loop(reference_loop, proposed, prefix=None):
     """The proposed hydronic system this reference loop corresponds to, or a
     reason it has none (Sol, DF-11 increment B).
 
@@ -1210,7 +1216,10 @@ def _corresponding_loop(reference_loop, proposed):
     """
     role = _loop_role(reference_loop)
     if role in (None, 'service_water'):
-        return None, f'{role or "unclassified"} loop is outside {LITERAL_PUMP_ARTICLE}', False
+        # `prefix` when the caller has it; LITERAL_PUMP_ARTICLE is the 2020
+        # fallback the literal already was (Fable's `133` G3).
+        article = f'{prefix}.14' if prefix else LITERAL_PUMP_ARTICLE
+        return None, f'{role or "unclassified"} loop is outside {article}', False
 
     reference_zones = _served_zone_names(reference_loop)
     if not reference_zones:
@@ -1411,7 +1420,7 @@ def _transfer_by_correspondence(reference_loop, proposed, prefix, audit):
     if not reference_pumps:
         return
 
-    match, reason, n_to_1 = _corresponding_loop(reference_loop, proposed)
+    match, reason, n_to_1 = _corresponding_loop(reference_loop, proposed, prefix)
     if match is None:
         if _loop_role(reference_loop) == 'service_water':
             return  # D-27 already said so, at the top of the pass
@@ -1704,8 +1713,9 @@ def _align_heat_pump_heating_capacity(model, audit, ruleset):
         cool_w = (optional_f(cool.ratedTotalCoolingCapacity())
                   or optional_f(cool.autosizedRatedTotalCoolingCapacity()))
         if cool_w is None:
-            audit.warn('efficiency', f'{heat.nameString()}: cooling capacity unavailable — 8.4.4.13.(2)(c) '
-                                     'heating=cooling alignment skipped (run sizing first)')
+            audit.warn('efficiency', f'{heat.nameString()}: cooling capacity unavailable — '
+                                     f'{hp_article} heating=cooling alignment skipped '
+                                     '(run sizing first)')
             continue
 
         heat.setRatedTotalHeatingCapacity(cool_w)
@@ -1730,7 +1740,7 @@ def _align_staged_heat_pump(heat, cool, audit, hp_article='8.4.4.13.(2)(c)'):
              for i, h in enumerate(heat_stages)]
     if any(c is None for _, c in pairs):
         audit.warn('efficiency', f'{heat.nameString()}: staged heat pump has MORE heating stages than cooling '
-                                 'stages — 8.4.4.13.(2)(c) alignment applied only to the matched stages',
+                                 f'stages — {hp_article} alignment applied only to the matched stages',
                    target=heat.nameString(), article=hp_article, ruling='D-22')
     top = None
     for heat_stage, cool_stage in pairs:
@@ -1745,7 +1755,8 @@ def _align_staged_heat_pump(heat, cool, audit, hp_article='8.4.4.13.(2)(c)'):
         heat_stage.setGrossRatedHeatingCapacity(cool_w)
         top = cool_w
     if top is None:
-        audit.warn('efficiency', f'{heat.nameString()}: staged cooling capacity unavailable — 8.4.4.13.(2)(c) '
+        audit.warn('efficiency', f'{heat.nameString()}: staged cooling capacity unavailable — '
+                                 f'{hp_article} '
                                  'heating=cooling alignment skipped (run sizing first)',
                    target=heat.nameString(), article=hp_article, ruling='D-22')
         return

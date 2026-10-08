@@ -805,7 +805,7 @@ class TestTheStoreysOverrideReachesTheBUILDER(unittest.TestCase):
     and with the override supplied it did exactly that one layer down.
     """
 
-    def _reference(self, declare_on_model):
+    def _reference(self, declare_on_model, declared=6):
         import btap.modeling as modeling
         from btap._compat import sorted_by_name
         from btap.audit import AuditLog
@@ -823,6 +823,9 @@ class TestTheStoreysOverrideReachesTheBUILDER(unittest.TestCase):
             [z for z in model.getThermalZones() if z.spaces()])
         if declare_on_model:
             model.getBuilding().setStandardsNumberOfAboveGroundStories(6)
+        elif declared != 6:
+            # G4's shape: the model DECLARES a contradicting count.
+            model.getBuilding().setStandardsNumberOfAboveGroundStories(declared)
         audit = AuditLog()
         result = hvac.reference_hvac(model, code="necb2020",
                                      building={"storeys": 6}, audit=audit)
@@ -855,9 +858,16 @@ class TestTheStoreysOverrideReachesTheBUILDER(unittest.TestCase):
         self.assertEqual(1, helpers.above_ground_storeys(model),
                          "the proposed model keeps whatever it said")
 
-    def test_a_model_that_DECLARES_a_count_keeps_it(self):
-        """The override is a fallback for a model that cannot say, not an
-        instruction to overwrite one that can."""
+    def test_the_override_WINS_over_a_declared_count_and_says_so(self):
+        """Fable's `133` G4 reversed this. The first version skipped a model
+        that declared its own count, calling it deference — and that
+        reproduced F2 exactly: `declared=2, --storeys 6` selected on 6 and
+        GROUPED on 2, one whole-building VAV, no citation, no audit entry.
+
+        It was not deference. `_building_info` already lets the override win in
+        the selector, so skipping the stamp just moved the split's roles
+        around. Deference would mean refusing the override in the selector too.
+        """
         import openstudio
 
         from btap.audit import AuditLog
@@ -865,11 +875,38 @@ class TestTheStoreysOverrideReachesTheBUILDER(unittest.TestCase):
 
         model = openstudio.model.Model()
         model.getBuilding().setStandardsNumberOfAboveGroundStories(3)
-        reference._reconcile_declared_storeys(model, {"storeys": 9},
-                                              AuditLog())
+        audit = AuditLog()
+        reference._reconcile_declared_storeys(model, {"storeys": 9}, audit)
         self.assertEqual(
-            3, model.getBuilding().standardsNumberOfAboveGroundStories().get(),
-            "a declared count is not overwritten by the override")
+            9, model.getBuilding().standardsNumberOfAboveGroundStories().get(),
+            "the override wins in the builder as it does in the selector")
+        warnings = [e for e in audit.entries if e.get("level") == "warning"]
+        self.assertEqual(1, len(warnings),
+                         "holding two storey counts silently breaks the audit "
+                         "contract whichever number wins")
+        self.assertIn(9, warnings[0]["inputs"].values())
+        self.assertIn(3, warnings[0]["inputs"].values(),
+                      "the warning must name BOTH numbers")
+
+    def test_an_AGREEING_declared_count_warns_about_nothing(self):
+        import openstudio
+
+        from btap.audit import AuditLog
+        from btap.codes.necb.hvac import reference
+
+        model = openstudio.model.Model()
+        model.getBuilding().setStandardsNumberOfAboveGroundStories(4)
+        audit = AuditLog()
+        reference._reconcile_declared_storeys(model, {"storeys": 4}, audit)
+        self.assertEqual([], [e for e in audit.entries
+                              if e.get("level") == "warning"])
+
+    def test_a_CONTRADICTED_count_still_reaches_the_facade_split(self):
+        """G4's row 2, end to end: the symptom F2 fixed must not come back."""
+        _model, result, cited = self._reference(declare_on_model=False,
+                                                declared=2)
+        self.assertTrue(cited, "the corner block is still cited")
+        self.assertGreater(len(result.model.getAirLoopHVACs()), 1)
 
 
 class TestTheReportAPPENDIXShowsEveryFiredDisposition(unittest.TestCase):
@@ -926,6 +963,148 @@ class TestTheReportAPPENDIXShowsEveryFiredDisposition(unittest.TestCase):
 
 
 @needs_sdk
+class TestEveryCitedArticleExistsInITSEdition(unittest.TestCase):
+    """Fable's `133` G3 replaced my own gate, which rested on a false premise.
+
+    The first version asserted that a necb2025 run cites no `8.4.4.x` article,
+    "always wrong" in 2025. It is not: `8.4.4.1` and `8.4.4.2` ARE NECB 2025's
+    archetype-EUI articles and every 2025 run cites them correctly from
+    coverage. My gate passed only because its fixture never reached them, and
+    moved to the pipeline it would have failed on TRUE citations. It also
+    declined to check 2020 at all, on the correct observation that 2020
+    legitimately cites 8.4.5.x curve tables — leaving that direction unguarded.
+
+    Membership in the edition's OWN snapshot is the property that actually
+    holds, in both directions: every Section 8.4 article a run cites must exist
+    in `data/<code>/coverage/articles_8_4.json`. It needs no judgement about
+    which subsection means what in which edition.
+    """
+
+    def _snapshot_articles(self, code):
+        import json
+
+        from btap.codes import necb
+
+        path = (necb._data_root() / code / "coverage" / "articles_8_4.json")
+        data = json.loads(path.read_text(encoding="utf-8"))
+        articles = data["articles"]
+        return set(articles) if isinstance(articles, dict) else {
+            str(entry) for entry in articles}
+
+    def _cited_articles(self, entries):
+        """Every `8.4.x.y` token in the fields that reach a reader."""
+        import re
+
+        seen = set()
+        for entry in entries:
+            blob = " ".join(str(entry.get(field) or "") for field
+                            in ("article", "action", "value", "evidence"))
+            for token in re.findall(r"8\.4\.\d+\.\d+", blob):
+                seen.add(token)
+        return seen
+
+    def _run(self, code):
+        import btap.modeling as modeling
+        from btap._compat import sorted_by_name
+        from btap.audit import AuditLog
+        from btap.codes.necb import hvac
+
+        from .support import compliance_fixture
+
+        system = ("MZ BU RTU Hot Water Heating Coil Scroll Chiller and "
+                  "Hot Water Baseboard")
+        model = compliance_fixture()
+        zones = sorted_by_name(model.getThermalZones())
+        modeling.build_system(model, system, zones[:3])
+        modeling.build_system(model, system, zones[3:])
+        audit = AuditLog()
+        hvac.reference_hvac(model, code=code, building={"storeys": 6},
+                            audit=audit)
+        hvac.apply_efficiencies(model, code=code, audit=audit)
+        hvac.apply_economizer_thresholds(model, audit=audit, code=code)
+        return audit.entries
+
+    #: Citations that are absent from their edition's snapshot and are NOT
+    #: code literals: every one comes from the `coverage` step, i.e. from that
+    #: edition's own `necb_rules.json` article_coverage. Whether the data or
+    #: the snapshot is wrong is a NORMATIVE question, referred to Sol in `134`
+    #: and not settled here — and a coverage-data edit has four gates of its
+    #: own (provenance hash, citation baseline, R7 ledger, regenerate).
+    #:
+    #: The MCP returns an empty result for all three 2020 ids and titles all
+    #: three in 2025, so the 2020 rows may be citing articles that edition does
+    #: not have. Declared here so the gate still fails on anything NEW.
+    PENDING_SOL_134 = {
+        "necb2020": {"8.4.1.5", "8.4.2.11", "8.4.2.12"},
+        "necb2025": {"8.4.4.3"},
+    }
+
+    def test_both_editions_cite_only_their_own_articles(self):
+        for code in ("necb2020", "necb2025"):
+            with self.subTest(code):
+                entries = self._run(code)
+                self.assertGreater(len(entries), 40,
+                                   "the run must be substantial")
+                known = self._snapshot_articles(code)
+                cited = self._cited_articles(entries)
+                self.assertTrue(cited, "the probe must find citations at all")
+                foreign = sorted(a for a in cited if a not in known)
+                self.assertEqual(
+                    [], foreign,
+                    "{} cited articles absent from its own snapshot: "
+                    "{}".format(code, foreign))
+
+    def test_the_full_pipeline_cites_only_its_own_articles(self):
+        """The fixture above reaches the HVAC sites. This runs the REAL
+        pipeline, which is where Fable's `133` G3 found five sites my first
+        gate's fixture never touched — the frozen corpus saw them and the
+        fixture did not.
+        """
+        import tempfile
+
+        import btap.modeling as modeling
+        from btap._compat import sorted_by_name
+        from btap.codes import performance_compliance
+
+        from .support import compliance_fixture
+
+        for code in ("necb2020", "necb2025"):
+            with self.subTest(code):
+                model = compliance_fixture()
+                modeling.build_system(
+                    model, "PSZ RTU Gas and DX Coils and Electric Baseboard",
+                    sorted_by_name(model.getThermalZones()))
+                with tempfile.TemporaryDirectory() as run_dir:
+                    result = performance_compliance(
+                        model, code=code, simulate="none", run_dir=run_dir,
+                        hdd=4000, building={"storeys": 1})
+                known = self._snapshot_articles(code)
+                cited = self._cited_articles(result.audit.entries)
+                foreign = {a for a in cited if a not in known}
+                unexpected = sorted(foreign - self.PENDING_SOL_134[code])
+                self.assertEqual(
+                    [], unexpected,
+                    "{} cited articles absent from its own snapshot and not "
+                    "among the declared normative referrals: {}".format(
+                        code, unexpected))
+                # And the declared ones must still BE there: if a referral is
+                # settled the list must shrink deliberately, not silently.
+                self.assertEqual(
+                    self.PENDING_SOL_134[code], foreign & self.PENDING_SOL_134[code],
+                    "a declared referral stopped firing; settle it in the list")
+
+    def test_the_probe_has_TEETH(self):
+        """Absence of output is not evidence. A deliberately foreign citation
+        must be caught, or the test above proves nothing."""
+        known = self._snapshot_articles("necb2025")
+        cited = self._cited_articles([
+            {"article": "8.4.4.12.; 5.2.2.7.(1)"},          # G3's real one
+            {"action": "the structural 8.4.4.9.(4) proxy"},  # G3's real one
+        ])
+        foreign = sorted(a for a in cited if a not in known)
+        self.assertEqual(["8.4.4.12", "8.4.4.9"], foreign,
+                         "the sweep must see a 2020 article on a 2025 snapshot")
+
 class TestNo2020ArticleReachesA2025Run(unittest.TestCase):
     """The class Sol's `129`.5 called a defect and Fable's `131` F6 found in
     four more places: a 2020 article number written as a LITERAL in action
@@ -1024,6 +1203,194 @@ class TestTheCLICanReachAHJ11(unittest.TestCase):
         from btap.codes import cli
 
         self.assertIn("--refrigerated-zones", cli.build_parser().format_help())
+
+
+class TestAnInputLessEntryIsNeverSUPERSEDED(unittest.TestCase):
+    """Fable's `133` G1, and the worst defect of the round because MY OWN fix
+    for F3 introduced it.
+
+    Supersession keyed on (step, target, input FIELDS). AHJ-11's System 5
+    decision records no inputs, so its identity collapsed to (step, target),
+    and the purchased-cooling decision emitted after it on the same zones —
+    also input-less — "re-made the choice" and retired the referral. A heated
+    refrigerated block on district cooling reported `code` with NO conditions:
+    the silent drop this entire axis exists to prevent.
+
+    An empty field set is not an identity, it is the absence of one. Treating
+    absence as a match is what let two unrelated decisions collide. AHJ-16's
+    five input-less warns carried the same fragility without colliding yet.
+    """
+
+    def _resolve(self, audit, code="necb2025"):
+        from btap.codes.necb import path as necb_path
+
+        class _Run:
+            pass
+
+        run = _Run()
+        run.report = {"annual": True, "code": code}
+        run.ruleset = type("_R", (), {"code": code})()
+        necb_path._resolve_ahj_conditions(run, audit)
+        reason = run.report.get("compliance_determination_reason") or {}
+        return (run.report.get("compliance_determination"),
+                [(c["id"], c["target"]) for c in reason.get("conditions", [])])
+
+    def _g1_audit(self):
+        from btap.audit import AuditLog
+
+        audit = AuditLog()
+        # The real pair, in the real order, from `_finalize`.
+        audit.decision(
+            "selection",
+            "System 5 reference MODELS HEATING in the two-pipe surrogate",
+            target="Thermal Zone 1,Thermal Zone 2",
+            article="8.4.5.1.(5)", ruling="D-39", ahj="AHJ-11")
+        audit.decision(
+            "selection",
+            "purchased cooling energy -> represented by air-cooled electric "
+            "chiller",
+            target="Thermal Zone 1,Thermal Zone 2", article="8.4.5.1.(3)")
+        return audit
+
+    def test_the_AHJ11_referral_survives_a_later_input_less_decision(self):
+        determination, conditions = self._resolve(self._g1_audit())
+        self.assertEqual([("AHJ-11", "Thermal Zone 1,Thermal Zone 2")],
+                         conditions,
+                         "the referral fired and must not be thrown away")
+        self.assertEqual("conditional", determination)
+
+    def test_it_holds_for_necb2020_too(self):
+        determination, conditions = self._resolve(self._g1_audit(),
+                                                  code="necb2020")
+        self.assertEqual(1, len(conditions))
+        self.assertEqual("conditional", determination)
+
+    def test_an_input_less_warn_is_not_retired_either(self):
+        """AHJ-16's shape: five input-less warns on one target and step."""
+        from btap.audit import AuditLog
+
+        audit = AuditLog()
+        audit.warn("efficiency", "pump power transfer DECLINED",
+                   target="Hot Water Loop", article="8.4.5.14.(1)",
+                   ruling="D-11", ahj="AHJ-16")
+        audit.decision("efficiency", "something else about the same loop",
+                       target="Hot Water Loop", article="8.4.5.14.(2)")
+        _determination, conditions = self._resolve(audit)
+        self.assertEqual([("AHJ-16", "Hot Water Loop")], conditions)
+
+    def test_the_RULING_also_separates_two_input_bearing_decisions(self):
+        """The second guard. Two different decisions that happen to record the
+        same field names stay distinct when their rulings differ."""
+        from btap.audit import AuditLog
+
+        audit = AuditLog()
+        audit.decision("selection", "first choice", target="Zone 1",
+                       inputs={"value": 1}, ruling="D-39", ahj="AHJ-11")
+        audit.decision("selection", "a DIFFERENT choice, same field name",
+                       target="Zone 1", inputs={"value": 2}, ruling="D-52")
+        _determination, conditions = self._resolve(audit)
+        self.assertEqual([("AHJ-11", "Zone 1")], conditions,
+                         "a different ruling is a different choice")
+
+
+class TestTheAppendixBearingComesFromTheRUN(unittest.TestCase):
+    """Fable's `133` G2, on the surface F7 created one round earlier.
+
+    The Bearing column was derived from the REGISTER STATUS alone, so it said
+    "this run's determination is conditional on it" on runs that reached no
+    determination at all — every `--simulate none|sizing --report-html` run of
+    an ordinary gas building, badged UNDETERMINED, with rows underneath
+    asserting a conditional determination. And the register and README prose I
+    wrote vouched for the column, which is the F4 pattern again.
+
+    The determination owns that judgement. The renderer reads
+    `compliance_determination` and the resolver's own `ahj_ids` instead of
+    re-deriving either.
+    """
+
+    def _rows(self, report, entries):
+        import re
+
+        from btap.codes.report import sections
+
+        html = sections.ahj_appendix({"report": report,
+                                      "audit_entries": entries,
+                                      "options": {}})
+        return dict(re.findall(
+            r"(AHJ-\d+)</td>.*?(YES[^<]*|not applicable[^<]*|no —[^<]*)",
+            html, re.S))
+
+    def test_a_run_with_NO_determination_claims_none(self):
+        """The defect. A sizing or none run has nothing to be conditional on."""
+        rows = self._rows({}, [{"step": "efficiency", "ahj": "AHJ-14"}])
+        self.assertIn("not applicable", rows["AHJ-14"])
+        self.assertNotIn("YES", rows["AHJ-14"])
+
+    def test_a_CONDITIONAL_run_says_YES_for_the_id_it_is_conditional_on(self):
+        report = {"compliance_determination": "conditional",
+                  "compliance_determination_reason": {"ahj_ids": ["AHJ-14"]}}
+        rows = self._rows(report, [{"step": "efficiency", "ahj": "AHJ-14"}])
+        self.assertIn("YES", rows["AHJ-14"])
+
+    def test_a_cited_id_the_resolver_SUPERSEDED_does_not_claim_YES(self):
+        """F3's own case: the audit keeps the citation, the determination is
+        `code`, and the appendix must not contradict it."""
+        report = {"compliance_determination": "code",
+                  "compliance_determination_reason": {}}
+        rows = self._rows(report, [{"step": "efficiency", "ahj": "AHJ-14"}])
+        self.assertIn("superseded", rows["AHJ-14"])
+        self.assertNotIn("YES", rows["AHJ-14"])
+
+    def test_the_non_conditional_statuses_are_unaffected_by_the_run(self):
+        """A `ruled` or `tool-gap` row says the same thing either way — those
+        never depended on the determination."""
+        for report in ({}, {"compliance_determination": "conditional",
+                            "compliance_determination_reason": {
+                                "ahj_ids": ["AHJ-14"]}}):
+            rows = self._rows(report, [{"step": "a", "ahj": "AHJ-5"},
+                                       {"step": "b", "ahj": "AHJ-18"}])
+            self.assertIn("settled", rows["AHJ-5"])
+            self.assertIn("defect in this tool", rows["AHJ-18"])
+
+
+class TestTheSharedChoicePhraseMatchesTheSTATUS(unittest.TestCase):
+    """Fable's `133` G5: one sentence served every status, so an AHJ-1 line
+    read "which the text DECIDES ... this same unresolved election" in a
+    single breath. An alternative solution is not an unresolved question — it
+    is a requirement the text settles and this tool does not meet."""
+
+    def _line(self, ident, count):
+        from btap.audit import AuditLog
+        from btap.codes.necb import path as necb_path
+
+        audit = AuditLog()
+        for index in range(count):
+            audit.decision("x", f"choice {index}", target=f"Zone {index}",
+                           inputs={"k": index}, ahj=ident)
+
+        class _Run:
+            pass
+
+        run = _Run()
+        run.report = {"annual": True, "code": "necb2020"}
+        run.ruleset = type("_R", (), {"code": "necb2020"})()
+        necb_path._resolve_ahj_conditions(run, audit)
+        reason = run.report.get("compliance_determination_reason") or {}
+        return (reason.get("ahj_must_approve") or [""])[0]
+
+    def test_an_alternative_solution_is_a_DEPARTURE_not_an_election(self):
+        line = self._line("AHJ-1", 5)
+        self.assertIn("this same departure", line)
+        self.assertNotIn("unresolved election", line)
+
+    def test_a_referral_is_still_an_unresolved_election(self):
+        line = self._line("AHJ-14", 3)
+        self.assertIn("this same unresolved election", line)
+
+    def test_a_single_site_still_quotes_its_own_account(self):
+        """F8's rule is unchanged: one site means one site's words."""
+        line = self._line("AHJ-14", 1)
+        self.assertNotIn("choices above", line)
 
 
 if __name__ == "__main__":      # pragma: no cover

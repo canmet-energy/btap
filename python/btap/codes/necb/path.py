@@ -290,14 +290,18 @@ def build_reference(run):
                 article=f"{prefix}.5.(9)-(12)", ruling="D-51")
         shw_reference._reference_shw(reference, ruleset, audit=audit)
     audit.building = None
+    # The reference-subsection prefix, for the two article numbers quoted in
+    # the text below. They were 2020 literals on every 2025 run (Fable's
+    # `133` G3), in the `compliance` step every frozen 2025 run carries.
+    _sub = run.ruleset.article('reference_subsection')
     audit.info(
         "compliance",
         "8.4.3.2 operating schedules and occupancy/receptacle loads are "
         "identical between proposed and reference by construction (the "
         "reference is a clone; neither reset touches schedules or those "
         "loads); interior lighting power is reset to the Part 4 allowance per "
-        "8.4.4.5.(1) (reference_lighting); service water heating efficiencies "
-        "are reset to the Part 6 minimums per 8.4.4.20 (reference_shw). "
+        f"{_sub}.5.(1) (reference_lighting); service water heating efficiencies "
+        f"are reset to the Part 6 minimums per {_sub}.20 (reference_shw). "
         "Representativeness of the loads for the building type remains the "
         "modeller's input (see the loads domain for NECB space-use data).",
         article="8.4.3.2.(1)-(2)")
@@ -337,7 +341,8 @@ def _size_reference(run):
         hvac.energy_recovery._apply_energy_recovery(reference, run.ruleset,
                                                     hdd=run.hdd, audit=audit)
         # T3: 5.2.2.7 economizer trigger is likewise a post-sizing determination
-        hvac.apply_economizer_thresholds(reference, audit=audit)
+        hvac.apply_economizer_thresholds(reference, audit=audit,
+                                         code=run.ruleset.id)
         audit.info("compliance",
                    "reference sized; efficiencies re-applied and the 5.2.10.1 "
                    "energy-recovery determination evaluated on sized flows",
@@ -419,18 +424,46 @@ def _resolve_ahj_conditions(run, audit):
     # same target records different fields and does not.
     latest_by_choice = {}
     for index, entry in enumerate(audit.entries):
-        key = (entry.get("step"), entry.get("target"),
-               frozenset((entry.get("inputs") or {}).keys()))
+        fields = frozenset((entry.get("inputs") or {}).keys())
+        if not fields:
+            # NEVER supersede an entry that records no inputs. Fable's `133`
+            # G1: AHJ-11's System 5 decision records none, so its identity
+            # collapsed to (step, target) and the purchased-cooling decision
+            # emitted after it on the same zones — also input-less — "re-made
+            # the choice" and retired the referral. A heated refrigerated block
+            # on district cooling reported `code` with no conditions at all,
+            # which is the silent-drop this whole axis exists to prevent, and
+            # my own supersession fix introduced it.
+            #
+            # An empty field set is not an identity. It is the ABSENCE of one,
+            # and treating absence as a match is what let two unrelated
+            # decisions collide. AHJ-16's five input-less warns had the same
+            # fragility without colliding yet.
+            continue
+        key = (entry.get("step"), entry.get("target"), fields,
+               # `ruling` too: non-prose and site-specific, so two genuinely
+               # different decisions that happen to record the same field
+               # names stay distinct.
+               entry.get("ruling"))
         latest_by_choice[key] = index
-    final_indices = set(latest_by_choice.values())
+    superseded = set()
+    for index, entry in enumerate(audit.entries):
+        fields = frozenset((entry.get("inputs") or {}).keys())
+        if not fields:
+            continue
+        key = (entry.get("step"), entry.get("target"), fields,
+               entry.get("ruling"))
+        if latest_by_choice.get(key) != index:
+            superseded.add(index)
 
     fired, conditions = [], []
     for index, entry in enumerate(audit.entries):
         citation = entry.get("ahj")
         if not citation:
             continue
-        if index not in final_indices:
-            # Superseded: a later entry re-made this exact choice.
+        if index in superseded:
+            # A later entry re-made this exact choice, recording the same
+            # fields under the same ruling.
             continue
         malformed = _ahj.malformed_ids_in(citation)
         if malformed:
@@ -566,9 +599,17 @@ def _set_conditional(run, audit, required, conditions, approval):
         if len(group) == 1 and details:
             detail = " — " + details[0]
         elif details:
-            detail = (" — each of the {} choices above makes this same "
-                      "unresolved election; the conditions list carries what "
-                      "was established at each one".format(len(group)))
+            # KEYED ON STATUS, like the `kind` clause before it. The one
+            # sentence said "this same unresolved election" for every status,
+            # so an AHJ-1 line read "which the text DECIDES ... this same
+            # unresolved election" in a single breath (Fable's `133` G5). An
+            # alternative solution is not an unresolved question; it is a
+            # requirement the text settles and this tool does not meet.
+            shared = ("departure" if first["status"] == "alternative-solution"
+                      else "unresolved election")
+            detail = (" — each of the {} choices above makes this same {}; "
+                      "the conditions list carries what was established at "
+                      "each one".format(len(group), shared))
         else:
             detail = ""
         deduped.append("{} ({}): {} — {}.{}{}".format(

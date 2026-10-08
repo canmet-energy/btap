@@ -842,6 +842,13 @@ def ahj_appendix(ctx):
     `alternative-solution` rows bear on the determination, and the Bearing
     column says so per row rather than leaving the reader to infer it.
     """
+    report = ctx.get("report") or {}
+    determination = report.get("compliance_determination")
+    # The ids the RESOLVER made this run conditional on, not the ids the
+    # register says could. Those differ, and the difference is the finding.
+    reason = report.get("compliance_determination_reason") or {}
+    conditional_ids = set(reason.get("ahj_ids") or ())
+
     fired: dict[str, dict] = {}
     for index, entry in enumerate(ctx["audit_entries"]):
         for ident in AHJ.ids_in(entry.get("ahj")):
@@ -859,14 +866,32 @@ def ahj_appendix(ctx):
             status = (entry or {}).get("status") or "not in register"
             title = (entry or {}).get("title") or (
                 f"{ident} was cited by this run but is not in the register")
-            if status in AHJ.approval_required_statuses():
+            if status not in AHJ.approval_required_statuses():
+                if status == "tool-gap":
+                    bearing = ("no — a defect in this tool, not a question of "
+                               "Code")
+                elif status == "ruled":
+                    bearing = "no — settled; the row records which way"
+                else:
+                    bearing = "no"
+            elif not determination:
+                # NO DETERMINATION TO BE CONDITIONAL ON. Fable's `133` G2:
+                # this column was derived from the register status alone, so a
+                # `--simulate none` or `sizing` run badged UNDETERMINED carried
+                # rows saying "this run's determination is conditional on it".
+                # Every `--report-html` run of an ordinary gas building short
+                # of annual reached that.
+                bearing = ("not applicable — this run reached no "
+                           "determination")
+            elif ident in conditional_ids:
                 bearing = "YES — this run's determination is conditional on it"
-            elif status == "tool-gap":
-                bearing = "no — a defect in this tool, not a question of Code"
-            elif status == "ruled":
-                bearing = "no — settled; the row records which way"
             else:
-                bearing = "no"
+                # Cited, approval-required, and NOT among the resolved
+                # conditions: the choice it applied to was superseded by a
+                # later pass, so the question is not live. Reading
+                # `ahj_applied` rather than re-deriving it is the point — the
+                # determination owns that judgement, not this renderer.
+                bearing = ("no — superseded by a later choice in this run")
             rows.append([ident, status, title, bearing, hit["count"],
                          Html.raw(f'<a href="#audit-{hit["first_index"]}">'
                                   f'entry {hit["first_index"]}</a>')])

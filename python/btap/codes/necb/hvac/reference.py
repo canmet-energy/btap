@@ -631,22 +631,47 @@ def _reconcile_declared_storeys(reference, building, audit):
 
     Writing it on the REFERENCE only, never the proposed: the selector's
     premise is what the reference must be built on, and the caller's model is
-    not ours to edit. A model that already declares a count keeps it — the
-    override is a fallback for models that cannot say, not an instruction to
-    overwrite one that can.
+    not ours to edit.
+
+    THE OVERRIDE WINS, including over a model that declares its own count.
+    The first version skipped those, calling it deference to the model — and
+    Fable's `133` G4 showed that reproduces the very defect F2 fixed: a model
+    declaring 2 with `--storeys 6` selected on 6 and GROUPED on 2, one
+    whole-building VAV, no facade split, no citation, and no audit entry
+    either. As he put it, that is not deference, it is the same split with the
+    roles swapped — because `_building_info` already lets the override win in
+    the selector. Deference would have to mean refusing the override there
+    too.
+
+    So the override wins in both halves, and a CONTRADICTION is warned with
+    both numbers named. The audit contract is that warnings are never silent,
+    and holding two storey counts while saying nothing breaks it whichever
+    number wins.
     """
     declared = (building or {}).get('storeys')
     if not declared:
         return
+    declared = int(declared)
     existing = opt(reference.getBuilding().standardsNumberOfAboveGroundStories())
-    if existing is not None:
+    if existing is not None and int(existing) != declared:
+        audit.warn('build',
+                   f'the supplied building data says {declared} above-ground '
+                   f'storeys and the model DECLARES {int(existing)} — the '
+                   'supplied value is an override and wins, here and in the '
+                   'reference-system selection, so both halves group on one '
+                   'premise; correct the model or drop the override if that '
+                   'is not intended',
+                   inputs={'storeys': declared,
+                           'model_declared_storeys': int(existing)},
+                   ruling='D-18')
+    elif existing is not None:
         return
-    reference.getBuilding().setStandardsNumberOfAboveGroundStories(int(declared))
+    reference.getBuilding().setStandardsNumberOfAboveGroundStories(declared)
     audit.info('build',
                'declared above-ground storey count stamped on the reference '
                'from the supplied building data — the selector and the system '
                'builder must group on the SAME premise',
-               inputs={'storeys': int(declared)}, ruling='D-18')
+               inputs={'storeys': declared}, ruling='D-18')
 
 
 def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=None):
@@ -1033,7 +1058,7 @@ def _apply_zone_fan_rules(zones, reference_system, rules_data, audit):
                    article='8.4.4.18.(3)', ruling='D-22')
 
 
-def apply_economizer_thresholds(model, audit=None):
+def apply_economizer_thresholds(model, audit=None, code=None):
     """T3 (audit 2026-07-25): 8.4.4.12 economizers apply only where Article
     5.2.2.7 applies to the proposed system — mechanical cooling AND (sized
     supply > 1500 L/s OR cooling capacity > 20 kW); dwelling-only/hotel
@@ -1044,8 +1069,15 @@ def apply_economizer_thresholds(model, audit=None):
 
     :param model: sized reference openstudio.model.Model (modified in place)
     :param audit: AuditLog or None (a new one is created if None)
+    :param code: code id, for the edition's own article prefix. `None` keeps
+        2020's, which is what the hardcoded value already was — the economizer
+        article is 8.4.4.12 in NECB 2020 and 8.4.5.12 in NECB 2025, and both
+        entries here spelled 2020's into the ARTICLE FIELD on every 2025 run
+        (Fable's `133` G3). In NECB 2025 `8.4.4.12` does not exist at all:
+        that subsection stops at `.2`.
     :return: AuditLog — the audit carrying every keep/strip decision
     """
+    economizer_article = f'{_subsection(resolve(code) if code else None)}.12.'
     from btap.audit import AuditLog
 
     audit = audit if audit is not None else AuditLog()
@@ -1100,14 +1132,14 @@ def apply_economizer_thresholds(model, audit=None):
                            inputs={'supply_l_s': ruby_round(supply * 1000, 0),
                                    'cooling_kw': ruby_round(cooling_w / 1000.0, 1)},
                            value=ctrl.getEconomizerControlType(),
-                           article='8.4.4.12.; 5.2.2.7.(1)', ruling='D-22')
+                           article=f'{economizer_article}; 5.2.2.7.(1)', ruling='D-22')
         else:
             ctrl.setEconomizerControlType('NoEconomizer')
             audit.decision('rules', 'economizer REMOVED — below the 5.2.2.7 trigger (<=1500 L/s and <=20 kW)',
                            target=air_loop.nameString(),
                            inputs={'supply_l_s': ruby_round(supply * 1000, 0),
                                    'cooling_kw': ruby_round(cooling_w / 1000.0, 1)},
-                           value='NoEconomizer', article='8.4.4.12.; 5.2.2.7.(1)', ruling='D-22')
+                           value='NoEconomizer', article=f'{economizer_article}; 5.2.2.7.(1)', ruling='D-22')
     return audit
 
 
@@ -2032,13 +2064,6 @@ def heat_pump_article_base(selection):
 # inapplicability recorded, rather than guessing.
 
 def heat_pump_aux_energy_type(group, facts, hp_rules, annual, audit, article_base='8.4.4.13'):
-    # The STRUCTURAL proxy lives in a different article from the one
-    # article_base names, so it needs the subsection on its own. Fable's
-    # `131` F6: these said '8.4.4.9.(4)' on a 2025 run whose `article=`
-    # correctly said 8.4.5.13, and the resolver quotes the action verbatim
-    # as the condition detail — so an authority was handed a 2020 number,
-    # which in 2025 is the archetype-EUI subsection entirely.
-    proxy = '.'.join(article_base.split('.')[:3]) + '.9.(4)'
     """:param group: one classify.characterize group (the heat-pump system)
     :param facts: the full classify.characterize output
     :param hp_rules: the ruleset's heat-pump rules block (threshold source), or None
@@ -2048,6 +2073,16 @@ def heat_pump_aux_energy_type(group, facts, hp_rules, annual, audit, article_bas
     :param audit: AuditLog or None
     :return: str or None — elected reference energy-type variant ('gas', 'electric'),
         or None when sentence (g) does not elect (proxy applies)"""
+    # The STRUCTURAL proxy lives in a different article from the one
+    # article_base names, so it needs the subsection on its own. Fable's `131`
+    # F6: these said '8.4.4.9.(4)' on a 2025 run whose `article=` correctly
+    # said 8.4.5.13, and the resolver quotes the action verbatim as the
+    # condition detail — so an authority was handed a 2020 number, which in
+    # 2025 is the archetype-EUI subsection entirely.
+    #
+    # This block sat ABOVE the docstring, which made it a leading comment and
+    # left `__doc__` None (Fable's `133` G6).
+    proxy = '.'.join(article_base.split('.')[:3]) + '.9.(4)'
     audit = audit if audit is not None else NullAudit()
     threshold = (hp_rules or {}).get('aux_energy_type_threshold_fraction') or 0.33
     if annual is None:
@@ -2057,8 +2092,8 @@ def heat_pump_aux_energy_type(group, facts, hp_rules, annual, audit, article_bas
         # made.
         audit.info('selection',
                    'no proposed annual data (simulate: :sizing/:none, or the annual run predates this '
-                   'feature) — the 8.4.4.13.(2)(g) auxiliary-fuel election cannot run; the structural '
-                   '8.4.4.9.(4) proxy elects the fuel instead',
+                   f'feature) — the {article_base}.(2)(g) auxiliary-fuel election cannot run; the '
+                   f'structural {proxy} proxy elects the fuel instead',
                    target=','.join(group['zones']), article=f'{article_base}.(2)(g)', ruling='D-52')
         return None
 
