@@ -287,7 +287,12 @@ class TestAHJ14DoesNotMultiplyAcrossPASSES(unittest.TestCase):
         self.assertEqual([("AHJ-14", 2)],
                          [(e["id"], e["count"])
                           for e in run.report["ahj_applied"]])
-        self.assertEqual(2, len(reason["ahj_must_approve"]))
+        # ONE approval line, because the banner is once per id — the two
+        # boilers are listed inside it (Sol's `128`.3). The conditions above
+        # still record both, which is the distinction.
+        self.assertEqual(1, len(reason["ahj_must_approve"]))
+        self.assertIn("Primary Boiler", reason["ahj_must_approve"][0])
+        self.assertIn("Secondary Boiler", reason["ahj_must_approve"][0])
 
 
 if __name__ == "__main__":      # pragma: no cover

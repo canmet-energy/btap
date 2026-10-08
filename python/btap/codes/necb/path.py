@@ -496,28 +496,39 @@ def _set_conditional(run, audit, required, conditions, approval):
     active = [record for record in conditions
               if record["id"] in set(required)]
     run.report["compliance_determination"] = "conditional"
-    must_approve = []
+    # ONE APPROVAL LINE PER REGISTER ID, with its equipment listed inside it
+    # (Sol's `128`.3: "the approval banner itself remains once per AHJ id").
+    # The CONDITIONS still enumerate every unique final choice — six gas coils
+    # each making the same unresolved class choice are six choices — but an
+    # authority reads ONE statement of the question, not six copies of it.
+    by_id = {}
     for record in active:
-        if record["status"] == "alternative-solution":
+        by_id.setdefault(record["id"], []).append(record)
+
+    deduped = []
+    for ident in sorted(by_id, key=lambda value: int(value.split("-")[1])):
+        group = by_id[ident]
+        first = group[0]
+        if first["status"] == "alternative-solution":
             kind = ("an ALTERNATIVE SOLUTION, which the text DECIDES and this "
                     "tool does not meet — accepting it means accepting an "
                     "explicitly identified non-conforming substitution")
         else:
             kind = ("an INTERPRETATION the acceptable-solution text does not "
                     "settle")
-        where = " Applies to: {}".format(record["target"]) if record.get(
-            "target") else ""
+        seen_targets, targets = set(), []
+        for record in group:
+            target = record.get("target")
+            if target and target not in seen_targets:
+                seen_targets.add(target)
+                targets.append(str(target))
+        where = " Applies to: {}".format(", ".join(targets)) if targets else ""
         # " — " not " ": without a separator the quoted detail ran straight
         # into "Applies to: Hot Water Loop", which an authority has to read.
-        detail = (" — " + record["detail"]) if record.get("detail") else ""
-        must_approve.append("{} ({}): {} — {}.{}{}".format(
-            record["id"], record["status"], record["title"], kind, where,
-            detail))
-    seen, deduped = set(), []
-    for text in must_approve:
-        if text not in seen:
-            seen.add(text)
-            deduped.append(text)
+        details = [str(r["detail"]) for r in group if r.get("detail")]
+        detail = (" — " + details[0]) if details else ""
+        deduped.append("{} ({}): {} — {}.{}{}".format(
+            ident, first["status"], first["title"], kind, where, detail))
     run.report["compliance_determination_reason"] = {
         "why": ("{} register question(s) requiring approval were raised by "
                 "this run's modelling choices, so the comparison is "

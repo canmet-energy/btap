@@ -647,5 +647,58 @@ class TestTheDeterminationMATRIX(unittest.TestCase):
         self.assertNotIn("compliance_determination", run.report)
 
 
+class TestTheApprovalBannerIsOncePerID(unittest.TestCase):
+    """Sol's `128`.3: "the approval banner itself remains once per AHJ id."
+
+    The conditions still enumerate every unique final CHOICE — six gas coils
+    each making the same unresolved class decision are six choices, and the
+    report records all six — but an authority reads one statement of the
+    question, not six copies. The full-year baseline had six identical AHJ-14
+    approval lines.
+    """
+
+    def _reason(self, citations):
+        from btap.audit import AuditLog
+        from btap.codes.necb import path as necb_path
+
+        class _Run:
+            pass
+
+        run = _Run()
+        run.report = {"annual": True, "code": "necb2020"}
+        run.ruleset = type("_R", (), {"code": "necb2020"})()
+        audit = AuditLog()
+        for target, citation in citations:
+            audit.decision("efficiency", "a choice", target=target,
+                           article="8.4.5.2.", ahj=citation)
+        necb_path._resolve_ahj_conditions(run, audit)
+        return run.report["compliance_determination_reason"]
+
+    def test_many_equipment_items_give_ONE_line_but_MANY_conditions(self):
+        reason = self._reason([(f"Coil {n}", "AHJ-14") for n in range(6)])
+        self.assertEqual(6, len(reason["conditions"]),
+                         "every unique final choice is recorded")
+        self.assertEqual(1, len(reason["ahj_must_approve"]),
+                         "and the authority reads the question once")
+
+    def test_the_single_line_LISTS_the_equipment_it_applies_to(self):
+        """Aggregating must not lose which equipment raised it."""
+        reason = self._reason([("Primary Boiler", "AHJ-14"),
+                               ("Coil A", "AHJ-14")])
+        line = reason["ahj_must_approve"][0]
+        self.assertIn("Primary Boiler", line)
+        self.assertIn("Coil A", line)
+
+    def test_different_ids_each_get_their_own_line_in_NUMERIC_order(self):
+        reason = self._reason([("Loop", "AHJ-1 AHJ-3"),
+                               ("Boiler", "AHJ-14")])
+        lines = reason["ahj_must_approve"]
+        self.assertEqual(3, len(lines))
+        self.assertEqual(
+            ["AHJ-1", "AHJ-3", "AHJ-14"],
+            [line.split(" ")[0] for line in lines],
+            "AHJ-14 sorts after AHJ-3, not between AHJ-1 and AHJ-3")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
