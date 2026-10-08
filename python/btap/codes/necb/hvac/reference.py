@@ -1339,10 +1339,16 @@ def _clone_model(model):
 
 def _building_info(model, overrides, audit):
     """Building info defaults derived from the model, overridable by the caller."""
-    info = {'storeys': _costing_geometry.above_ground_storeys(model),
-            'zone_types': _zone_space_types(model)}
+    # DERIVED LAZILY. The model is the source of truth for its own storey
+    # count, and asking it now raises when it cannot say — so a caller who has
+    # already supplied the count must not be made to answer for the model's
+    # silence. Computing first and overriding second would fail the very runs
+    # the override exists for.
+    info = {'zone_types': _zone_space_types(model)}
     if overrides:
         info.update(overrides)
+    if info.get('storeys') is None:
+        info['storeys'] = _costing_geometry.above_ground_storeys(model)
     audit.info('characterize', 'building info for selection',
                inputs={'storeys': info['storeys'],
                        'typed_zones': sum(1 for v in info['zone_types'].values()

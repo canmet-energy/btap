@@ -30,7 +30,18 @@ POST_HANDOFF_REASON = (
 # The corpus tiers mirror verification/run_corpus.rb's recipe exactly —
 # same base args, same subsets — so the frozen baselines describe the
 # same runs Leg B compared.
-BASE_ARGS = ["--hdd", "3890", "--storeys", "1", "--no-report", "--quiet"]
+#: No `--storeys`. The OSM is the source of truth for its own storey count and
+#: every corpus sample says: 14 and 15 set
+#: `standardsNumberOfAboveGroundStories` (to 2 and 3), and the other fifteen
+#: carry a BuildingStory holding their spaces, which derives 1.
+#:
+#: This passed `--storeys 1` to all of them, which overrode the two that
+#: declare — and sample 15's own generator description is
+#: "the same building at 3 storeys crosses the threshold and selects System 6".
+#: The harness was preventing the fixture from demonstrating the thing it was
+#: built to demonstrate, and the corpus froze System 3 for it and asserted that
+#: as correct (phylroy, 2026-10-08).
+BASE_ARGS = ["--hdd", "3890", "--no-report", "--quiet"]
 FIXTURE_ARGS = BASE_ARGS + ["--space-type", "Space Function/Office enclosed > 25 m2"]
 SIZING_SUBSET = ["01-baseboard-gas", "02-psz-gas-dx", "09-water-source-hp"]
 ANNUAL_SUBSET = ["01-baseboard-gas", "02-psz-gas-dx"]
@@ -150,40 +161,12 @@ def edition_of(code):
     return match.group(1)
 
 
-#: Corpus models whose own declared above-ground storey count is NOT 1.
-#:
-#: `BASE_ARGS` passes `--storeys 1` to every corpus scenario, so the two
-#: fixtures NAMED for their storey count were told they had one — the harness
-#: contradicting the thing the fixture exists to exercise. It was invisible
-#: while the override silently lost to the model inside the builder; D-90's
-#: successor work made the override win in BOTH the selector and the builder
-#: and WARN on a contradiction, which is how it surfaced (Fable's `135` H3).
-#:
-#: Keyed by slug rather than parsed out of the name: a name is a label, and a
-#: scenario definition should not infer its inputs from its own title.
-CORPUS_STOREYS = {
-    "14-general-2storey": 2,
-    "15-general-3storey": 3,
-}
-
-
-def _storey_args(slug, args):
-    """`args` with the storey override matching THIS model's declaration."""
-    storeys = CORPUS_STOREYS.get(slug)
-    if storeys is None:
-        return args
-    out = list(args)
-    out[out.index("--storeys") + 1] = str(storeys)
-    return out
-
-
 def _corpus(slug, tier, lane, *, code=DEFAULT_CODE, extra=(), seal=None):
     sim = (["--simulate", "annual", "--quick"] if tier == "annual"
            else ["--simulate", tier])
     epw = [] if tier == "none" else ["--epw", "<EPW>"]
     model = "<SEED>" if slug == "5zone-onramp" else f"<CORPUS>/{slug}.osm"
-    args = _storey_args(
-        slug, FIXTURE_ARGS if slug == "5zone-onramp" else BASE_ARGS)
+    args = FIXTURE_ARGS if slug == "5zone-onramp" else BASE_ARGS
     # The CLI selects an edition by CODE ID (Stage 7); the default is
     # implicit, so only a non-default edition appears in argv.
     selector = [] if code == DEFAULT_CODE else ["--code", code]
