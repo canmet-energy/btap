@@ -21,13 +21,13 @@ compliance paths share — so nothing is silently missed.
 | Implemented | 61 | 63 |
 | Partial (warns every run) | 29 | 30 |
 | Not implemented (warns every run) | 4 | 4 |
-| Satisfied by construction (clone) | 3 | 3 |
+| Satisfied by construction (clone) | 2 | 3 |
 | Host / other-domain scope | 12 | 12 |
-| Field / document verification (modeller scope, does not warn) | 10 | 10 |
-| **Total entries** | **119** | **122** |
+| Field / document verification (modeller scope, does not warn) | 9 | 10 |
+| **Total entries** | **117** | **122** |
 
 <details>
-<summary><b>NECB 2020</b> — 119 entries (click to expand)</summary>
+<summary><b>NECB 2020</b> — 117 entries (click to expand)</summary>
 
 ### Implemented (61)
 
@@ -85,7 +85,7 @@ compliance paths share — so nothing is silently missed.
 | necb | 8.4.2.1. | General | Compliance is assessed through modeling: the umbrella is the only gem permitted to run EnergyPlus, and a determination requires sizing + annual runs of BOTH models (simulate: :annual); any other mode is flagged non-determining. — Code: `compliance.py#performance_compliance` |
 | necb | 8.4.2.2.(2) | Calculation Methods | annual 8760-hour runs at an hourly timestep; a shortened run_period computes the arithmetic but is flagged NOT code-compliant and exits as no-determination — Code: `compliance.py#_evaluate`, `cli.py#verdict_exit`, `runner.py#run_energyplus` |
 | necb | 8.4.2.2.(3) | Calculation Methods | operating schedules and climatic data enter at an hourly interval — Code: `schedules.py#add`, `runner.py#attach_weather` |
-| necb | 8.4.2.2.(4) | Calculation Methods | software conformance rests on EnergyPlus’s ANSI/ASHRAE 140 testing (see 8.4.2.11.) — Code: `backends.py#execute` |
+| necb | 8.4.2.2.(4) | Calculation Methods | software conformance rests on EnergyPlus’s ANSI/ASHRAE 140 testing — Code: `backends.py#execute` |
 | necb | 8.4.2.3.(1) | Climatic Data | weather attach (CWEC EPW + DDY design days) via OpenStudioSimulation::Runner.attach_weather!; HDD resolution: explicit arg -> Table C-1 -> .stat fallback — Code: `runner.py#attach_weather`, `climate.py#hdd18` |
 | necb | 8.4.3.1. | General (Proposed Building) | The proposed model is simulated as supplied — the pipeline applies no transforms to it (weather attach only); reference transforms operate on a clone. Guaranteed by test_caller_model_never_mutated (test_compliance.rb). — Code: `compliance.py#_load_and_validate` |
 | shw | 6.2.4.1. | Service water temperature controls | the storage tank is built with an automatic setpoint: a constant ScheduleRuleset at the sizing max temperature is installed as BOTH the loop SetpointManagerScheduled and the WaterHeaterMixed setpointTemperatureSchedule, with a 2 C deadband and Cycle control, so the tank is temperature-controlled and the setpoint is adjustable by editing one schedule — Code: `demand.py#_build_loop` |
@@ -138,12 +138,11 @@ compliance paths share — so nothing is silently missed.
 | hvac | 8.4.4.18.(5) | Supply Air Systems (airflow rates, fan specs) | Gaps: the identical-fan-power fallback for secondaries failing 5.2.3.1.(1)(b) is not modeled |
 | hvac | 8.4.4.18.(6) | Supply Air Systems (airflow rates, fan specs) | Gaps: the exemption for equipment whose fan energy is included in the Tables 5.2.12.1 minimum performance is not modeled |
 
-### Satisfied by construction (clone) (3)
+### Satisfied by construction (clone) (2)
 
 | Python domain | Article | Title | Notes |
 |---|---|---|---|
 | hvac | 8.4.4.2. | Operating Schedules, Internal Loads and Service Water Heating Loads | The reference model is a clone of the proposed model: schedules and internal/SHW loads remain identical, as required. — Code: `reference.py#_clone_model` |
-| necb | 8.4.1.5. | Treatment of Process Loads | (2): process loads included in the proposed model are automatically included in the reference — the reference is a clone and no transform touches process loads. (1) exclusion-by-default is the modeller's input decision. — Code: `compliance.py#_build_reference` |
 | shw | 8.4.4.20.(1) | Reference SWH identical to proposed (storage, power, energy type) | the umbrella clones the proposed; neither reference transform touches SWH plant sizing or fuel — Code: `reference.py#reference_shw` |
 
 ### Host / other-gem scope (12)
@@ -163,7 +162,7 @@ compliance paths share — so nothing is silently missed.
 | loads | 8.4.3.4. | HVAC System Operation | fan/system operating schedules ship in the schedule sets (NECB-<letter>-Fan); wiring them to systems is the openstudio-hvac / umbrella layer — Code: `apply_lights.py#_apply_to_space_type`, `reference.py#_apply_dwelling_rule` |
 | loads | 8.4.3.5. | Assumed chiller performance for Part 8 calculations (Table 8.4.3.5) | Table 8.4.3.5 = assumed chiller COP/IPLV (Scroll < 528 kW: COP 2.802/IPLV 3.664; Screw >= 528 kW: COP 2.802/IPLV 3.737) — an HVAC calculation assumption, not a loads concern; the article body was not retrievable when this was written; it IS now (re-checked 2026-09-01 via the codes MCP: all five sentences of 8.4.3.5 return complete), which corrects an earlier mislabel as simulation parameters — Code: `plant_loops.py#hot_water`, `plant_loops.py#chilled_water` |
 
-### Field / document verification (modeller scope, does not warn) (10)
+### Field / document verification (modeller scope, does not warn) (9)
 
 Requirements the code imposes on the BUILDING that no energy model can
 answer — a blower-door test, an installed control device, a pipe
@@ -177,7 +176,6 @@ verified from drawings, submittals or on site.
 | hvac | 8.4.4.16.(1) | Space Temperature Control (radiant workaround, throttling range) | Gaps: the +-2 C radiant workaround applies ONLY when the tool cannot model radiant effects — EnergyPlus can (ZoneHVAC low-temperature radiant objects); it binds only if the modeller chooses to approximate a radiant proposed design convectively, and applying the adjustment is then the modeller’s responsibility |
 | loads | 8.4.3.2.(3) | Operating Schedules, Internal Loads, Service Water Heating Loads and Set-point Temperature | Gaps: the semi-heated set-point comes from the proposed building’s specifications — a modeller input; the pipeline keeps whatever thermostats the model carries |
 | necb | 8.4.2.2.(5) | Calculation Methods | Gaps: excluding redundant/back-up equipment is a modeller decision about the model’s contents; the pipeline cannot know which equipment is redundant |
-| necb | 8.4.2.2.(6) | Calculation Methods | Gaps: routing un-modelable systems through an 8.4.2.12. exceptional calculation method is a modeller decision |
 | necb | 8.4.2.3.(2) | Climatic Data | Gaps: the choice among multiple urban climatic data sets is the modeller’s; the pipeline attaches exactly the file it is given |
 | shw | 6.2.3.1. | Piping insulation | Gaps: the SHW plant carries no pipe objects and no pipe-run lengths, so insulation thickness cannot be checked against Table 6.2.3.1.; note also that pipe insulation IS costed (a fixed 10 ft/pump BOM line) while never being modelled, and the vendored Table 6.2.3.1. is known-damaged in the codes store (phantom/blank rows) so it would need PDF-verified re-vendoring first. Verified from drawings and on site. |
 | shw | 6.2.4.3. | Maintaining temperature (heat trace) | Gaps: no model object represents heat-trace temperature-maintenance controls; declared per run and verified from drawings |
@@ -389,4 +387,4 @@ genuine open item to watch on a real run.
 
 </details>
 
-_241 coverage entries across 6 domains (119 × 2020, 122 × 2025)._
+_239 coverage entries across 6 domains (117 × 2020, 122 × 2025)._

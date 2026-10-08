@@ -15,6 +15,11 @@ MAPPING_PATH = Path(__file__).with_name("data") / "coverage_code_ref_mapping.jso
 #: ledgers, never one rewritten in place — see test_r7_ledger_chains_from_r6.
 MAPPING_PATH_R7 = (Path(__file__).with_name("data")
                    / "coverage_code_ref_mapping_r7.json")
+#: References retired because the coverage CLAIM that carried them was deleted,
+#: not because the code moved. The third term that keeps R6's 313 provable
+#: instead of edited — see test_r7_ledger_chains_from_r6_to_the_live_manifests.
+RETIREMENTS_PATH = (Path(__file__).with_name("data")
+                    / "coverage_code_ref_retirements.json")
 SIZING_TIME = re.compile(
     r"sizing[- ]time|autosiz|not explicitly enforced|not individually evaluated",
     re.IGNORECASE,
@@ -63,11 +68,17 @@ def definitions(path):
 def test_manifest_inventory_and_every_code_ref_resolves():
     manifests = coverage_manifests()
     assert len(manifests) == 12
-    assert sum(len(articles) for _path, articles in manifests) == 241
+    # 241 -> 239 and 313 -> 312 on Sol's `137`: NECB 2020 contains neither
+    # Article 8.4.1.5 nor Sentence 8.4.2.2.(6), verified against the official
+    # NRC 2020 second printing with the 2025-02-27 errata, so two 2020
+    # coverage rows cited articles that do not exist and were DELETED rather
+    # than renumbered. One carried a code pointer, hence the ref count. The
+    # 2025 claims for the same provisions stay: they exist there.
+    assert sum(len(articles) for _path, articles in manifests) == 239
 
     refs = code_refs(manifests)
     assert len(refs) > 60
-    assert len(refs) == 313
+    assert len(refs) == 312
     assert all(not re.match(r"^btap-[^/]+/lib/", ref) for ref in refs)
 
     definitions_by_path = {}
@@ -136,7 +147,8 @@ def test_r7_ledger_chains_from_r6_to_the_live_manifests():
     1. every R7 `old` is an R6 `new` (and every R6 `new` is an R7 `old`) —
        R-B moved paths, it did not add, drop or merge an owner;
     2. every R7 `new` is a live manifest reference, with the same use count;
-    3. the R7 use counts still sum to R6's 313.
+    3. the R7 use counts still sum to R6's 313, counting live references and
+       recorded retirements together.
     """
     r6 = json.loads(MAPPING_PATH.read_text(encoding="utf-8"))["mappings"]
     r7_mapping = json.loads(MAPPING_PATH_R7.read_text(encoding="utf-8"))
@@ -151,8 +163,25 @@ def test_r7_ledger_chains_from_r6_to_the_live_manifests():
     assert len({row["old"] for row in rows}) == len(rows)
     assert len({row["new"] for row in rows}) == len(rows)
 
-    # --- link 2: R7.new == the live manifests -------------------------------
-    assert Counter(code_refs(coverage_manifests())) == Counter(
+    # --- link 2: R7.new == the live manifests PLUS the retirements ----------
+    #
+    # A deleted coverage claim takes its code reference with it. That is a
+    # different event from the rename these ledgers record — link 1 asserts
+    # R-B "did not add, drop or merge an owner" — so it is accounted in a
+    # THIRD file rather than by rewriting a ledger in place, which both
+    # ledgers forbid. The invariant is unchanged and still exact: every
+    # reference R7 names is either live today or retired on a stated
+    # authority. A silent ledger edit still fails this; a recorded retirement
+    # passes it.
+    retirements = json.loads(RETIREMENTS_PATH.read_text(encoding="utf-8"))
+    assert retirements["schema_version"] == 1
+    retired = Counter()
+    for entry in retirements["retirements"]:
+        assert entry["authority"], "a retirement without an authority is a silent edit"
+        assert entry["reason"], "a retirement must say why"
+        retired[entry["ref"]] += entry["uses"]
+
+    assert Counter(code_refs(coverage_manifests())) + retired == Counter(
         {row["new"]: row["uses"] for row in rows}
     )
 
