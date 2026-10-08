@@ -326,5 +326,72 @@ class TestAHJ14DoesNotMultiplyAcrossPASSES(unittest.TestCase):
         self.assertIn("Secondary Boiler", reason["ahj_must_approve"][0])
 
 
+class TestAHJ15DispatchPriority(unittest.TestCase):
+    """AHJ-15: whether 8.4.x.9.(3) governs dispatch PRIORITY at all.
+
+    Sol's `126` narrowed it to the case where Article 9.(5)(b) does NOT already
+    prescribe the proposed multi-energy priority — where it does, the priority
+    is carried over rather than chosen by us, and there is nothing to refer.
+    `127` adds that a zero-capacity component is not a second competing path.
+
+    Tested at the narrowing, because the (5)(b) fact is CARRIED IN from the
+    selection: the dispatch site knows the final topology but not the proposed
+    group's energy types, and rediscovering them there would rebuild the
+    duplicated predicate D-100 removed.
+    """
+
+    def _ahj(self, prescribed, ordered=("Zone 1",), zeroed=()):
+        from btap.codes.necb.hvac import reference
+
+        return reference._dispatch_ahj(prescribed, list(ordered), list(zeroed))
+
+    def test_a_chosen_priority_cites_AHJ_15(self):
+        self.assertEqual("AHJ-15", self._ahj(False))
+
+    def test_a_priority_PRESCRIBED_by_5b_cites_nothing(self):
+        """A multi-energy service set carries its proposed priority over, so
+        the tool is not choosing and there is no question to refer."""
+        self.assertIsNone(self._ahj(True))
+
+    def test_a_zone_whose_baseboard_is_ZERO_capacity_cites_nothing(self):
+        """Not a second path competing for the load."""
+        self.assertIsNone(self._ahj(False, ordered=("Zone 1",),
+                                    zeroed=("Zone 1",)))
+
+    def test_a_MIX_still_cites_for_the_live_zones(self):
+        """One zeroed zone must not suppress the question for a zone where both
+        components really do compete."""
+        self.assertEqual("AHJ-15",
+                         self._ahj(False, ordered=("Zone 1", "Zone 2"),
+                                   zeroed=("Zone 1",)))
+
+    def test_NO_in_scope_zone_cites_nothing(self):
+        """The dispatch pass runs on System 3/4 and finds nothing to order."""
+        self.assertIsNone(self._ahj(False, ordered=()))
+
+    def test_a_VISIBLY_zero_baseboard_is_detected_and_unknown_is_not(self):
+        """`_visibly_zero_capacity` must treat UNKNOWN as present. An autosized
+        component has no capacity before sizing, and reading that as zero would
+        silently drop AHJ-15 on the ordinary unsized path — under-disclosing,
+        which is the direction that hides things."""
+        import openstudio
+
+        from btap.codes.necb.hvac import reference
+
+        model = openstudio.model.Model()
+        zeroed = openstudio.model.ZoneHVACBaseboardConvectiveElectric(model)
+        zeroed.setNominalCapacity(0.0)
+        self.assertTrue(reference._visibly_zero_capacity(zeroed))
+
+        autosized = openstudio.model.ZoneHVACBaseboardConvectiveElectric(model)
+        autosized.autosizeNominalCapacity()
+        self.assertFalse(reference._visibly_zero_capacity(autosized),
+                         "unknown is not zero")
+
+        real = openstudio.model.ZoneHVACBaseboardConvectiveElectric(model)
+        real.setNominalCapacity(1500.0)
+        self.assertFalse(reference._visibly_zero_capacity(real))
+
+
 if __name__ == "__main__":      # pragma: no cover
     unittest.main()

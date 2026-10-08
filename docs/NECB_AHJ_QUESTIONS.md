@@ -92,10 +92,12 @@ nonconformity with 8.4.x.9.(6)(e).
 | AHJ-12 | Table 8.4.x.7.-B Note (1) "where present" humidification | referral | necb2020, necb2025 | not yet |
 | AHJ-13 | Table 5.2.12.1.-K Path A vs Path B | ruled | necb2020, necb2025 | no — Path B is express; the IPLV check is a tool gap |
 | AHJ-14 | boiler/furnace part-load class selection | referral | necb2020, necb2025 | yes, where the row's own default elected the class |
-| AHJ-15 | 8.4.x.9.(3) terminal-vs-plant dispatch priority | referral | necb2020, necb2025 | not yet |
+| AHJ-15 | 8.4.x.9.(3) terminal-vs-plant dispatch priority | referral | necb2020, necb2025 | yes, on the System 3/4 branch where (5)(b) does not prescribe it |
 | AHJ-16 | 8.4.x.14 N:1 system correspondence | referral | necb2020, necb2025 | yes, on an in-scope transfer decline |
 | AHJ-17 | no air-cooled chiller curve is shipped | tool-gap | necb2020, necb2025 | no |
 | AHJ-18 | the two-pipe fan-coil surrogate has no plant-side changeover | tool-gap | necb2020, necb2025 | no |
+| AHJ-19 | real refrigeration is invisible to classification, teardown and end-use reporting | tool-gap | necb2020, necb2025 | no |
+| AHJ-20 | System 5's chilled-water loop is a 7 °C comfort loop | tool-gap | necb2020, necb2025 | no |
 
 ---
 
@@ -551,12 +553,26 @@ NECB layer to audit — a metadata handoff, not a second copy of the rule.
 
 **Status: `referral`** — the acceptable-solution text does not decide this question.
 
-**Cross-reference while AHJ-18 is open.** The interpretation this entry refers
-is EVALUABLE — a coherent refrigerated proposed model completes the full
-`necb2025` path cleanly (Sol, `129`). But the two-pipe surrogate the reference
-is built in has no plant-side changeover, so some heated System 5 references
-currently fail to simulate. That is AHJ-18, a tool gap, and it is not part of
-this ambiguity.
+**Reachable in the Code, NOT YET EVALUABLE by this tool.** `129` claimed a
+coherent refrigerated model completed the full `necb2025` path. Sol WITHDREW
+that in `130`: the fixture it rested on established only that four EnergyPlus
+runs terminated, and a matched reference probe is thermally invalid despite
+completing — 8,760 cooling-unmet hours per zone, temperatures to 41.75 °C
+against a 4 °C setpoint. I had repeated the claim here, so it was false on this
+surface too.
+
+The truthful statement: the branch is normatively and physically reachable —
+`130` identifies the archetype, a medium-temperature cool-storage block with
+real refrigeration evaporators plus a low-limit unit heater — but **no coherent
+BTAP annual artifact has yet evaluated it.** Three separate tool gaps stand in
+the way: AHJ-18 (no plant-side changeover), AHJ-19 (refrigeration invisible to
+classification, teardown and end-use reporting) and AHJ-20 (a 7 °C comfort
+chilled-water loop that cannot condition a 2/4 °C cooler). None is part of this
+ambiguity.
+
+**Narrowed reachability** (`130`): a thermal block selected as refrigerated
+space that has GENUINE SPACE-HEATING equipment in addition to its refrigeration
+cooling. A cooling-only freezer or cooler does not raise AHJ-11.
 
 **The ambiguity.** A genuine internal tension in the Code, not just in our
 reading: sentence (5) requires identical heating presence between proposed and
@@ -753,6 +769,81 @@ its other consumers, which is a design decision rather than a one-line control.
 **What the tool does meanwhile.** It builds the four-pipe surrogate. A heated
 System 5 reference may fail to simulate, and when it does the run fails loudly
 rather than reporting a number. AHJ-11 cross-references this entry while it is
-open; the two are separate, and Sol's `129` is explicit that the INTERPRETATION
-is evaluable — a coherent refrigerated proposed model completes the full
-`necb2025` path with zero severe and zero fatal errors.
+open, and the two remain separate.
+
+This paragraph previously ended by saying a coherent refrigerated model
+completes the full `necb2025` path with zero severe and zero fatal errors. Sol
+withdrew that in `130` and I had repeated it: a clean termination is not
+evidence of thermal validity, on either side of the comparison.
+
+## AHJ-19 — real refrigeration is invisible to classification, teardown and end-use reporting
+
+**Article.** Table 8.4.4.7.-A / Table 8.4.5.7.-A, the "all sizes of
+refrigerated space" row; with 8.4.x.1.(5) and 8.4.2.10.
+
+**Status: `tool-gap`** — implementable, so a defect to close and never an
+interpretation. It sets no verdict conditional.
+
+**The gap, in three places.** Sol's `130` built OpenStudio models carrying
+`Refrigeration:AirChiller` objects and measured the real code paths:
+
+1. **Classification.** `btap.modeling.hvac.classify.ZONAL` has no refrigeration
+   entry. A refrigeration-only block reads `heated=False, cooled=False` and is
+   dropped by `reference.py`'s `if not (group['heated'] or group['cooled'])`.
+   With a low-limit heater it reads `heated=True, cooled=False` — so the tool
+   says a genuinely cooled block is **not cooled**. A refrigeration air chiller
+   that removes heat from the room IS a cooling system for 8.4.x.1.(5).
+2. **Teardown.** `remove_hvac_from_zones` removed all ten air chillers and left
+   their `RefrigerationCompressorRack` behind with zero loads, which is fatal:
+   `Refrigeration:CompressorRack="COOL STORAGE RACK" has no loads` then
+   `GetRefrigerationInput: Previous errors cause program termination`. A shared
+   rack must be detached and removed once orphaned, as the teardown fixpoint
+   already does for plant equipment.
+3. **Reporting.** `runner.energy_results()` includes refrigeration in total site
+   energy through the SDK total, but `end_uses_kwh` has no `refrigeration` key.
+   A scenario can therefore show a plausible total while hiding whether its
+   defining system ran at all.
+
+**Established by.** Sol `130`, by building the models and reading the outputs
+rather than the code.
+
+**What the tool does meanwhile.** A refrigeration-only block gets no reference
+system; a block with a low-limit heater reaches System 5 only because the heater
+makes it look conditioned and the caller supplies `refrigerated_zones`. The
+run's total energy includes refrigeration, and nothing in the report says so.
+
+
+## AHJ-20 — System 5's chilled-water loop is a 7 °C comfort loop
+
+**Article.** Table 8.4.4.7.-B / Table 8.4.5.7.-B, the System 5 row; with
+8.4.2.10.
+
+**Status: `tool-gap`** — implementable, so a defect to close. It sets no verdict
+conditional.
+
+**The gap.** `systems/plant_loops.py` hard-codes the reference chilled-water
+loop to 7 °C, and the chillers' reference leaving-water temperature is 6.67 °C.
+Table -B prescribes a water-cooled water chiller; **it does not prescribe 7 °C.**
+A 2/4 °C cold room cannot be served by that fluid, and a colder space submitted
+under the same row makes the mismatch larger.
+
+**Why it is dangerous rather than merely wrong.** Sol's `130` measured the
+reference that results: it completed with ZERO severe and ZERO fatal errors, a
+site EUI of about 314 kWh/m² — entirely plausible — and **refrigerated nothing**.
+Zone temperatures ran 9.32 °C to 41.75 °C against a 4 °C cooling setpoint, with
+8,760 cooling-unmet hours in every zone. At the reverted fixture's 4/8 °C
+setpoints the same reference recorded 8,736.5 to 8,760 unmet hours and
+temperatures to 41.02 °C.
+
+So a clean termination AND a plausible EUI are both insufficient. Article
+8.4.2.10 requires the reference components to be modelled, limited capacities to
+affect space temperature and energy, and unmet-load hours to be determined;
+"EnergyPlus exited zero" is not the Code's test. The frozen-scenario EUI guard
+added after my own absurd fixture would not have caught this one.
+
+**Established by.** Sol `130`, measuring zone temperatures and unmet hours.
+
+**What the tool does meanwhile.** It builds the comfort loop. Configuring a
+water-chiller reference that can actually serve a refrigerated block — an
+appropriate low-temperature fluid and equipment representation — is an
+implementable modelling problem, not an interpretation an authority must bless.

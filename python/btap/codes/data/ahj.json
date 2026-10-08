@@ -172,6 +172,24 @@
         "necb2020",
         "necb2025"
       ]
+    },
+    {
+      "id": "AHJ-19",
+      "title": "real refrigeration is invisible to classification, teardown and end-use reporting",
+      "status": "tool-gap",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ]
+    },
+    {
+      "id": "AHJ-20",
+      "title": "System 5's chilled-water loop is a 7 °C comfort loop",
+      "status": "tool-gap",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ]
     }
   ]
 }

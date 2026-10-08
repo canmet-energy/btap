@@ -63,6 +63,21 @@ TRANSITION_FIELDS = (
 #: NOT a materiality threshold on a Code question — the point is to catch a
 #: model that is physically absurd, never to express a view about how much
 #: energy a compliant building may use.
+#:
+#: WHAT THIS GUARD DOES NOT CATCH, stated so nobody trusts it further than it
+#: reaches. Sol's `130` measured a System 5 reference that completed with zero
+#: severe and zero fatal errors AND a site EUI of about 314 kWh/m2 — squarely
+#: inside this band — while refrigerating nothing: zone temperatures 9.32 to
+#: 41.75 C against a 4 C setpoint, and 8,760 cooling-unmet hours in every zone.
+#: A plausible total is not thermal control.
+#:
+#: The right check is ALL-HOURS zone control, and `report.json` does not carry
+#: it — only `unmet_occupied_hours` and `zone_unmet_occupied_hours`, which a
+#: real baseline legitimately pushes high (determination-01's proposed side
+#: records 1,709.75 unmet cooling hours). A threshold on the occupied figure
+#: would be a number I cannot justify rather than a check, so none is written
+#: here. Carrying an all-hours metric is part of AHJ-19's reporting gap; when it
+#: lands, this guard should grow a thermal-control arm beside the energy one.
 EUI_SANE_MIN_KWH_M2 = 0.1
 EUI_SANE_MAX_KWH_M2 = 10_000.0
 

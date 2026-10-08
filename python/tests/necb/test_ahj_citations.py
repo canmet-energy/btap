@@ -37,7 +37,7 @@ AUDIT_METHODS = {"decision", "info", "warn"}
 #: functions' bodies as well. The set is deliberately tiny and explicit: every
 #: id must still be a literal SOMEWHERE the walker reaches, or the grammar and
 #: resolution gates would have nothing to check.
-CITATION_HELPERS = {"_disclosure_ahj", "_boiler_class_ahj"}
+CITATION_HELPERS = {"_disclosure_ahj", "_boiler_class_ahj", "_dispatch_ahj"}
 
 
 def _registry() -> dict:

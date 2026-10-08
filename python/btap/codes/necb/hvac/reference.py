@@ -719,7 +719,13 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
         _apply_operating_schedules(result.air_loops, proposed_availability, audit)
         _audit_terminal_secondary_split(zones, assignment.reference_system,
                                         ruleset.id, audit)
-        _apply_zone_dispatch(zones, assignment.reference_system, ruleset.id, audit)
+        # The (5)(b) fact is established HERE, where the group's energy types
+        # are known, and carried into the dispatch site. Sol's `127`: carry an
+        # already-decided selection fact rather than rediscovering it, or the
+        # duplicated predicate D-100 removed comes back by another door.
+        service_fuels, _added = service_set_heating_fuels(group, facts)
+        _apply_zone_dispatch(zones, assignment.reference_system, ruleset.id,
+                             audit, priority_prescribed=len(service_fuels) > 1)
 
     _rebuild_humidification(reference, proposed_humidification, rules_data,
                             ruleset.id, audit)
@@ -780,7 +786,49 @@ _CONSTANT_VOLUME_TERMINALS = ('OS_AirTerminal_SingleDuct_ConstantVolume_NoReheat
                               'OS_AirTerminal_SingleDuct_Uncontrolled')
 
 
-def _apply_zone_dispatch(zones, reference_system, code, audit):
+def _visibly_zero_capacity(component):
+    """True only when a component's capacity is KNOWN and is zero.
+
+    Unknown is not zero. An autosized component has no capacity before sizing,
+    and treating that as zero would silently drop AHJ-15 on the ordinary
+    unsized path — under-disclosing a question, which is the direction that
+    hides things. So an unreadable capacity counts as present.
+    """
+    baseboard = component.to_ZoneHVACBaseboardConvectiveElectric()
+    if baseboard.is_initialized():
+        value = baseboard.get().nominalCapacity()
+        return bool(value.is_initialized()) and float(value.get()) <= 0.0
+    water = component.to_ZoneHVACBaseboardConvectiveWater()
+    if water.is_initialized():
+        coil = water.get().heatingCoil().to_CoilHeatingWaterBaseboard()
+        if coil.is_initialized():
+            value = coil.get().heatingDesignCapacity()
+            return bool(value.is_initialized()) and float(value.get()) <= 0.0
+    return False
+
+
+def _dispatch_ahj(priority_prescribed, ordered, zeroed):
+    """AHJ-15's narrowing, applied where the dispatch order is chosen.
+
+    Sol's `126` narrowed it to the case where Article 9.(5)(b) does NOT already
+    prescribe the proposed priority — where it does, the priority is carried
+    over rather than chosen by us, and there is nothing to refer. `127` adds
+    that a zero-capacity component is not a second competing path.
+
+    The (5)(b) fact is CARRIED IN from the selection rather than rediscovered
+    here: this function knows the final topology but not the proposed group's
+    energy types, and rebuilding that knowledge would be the duplicated
+    predicate D-100 exists to remove.
+    """
+    if priority_prescribed:
+        return None
+    if not [zone for zone in ordered if zone not in set(zeroed)]:
+        return None
+    return 'AHJ-15'
+
+
+def _apply_zone_dispatch(zones, reference_system, code, audit,
+                         priority_prescribed=False):
     """D-91 — zone equipment dispatch for one-unit-per-block Systems 3 and 4.
 
     Legacy creation order puts the baseboard first in `SequentialLoad`, so it
@@ -805,7 +853,7 @@ def _apply_zone_dispatch(zones, reference_system, code, audit):
     untouched."""
     if reference_system not in (3, 4):
         return
-    ordered = []
+    ordered, zeroed = [], []
     for zone in zones:
         loop = zone.airLoopHVAC()
         if not loop.is_initialized() or len(loop.get().thermalZones()) != 1:
@@ -820,6 +868,11 @@ def _apply_zone_dispatch(zones, reference_system, code, audit):
         if len(equipment) != 2 or len(terminals) != 1 or len(baseboards) != 1:
             continue
         terminal, baseboard = terminals[0], baseboards[0]
+        # AHJ-15 needs BOTH to be able to serve overlapping demand, so a
+        # component whose capacity is visibly ZERO excludes the zone — it is
+        # not a second path competing for the load (Sol, `127`).
+        if _visibly_zero_capacity(baseboard):
+            zeroed.append(zone.nameString())
         zone.setLoadDistributionScheme('SequentialLoad')
         zone.setHeatingPriority(terminal, 1)
         zone.setCoolingPriority(terminal, 1)
@@ -843,7 +896,8 @@ def _apply_zone_dispatch(zones, reference_system, code, audit):
                          'the residual; heating energy moves from the baseboards and hot-water plant '
                          'to the rooftop coil — accepted, because the article sets installed '
                          'capacities, not annual shares',
-                   article=f'{prefix}.9.(3); 8.4.2.10.(2)', ruling='D-91')
+                   article=f'{prefix}.9.(3); 8.4.2.10.(2)', ruling='D-91',
+                   ahj=_dispatch_ahj(priority_prescribed, ordered, zeroed))
 
 
 def _apply_zone_fan_rules(zones, reference_system, rules_data, audit):

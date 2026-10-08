@@ -380,6 +380,19 @@ class TestTheFreezeRefusesAnAbsurdBaseline(unittest.TestCase):
         self.assertGreater(checked, 3,
                            "no baseline carried energy — the scan is vacuous")
 
+    def test_the_guard_is_documented_as_INSUFFICIENT_for_thermal_validity(self):
+        """Sol's `130` measured a reference inside this band — about 314
+        kWh/m² — that refrigerated nothing: 8,760 cooling-unmet hours per zone
+        and temperatures to 41.75 °C against a 4 °C setpoint. A guard whose
+        limits are not written down gets trusted past them, which is how the
+        fixture it was built for got called coherent in the first place."""
+        source = (REPO_ROOT / "verification" / "scenarios"
+                  / "freeze.py").read_text(encoding="utf-8")
+        self.assertIn("WHAT THIS GUARD DOES NOT CATCH", source)
+        self.assertIn("A plausible total is not thermal control", source)
+        self.assertIn("AHJ-19", source,
+                      "and it names where the missing metric is tracked")
+
     def test_a_report_with_NO_energy_is_not_an_absurd_one(self):
         """A `--simulate none` scenario has nothing to check, and a missing
         number must not be treated as an out-of-range one."""
