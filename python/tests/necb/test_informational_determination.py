@@ -495,11 +495,36 @@ class TestTheResolverPolicy(unittest.TestCase):
                          report["compliance_determination_reason"]["ahj_ids"],
                          "only the approval-required subset")
 
-    def test_a_repeated_id_across_entries_is_counted_and_deduped(self):
+    def test_a_repeated_id_on_the_SAME_target_is_ONE_choice(self):
+        """Rewritten for Sol's `128`.3. This asserted a count of 3 for three
+        citations on one target, which was the defect: the efficiency pass runs
+        twice, so the same boiler's same class decision was being counted as
+        two or three questions. One target, one choice."""
         report = self._report(["AHJ-1", "AHJ-1", "AHJ-1"])
         applied = report["ahj_applied"]
         self.assertEqual(1, len(applied))
-        self.assertEqual(3, applied[0]["count"], "the count is kept")
+        self.assertEqual(1, applied[0]["count"],
+                         "three entries on one target are one live choice")
+
+    def test_the_same_id_on_DIFFERENT_targets_counts_each(self):
+        """The control: deduping must not collapse two real choices. Two equal
+        active boilers in the 176-352 kW band are two questions."""
+        from btap.audit import AuditLog
+        from btap.codes.necb import path as necb_path
+
+        class _Run:
+            pass
+
+        run = _Run()
+        run.report = {"annual": True, "code": "necb2020"}
+        run.ruleset = type("_R", (), {"code": "necb2020"})()
+        audit = AuditLog()
+        for target in ("Primary Boiler", "Secondary Boiler"):
+            audit.warn("efficiency", "a choice", target=target, ahj="AHJ-1")
+        necb_path._resolve_ahj_conditions(run, audit)
+        self.assertEqual([("AHJ-1", 2)],
+                         [(e["id"], e["count"])
+                          for e in run.report["ahj_applied"]])
 
     def test_ids_are_ordered_NUMERICALLY_not_lexically(self):
         report = self._report(["AHJ-11 AHJ-2 AHJ-1"])

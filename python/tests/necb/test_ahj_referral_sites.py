@@ -12,6 +12,8 @@ from __future__ import annotations
 
 import unittest
 
+from .support import needs_sdk
+
 
 def _citations(audit, ident):
     """Entries whose `ahj` field cites `ident`."""
@@ -152,6 +154,140 @@ class TestAHJ14BoilerPartLoadClass(unittest.TestCase):
             ("non_condensing", "atmospheric", "condensing", "modulating",
              "not_applicable"),
             efficiency.PART_LOAD_CLASSES)
+
+
+@needs_sdk
+class TestAHJ14OnRealBoilerPlants(unittest.TestCase):
+    """Sol's `128` found three defects my helper-only tests could not see.
+
+    They called `_boiler_class_ahj` directly, which proved the narrowing's
+    logic and nothing about whether a real boiler ever reaches it with the
+    right inputs. A 400 kW boiler was taking the row's `non_condensing` class —
+    a MODELLING defect, not just a citation one — because the Code's election
+    at (6)(d) had never been applied to the class at all.
+    """
+
+    def _plant(self, watts, names=("Primary Boiler", "Secondary Boiler")):
+        import openstudio
+
+        from btap.audit import AuditLog
+        from btap.codes.necb import hvac
+
+        model = openstudio.model.Model()
+        loop = openstudio.model.PlantLoop(model)
+        loop.setName("Hot Water Loop")
+        loop.sizingPlant().setLoopType("Heating")
+        for name in names:
+            boiler = openstudio.model.BoilerHotWater(model)
+            boiler.setName(name)
+            boiler.setFuelType("NaturalGas")
+            boiler.setNominalCapacity(watts)
+            loop.addSupplyBranchForComponent(boiler)
+        audit = AuditLog()
+        hvac.apply_efficiencies(model, code="necb2020", audit=audit)
+        return audit
+
+    @staticmethod
+    def _cited(audit):
+        return [(str(e.get("target")), (e.get("inputs") or {}).get("capacity_kw"))
+                for e in audit.entries
+                if "AHJ-14" in str(e.get("ahj") or "").split()]
+
+    @staticmethod
+    def _classes(audit):
+        return {str(e.get("target")): ((e.get("inputs") or {}).get(
+                    "part_load_curve_class"),
+                    (e.get("inputs") or {}).get("class_source"))
+                for e in audit.entries
+                if (e.get("inputs") or {}).get("part_load_curve_class")
+                and "boiler" in str(e.get("action"))}
+
+    def test_above_352_kW_the_CODE_elects_modulating(self):
+        """The modelling fix. (6)(d) names a modulating boiler up here, and the
+        class resolution was reading the unchanged catalogue row."""
+        classes = self._classes(self._plant(400_000.0))
+        self.assertEqual(("modulating", "reference selection"),
+                         classes["Primary Boiler"])
+
+    def test_above_352_kW_raises_NO_referral(self):
+        """A class the Code elected is not an unresolved local default."""
+        self.assertEqual([], self._cited(self._plant(400_000.0)))
+
+    def test_an_ORDINARY_boiler_raises_the_referral_on_the_ACTIVE_one_only(self):
+        """52 kW: (6)(b) wants ONE single-stage boiler, so the second object is
+        stood down to 0.001 W and is an implementation device, not a second
+        normative question."""
+        cited = self._cited(self._plant(52_000.0))
+        self.assertEqual([("Primary Boiler", 52.0)], cited)
+
+    def test_the_176_to_352_band_names_BOTH_active_boilers(self):
+        """Two equal active boilers are two live choices, which is why the
+        suppression test above cannot simply assert "one condition"."""
+        cited = self._cited(self._plant(250_000.0))
+        self.assertEqual([("Primary Boiler", 125.0),
+                          ("Secondary Boiler", 125.0)], cited)
+
+    def test_crossing_DOWN_out_of_the_band_clears_the_forced_class(self):
+        """A stale forced class would outlive the band that justified it: one
+        pass reads the proposed's sizing, the next the reference's."""
+        import openstudio
+
+        from btap.audit import AuditLog
+        from btap.codes.necb import hvac
+        from btap.codes.necb.hvac import efficiency
+
+        model = openstudio.model.Model()
+        loop = openstudio.model.PlantLoop(model)
+        loop.setName("Hot Water Loop")
+        loop.sizingPlant().setLoopType("Heating")
+        boiler = openstudio.model.BoilerHotWater(model)
+        boiler.setName("Primary Boiler")
+        boiler.setFuelType("NaturalGas")
+        boiler.setNominalCapacity(400_000.0)
+        loop.addSupplyBranchForComponent(boiler)
+        hvac.apply_efficiencies(model, code="necb2020", audit=AuditLog())
+        self.assertTrue(efficiency._forced_modulating(boiler),
+                        "the 400 kW pass must have stamped it")
+
+        boiler.setNominalCapacity(52_000.0)
+        hvac.apply_efficiencies(model, code="necb2020", audit=AuditLog())
+        self.assertFalse(
+            efficiency._forced_modulating(boiler),
+            "falling below the band must clear the class the band forced")
+
+
+class TestAHJ14DoesNotMultiplyAcrossPASSES(unittest.TestCase):
+    """Sol's `128`.3: the full-year baseline showed FOUR conditions where there
+    was one live choice, because the efficiency pass runs twice."""
+
+    def test_two_passes_over_one_boiler_are_ONE_condition(self):
+        from btap.audit import AuditLog
+        from btap.codes.necb import path as necb_path
+
+        class _Run:
+            pass
+
+        run = _Run()
+        run.report = {"annual": True, "code": "necb2020"}
+        run.ruleset = type("_R", (), {"code": "necb2020"})()
+        audit = AuditLog()
+        for _pass in (1, 2):
+            for name in ("Primary Boiler", "Secondary Boiler"):
+                audit.decision("efficiency", "boiler efficiency applied",
+                               target=name, article="8.4.5.2.", ahj="AHJ-14")
+        necb_path._resolve_ahj_conditions(run, audit)
+
+        self.assertEqual(
+            4, sum(1 for e in audit.entries if e.get("ahj")),
+            "the audit history is KEPT — only the derived set collapses")
+        reason = run.report["compliance_determination_reason"]
+        self.assertEqual(
+            [("AHJ-14", "Primary Boiler"), ("AHJ-14", "Secondary Boiler")],
+            [(c["id"], c["target"]) for c in reason["conditions"]])
+        self.assertEqual([("AHJ-14", 2)],
+                         [(e["id"], e["count"])
+                          for e in run.report["ahj_applied"]])
+        self.assertEqual(2, len(reason["ahj_must_approve"]))
 
 
 if __name__ == "__main__":      # pragma: no cover

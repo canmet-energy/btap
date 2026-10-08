@@ -2448,6 +2448,25 @@ def _part_load_curve(component, tables, equipment, klass, audit, target):
     return built, built.nameString(), row.get('form'), _curve_evidence(tables, row)
 
 
+#: Marks a part-load class THIS pass stamped from the capacity band.
+#:
+#: A separate feature, because the class value cannot carry its own provenance:
+#: the reference BUILDER also propagates `modulating` — for purchased heating,
+#: where Article 6 names it regardless of capacity — and that stamp must
+#: survive a band change. My first version compared the class string alone and
+#: so cleared the builder's class on any sub-352 kW boiler, breaking the
+#: purchased-heating path. A pre-existing part-load test caught it; the
+#: docstring claiming the two were distinguished was simply false.
+BAND_FORCED_CLASS_FEATURE = 'btap_band_forced_part_load_class'
+
+
+def _forced_modulating(boiler) -> bool:
+    """True when THIS pass stamped the class from the capacity band."""
+    marker = boiler.additionalProperties().getFeatureAsBoolean(
+        BAND_FORCED_CLASS_FEATURE)
+    return bool(marker.is_initialized()) and bool(marker.get())
+
+
 def _apply_boiler(boiler, tables, plant, audit):
     """Legacy boiler_hot_water_apply_efficiency_and_curves (NECB2011 hvac_systems.rb:539):
     primary/secondary staging (176/352 kW), the part-load curve of the boiler's own
@@ -2492,9 +2511,33 @@ def _apply_boiler(boiler, tables, plant, audit):
         if modulating:
             boiler.setBoilerFlowMode('LeavingSetpointModulated')
             boiler.setMinimumPartLoadRatio(plant['modulating_min_fraction'])
+            # THE CLASS, not only the controls. (6)(d) names a MODULATING
+            # boiler above the two-boiler threshold, and class resolution ran
+            # later against the unchanged catalogue row — so a 400 kW primary
+            # took the row's `non_condensing` curve AND acquired AHJ-14, when
+            # the Code had already elected its class (Sol, `128`.2). Stamped
+            # as the propagated feature, the channel the reference builder
+            # already uses, so `_part_load_class` reports source
+            # `reference selection` and the ordinary-class referral correctly
+            # does not apply.
+            boiler.additionalProperties().setFeature(
+                PART_LOAD_CLASS_FEATURE, 'modulating')
+            boiler.additionalProperties().setFeature(
+                BAND_FORCED_CLASS_FEATURE, True)
         else:
             boiler.setBoilerFlowMode('ConstantFlow')
             boiler.resetMinimumPartLoadRatio()
+            # CROSSING DOWNWARD must clear it. One pass reads the proposed's
+            # sizing and the next the reference's, so a plant can fall below
+            # the threshold between passes, and a stale forced class would
+            # outlive the band that justified it. Only the class THIS function
+            # stamps is cleared: one the reference builder elected for a
+            # selected variant is not ours to drop.
+            if _forced_modulating(boiler):
+                boiler.additionalProperties().resetFeature(
+                    PART_LOAD_CLASS_FEATURE)
+                boiler.additionalProperties().resetFeature(
+                    BAND_FORCED_CLASS_FEATURE)
     boiler.setNominalCapacity(boiler_capacity)
     _record_capacity(boiler, capacity_w, capacity_source, boiler_capacity, name)
 
@@ -2538,10 +2581,22 @@ def _apply_boiler(boiler, tables, plant, audit):
                           evidence=f"{evidence}; the efficiency curve is evaluated on "
                                    "the EnteringBoiler temperature",
                           article=article, ruling='D-89 D-90',
-                          ahj=_boiler_class_ahj(klass, class_source))
+                          ahj=_boiler_class_ahj(klass, class_source,
+                                                boiler_capacity))
 
 
-def _boiler_class_ahj(klass, class_source):
+#: Below this, in watts, a boiler object is SUPPRESSED rather than small.
+#:
+#: The staging rules set exactly 0.001 W to stand a Code-required object down,
+#: and the tiny-capacity floor sets exactly 1.0 W for a real but minimal
+#: boiler. One watt therefore separates "an implementation device" from "a
+#: genuine if trivial boiler", and the distinction is load-bearing: a stood-down
+#: object is not a second Code-required boiler and must not raise a second
+#: question (Sol, `128`.3).
+SUPPRESSED_CAPACITY_W = 1.0
+
+
+def _boiler_class_ahj(klass, class_source, final_capacity_w=None):
     """AHJ-14's narrowing, applied where the class is resolved.
 
     Sol's `126` narrowed this to equipment for which NO provision elects a
@@ -2563,6 +2618,12 @@ def _boiler_class_ahj(klass, class_source):
     if class_source != 'row':
         return None
     if klass not in ('non_condensing', 'atmospheric', 'condensing'):
+        return None
+    if (final_capacity_w is not None
+            and final_capacity_w < SUPPRESSED_CAPACITY_W):
+        # Stood down by the staging rules. Article 9.(6)(b) requires ONE
+        # single-stage boiler; the zeroed SDK object beside it is how that is
+        # expressed in a model, not a second normative class question.
         return None
     return 'AHJ-14'
 
@@ -2982,7 +3043,8 @@ def _apply_gas_multi(coil, tables, audit, capacity_w=None):
                           evidence=f"{evidence}; the part-load curve sits on the PARENT "
                                    "staged coil, which carries EnergyPlus' single "
                                    "part-load-fraction field (D-46)",
-                          article=article, ruling='D-46 D-89')
+                          article=article, ruling='D-46 D-89',
+                          ahj=_boiler_class_ahj(klass, class_source))
 
 
 def _apply_dx_heating(coil, tables, audit):
@@ -3060,7 +3122,8 @@ def _apply_gas_coil(coil, tables, audit):
                           value=f'burner efficiency {ruby_round(thermal_eff, 3)} ({label}), '
                                 f'part-load curve {curve_label}',
                           evidence=evidence,
-                          article=article, ruling='D-89')
+                          article=article, ruling='D-89',
+                          ahj=_boiler_class_ahj(klass, class_source))
 
 
 # ---------------- context helpers ----------------

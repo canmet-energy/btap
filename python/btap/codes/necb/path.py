@@ -432,6 +432,19 @@ def _resolve_ahj_conditions(run, audit):
                 "detail": entry.get("action"),
                 "entry_index": index,
             })
+    # ONE QUESTION PER FINAL CHOICE. The efficiency pass runs twice — once
+    # against the proposed's sizing, once against the reference's — so the same
+    # boiler's same class decision was recorded as two conditions, and the
+    # full-year baseline showed four where there was one live choice (Sol,
+    # `128`.3). Deduped by (id, target) keeping the LAST occurrence, because
+    # the final pass is the one whose outcome the reference carries. The audit
+    # history is untouched; only the derived condition set collapses.
+    latest = {}
+    for record in conditions:
+        latest[(record["id"], record.get("target"))] = record
+    conditions = list(latest.values())
+    fired = [record["id"] for record in conditions]
+
     if not fired:
         # Sol's `127`: "no approval-required id -> compliance_determination:
         # 'code'". The POSITIVE statement matters — a reader must be able to
@@ -449,6 +462,8 @@ def _resolve_ahj_conditions(run, audit):
         {"id": ident,
          "status": _ahj.by_id()[ident]["status"],
          "title": _ahj.by_id()[ident]["title"],
+         # UNIQUE final choices, not audit entries: two efficiency passes over
+         # one boiler are one question.
          "count": fired.count(ident)}
         for ident in unique]
     run.report["ahj_register"] = "docs/NECB_AHJ_QUESTIONS.md"
