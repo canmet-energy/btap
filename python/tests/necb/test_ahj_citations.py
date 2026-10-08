@@ -37,7 +37,7 @@ AUDIT_METHODS = {"decision", "info", "warn"}
 #: functions' bodies as well. The set is deliberately tiny and explicit: every
 #: id must still be a literal SOMEWHERE the walker reaches, or the grammar and
 #: resolution gates would have nothing to check.
-CITATION_HELPERS = {"_disclosure_ahj"}
+CITATION_HELPERS = {"_disclosure_ahj", "_boiler_class_ahj"}
 
 
 def _registry() -> dict:
@@ -121,14 +121,34 @@ class TestAHJCitationSites(unittest.TestCase):
         allowed_helpers = CITATION_HELPERS
         bad = []
         for path, line, method, value in self.sites:
-            if isinstance(value, ast.Constant) and isinstance(value.value, str):
+            if self._is_literal_citation(value):
                 continue
             if (isinstance(value, ast.Call)
                     and getattr(value.func, "id", None) in allowed_helpers):
                 continue
             bad.append(f"{path}:{line} — ahj= on .{method}() is neither a "
-                       f"string literal nor {sorted(allowed_helpers)}")
+                       f"literal citation nor {sorted(allowed_helpers)}")
         self.assertEqual([], bad, "\n".join(bad))
+
+    @staticmethod
+    def _is_literal_citation(value) -> bool:
+        """A string literal, or a conditional whose BOTH branches are one.
+
+        `ahj='AHJ-16' if in_scope else None` is admitted because every id in it
+        is still a visible literal this walker reads — which is the property
+        the gate exists to protect — and a narrowing that applies at the site
+        is exactly what Sol's `127` asked for. It is NOT a loophole for
+        `ahj=some_variable`: both branches must be a `str` or `None`
+        constant, so a pass-through still fails.
+        """
+        if isinstance(value, ast.Constant):
+            return isinstance(value.value, (str, type(None)))
+        if isinstance(value, ast.IfExp):
+            return all(
+                isinstance(branch, ast.Constant)
+                and isinstance(branch.value, (str, type(None)))
+                for branch in (value.body, value.orelse))
+        return False
 
     def test_no_COVERAGE_entry_carries_a_citation(self):
         """Sol's `127`: "A static coverage warning emitted on every run is not
@@ -216,9 +236,15 @@ class TestTheRegisterAndTheSitesAgree(unittest.TestCase):
             status = self.registry[ident]["status"]
             if status in ("ruled", "tool-gap"):
                 continue      # cited for traceability; never conditional
-            with self.subTest(ident, status=status):
-                self.assertFalse(
-                    sets.startswith("no"),
+            # The FIRST TOKEN, not a prefix: `"not yet".startswith("no")` is
+            # True, so a prefix test conflated "this question does not affect a
+            # run" with "its wiring is still being established" — opposite
+            # meanings, and the gate reported the wrong one.
+            verdict = re.split(r"[^a-z]+", sets)[0] if sets else ""
+            rest = sets.split(None, 1)[0] if sets else ""
+            with self.subTest(ident, status=status, column=sets[:20]):
+                self.assertNotEqual(
+                    "no", rest if rest in ("no", "not") else verdict,
                     "{} is cited in product code and is a {}, but the register "
                     "says it does not affect a run".format(ident, status))
 

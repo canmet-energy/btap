@@ -1,0 +1,158 @@
+"""Each wired referral cites on its OWN branch, and not on its exclusions.
+
+Sol's `127` guards 3 and 4. The positive case proves the deciding entry carries
+the id, its target and its article; the BOUNDARY NEGATIVE proves the excluded
+branch carries nothing. The negatives matter as much as the positives: the
+whole risk of site-owned applicability is a broad "this function ran" tag that
+over-discloses, and `126` narrowed most of these questions precisely because
+the unnarrowed version would have fired on cases the Code settles.
+"""
+
+from __future__ import annotations
+
+import unittest
+
+
+def _citations(audit, ident):
+    """Entries whose `ahj` field cites `ident`."""
+    return [e for e in audit.entries
+            if ident in str(e.get("ahj") or "").split()]
+
+
+class TestAHJ11SystemFiveHeatingPresence(unittest.TestCase):
+    """AHJ-11: Sentence (5) requires identical heating presence while Table -B's
+    System 5 cell says "None".
+
+    The positive branch is the tool KEEPING heating on a heated proposed block.
+    The exclusion is an UNHEATED block, where honouring the table's "None" is
+    text-consistent and raises no question at all.
+    """
+
+    def _assignment(self, heated):
+        """Driven through `_finalize`, the real call site.
+
+        Not through an extracted helper: four bugs on this branch have survived
+        helper-only tests before, because a helper can be correct while nothing
+        calls it. `_finalize` is where the System-5 presence decision actually
+        happens.
+        """
+        from btap.audit import AuditLog
+        from btap.codes import resolve
+        from btap.codes.necb.hvac import reference
+
+        audit = AuditLog()
+        group = {"zones": ["Zone 7"], "heated": heated, "cooled": True,
+                 "heating_energy_types": ["NaturalGas"] if heated else [],
+                 "heat_pump_source_loops": [], "heat_pump": False,
+                 "heat_pump_sources": [], "terminal_type": "none",
+                 "zonal_units": [], "design_cooling_kw": 10.0,
+                 "cooling_energy_types": ["Electricity"],
+                 "air_loop": "AirLoop 7", "family": "fan_coils",
+                 "loop_dx_cooling": False}
+
+        # The REAL dataclass, not a stand-in: a hand-rolled object grows
+        # whatever attributes the code happens to touch, so it drifts toward
+        # the implementation's assumptions and stops catching shape errors.
+        assignment = reference.Assignment(
+            zones=list(group["zones"]), category="fan_coils",
+            reference_system=5, catalog_name=None,
+            config={"heating": "hot_water", "needs_boiler": True},
+            energy_type=None, action="build")
+
+        ruleset = resolve("necb2020")
+        rules_data = ruleset.rules("hvac")
+        selection = rules_data["selection"]
+        facts = {"zone_groups": [group], "plants": [],
+                 "purchased_energy": {"heating": False, "cooling": False}}
+        reference._finalize(assignment, group,
+                            rules_data["system_definitions"], selection,
+                            facts, audit, hp_rules=rules_data[
+                                "heat_pump_reference"],
+                            ruleset=ruleset, disclosed=set())
+        return assignment, audit
+
+    def test_a_HEATED_block_cites_AHJ_11(self):
+        _assignment, audit = self._assignment(heated=True)
+        cited = _citations(audit, "AHJ-11")
+        self.assertEqual(1, len(cited), audit.entries)
+        entry = cited[0]
+        self.assertEqual("Zone 7", entry["target"])
+        self.assertIn("8.4.4.1.(5)", entry["article"])
+        self.assertEqual("D-39", entry["ruling"],
+                         "the project reading travels beside the referral")
+
+    def test_an_UNHEATED_block_cites_NOTHING(self):
+        """The boundary negative. Honouring the table on an unheated block is
+        what the text says, so there is no question to refer."""
+        _assignment, audit = self._assignment(heated=False)
+        self.assertEqual([], _citations(audit, "AHJ-11"),
+                         "an unheated System 5 reference is text-consistent")
+        self.assertEqual(
+            [], [e for e in audit.entries if e.get("ahj")],
+            "and it raises no other register question either")
+
+    def test_the_unheated_branch_still_DID_something(self):
+        """Guards the negative: if the helper had simply not run, the test
+        above would pass for the wrong reason."""
+        assignment, audit = self._assignment(heated=False)
+        self.assertEqual("none", assignment.config["heating"])
+        self.assertFalse(assignment.config["needs_boiler"])
+        self.assertTrue(audit.entries, "the decision is still recorded")
+
+
+class TestAHJ14BoilerPartLoadClass(unittest.TestCase):
+    """AHJ-14: which part-load class an ordinary fuel-fired boiler takes.
+
+    Sol's `126` narrowed it to equipment for which NO provision elects a class.
+    Tested at the narrowing itself rather than through a built boiler, because
+    the question is exactly "where did this class come from" and that is the
+    helper's whole input. The citation's presence AT the efficiency entry is
+    held by the AST gate in `test_ahj_citations.py`.
+    """
+
+    def _ahj(self, klass, source):
+        from btap.codes.necb.hvac import efficiency
+
+        return efficiency._boiler_class_ahj(klass, source)
+
+    def test_a_ROW_DEFAULT_combustion_class_cites_AHJ_14(self):
+        for klass in ("non_condensing", "atmospheric", "condensing"):
+            with self.subTest(klass):
+                self.assertEqual("AHJ-14", self._ahj(klass, "row"))
+
+    def test_a_class_ELECTED_BY_A_PROVISION_cites_nothing(self):
+        """A purchased boiler is explicitly modulating under Article 6, so the
+        Code decided it and there is nothing to refer."""
+        for klass in ("non_condensing", "condensing", "modulating"):
+            with self.subTest(klass):
+                self.assertIsNone(self._ahj(klass, "reference selection"))
+
+    def test_the_MODULATING_class_cites_nothing(self):
+        """What the Code names above 352 kW. A row carrying it was decided by
+        the Code; applying a NON-modulating class up there would be a tool
+        defect, not this referral."""
+        self.assertIsNone(self._ahj("modulating", "row"))
+
+    def test_NOT_APPLICABLE_cites_nothing(self):
+        """No combustion part-load factor to classify — electric among it."""
+        self.assertIsNone(self._ahj("not_applicable", "row"))
+
+    def test_an_unknown_class_cites_nothing(self):
+        """Fail closed: an unrecognised class is a data error, and inventing a
+        referral for it would dress a defect as an interpretation."""
+        self.assertIsNone(self._ahj("something_new", "row"))
+
+    def test_the_vocabulary_this_narrowing_relies_on_still_exists(self):
+        """Guards every negative above. If `PART_LOAD_CLASSES` were renamed,
+        the exclusions would silently stop matching and the narrowing would
+        quietly admit everything or nothing."""
+        from btap.codes.necb.hvac import efficiency
+
+        self.assertEqual(
+            ("non_condensing", "atmospheric", "condensing", "modulating",
+             "not_applicable"),
+            efficiency.PART_LOAD_CLASSES)
+
+
+if __name__ == "__main__":      # pragma: no cover
+    unittest.main()

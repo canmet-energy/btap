@@ -418,7 +418,16 @@ def _finalize(assignment, group, definitions, selection, facts, audit,
                            'System 5 reference keeps its heating — proposed block is heated, '
                            '8.4.4.1.(5) presence override of the Table -B "None" heating column',
                            target=','.join(group['zones']),
-                           article='8.4.4.1.(5); Table 8.4.4.7.-B', ruling='D-39')
+                           article='8.4.4.1.(5); Table 8.4.4.7.-B',
+                           ruling='D-39',
+                           # AHJ-11, on THIS branch only. Sentence (5) requires
+                           # identical heating presence while Table -B's cell
+                           # for this system says "None" — a genuine internal
+                           # tension Sol's `126` confirmed in both editions.
+                           # The `else` branch below honours the table on an
+                           # UNHEATED block, which is text-consistent and must
+                           # not cite anything (Sol, `127`).
+                           ahj='AHJ-11')
         else:
             merged = dict(assignment.config or {})
             merged.update({'heating': 'none', 'needs_boiler': False,

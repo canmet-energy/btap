@@ -1417,6 +1417,16 @@ def _transfer_by_correspondence(reference_loop, proposed, prefix, audit):
         # false comfort. Every other decline keeps D-93's existing text —
         # the same is arguably true of them, but that is a D-93 question and
         # not a side effect of this ruling (Fable, PR #63).
+        # AHJ-16 applies to the three shapes Sol's `126` named: N:1
+        # consolidation, ambiguous overlap, and no corresponding proposed
+        # system. It does NOT apply to a loop outside the article's scope, nor
+        # to a reference loop serving no thermal block — there is nothing for a
+        # correspondence to be drawn BETWEEN, so that is a degenerate model and
+        # not an interpretation an authority can settle. (2) and (3) settle
+        # multiple pumps within one system and missing characteristics on an
+        # otherwise corresponding pump, and neither reaches this branch.
+        in_scope = (_loop_role(reference_loop) not in (None, 'service_water')
+                    and bool(_served_zone_names(reference_loop)))
         if n_to_1:
             return audit.warn('efficiency',
                               f'{reference_loop.nameString()}: {prefix}.14.(1)-(3) NOT applied — '
@@ -1425,12 +1435,14 @@ def _transfer_by_correspondence(reference_loop, proposed, prefix, audit):
                               'bias the reference in either direction. 5.2.6.3 supplies only an '
                               'upper cap',
                               target=reference_loop.nameString(), article=f'{prefix}.14.(1)-(3)',
-                              ruling='D-93 D-97')
+                              ruling='D-93 D-97',
+                              ahj='AHJ-16' if in_scope else None)
         return audit.warn('efficiency', f'{reference_loop.nameString()}: {prefix}.14.(1)-(3) NOT '
                                         f'applied — {reason}. The pump keeps the modelling default, '
                                         f'which is not a Code value; 5.2.6.3 still caps it',
                           target=reference_loop.nameString(), article=f'{prefix}.14.(1)-(3)',
-                          ruling='D-93')
+                          ruling='D-93',
+                          ahj='AHJ-16' if in_scope else None)
 
     proposed_pumps = _applicable_pumps(match)
     sentence = _governing_sentence(proposed_pumps)
@@ -2525,7 +2537,34 @@ def _apply_boiler(boiler, tables, plant, audit):
                                 f"part-load curve {curve_label}",
                           evidence=f"{evidence}; the efficiency curve is evaluated on "
                                    "the EnteringBoiler temperature",
-                          article=article, ruling='D-89 D-90')
+                          article=article, ruling='D-89 D-90',
+                          ahj=_boiler_class_ahj(klass, class_source))
+
+
+def _boiler_class_ahj(klass, class_source):
+    """AHJ-14's narrowing, applied where the class is resolved.
+
+    Sol's `126` narrowed this to equipment for which NO provision elects a
+    curve class. Three exclusions follow, and each matters:
+
+    * `class_source == 'reference selection'` means a provision DID elect it —
+      a purchased boiler is explicitly modulating under Article 6 — so it is
+      not a referral.
+    * `modulating` is what the Code names for a boiler above 352 kW, so a row
+      carrying it was decided by the Code and not by us. Applying a
+      NON-modulating class above 352 kW would be a tool DEFECT, not AHJ-14.
+    * `not_applicable` is equipment with no combustion part-load factor to
+      classify, electric boilers among it.
+
+    What remains is an ordinary fuel-fired boiler whose condensing versus
+    non-condensing class came from the catalogue row's own default — the local
+    default Sol's audit flagged as unresolved.
+    """
+    if class_source != 'row':
+        return None
+    if klass not in ('non_condensing', 'atmospheric', 'condensing'):
+        return None
+    return 'AHJ-14'
 
 
 def boiler_thermal_efficiency(row):
