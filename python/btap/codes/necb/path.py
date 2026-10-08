@@ -404,10 +404,33 @@ def _resolve_ahj_conditions(run, audit):
     something an authority must accept.
     """
     code = getattr(run.ruleset, "code", None) or run.report.get("code")
+    # SUPERSESSION FIRST. A later pass that re-makes the same choice must
+    # replace the earlier record even when it cites NOTHING — Fable's `131` F3:
+    # dedup kept the last CITING entry, so a 400 kW boiler whose class the Code
+    # elected on the second pass still carried AHJ-14 from the first, and the
+    # authority was told its class was an unresolved local default while the
+    # final audit entry said `modulating, reference selection`.
+    #
+    # "The same choice" is identified structurally, never from action text:
+    # same step, same target, and the same INPUT FIELDS recorded. One
+    # `_apply_boiler` pass emits one decision per boiler carrying
+    # `part_load_curve_class` and `class_source`, so a second pass over the
+    # same boiler matches and supersedes it, while an unrelated entry about the
+    # same target records different fields and does not.
+    latest_by_choice = {}
+    for index, entry in enumerate(audit.entries):
+        key = (entry.get("step"), entry.get("target"),
+               frozenset((entry.get("inputs") or {}).keys()))
+        latest_by_choice[key] = index
+    final_indices = set(latest_by_choice.values())
+
     fired, conditions = [], []
     for index, entry in enumerate(audit.entries):
         citation = entry.get("ahj")
         if not citation:
+            continue
+        if index not in final_indices:
+            # Superseded: a later entry re-made this exact choice.
             continue
         malformed = _ahj.malformed_ids_in(citation)
         if malformed:
@@ -436,9 +459,11 @@ def _resolve_ahj_conditions(run, audit):
     # against the proposed's sizing, once against the reference's — so the same
     # boiler's same class decision was recorded as two conditions, and the
     # full-year baseline showed four where there was one live choice (Sol,
-    # `128`.3). Deduped by (id, target) keeping the LAST occurrence, because
-    # the final pass is the one whose outcome the reference carries. The audit
-    # history is untouched; only the derived condition set collapses.
+    # `128`.3). Deduped by (id, target) keeping the LAST occurrence. The
+    # supersession filter above is what makes that safe: on its own, keeping
+    # the last CITING entry left a stale condition whenever the final pass
+    # cited nothing (Fable, `131` F3). The audit history is untouched; only the
+    # derived condition set collapses.
     latest = {}
     for record in conditions:
         latest[(record["id"], record.get("target"))] = record

@@ -56,9 +56,12 @@ listed id against the editions actually registered under
 `python/btap/codes/necb/data/`, so a typo or a retired id fails rather than
 quietly misinforming a reader.
 
-AHJ-10 to AHJ-16 come from the decision-log audit and are `unverified`: the
-decisions they derive from carry NO edition applicability of their own, so
-asserting `both` would be a guess. One known asymmetry already matters — Sol
+AHJ-10 to AHJ-16 came from the decision-log audit and were `unverified` when
+first written, because the decisions they derive from carried no edition
+applicability of their own. **Sol's `126` edition-verified all of them against
+both texts**, which is why their rows above now read `necb2020, necb2025`; the
+sentence claiming they are still unverified survived that round and was caught
+by Fable's `131` F4. One known asymmetry already matters — Sol
 noted NECB 2025 has an exceptional-calculation route at 8.4.2.12 with no 2020
 equivalent, which bears on how AHJ-1 could be remedied in one edition and not
 the other.
@@ -87,7 +90,7 @@ nonconformity with 8.4.x.9.(6)(e).
 | AHJ-7 | Table 8.4.5.5.-C / 8.4.6.5.-C chiller EIR_FT | alternative-solution | necb2020, necb2025 | not yet — see the entry |
 | AHJ-8 | Table 4.2.1.6 Note (1) A/B control marks | tool-gap | necb2020, necb2025 | no |
 | AHJ-9 | Table A-8.4.3.2.(1)-G and the '12' column heads | ruled | necb2020, necb2025 | no |
-| AHJ-10 | Table 8.4.x.7.-B Note (3) corner-block grouping | referral | necb2020, necb2025 | not yet |
+| AHJ-10 | Table 8.4.x.7.-B Note (3) corner-block grouping | referral | necb2020, necb2025 | yes, on a corner block above four storeys |
 | AHJ-11 | 8.4.x.1.(5) vs Table 8.4.x.7.-B System 5 heating | referral | necb2020, necb2025 | yes, where a heated block is assigned System 5 |
 | AHJ-12 | Table 8.4.x.7.-B Note (1) "where present" humidification | referral | necb2020, necb2025 | yes, on a presence CHOICE — not where the topology settles it |
 | AHJ-13 | Table 5.2.12.1.-K Path A vs Path B | ruled | necb2020, necb2025 | no — Path B is express; the IPLV check is a tool gap |
@@ -226,8 +229,10 @@ path as well as the structural one, and says the allocation is NOT VERIFIED.
 It does not claim the auxiliary election eliminates electric reference
 heating, which was a false statement it used to make. The (2)(g) election
 itself proceeds on delivered heat, audited, and falls back to the structural
-proxy with its own audit entry — so the choice is visible per run even though
-it is not yet conditional.
+proxy with its own audit entry — so the choice is visible per run, and it
+SETS THE RUN CONDITIONAL wherever the (2)(g) comparison is actually made. It
+does not where there is no annual data to compare, which is a mode limitation
+rather than a question an authority can settle.
 
 ## AHJ-3 — whether 8.4.4.9.(6)(d) permits more than one boiler
 
@@ -547,10 +552,17 @@ referrals and named as tool or data gaps** — D-05, D-14, D-22, D-35, D-41,
 D-47, D-48, D-49, D-50, D-57, D-92 and AHJ-6 — because calling a defect an
 ambiguity would launder it.
 
-**None of these sets a run conditional yet.** Each is disclosed in its own
-decision and audit entries, and wiring them into the conditional determination
-is follow-on work with its own freeze. Listing them as `not yet` is the honest
-state, the same treatment AHJ-5 gets.
+**That paragraph is now history.** It used to say none of these set a run
+conditional and that wiring them was follow-on work. All seven are wired —
+AHJ-2, AHJ-10, AHJ-11, AHJ-12, AHJ-14, AHJ-15 and AHJ-16 — each at the site
+that makes the choice, with the narrowing Sol's `126`/`127` established and a
+boundary negative for every exclusion. Two of them, AHJ-14 and AHJ-15, reach a
+real annual determination in the frozen corpus.
+
+What remains open is EVIDENCE, not wiring: AHJ-2, AHJ-3, AHJ-10, AHJ-11,
+AHJ-12 and AHJ-16 have no frozen artifact that reaches a determination, because
+the annual tier runs `--quick` and the shapes that would exercise them sit in
+tiers that stop earlier. The status column says so per entry.
 
 ## AHJ-10 — how corner thermal blocks are grouped
 
@@ -565,16 +577,18 @@ tie-break is in the text.
 
 **Established by.** Sol `122`, decision-log audit.
 
-**What the tool does meanwhile.** It applies D-18's rule — largest
-exterior-wall area with an N/E/S/W tie-break — and **the choice is NOT
-audited.** This entry previously claimed it was. Sol's `127` traced the
-deciding code to
-`btap.modeling.hvac.systems.vav_reheat.VAVReheat._dominant_orientation`, which
-has no audit object, and the later `multizone selection groups merged` entry
-records neither the corner block's identity nor the elected facade. So a
-reviewer today cannot see which facade a corner block was given. Closing that
-needs the generic grouping operation to return structured evidence for the
-NECB layer to audit — a metadata handoff, not a second copy of the rule.
+**What the tool does now.** It applies D-18's rule — largest exterior-wall
+area with an N/E/S/W tie-break — and **the choice IS audited**, since the
+metadata handoff landed. `VAVReheat` records structured grouping evidence
+(per external zone: the exterior wall area in each compass bin, the elected
+facade, the tie-break rule) and `btap.codes` emits the entry citing
+Table 8.4.x.7.-B Note (3) with `ahj='AHJ-10'`.
+
+This entry said for one round that the choice was NOT audited, which was true
+when Sol wrote `127` and false once the handoff shipped. Fable's `131` F4 caught
+the stale sentence. Before the handoff a reviewer could not see which facade a
+corner block was given; now the corner block's identity, its facade areas and
+the elected facade are all in the audit.
 
 ## AHJ-11 — heating in a two-pipe System 5 reference
 

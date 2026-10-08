@@ -240,13 +240,20 @@ class TestTheRegisterAndTheSitesAgree(unittest.TestCase):
             # True, so a prefix test conflated "this question does not affect a
             # run" with "its wiring is still being established" — opposite
             # meanings, and the gate reported the wrong one.
-            verdict = re.split(r"[^a-z]+", sets)[0] if sets else ""
-            rest = sets.split(None, 1)[0] if sets else ""
-            with self.subTest(ident, status=status, column=sets[:20]):
-                self.assertNotEqual(
-                    "no", rest if rest in ("no", "not") else verdict,
+            first = sets.split(None, 1)[0] if sets else ""
+            with self.subTest(ident, status=status, column=sets[:24]):
+                # "no" AND "not yet" both fail now. Fable's `131` F4: letting
+                # "not yet" through meant a WIRED referral could sit on a stale
+                # row, and `TestTheREADMEMatchesTheRegister` then held the
+                # README to that same stale row — two prose surfaces vouching
+                # for each other and neither for the code. A cited
+                # approval-required id is wired BY DEFINITION, so its row must
+                # say so.
+                self.assertNotIn(
+                    first, ("no", "not"),
                     "{} is cited in product code and is a {}, but the register "
-                    "says it does not affect a run".format(ident, status))
+                    "column says {!r} — a cited id is wired, so the row must "
+                    "say what it does".format(ident, status, sets[:28]))
 
 
 if __name__ == "__main__":      # pragma: no cover

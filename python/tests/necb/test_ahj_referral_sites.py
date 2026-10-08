@@ -636,5 +636,158 @@ class TestAHJ10CornerBlockGrouping(unittest.TestCase):
                       "it records evidence, and nothing more")
 
 
+@needs_sdk
+class TestAHJ15IsComputedPerASSIGNMENT(unittest.TestCase):
+    """Fable's `131` F1. The (5)(b) fact was read from `group`, which the
+    assignment loop never binds — its only binding is the DCV capture loop far
+    above — so EVERY assignment got whichever zone group iterated last.
+
+    He reproduced both directions through the real build: four single-fuel
+    System 3 zones lost the citation they are owed when a multi-fuel zonal
+    group iterated last, and a multi-fuel zone carried AHJ-1 and AHJ-15
+    together — the claim that its priority IS prescribed by (5)(b) and the
+    claim that it is not — when it iterated first.
+
+    The frozen corpus cannot see it: every sample carries one fuel set across
+    all its zones, so the last group's flag happens to be every group's flag.
+    """
+
+    def _dispatch_calls(self, systems):
+        """Every `_apply_zone_dispatch` call and the flag it received."""
+        import btap.modeling as modeling
+        from btap._compat import sorted_by_name
+        from btap.audit import AuditLog
+        from btap.codes.necb import hvac
+        from btap.codes.necb.hvac import reference
+
+        from .support import compliance_fixture
+
+        seen = []
+        real = reference._apply_zone_dispatch
+
+        def spy(zones, system, code, audit, priority_prescribed=False):
+            seen.append((tuple(z.nameString() for z in zones),
+                         priority_prescribed))
+            return real(zones, system, code, audit,
+                        priority_prescribed=priority_prescribed)
+
+        reference._apply_zone_dispatch = spy
+        try:
+            model = compliance_fixture()
+            zones = sorted_by_name(model.getThermalZones())
+            for name, slice_ in systems:
+                modeling.build_system(model, name, zones[slice_])
+            hvac.reference_hvac(model, code="necb2020",
+                                building={"storeys": 1}, audit=AuditLog())
+        finally:
+            reference._apply_zone_dispatch = real
+        return seen
+
+    def test_assignments_with_DIFFERENT_fuel_sets_get_different_flags(self):
+        """The property the stale variable destroyed. A multi-fuel group's
+        priority IS prescribed by (5)(b); a single-fuel group's is not, and it
+        is owed the citation."""
+        calls = self._dispatch_calls([
+            # gas coil + electric baseboard: multi-fuel, so (5)(b) prescribes
+            ("PSZ RTU Gas and DX Coils and Electric Baseboard", slice(0, 3)),
+            # electric only: single-fuel, so nothing prescribes the priority
+            ("Baseboard electric", slice(3, None)),
+        ])
+        self.assertGreater(len(calls), 1, "more than one assignment is needed")
+        flags = {flag for _zones, flag in calls}
+        self.assertEqual(
+            {True, False}, flags,
+            "every assignment received the same flag, which is the stale-"
+            "variable bug: {}".format(calls))
+
+    def test_each_call_sees_its_OWN_zones(self):
+        """Guards the spy: if the calls all carried the same zone set, the
+        test above could pass while the flags were still shared."""
+        calls = self._dispatch_calls([
+            ("PSZ RTU Gas and DX Coils and Electric Baseboard", slice(0, 3)),
+            ("Baseboard electric", slice(3, None)),
+        ])
+        zone_sets = {zones for zones, _flag in calls}
+        self.assertEqual(len(calls), len(zone_sets),
+                         "each assignment dispatches its own zones")
+
+
+@needs_sdk
+class TestASupersededConditionDoesNotSTAND(unittest.TestCase):
+    """Fable's `131` F3. The condition set deduped by (id, target) keeping the
+    last CITING entry — which is only right when the final pass cites.
+
+    When the second pass re-made the same choice WITHOUT citing, because the
+    Code had elected the class or the boiler was stood down, nothing overwrote
+    the first-pass record. A 400 kW primary was presented to an authority as an
+    unresolved local default while its own final audit entry said
+    `modulating, reference selection`.
+
+    Reachable because pass 1 reads the PROPOSED's sizing and pass 2 the
+    REFERENCE's, so a plant near 176 or 352 kW crosses the band between them —
+    D-90's own comment says so. The frozen scenario sits at 52 kW on both
+    passes and cannot see it.
+    """
+
+    def _two_passes(self, first_w, second_w):
+        import openstudio
+
+        from btap.audit import AuditLog
+        from btap.codes.necb import hvac
+        from btap.codes.necb import path as necb_path
+
+        model = openstudio.model.Model()
+        loop = openstudio.model.PlantLoop(model)
+        loop.setName("Hot Water Loop")
+        loop.sizingPlant().setLoopType("Heating")
+        for name in ("Primary Boiler", "Secondary Boiler"):
+            boiler = openstudio.model.BoilerHotWater(model)
+            boiler.setName(name)
+            boiler.setFuelType("NaturalGas")
+            boiler.setNominalCapacity(first_w)
+            loop.addSupplyBranchForComponent(boiler)
+
+        audit = AuditLog()
+        hvac.apply_efficiencies(model, code="necb2020", audit=audit)
+        for boiler in model.getBoilerHotWaters():
+            boiler.setNominalCapacity(second_w)
+        hvac.apply_efficiencies(model, code="necb2020", audit=audit)
+
+        class _Run:
+            pass
+
+        run = _Run()
+        run.report = {"annual": True, "code": "necb2020"}
+        run.ruleset = type("_R", (), {"code": "necb2020"})()
+        necb_path._resolve_ahj_conditions(run, audit)
+        reason = run.report.get("compliance_determination_reason") or {}
+        return (run.report.get("compliance_determination"),
+                [(c["id"], c["target"]) for c in reason.get("conditions", [])])
+
+    def test_crossing_UP_out_of_the_band_RETIRES_the_condition(self):
+        """The defect. The Code elects `modulating` above 352 kW, so the
+        question is answered and the first pass's citation must not survive."""
+        determination, conditions = self._two_passes(250_000.0, 400_000.0)
+        self.assertEqual([], conditions)
+        self.assertEqual("code", determination)
+
+    def test_crossing_DOWN_into_the_band_still_CITES(self):
+        """The control that keeps the fix from being mere suppression."""
+        determination, conditions = self._two_passes(400_000.0, 52_000.0)
+        self.assertEqual([("AHJ-14", "Primary Boiler")], conditions)
+        self.assertEqual("conditional", determination)
+
+    def test_an_unchanged_ordinary_plant_still_cites_ONCE(self):
+        determination, conditions = self._two_passes(52_000.0, 52_000.0)
+        self.assertEqual([("AHJ-14", "Primary Boiler")], conditions)
+        self.assertEqual("conditional", determination)
+
+    def test_an_equal_ACTIVE_pair_still_names_BOTH(self):
+        """Supersession must not collapse two live choices into one."""
+        _determination, conditions = self._two_passes(250_000.0, 250_000.0)
+        self.assertEqual([("AHJ-14", "Primary Boiler"),
+                          ("AHJ-14", "Secondary Boiler")], conditions)
+
+
 if __name__ == "__main__":      # pragma: no cover
     unittest.main()

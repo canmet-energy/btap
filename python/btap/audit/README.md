@@ -35,8 +35,13 @@ at insert. `level` is `'decision' | 'info' | 'warning'`. **There is no
   Several citations join into one string with `; `.
 - **`ruling`** cites the adjudicated project DECISION that says how we read
   that code (`docs/necb_decisions.md`, mirrored machine-readably in
-  `btap/codes/data/decisions.json`). Two axes: what was done, and why we did
-  it that way.
+  `btap/codes/data/decisions.json`). THREE axes now: what the Code
+  requires (`article`), why we read it that way (`ruling`), and which
+  AHJ-NN register disposition applies to this exact choice (`ahj`,
+  added by D-100). This package stores, serializes and renders `ahj`
+  and decides nothing about it: it does not know what a status is or
+  whether a citation makes a run conditional, because it is the
+  SDK-free, code-family-neutral floor.
 - **`building`** is which model the entry is about (`'input model'`,
   `'proposed building'`, `'reference building'`; `None` = cross-building
   verdict), stamped automatically from the current context — set it at phase

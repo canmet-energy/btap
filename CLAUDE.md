@@ -41,11 +41,18 @@ unless a moved link itself is wrong.
   `decisions.json`, the Section 8.4 disposition and `ATTRIBUTION.md` — stays
   in `btap/codes/data/`.
 - **One AuditLog schema:**
-  `{step, target, action, inputs, value, article, ruling, evidence, building, level}`.
+  `{step, target, action, inputs, value, article, ruling, ahj, evidence, building, level}`.
   Levels are `decision`, `info`, and `warning`; warnings are never silent.
-- **Two citation axes.** `article` cites the code requirement; `ruling` cites
-  the adjudicated D-XX interpretation. Keep `ruling` top-level, never nested in
-  `inputs`.
+- **THREE citation axes** (D-100). `article` cites the code requirement;
+  `ruling` cites the adjudicated D-XX interpretation; `ahj` cites the
+  `docs/NECB_AHJ_QUESTIONS.md` disposition that applies to THIS runtime
+  choice. Keep all three top-level, never nested in `inputs`.
+  `ahj` means "this disposition applies here", NOT "approval is required":
+  all four register statuses may be cited, and only `referral` and
+  `alternative-solution` make a run conditional. `btap.audit` stores and
+  renders the field and decides nothing about it — the status mapping lives in
+  `btap.codes.ahj`, generated from the authored register. A static
+  coverage-manifest entry may never carry `ahj`.
 - **Audit text is case-sensitive.** Violations are SHOUTED and passes are
   lowercase because the report checklist classifier relies on that distinction.
 - **One public selector: the code id.** `performance_compliance(model, *,
@@ -238,9 +245,11 @@ Where Claude, Sol and Fable cannot resolve a question after real effort,
 phylroy's direction (2026-10-07) is to emit a CONDITIONAL result naming the
 approval required rather than stall. That is
 `report['compliance_determination'] = 'conditional'`, set in
-`btap/codes/necb/path.py`, with a reason block carrying the condition, the
-serving systems, `ahj_must_approve`, `if_not_approved`, and `ahj_ids` citing
-the register. The CLI prints it inside the verdict string — not beside it —
+`btap/codes/necb/path.py`, with a reason block carrying `conditions` — one
+record per unique final choice, each with its id, status, title, article,
+target and the deciding entry's own account — plus `ahj_must_approve` (ONE
+line per register id, not per choice), `if_not_approved` and `ahj_ids`. There
+is no `serving_systems` key: that was the pre-D-100 shape. The CLI prints it inside the verdict string — not beside it —
 and the HTML report badges it beside the pass/fail badge, because the report
 is the AHJ-facing artifact. The exit code is deliberately unchanged, pinned by
 `test_the_exit_code_is_UNCHANGED_by_the_label`.

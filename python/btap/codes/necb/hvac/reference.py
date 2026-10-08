@@ -762,13 +762,27 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
         _apply_operating_schedules(result.air_loops, proposed_availability, audit)
         _audit_terminal_secondary_split(zones, assignment.reference_system,
                                         ruleset.id, audit)
-        # The (5)(b) fact is established HERE, where the group's energy types
-        # are known, and carried into the dispatch site. Sol's `127`: carry an
-        # already-decided selection fact rather than rediscovering it, or the
-        # duplicated predicate D-100 removed comes back by another door.
-        service_fuels, _added = service_set_heating_fuels(group, facts)
+        # The (5)(b) fact, for THIS ASSIGNMENT'S groups.
+        #
+        # This read `group`, which the assignment loop never binds — its only
+        # binding is the DCV capture loop far above, so every assignment got
+        # whichever zone group iterated LAST. Fable's `131` F1 reproduced both
+        # directions through the real build: four single-fuel System 3 zones
+        # lost the citation they are owed when a multi-fuel zonal group
+        # iterated last, and a multi-fuel zone carried AHJ-1 and AHJ-15
+        # together — the claim that its priority is prescribed and the claim
+        # that it is not — when it iterated first.
+        #
+        # The comment that stood here said the fact "is established HERE, where
+        # the group's energy types are known". It was established for one group
+        # and applied to all of them.
+        assignment_zones = set(assignment.zones)
+        prescribed = any(
+            len(service_set_heating_fuels(candidate, facts)[0]) > 1
+            for candidate in (facts.get('zone_groups') or ())
+            if assignment_zones & set(candidate.get('zones') or ()))
         _apply_zone_dispatch(zones, assignment.reference_system, ruleset.id,
-                             audit, priority_prescribed=len(service_fuels) > 1)
+                             audit, priority_prescribed=prescribed)
 
     _rebuild_humidification(reference, proposed_humidification, rules_data,
                             ruleset.id, audit)

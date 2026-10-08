@@ -5,7 +5,7 @@ article-coverage emitter. 207 lines across three files, and the dependency
 floor — everything depends on it, it depends on nothing.
 
 [README.md](README.md) is the API guide and is thorough: entry schema, the
-`article:`/`ruling:` axes, the `ruling=` shape rules (D-44), the coverage
+`article:`/`ruling:`/`ahj:` axes (three since D-100), the `ruling=` shape rules (D-44), the coverage
 emit contract and its status→level table. Read it first. This file is only
 what a change *here* costs, which the README does not say.
 
