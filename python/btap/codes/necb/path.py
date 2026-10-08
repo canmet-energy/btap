@@ -548,10 +548,29 @@ def _set_conditional(run, audit, required, conditions, approval):
                 seen_targets.add(target)
                 targets.append(str(target))
         where = " Applies to: {}".format(", ".join(targets)) if targets else ""
+        # QUOTE ONE SITE'S ACCOUNT ONLY WHEN IT IS THE ONLY SITE.
+        #
+        # This took `details[0]` for the whole id group, so AHJ-14's frozen
+        # line described five gas furnace coils as "boiler efficiency applied"
+        # (Fable's `131` F8). One equipment's account is not the group's
+        # account, and the id that fires most is the one it misdescribed.
+        #
+        # With several sites the line states the QUESTION and lets the
+        # `conditions` list carry each site's own `detail`. The question is
+        # what an authority rules on; the per-site accounts are the evidence
+        # under it, and they are already in the report.
+        #
         # " — " not " ": without a separator the quoted detail ran straight
         # into "Applies to: Hot Water Loop", which an authority has to read.
         details = [str(r["detail"]) for r in group if r.get("detail")]
-        detail = (" — " + details[0]) if details else ""
+        if len(group) == 1 and details:
+            detail = " — " + details[0]
+        elif details:
+            detail = (" — each of the {} choices above makes this same "
+                      "unresolved election; the conditions list carries what "
+                      "was established at each one".format(len(group)))
+        else:
+            detail = ""
         deduped.append("{} ({}): {} — {}.{}{}".format(
             ident, first["status"], first["title"], kind, where, detail))
     run.report["compliance_determination_reason"] = {

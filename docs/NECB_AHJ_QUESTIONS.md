@@ -559,6 +559,16 @@ that makes the choice, with the narrowing Sol's `126`/`127` established and a
 boundary negative for every exclusion. Two of them, AHJ-14 and AHJ-15, reach a
 real annual determination in the frozen corpus.
 
+Every one of them, and every `ruled` and `tool-gap` disposition besides, now
+reaches a reader through the HTML report's "Code questions referred to an
+authority" appendix. Sol's `127` guard 6 asked for it and nothing implemented
+it: the renderer read only the conditional reason block, so AHJ-5's fifteen
+citations per corpus reached `report.json` and the audit text and stopped there
+(Fable's `131` F7). The appendix lists each fired id with its status, what is
+unsettled, how many times the run applied it, a link to the first audit entry,
+and its bearing on the verdict — stated per row, because a status alone does
+not tell a reader whether the verdict moved.
+
 What remains open is EVIDENCE, not wiring: AHJ-2, AHJ-3, AHJ-10, AHJ-11,
 AHJ-12 and AHJ-16 have no frozen artifact that reaches a determination, because
 the annual tier runs `--quick` and the shapes that would exercise them sit in

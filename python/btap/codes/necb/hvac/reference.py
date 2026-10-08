@@ -613,6 +613,41 @@ def reference_hvac(model, code='necb2020', building=None, audit=None, proposed_a
                            audit=audit, proposed_annual=proposed_annual)
 
 
+def _reconcile_declared_storeys(reference, building, audit):
+    """Stamp the storey count the SELECTOR used onto the reference's Building.
+
+    The two halves of the System 6 grouping disagreed (Fable's `131` F2). The
+    selector reads `building['storeys']` — the `--storeys` override — while
+    `VAVReheat` reads `helpers.above_ground_storeys(model)`, which falls back to
+    a BuildingStory count and then to 1. Nothing wrote the override onto the
+    model, so a building the selector had just classified as more than four
+    storeys was GROUPED as one storey: one whole-building VAV, no facade split,
+    no Note (3) corner assignment, and no AHJ-10 citation.
+
+    That is worse than the missing citation. `pipeline.py`'s own preflight
+    warns that the fallback "would silently treat the building as ONE storey";
+    with the override supplied it did exactly that, one layer down.
+
+    Writing it on the REFERENCE only, never the proposed: the selector's
+    premise is what the reference must be built on, and the caller's model is
+    not ours to edit. A model that already declares a count keeps it — the
+    override is a fallback for models that cannot say, not an instruction to
+    overwrite one that can.
+    """
+    declared = (building or {}).get('storeys')
+    if not declared:
+        return
+    existing = opt(reference.getBuilding().standardsNumberOfAboveGroundStories())
+    if existing is not None:
+        return
+    reference.getBuilding().setStandardsNumberOfAboveGroundStories(int(declared))
+    audit.info('build',
+               'declared above-ground storey count stamped on the reference '
+               'from the supplied building data — the selector and the system '
+               'builder must group on the SAME premise',
+               inputs={'storeys': int(declared)}, ruling='D-18')
+
+
 def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=None):
     """The proposed -> reference HVAC transform against ONE resolved edition.
 
@@ -626,6 +661,7 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
 
     audit = audit if audit is not None else AuditLog()
     reference = _clone_model(model)
+    _reconcile_declared_storeys(reference, building, audit)
     _clear_proposed_part_load_classes(reference, audit)
     _clear_proposed_capacity_ownership(reference, audit)
 
@@ -1629,9 +1665,14 @@ def _rebuild_humidification(reference, captured, rules_data, code, audit):
     if not missed:
         return
 
+    # TARGETED. Fable's `131` F10: this passed no `target=`, so the condition
+    # reached the report as ('AHJ-12', None) and its approval line carried no
+    # "Applies to" — the loop names existed only inside the action text, where
+    # the resolver cannot and must not read them.
     audit.warn('build', f"the proposed humidification on {', '.join(sorted(missed))} has NO reference loop to carry "
                         'it — the thermal blocks it served are unconditioned or zonally served in the reference, '
                         'so it is not rebuilt',
+               target=','.join(sorted(missed)),
                article=article, ruling='D-55', ahj='AHJ-12')
 
 
@@ -2059,11 +2100,22 @@ def heat_pump_aux_energy_type(group, facts, hp_rules, annual, audit, article_bas
                    'system variant — the structural 8.4.4.9.(4) proxy elects the fuel instead',
                    target=','.join(group['zones']),
                    inputs={'by_fuel_gj': {f: ruby_round(j / 1e9, 2) for f, j in aux_by_fuel.items()}},
-                   article=f'{article_base}.(2){sentence}', ruling='D-52')
+                   article=f'{article_base}.(2){sentence}', ruling='D-52',
+                   # CITES, even though the election could not be carried out.
+                   # Fable's `131` F5: by this point BOTH of Sol's `127`
+                   # positive conditions have happened — the (2)(g) share
+                   # comparison was made and the largest auxiliary type was
+                   # elected on the delivered-heat basis AHJ-2 is about. That
+                   # the elected fuel then maps to no variant is a mapping
+                   # limitation, not a reason the disposition stops applying.
+                   # `_energy_type_variant` covers gas|oil|propane|purchased
+                   # and electric, so a hydronic coil on a loop with no
+                   # recognised fuel ('Unknown') lands here.
+                   ahj='AHJ-2')
         return None
     audit.decision('selection',
-                   'auxiliary heating energy type ELECTED from the proposed annual run: the terminal/aux '
-                   f'energy type with the largest annual energy use is {elected_fuel} '
+                   "auxiliary heating energy type ELECTED from the proposed run's simulated period: "
+                   f'the terminal/aux energy type with the largest energy use over that period is {elected_fuel} '
                    f"({ruby_round(elected_j / 1e9, 2)} GJ delivered), and the heat pump's "
                    f'{ruby_round(share * 100, 1)}% share exceeds the {ruby_round(threshold * 100)}% proviso '
                    '((h) inapplicable: the source is classified air/water/ground)',

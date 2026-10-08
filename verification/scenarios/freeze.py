@@ -103,7 +103,18 @@ def _implausible_eui(run):
         block = report.get(side) or {}
         kwh = block.get("total_site_kwh")
         area = block.get("floor_area_m2") or report.get("floor_area_m2")
-        if not kwh or not area:
+        # ABSENT is skipped; PRESENT AND ZERO is caught. `if not kwh` treated
+        # them alike, so a `total_site_kwh` of 0 passed a guard that complains
+        # about 50 (Fable's `131` F11). The docstring's reason — "a missing
+        # number is not an absurd one" — does not cover zero, which is present
+        # and absurd: a building that consumed nothing all year did not
+        # simulate. Nothing freezes that way today; the guard simply did not
+        # catch what it says it catches.
+        if kwh is None or not area:
+            continue
+        if not kwh:
+            out.append(f"  {side}: total_site_kwh is {kwh!r} — a building that "
+                       f"consumed NOTHING over a year did not simulate")
             continue
         eui = kwh / area
         if not EUI_SANE_MIN_KWH_M2 <= eui <= EUI_SANE_MAX_KWH_M2:

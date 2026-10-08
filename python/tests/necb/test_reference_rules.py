@@ -228,7 +228,11 @@ class TestReferenceRulesAnnual(unittest.TestCase):
                             "the election should have run — only the bare "
                             "(g) proxy entry was emitted")
             self.assertTrue(
-                said(elected, r"ELECTED from the proposed annual run"),
+                # "annual" came out of this wording (Fable's `131` F12): a
+            # `--quick` run simulates seven days, and the cited action called
+            # them annual on an AHJ-facing surface. The ELECTED/proxy
+            # distinction this test exists for is unchanged.
+            said(elected, r"ELECTED from the proposed run's simulated period"),
                 "expected the ELECTED wording, which distinguishes the "
                 "election from the proxy")
 

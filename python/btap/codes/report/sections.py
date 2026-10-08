@@ -13,6 +13,7 @@ from __future__ import annotations
 import re
 
 from btap._compat import esc, ruby_round, ruby_str
+from btap.codes import ahj as AHJ
 from btap.codes import decisions as Decisions
 from btap.codes.report import charts as Charts
 from btap.codes.report import checklist as Checklist
@@ -21,7 +22,7 @@ from btap.codes.report import html as Html
 ORDER = ("header", "verdict_banner", "path_declaration", "floor_plans",
          "checklist", "energy", "ghg", "envelope", "hvac", "lighting", "loads",
          "shw", "costing", "coverage_appendix", "rulings_appendix",
-         "audit_appendix", "declarations")
+         "ahj_appendix", "audit_appendix", "declarations")
 
 #: CONTRACT: maps each per-domain report section to the audit ``step`` names
 #: (substring match) whose entries it renders as notes. A NEW audit step name
@@ -820,6 +821,68 @@ def rulings_appendix(ctx):
             "carry the same identifiers alongside the article citation.</p>")
     return Html.section("rulings", "Decisions and assumptions applied", body + note,
                         page_break=True)
+
+
+# -- ahj_appendix --------------------------------------------------
+
+def ahj_appendix(ctx):
+    """Every AHJ-NN disposition this run acted on, whatever its status.
+
+    Parallel to the decisions appendix, and required for the same reason: the
+    HTML report is the AHJ-FACING artifact. Sol's `127` guard 6 asked for it
+    explicitly — "listing every fired id including `ruled` and `tool-gap`.
+    This is what makes those non-conditional citations useful to the reader" —
+    and Fable's `131` F7 found that nothing read `ahj_applied` at all, so
+    AHJ-5's citations reached `report.json` and the audit text and no further.
+
+    The two non-conditional statuses are the point of the table, not padding.
+    A `ruled` row tells a reader a judgement call was settled and by whom; a
+    `tool-gap` row tells them this tool does not implement a requirement, which
+    they must know even though it changes no verdict. Only `referral` and
+    `alternative-solution` rows bear on the determination, and the Bearing
+    column says so per row rather than leaving the reader to infer it.
+    """
+    fired: dict[str, dict] = {}
+    for index, entry in enumerate(ctx["audit_entries"]):
+        for ident in AHJ.ids_in(entry.get("ahj")):
+            hit = fired.setdefault(ident, {"count": 0, "first_index": index})
+            hit["count"] += 1
+
+    if not fired:
+        body = ("<p>This run acted on no referred or otherwise dispositioned "
+                "Code question.</p>")
+    else:
+        rows = []
+        for ident in sorted(fired, key=lambda value: int(value.split("-")[1])):
+            hit = fired[ident]
+            entry = AHJ.by_id().get(ident)
+            status = (entry or {}).get("status") or "not in register"
+            title = (entry or {}).get("title") or (
+                f"{ident} was cited by this run but is not in the register")
+            if status in AHJ.approval_required_statuses():
+                bearing = "YES — this run's determination is conditional on it"
+            elif status == "tool-gap":
+                bearing = "no — a defect in this tool, not a question of Code"
+            elif status == "ruled":
+                bearing = "no — settled; the row records which way"
+            else:
+                bearing = "no"
+            rows.append([ident, status, title, bearing, hit["count"],
+                         Html.raw(f'<a href="#audit-{hit["first_index"]}">'
+                                  f'entry {hit["first_index"]}</a>')])
+        body = Html.table(["Question", "Status", "What is unsettled, or was settled",
+                           "Bearing on the verdict", "Times applied",
+                           "First audit entry"], rows)
+
+    note = ('<p class="meta">The acceptable-solution text does not answer every '
+            "question a model raises. Each row is a question this run met and the\n"
+            "          disposition it applied, recorded in "
+            "<code>docs/NECB_AHJ_QUESTIONS.md</code>. A row whose bearing is YES "
+            "is part of the\n          conditional determination above; the "
+            "others are disclosed because a reader is entitled to them, not "
+            "because they change the\n          outcome.</p>")
+    return Html.section("ahj", "Code questions referred to an authority",
+                        body + note, page_break=True)
 
 
 # -- audit_appendix ------------------------------------------------

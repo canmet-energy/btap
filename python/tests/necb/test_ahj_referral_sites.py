@@ -789,5 +789,141 @@ class TestASupersededConditionDoesNotSTAND(unittest.TestCase):
                           ("AHJ-14", "Secondary Boiler")], conditions)
 
 
+@needs_sdk
+class TestTheStoreysOverrideReachesTheBUILDER(unittest.TestCase):
+    """Fable's `131` F2. The two halves of the System 6 grouping disagreed.
+
+    The selector reads `building['storeys']` — the `--storeys` override — while
+    `VAVReheat` reads `helpers.above_ground_storeys(model)`, which falls back to
+    a BuildingStory count and then to 1. Nothing wrote the override onto a
+    model, so a building the selector had just classified as MORE than four
+    storeys was GROUPED as one: one whole-building VAV, no facade split, no
+    Note (3) corner assignment, no AHJ-10.
+
+    The missing citation is the smaller half. `pipeline.py`'s own preflight
+    warns that the fallback "would silently treat the building as ONE storey",
+    and with the override supplied it did exactly that one layer down.
+    """
+
+    def _reference(self, declare_on_model):
+        import btap.modeling as modeling
+        from btap._compat import sorted_by_name
+        from btap.audit import AuditLog
+        from btap.codes.necb import hvac
+
+        from .support import compliance_fixture
+
+        model = compliance_fixture()
+        zones = sorted_by_name(model.getThermalZones())
+        # A two-facade CORNER block: fold zone 3's spaces into zone 2.
+        for space in list(zones[2].spaces()):
+            space.setThermalZone(zones[1])
+        modeling.build_system(
+            model, "PSZ RTU Gas and DX Coils and Electric Baseboard",
+            [z for z in model.getThermalZones() if z.spaces()])
+        if declare_on_model:
+            model.getBuilding().setStandardsNumberOfAboveGroundStories(6)
+        audit = AuditLog()
+        result = hvac.reference_hvac(model, code="necb2020",
+                                     building={"storeys": 6}, audit=audit)
+        cited = [entry.get("target") for entry in audit.entries
+                 if "AHJ-10" in str(entry.get("ahj") or "").split()]
+        return model, result, cited
+
+    def test_the_OVERRIDE_ALONE_reaches_the_facade_split(self):
+        """Fable's failing case. Before the fix this produced one air loop and
+        no citation."""
+        _model, result, cited = self._reference(declare_on_model=False)
+        self.assertTrue(cited, "the corner block must be cited")
+        self.assertGreater(
+            len(result.model.getAirLoopHVACs()), 1,
+            "more than four storeys means a facade SPLIT, not one "
+            "whole-building VAV")
+
+    def test_a_DECLARED_count_behaves_identically(self):
+        """The control: same model, same selection, same corner block."""
+        _model, result, cited = self._reference(declare_on_model=True)
+        self.assertTrue(cited)
+        self.assertGreater(len(result.model.getAirLoopHVACs()), 1)
+
+    def test_the_PROPOSED_model_is_not_edited(self):
+        """The caller's model is not ours to change — the premise is stamped on
+        the REFERENCE clone only."""
+        from btap.modeling.geometry import helpers
+
+        model, _result, _cited = self._reference(declare_on_model=False)
+        self.assertEqual(1, helpers.above_ground_storeys(model),
+                         "the proposed model keeps whatever it said")
+
+    def test_a_model_that_DECLARES_a_count_keeps_it(self):
+        """The override is a fallback for a model that cannot say, not an
+        instruction to overwrite one that can."""
+        import openstudio
+
+        from btap.audit import AuditLog
+        from btap.codes.necb.hvac import reference
+
+        model = openstudio.model.Model()
+        model.getBuilding().setStandardsNumberOfAboveGroundStories(3)
+        reference._reconcile_declared_storeys(model, {"storeys": 9},
+                                              AuditLog())
+        self.assertEqual(
+            3, model.getBuilding().standardsNumberOfAboveGroundStories().get(),
+            "a declared count is not overwritten by the override")
+
+
+class TestTheReportAPPENDIXShowsEveryFiredDisposition(unittest.TestCase):
+    """Sol's `127` guard 6, which Fable's `131` F7 found unmet: nothing in the
+    report package read `ahj_applied`, so a `ruled` or `tool-gap` citation
+    reached `report.json` and the audit text and went no further. The HTML
+    report is the AHJ-facing artifact; a reader of it saw none of them.
+    """
+
+    def _appendix(self, entries):
+        from btap.codes.report import sections
+
+        return sections.ahj_appendix({"audit_entries": entries,
+                                      "report": {}, "options": {}})
+
+    def test_a_RULED_citation_is_shown_though_it_changes_no_verdict(self):
+        """The non-conditional statuses are the POINT of the table. AHJ-5 fires
+        15 times in the frozen corpus and had no reader-facing surface."""
+        html = self._appendix([{"step": "selection", "ahj": "AHJ-5"}])
+        self.assertIn("AHJ-5", html)
+        self.assertIn("ruled", html)
+        self.assertIn("settled", html)
+
+    def test_a_TOOL_GAP_citation_is_shown_and_named_as_a_defect(self):
+        html = self._appendix([{"step": "build", "ahj": "AHJ-18"}])
+        self.assertIn("AHJ-18", html)
+        self.assertIn("tool-gap", html)
+        self.assertIn("defect in this tool", html)
+
+    def test_an_APPROVAL_REQUIRED_citation_says_it_bears_on_the_verdict(self):
+        html = self._appendix([{"step": "efficiency", "ahj": "AHJ-14"}])
+        self.assertIn("AHJ-14", html)
+        self.assertIn("YES", html)
+
+    def test_the_appendix_COUNTS_repeated_applications(self):
+        html = self._appendix([{"step": "a", "ahj": "AHJ-5"},
+                               {"step": "b", "ahj": "AHJ-5"},
+                               {"step": "c", "ahj": "AHJ-5"}])
+        self.assertIn(">3<", html, "three applications are reported as three")
+
+    def test_a_run_citing_NOTHING_says_so_rather_than_rendering_an_empty_table(self):
+        html = self._appendix([{"step": "selection", "ruling": "D-52"}])
+        self.assertIn("no referred or otherwise dispositioned", html)
+
+    def test_the_appendix_is_IN_the_rendered_report(self):
+        """The section function existing is not the same as it being rendered —
+        F7 was precisely a renderer that never called it."""
+        from btap.codes.report import sections
+
+        self.assertIn("ahj_appendix", sections.ORDER)
+        self.assertLess(sections.ORDER.index("ahj_appendix"),
+                        sections.ORDER.index("audit_appendix"),
+                        "the dispositions are read before the raw audit trail")
+
+
 if __name__ == "__main__":      # pragma: no cover
     unittest.main()

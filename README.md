@@ -318,6 +318,14 @@ REQUIRED** badge beside the pass/fail badge, so it travels with the submission.
 `report.json` carries it as `compliance_determination`, with the conditions and
 what follows if approval is not given.
 
+The report also carries a **"Code questions referred to an authority"**
+appendix, beside the decisions appendix, listing EVERY disposition the run
+applied — not only the ones that made it conditional. A `ruled` row records a
+judgement call that is settled; a `tool-gap` row records a requirement this
+tool does not implement, which you need to know even though it changes no
+verdict. Each row states its bearing on the verdict rather than leaving you to
+work it out from the status.
+
 The commonest case today is a **proposed heating plant using two fuels**: the
 Code requires the reference building to carry both in the same capacity ratio,
 and this tool elects one energy type at SELECTION and computes no ratio. What
