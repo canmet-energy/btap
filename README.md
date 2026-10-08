@@ -346,6 +346,17 @@ Stated plainly, because a compliance tool that hides these is worse than useless
   see exit 3 above.
 - **`--quick` is never a determination.** Article 8.4.1.2 requires a simulated
   year.
+- **Your model must say how many above-ground storeys it has.** The count
+  selects the reference system — Table 8.4.x.7.-A assigns a General Area
+  building System 3 at two storeys and System 6 at three — so this tool will
+  not assume it. A run stops, naming the omission, when the model declares no
+  **Standards Number of Above Ground Stories** on the Building AND has no
+  **BuildingStory** holding a space at or above grade. Either source satisfies
+  it. `--storeys N` remains a deliberate override, and where it contradicts a
+  count the model declares, the run says so and the override wins. This used
+  to default silently to one storey, so a multi-storey model missing the field
+  was compared against the wrong reference building and the result still read
+  as a determination.
 - **Multi-energy capacity ratios (8.4.4.9.(5) / 8.4.4.10.(4)) are not
   modelled.** A plant drawing on more than one energy source is elected into
   ONE energy type at selection, and no capacity ratio is computed. What the
