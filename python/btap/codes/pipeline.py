@@ -118,13 +118,13 @@ class _Run:
     """One determination's context: the option dict plus the mutable state the
     pipeline phases and the code family's hooks hand each other (internal —
     phases read run.opts and write the stateful slots)."""
-    opts: dict = None
+    opts: dict | None = None
     proposed: object = None
     reference: object = None
-    report: dict = None
+    report: dict | None = None
     audit: object = None
     hdd: object = None
-    proposed_annual_data: dict = None
+    proposed_annual_data: dict | None = None
     compliant: bool | None = None
     #: The edition this run is determined against — built ONCE here and reused
     #: by every phase that asks it for an edition-specific behaviour.
