@@ -240,6 +240,7 @@
   "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
   "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
   "ruling": "D-89 D-90",
+  "ahj": "AHJ-14",
   "evidence": "Article 8.4.5.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.2.-A, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0 (node value 0), 0.00001 to 0.0001 step 0.00001, 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (169 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.1994 % against the exact requirement (sampled at PLR step 0.00001); a node at PLR 0 carries the Code equation down to zero load; the efficiency curve is evaluated on the EnteringBoiler temperature",
   "building": "reference building",
   "level": "decision"
@@ -261,6 +262,7 @@
   "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
   "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
   "ruling": "D-89 D-90",
+  "ahj": "AHJ-14",
   "evidence": "Article 8.4.5.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.2.-A, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0 (node value 0), 0.00001 to 0.0001 step 0.00001, 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (169 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.1994 % against the exact requirement (sampled at PLR step 0.00001); a node at PLR 0 carries the Code equation down to zero load; the efficiency curve is evaluated on the EnteringBoiler temperature",
   "building": "reference building",
   "level": "decision"
@@ -2360,6 +2362,7 @@
   "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
   "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
   "ruling": "D-89 D-90",
+  "ahj": "AHJ-14",
   "evidence": "Article 8.4.5.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.2.-A, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0 (node value 0), 0.00001 to 0.0001 step 0.00001, 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (169 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.1994 % against the exact requirement (sampled at PLR step 0.00001); a node at PLR 0 carries the Code equation down to zero load; the efficiency curve is evaluated on the EnteringBoiler temperature",
   "building": "reference building",
   "level": "decision"
@@ -2381,6 +2384,7 @@
   "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
   "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
   "ruling": "D-89 D-90",
+  "ahj": "AHJ-14",
   "evidence": "Article 8.4.5.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.2.-A, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0 (node value 0), 0.00001 to 0.0001 step 0.00001, 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (169 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.1994 % against the exact requirement (sampled at PLR step 0.00001); a node at PLR 0 carries the Code equation down to zero load; the efficiency curve is evaluated on the EnteringBoiler temperature",
   "building": "reference building",
   "level": "decision"

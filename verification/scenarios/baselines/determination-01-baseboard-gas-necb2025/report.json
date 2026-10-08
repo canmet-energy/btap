@@ -101,7 +101,67 @@
  "percent_of_target": 79.7,
  "tier": 1,
  "annual": true,
- "compliance_determination": "code",
+ "ahj_applied": [
+  {
+   "id": "AHJ-14",
+   "status": "referral",
+   "title": "which part-load class a reference boiler or furnace takes",
+   "count": 4
+  }
+ ],
+ "ahj_register": "docs/NECB_AHJ_QUESTIONS.md",
+ "compliance_determination": "conditional",
+ "compliance_determination_reason": {
+  "why": "1 register question(s) requiring approval were raised by this run's modelling choices, so the comparison is INFORMATIONAL and is NOT a Code-compliance determination. Each condition below names the question, its register status and the deciding entry's own account of what was and was not established.",
+  "condition": "approval by the authority having jurisdiction",
+  "if_not_approved": "the comparison does not establish compliance and no verdict from it may be submitted as a determination",
+  "ahj_ids": [
+   "AHJ-14"
+  ],
+  "ahj_register": "docs/NECB_AHJ_QUESTIONS.md",
+  "ahj_must_approve": [
+   "AHJ-14 (referral): which part-load class a reference boiler or furnace takes \u2014 an INTERPRETATION the acceptable-solution text does not settle. Applies to: Primary Boiler \u2014 boiler efficiency applied",
+   "AHJ-14 (referral): which part-load class a reference boiler or furnace takes \u2014 an INTERPRETATION the acceptable-solution text does not settle. Applies to: Secondary Boiler \u2014 boiler efficiency applied"
+  ],
+  "conditions": [
+   {
+    "id": "AHJ-14",
+    "status": "referral",
+    "title": "which part-load class a reference boiler or furnace takes",
+    "article": "NECB 2025 Table 5.2.12.1.-N; 8.4.6.2.",
+    "target": "Primary Boiler",
+    "detail": "boiler efficiency applied",
+    "entry_index": 57
+   },
+   {
+    "id": "AHJ-14",
+    "status": "referral",
+    "title": "which part-load class a reference boiler or furnace takes",
+    "article": "NECB 2025 Table 5.2.12.1.-N; 8.4.6.2.",
+    "target": "Secondary Boiler",
+    "detail": "boiler efficiency applied",
+    "entry_index": 58
+   },
+   {
+    "id": "AHJ-14",
+    "status": "referral",
+    "title": "which part-load class a reference boiler or furnace takes",
+    "article": "NECB 2025 Table 5.2.12.1.-N; 8.4.6.2.",
+    "target": "Primary Boiler",
+    "detail": "boiler efficiency applied",
+    "entry_index": 233
+   },
+   {
+    "id": "AHJ-14",
+    "status": "referral",
+    "title": "which part-load class a reference boiler or furnace takes",
+    "article": "NECB 2025 Table 5.2.12.1.-N; 8.4.6.2.",
+    "target": "Secondary Boiler",
+    "detail": "boiler efficiency applied",
+    "entry_index": 234
+   }
+  ]
+ },
  "ghg": {
   "percent_of_ghg_target": 85.2,
   "level": "E"
@@ -170,6 +230,7 @@
   "model object named 'DXCOOL-REF-CAPFFLOW' does not state this edition's Quadratic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-CAPFFLOW (D-89)'",
   "model object named 'DXCOOL-REF-COOLEIRFT' does not state this edition's BiQuadratic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-COOLEIRFT (D-89)'",
   "model object named 'DXCOOL-REF-COOLPLFFPLR' does not state this edition's Cubic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-COOLPLFFPLR (D-89)'",
+  "INFORMATIONAL AND CONDITIONAL: 1 register question(s) requiring approval by the authority having jurisdiction were raised by this run's modelling choices, so the verdict below is NOT a Code-compliance determination. AHJ-14 (referral); AHJ-14 (referral); AHJ-14 (referral); AHJ-14 (referral)",
   "Calculation Methods \u2014 partial. Applied: the energy model accounts for the annual energy use of what the model contains. Gaps: elevators/escalators ((1)(j)) and other loads absent from the model are not added by the pipeline",
   "Operating Schedules, Internal Loads and Service Water Heating Loads (EUI path) \u2014 partial. Applied: check-then-normalize (Archetypes.conformance / normalize!): the proposed is checked against the Table 8.4.4.2. values (occupant density, receptacle W/m2, SWH L/h/occupant; schedule profiles compared hourly against the archetype letter) and, when non-conformant, REWRITTEN to them before the EUI-path annual run. Gaps: unmapped spaces keep their modeled loads (the Table applies \u201cfor the applicable building archetype\u201d); spaces with no water-use equipment warn rather than gaining a SWH system"
  ]

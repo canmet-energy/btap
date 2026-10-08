@@ -111,6 +111,12 @@
    "status": "referral",
    "title": "whether 8.4.4.9.(6)(d) permits more than one boiler",
    "count": 1
+  },
+  {
+   "id": "AHJ-14",
+   "status": "referral",
+   "title": "which part-load class a reference boiler or furnace takes",
+   "count": 2
   }
  ],
  "ahj_register": "docs/NECB_AHJ_QUESTIONS.md",

@@ -99,6 +99,15 @@
  "percent_of_target": 100.1,
  "tier": null,
  "annual": false,
+ "ahj_applied": [
+  {
+   "id": "AHJ-14",
+   "status": "referral",
+   "title": "which part-load class a reference boiler or furnace takes",
+   "count": 4
+  }
+ ],
+ "ahj_register": "docs/NECB_AHJ_QUESTIONS.md",
  "compliant": false,
  "warnings": [
   "CoilCoolingDXMultiSpeed_dx: staged capacity unavailable (model not sized?) \u2014 8.4.4.10.(8) stage count NOT set; run sizing first",
