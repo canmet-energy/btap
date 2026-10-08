@@ -65,7 +65,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-15** — Energy-recovery effectiveness and frost values verified against the code text _(runtime)_
 - **D-16** — Orphaned proposed EMS purged from the reference _(runtime)_
 - **D-17** — Legacy energy-recovery diagnosis filed upstream _(process)_
-- **D-18** — Multizone system zone grouping rewritten to the table note _(runtime_unwired)_
+- **D-18** — Multizone system zone grouping rewritten to the table note _(runtime)_
 - **D-19** — Infiltration lineage reconciled; reference inherits proposed leakage coefficients _(runtime)_
 - **D-20** — Economizer exempted on 100%-outdoor-air makeup air units _(runtime)_
 - **D-21** — Envelope area for air leakage computed as the conditioned-space enclosure _(runtime)_
@@ -146,6 +146,8 @@ audit are drained and archived — see `docs/README.md`.
 - **D-96** — The package relicenses from LGPL-3.0-or-later to GPL-3.0-or-later _(process)_
 - **D-97** — 8.4.x.14.(2) combines pumps within one hydronic system, not across consolidated ones _(runtime)_
 - **D-98** — A baseline records its producer; freezing stays local until an image digest is obtainable _(process)_
+- **D-99** — A reference that cannot satisfy a requirement yields a CONDITIONAL result, not a certification _(runtime)_
+- **D-100** — AHJ dispositions are cited by the deciding rule site; the determination owns only policy _(runtime)_
 
 <!-- TOC END -->
 
@@ -1356,8 +1358,15 @@ to the proposed. Reconciliation (same shape as D-38's min-wins): the
 table's "None" governs the default composition — a COOLED-BUT-UNHEATED
 proposed block (the refrigerated-space case System 5 exists for) gets a
 cooling-only TPFC reference; when the proposed block IS heated, sentence
-(5) overrides presence and the existing two-pipe changeover heating is
-kept (no baseboard variant invented — the table describes none). Both
+(5) overrides presence, and the reference MODELS heating in the System 5
+surrogate. An earlier version of this decision said "the existing two-pipe
+changeover heating is kept (no baseboard variant invented)", which was false in
+both halves: there is no existing changeover heating to keep, and the tool does
+invent equipment — it builds a hot-water loop, a boiler, heating coils and an
+MAU heating coil inside a FOUR-PIPE fan-coil surrogate. **The Code does not
+select that topology**, which is why AHJ-11 refers the precedence question and
+AHJ-18 records the surrogate's missing plant-side changeover as a tool gap
+(Sol, `129`). Both
 branches audited with both articles. A block with NO conditioning at all
 gets no reference system (existing 8.4.4.1.(5) behavior — that case is
 absence, not "None").
@@ -6546,3 +6555,167 @@ So the follow-on is: `ci-image.yml` emitting the pushed digest, a freeze
 workflow running in that image and returning its output, and `freeze.py`
 filling `container_digest`. The fields recorded here are exactly what that end
 state records **plus** the digest, so nothing done now is wasted.
+
+<a id="d-99"></a>
+
+## D-99 — a reference that cannot satisfy a requirement yields a CONDITIONAL result, not a certification
+
+- **Decision:** where a reference model is known not to implement a
+  requirement that governs the building, the run reports its comparison and
+  **labels the determination as conditional** rather than returning a
+  compliance certification. The exit code is unchanged. The label states what
+  an authority having jurisdiction must accept, and what follows if it does
+  not.
+- **Scope today:** 8.4.x.9.(5), multi-energy proposed heating systems. The
+  mechanism is general; this is the only requirement that currently uses it.
+
+### Why (4) does not apply, and (5) is not satisfiable here
+
+Sentence 8.4.x.9.(4) opens **"Except as provided in Sentence (5)"**, which is
+how the Code writes an exception. For a group whose proposed heating system
+uses more than one energy type, (4) therefore has no reading at all — (5)
+governs, and requires both
+
+- **(5)(a)** the reference heating capacities to match the **ratio** of the
+  proposed building's capacity allocation per energy type, and
+- **(5)(b)** its operating schedule, priority of use and other operational
+  characteristics to apply.
+
+This tool elects one energy type for the reference SELECTION and computes no
+ratio — what the reference's final equipment carries is a separate question it
+does not establish. Sol ruled on
+text fetched from the codes MCP that no single-fuel basis satisfies (5)(a):
+not the fossil-first cascade, not capacity-dominant, not lead-fuel, not
+annual-dominant. A capacity-dominant election was implemented, measured and
+abandoned on that ruling.
+
+### Why that cannot be reported as compliance
+
+8.4.1.2 defines the comparison, Division A defines the building energy target
+as requiring the same energy sources for the same functions, 8.4.2.10 governs
+the reference model's conformity, and Division C 2.2.2.8 governs what may be
+submitted. Together they mean a knowingly non-conforming reference cannot
+support an unqualified determination. The treatment is a product decision;
+phylroy chose informational **and** conditional, so the numbers stay useful
+while the claim stays honest.
+
+### What an authority is asked to accept, and why they differ
+
+- **An alternative solution.** (5)(a) decides the question — the capacities
+  "shall match the ratio" — and we do not comply. Accepting the comparison
+  means accepting a non-conforming modelling substitution, identified as
+  such. This is not an ambiguity and is not written as one.
+- **An interpretation.** How a two-fuel ratio may be **represented** when
+  (6) bands the reference plant's boiler count and each simulation boiler
+  object carries one fixed fuel is genuinely unsettled by the
+  acceptable-solution text. Raised only where one plant carries the group's
+  fuels, because (6) governs "where a hydronic system is modeled".
+
+### What is NOT claimed
+
+Nothing about the reference's final equipment. Four outcomes are reachable and
+the entry lists them without electing one: the proposed plant adopted; a
+different plant built by the selected variant after this one is torn down; no
+plant at all where the variant needs no boiler; or a hydronic plant staged
+after sizing by primary/secondary role, **blind to fuel** — which preserves an
+equal role-labelled pair in the two-boiler band, drives a recognised secondary
+below the single-boiler threshold to ~0 W, and does nothing at all to a plant
+whose devices take no recognised role, since the resolver requires exactly
+two.
+
+Six successive reviews each found this entry asserting one of those as
+general. The rule that ended it is narrower than "measure before claiming":
+**do not generalise a measurement past the configuration it was taken on.**
+
+### The register, and what this decision does not excuse
+
+`docs/NECB_AHJ_QUESTIONS.md` records these questions with four statuses.
+Only `referral` and `alternative-solution` may set a run conditional; `ruled`
+and `tool-gap` may not, so a defect is never dressed as an interpretation.
+
+This decision does **not** excuse the gap. Computing the allocation and
+verifying it is tool-side work, as is carrying Table 4.2.1.6's A and B control
+marks (AHJ-8) and the air-cooled chiller curves (AHJ-17). A conditional result
+is the honest interim state, not a destination.
+
+<a id="d-100"></a>
+
+## D-100 — the deciding site declares, the determination decides
+
+A question an authority must answer is raised by a MODELLING CHOICE, and the
+code that makes that choice is the only place that knows it was made.
+
+`_mark_informational_if_multi_energy` did not work that way. It ran at the end
+of the annual path and re-characterized the proposed model to ask, in effect,
+"would the disclosure branch have fired?" That worked while there was exactly
+one question. It was still a second implementation of a predicate that already
+existed, and the branch and the determination could disagree without anything
+noticing.
+
+Sol's `126` then established reachability conditions for seven more referrals,
+and every one turned out to be a property of the SELECTION rather than of the
+characterized facts: System 6 assigned with more than four storeys and a
+multi-facade external block; System 5 assigned with a heated proposed block; an
+ordinary fuel-fired reference boiler at or below 352 kW. Writing those as seven
+predicates beside the determination would have duplicated the selection logic
+seven more times.
+
+So the ownership inverts. Each deciding site cites the dispositions that apply
+on **its own narrowed branch** — not merely "this function ran" — and the
+determination resolves what it finds.
+
+### What the axis means, and what it does not
+
+`ahj` says a register disposition applies to this choice. It does not say
+approval is required. All four statuses ride on applicable entries, because a
+reader wants to know that AHJ-5 is the settled reason a water-loop heat-pump
+group entered multi-energy scope at all. Only `referral` and
+`alternative-solution` change a verdict.
+
+That distinction has to survive into the report, and it is the reason the
+condition records carry status and title: an AHJ-11 System-5 condition must not
+render as a boiler-capacity condition, which is what hardcoded multi-energy
+prose in the CLI and HTML would have done.
+
+### Why the floor stays neutral
+
+`btap.audit` is the code-family-neutral, SDK-free floor. It stores the string,
+serializes it, and appends it to the narrative beside `article` and `ruling`.
+It does not import the NECB register, know what a status is, or decide whether
+a citation is conditional. A future code family brings its own register and its
+own resolver; the axis is the only shared thing.
+
+### Why the register is generated, and rejects rather than drops
+
+`docs/NECB_AHJ_QUESTIONS.md` is canonical and authored. Repository
+documentation is not a wheel dependency, so the runtime reads a generated
+projection — `{id, title, status, editions}` — exactly as the decision registry
+reads `decisions.json`. A second `{id: status}` map in `path.py` would be the
+drift this whole decision exists to remove, and no `sets_conditional` boolean
+is serialized because a boolean can contradict the status it came from.
+
+The resolver raises on an unknown id, an unknown status, or an id whose
+editions do not include the run's code. Dropping any of those would convert a
+missing disclosure into a clean non-conditional success, which is precisely the
+failure AHJ-5's predicate defect was: a question with a settled answer that
+nothing ever asked.
+
+### What a reader of the report sees
+
+Three surfaces carry the axis, and they are not interchangeable. The CLI prints
+the condition INSIDE the verdict string so it cannot be read apart from it. The
+HTML report badges it beside the pass/fail badge, because the report is the
+AHJ-facing artifact that travels with a submission. And the report carries a
+"Code questions referred to an authority" appendix listing EVERY fired
+disposition with its bearing on the verdict stated per row — not only those
+that made the run conditional.
+
+The appendix is why the two non-conditional statuses are worth citing at all.
+A `ruled` citation tells a reader that a judgement call was settled and which
+way; a `tool-gap` citation tells them this tool does not implement a
+requirement, which they need whether or not the verdict moved. Without the
+appendix those citations reached `report.json` and the audit text and stopped
+there, which is the state Fable's `131` F7 found: AHJ-5 fired fifteen times
+per frozen corpus and no reader of a report saw it once.
+
+The exit code is deliberately unchanged by any of this.

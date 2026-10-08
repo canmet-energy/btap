@@ -42,7 +42,7 @@ class TestAuditLog(unittest.TestCase):
         self.audit.decision("reference", "air-leakage default applied", ruling="D-19 D-21")
         entry = self.audit.entries[0]
         self.assertEqual("D-19 D-21", entry["ruling"])
-        self.assertEqual(["D-19", "D-21"], re.findall(r"\bD-\d{2}\b", entry["ruling"]),
+        self.assertEqual(["D-19", "D-21"], re.findall(r"\bD-\d+\b", entry["ruling"]),
                          "the documented consumer parse recovers both ids")
 
     def test_str_appends_ruling_after_the_article_segment(self):

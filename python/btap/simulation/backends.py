@@ -340,6 +340,9 @@ class Remote(Backend):
                          or os.environ.get("OS_SIM_REMOTE_API_KEY") or None)
         self._opts = opts
         self._transport = transport or Http(self._api_key)
+        #: `weather_s3_key` for a caller-supplied EPW, set per execute() when
+        #: the model names a local file. None means "use the service library".
+        self._weather_key = None
 
     def is_configured(self) -> bool:
         return bool(self._endpoint) and bool(self._api_key)
@@ -353,6 +356,7 @@ class Remote(Backend):
         run_dir = Path(run_dir)
         payload, filename = self._prepare_payload(run_dir)
         self._guard_engine_version()
+        self._weather_key = self._resolve_weather(run_dir)
         model_id = self._upload(payload, filename)
         job_id = self._submit(model_id)
         self._poll(job_id)
@@ -440,10 +444,88 @@ class Remote(Backend):
         self._with_retry("upload-put", lambda: self._transport.put_bytes(url, payload))
         return reg.get("model_id")
 
+    def _resolve_weather(self, run_dir: Path):
+        """OUR EPW's key, or None to fall back to the service's library.
+
+        Opt out with `upload_weather=False`, which the station-id path still
+        needs for a model whose EPW is not on this machine.
+        """
+        if not self._opts.get("upload_weather", True):
+            return None
+        epw = self._local_epw(run_dir)
+        if epw is None:
+            return None
+        return self._upload_weather(epw)
+
+    def _local_epw(self, run_dir: Path):
+        """The model's weather file, when it is a readable local path.
+
+        `in.epw` beside the model first: the runner copies it there, and that
+        is the file the LOCAL run used, which is the one a comparison needs.
+        """
+        beside = run_dir / "in.epw"
+        if beside.is_file():
+            return beside
+        named = self._opts.get("epw")
+        if named and Path(named).is_file():
+            return Path(named)
+        return None
+
+    def _upload_weather(self, epw: Path):
+        """Presign, PUT and return a `weather_s3_key` for OUR OWN EPW.
+
+        Until hbix#107 (PR 108) there was no way to do this: the service
+        resolved weather from its library by station id, and the comment on
+        `_station_id` recorded that as a documented limitation. It mattered
+        because the library DRIFTED — measured 2026-10-08, the same
+        `CWEC2020`/`716240` label served an EPW 62 bytes different from our
+        committed fixture, with the STAT and DDY further apart still and no
+        `sha256_b64` on any of the three. A remote run on that file cannot be
+        compared with a local baseline.
+
+        `sha256_b64` is sent so the service BINDS the PUT to our digest: the
+        upload either carries our exact bytes or it fails, which is the
+        property a comparison needs. DDY and STAT are not uploadable and do
+        not need to be — `attach_weather` (D-25) filters the design days INTO
+        the model, so they travel inside the IDF.
+        """
+        import base64
+        import hashlib
+
+        payload = epw.read_bytes()
+        # `.digest()`, NOT `.hexdigest()`: the service wants the base64 of the
+        # BINARY sha-256, and base64 of the hex string is a well-formed value
+        # that fails the comparison (hbix called this out explicitly).
+        digest = base64.b64encode(hashlib.sha256(payload).digest()).decode()
+        # The documented shape is the JSON body alone (hbix, 2026-10-08). The
+        # models endpoint takes `filename` as a QUERY parameter and this one
+        # does not; sending it both ways worked but said the same thing twice.
+        reg = self._with_retry("weather-upload", lambda: self._transport.post_json(
+            f"{self._endpoint}/weather/upload-url",
+            {"filename": epw.name, "sha256_b64": digest}))
+        url = reg.get("upload_url")
+        key = reg.get("weather_s3_key")
+        if url is None or key is None:
+            # NOT a silent fall back to the station id: that would substitute
+            # different weather for the file the caller asked for and report a
+            # comparison as if it were like-for-like.
+            raise RuntimeError(
+                "remote weather upload returned no upload_url/weather_s3_key "
+                f"(host {self._host()}) — the service may predate the "
+                "caller-supplied weather path")
+        headers = reg.get("required_headers") or {}
+        self._with_retry("weather-put", lambda: self._transport.put_bytes(
+            url, payload, headers=headers))
+        return key
+
     def _submit(self, model_id: str) -> str:
+        # OUR bytes when we have them, the service's library otherwise.
         body = {"model_id": model_id,
-                "weather_station_id": self._station_id(),
-                "weather_format": self._opts.get("weather_format", "CWEC2020"),
+                "weather_s3_key": self._weather_key,
+                "weather_station_id": (None if self._weather_key
+                                       else self._station_id()),
+                "weather_format": (None if self._weather_key else
+                                   self._opts.get("weather_format", "CWEC2020")),
                 "workflow_type": self._workflow_type(),
                 "engine_version": self._engine_version(),
                 "queue": self._opts.get("queue", "auto")}
@@ -523,8 +605,10 @@ class Remote(Backend):
             return explicit
         return ".".join(engine.wheel_energyplus_version().split(".")[:2])
 
-    # The service resolves weather from its own library by station id;
-    # arbitrary local EPWs are not uploadable on this path (documented).
+    # The service's own library, by station id. Used only when we have no
+    # local EPW to upload: since hbix#107 a caller-supplied file is the
+    # preferred path, because the library has been measured to drift from our
+    # committed fixture and a drifting input cannot be compared.
     def _station_id(self):
         return self._opts.get("weather_station_id") or (
             self._opts.get("station_map") or {}).get("default")
@@ -554,15 +638,23 @@ class Http:
     def get_bytes(self, url):
         return self._request("GET", url, auth=False, raw=True)
 
-    def put_bytes(self, url, payload):
-        return self._request("PUT", url, body=payload, auth=False, raw=True)
+    def put_bytes(self, url, payload, headers=None):
+        # `headers` carries the presigner's `required_headers`. A checksum-bound
+        # weather PUT is REFUSED without `x-amz-checksum-sha256`, and the bound
+        # upload is the point: the service verifies our bytes rather than
+        # taking our word (hbix#107).
+        return self._request("PUT", url, body=payload, auth=False, raw=True,
+                             headers=headers)
 
-    def _request(self, method, url, body=None, json_body=False, auth=True, raw=False):
+    def _request(self, method, url, body=None, json_body=False, auth=True,
+                 raw=False, headers=None):
         req = urllib.request.Request(url, data=body, method=method)
         if auth and self._api_key:
             req.add_header("X-API-Key", self._api_key)
         if json_body:
             req.add_header("Content-Type", "application/json")
+        for name, value in (headers or {}).items():
+            req.add_header(name, value)
         with urllib.request.urlopen(req) as res:
             if not 200 <= res.status < 300:
                 raise RuntimeError(f"HTTP {res.status}")

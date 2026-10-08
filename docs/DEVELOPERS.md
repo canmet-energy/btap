@@ -153,7 +153,8 @@ assert btap.__file__.startswith(EXPORT)   # never skip this check
 ## Decisions and generated docs
 
 One decision is one file, `docs/decisions/D-NN.md`: TOML front matter
-(`id`, `title`, `kind`, `articles`, `summary`) followed by the authored Markdown
+(`id`, `title`, `kind`, `articles`, `editions`, `summary`) followed by the
+authored Markdown
 body, whose first line is its own `## D-NN —` heading. Those files are
 canonical. Both [necb_decisions.md](necb_decisions.md) and
 `python/btap/codes/data/decisions.json` are generated from them, in numeric id
@@ -176,9 +177,58 @@ Refresh them only as a maintainer operation with
 `python3 python/scripts/fetch_necb_8_4_text.py` and review the generated-doc
 diff.
 
+## The AHJ register
+
+`docs/NECB_AHJ_QUESTIONS.md` is AUTHORED, not generated — unlike
+`docs/necb_decisions.md` and `NECB_COVERAGE.md`, nothing regenerates it, so
+edit it directly and keep its entries in id order.
+
+It records questions this tool does not decide, and NOT all of them are
+ambiguities. Entries carry one of four statuses — `referral`,
+`alternative-solution`, `ruled`, `tool-gap` — and only the first two may set a
+run conditional. The register's own status table is the contract; calling a
+tool gap a referral would launder a defect as somebody else's question, which
+is why twelve decisions Sol audited were explicitly rejected as referrals.
+
+A runtime condition must cite its entry (`ahj_ids` in `path.py`'s
+determination reason), and `tests/necb/test_ahj_register.py` fails if the
+citation does not resolve, if the file stops being tracked, if an entry omits
+its article, who established it, or what the tool does in the meantime, if an
+entry's own body declares a status its table row does not, or if the README's
+claim about which entries change a run disagrees with the table. That last
+pair exists because a status carried only in the table let one entry hold a
+referral and a tool gap at once, and because the README quoted a verdict block
+the CLI had stopped emitting. Those properties are the difference between a register and a
+pile of correspondence: the `.reviews/` trail held the same questions for
+weeks and was gitignored, so none of it was a record.
+
+```bash
+cd python && .venv/bin/python -m pytest -q tests/necb/test_ahj_register.py
+```
+
+Do not open an entry for something implementable. A requirement the tool
+could satisfy is a coverage gap; a referral is for a question an authority has
+to answer.
+
+### The `editions` field
+
+Decision front matter carries `editions`: the code ids the decision governs,
+or `unverified`. Validated against the editions discovered under
+`btap/codes/necb/data/`, so a typo or a retired id fails the generator rather
+than quietly misinforming a reader. No collective words — list the ids.
+
+```bash
+cd python && .venv/bin/python -m unittest tests.necb.test_decisions_generator
+```
+
+98 of 99 decisions are `unverified`. Filling one in means checking the
+decision's reasoning against that edition's own text, not inferring from the
+article numbers: 2020's `8.4.4.x` and 2025's `8.4.5.x` are different spellings
+of articles that may or may not say the same thing.
+
 ## Frozen scenarios
 
-`verification/scenarios/` contains 45 scenarios in three lanes:
+`verification/scenarios/` contains 46 scenarios in three lanes:
 
 - `python`: engine-free, every Python-suite run
 - `verify`: sizing, in the OpenStudio container

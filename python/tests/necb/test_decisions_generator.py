@@ -27,7 +27,18 @@ GOOD_META = {
     "id": "D-01",
     "title": "A compact registry title",
     "kind": "process",
-    "articles": ["8.4.4.14."],
+    # `articles` is a MAP from code id to that edition's own citations: the
+    # same number can name different requirements in different editions, so a
+    # flat list cannot say which numbering it uses. The fixture uses a real
+    # code id and a real article so the validated path is exercised rather
+    # than skipped.
+    # `articles` groups by an AUTHORED requirement identity, then by code id
+    # inside it. Correspondence across editions is asserted by the author,
+    # not inferred from title vocabulary, which could not be made safe.
+    "articles": {"hydronic_pumps": {
+        "label": "Hydronic pump power",
+        "necb2020": ["8.4.4.14."]}},
+    "editions": ["necb2020"],
     "summary": "A paraphrase of what was decided.",
 }
 GOOD_BODY = "## D-01 {} An authored heading, not the title\n\nBody text.\n".format(EM)
@@ -86,11 +97,23 @@ class TestTomlWriter(unittest.TestCase):
                 with self.assertRaises(TypeError):
                     G.toml_value(value)
 
-    def test_front_matter_emits_the_five_fields_in_registry_order(self):
+    def test_front_matter_emits_the_scalars_then_the_articles_table(self):
+        """`articles` is a TOML TABLE and must come last: a table header
+        captures every key that follows it, so a scalar after it would be read
+        as an articles key."""
         lines = G.front_matter(GOOD_META).split("\n")
         self.assertEqual(G.FENCE, lines[0])
         self.assertEqual(G.FENCE, lines[-1])
-        self.assertEqual(list(G.FIELDS), [line.split(" = ")[0] for line in lines[1:-1]])
+        inner = [ln for ln in lines[1:-1] if ln.strip()]
+        header = next(i for i, ln in enumerate(inner)
+                      if ln.startswith("[articles"))
+        scalars = [ln.split(" = ")[0] for ln in inner[:header]]
+        self.assertEqual([f for f in G.FIELDS if f != "articles"], scalars)
+        allowed = G.registered_codes() | {G.ARTICLES_UNVERIFIED, "label"}
+        for line in inner[header + 1:]:
+            if line.startswith("["):
+                continue        # a further requirement table
+            self.assertIn(line.split(" = ")[0], allowed)
 
 
 class TestSourceValidation(unittest.TestCase):
@@ -115,6 +138,12 @@ class TestSourceValidation(unittest.TestCase):
             self.parse(**kwargs)
         self.assertIn(message, str(caught.exception))
 
+    def accepts(self, **kwargs):
+        """The control. A validator is only as good as what it still admits,
+        and the rule this file replaced was caught by what it WRONGLY
+        refused, not by what it let through."""
+        self.parse(**kwargs)
+
     def test_a_missing_or_unexpected_field_is_refused(self):
         # A missing field cannot be written through source_text, which needs
         # all five, so this one is assembled by hand.
@@ -138,16 +167,35 @@ class TestSourceValidation(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "D-01.md"
             path.write_text(
+                # inserted BEFORE the [articles] table: a TOML table
+                # header captures every key that follows it, so appending
+                # before the closing fence would make this an articles key
+                # rather than an unexpected top-level field
                 G.source_text(GOOD_META, GOOD_BODY).replace(
-                    G.FENCE + "\n\n##", 'extra = "x"\n' + G.FENCE + "\n\n##"),
+                    "\n[articles", '\nextra = "x"\n\n[articles'),
                 encoding="utf-8")
             with self.assertRaises(ValueError) as caught:
                 G.parse_source(path)
             self.assertIn("unexpected", str(caught.exception))
 
     def test_a_malformed_id_is_refused(self):
-        self.rejects("malformed id", meta=dict(GOOD_META, id="D-1"), name="D-1.md")
-        self.rejects("malformed id", meta=dict(GOOD_META, id="D-100"), name="D-100.md")
+        """`D-1` and `D-100` used to be refused by `^D-\\d{2}$`. They are VALID
+        now: D-01..D-99 were all taken, so the grammar widened to `^D-\\d+$`
+        rather than move the wall to 999. What is still malformed is anything
+        that is not D- followed by digits."""
+        for bad in ("D-", "D-x", "D-1a", "Dx1", "99", "D--1"):
+            self.rejects("malformed id",
+                         meta=dict(GOOD_META, id=bad), name=bad + ".md")
+
+    def test_a_THREE_digit_id_is_now_accepted(self):
+        """The widening, pinned: D-01..D-99 are all taken, so a new decision
+        needs an id the old grammar refused."""
+        with tempfile.TemporaryDirectory() as d:
+            body = "## D-100 {} An authored heading\n\nBody text.\n".format(EM)
+            write(d, meta=dict(GOOD_META, id="D-100"), body=body,
+                  name="D-100.md")
+            parsed = G.parse_source(Path(d) / "D-100.md")
+            self.assertIsNotNone(parsed)
 
     def test_a_filename_that_disagrees_with_the_id_is_refused(self):
         self.rejects("filename does not match", name="D-02.md")
@@ -159,8 +207,176 @@ class TestSourceValidation(unittest.TestCase):
         self.rejects("title must be", meta=dict(GOOD_META, title="  "))
         self.rejects("summary must be", meta=dict(GOOD_META, summary=""))
 
-    def test_articles_must_be_a_list_of_strings(self):
-        self.rejects("articles must be", meta=dict(GOOD_META, articles="8.4.4.14."))
+    def test_articles_must_be_a_MAP_of_lists(self):
+        """A flat list cannot say which edition's numbering it uses, and the
+        same number can name different requirements in different editions."""
+        self.rejects("articles must be",
+                     meta=dict(GOOD_META, articles="8.4.4.14."))
+        self.rejects("articles must be",
+                     meta=dict(GOOD_META, articles=["8.4.4.14."]))
+        self.rejects("non-empty list of strings",
+                     meta=dict(GOOD_META, articles={"hydronic_pumps": {
+                         "label": "x", "necb2020": "8.4.4.14."}}))
+
+    def test_a_requirement_must_cover_every_edition_the_decision_claims(self):
+        """Checked PER REQUIREMENT. A global check let one requirement's
+        missing edition hide behind another that listed it."""
+        self.rejects("lists no article for",
+                     meta=dict(GOOD_META,
+                               articles={"hydronic_pumps": {
+                                   "label": "Hydronic pump power",
+                                   "necb2025": ["8.4.5.14."]}}))
+
+    def test_a_requirement_need_NOT_correspond_by_NUMBERING(self):
+        """The suffix-correspondence rule this replaces was wrong in BOTH
+        directions (Sol, `124`.5). It admitted unrelated articles that happened
+        to share suffixes, and it REFUSED a real migration: D-89's
+        modulating-boiler part-load requirement is 8.4.5.2.(3) in NECB 2020 and
+        8.4.6.2.(2) in NECB 2025, because the 2020 article has three sentences
+        and the 2025 article has two. Correspondence is the authored key and
+        its label; numbering cannot carry it."""
+        self.accepts(meta=dict(
+            GOOD_META, editions=["necb2020", "necb2025"],
+            articles={"boiler_part_load": {
+                "label": "Modulating boiler part-load efficiency curve",
+                "necb2020": ["8.4.5.2.(3)"],
+                "necb2025": ["8.4.6.2.(2)"]}}))
+
+    def test_a_citation_may_not_be_blank_or_repeated(self):
+        """A blank cites nothing; a repeat counts one piece of evidence
+        twice. Both were accepted before."""
+        for values in (["   "], [""], ["8.4.4.9.(5)", "8.4.4.9.(5)"]):
+            self.rejects("blank citation" if not values[0].strip()
+                         else "twice",
+                         meta=dict(GOOD_META, articles={"heating": {
+                             "label": "Heating system",
+                             "necb2020": values}}))
+
+    def test_a_nonexistent_SENTENCE_of_a_real_article_is_refused(self):
+        """Validating only the bare article admitted Sentence (999) of an
+        article that does exist."""
+        self.rejects("has sentences",
+                     meta=dict(GOOD_META, articles={"heating": {
+                         "label": "Heating system",
+                         "necb2020": ["8.4.4.9.(999)"]}}))
+
+    def test_a_citation_PREFIX_is_normalised_both_ways(self):
+        """`Article 8.4.4.9.(5)` and `8.4.4.9.(5)` are one citation. Not
+        normalising admitted `Article 8.4.999.1.(5)`, whose prefix hid it from
+        the existence check, and refused a correct prefixed citation."""
+        self.accepts(meta=dict(GOOD_META, articles={"heating": {
+            "label": "Heating system",
+            "necb2020": ["Article 8.4.4.9.(5)"]}}))
+        self.rejects("does not exist in that edition",
+                     meta=dict(GOOD_META, articles={"heating": {
+                         "label": "Heating system",
+                         "necb2020": ["Article 8.4.999.1.(5)"]}}))
+
+    def test_a_citation_must_FULLMATCH_the_grammar(self):
+        """A prefix match ignored anything after a valid citation and
+        downgraded anything before it to unchecked scope, so arbitrary text
+        rode along beside a real citation (Sol, `125`.3)."""
+        for bad in ("8.4.4.9.(5) THIS IS TRAILING JUNK",
+                    "junk before 8.4.4.9.(5)",
+                    "not a citation"):
+            with self.subTest(bad):
+                self.rejects("which is not a citation",
+                             meta=dict(GOOD_META, articles={"heating": {
+                                 "label": "Heating system",
+                                 "necb2020": [bad]}}))
+
+    def test_a_CLAUSE_is_validated_against_ITS_OWN_sentence(self):
+        """8.4.x.9's clause letters run a..i across the article, because
+        Sentence (6) has nine. An unscoped check would admit `(5)(f)` where
+        the Code gives Sentence (5) only clauses (a) and (b)."""
+        self.accepts(meta=dict(GOOD_META, articles={"heating": {
+            "label": "Heating system", "necb2020": ["8.4.4.9.(5)(a)"]}}))
+        self.accepts(meta=dict(GOOD_META, articles={"heating": {
+            "label": "Heating system", "necb2020": ["8.4.4.9.(6)(i)"]}}))
+        for bad in ("8.4.4.9.(5)(z)", "8.4.4.9.(5)(f)"):
+            with self.subTest(bad):
+                self.rejects("has clauses",
+                             meta=dict(GOOD_META, articles={"heating": {
+                                 "label": "Heating system",
+                                 "necb2020": [bad]}}))
+
+    def test_a_TABLE_suffix_is_validated_against_the_edition(self):
+        """Only Tables -A and -B exist for the system-selection article."""
+        self.accepts(meta=dict(GOOD_META, articles={"selection": {
+            "label": "Reference system selection",
+            "necb2020": ["Table 8.4.4.7.-B"]}}))
+        self.rejects("has tables",
+                     meta=dict(GOOD_META, articles={"selection": {
+                         "label": "Reference system selection",
+                         "necb2020": ["Table 8.4.4.7.-Z"]}}))
+
+    def test_a_requirement_key_may_not_be_BLANK(self):
+        """The key and its label are the equivalence assertion, so an empty
+        key asserts nothing while looking authored.
+
+        Written as a QUOTED TOML key, which is how it reaches the validator.
+        A bare whitespace key is a TOML syntax error, so the dict path used by
+        `rejects` cannot express this case — the first version of this test
+        asserted the wrong refusal and passed for the wrong reason.
+        """
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "D-99.md"
+            real = (Path(G.__file__).resolve().parents[2] / "docs"
+                    / "decisions" / "D-99.md").read_text(encoding="utf-8")
+            path.write_text(
+                real.replace("[articles.multi_energy_heating]",
+                             '[articles.""]'),
+                encoding="utf-8")
+            with self.assertRaises(ValueError) as caught:
+                G.parse_source(path)
+            self.assertIn("blank requirement key", str(caught.exception))
+
+    def test_an_edition_may_not_be_listed_TWICE(self):
+        """`check_articles` reduces editions to a set, so a duplicate was
+        erased silently before reaching any check."""
+        self.rejects("more than once",
+                     meta=dict(GOOD_META,
+                               editions=["necb2020", "necb2020"]))
+
+    def test_validated_and_unvalidated_scope_may_not_mix_WITHIN_an_edition(self):
+        """Comparing scope only ACROSS editions let every edition carry the
+        same mixed set and pass."""
+        self.rejects("mixes validated Section 8.4",
+                     meta=dict(GOOD_META, articles={"heating": {
+                         "label": "Heating system",
+                         "necb2020": ["8.4.4.9.(5)", "5.2.12.1.(1)"]}}))
+
+    def test_a_requirement_may_not_MIX_validated_and_unvalidated_scope(self):
+        """Section 8.4 on one side and an unchecked citation on the other
+        means half the claim was verified and half was not, with nothing
+        saying which."""
+        self.rejects("mixes validated Section 8.4",
+                     meta=dict(GOOD_META, editions=["necb2020", "necb2025"],
+                               articles={"heating": {
+                                   "label": "Heating system",
+                                   "necb2020": ["8.4.4.9.(5)"],
+                                   "necb2025": ["5.2.12.1.(5)"]}}))
+
+    def test_the_holding_key_and_established_editions_are_exclusive_BOTH_ways(self):
+        """Checking one direction let a decision claim two code ids while
+        carrying nothing but the holding pen."""
+        self.rejects("go together or not at all",
+                     meta=dict(GOOD_META, editions=["necb2020"],
+                               articles={"unverified": []}))
+        self.rejects("go together or not at all",
+                     meta=dict(GOOD_META, editions=["unverified"],
+                               articles={"heating": {
+                                   "label": "Heating system",
+                                   "necb2020": ["8.4.4.9.(5)"]}}))
+
+    def test_a_Section_8_4_article_absent_from_that_edition_is_refused(self):
+        """`8.4.4.9` is the Heating System article in NECB 2020 and does not
+        exist in 2025 at all."""
+        self.rejects("does not exist in that edition",
+                     meta=dict(GOOD_META, editions=["necb2025"],
+                               articles={"heating": {
+                                   "label": "Heating system",
+                                   "necb2025": ["8.4.4.9.(5)"]}}))
 
     def test_a_body_without_its_own_titled_heading_is_refused(self):
         self.rejects("must open with", body="Body text.\n")
@@ -492,6 +708,72 @@ class TestSplitIsNotAWriter(unittest.TestCase):
             registry = Path("unused")
 
         self.assertEqual(1, G.run_split(Args()))
+
+
+class TestTheEditionsField(unittest.TestCase):
+    """phylroy, 2026-10-07: a decision taken against one edition's text read as
+    applying to every edition, because the front matter said nothing about
+    which code it governs. An authority has to know WHICH code their project
+    is under.
+
+    The field lists CODE IDS, validated against the editions discovered under
+    `btap/codes/necb/data/`, or the single literal `unverified`. It is never a
+    collective word: "both" would stop meaning anything the moment a third
+    edition is registered, and `vintage` is retired vocabulary.
+    """
+
+    def test_a_registered_code_id_is_accepted(self):
+        with tempfile.TemporaryDirectory() as d:
+            write(d, meta=dict(GOOD_META, editions=["necb2025"],
+                               articles={"hydronic_pumps": {
+                                   "label": "Hydronic pump power",
+                                   "necb2025": ["8.4.5.14."]}}))
+            G.parse_source(Path(d) / "D-01.md")     # must not raise
+
+    def test_unverified_alone_is_accepted(self):
+        with tempfile.TemporaryDirectory() as d:
+            write(d, meta=dict(GOOD_META, editions=["unverified"],
+                               articles={"unverified": ["8.4.4.14."]}))
+            G.parse_source(Path(d) / "D-01.md")
+
+    def test_an_UNREGISTERED_code_id_is_refused(self):
+        with tempfile.TemporaryDirectory() as d:
+            write(d, meta=dict(GOOD_META, editions=["necb2030"],
+                               articles={"unverified": []}))
+            with self.assertRaises(ValueError) as caught:
+                G.parse_source(Path(d) / "D-01.md")
+            self.assertIn("necb2030", str(caught.exception))
+
+    def test_a_COLLECTIVE_word_is_refused(self):
+        """The failure mode this field exists to prevent."""
+        with tempfile.TemporaryDirectory() as d:
+            write(d, meta=dict(GOOD_META, editions=["both"],
+                               articles={"unverified": []}))
+            with self.assertRaises(ValueError):
+                G.parse_source(Path(d) / "D-01.md")
+
+    def test_unverified_may_not_be_MIXED_with_a_code_id(self):
+        """Either it has been checked against that edition or it has not."""
+        with tempfile.TemporaryDirectory() as d:
+            write(d, meta=dict(GOOD_META,
+                               editions=["necb2020", "unverified"],
+                               articles={"unverified": []}))
+            with self.assertRaises(ValueError):
+                G.parse_source(Path(d) / "D-01.md")
+
+    def test_an_empty_list_is_refused(self):
+        with tempfile.TemporaryDirectory() as d:
+            write(d, meta=dict(GOOD_META, editions=[],
+                               articles={"unverified": []}))
+            with self.assertRaises(ValueError):
+                G.parse_source(Path(d) / "D-01.md")
+
+    def test_the_allowed_ids_are_DISCOVERED_not_hardcoded(self):
+        """So registering a new edition does not leave the validation stale."""
+        codes = G.registered_codes()
+        self.assertIn("necb2020", codes)
+        self.assertIn("necb2025", codes)
+        self.assertNotIn("unverified", codes)
 
 
 if __name__ == "__main__":

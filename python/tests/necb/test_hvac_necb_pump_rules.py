@@ -1469,5 +1469,89 @@ class TestNecbOperatingSchedules(unittest.TestCase):
                             for e in result.audit.entries))
 
 
+@needs_sdk
+class TestAHJ16IsCitedOnlyWhereTheQuestionArises(unittest.TestCase):
+    """AHJ-16: a reference hydronic system with no UNIQUE proposed counterpart.
+
+    Sol's `126` narrowed it to three shapes — N:1 consolidation, ambiguous
+    overlap, and no corresponding proposed system. Sentence (2) settles several
+    pumps within ONE proposed system and (3) settles missing characteristics on
+    an otherwise corresponding pump, so neither may acquire the citation; nor
+    may a loop outside the article's scope.
+    """
+
+    PREFIX = "8.4.4"
+
+    def _decline(self, reference_loop, proposed):
+        from btap.audit import AuditLog
+        from btap.codes.necb.hvac import efficiency
+
+        audit = AuditLog()
+        efficiency._transfer_by_correspondence(
+            reference_loop, proposed, self.PREFIX, audit)
+        return audit
+
+    @staticmethod
+    def _cited(audit):
+        return [e for e in audit.entries
+                if "AHJ-16" in str(e.get("ahj") or "").split()]
+
+    def test_NO_corresponding_proposed_loop_cites_AHJ_16(self):
+        proposed = openstudio.model.Model()
+        reference = openstudio.model.Model()
+        # WITH a pump: `_transfer_by_correspondence` returns before any decline
+        # when the reference loop has no applicable pump, so a pumpless loop
+        # would have made every assertion below vacuous.
+        loop, _pump = loop_with_vsd_pump(reference, "Heating", zones=("Block A",))
+        loop.setName("Reference Hot Water")
+
+        audit = self._decline(loop, proposed)
+        cited = self._cited(audit)
+        self.assertEqual(1, len(cited), [e.get("action") for e in audit.entries])
+        self.assertEqual("Reference Hot Water", cited[0]["target"])
+        self.assertIn("8.4.4.14", cited[0]["article"])
+
+    def test_a_SERVICE_WATER_loop_cites_nothing(self):
+        """Out of scope for the article, so out of scope for the question."""
+        proposed = openstudio.model.Model()
+        reference = openstudio.model.Model()
+        loop, _pump = loop_with_vsd_pump(reference, "Heating", zones=("Block A",))
+        loop.setName("Reference SWH")
+        connections = openstudio.model.WaterUseConnections(reference)
+        connections.addToNode(loop.demandInletNode())
+
+        audit = self._decline(loop, proposed)
+        self.assertEqual([], self._cited(audit))
+        self.assertEqual(
+            "service_water", efficiency._loop_role(loop),
+            "guards the negative: if the role were not service_water this "
+            "would pass for the wrong reason")
+
+    def test_a_loop_serving_NO_thermal_block_cites_nothing(self):
+        """Nothing for a correspondence to be drawn between: a degenerate
+        model, not an interpretation an authority can settle."""
+        proposed = openstudio.model.Model()
+        reference = openstudio.model.Model()
+        loop, _pump = loop_with_vsd_pump(reference, "Heating", zones=())
+        loop.setName("Reference Orphan")
+
+        audit = self._decline(loop, proposed)
+        self.assertEqual([], self._cited(audit))
+        self.assertTrue(audit.entries, "but the decline is still recorded")
+
+    def test_a_ONE_TO_ONE_correspondence_cites_nothing(self):
+        """The control that matters: where the correspondence IS unique, the
+        article applies and there is no question to refer."""
+        proposed = openstudio.model.Model()
+        proposed_loop, _ = loop_with_vsd_pump(proposed, "Heating",
+                                              zones=("Block A",))
+        reference = openstudio.model.Model()
+        loop, _pump = loop_with_vsd_pump(reference, "Heating", zones=("Block A",))
+        loop.setName("Reference Hot Water")
+
+        audit = self._decline(loop, proposed)
+        self.assertEqual([], self._cited(audit))
+
+
 if __name__ == '__main__':
     unittest.main()
