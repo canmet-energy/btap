@@ -10,6 +10,7 @@ the unnarrowed version would have fired on cases the Code settles.
 
 from __future__ import annotations
 
+import re
 import unittest
 
 from .support import needs_sdk
@@ -991,17 +992,39 @@ class TestEveryCitedArticleExistsInITSEdition(unittest.TestCase):
         return set(articles) if isinstance(articles, dict) else {
             str(entry) for entry in articles}
 
-    def _cited_articles(self, entries):
-        """Every `8.4.x.y` token in the fields that reach a reader."""
-        import re
+    #: A DELIBERATE cross-edition reference, e.g. `8.4.4.3./8.4.5.3.`. Prose
+    #: that explains where a requirement lands in EITHER edition names both
+    #: numbers on purpose, so one of them is always absent from the running
+    #: edition's snapshot and is not a miscitation. NECB 2025's air-barrier
+    #: coverage row says "the leakage RATE is applied to the model (see
+    #: 8.4.2.9. and 8.4.4.3./8.4.5.3.)" — I filed that as a normative question
+    #: for Sol and Fable's `135` H2 showed it is nothing of the kind.
+    #:
+    #: Only the PAIRED form is forgiven, and only when its partner IS in the
+    #: snapshot. A lone foreign number still fails.
+    PAIRED = re.compile(r"(8\.4\.\d+\.\d+)\.?/(8\.4\.\d+\.\d+)")
 
-        seen = set()
+    def _cited_articles(self, entries):
+        """Every `8.4.x.y` token in the fields that reach a reader, minus the
+        half of a cross-edition pair that belongs to the other edition."""
+        seen, paired = set(), set()
         for entry in entries:
             blob = " ".join(str(entry.get(field) or "") for field
                             in ("article", "action", "value", "evidence"))
+            for left, right in self.PAIRED.findall(blob):
+                paired.add((left, right))
             for token in re.findall(r"8\.4\.\d+\.\d+", blob):
                 seen.add(token)
-        return seen
+        return seen, paired
+
+    def _foreign(self, entries, known):
+        """Cited articles absent from `known`, forgiving a cross-edition pair
+        whose OTHER half is present."""
+        cited, paired = self._cited_articles(entries)
+        forgiven = {other for left, right in paired
+                    for one, other in ((left, right), (right, left))
+                    if one in known and other not in known}
+        return {a for a in cited if a not in known} - forgiven
 
     def _run(self, code):
         import btap.modeling as modeling
@@ -1024,20 +1047,17 @@ class TestEveryCitedArticleExistsInITSEdition(unittest.TestCase):
         hvac.apply_economizer_thresholds(model, audit=audit, code=code)
         return audit.entries
 
-    #: Citations that are absent from their edition's snapshot and are NOT
-    #: code literals: every one comes from the `coverage` step, i.e. from that
-    #: edition's own `necb_rules.json` article_coverage. Whether the data or
-    #: the snapshot is wrong is a NORMATIVE question, referred to Sol in `134`
-    #: and not settled here — and a coverage-data edit has four gates of its
-    #: own (provenance hash, citation baseline, R7 ledger, regenerate).
-    #:
-    #: The MCP returns an empty result for all three 2020 ids and titles all
-    #: three in 2025, so the 2020 rows may be citing articles that edition does
-    #: not have. Declared here so the gate still fails on anything NEW.
-    PENDING_SOL_134 = {
-        "necb2020": {"8.4.1.5", "8.4.2.11", "8.4.2.12"},
-        "necb2025": {"8.4.4.3"},
-    }
+    @property
+    def PENDING_SOL_136(self):
+        """ONE list, owned by the frozen sweep.
+
+        It lived here too until the sweep became a test of its own, and two
+        copies of "known wrong, not fixed" is precisely the drift that list
+        exists to prevent. The evidence and the referral live with it.
+        """
+        from tests.test_frozen_article_membership import PENDING_SOL_136
+
+        return PENDING_SOL_136
 
     def test_both_editions_cite_only_their_own_articles(self):
         for code in ("necb2020", "necb2025"):
@@ -1046,9 +1066,9 @@ class TestEveryCitedArticleExistsInITSEdition(unittest.TestCase):
                 self.assertGreater(len(entries), 40,
                                    "the run must be substantial")
                 known = self._snapshot_articles(code)
-                cited = self._cited_articles(entries)
+                cited, _paired = self._cited_articles(entries)
                 self.assertTrue(cited, "the probe must find citations at all")
-                foreign = sorted(a for a in cited if a not in known)
+                foreign = sorted(self._foreign(entries, known))
                 self.assertEqual(
                     [], foreign,
                     "{} cited articles absent from its own snapshot: "
@@ -1079,9 +1099,8 @@ class TestEveryCitedArticleExistsInITSEdition(unittest.TestCase):
                         model, code=code, simulate="none", run_dir=run_dir,
                         hdd=4000, building={"storeys": 1})
                 known = self._snapshot_articles(code)
-                cited = self._cited_articles(result.audit.entries)
-                foreign = {a for a in cited if a not in known}
-                unexpected = sorted(foreign - self.PENDING_SOL_134[code])
+                foreign = self._foreign(result.audit.entries, known)
+                unexpected = sorted(foreign - self.PENDING_SOL_136[code])
                 self.assertEqual(
                     [], unexpected,
                     "{} cited articles absent from its own snapshot and not "
@@ -1090,20 +1109,31 @@ class TestEveryCitedArticleExistsInITSEdition(unittest.TestCase):
                 # And the declared ones must still BE there: if a referral is
                 # settled the list must shrink deliberately, not silently.
                 self.assertEqual(
-                    self.PENDING_SOL_134[code], foreign & self.PENDING_SOL_134[code],
+                    self.PENDING_SOL_136[code], foreign & self.PENDING_SOL_136[code],
                     "a declared referral stopped firing; settle it in the list")
 
     def test_the_probe_has_TEETH(self):
         """Absence of output is not evidence. A deliberately foreign citation
         must be caught, or the test above proves nothing."""
         known = self._snapshot_articles("necb2025")
-        cited = self._cited_articles([
+        foreign = sorted(self._foreign([
             {"article": "8.4.4.12.; 5.2.2.7.(1)"},          # G3's real one
             {"action": "the structural 8.4.4.9.(4) proxy"},  # G3's real one
-        ])
-        foreign = sorted(a for a in cited if a not in known)
+        ], known))
         self.assertEqual(["8.4.4.12", "8.4.4.9"], foreign,
                          "the sweep must see a 2020 article on a 2025 snapshot")
+
+    def test_a_cross_edition_PAIR_is_forgiven_but_a_lone_number_is_not(self):
+        """H2's rule, both directions."""
+        known = self._snapshot_articles("necb2025")
+        self.assertEqual(
+            set(), self._foreign([{"action": "see 8.4.2.9. and 8.4.4.3./8.4.5.3."}],
+                                 known),
+            "a pair whose other half is in the snapshot is deliberate")
+        self.assertEqual(
+            {"8.4.4.3"},
+            self._foreign([{"action": "see 8.4.4.3. alone"}], known),
+            "the same number ALONE is still a miscitation")
 
 class TestNo2020ArticleReachesA2025Run(unittest.TestCase):
     """The class Sol's `129`.5 called a defect and Fable's `131` F6 found in
