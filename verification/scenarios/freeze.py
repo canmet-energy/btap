@@ -55,6 +55,50 @@ TRANSITION_FIELDS = (
 )
 
 
+#: The band a frozen scenario's energy intensity must fall in, kWh/m2.
+#:
+#: Deliberately WIDE. The corpus spans 3.2 (a `--quick` run simulating days
+#: rather than a year) to 185 (a real full year), so this leaves roughly 30x
+#: headroom below and 50x above. It is a sanity bound on a simulation result,
+#: NOT a materiality threshold on a Code question — the point is to catch a
+#: model that is physically absurd, never to express a view about how much
+#: energy a compliant building may use.
+EUI_SANE_MIN_KWH_M2 = 0.1
+EUI_SANE_MAX_KWH_M2 = 10_000.0
+
+
+def _implausible_eui(run):
+    """Complaints about any side whose energy intensity is not a building's.
+
+    Reads the run's own `report.json`; silent when the report carries no energy
+    (a `--simulate none` scenario has none to check), because a missing number
+    is not an absurd one.
+    """
+    report = (run.observations or {}).get("report") if run.observations else None
+    if report is None:
+        path = Path(run.run_dir) / "report.json"
+        if not path.is_file():
+            return []
+        try:
+            report = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return []
+    out = []
+    for side in ("proposed", "reference"):
+        block = report.get(side) or {}
+        kwh = block.get("total_site_kwh")
+        area = block.get("floor_area_m2") or report.get("floor_area_m2")
+        if not kwh or not area:
+            continue
+        eui = kwh / area
+        if not EUI_SANE_MIN_KWH_M2 <= eui <= EUI_SANE_MAX_KWH_M2:
+            out.append(
+                f"  {side}: {kwh:,.0f} kWh over {area:,.0f} m2 = "
+                f"{eui:,.1f} kWh/m2, outside "
+                f"[{EUI_SANE_MIN_KWH_M2}, {EUI_SANE_MAX_KWH_M2:,.0f}]")
+    return out
+
+
 def die(msg):
     sys.exit(f"FREEZE REFUSED: {msg}")
 
@@ -492,6 +536,18 @@ def main():
         if vacuity:
             die(f"{sc['id']}: non-vacuity assertions failed — a vacuous "
                 "baseline must not freeze:\n" + "\n".join(vacuity))
+
+        # PHYSICAL SANITY, before anything is written. A run that completes
+        # is not a run that makes sense, and nothing here checked the
+        # difference until a fixture froze with a proposed EUI of 13.9 MILLION
+        # kWh/m2 — five orders of magnitude out, reported as a number rather
+        # than an error, and caught only by `parity-scenarios` noticing it was
+        # not reproducible across machines.
+        insane = _implausible_eui(run1)
+        if insane:
+            die(f"{sc['id']}: implausible energy intensity — a baseline must "
+                "be a building, not merely a completed simulation:\n"
+                + "\n".join(insane))
 
         # publish this scenario's baselines
         dest = baselines / sc["id"]

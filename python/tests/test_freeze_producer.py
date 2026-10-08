@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import importlib
 import json
+import shutil
 import sys
 import unittest
 from pathlib import Path
@@ -313,6 +314,81 @@ class TestItIsARecordAndNotAGate(unittest.TestCase):
             self.assertRegex(producer["python_driver"], r"^\d+\.\d+\.\d+$")
         self.assertIsNone(producer["container_digest"],
                           "only CI can supply a real image digest")
+
+
+class TestTheFreezeRefusesAnAbsurdBaseline(unittest.TestCase):
+    """A run that COMPLETES is not a run that makes sense.
+
+    Nothing checked the difference until a fixture froze carrying a proposed
+    EUI of 13.9 MILLION kWh/m2 — five orders of magnitude out, reported as a
+    number rather than an error, and caught only because `parity-scenarios`
+    noticed it was not reproducible across machines. The claim at the time was
+    "zero severe and zero fatal errors", which is evidence the solver did not
+    complain and nothing more.
+
+    The bound is a sanity check on a simulation result, never a view about how
+    much energy a compliant building may use: the corpus spans 3.2 kWh/m2 (a
+    `--quick` run simulating days) to 185 (a real full year), and the band is
+    0.1 to 10,000.
+    """
+
+    def setUp(self):
+        self.freeze = _freeze()
+
+    def _run(self, report):
+        import tempfile
+
+        class _Run:
+            observations = None
+
+        run = _Run()
+        directory = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, directory, True)
+        (Path(directory) / "report.json").write_text(
+            json.dumps(report), encoding="utf-8")
+        run.run_dir = directory
+        return run
+
+    def test_the_absurd_fixture_is_REFUSED(self):
+        problems = self.freeze._implausible_eui(self._run(
+            {"proposed": {"total_site_kwh": 11_127_465_412,
+                          "floor_area_m2": 800.0}}))
+        self.assertTrue(problems)
+        self.assertIn("13,909,331.8 kWh/m2", problems[0])
+
+    def test_every_real_corpus_baseline_PASSES(self):
+        """The control, over the committed baselines rather than invented
+        numbers: a bound that rejected a real scenario would be a tuning knob
+        instead of a sanity check."""
+        import json
+
+        root = REPO_ROOT / "verification" / "scenarios" / "baselines"
+        checked = 0
+        for directory in sorted(root.iterdir()):
+            report = directory / "report.json"
+            if not report.is_file():
+                continue
+            data = json.loads(report.read_text(encoding="utf-8"))
+            if not any((data.get(side) or {}).get("total_site_kwh")
+                       for side in ("proposed", "reference")):
+                continue
+            checked += 1
+            with self.subTest(directory.name):
+                self.assertEqual(
+                    [], self.freeze._implausible_eui(self._run(data)),
+                    f"{directory.name} is a real frozen baseline")
+        self.assertGreater(checked, 3,
+                           "no baseline carried energy — the scan is vacuous")
+
+    def test_a_report_with_NO_energy_is_not_an_absurd_one(self):
+        """A `--simulate none` scenario has nothing to check, and a missing
+        number must not be treated as an out-of-range one."""
+        for report in ({"proposed": {}},
+                       {"proposed": {"total_site_kwh": 1000,
+                                     "floor_area_m2": 0}},
+                       {}):
+            with self.subTest(str(report)[:40]):
+                self.assertEqual([], self.freeze._implausible_eui(self._run(report)))
 
 
 if __name__ == "__main__":
