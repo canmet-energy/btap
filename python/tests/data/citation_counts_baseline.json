@@ -1,6 +1,7 @@
 {
   "_provenance": [
-    "Re-baselined 2026-10-08 for Sol's `129`.5. The System 5 presence decision cited `8.4.4.1.(5); Table 8.4.4.7.-B` as a LITERAL, so a necb2025 run told an authority its AHJ-11 condition came from the other edition's articles. Both branches now derive the citation from the edition's own `reference_subsection`, which is why four per-edition literal counts drop by one each: 2020/8.4.4.1 and 2020/8.4.4.7 cited 5->4 and 6->5, and the 2025 counterparts the same. Nothing is lost from the PRODUCT — the citation is now correct for both editions rather than correct for one — but a literal-only per-edition scanner can no longer see it, which is the same trade every other prefix-derived citation in this file already made. One dynamic key is added, `presence_article`; it is a NAME, so the foreign scanner counts it conservatively rather than inspecting its content, and the unheated branch's inline f-string cites only Section 8.4 articles and so is not foreign at all. Verified end to end in the frozen full-year determination-02 run: the AHJ-11 condition carries '8.4.5.1.(5); Table 8.4.5.7.-B'."
+    "Re-baselined 2026-10-08 for Sol's `129`.5. The System 5 presence decision cited `8.4.4.1.(5); Table 8.4.4.7.-B` as a LITERAL, so a necb2025 run told an authority its AHJ-11 condition came from the other edition's articles. Both branches now derive the citation from the edition's own `reference_subsection`, which is why four per-edition literal counts drop by one each: 2020/8.4.4.1 and 2020/8.4.4.7 cited 5->4 and 6->5, and the 2025 counterparts the same. Nothing is lost from the PRODUCT — the citation is now correct for both editions rather than correct for one — but a literal-only per-edition scanner can no longer see it, which is the same trade every other prefix-derived citation in this file already made. One dynamic key is added, `presence_article`; it is a NAME, so the foreign scanner counts it conservatively rather than inspecting its content, and the unheated branch's inline f-string cites only Section 8.4 articles and so is not foreign at all. Verified end to end in the frozen full-year determination-02 run: the AHJ-11 condition carries '8.4.5.1.(5); Table 8.4.5.7.-B'.",
+    "Re-baselined 2026-10-08 for AHJ-10. The corner-block grouping choice was NOT audited — Sol's `127` traced it to `VAVReheat._dominant_orientation`, which has no audit object, while the register claimed it was. The fix is the metadata handoff he specified: the generic builder records structured grouping evidence and learns no NECB ids, and `btap.codes` emits the entry. That entry cites `Table 8.4.x.7.-B Note (3)`, so 2020/8.4.4.7 and 2025/8.4.5.7 each gain one `cited` site: 227 to 229. An ADDITION, not a loss — and it makes D-18 genuinely runtime-wired, so its kind moves from `runtime_unwired` to `runtime`."
   ],
   "2020": {
     "8.4.4.1": {
@@ -40,7 +41,7 @@
       "warn": 3
     },
     "8.4.4.7": {
-      "cited": 5,
+      "cited": 6,
       "warn": 5
     },
     "8.4.2.10": {
@@ -125,7 +126,7 @@
       "warn": 3
     },
     "8.4.5.7": {
-      "cited": 5,
+      "cited": 6,
       "warn": 5
     },
     "8.4.2.10": {

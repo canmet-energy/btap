@@ -65,7 +65,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-15** — Energy-recovery effectiveness and frost values verified against the code text _(runtime)_
 - **D-16** — Orphaned proposed EMS purged from the reference _(runtime)_
 - **D-17** — Legacy energy-recovery diagnosis filed upstream _(process)_
-- **D-18** — Multizone system zone grouping rewritten to the table note _(runtime_unwired)_
+- **D-18** — Multizone system zone grouping rewritten to the table note _(runtime)_
 - **D-19** — Infiltration lineage reconciled; reference inherits proposed leakage coefficients _(runtime)_
 - **D-20** — Economizer exempted on 100%-outdoor-air makeup air units _(runtime)_
 - **D-21** — Envelope area for air leakage computed as the conditioned-space enclosure _(runtime)_

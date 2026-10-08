@@ -37,6 +37,11 @@ class Result:
     family: str
     air_loops: list
     control_zone: object
+    #: Structured evidence a builder chose to record about a grouping decision,
+    #: or None. The generic layer produces it and names no code family; a
+    #: code layer interprets it. Sol's `127` required this handoff because the
+    #: deciding method lives here and may not learn NECB ids.
+    grouping_evidence: object = None
 
 
 def _system_class(family):
@@ -122,11 +127,15 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
                                              chiller_type=resolved.get('chiller_type', 'Scroll'),
                                              source=resolved.get('chw_source', 'water_cooled'))
 
-    air_loops = system_class(resolved).build(model, zones,
-                                             control_zone=control_zone,
-                                             namer=namer,
-                                             hw_loop=hw_loop,
-                                             chw_loop=chw_loop)
+    # The INSTANCE is kept, not discarded: a builder may record structured
+    # evidence about a decision only it can see.
+    system = system_class(resolved)
+    air_loops = system.build(model, zones,
+                             control_zone=control_zone,
+                             namer=namer,
+                             hw_loop=hw_loop,
+                             chw_loop=chw_loop)
 
     return Result(system_name=system_name, family=resolved['family'],
-                  air_loops=air_loops, control_zone=control_zone)
+                  air_loops=air_loops, control_zone=control_zone,
+                  grouping_evidence=getattr(system, 'grouping_evidence', None))

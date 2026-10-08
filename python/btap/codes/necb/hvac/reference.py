@@ -351,6 +351,47 @@ def _subsection(ruleset):
     return ruleset.article('reference_subsection')
 
 
+def _audit_corner_block_grouping(result, assignment, prefix, audit):
+    """AHJ-10: which facade a CORNER block was assigned to, and that we chose it.
+
+    The register used to claim this choice was audited. It was not — Sol's `127`
+    traced the deciding code to `VAVReheat._dominant_orientation`, which has no
+    audit object, and the later `multizone selection groups merged` entry
+    records neither the corner block's identity nor the elected facade. So a
+    reviewer could not see which facade a corner block was given.
+
+    The fix is the metadata handoff Sol specified, not a second copy of the
+    rule: the generic builder records WHAT it measured and elected, and this
+    function — in `btap.codes`, where NECB ids belong — decides whether that
+    raises a question and writes it down.
+
+    Table -B Note (3) says only that blocks are "grouped together based on
+    facade orientation". It supplies neither the metric nor the tie-break, so a
+    block with exposure on MORE THAN ONE orientation is assigned by a rule we
+    chose. A single-facade block is unambiguous and raises nothing.
+    """
+    evidence = getattr(result, 'grouping_evidence', None)
+    if not evidence or assignment.reference_system != 6:
+        return
+    corners = [record for record in evidence
+               if len(record.get('facade_areas_m2') or {}) > 1]
+    if not corners:
+        return
+    audit.decision(
+        'selection',
+        'corner thermal blocks assigned to ONE facade group by largest '
+        'exterior wall area, with an N/E/S/W tie-break — Note (3) says only '
+        'that blocks are grouped by facade orientation and supplies neither '
+        'the metric nor the tie-break, so this assignment is ours',
+        target=','.join(record['zone'] for record in corners),
+        inputs={'corner_blocks': {record['zone']: {
+                    'facade_areas_m2': record['facade_areas_m2'],
+                    'elected': record['elected']} for record in corners},
+                'tie_break': corners[0].get('tie_break')},
+        article=f'Table {prefix}.7.-B Note (3)', ruling='D-18',
+        ahj='AHJ-10')
+
+
 def _finalize(assignment, group, definitions, selection, facts, audit,
               hp_rules=None, proposed_annual=None, ruleset=None,
               disclosed=None):
@@ -678,6 +719,8 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
                             for boiler in reference.getBoilerHotWaters()}
         result = modeling.replace_system(reference, assignment.catalog_name, zones,
                                          config=assignment.config)
+        _audit_corner_block_grouping(result, assignment,
+                                     _subsection(ruleset), audit)
         purchased_cooling_cop = (assignment.config or {}).get(
             'purchased_cooling_reference_cop')
         if purchased_cooling_cop is not None:

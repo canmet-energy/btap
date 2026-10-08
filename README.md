@@ -227,7 +227,7 @@ usefully, for each partial article's specific gap.
 
 Where the code needs interpreting, the interpretation is written down rather than
 buried in the source. **100 decisions** are recorded in
-**[necb_decisions.md](docs/necb_decisions.md)** — 51 of them
+**[necb_decisions.md](docs/necb_decisions.md)** — 52 of them
 active at runtime, tagging the audit entries they govern.
 
 A decision records what the code says, how we read it, what we rejected, and why.

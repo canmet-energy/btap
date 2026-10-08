@@ -529,5 +529,112 @@ class TestAHJ2TheAnnualEnergyBasis(unittest.TestCase):
         self.assertIn("MODE limitation", segment)
 
 
+@needs_sdk
+class TestAHJ10CornerBlockGrouping(unittest.TestCase):
+    """AHJ-10: which facade a CORNER block is assigned to.
+
+    The register used to claim this choice was audited. It was NOT — Sol's
+    `127` traced the deciding code to `VAVReheat._dominant_orientation`, which
+    has no audit object, and the later merge entry records neither the corner
+    block's identity nor the elected facade.
+
+    The fix is the metadata handoff Sol specified, and these tests check BOTH
+    halves of it: that the generic builder records what it measured and
+    elected, and that it learns nothing about NECB while doing so.
+    """
+
+    @staticmethod
+    def _wall(space, points):
+        import openstudio
+
+        vertices = openstudio.Point3dVector()
+        for x, y, z in points:
+            vertices.append(openstudio.Point3d(x, y, z))
+        surface = openstudio.model.Surface(vertices, space.model())
+        surface.setSpace(space)
+        surface.setSurfaceType("Wall")
+        surface.setOutsideBoundaryCondition("Outdoors")
+        return surface
+
+    def _model_with_a_corner(self):
+        """One zone with NORTH and EAST exterior walls, one with SOUTH only."""
+        import openstudio
+
+        model = openstudio.model.Model()
+        made = []
+        for name, walls in (
+                ("Corner Block", [[(0, 10, 0), (10, 10, 0), (10, 10, 3), (0, 10, 3)],
+                                  [(10, 10, 0), (10, 0, 0), (10, 0, 3), (10, 10, 3)]]),
+                ("Single Facade Block", [[(10, 0, 0), (0, 0, 0), (0, 0, 3),
+                                          (10, 0, 3)]])):
+            space = openstudio.model.Space(model)
+            space.setName(f"{name} Space")
+            zone = openstudio.model.ThermalZone(model)
+            zone.setName(name)
+            space.setThermalZone(zone)
+            for points in walls:
+                self._wall(space, points)
+            made.append(zone)
+        return model, made
+
+    def _evidence(self):
+        from btap.modeling.geometry import helpers
+        from btap.modeling.hvac.systems import vav_reheat
+
+        model, zones = self._model_with_a_corner()
+        builder = vav_reheat.VAVReheat({"sys_abbr": "sys6",
+                                        "family": "vav_reheat"})
+        real = helpers.above_ground_storeys
+        # The facade split only runs ABOVE four storeys, which is itself one of
+        # Sol's exclusions; this forces the branch under test.
+        vav_reheat.helpers.above_ground_storeys = lambda _model: 5
+        try:
+            builder._zone_groups(model, zones)
+        finally:
+            vav_reheat.helpers.above_ground_storeys = real
+        return builder.grouping_evidence
+
+    def test_the_builder_records_what_it_MEASURED_and_ELECTED(self):
+        """The COUNT of orientations is the property, not which ones. Which
+        compass bin a wall lands in follows its vertex winding, and asserting a
+        letter would pin my own winding assumption rather than the behaviour —
+        the first version of this test did exactly that and failed on it."""
+        evidence = {record["zone"]: record for record in self._evidence()}
+        corner = evidence["Corner Block"]
+        self.assertEqual(2, len(corner["facade_areas_m2"]),
+                         f"two orientations carry wall area: {corner}")
+        self.assertIn(corner["elected"], corner["facade_areas_m2"],
+                      "the elected facade is one it actually has")
+        self.assertIn("N/E/S/W", corner["tie_break"],
+                      "the tie-break rule travels with the evidence")
+        self.assertTrue(all(area > 0 for area
+                            in corner["facade_areas_m2"].values()))
+
+    def test_a_SINGLE_facade_block_is_not_a_corner(self):
+        """The boundary negative: one orientation is unambiguous, so Note (3)
+        decides it and no question arises."""
+        evidence = {record["zone"]: record for record in self._evidence()}
+        single = evidence["Single Facade Block"]
+        self.assertEqual(1, len(single["facade_areas_m2"]),
+                         f"one orientation only: {single}")
+        self.assertEqual(single["elected"],
+                         next(iter(single["facade_areas_m2"])))
+
+    def test_the_GENERIC_builder_learns_no_NECB_ids(self):
+        """The constraint that made this a handoff instead of a citation:
+        `btap.modeling` is the code-family-neutral layer and may not carry NECB
+        articles or register ids (Sol, `127`)."""
+        import pathlib as _pathlib
+        import re as _re
+
+        from btap.modeling.hvac.systems import vav_reheat
+
+        source = _pathlib.Path(vav_reheat.__file__).read_text(encoding="utf-8")
+        self.assertEqual([], _re.findall(r"\bAHJ-\d+\b", source))
+        self.assertNotIn("ahj=", source)
+        self.assertIn("grouping_evidence", source,
+                      "it records evidence, and nothing more")
+
+
 if __name__ == "__main__":      # pragma: no cover
     unittest.main()

@@ -272,7 +272,7 @@
     {
       "id": "D-18",
       "title": "Multizone system zone grouping rewritten to the table note",
-      "kind": "runtime_unwired",
+      "kind": "runtime",
       "articles": {
         "unverified": [
           "Table 8.4.4.7.-B Note (3)"
