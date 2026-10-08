@@ -402,7 +402,8 @@ def _finalize(assignment, group, definitions, selection, facts, audit,
     hp_article = heat_pump_article_base(selection)
     if _heat_pump_redirects(group) and assignment.reference_system in hp_rule['applies_to_systems']:
         audit.decision('selection',
-                       'proposed heat pump -> reference is an air-source heat pump (Table 8.4.4.13)',
+                       'proposed heat pump -> reference is an air-source heat pump '
+                       f'(Table {hp_article})',
                        target=','.join(group['zones']),
                        inputs={'selected_system': assignment.reference_system,
                                'heat_pump_sources': group.get('heat_pump_sources')},
@@ -708,7 +709,8 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
     # Table 8.4.4.7.-B note (1) (D-55): record every proposed thermal block's
     # humidification and its energy source BEFORE the teardown destroys the loops
     # that carry it — the rebuild happens once the reference loops exist.
-    proposed_humidification = _capture_humidification(reference, audit)
+    proposed_humidification = _capture_humidification(
+        reference, audit, table=f'Table {_subsection(ruleset)}.7.-B')
     # D-28 (LargeOffice end-use isolation): Note (3) to Table 8.4.4.7.-B
     # scopes a MULTIZONE reference system to the thermal blocks of ALL
     # storeys — one system at <=4 above-ground storeys, per-facade splits
@@ -737,7 +739,8 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
                        inputs={'selection_groups': len(assignments), 'merged_groups': len(merged)},
                        value='one multizone system spans the thermal blocks of all storeys; '
                              'facade/internal/underground split applied inside the builder',
-                       article='Table 8.4.4.7.-B Note (3)', ruling='D-28')
+                       article=f'Table {_subsection(ruleset)}.7.-B Note (3)',
+                       ruling='D-28')
     assignments = [m[1] for m in merged]
 
     purchased_cooling_chillers = []
@@ -1574,7 +1577,7 @@ def _air_loop_humidifier(air_loop):
     return None
 
 
-def _capture_humidification(reference, audit):
+def _capture_humidification(reference, audit, table='Table 8.4.4.7.-B'):
     """Record, per zone, the humidification of the proposed loop serving it, plus the
     material needed to rebuild a working control: the proposed's own scheduled
     minimum-humidity setpoint, if it used one. (A ZoneControlHumidistat lives on the
@@ -1598,7 +1601,7 @@ def _capture_humidification(reference, audit):
                            'zones': len(air_loop.thermalZones()),
                            'scheduled_setpoint': record['scheduled_setpoint'] is not None},
                    value=component.nameString(),
-                   article='Table 8.4.4.7.-B Note (1)', ruling='D-55')
+                   article=f'{table} Note (1)', ruling='D-55')
 
     orphans = [h for h in (list(reference.getHumidifierSteamElectrics())
                            + list(reference.getHumidifierSteamGass()))
@@ -1608,7 +1611,7 @@ def _capture_humidification(reference, audit):
         audit.warn('build', f'{len(orphans)} proposed humidifier(s) sit on NO air loop serving a thermal block '
                             f'({names}) — the reference humidification they '
                             'correspond to CANNOT be determined and is not rebuilt',
-                   article='Table 8.4.4.7.-B Note (1)', ruling='D-55')
+                   article=f'{table} Note (1)', ruling='D-55')
     return captured
 
 
@@ -2029,6 +2032,13 @@ def heat_pump_article_base(selection):
 # inapplicability recorded, rather than guessing.
 
 def heat_pump_aux_energy_type(group, facts, hp_rules, annual, audit, article_base='8.4.4.13'):
+    # The STRUCTURAL proxy lives in a different article from the one
+    # article_base names, so it needs the subsection on its own. Fable's
+    # `131` F6: these said '8.4.4.9.(4)' on a 2025 run whose `article=`
+    # correctly said 8.4.5.13, and the resolver quotes the action verbatim
+    # as the condition detail — so an authority was handed a 2020 number,
+    # which in 2025 is the archetype-EUI subsection entirely.
+    proxy = '.'.join(article_base.split('.')[:3]) + '.9.(4)'
     """:param group: one classify.characterize group (the heat-pump system)
     :param facts: the full classify.characterize output
     :param hp_rules: the ruleset's heat-pump rules block (threshold source), or None
@@ -2073,7 +2083,8 @@ def heat_pump_aux_energy_type(group, facts, hp_rules, annual, audit, article_bas
         # (2)(g) comparison to weigh, so no basis question arises.
         audit.info('selection',
                    'the proposed thermal blocks have no terminal or auxiliary heating energy in the annual '
-                   'run — 8.4.4.13.(2)(g) has nothing to elect; the structural 8.4.4.9.(4) proxy elects the fuel',
+                   f'run — {article_base}.(2)(g) has nothing to elect; the structural {proxy} '
+                   'proxy elects the fuel',
                    target=','.join(group['zones']),
                    inputs={'hp_gj': ruby_round(hp_j / 1e9, 2)},
                    article=f'{article_base}.(2)(g)', ruling='D-52')
@@ -2084,7 +2095,7 @@ def heat_pump_aux_energy_type(group, facts, hp_rules, annual, audit, article_bas
         audit.decision('selection',
                        f"the heat pump carries {ruby_round(share * 100, 1)}% of the blocks' annual space-heating "
                        f'energy — NOT above the {ruby_round(threshold * 100)}% proviso, so sentence (g) does not '
-                       'elect; the structural 8.4.4.9.(4) proxy elects the fuel',
+                       f'elect; the structural {proxy} proxy elects the fuel',
                        target=','.join(group['zones']),
                        inputs={'hp_gj': ruby_round(hp_j / 1e9, 2), 'total_gj': ruby_round(total_j / 1e9, 2),
                                'share': ruby_round(share, 3), 'threshold': threshold, 'sentence': sentence},
@@ -2097,7 +2108,7 @@ def heat_pump_aux_energy_type(group, facts, hp_rules, annual, audit, article_bas
     if variant is None:
         audit.warn('selection',
                    f"the largest terminal/aux energy type is '{elected_fuel}', which maps to NO reference "
-                   'system variant — the structural 8.4.4.9.(4) proxy elects the fuel instead',
+                   f'system variant — the structural {proxy} proxy elects the fuel instead',
                    target=','.join(group['zones']),
                    inputs={'by_fuel_gj': {f: ruby_round(j / 1e9, 2) for f, j in aux_by_fuel.items()}},
                    article=f'{article_base}.(2){sentence}', ruling='D-52',

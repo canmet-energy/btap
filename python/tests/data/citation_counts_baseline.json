@@ -1,8 +1,4 @@
 {
-  "_provenance": [
-    "Re-baselined 2026-10-08 for Sol's `129`.5. The System 5 presence decision cited `8.4.4.1.(5); Table 8.4.4.7.-B` as a LITERAL, so a necb2025 run told an authority its AHJ-11 condition came from the other edition's articles. Both branches now derive the citation from the edition's own `reference_subsection`, which is why four per-edition literal counts drop by one each: 2020/8.4.4.1 and 2020/8.4.4.7 cited 5->4 and 6->5, and the 2025 counterparts the same. Nothing is lost from the PRODUCT — the citation is now correct for both editions rather than correct for one — but a literal-only per-edition scanner can no longer see it, which is the same trade every other prefix-derived citation in this file already made. One dynamic key is added, `presence_article`; it is a NAME, so the foreign scanner counts it conservatively rather than inspecting its content, and the unheated branch's inline f-string cites only Section 8.4 articles and so is not foreign at all. Verified end to end in the frozen full-year determination-02 run: the AHJ-11 condition carries '8.4.5.1.(5); Table 8.4.5.7.-B'.",
-    "Re-baselined 2026-10-08 for AHJ-10. The corner-block grouping choice was NOT audited — Sol's `127` traced it to `VAVReheat._dominant_orientation`, which has no audit object, while the register claimed it was. The fix is the metadata handoff he specified: the generic builder records structured grouping evidence and learns no NECB ids, and `btap.codes` emits the entry. That entry cites `Table 8.4.x.7.-B Note (3)`, so 2020/8.4.4.7 and 2025/8.4.5.7 each gain one `cited` site: 227 to 229. An ADDITION, not a loss — and it makes D-18 genuinely runtime-wired, so its kind moves from `runtime_unwired` to `runtime`."
-  ],
   "2020": {
     "8.4.4.1": {
       "cited": 4,
@@ -41,8 +37,8 @@
       "warn": 3
     },
     "8.4.4.7": {
-      "cited": 6,
-      "warn": 5
+      "cited": 4,
+      "warn": 4
     },
     "8.4.2.10": {
       "cited": 1
@@ -126,8 +122,8 @@
       "warn": 3
     },
     "8.4.5.7": {
-      "cited": 6,
-      "warn": 5
+      "cited": 4,
+      "warn": 4
     },
     "8.4.2.10": {
       "cited": 1
@@ -161,5 +157,10 @@
     "8.4.5.20": {
       "cited": 1
     }
-  }
+  },
+  "_provenance": [
+    "Re-baselined 2026-10-08 for Sol's `129`.5. The System 5 presence decision cited `8.4.4.1.(5); Table 8.4.4.7.-B` as a LITERAL, so a necb2025 run told an authority its AHJ-11 condition came from the other edition's articles. Both branches now derive the citation from the edition's own `reference_subsection`, which is why four per-edition literal counts drop by one each: 2020/8.4.4.1 and 2020/8.4.4.7 cited 5->4 and 6->5, and the 2025 counterparts the same. Nothing is lost from the PRODUCT — the citation is now correct for both editions rather than correct for one — but a literal-only per-edition scanner can no longer see it, which is the same trade every other prefix-derived citation in this file already made. One dynamic key is added, `presence_article`; it is a NAME, so the foreign scanner counts it conservatively rather than inspecting its content, and the unheated branch's inline f-string cites only Section 8.4 articles and so is not foreign at all. Verified end to end in the frozen full-year determination-02 run: the AHJ-11 condition carries '8.4.5.1.(5); Table 8.4.5.7.-B'.",
+    "Re-baselined 2026-10-08 for AHJ-10. The corner-block grouping choice was NOT audited — Sol's `127` traced it to `VAVReheat._dominant_orientation`, which has no audit object, while the register claimed it was. The fix is the metadata handoff he specified: the generic builder records structured grouping evidence and learns no NECB ids, and `btap.codes` emits the entry. That entry cites `Table 8.4.x.7.-B Note (3)`, so 2020/8.4.4.7 and 2025/8.4.5.7 each gain one `cited` site: 227 to 229. An ADDITION, not a loss — and it makes D-18 genuinely runtime-wired, so its kind moves from `runtime_unwired` to `runtime`.",
+    "Re-baselined 2026-10-08 for Fable's `131` F6, the class Sol's `129`.5 had already called a defect: a 2020 article number written as a LITERAL in action text on a run whose `article=` field was correctly 2025. It reaches an authority, because the resolver quotes the deciding entry's action verbatim as the condition `detail`, and in NECB 2025 the 8.4.4 subsection is archetype EUI entirely. Three citations in reference.py now derive the edition's own prefix instead of spelling 2020's: the D-28 multizone merge decision's `Table 8.4.x.7.-B Note (3)`, and the humidification capture decision and orphan warning's `Table 8.4.x.7.-B Note (1)`. That is why 8.4.4.7 and 8.4.5.7 each drop two `cited` and one `warn`, 229 to 223. Nothing is lost from the PRODUCT — each citation is now right for both editions where it was right for one — but a literal-only per-edition scanner can no longer see it, the same trade the two entries above made. Two more of the same class were fixed outside this file's scope: the heat-pump redirect action (already had `hp_article` computed above it) and efficiency.py's fan-curve warning, whose own comment said \"(2025: 8.4.5.17)\" while the string said 8.4.4.17. That one was found by sweeping both editions at runtime rather than reported, and the sweep is now a test: a necb2025 run must cite no 8.4.4.x article. The check is deliberately one-way, because NECB 2020 legitimately cites 8.4.5.x for its part-load curve tables."
+  ]
 }

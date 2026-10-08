@@ -499,8 +499,15 @@ def _apply_fan_power_curve(fan, ruleset, audit):
         flow = (fan.autosizedMaximumFlowRate().get()
                 if fan.autosizedMaximumFlowRate().is_initialized() else None)
     if flow is None:
-        audit.warn('efficiency', f'{fan.nameString()}: flow not sized — 8.4.4.17 fan curve selection needs the '
-                                 'rated power; run sizing first (curve not applied)')
+        # The subsection is per-edition; line 481's own comment says
+        # "(2025: 8.4.5.17)" while this literal said 8.4.4.17 on every run.
+        # Same class as Fable's `131` F6, found by sweeping both editions for
+        # foreign-prefix citations rather than reported — in NECB 2025, 8.4.4
+        # is the archetype-EUI subsection entirely.
+        audit.warn('efficiency', f'{fan.nameString()}: flow not sized — '
+                                 f"{ruleset.article('reference_subsection')}.17 fan curve "
+                                 'selection needs the rated power; run sizing first '
+                                 '(curve not applied)')
         return
 
     power_kw = fan.pressureRise() * flow / (fan.fanTotalEfficiency() * 1000.0)

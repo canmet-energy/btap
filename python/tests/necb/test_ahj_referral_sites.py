@@ -925,5 +925,106 @@ class TestTheReportAPPENDIXShowsEveryFiredDisposition(unittest.TestCase):
                         "the dispositions are read before the raw audit trail")
 
 
+@needs_sdk
+class TestNo2020ArticleReachesA2025Run(unittest.TestCase):
+    """The class Sol's `129`.5 called a defect and Fable's `131` F6 found in
+    four more places: a 2020 article number written as a LITERAL in action
+    text, on a run whose `article=` field is correctly 2025.
+
+    It reaches an authority. The resolver quotes the deciding entry's action
+    verbatim as the condition `detail`, so a conditional 2025 run handed over a
+    number that in NECB 2025 names the archetype-EUI subsection entirely.
+
+    Checked by RUNNING both editions rather than scanning the source, because a
+    computed citation can be wrong too and a literal in a docstring is
+    harmless. The direction is deliberately one-way: NECB 2020 legitimately
+    cites 8.4.5.x for its part-load curve tables (Sol's `128` quotes
+    Table 8.4.5.2.-A for 2020 boilers), so a 2020 run carrying an 8.4.5 number
+    proves nothing. A 2025 run carrying an 8.4.4 number is always wrong.
+    """
+
+    def test_no_entry_on_a_2025_run_cites_the_2020_subsection(self):
+        import re
+
+        import btap.modeling as modeling
+        from btap._compat import sorted_by_name
+        from btap.audit import AuditLog
+        from btap.codes.necb import hvac
+
+        from .support import compliance_fixture
+
+        system = ("MZ BU RTU Hot Water Heating Coil Scroll Chiller and "
+                  "Hot Water Baseboard")
+        model = compliance_fixture()
+        zones = sorted_by_name(model.getThermalZones())
+        # Two multizone groups above four storeys, so the D-28 merge, the
+        # Note (3) grouping and the humidification capture all fire.
+        modeling.build_system(model, system, zones[:3])
+        modeling.build_system(model, system, zones[3:])
+        audit = AuditLog()
+        hvac.reference_hvac(model, code="necb2025", building={"storeys": 6},
+                            audit=audit)
+        hvac.apply_efficiencies(model, code="necb2025", audit=audit)
+
+        self.assertGreater(len(audit.entries), 40, "the run must be substantial")
+        offenders = []
+        for entry in audit.entries:
+            blob = "{} {} {}".format(entry.get("action"), entry.get("article"),
+                                     entry.get("value"))
+            for hit in re.findall(r"8\.4\.4\.[0-9][0-9.\-A-B()]*", blob):
+                offenders.append((hit, str(entry.get("action"))[:60]))
+        self.assertEqual(
+            [], offenders,
+            "a necb2025 run cited the 2020 reference subsection: {}".format(
+                offenders[:6]))
+
+
+class TestTheCLICanReachAHJ11(unittest.TestCase):
+    """Fable's `131` F9: `compliance_kwargs` built `building` from `--storeys`
+    alone and no option offered refrigerated zones, so every CLI run took the
+    "ASSUMED non-refrigerated" branch. The register discloses AHJ-11 to a
+    reader who, through `btap-compliance`, could never meet it.
+
+    The model cannot express refrigerated space, which is why the override
+    exists; leaving it API-only made the referral unreachable for the surface
+    most users have. Sol's rule is that a tool gap is a defect to close.
+    """
+
+    def _building(self, argv):
+        from btap.codes import cli
+
+        namespace = cli.build_parser().parse_args(argv)
+        options = {"code": "necb2020", "run_dir": "/tmp/x", "simulate": "annual",
+                   "report_options": {}, "model": "b.osm", "report_html": None}
+        options.update({key: value for key, value
+                        in vars(namespace).items() if value is not None})
+        _model, kwargs = cli.compliance_kwargs(options)
+        return kwargs.get("building")
+
+    def test_the_option_reaches_the_building_data(self):
+        self.assertEqual(
+            {"refrigerated_zones": ["Cooler 1", "Freezer 2"]},
+            self._building(["--refrigerated-zones", "Cooler 1, Freezer 2"]),
+            "names are split on commas and stripped")
+
+    def test_it_does_not_DISPLACE_the_storeys_override(self):
+        """`building` was assigned, not built up, so a second key would have
+        dropped the first."""
+        self.assertEqual(
+            {"storeys": 6, "refrigerated_zones": ["Cooler 1"]},
+            self._building(["--storeys", "6", "--refrigerated-zones", "Cooler 1"]))
+
+    def test_storeys_alone_is_unchanged(self):
+        self.assertEqual({"storeys": 3}, self._building(["--storeys", "3"]))
+
+    def test_neither_passes_no_building_data(self):
+        self.assertIsNone(self._building([]))
+
+    def test_it_is_in_the_help(self):
+        from btap.codes import cli
+
+        self.assertIn("--refrigerated-zones", cli.build_parser().format_help())
+
+
 if __name__ == "__main__":      # pragma: no cover
     unittest.main()

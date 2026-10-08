@@ -197,6 +197,10 @@ def build_parser():
                         f"(default {DEFAULT_CODE})")
     p.add_argument("--storeys", type=int, metavar="N",
                    help="above-ground storey count override")
+    p.add_argument("--refrigerated-zones", metavar="NAME[,NAME...]",
+                   help="thermal zones that are refrigerated space; the model "
+                        "cannot express this, and Table 8.4.x.7.-A selects "
+                        "System 5 for them")
     p.add_argument("--simulate", choices=["annual", "sizing", "none"],
                    default="annual", help="annual (default), sizing, or none")
     p.add_argument("--quick", action="store_true",
@@ -245,6 +249,7 @@ def _collect(o, namespace):
     """argparse namespace -> the Ruby-shaped options dict."""
     ns = vars(namespace)
     for key in ("epw", "ddy", "hdd", "city", "run_dir", "code", "storeys",
+                "refrigerated_zones",
                 "simulate", "quick", "backend", "report_html", "json", "quiet",
                 "space_type", "space_type_map", "costs_csv"):
         if ns.get(key) is not None:
@@ -315,8 +320,20 @@ def compliance_kwargs(o):
         kw["weather"] = {"epw": o["epw"], "ddy": o["ddy"]}
     if o.get("hdd") is not None:
         kw["hdd"] = o["hdd"]
+    # ONE `building` dict, built up: a second assignment silently dropped
+    # whichever key was set first. AHJ-11 was unreachable from the CLI
+    # altogether (Fable's `131` F9) — the register's reachability statement was
+    # true of the Python API only, and a `btap-compliance` user could never
+    # meet the referral the register discloses to them.
+    building = {}
     if o.get("storeys") is not None:
-        kw["building"] = {"storeys": o["storeys"]}
+        building["storeys"] = o["storeys"]
+    if o.get("refrigerated_zones"):
+        building["refrigerated_zones"] = [name.strip() for name
+                                          in str(o["refrigerated_zones"]).split(",")
+                                          if name.strip()]
+    if building:
+        kw["building"] = building
     if o.get("quick"):
         kw["run_period"] = dict(QUICK_RUN_PERIOD)
     if o.get("costs_csv"):
