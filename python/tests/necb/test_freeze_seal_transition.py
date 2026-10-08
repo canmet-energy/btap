@@ -47,12 +47,16 @@ class TestFreezeSealTransition(unittest.TestCase):
         #      (Sol's `122`.5 — the determination had focused tests and zero
         #      frozen coverage) and sample 09 for AHJ-5 (Sol's `126` — the
         #      WSHP shape had the same hole once its predicate was fixed)
-        #   = 16
+        #   1  the first guard-7 witness: determination-02, sample 11 run
+        #      FULL-YEAR for AHJ-1 and AHJ-3 (Sol's `127` — both fired only in
+        #      tiers that cannot reach a determination, so nothing proved they
+        #      survive a real year)
+        #   = 17
         #
         # This enumeration was ALREADY one behind before sample 09: it listed
         # 4+4+2+4 = 14 beside an assertion of 15, having never recorded sample
         # 11. A provenance narrative that does not add up is not provenance.
-        self.assertEqual({"python-only:post-handoff": 31, "python-only": 16}, active)
+        self.assertEqual({"python-only:post-handoff": 31, "python-only": 17}, active)
         self.assertEqual({"ruby": 29, "ruby-api": 2}, retired)
         self.assertEqual({
             "commit": "85ab14352677093e24038d933cf1071e5b03431a",
