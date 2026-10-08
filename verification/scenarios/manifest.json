@@ -2,7 +2,7 @@
  "version": 2,
  "spec_sha256": "ca661a5cfb1a69f6b16b7f0b4d2f2e4afb4a593e3fcb1af37f4107fcf050e107",
  "provenance": {
-  "commit": "71f5be6735313692d9f24c13eca5877f71a2c001",
+  "commit": "f6f3f2ca8988bcb66aaae5ed4906f92e52344bf7",
   "dirty": false,
   "freezer_sha256": "fb8b5e7ae9dacc434ec5c1182ec30c44f600868c782f679df97b23a66d046c68",
   "defs_sha256": "c7ed09c5476954b5e4bb09c4908b3878d33cd14cf555cf8809a349d3930fa4c1",
@@ -713,11 +713,11 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "688c9b55b3547f42b4ec70c8e22080e206209f5b84239c01989775d2af12d464",
-    "audit.txt": "c5e131a4598adfebe737fe71aa665b78dcc13b55b335e07fb3fef43036c2853a",
-    "report.json": "729a11749dec93fc41f01a39606edc0605ae7aa38e18a4ec2a8804f26741d93c",
+    "audit.json": "7d2ad1f92936c7fa1251666c4542deb6e7c4d455f2dab2ee643a69e576771918",
+    "audit.txt": "9c576a8e54929f816611352b3c5d77f36310b7005e5c91113dd430e99f31147c",
+    "report.json": "96e834540b68ca8ac42b58ba9e5263af74ef54916d88b40bd96049310079419b",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "stdout.txt": "70456f63c4cd17296f999111ac6a8a085e1011d69087f38327a9cb76b6c041de"
+    "stdout.txt": "fff32bb35373ad25535137def1a90bab8b945ccea14e008bcd387de8fb3b5fb9"
    }
   },
   {
@@ -761,11 +761,11 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "688c9b55b3547f42b4ec70c8e22080e206209f5b84239c01989775d2af12d464",
-    "audit.txt": "c5e131a4598adfebe737fe71aa665b78dcc13b55b335e07fb3fef43036c2853a",
-    "report.json": "729a11749dec93fc41f01a39606edc0605ae7aa38e18a4ec2a8804f26741d93c",
+    "audit.json": "45ca348245655eed70fc423ae80cd9d3461cd6a8fa2e5b9e2772b6eeb17ea9af",
+    "audit.txt": "02dab7c75a0d5e4890c3fb4685d5ea19322a4e4662efbfdbc3e1466cd9404477",
+    "report.json": "5ecbe2da66699ab02f10936772ace85091521a8f4cc4b8c424e863b0806a93f8",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "stdout.txt": "70456f63c4cd17296f999111ac6a8a085e1011d69087f38327a9cb76b6c041de"
+    "stdout.txt": "fff32bb35373ad25535137def1a90bab8b945ccea14e008bcd387de8fb3b5fb9"
    }
   },
   {
@@ -2075,8 +2075,8 @@
     }
    ],
    "baseline_sha256": {
-    "audit.json": "1d4f0e195fd0635e241d9dfdd06b9042cd97315d0dacae4ffec2126a977d8e7d",
-    "audit.txt": "1aba42476768b22aa9697e8df3a64759698730bded119bab64286f6ec992c88a",
+    "audit.json": "7d8e42898877d3c8af0273b2e9c8c104b3fff2175e59c1cbe5453aeb8158eafe",
+    "audit.txt": "9620f1c42c8b01d6a670f0bf010ec7bbb578f1fca731e4682609a8d828b4abf2",
     "report.json": "d75db80ce508a385b47fdec2993ee8cdaf1a5a9bc22920aceb37a53e8180ab79",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "fff32bb35373ad25535137def1a90bab8b945ccea14e008bcd387de8fb3b5fb9"
@@ -2136,9 +2136,9 @@
     }
    ],
    "baseline_sha256": {
-    "audit.json": "870b074b8774a16679b475de7d70cffdbd3ad510b74f1f9a318c16af3602afbd",
-    "audit.txt": "86d2f01bc841d4d46132aecfb3f6a864cf46c15a8f2a5480d8172fb61e0adb1d",
-    "report.json": "f39f5bbc8e82da8bd2b92048ef3866aa3ff0c550a27a2e192ab4d128b87bbb53",
+    "audit.json": "e07dafe22c658c87b6e165c9fbf783956719ab0afe7fe10f377269c51ba1e192",
+    "audit.txt": "05e89e11363822e7bc225eabff52a47770256240095ef436676d685a5f1239d3",
+    "report.json": "e10de9a8e4110e11a6cc25aecbe21b5723940ebfe64d052105c5b44624f58a62",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "133fcd013cb5c71992f7289ddab2f9e0f61997fa8c65cda2a0dc1e2aa25a4b07"
    }
@@ -2273,8 +2273,8 @@
     }
    ],
    "baseline_sha256": {
-    "audit.json": "eb31f8301002b16c2972523ec79bdf0ba2f496a28c6eecf011dbdcc31b4feaba",
-    "audit.txt": "68005876d45bcef9608f6a8272f904284a26e8188747f5bbbc097cb843c722d2",
+    "audit.json": "7c6a56c4ca0bde0ef2403a75d76264b1298ebe14860d383e3ade32eeba152639",
+    "audit.txt": "46185e303a0eb2b1d2f27ced567339815826eb101708d25da626a5d87eb1c30b",
     "report.json": "1fe20f38b90b744c280ed541b69ed81cac87fa9e5914e092b7e2ddcf4dc31ae3"
    }
   },

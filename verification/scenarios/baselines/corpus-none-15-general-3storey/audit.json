@@ -43,6 +43,27 @@
   "level": "warning"
  },
  {
+  "step": "build",
+  "action": "the supplied building data says 1 above-ground storeys and the model DECLARES 3 \u2014 the supplied value is an override and wins, here and in the reference-system selection, so both halves group on one premise; correct the model or drop the override if that is not intended",
+  "inputs": {
+   "storeys": 1,
+   "model_declared_storeys": 3
+  },
+  "ruling": "D-18",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "build",
+  "action": "declared above-ground storey count stamped on the reference from the supplied building data \u2014 the selector and the system builder must group on the SAME premise",
+  "inputs": {
+   "storeys": 1
+  },
+  "ruling": "D-18",
+  "building": "reference building",
+  "level": "info"
+ },
+ {
   "step": "characterize",
   "target": "Hot Water Loop",
   "action": "plant loop classified",

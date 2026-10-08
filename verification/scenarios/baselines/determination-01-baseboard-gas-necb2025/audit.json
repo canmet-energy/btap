@@ -962,7 +962,7 @@
  {
   "step": "efficiency",
   "target": "Main Service Water Loop",
-  "action": "service water heating loop \u2014 outside 8.4.4.14 (HVAC hydronic pumps); pump left as built",
+  "action": "service water heating loop \u2014 outside 8.4.5.14 (HVAC hydronic pumps); pump left as built",
   "ruling": "D-27",
   "building": "reference building",
   "level": "info"
@@ -2961,7 +2961,7 @@
  },
  {
   "step": "compliance",
-  "action": "8.4.3.2 operating schedules and occupancy/receptacle loads are identical between proposed and reference by construction (the reference is a clone; neither reset touches schedules or those loads); interior lighting power is reset to the Part 4 allowance per 8.4.4.5.(1) (reference_lighting); service water heating efficiencies are reset to the Part 6 minimums per 8.4.4.20 (reference_shw). Representativeness of the loads for the building type remains the modeller's input (see the loads domain for NECB space-use data).",
+  "action": "8.4.3.2 operating schedules and occupancy/receptacle loads are identical between proposed and reference by construction (the reference is a clone; neither reset touches schedules or those loads); interior lighting power is reset to the Part 4 allowance per 8.4.5.5.(1) (reference_lighting); service water heating efficiencies are reset to the Part 6 minimums per 8.4.5.20 (reference_shw). Representativeness of the loads for the building type remains the modeller's input (see the loads domain for NECB space-use data).",
   "article": "8.4.3.2.(1)-(2)",
   "level": "info"
  },
@@ -3480,7 +3480,7 @@
  {
   "step": "efficiency",
   "target": "Main Service Water Loop",
-  "action": "service water heating loop \u2014 outside 8.4.4.14 (HVAC hydronic pumps); pump left as built",
+  "action": "service water heating loop \u2014 outside 8.4.5.14 (HVAC hydronic pumps); pump left as built",
   "ruling": "D-27",
   "building": "reference building",
   "level": "info"
@@ -3603,7 +3603,7 @@
    "cooling_kw": 0.0
   },
   "value": "NoEconomizer",
-  "article": "8.4.4.12.; 5.2.2.7.(1)",
+  "article": "8.4.5.12.; 5.2.2.7.(1)",
   "ruling": "D-22",
   "building": "reference building",
   "level": "decision"
@@ -3617,7 +3617,7 @@
    "cooling_kw": 0.0
   },
   "value": "NoEconomizer",
-  "article": "8.4.4.12.; 5.2.2.7.(1)",
+  "article": "8.4.5.12.; 5.2.2.7.(1)",
   "ruling": "D-22",
   "building": "reference building",
   "level": "decision"
@@ -3631,7 +3631,7 @@
    "cooling_kw": 0.0
   },
   "value": "NoEconomizer",
-  "article": "8.4.4.12.; 5.2.2.7.(1)",
+  "article": "8.4.5.12.; 5.2.2.7.(1)",
   "ruling": "D-22",
   "building": "reference building",
   "level": "decision"
@@ -3645,7 +3645,7 @@
    "cooling_kw": 0.0
   },
   "value": "NoEconomizer",
-  "article": "8.4.4.12.; 5.2.2.7.(1)",
+  "article": "8.4.5.12.; 5.2.2.7.(1)",
   "ruling": "D-22",
   "building": "reference building",
   "level": "decision"
@@ -3659,7 +3659,7 @@
    "cooling_kw": 0.0
   },
   "value": "NoEconomizer",
-  "article": "8.4.4.12.; 5.2.2.7.(1)",
+  "article": "8.4.5.12.; 5.2.2.7.(1)",
   "ruling": "D-22",
   "building": "reference building",
   "level": "decision"

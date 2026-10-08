@@ -206,7 +206,7 @@
  {
   "step": "selection",
   "target": "Thermal Zone 1",
-  "action": "no proposed annual data (simulate: :sizing/:none, or the annual run predates this feature) \u2014 the 8.4.4.13.(2)(g) auxiliary-fuel election cannot run; the structural 8.4.4.9.(4) proxy elects the fuel instead",
+  "action": "no proposed annual data (simulate: :sizing/:none, or the annual run predates this feature) \u2014 the 8.4.5.13.(2)(g) auxiliary-fuel election cannot run; the structural 8.4.5.9.(4) proxy elects the fuel instead",
   "article": "8.4.5.13.(2)(g)",
   "ruling": "D-52",
   "building": "reference building",
@@ -247,7 +247,7 @@
  {
   "step": "selection",
   "target": "Thermal Zone 2",
-  "action": "no proposed annual data (simulate: :sizing/:none, or the annual run predates this feature) \u2014 the 8.4.4.13.(2)(g) auxiliary-fuel election cannot run; the structural 8.4.4.9.(4) proxy elects the fuel instead",
+  "action": "no proposed annual data (simulate: :sizing/:none, or the annual run predates this feature) \u2014 the 8.4.5.13.(2)(g) auxiliary-fuel election cannot run; the structural 8.4.5.9.(4) proxy elects the fuel instead",
   "article": "8.4.5.13.(2)(g)",
   "ruling": "D-52",
   "building": "reference building",
@@ -288,7 +288,7 @@
  {
   "step": "selection",
   "target": "Thermal Zone 3",
-  "action": "no proposed annual data (simulate: :sizing/:none, or the annual run predates this feature) \u2014 the 8.4.4.13.(2)(g) auxiliary-fuel election cannot run; the structural 8.4.4.9.(4) proxy elects the fuel instead",
+  "action": "no proposed annual data (simulate: :sizing/:none, or the annual run predates this feature) \u2014 the 8.4.5.13.(2)(g) auxiliary-fuel election cannot run; the structural 8.4.5.9.(4) proxy elects the fuel instead",
   "article": "8.4.5.13.(2)(g)",
   "ruling": "D-52",
   "building": "reference building",
@@ -329,7 +329,7 @@
  {
   "step": "selection",
   "target": "Thermal Zone 4",
-  "action": "no proposed annual data (simulate: :sizing/:none, or the annual run predates this feature) \u2014 the 8.4.4.13.(2)(g) auxiliary-fuel election cannot run; the structural 8.4.4.9.(4) proxy elects the fuel instead",
+  "action": "no proposed annual data (simulate: :sizing/:none, or the annual run predates this feature) \u2014 the 8.4.5.13.(2)(g) auxiliary-fuel election cannot run; the structural 8.4.5.9.(4) proxy elects the fuel instead",
   "article": "8.4.5.13.(2)(g)",
   "ruling": "D-52",
   "building": "reference building",
@@ -370,7 +370,7 @@
  {
   "step": "selection",
   "target": "Thermal Zone 5",
-  "action": "no proposed annual data (simulate: :sizing/:none, or the annual run predates this feature) \u2014 the 8.4.4.13.(2)(g) auxiliary-fuel election cannot run; the structural 8.4.4.9.(4) proxy elects the fuel instead",
+  "action": "no proposed annual data (simulate: :sizing/:none, or the annual run predates this feature) \u2014 the 8.4.5.13.(2)(g) auxiliary-fuel election cannot run; the structural 8.4.5.9.(4) proxy elects the fuel instead",
   "article": "8.4.5.13.(2)(g)",
   "ruling": "D-52",
   "building": "reference building",
@@ -961,7 +961,7 @@
  {
   "step": "efficiency",
   "target": "Main Service Water Loop",
-  "action": "service water heating loop \u2014 outside 8.4.4.14 (HVAC hydronic pumps); pump left as built",
+  "action": "service water heating loop \u2014 outside 8.4.5.14 (HVAC hydronic pumps); pump left as built",
   "ruling": "D-27",
   "building": "reference building",
   "level": "info"
@@ -969,7 +969,7 @@
  {
   "step": "efficiency",
   "target": "CoilHeatingDXMultiSpeed_ashp",
-  "action": "CoilHeatingDXMultiSpeed_ashp: staged cooling capacity unavailable \u2014 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
+  "action": "CoilHeatingDXMultiSpeed_ashp: staged cooling capacity unavailable \u2014 8.4.5.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
   "article": "8.4.5.13.(2)(c)",
   "ruling": "D-22",
   "building": "reference building",
@@ -978,7 +978,7 @@
  {
   "step": "efficiency",
   "target": "CoilHeatingDXMultiSpeed_ashp 1",
-  "action": "CoilHeatingDXMultiSpeed_ashp 1: staged cooling capacity unavailable \u2014 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
+  "action": "CoilHeatingDXMultiSpeed_ashp 1: staged cooling capacity unavailable \u2014 8.4.5.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
   "article": "8.4.5.13.(2)(c)",
   "ruling": "D-22",
   "building": "reference building",
@@ -987,7 +987,7 @@
  {
   "step": "efficiency",
   "target": "CoilHeatingDXMultiSpeed_ashp 2",
-  "action": "CoilHeatingDXMultiSpeed_ashp 2: staged cooling capacity unavailable \u2014 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
+  "action": "CoilHeatingDXMultiSpeed_ashp 2: staged cooling capacity unavailable \u2014 8.4.5.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
   "article": "8.4.5.13.(2)(c)",
   "ruling": "D-22",
   "building": "reference building",
@@ -996,7 +996,7 @@
  {
   "step": "efficiency",
   "target": "CoilHeatingDXMultiSpeed_ashp 3",
-  "action": "CoilHeatingDXMultiSpeed_ashp 3: staged cooling capacity unavailable \u2014 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
+  "action": "CoilHeatingDXMultiSpeed_ashp 3: staged cooling capacity unavailable \u2014 8.4.5.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
   "article": "8.4.5.13.(2)(c)",
   "ruling": "D-22",
   "building": "reference building",
@@ -1005,7 +1005,7 @@
  {
   "step": "efficiency",
   "target": "CoilHeatingDXMultiSpeed_ashp 4",
-  "action": "CoilHeatingDXMultiSpeed_ashp 4: staged cooling capacity unavailable \u2014 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
+  "action": "CoilHeatingDXMultiSpeed_ashp 4: staged cooling capacity unavailable \u2014 8.4.5.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
   "article": "8.4.5.13.(2)(c)",
   "ruling": "D-22",
   "building": "reference building",
@@ -2992,7 +2992,7 @@
  },
  {
   "step": "compliance",
-  "action": "8.4.3.2 operating schedules and occupancy/receptacle loads are identical between proposed and reference by construction (the reference is a clone; neither reset touches schedules or those loads); interior lighting power is reset to the Part 4 allowance per 8.4.4.5.(1) (reference_lighting); service water heating efficiencies are reset to the Part 6 minimums per 8.4.4.20 (reference_shw). Representativeness of the loads for the building type remains the modeller's input (see the loads domain for NECB space-use data).",
+  "action": "8.4.3.2 operating schedules and occupancy/receptacle loads are identical between proposed and reference by construction (the reference is a clone; neither reset touches schedules or those loads); interior lighting power is reset to the Part 4 allowance per 8.4.5.5.(1) (reference_lighting); service water heating efficiencies are reset to the Part 6 minimums per 8.4.5.20 (reference_shw). Representativeness of the loads for the building type remains the modeller's input (see the loads domain for NECB space-use data).",
   "article": "8.4.3.2.(1)-(2)",
   "level": "info"
  },
