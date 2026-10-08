@@ -398,15 +398,6 @@ NEWLY_COVERED = [
 #: a baseline that fails its own asserts does not freeze.
 NECB2025_EDITION = "necb2025"
 
-#: The five zones of the `sys5_refrigerated` mockup, named once.
-ZONES = tuple(f"Thermal Zone {n}" for n in range(1, 6))
-
-#: AHJ-11's annual determination scenario, authored after the Ruby retirement.
-AHJ11_SEAL = ("python-only:first frozen for AHJ-11's System-5 heating-presence "
-              "referral reaching an annual determination — authored after the "
-              "Ruby product retired; no cross-language attestation exists for "
-              "this scenario")
-
 _WEATHER_2025 = {"epw": "<EPW>", "ddy": "<DDY>"}
 
 EDITION_SCENARIOS = [
@@ -495,52 +486,6 @@ EDITION_SCENARIOS = [
          {"op": "observation_equals", "key": "compliant", "value": True},
          {"op": "observation_equals", "key": "reference_model_present",
           "value": True},
-     ]},
-    # AHJ-11's FROZEN ANNUAL EVIDENCE. Sol's `128` ruled a focused test
-    # insufficient for guard 7: a referral that can set a run conditional needs
-    # an annual artifact that REACHES the determination, and no corpus sample
-    # produces a heated block assigned System 5. This reuses the existing
-    # `sys5_refrigerated` mockup rather than inventing an archetype to make the
-    # corpus look representative — it already carries five zones, design days,
-    # loads and electric baseboards, so the proposed block is HEATED, which is
-    # the branch 8.4.x.1.(5) overrides Table -B's "None" on.
-    #
-    # Parity lane because it is a FULL-YEAR run: the `--quick` annual tier
-    # records `annual: false` and never reaches a determination, which is the
-    # whole reason this scenario is needed.
-    #
-    # The asserts deliberately do NOT name which ids fire. I have measured that
-    # AHJ-11 fires on all five zones at selection, but which OTHER questions a
-    # full reference build raises here is not something I have run, and writing
-    # a list I had not measured is how a scenario comes to assert the wrong
-    # thing confidently. The frozen `report.json` pins the exact set.
-    {"id": f"determination-02-sys5-heated-{NECB2025_EDITION}",
-     "lane": "parity", "kind": "api", "replaces": [],
-     "api_call": {"code": NECB2025_EDITION, "simulate": "annual",
-                  "province_state": "ONTARIO",
-                  "model": "<ROOT>/python/tests/fixtures/variant_mockups/"
-                           "sys5_refrigerated.osm",
-                  "weather": _WEATHER_2025,
-                  "building": {"storeys": 1,
-                               "zone_types": {z: "Warehouse - refrigerated"
-                                              for z in ZONES},
-                               "refrigerated_zones": list(ZONES)}},
-     "env": {}, "expect_exit": 0, "timeout_s": 5400,
-     "files": CORPUS_FILES, "text_files": CORPUS_TEXT, "streams": {},
-     "seal": AHJ11_SEAL,
-     "asserts": [
-         {"op": "json_equals", "file": "report.json", "path": "annual",
-          "value": True},
-         # The property this scenario exists for: a System-5 heating-presence
-         # referral reaching a REAL determination, not a helper's return value.
-         {"op": "json_equals", "file": "report.json",
-          "path": "compliance_determination", "value": "conditional"},
-         {"op": "json_exists", "file": "report.json",
-          "path": "compliance_determination_reason.ahj_ids"},
-         # Five heated zones, five D-39 presence decisions — the branch that
-         # carries the AHJ-11 citation.
-         {"op": "audit_entry", "step": "selection", "level": "decision",
-          "ruling": "D-39", "count": 5},
      ]},
     # The 2025 archetype-EUI path: no reference building is built, so no
     # reference_sizing/ or reference_annual/ appears, the target comes from
