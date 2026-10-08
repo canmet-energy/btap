@@ -20,12 +20,12 @@ from btap.modeling.hvac import catalog, classify
 @dataclass
 class Report:
     """Ruby Struct.new(..., keyword_init: true) — constructed by keyword."""
-    total: float = None
-    by_category: dict = None
-    items: list = field(default=None)
-    warnings: list = field(default=None)
-    city: str = None
-    province_state: str = None
+    total: float | None = None
+    by_category: dict | None = None
+    items: list | None = field(default=None)
+    warnings: list | None = field(default=None)
+    city: str | None = None
+    province_state: str | None = None
     audit: object = None
 
 
