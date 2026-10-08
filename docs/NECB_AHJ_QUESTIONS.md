@@ -764,6 +764,26 @@ claimed: D-97's runtime warning and Sol's `126` both say the retained
 default may bias the reference in EITHER direction. Declining to guess is
 defensible; calling the result conservative was not.
 
+
+**Guard 7 is UNMET, and the reason is a finding of its own.** Sol's `127`
+requires one full-year frozen artifact per approval-required id. AHJ-16 fires
+on exactly one corpus model, sample 18 (`18-vav-hw-subset-reheat`), and only
+in the SIZING tier, which reaches no determination. Driven through a real
+annual run on 2026-10-08 it does reach one — `conditional`, with AHJ-16 on the
+Hot Water Loop — so the wiring is sound.
+
+It is not frozen, because that run's REFERENCE building does not hold
+setpoint: 932.25 unmet heating hours and 542.25 unmet cooling, against the
+proposed building's 0.0 and 4.0. Article 8.4.1.2.(3) allows 100 h, so the
+non-compliant verdict is the reference failing, not the proposed building. Sol
+refused exactly this standard of evidence for AHJ-11 in `130` — a reference
+that completes without conditioning is not a comparison, and "EnergyPlus
+exited zero is not the Code's test".
+
+So AHJ-16 needs either a model that triggers the N:1 shape with a valid
+reference, or the sample-18 reference's unmet hours understood first. Freezing
+the run as it stands would record a broken reference as the expected baseline.
+
 ## AHJ-17 — no air-cooled chiller performance curve is shipped
 
 **Article.** Table 8.4.5.5.-C / 8.4.6.5.-C; with 8.4.x.6.(2) and
