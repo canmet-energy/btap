@@ -2,10 +2,10 @@
  "version": 2,
  "spec_sha256": "ca661a5cfb1a69f6b16b7f0b4d2f2e4afb4a593e3fcb1af37f4107fcf050e107",
  "provenance": {
-  "commit": "2c9b4849f0ea7f6834fdb5e82ca13849df1127e8",
+  "commit": "5481e7308f7065cb7ce2ec11536b6af66ce20773",
   "dirty": false,
   "freezer_sha256": "4d8c2ff76da26c5c75e95001c1e3405b78b33a4f163edcf5ff2032cde341804d",
-  "defs_sha256": "c7ed09c5476954b5e4bb09c4908b3878d33cd14cf555cf8809a349d3930fa4c1",
+  "defs_sha256": "884745cccb0e689e523ed284086fad60115d069560c1948cb62d1f511f694f2e",
   "runner_sha256": "7333ea6fd76fc8e4c430958a40a37ab57ed48e4003808457988a39be871c813f",
   "api_worker_sha256": "fbd1870815b1078305a16d84669c7a7e1d5a735344ee17301bcb3539a213b417",
   "compare_runs_sha256": "b8f1f60f5e285047ede41cdcb933296564ec0130a8c3946ab03b5a6a014e08ec",
@@ -25,7 +25,7 @@
   },
   "active_seals": {
    "python-only:post-handoff": 31,
-   "python-only": 16
+   "python-only": 17
   },
   "retired_seals": {
    "ruby": 29,
@@ -45,7 +45,7 @@
  "counts": {
   "python": 34,
   "verify": 6,
-  "parity": 7
+  "parity": 8
  },
  "scenarios": [
   {
@@ -2276,6 +2276,93 @@
     "audit.json": "8ece0f69deafc27b407e2f35ca2c4b7531d64ca9453c70d23e38b812e41dd9c8",
     "audit.txt": "4b4daa6cfa4449b8144dbd6f1d0a4dadcaf4ec3624b6222534c8ca4b5139ec88",
     "report.json": "196fbb46654ff357b145a2d0cf364f2428dbb56e5e4b417551d7208a40f6d926"
+   }
+  },
+  {
+   "id": "determination-02-sys5-heated-necb2025",
+   "lane": "parity",
+   "kind": "api",
+   "replaces": [],
+   "api_call": {
+    "code": "necb2025",
+    "simulate": "annual",
+    "province_state": "ONTARIO",
+    "model": "<ROOT>/python/tests/fixtures/variant_mockups/sys5_refrigerated_annual.osm",
+    "weather": {
+     "epw": "<EPW>",
+     "ddy": "<DDY>"
+    },
+    "building": {
+     "storeys": 1,
+     "zone_types": {
+      "Thermal Zone 1": "Warehouse - refrigerated",
+      "Thermal Zone 2": "Warehouse - refrigerated",
+      "Thermal Zone 3": "Warehouse - refrigerated",
+      "Thermal Zone 4": "Warehouse - refrigerated",
+      "Thermal Zone 5": "Warehouse - refrigerated"
+     },
+     "refrigerated_zones": [
+      "Thermal Zone 1",
+      "Thermal Zone 2",
+      "Thermal Zone 3",
+      "Thermal Zone 4",
+      "Thermal Zone 5"
+     ]
+    }
+   },
+   "env": {},
+   "expect_exit": 1,
+   "timeout_s": 5400,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {},
+   "seal": "python-only:first frozen for AHJ-11's System-5 heating-presence referral reaching an annual determination \u2014 authored after the Ruby product retired; no cross-language attestation exists for this scenario",
+   "asserts": [
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "annual",
+     "value": true
+    },
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "compliance_determination",
+     "value": "conditional"
+    },
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "compliance_determination_reason.ahj_ids",
+     "value": [
+      "AHJ-11",
+      "AHJ-14",
+      "AHJ-16"
+     ]
+    },
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "compliance_determination_reason.conditions.0.article",
+     "value": "8.4.5.1.(5); Table 8.4.5.7.-B"
+    },
+    {
+     "op": "audit_entry",
+     "step": "selection",
+     "level": "decision",
+     "ruling": "D-39",
+     "count": 1
+    }
+   ],
+   "baseline_sha256": {
+    "audit.json": "e6a104bcd024f90190cb15d2ca48e6aa1d8e98791515c0660cf27dd9eaf59675",
+    "audit.txt": "15675b66be8573ee06540bec7339cc589c873268cafeda4e67676f1188b5ccc4",
+    "report.json": "84e9dedf20de17ba2afeb3351fe4f35fe8dc98b55324b3772fd35c558548cf86"
    }
   },
   {

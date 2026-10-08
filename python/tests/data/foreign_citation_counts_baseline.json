@@ -1,150 +1,8 @@
 {
   "_provenance": [
-    "Re-baselined 2026-10-07 for D-100. `_mark_informational_if_multi_energy` was removed — it re-characterized the proposed model inside the determination to decide whether AHJ-1 and AHJ-3 had fired, a second source of truth beside the disclosure branch that already knew — so its `article=article` warn site retires and the bare `article` key goes from 18 warn uses to 17. The generic collector's determination warning appears as a new dynamic key joining the FIRED entries' own articles, with warn 1: one key retires, one appears, and no citation is lost. The collector cites the articles the rule sites recorded rather than one hardcoded article, which is the point of the change."
+    "Re-baselined 2026-10-07 for D-100. `_mark_informational_if_multi_energy` was removed — it re-characterized the proposed model inside the determination to decide whether AHJ-1 and AHJ-3 had fired, a second source of truth beside the disclosure branch that already knew — so its `article=article` warn site retires and the bare `article` key goes from 18 warn uses to 17. The generic collector's determination warning appears as a new dynamic key joining the FIRED entries' own articles, with warn 1: one key retires, one appears, and no citation is lost. The collector cites the articles the rule sites recorded rather than one hardcoded article, which is the point of the change.",
+    "Re-baselined 2026-10-08 for Sol's `129`.5. The System 5 presence decision cited `8.4.4.1.(5); Table 8.4.4.7.-B` as a LITERAL, so a necb2025 run told an authority its AHJ-11 condition came from the other edition's articles. Both branches now derive the citation from the edition's own `reference_subsection`, which is why four per-edition literal counts drop by one each: 2020/8.4.4.1 and 2020/8.4.4.7 cited 5->4 and 6->5, and the 2025 counterparts the same. Nothing is lost from the PRODUCT — the citation is now correct for both editions rather than correct for one — but a literal-only per-edition scanner can no longer see it, which is the same trade every other prefix-derived citation in this file already made. One dynamic key is added, `presence_article`; it is a NAME, so the foreign scanner counts it conservatively rather than inspecting its content, and the unheated branch's inline f-string cites only Section 8.4 articles and so is not foreign at all. Verified end to end in the frozen full-year determination-02 run: the AHJ-11 condition carries '8.4.5.1.(5); Table 8.4.5.7.-B'."
   ],
-  "dynamic": {
-    "art[\"article\"]": {
-      "cited": 2,
-      "warn": 1
-    },
-    "\"Table 3.2.2.2.; {}; {}\".format(\n                           ruleset.article(\"enclosed_unconditioned_credit\"),\n                           ruleset.article(\"assembly_inclination\"))": {
-      "cited": 1
-    },
-    "\"Table 3.2.3.1.\" if boundary == \"ground\"\n                                else \"Table 3.2.2.2.\"": {
-      "cited": 1
-    },
-    "\"{}.4.(1) (Note {}: light-frame example \"\n                           \"mass/heat capacity)\".format(\n                               prefix, ruleset.article(\"thermal_mass_note\"))": {
-      "cited": 1
-    },
-    "f\"NECB {ruleset.edition} Tables 3.2.2.x/3.2.3.1 \"\n                           \"(3.1.1.7 effective)\"": {
-      "cited": 1
-    },
-    "fdwr.get(\"article\")": {
-      "cited": 1
-    },
-    "srr.get(\"article\")": {
-      "cited": 1
-    },
-    "rule['trigger_article']": {
-      "warn": 3,
-      "cited": 1
-    },
-    "article": {
-      "cited": 16,
-      "warn": 17
-    },
-    "f'5.2.6.3.(1); {prefix}.1.(2)'": {
-      "cited": 1
-    },
-    "hp_article": {
-      "cited": 2,
-      "warn": 2
-    },
-    "economizer_spec['article']": {
-      "cited": 1
-    },
-    "f\"{rule['article']}; {rule['trigger_article']}; 5.2.10.1.(4); 5.2.10.1.(6)\"": {
-      "cited": 1
-    },
-    "res['article']": {
-      "cited": 3
-    },
-    "'; '.join(_uniq([a for a in assignment.articles if a is not None]))": {
-      "cited": 2
-    },
-    "caps['article']": {
-      "cited": 1
-    },
-    "f\"{heat_pump_article_base(rules_data.get('selection') or {})}.(2)(b)\"": {
-      "cited": 1
-    },
-    "f'{article_base}.(2){sentence}'": {
-      "cited": 2,
-      "warn": 1
-    },
-    "f'{ratio_article}; {sentence_six}'": {
-      "warn": 1
-    },
-    "hp_rule['article']": {
-      "cited": 1
-    },
-    "pc['article']": {
-      "cited": 1
-    },
-    "f'{prefix}.12. (Table -12 -> 5.2.2.8)'": {
-      "cited": 1
-    },
-    "f'{article_base}.(2)(g)'": {
-      "cited": 2
-    },
-    "ratio_article": {
-      "warn": 1
-    },
-    "purchased_heating['article']": {
-      "cited": 1
-    },
-    "f'{hp_article}.(1); Note A-{hp_article}'": {
-      "cited": 1
-    },
-    "'; '.join(a for a in assignment.articles if a is not None)": {
-      "cited": 1
-    },
-    "fans['article']": {
-      "cited": 1
-    },
-    "rules_data['heat_pump_reference']['article']": {
-      "cited": 1
-    },
-    "rule['article']": {
-      "warn": 1
-    },
-    "'4.2.1.6.' if building_type == 'Space Function' else '4.2.1.5.'": {
-      "cited": 1
-    },
-    "f\"4.2.1.6.; 4.2.2.1.({sentence})\"": {
-      "warn": 1
-    },
-    "f\"4.2.1.6.; 4.2.2.1.({sentence}); 4.2.2.1.(2)\"": {
-      "cited": 1
-    },
-    "sensor_article": {
-      "cited": 1
-    },
-    "f\"{prefix}.5.(3); 4.3.2.10.\"": {
-      "cited": 1
-    },
-    "f\"{prefix}.5.(1); 4.2.1.6.\"": {
-      "warn": 1
-    },
-    "f\"{article}(2)\"": {
-      "cited": 1,
-      "warn": 1
-    },
-    "f\"{article}(3)\"": {
-      "cited": 2,
-      "warn": 1
-    },
-    "f\"{article}(5)\"": {
-      "cited": 1
-    },
-    "f\"{article}(1)\"": {
-      "cited": 1,
-      "warn": 1
-    },
-    "f\"{article}(4)\"": {
-      "cited": 4,
-      "warn": 1
-    },
-    "', '.join(sorted({str(record['article']) for record in active\n                                  if record.get('article')})) or None": {
-      "warn": 1
-    },
-    "spec[\"article\"]": {
-      "cited": 6
-    },
-    "_article(entry)": {
-      "cited": 3
-    }
-  },
   "static": {
     "11.4.1.1.; 11.4.2.1. (NECB 2025)": {
       "cited": 1
@@ -305,6 +163,152 @@
     },
     "NECB 2011 4.2.2.4./4.2.2.5./4.2.2.9. (legacy costing rule; 4.2.2.9. does not exist in NECB 2020/2025)": {
       "cited": 1
+    }
+  },
+  "dynamic": {
+    "art[\"article\"]": {
+      "cited": 2,
+      "warn": 1
+    },
+    "\"Table 3.2.2.2.; {}; {}\".format(\n                           ruleset.article(\"enclosed_unconditioned_credit\"),\n                           ruleset.article(\"assembly_inclination\"))": {
+      "cited": 1
+    },
+    "\"Table 3.2.3.1.\" if boundary == \"ground\"\n                                else \"Table 3.2.2.2.\"": {
+      "cited": 1
+    },
+    "\"{}.4.(1) (Note {}: light-frame example \"\n                           \"mass/heat capacity)\".format(\n                               prefix, ruleset.article(\"thermal_mass_note\"))": {
+      "cited": 1
+    },
+    "f\"NECB {ruleset.edition} Tables 3.2.2.x/3.2.3.1 \"\n                           \"(3.1.1.7 effective)\"": {
+      "cited": 1
+    },
+    "fdwr.get(\"article\")": {
+      "cited": 1
+    },
+    "srr.get(\"article\")": {
+      "cited": 1
+    },
+    "rule['trigger_article']": {
+      "warn": 3,
+      "cited": 1
+    },
+    "article": {
+      "cited": 16,
+      "warn": 17
+    },
+    "f'5.2.6.3.(1); {prefix}.1.(2)'": {
+      "cited": 1
+    },
+    "hp_article": {
+      "cited": 2,
+      "warn": 2
+    },
+    "economizer_spec['article']": {
+      "cited": 1
+    },
+    "f\"{rule['article']}; {rule['trigger_article']}; 5.2.10.1.(4); 5.2.10.1.(6)\"": {
+      "cited": 1
+    },
+    "res['article']": {
+      "cited": 3
+    },
+    "'; '.join(_uniq([a for a in assignment.articles if a is not None]))": {
+      "cited": 2
+    },
+    "caps['article']": {
+      "cited": 1
+    },
+    "f\"{heat_pump_article_base(rules_data.get('selection') or {})}.(2)(b)\"": {
+      "cited": 1
+    },
+    "f'{article_base}.(2){sentence}'": {
+      "cited": 2,
+      "warn": 1
+    },
+    "f'{ratio_article}; {sentence_six}'": {
+      "warn": 1
+    },
+    "hp_rule['article']": {
+      "cited": 1
+    },
+    "pc['article']": {
+      "cited": 1
+    },
+    "f'{prefix}.12. (Table -12 -> 5.2.2.8)'": {
+      "cited": 1
+    },
+    "f'{article_base}.(2)(g)'": {
+      "cited": 2
+    },
+    "ratio_article": {
+      "warn": 1
+    },
+    "purchased_heating['article']": {
+      "cited": 1
+    },
+    "f'{hp_article}.(1); Note A-{hp_article}'": {
+      "cited": 1
+    },
+    "presence_article": {
+      "cited": 1
+    },
+    "'; '.join(a for a in assignment.articles if a is not None)": {
+      "cited": 1
+    },
+    "fans['article']": {
+      "cited": 1
+    },
+    "rules_data['heat_pump_reference']['article']": {
+      "cited": 1
+    },
+    "rule['article']": {
+      "warn": 1
+    },
+    "'4.2.1.6.' if building_type == 'Space Function' else '4.2.1.5.'": {
+      "cited": 1
+    },
+    "f\"4.2.1.6.; 4.2.2.1.({sentence})\"": {
+      "warn": 1
+    },
+    "f\"4.2.1.6.; 4.2.2.1.({sentence}); 4.2.2.1.(2)\"": {
+      "cited": 1
+    },
+    "sensor_article": {
+      "cited": 1
+    },
+    "f\"{prefix}.5.(3); 4.3.2.10.\"": {
+      "cited": 1
+    },
+    "f\"{prefix}.5.(1); 4.2.1.6.\"": {
+      "warn": 1
+    },
+    "f\"{article}(2)\"": {
+      "cited": 1,
+      "warn": 1
+    },
+    "f\"{article}(3)\"": {
+      "cited": 2,
+      "warn": 1
+    },
+    "f\"{article}(5)\"": {
+      "cited": 1
+    },
+    "f\"{article}(1)\"": {
+      "cited": 1,
+      "warn": 1
+    },
+    "f\"{article}(4)\"": {
+      "cited": 4,
+      "warn": 1
+    },
+    "', '.join(sorted({str(record['article']) for record in active\n                                  if record.get('article')})) or None": {
+      "warn": 1
+    },
+    "spec[\"article\"]": {
+      "cited": 6
+    },
+    "_article(entry)": {
+      "cited": 3
     }
   }
 }
