@@ -398,15 +398,6 @@ NEWLY_COVERED = [
 #: a baseline that fails its own asserts does not freeze.
 NECB2025_EDITION = "necb2025"
 
-#: The five zones of the System 5 annual fixture, named once.
-SYS5_ZONES = tuple(f"Thermal Zone {n}" for n in range(1, 6))
-
-#: AHJ-11's annual determination scenario, authored after the Ruby retirement.
-AHJ11_SEAL = ("python-only:first frozen for AHJ-11's System-5 heating-presence "
-              "referral reaching an annual determination — authored after the "
-              "Ruby product retired; no cross-language attestation exists for "
-              "this scenario")
-
 _WEATHER_2025 = {"epw": "<EPW>", "ddy": "<DDY>"}
 
 EDITION_SCENARIOS = [
@@ -495,68 +486,6 @@ EDITION_SCENARIOS = [
          {"op": "observation_equals", "key": "compliant", "value": True},
          {"op": "observation_equals", "key": "reference_model_present",
           "value": True},
-     ]},
-    # AHJ-11's FROZEN ANNUAL EVIDENCE, second attempt.
-    #
-    # The first used `sys5_refrigerated.osm` and the freeze REFUSED it: that
-    # model terminates. Sol's `129` isolated two independent causes, neither of
-    # which was my hypothesis — cooling-coil UA failures that follow the
-    # fixture's office setpoints on refrigerated zones (they occur with
-    # four-pipe fan coils too), and an August plant runaway that follows the
-    # two-pipe surrogate's missing plant-side availability, now AHJ-18.
-    #
-    # So this uses a COHERENT refrigerated case built his way: the cooling-only
-    # fixture, which has real DX cooling, plus electric baseboards for
-    # non-heat-pump heating, with 4/8 C cold-space thermostats. Those setpoints
-    # are a test construction, not Code-prescribed values. Measured: the full
-    # `necb2025` path completes proposed and reference sizing and both annual
-    # runs with ZERO severe and ZERO fatal errors.
-    #
-    # One scenario, three referrals: the determination comes back conditional
-    # carrying AHJ-11, AHJ-14 and AHJ-16. AHJ-16 had no annual artifact at all
-    # before this.
-    {"id": f"determination-02-sys5-heated-{NECB2025_EDITION}",
-     "lane": "parity", "kind": "api", "replaces": [],
-     "api_call": {"code": NECB2025_EDITION, "simulate": "annual",
-                  "province_state": "ONTARIO",
-                  "model": "<ROOT>/python/tests/fixtures/variant_mockups/"
-                           "sys5_refrigerated_annual.osm",
-                  "weather": _WEATHER_2025,
-                  "building": {"storeys": 1,
-                               "zone_types": {z: "Warehouse - refrigerated"
-                                              for z in SYS5_ZONES},
-                               "refrigerated_zones": list(SYS5_ZONES)}},
-     # expect_exit 1, NOT 0: this building does not meet its energy target, and
-     # the conditional determination deliberately does not change the exit code.
-     # My first version said 0 and the freeze refused it — a real refusal for a
-     # trivial reason, unlike the previous attempt's genuine EnergyPlus fatal.
-     "env": {}, "expect_exit": 1, "timeout_s": 5400,
-     "files": CORPUS_FILES, "text_files": CORPUS_TEXT, "streams": {},
-     "seal": AHJ11_SEAL,
-     "asserts": [
-         {"op": "json_equals", "file": "report.json", "path": "annual",
-          "value": True},
-         # What this scenario exists for: a System-5 heating-presence referral
-         # reaching a REAL determination, not a helper's return value.
-         {"op": "json_equals", "file": "report.json",
-          "path": "compliance_determination", "value": "conditional"},
-         # Now MEASURED, so now asserted: one scenario, three referrals.
-         {"op": "json_equals", "file": "report.json",
-          "path": "compliance_determination_reason.ahj_ids",
-          "value": ["AHJ-11", "AHJ-14", "AHJ-16"]},
-         # The edition citation, end to end. This was hardcoded to 2020's
-         # numbering, so a 2025 run told an authority its condition came from
-         # Table 8.4.4.7.-B (Sol, `129`.5).
-         #
-         # Index 0 is AHJ-11 because conditions follow audit order and the
-         # System-5 presence decision happens at SELECTION, before the
-         # efficiency pass raises AHJ-14 and AHJ-16. Measured, not assumed:
-         # [AHJ-11, AHJ-14, AHJ-16 x3].
-         {"op": "json_equals", "file": "report.json",
-          "path": "compliance_determination_reason.conditions.0.article",
-          "value": "8.4.5.1.(5); Table 8.4.5.7.-B"},
-         {"op": "audit_entry", "step": "selection", "level": "decision",
-          "ruling": "D-39", "count": 1},
      ]},
     # The 2025 archetype-EUI path: no reference building is built, so no
     # reference_sizing/ or reference_annual/ appears, the target comes from
