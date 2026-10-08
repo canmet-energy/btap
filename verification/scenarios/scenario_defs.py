@@ -30,7 +30,18 @@ POST_HANDOFF_REASON = (
 # The corpus tiers mirror verification/run_corpus.rb's recipe exactly —
 # same base args, same subsets — so the frozen baselines describe the
 # same runs Leg B compared.
-BASE_ARGS = ["--hdd", "3890", "--storeys", "1", "--no-report", "--quiet"]
+#: No `--storeys`. The OSM is the source of truth for its own storey count and
+#: every corpus sample says: 14 and 15 set
+#: `standardsNumberOfAboveGroundStories` (to 2 and 3), and the other fifteen
+#: carry a BuildingStory holding their spaces, which derives 1.
+#:
+#: This passed `--storeys 1` to all of them, which overrode the two that
+#: declare — and sample 15's own generator description is
+#: "the same building at 3 storeys crosses the threshold and selects System 6".
+#: The harness was preventing the fixture from demonstrating the thing it was
+#: built to demonstrate, and the corpus froze System 3 for it and asserted that
+#: as correct (phylroy, 2026-10-08).
+BASE_ARGS = ["--hdd", "3890", "--no-report", "--quiet"]
 FIXTURE_ARGS = BASE_ARGS + ["--space-type", "Space Function/Office enclosed > 25 m2"]
 SIZING_SUBSET = ["01-baseboard-gas", "02-psz-gas-dx", "09-water-source-hp"]
 ANNUAL_SUBSET = ["01-baseboard-gas", "02-psz-gas-dx"]

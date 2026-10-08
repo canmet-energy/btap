@@ -1,8 +1,7 @@
-[info    ] compliance    input model loaded and structurally simulate-able | building: input model | inputs: spaces=5, thermal_zones=5, surfaces=30, storeys_source=building: override, zones_with_thermostats=5, openstudio_version=3.11.0
+[info    ] compliance    input model loaded and structurally simulate-able | building: input model | inputs: spaces=5, thermal_zones=5, surfaces=30, storeys_source=derived from BuildingStorys, zones_with_thermostats=5, openstudio_version=3.11.0
 [info    ] compliance    space-type pre-flight passed — every floor-area space type resolves against the NECB catalog | building: input model | inputs: floor_area_spaces_checked=5, code=necb2020, edition=2020
 [decision] compliance    performance-path run started | inputs: code=necb2020, edition=2020, simulate=none, costing=false | per 8.4.1.2.(1)
 [warning ] compliance    proposed is UNSIZED (simulate: :none) — data-centre kW thresholds and capacity-binned efficiencies fall back with warnings; the 5.2.10.1 energy-recovery determination needs sized flows and is SKIPPED | building: proposed building
-[info    ] build         declared above-ground storey count stamped on the reference from the supplied building data — the selector and the system builder must group on the SAME premise | building: reference building | inputs: storeys=1 | ruling D-18
 [info    ] characterize  plant loop classified | building: reference building | target: Chilled Water Loop | inputs: fuels=Electricity, purchased=false | value: chilled_water
 [info    ] characterize  plant loop classified | building: reference building | target: Condenser Water Loop | inputs: fuels=, purchased=false | value: condenser
 [info    ] characterize  plant loop classified | building: reference building | target: Main Service Water Loop | inputs: fuels=NaturalGas, purchased=false | value: service_water

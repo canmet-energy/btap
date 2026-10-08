@@ -9,7 +9,6 @@
  "compliant": null,
  "warnings": [
   "proposed is UNSIZED (simulate: :none) \u2014 data-centre kW thresholds and capacity-binned efficiencies fall back with warnings; the 5.2.10.1 energy-recovery determination needs sized flows and is SKIPPED",
-  "the supplied building data says 1 above-ground storeys and the model DECLARES 2 \u2014 the supplied value is an override and wins, here and in the reference-system selection, so both halves group on one premise; correct the model or drop the override if that is not intended",
   "boiler capacity unavailable (model not sized?) \u2014 not set",
   "boiler capacity unavailable (model not sized?) \u2014 not set",
   "CoilCoolingDXMultiSpeed_dx: staged capacity unavailable (model not sized?) \u2014 8.4.4.10.(8) stage count NOT set; run sizing first",
