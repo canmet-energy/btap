@@ -526,7 +526,11 @@ EDITION_SCENARIOS = [
                                "zone_types": {z: "Warehouse - refrigerated"
                                               for z in SYS5_ZONES},
                                "refrigerated_zones": list(SYS5_ZONES)}},
-     "env": {}, "expect_exit": 0, "timeout_s": 5400,
+     # expect_exit 1, NOT 0: this building does not meet its energy target, and
+     # the conditional determination deliberately does not change the exit code.
+     # My first version said 0 and the freeze refused it — a real refusal for a
+     # trivial reason, unlike the previous attempt's genuine EnergyPlus fatal.
+     "env": {}, "expect_exit": 1, "timeout_s": 5400,
      "files": CORPUS_FILES, "text_files": CORPUS_TEXT, "streams": {},
      "seal": AHJ11_SEAL,
      "asserts": [
@@ -536,8 +540,21 @@ EDITION_SCENARIOS = [
          # reaching a REAL determination, not a helper's return value.
          {"op": "json_equals", "file": "report.json",
           "path": "compliance_determination", "value": "conditional"},
-         {"op": "json_exists", "file": "report.json",
-          "path": "compliance_determination_reason.ahj_ids"},
+         # Now MEASURED, so now asserted: one scenario, three referrals.
+         {"op": "json_equals", "file": "report.json",
+          "path": "compliance_determination_reason.ahj_ids",
+          "value": ["AHJ-11", "AHJ-14", "AHJ-16"]},
+         # The edition citation, end to end. This was hardcoded to 2020's
+         # numbering, so a 2025 run told an authority its condition came from
+         # Table 8.4.4.7.-B (Sol, `129`.5).
+         #
+         # Index 0 is AHJ-11 because conditions follow audit order and the
+         # System-5 presence decision happens at SELECTION, before the
+         # efficiency pass raises AHJ-14 and AHJ-16. Measured, not assumed:
+         # [AHJ-11, AHJ-14, AHJ-16 x3].
+         {"op": "json_equals", "file": "report.json",
+          "path": "compliance_determination_reason.conditions.0.article",
+          "value": "8.4.5.1.(5); Table 8.4.5.7.-B"},
          {"op": "audit_entry", "step": "selection", "level": "decision",
           "ruling": "D-39", "count": 1},
      ]},
