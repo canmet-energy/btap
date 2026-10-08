@@ -2700,19 +2700,6 @@
  },
  {
   "step": "coverage",
-  "action": "Treatment of Process Loads \u2014 satisfied by clone: (2): process loads included in the proposed model are automatically included in the reference \u2014 the reference is a clone and no transform touches process loads. (1) exclusion-by-default is the modeller's input decision.",
-  "inputs": {
-   "status": "satisfied_by_clone",
-   "decisions_citing": 0,
-   "code": [
-    "python/btap/codes/compliance.py#_build_reference"
-   ]
-  },
-  "article": "8.4.1.5.",
-  "level": "info"
- },
- {
-  "step": "coverage",
   "action": "General \u2014 implemented: Compliance is assessed through modeling: the umbrella is the only gem permitted to run EnergyPlus, and a determination requires sizing + annual runs of BOTH models (simulate: :annual); any other mode is flagged non-determining.",
   "inputs": {
    "status": "implemented",
@@ -2769,7 +2756,7 @@
  },
  {
   "step": "coverage",
-  "action": "Calculation Methods \u2014 implemented: software conformance rests on EnergyPlus\u2019s ANSI/ASHRAE 140 testing (see 8.4.2.11.)",
+  "action": "Calculation Methods \u2014 implemented: software conformance rests on EnergyPlus\u2019s ANSI/ASHRAE 140 testing",
   "inputs": {
    "status": "implemented",
    "decisions_citing": 0,
@@ -2789,17 +2776,6 @@
    "gap_owner": "modeller"
   },
   "article": "8.4.2.2.(5)",
-  "level": "info"
- },
- {
-  "step": "coverage",
-  "action": "Calculation Methods \u2014 not implemented, modeller scope. Modeller's responsibility: routing un-modelable systems through an 8.4.2.12. exceptional calculation method is a modeller decision",
-  "inputs": {
-   "status": "not_implemented",
-   "decisions_citing": 0,
-   "gap_owner": "modeller"
-  },
-  "article": "8.4.2.2.(6)",
   "level": "info"
  },
  {
