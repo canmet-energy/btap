@@ -2,10 +2,10 @@
  "version": 2,
  "spec_sha256": "ca661a5cfb1a69f6b16b7f0b4d2f2e4afb4a593e3fcb1af37f4107fcf050e107",
  "provenance": {
-  "commit": "413e53f59e6269deec6b7f0fc5c5c902f24a9fdf",
+  "commit": "33bca781ee2ca3e9650bd5304d055505ad7f5bd6",
   "dirty": false,
   "freezer_sha256": "fb8b5e7ae9dacc434ec5c1182ec30c44f600868c782f679df97b23a66d046c68",
-  "defs_sha256": "7a8258006ffa37794970080478af3fc620a50c311fd595c9630cccb5b3fcb377",
+  "defs_sha256": "6ccf5de092aca2955bc6cbe0cc7446c5bc7b5a1422e55fd8366e684b1e6505c2",
   "runner_sha256": "7333ea6fd76fc8e4c430958a40a37ab57ed48e4003808457988a39be871c813f",
   "api_worker_sha256": "fbd1870815b1078305a16d84669c7a7e1d5a735344ee17301bcb3539a213b417",
   "compare_runs_sha256": "b8f1f60f5e285047ede41cdcb933296564ec0130a8c3946ab03b5a6a014e08ec",
@@ -25,7 +25,7 @@
   },
   "active_seals": {
    "python-only:post-handoff": 31,
-   "python-only": 16
+   "python-only": 17
   },
   "retired_seals": {
    "ruby": 29,
@@ -45,7 +45,7 @@
  "counts": {
   "python": 34,
   "verify": 6,
-  "parity": 7
+  "parity": 8
  },
  "scenarios": [
   {
@@ -1948,6 +1948,109 @@
    "seal": "python-only:synthetic result construction is implementation-internal; rendering equivalence was held by Leg B at the freeze commit",
    "baseline_sha256": {
     "stdout.txt": "1e410c2429769eb5c81435dd2369353bdf52d392b311453fdda7a03d30b4a6b6"
+   }
+  },
+  {
+   "id": "determination-02-staged-boilers-gas-lead",
+   "lane": "parity",
+   "kind": "api",
+   "replaces": [],
+   "api_call": {
+    "code": "necb2020",
+    "simulate": "annual",
+    "province_state": "ONTARIO",
+    "model": "<CORPUS>/11-staged-boilers-gas-lead.osm",
+    "weather": {
+     "epw": "<EPW>",
+     "ddy": "<DDY>"
+    }
+   },
+   "env": {},
+   "expect_exit": 0,
+   "timeout_s": 5400,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {},
+   "seal": "python-only:first frozen as a guard-7 witness \u2014 authored after the Ruby product retired; no cross-language attestation exists for this scenario",
+   "asserts": [
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "annual",
+     "value": true
+    },
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "compliance_determination",
+     "value": "conditional"
+    },
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "compliance_determination_reason.ahj_ids",
+     "value": [
+      "AHJ-1",
+      "AHJ-3",
+      "AHJ-14"
+     ]
+    },
+    {
+     "op": "json_exists",
+     "file": "report.json",
+     "path": "proposed.unmet_occupied_hours"
+    },
+    {
+     "op": "json_exists",
+     "file": "report.json",
+     "path": "reference.unmet_occupied_hours"
+    },
+    {
+     "op": "json_gt",
+     "file": "report.json",
+     "path": "proposed.total_site_kwh",
+     "value": 0
+    },
+    {
+     "op": "json_gt",
+     "file": "report.json",
+     "path": "reference.total_site_kwh",
+     "value": 0
+    },
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "tier",
+     "value": 1
+    },
+    {
+     "op": "audit_entry",
+     "step": "compliance",
+     "level": "decision",
+     "action": "unmet heating hours within 100 h for both buildings",
+     "article": "8.4.1.2.(3)",
+     "count": 1
+    },
+    {
+     "op": "observation_equals",
+     "key": "compliant",
+     "value": true
+    },
+    {
+     "op": "observation_equals",
+     "key": "reference_model_present",
+     "value": true
+    }
+   ],
+   "baseline_sha256": {
+    "audit.json": "300e760e6f2df025407ad5c77bc377181dcfc788550d061edceb836d5cbb8283",
+    "audit.txt": "37152dabd6e215a9f9184e2248286ce7d6b25c845dade68c626e0dbaa4937860",
+    "report.json": "8a97c75843b295d6b96d82f0913cddf1957be92828bc5b1caa523f2bd8f65a97"
    }
   },
   {

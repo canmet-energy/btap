@@ -84,6 +84,15 @@ DF17_SEAL = ("python-only:first frozen at DF-17 — authored after the Ruby "
              "product retired; no cross-language attestation exists for this "
              "scenario")
 
+#: Guard-7 witnesses are authored NOW, so they cannot claim the final
+#: cross-language attestation (85ab143) that `python-only:post-handoff`
+#: carries. The freeze refused that seal for exactly this reason, which is the
+#: gate working: a seal is a provenance claim, and these scenarios post-date
+#: the evidence.
+GUARD7_SEAL = ("python-only:first frozen as a guard-7 witness — authored "
+               "after the Ruby product retired; no cross-language attestation "
+               "exists for this scenario")
+
 #: The 8.4.x.9.(5) conditional determination is set AFTER the annual
 #: comparison, and no annual scenario was multi-energy: the dual-fuel samples
 #: existed only in the `none` and `sizing` tiers, which never reach the
@@ -333,6 +342,83 @@ API_SCENARIOS = [
      "streams": {}, "seal": "ruby-api:audit ruby_reference.rb"},
 ]
 
+#: GUARD 7 witnesses: one FULL-YEAR frozen artifact per approval-required AHJ
+#: id, which is Sol's `127` requirement. `--quick` is never a determination
+#: (Article 8.4.1.2 wants a simulated year) and the sizing tier has no verdict,
+#: so an id can be wired, cited and resolvable while nothing proves it survives
+#: a real year — which was true of every id but AHJ-14 and AHJ-15.
+#:
+#: `determination-01-baseboard-gas-necb2025` is a witness too and stays below
+#: with the NECB 2025 evidence it was authored as; it predates this list and its
+#: own comment explains that placement.
+DETERMINATION_SCENARIOS = [
+    # GUARD 7 for AHJ-1 and AHJ-3 (Sol's `127`: one ANNUAL frozen artifact per
+    # approval-required id). Both fired only in tiers that structurally cannot
+    # reach a determination — the annual tier runs `--quick`, which Article
+    # 8.4.1.2 makes a non-determination, and the sizing tier has no verdict at
+    # all. So the ids were wired, cited and resolvable with nothing proving
+    # they survive a real year.
+    #
+    # Sample 11 is the shape: a staged gas-lead plant whose ONE hot-water loop
+    # carries the group's fuels, which is exactly the `covers` branch AHJ-3
+    # needs — the (6) cardinality question requires such a plant to exist.
+    # AHJ-1 rides with it, and this is ALSO its first full-year witness: it is
+    # the only `alternative-solution` in the register, the most serious status,
+    # and it had no determination-reaching artifact either.
+    #
+    # Every value below was read off an authoring run of the unmodified
+    # product on 2026-10-08 (necb2020, Toronto CWEC2020, ONTARIO) and is
+    # asserted, not assumed. `compliant: True` WITH `conditional` is the
+    # combination an authority actually meets, and the one a later
+    # simplification is most likely to break: the condition must not move the
+    # exit code.
+    {"id": "determination-02-staged-boilers-gas-lead",
+     "lane": "parity", "kind": "api", "replaces": [],
+     "api_call": {"code": "necb2020", "simulate": "annual",
+                  "province_state": "ONTARIO",
+                  "model": "<CORPUS>/11-staged-boilers-gas-lead.osm",
+                  "weather": {"epw": "<EPW>", "ddy": "<DDY>"}},
+     "env": {}, "expect_exit": 0, "timeout_s": 5400,
+     "files": CORPUS_FILES, "text_files": CORPUS_TEXT, "streams": {},
+     "seal": GUARD7_SEAL,
+     "asserts": [
+         {"op": "json_equals", "file": "report.json", "path": "annual",
+          "value": True},
+         {"op": "json_equals", "file": "report.json",
+          "path": "compliance_determination", "value": "conditional"},
+         # The ids the RESOLVER made this run conditional on — not the ids the
+         # register says could. Pinned as the EXACT list, so a new id
+         # appearing or one of these dropping both fail loudly.
+         #
+         # (`json_in` is the inverse of what this needs: it asserts the value
+         # AT the path is one of a given list. Membership of a list at the path
+         # is `json_equals` on the whole list.)
+         {"op": "json_equals", "file": "report.json",
+          "path": "compliance_determination_reason.ahj_ids",
+          "value": ["AHJ-1", "AHJ-3", "AHJ-14"]},
+         # 8.4.1.2.(3): a reference that cannot hold setpoint is not a valid
+         # comparison basis, so the witness pins BOTH sides' unmet hours.
+         {"op": "json_exists", "file": "report.json",
+          "path": "proposed.unmet_occupied_hours"},
+         {"op": "json_exists", "file": "report.json",
+          "path": "reference.unmet_occupied_hours"},
+         {"op": "json_gt", "file": "report.json",
+          "path": "proposed.total_site_kwh", "value": 0},
+         {"op": "json_gt", "file": "report.json",
+          "path": "reference.total_site_kwh", "value": 0},
+         {"op": "json_equals", "file": "report.json", "path": "tier",
+          "value": 1},
+         {"op": "audit_entry", "step": "compliance", "level": "decision",
+          "action": "unmet heating hours within 100 h for both buildings",
+          "article": "8.4.1.2.(3)", "count": 1},
+         # The exit code is deliberately UNCHANGED by the conditional label.
+         {"op": "observation_equals", "key": "compliant", "value": True},
+         {"op": "observation_equals", "key": "reference_model_present",
+          "value": True},
+     ]},
+]
+
+
 VERDICT_SCENARIOS = [
     # Exits 0 and 1 — the CLI's two determination statuses, frozen at the
     # verdict/emit unit level (live Leg B never covered them end-to-end
@@ -539,7 +625,8 @@ EDITION_SCENARIOS = [
 
 def all_scenarios(slugs):
     scenarios = (corpus_scenarios(slugs) + API_SCENARIOS + FAILURE_SCENARIOS
-                 + VERDICT_SCENARIOS + EDITION_SCENARIOS)
+                 + VERDICT_SCENARIOS + DETERMINATION_SCENARIOS
+                 + EDITION_SCENARIOS)
     for scenario in scenarios:
         seal = scenario["seal"]
         if seal == "ruby" or seal.startswith("ruby-api:"):
