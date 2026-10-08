@@ -99,6 +99,15 @@
  "percent_of_target": 133.9,
  "tier": null,
  "annual": false,
+ "ahj_applied": [
+  {
+   "id": "AHJ-14",
+   "status": "referral",
+   "title": "which part-load class a reference boiler or furnace takes",
+   "count": 1
+  }
+ ],
+ "ahj_register": "docs/NECB_AHJ_QUESTIONS.md",
  "compliant": false,
  "warnings": [
   "cooling capacity unsized \u2014 design_cooling_kw unavailable (run a sizing run for kW-threshold rules)",

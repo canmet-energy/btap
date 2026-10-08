@@ -748,7 +748,6 @@
   "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
   "article": "NECB 2025 Table 5.2.12.1.-N; 8.4.6.2.",
   "ruling": "D-89 D-90",
-  "ahj": "AHJ-14",
   "evidence": "Article 8.4.6.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.2, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0 (node value 0), 0.00001 to 0.0001 step 0.00001, 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (169 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.1994 % against the exact requirement (sampled at PLR step 0.00001); a node at PLR 0 carries the Code equation down to zero load; the efficiency curve is evaluated on the EnteringBoiler temperature",
   "building": "reference building",
   "level": "decision"
@@ -2990,7 +2989,6 @@
   "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
   "article": "NECB 2025 Table 5.2.12.1.-N; 8.4.6.2.",
   "ruling": "D-89 D-90",
-  "ahj": "AHJ-14",
   "evidence": "Article 8.4.6.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.2, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0 (node value 0), 0.00001 to 0.0001 step 0.00001, 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (169 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.1994 % against the exact requirement (sampled at PLR step 0.00001); a node at PLR 0 carries the Code equation down to zero load; the efficiency curve is evaluated on the EnteringBoiler temperature",
   "building": "reference building",
   "level": "decision"
@@ -3326,6 +3324,7 @@
   "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
   "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
   "ruling": "D-46 D-89",
+  "ahj": "AHJ-14",
   "evidence": "Article 8.4.6.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.055) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x rated fuel; the first node's value lies above the engine's 0.7 floor on the coil part-load fraction, so the engine never clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
   "building": "reference building",
   "level": "decision"
@@ -3345,6 +3344,7 @@
   "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
   "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
   "ruling": "D-46 D-89",
+  "ahj": "AHJ-14",
   "evidence": "Article 8.4.6.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.055) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x rated fuel; the first node's value lies above the engine's 0.7 floor on the coil part-load fraction, so the engine never clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
   "building": "reference building",
   "level": "decision"
@@ -3364,6 +3364,7 @@
   "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
   "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
   "ruling": "D-46 D-89",
+  "ahj": "AHJ-14",
   "evidence": "Article 8.4.6.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.055) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x rated fuel; the first node's value lies above the engine's 0.7 floor on the coil part-load fraction, so the engine never clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
   "building": "reference building",
   "level": "decision"
@@ -3383,6 +3384,7 @@
   "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
   "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
   "ruling": "D-46 D-89",
+  "ahj": "AHJ-14",
   "evidence": "Article 8.4.6.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.055) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x rated fuel; the first node's value lies above the engine's 0.7 floor on the coil part-load fraction, so the engine never clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
   "building": "reference building",
   "level": "decision"
@@ -3402,6 +3404,7 @@
   "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
   "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
   "ruling": "D-46 D-89",
+  "ahj": "AHJ-14",
   "evidence": "Article 8.4.6.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.055) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x rated fuel; the first node's value lies above the engine's 0.7 floor on the coil part-load fraction, so the engine never clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
   "building": "reference building",
   "level": "decision"
@@ -3711,15 +3714,15 @@
  },
  {
   "step": "compliance",
-  "target": "Primary Boiler, Secondary Boiler",
-  "action": "INFORMATIONAL AND CONDITIONAL: 1 register question(s) requiring approval by the authority having jurisdiction were raised by this run's modelling choices, so the verdict below is NOT a Code-compliance determination. AHJ-14 (referral); AHJ-14 (referral); AHJ-14 (referral); AHJ-14 (referral)",
+  "target": "CoilHeatingGasMultiStage_gas, CoilHeatingGasMultiStage_gas 1, CoilHeatingGasMultiStage_gas 2, CoilHeatingGasMultiStage_gas 3, CoilHeatingGasMultiStage_gas 4, Primary Boiler",
+  "action": "INFORMATIONAL AND CONDITIONAL: 1 register question(s) requiring approval by the authority having jurisdiction were raised by this run's modelling choices, so the verdict below is NOT a Code-compliance determination. AHJ-14 (referral); AHJ-14 (referral); AHJ-14 (referral); AHJ-14 (referral); AHJ-14 (referral); AHJ-14 (referral)",
   "inputs": {
    "ahj_ids": [
     "AHJ-14"
    ],
    "ahj_register": "docs/NECB_AHJ_QUESTIONS.md"
   },
-  "article": "NECB 2025 Table 5.2.12.1.-N; 8.4.6.2.",
+  "article": "NECB 2025 Table 5.2.12.1.-N; 8.4.6.2., NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
   "ruling": "D-99 D-100",
   "level": "warning"
  },
