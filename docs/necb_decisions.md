@@ -1358,8 +1358,15 @@ to the proposed. Reconciliation (same shape as D-38's min-wins): the
 table's "None" governs the default composition — a COOLED-BUT-UNHEATED
 proposed block (the refrigerated-space case System 5 exists for) gets a
 cooling-only TPFC reference; when the proposed block IS heated, sentence
-(5) overrides presence and the existing two-pipe changeover heating is
-kept (no baseboard variant invented — the table describes none). Both
+(5) overrides presence, and the reference MODELS heating in the System 5
+surrogate. An earlier version of this decision said "the existing two-pipe
+changeover heating is kept (no baseboard variant invented)", which was false in
+both halves: there is no existing changeover heating to keep, and the tool does
+invent equipment — it builds a hot-water loop, a boiler, heating coils and an
+MAU heating coil inside a FOUR-PIPE fan-coil surrogate. **The Code does not
+select that topology**, which is why AHJ-11 refers the precedence question and
+AHJ-18 records the surrogate's missing plant-side changeover as a tool gap
+(Sol, `129`). Both
 branches audited with both articles. A block with NO conditioning at all
 gets no reference system (existing 8.4.4.1.(5) behavior — that case is
 absence, not "None").

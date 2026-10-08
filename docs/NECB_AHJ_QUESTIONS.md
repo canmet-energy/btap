@@ -95,6 +95,7 @@ nonconformity with 8.4.x.9.(6)(e).
 | AHJ-15 | 8.4.x.9.(3) terminal-vs-plant dispatch priority | referral | necb2020, necb2025 | not yet |
 | AHJ-16 | 8.4.x.14 N:1 system correspondence | referral | necb2020, necb2025 | yes, on an in-scope transfer decline |
 | AHJ-17 | no air-cooled chiller curve is shipped | tool-gap | necb2020, necb2025 | no |
+| AHJ-18 | the two-pipe fan-coil surrogate has no plant-side changeover | tool-gap | necb2020, necb2025 | no |
 
 ---
 
@@ -550,6 +551,13 @@ NECB layer to audit — a metadata handoff, not a second copy of the rule.
 
 **Status: `referral`** — the acceptable-solution text does not decide this question.
 
+**Cross-reference while AHJ-18 is open.** The interpretation this entry refers
+is EVALUABLE — a coherent refrigerated proposed model completes the full
+`necb2025` path cleanly (Sol, `129`). But the two-pipe surrogate the reference
+is built in has no plant-side changeover, so some heated System 5 references
+currently fail to simulate. That is AHJ-18, a tool gap, and it is not part of
+this ambiguity.
+
 **The ambiguity.** A genuine internal tension in the Code, not just in our
 reading: sentence (5) requires identical heating presence between proposed and
 reference, while the table's System 5 row says heating "None". D-39 retains
@@ -707,3 +715,44 @@ AHJ-7 on Sol's clearance review.
 warning. Closing this means carrying the air-cooled rows — and the Screw row
 among them is the one AHJ-7's erratum affects, so closing it requires adopting
 that correction deliberately rather than transcribing the printed value.
+
+## AHJ-18 — the two-pipe fan-coil surrogate has no plant-side changeover
+
+**Article.** Table 8.4.4.7.-B / Table 8.4.5.7.-B, the System 5 row.
+
+**Status: `tool-gap`** — implementable, so it is a defect to close, never an
+interpretation. It does NOT make a verdict conditional.
+
+**The gap.** Table 7-B defines System 5 as a TWO-PIPE fan coil. The build gives
+each zone a `ZoneHVACFourPipeFanCoil` with a water-heating coil on an
+independent hot-water loop and a water-cooling coil on an independent
+chilled-water loop. `tpfc_htg_availability` and `tpfc_clg_availability` make the
+COILS seasonally exclusive; **neither plant loop receives the corresponding
+availability control.**
+
+Two simulation loops are not themselves disqualifying — Sol's `129` notes the
+pinned library's own `model_two_pipe_loop` keeps separate loops "for sizing
+reasons" — but it adds inverse PLANT availability and this port does not. In
+cooling season the hot-water loop can circulate through unavailable heating
+coils with no heat sink and run away.
+
+**Established by.** Sol `129`, isolating one factor at a time. With four-pipe
+fan coils the runaway does not occur; with inverse scheduled availability added
+to both plant loops it disappears. Measured here: a heated System 5 reference
+terminates with `CheckForRunawayPlantTemps` in August.
+
+**Why it is not simply fixed in place, measured.** The plant loops are SHARED.
+`plant_loops.hot_water(..., reuse=True)` returns one loop per model, and a
+mixed reference was measured carrying ONE 'Hot Water Loop' with 8 demand coils
+across two different systems. Stamping seasonal availability on it would make
+heating unavailable in summer for every other system drawing on it — a worse
+defect than the one being fixed. Closing this properly needs either a dedicated
+loop for the two-pipe system or a changeover that does not disable the loop for
+its other consumers, which is a design decision rather than a one-line control.
+
+**What the tool does meanwhile.** It builds the four-pipe surrogate. A heated
+System 5 reference may fail to simulate, and when it does the run fails loudly
+rather than reporting a number. AHJ-11 cross-references this entry while it is
+open; the two are separate, and Sol's `129` is explicit that the INTERPRETATION
+is evaluable — a coherent refrigerated proposed model completes the full
+`necb2025` path with zero severe and zero fatal errors.

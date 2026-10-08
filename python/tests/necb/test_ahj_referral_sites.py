@@ -30,7 +30,7 @@ class TestAHJ11SystemFiveHeatingPresence(unittest.TestCase):
     text-consistent and raises no question at all.
     """
 
-    def _assignment(self, heated):
+    def _assignment(self, heated, code="necb2020"):
         """Driven through `_finalize`, the real call site.
 
         Not through an extracted helper: four bugs on this branch have survived
@@ -61,7 +61,7 @@ class TestAHJ11SystemFiveHeatingPresence(unittest.TestCase):
             config={"heating": "hot_water", "needs_boiler": True},
             energy_type=None, action="build")
 
-        ruleset = resolve("necb2020")
+        ruleset = resolve(code)
         rules_data = ruleset.rules("hvac")
         selection = rules_data["selection"]
         facts = {"zone_groups": [group], "plants": [],
@@ -82,6 +82,37 @@ class TestAHJ11SystemFiveHeatingPresence(unittest.TestCase):
         self.assertIn("8.4.4.1.(5)", entry["article"])
         self.assertEqual("D-39", entry["ruling"],
                          "the project reading travels beside the referral")
+
+    def test_the_citation_names_THIS_edition_s_articles(self):
+        """These were hardcoded to 2020's numbering, so a necb2025 run told an
+        authority its condition came from 8.4.4.1.(5) and Table 8.4.4.7.-B —
+        the OTHER edition's articles (Sol, `129`.5). The same article number
+        naming a different requirement per edition is the collision the
+        repository contract warns about, and it had reached product output.
+        """
+        for code, own, foreign in (("necb2020", "8.4.4", "8.4.5"),
+                                   ("necb2025", "8.4.5", "8.4.4")):
+            with self.subTest(code):
+                _a, audit = self._assignment(heated=True, code=code)
+                article = _citations(audit, "AHJ-11")[0]["article"]
+                self.assertIn(f"{own}.1.(5)", article)
+                self.assertIn(f"Table {own}.7.-B", article)
+                self.assertNotIn(foreign, article,
+                                 "no other edition's numbering may appear")
+
+    def test_the_prose_says_heating_is_BUILT_not_merely_kept(self):
+        """D-39's wording said "the existing two-pipe changeover heating is
+        kept" and "no system invented". Both false: the tool constructs a
+        hot-water loop, a boiler and heating coils inside a FOUR-PIPE fan-coil
+        surrogate (Sol, `129`.4). An authority told that nothing was invented
+        would be misled about what it is approving."""
+        _a, audit = self._assignment(heated=True)
+        action = _citations(audit, "AHJ-11")[0]["action"]
+        self.assertIn("BUILT", action)
+        self.assertIn("does not select the topology", action)
+        for false_claim in ("existing two-pipe changeover heating is kept",
+                            "no system invented"):
+            self.assertNotIn(false_claim, action)
 
     def test_an_UNHEATED_block_cites_NOTHING(self):
         """The boundary negative. Honouring the table on an unheated block is

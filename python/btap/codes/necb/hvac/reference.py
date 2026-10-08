@@ -337,6 +337,20 @@ def _residential_compatible_cooling(group):
 
 # ---- finalize: heat-pump override, energy type, catalog name ----
 
+def _subsection(ruleset):
+    """This edition's reference subsection prefix — `8.4.4` or `8.4.5`.
+
+    Read from the edition's manifest, never written as a literal: the same
+    article NUMBER names a different requirement in each edition, so a
+    hardcoded citation is wrong for every edition but the one it was written
+    against. `None` falls back to 2020's, which is what the hardcoded value
+    already was — but the fallback is now visible instead of implicit.
+    """
+    if ruleset is None:
+        return '8.4.4'
+    return ruleset.article('reference_subsection')
+
+
 def _finalize(assignment, group, definitions, selection, facts, audit,
               hp_rules=None, proposed_annual=None, ruleset=None,
               disclosed=None):
@@ -410,15 +424,33 @@ def _finalize(assignment, group, definitions, selection, facts, audit,
     # absence of heating per thermal block to be IDENTICAL to the proposed.
     # Reconciliation: the table's "None" governs the default composition
     # (cooling-only TPFC when the proposed block is unheated); sentence (5)
-    # overrides presence when the proposed block IS heated (the existing
-    # two-pipe changeover heating is kept — no system invented).
+    # overrides presence when the proposed block IS heated.
+    #
+    # "THE EXISTING TWO-PIPE CHANGEOVER HEATING IS KEPT — NO SYSTEM INVENTED"
+    # was the old wording here and it was false (Sol, `129`.4). There is no
+    # existing changeover heating to keep: this path BUILDS a hot-water loop, a
+    # boiler and heating coils — and an MAU heating coil — inside a FOUR-PIPE
+    # fan-coil surrogate. The Code does not select that topology, which is the
+    # substance of the AHJ-11 referral, and the surrogate's missing plant-side
+    # changeover is AHJ-18.
     if assignment.reference_system == 5:
+        # PER EDITION. These were hardcoded to 2020's numbering, so a necb2025
+        # run told an authority its System-5 condition came from 8.4.4.1.(5)
+        # and Table 8.4.4.7.-B — the other edition's articles (Sol, `129`.5).
+        # `8.4.5.9` naming a different requirement in each edition is the exact
+        # collision the repository contract warns about, and here it reached
+        # product output.
+        prefix = _subsection(ruleset)
+        presence_article = f'{prefix}.1.(5); Table {prefix}.7.-B'
         if group['heated']:
             audit.decision('selection',
-                           'System 5 reference keeps its heating — proposed block is heated, '
-                           '8.4.4.1.(5) presence override of the Table -B "None" heating column',
+                           'System 5 reference MODELS HEATING in the two-pipe surrogate — the '
+                           f'proposed block is heated, so {prefix}.1.(5)\'s presence requirement '
+                           'overrides the Table -B "None" heating column. The Code does not '
+                           'select the topology of that heating: a hot-water loop, boiler and '
+                           'heating coils are BUILT here, inside a four-pipe fan-coil surrogate',
                            target=','.join(group['zones']),
-                           article='8.4.4.1.(5); Table 8.4.4.7.-B',
+                           article=presence_article,
                            ruling='D-39',
                            # AHJ-11, on THIS branch only. Sentence (5) requires
                            # identical heating presence while Table -B's cell
@@ -434,10 +466,10 @@ def _finalize(assignment, group, definitions, selection, facts, audit,
                            'mau_heating_coil_type': 'None'})
             assignment.config = merged
             audit.decision('selection',
-                           'System 5 reference built COOLING-ONLY — Table 8.4.4.7.-B heating "None" '
-                           'honoured (proposed block is unheated)',
+                           f'System 5 reference built COOLING-ONLY — Table {prefix}.7.-B heating '
+                           '"None" honoured (proposed block is unheated)',
                            target=','.join(group['zones']),
-                           article='Table 8.4.4.7.-B; 8.4.4.1.(5)', ruling='D-39')
+                           article=f'Table {prefix}.7.-B; {prefix}.1.(5)', ruling='D-39')
 
     # 8.4.4.6.(2)/8.4.5.6.(2): purchased cooling is represented by an air-cooled
     # electric chiller.

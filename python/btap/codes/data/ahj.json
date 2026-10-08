@@ -163,6 +163,15 @@
         "necb2020",
         "necb2025"
       ]
+    },
+    {
+      "id": "AHJ-18",
+      "title": "the two-pipe fan-coil surrogate has no plant-side changeover",
+      "status": "tool-gap",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ]
     }
   ]
 }
