@@ -242,6 +242,8 @@
   "inputs": {
    "reference_system": 6,
    "catalogue": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
+   "config": null,
+   "energy_type": "gas",
    "selection_assignments_absorbed": 5,
    "thermal_blocks_spanned": 5,
    "thermal_blocks": [
