@@ -265,12 +265,24 @@ def _category_for(group, building, selection, audit):
     category = max(votes.items(),
                    key=lambda kv: (kv[1], 0 if kv[0] is None else 1))[0]
     named = [k for k in votes if k is not None]
-    if len(named) > 1:
+    # D-22's majority warning is UNREACHABLE since D-101 and is kept as a
+    # guard rather than deleted. `_category_for` now receives one block, so
+    # `named` can never hold two categories — the condition is false by
+    # construction. If a future change hands this a multi-block group again,
+    # the warning should fire rather than a majority being applied silently,
+    # which is the defect D-22 recorded (Fable, `167` G5).
+    #
+    # Its article stays the 2020 literal because this whole function hardcodes
+    # 2020 articles (see the 8.4.4.7.(3) warning below) and threading the
+    # ruleset through for an unreachable branch would be a bigger change than
+    # the finding. Noted rather than fixed: were it ever to fire under
+    # NECB 2025, both literals would name the wrong subsection.
+    if len(named) > 1:  # pragma: no cover - unreachable with per-block views
         audit.warn('selection',
                    '8.4.4.7.(1) assigns systems PER THERMAL BLOCK, but this zone group mixes '
                    f"categories {' / '.join(named)} — majority ({category}) applied "
                    'to the whole group',
-                   target=group['air_loop'] or group['zones'][0],
+                   target=','.join(group['zones']),
                    article='8.4.4.7.(1)', ruling='D-22')
     if category is None:
         category = selection['default_category']
@@ -279,10 +291,15 @@ def _category_for(group, building, selection, audit):
             t = (building.get('zone_types') or {}).get(z)
             if t is not None and t not in seen:
                 seen.append(t)
+        # TARGET THE BLOCK, like the selection record it precedes. This ran
+        # per block while naming the serving system, which is F1's class
+        # (Fable, `167` G5); no baseline shows a duplicate yet only because
+        # no corpus model has an unlisted space type.
         audit.warn('selection',
                    'space type not listed in Table 8.4.4.7.-A — closest-corresponding category assumed',
-                   target=group['air_loop'] or group['zones'][0],
-                   inputs={'zone_types': seen},
+                   target=','.join(group['zones']),
+                   inputs={'zone_types': seen,
+                           'serving_system': group['air_loop']},
                    value=category, article='8.4.4.7.(3)')
     _audit_museum_row(group, building, category, audit)
     return category
@@ -1217,7 +1234,15 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
                 'keeping it alive',
                 target=','.join(sorted(p.nameString() for p in adoptable)),
                 inputs={'retained_plants': len(adoptable),
-                        'retained_non_hvac_plants': len(surviving) - len(adoptable),
+                        # NOT "non-HVAC": this counts survivors NO REUSE PATH
+                        # CAN RETURN, which is a different set. A copied
+                        # residential WSHP block retains its CONDENSER loop —
+                        # `wshp` is in both compatible sets — and a condenser
+                        # loop carries no boiler, district object, chiller or
+                        # builder hot/chilled-water name, so it fails all five
+                        # branches while being plainly HVAC (Fable, `167` G3).
+                        'retained_unadoptable_plants':
+                            len(surviving) - len(adoptable),
                         'reserved_plants': len(retained_plants),
                         'copied_blocks': sum(len(a.zones) for a in assignments
                                              if a.action == 'copy_proposed'),
@@ -3059,8 +3084,9 @@ def _disclose_multi_energy(group, selection, facts, audit, ruleset=None,
     # ADOPTION is no longer among them, which is a finding rather than an edit.
     #
     # This disclosure only ever fires for a block whose heating was collapsed
-    # to one energy type, and such a block is always an `action == "build"`
-    # assignment — `_finalize` returns before the election and before this
+    # to one energy type, and such a block is always a REPLACED assignment —
+    # `build` or `through_the_wall`, both of which reach the election, which
+    # the earlier wording narrowed to `build` alone (Fable, `167` G4) — `_finalize` returns before the election and before this
     # function for a `copy_proposed` block, so a retained block raises no
     # question here at all. The one measured adoption was an
     # all-`copy_proposed` residential service with ZERO records from this

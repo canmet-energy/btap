@@ -1842,15 +1842,43 @@ class TestTheClassifierMatchesTheREUSEPathsExactly(unittest.TestCase):
         def builder_named_district(model, plant_loops):
             return plant_loops.hot_water(model, source='district', reuse=False)
 
-        for shape, source, expected in (
-                (district_oddly_named, 'district', False),
-                (district_oddly_named, 'boiler', False),
-                (hybrid, 'boiler', False),
-                (hybrid, 'district', False),
-                (ordinary_boiler, 'boiler', True),
-                (builder_named_district, 'district', True)):
+        def water_cooled_chillers(model, plant_loops):
+            return plant_loops.chilled_water(model, source='water_cooled',
+                                             reuse=False)
+
+        def district_cooled(model, plant_loops):
+            return plant_loops.chilled_water(model, source='district',
+                                             reuse=False)
+
+        def boilerless_hot_water_name(model, plant_loops):
+            import openstudio
+
+            loop = openstudio.model.PlantLoop(model)
+            loop.setName('Hot Water Loop')
+            return loop
+
+        # THREE OF THE FIVE BRANCHES WERE UNPINNED. Dropping `_chillers`,
+        # `_district_cooled` or the hot-water name fallback each left all 210
+        # targeted tests green, frozen scenarios included (Fable, `167` G1).
+        # The `_chillers` one is the shape that matters: a proposed chiller
+        # plant retained by a COPIED block is the common case, and it would
+        # have vanished from the RESERVED audit while the exclusion still
+        # protected it — Sol's `162` false-negative class on the ordinary
+        # shape. Both existing full-path reservation tests use boiler
+        # fixtures, so neither could see it.
+        for shape, medium, source, expected in (
+                (district_oddly_named, 'hot', 'district', False),
+                (district_oddly_named, 'hot', 'boiler', False),
+                (hybrid, 'hot', 'boiler', False),
+                (hybrid, 'hot', 'district', False),
+                (ordinary_boiler, 'hot', 'boiler', True),
+                (builder_named_district, 'hot', 'district', True),
+                (water_cooled_chillers, 'chilled', 'water_cooled', True),
+                (district_cooled, 'chilled', 'district', True),
+                (boilerless_hot_water_name, 'hot', 'boiler', True)):
             with self.subTest(shape=shape.__name__, source=source):
-                candidate, reused = self.classify_and_reuse(shape, medium='hot',
+                candidate, reused = self.classify_and_reuse(shape,
+                                                            medium=medium,
                                                             source=source)
                 self.assertEqual(
                     expected, reused,
@@ -1935,3 +1963,64 @@ class TestTheClassifierMatchesTheREUSEPathsExactly(unittest.TestCase):
             5, len([c for c in built[0].demandComponents()
                     if 'Coil Cooling' in c.nameString()]),
             'carrying all five built blocks\' cooling coils')
+
+
+class TestTheAssignmentDoesNotALIASTheGroupsZones(unittest.TestCase):
+    """Fable's `167` G2: F4's `list(...)` fix had no test that notices its
+    removal — re-aliasing a constructor passed everything.
+
+    `_blocks_of` copies the group dict shallowly, so a single-zone group's
+    assignment shared the list object with `facts['zone_groups'][i]['zones']`,
+    and the merge's `extend` then grew the characterised facts from one zone
+    to five.
+
+    MY FIRST ATTEMPT AT THIS TEST WAS ALSO VACUOUS, and for an instructive
+    reason: it drove `select_reference_systems` and compared the facts before
+    and after, but selection does not merge — the merge runs in the reference
+    BUILD, the same division that made the D-58 matrix migration subtle. With
+    all six constructors re-aliased the test still passed, because nothing had
+    extended the shared list yet. And inside the build the facts are internal,
+    so there is no observable consumer to assert against, which is why Fable
+    rated the finding LOW.
+
+    So the invariant is asserted where it lives: an assignment's `zones` must
+    not BE the group's list. That is one identity check, it fails the instant a
+    constructor re-aliases, and it does not pretend to observe a consequence
+    that no caller can currently see.
+    """
+
+    def test_no_constructor_returns_the_groups_own_list(self):
+        from btap.codes import resolve
+        from btap.codes.necb.hvac import reference as ref
+
+        selection = resolve('necb2020').rules('hvac')['selection']
+        # One group per selection branch that constructs an Assignment: the
+        # ordinary path, the residential paths and the unlisted-type fallback.
+        cases = {
+            'general': ('Office - enclosed', True, True),
+            'residential heated-only': ('Dwelling unit', True, False),
+            'residential cooled': ('Dwelling unit', True, True),
+            'data processing': ('Computer/Server room', True, True),
+            'unlisted space type': ('Not In Table 8.4.4.7.-A', True, True),
+        }
+        for label, (space_type, heated, cooled) in cases.items():
+            with self.subTest(case=label):
+                group = {'zones': ['Zone 1'], 'air_loop': 'Loop 1',
+                         'heated': heated, 'cooled': cooled,
+                         'design_cooling_kw': None,
+                         'heating_energy_types': ['NaturalGas'],
+                         'heat_pump': False, 'heat_pump_sources': [],
+                         'heat_pump_source_loops': [],
+                         'zonal_units': False, 'loop_dx_cooling': False}
+                building = {'storeys': 2, 'zone_types': {'Zone 1': space_type}}
+                audit = AuditLog()
+                category = ref._category_for(group, building, selection, audit)
+                assignment = ref._assign(group, category, building, selection,
+                                         audit)
+                self.assertIsNotNone(assignment, label)
+                self.assertEqual(group['zones'], assignment.zones,
+                                 'same contents')
+                self.assertIsNot(
+                    group['zones'], assignment.zones,
+                    'but NOT the same list: the merge extends an assignment\'s '
+                    'zones, which would mutate the characterised facts')

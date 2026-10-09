@@ -19,7 +19,9 @@ established:
   * `(6)(b)` cited without any capacity to establish which of (6)(b)/(c)/(d)
     applies;
   * "the reference retains one boiler per energy type", when the reference
-    ADOPTS the proposed plant with its own device count and the post-sizing
+    ADOPTED the proposed plant with its own device count — present tense when
+    written, and D-101 made it unreachable for a replaced block
+    (Fable, `167` G4) — and the post-sizing
     staging pass then sets live capacity by primary/secondary ROLE, blind to
     fuel — the committed baselines show the reference secondary at
     `capacity_kw: 0.0` against a real design capacity.
