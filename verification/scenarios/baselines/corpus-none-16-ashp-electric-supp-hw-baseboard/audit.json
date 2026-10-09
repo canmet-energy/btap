@@ -331,6 +331,20 @@
  },
  {
   "step": "build",
+  "target": "Main Service Water Loop",
+  "action": "proposed plant equipment RESERVED to whatever retained it: a reference system built for a replaced block may not connect to a plant that survived teardown, whether a copied block, process or service water, or another non-zone demand is keeping it alive",
+  "inputs": {
+   "retained_plants": 1,
+   "copied_blocks": 0,
+   "replaced_blocks": 5
+  },
+  "value": "a built block connects to a planned reference plant; proposed equipment stays with the demand that retained it",
+  "ruling": "D-101",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "build",
   "target": "Thermal Zone 1",
   "action": "reference system built",
   "inputs": {
