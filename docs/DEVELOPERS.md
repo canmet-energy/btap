@@ -79,7 +79,8 @@ set -a && source .env && set +a
 
 `set -a` is required in an existing shell because plain `source` does not
 export values to child processes. The two Python maintainers' clients use the
-same variables and also support a missing `.mcp.json`:
+same variables and never need `.mcp.json` (that file is Claude Code's own
+native-tool config, unrelated to the Python client below):
 
 ```bash
 python3 python/scripts/fetch_necb_8_4_text.py
@@ -87,6 +88,17 @@ python3 python/scripts/building_stock.py --help
 ```
 
 CI uses mocked protocol tests and never requires live HBIX.
+
+`python/btap/_mcp.py` is a byte-identical vendored copy of hbix's own
+`mcp_client.py` (`canmet-energy/hbix`, served at `GET <base>/mcp_client.py`;
+see `canmet-energy/btap#66`). Do not hand-edit it. Check staleness and
+re-sync with its own CLI:
+
+```bash
+python3 python/btap/_mcp.py --check-update   # sha256 vs the served copy
+curl https://3ucoopudrb.execute-api.ca-central-1.amazonaws.com/prod/mcp_client.py \
+    -o python/btap/_mcp.py                   # re-vendor if stale
+```
 
 ## Testing
 
