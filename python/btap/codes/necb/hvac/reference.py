@@ -188,8 +188,13 @@ def _blocks_of(group, election_key=None):
     extra = {'_serving_zones': serving, '_election_key': election_key,
              '_origin_group': group}
     if len(serving) == 1:
-        return [dict(group, **extra)]
-    return [dict(group, zones=[zone], **extra) for zone in serving]
+        return [dict(group, _first_block=True, **extra)]
+    # `_first_block` marks the ONE view that may speak for the serving system.
+    # A fact about the group — "this model is not sized", say — is not five
+    # findings because the group has five blocks, and the unsized-threshold
+    # warning was emitted once per block with the same air-loop target.
+    return [dict(group, zones=[zone], _first_block=(index == 0), **extra)
+            for index, zone in enumerate(serving)]
 
 
 
@@ -282,10 +287,45 @@ def _assign(group, category, building, selection, audit):
         if rule.get('min_cooling_kw_exclusive'):
             kw = group['design_cooling_kw']
             if kw is None:
-                audit.warn('selection',
-                           'cooling-capacity threshold rule needs a sized model — smaller-system branch assumed',
-                           target=group['air_loop'] or group['zones'][0], article=rule['article'])
+                # Once per serving system: the model's sizing state is a fact
+                # about the group, not about each of its blocks.
+                if group.get('_first_block', True):
+                    audit.warn('selection',
+                               'cooling-capacity threshold rule needs a sized model — smaller-system branch assumed',
+                               target=group['air_loop'] or group['zones'][0],
+                               inputs={'blocks_assigned_on_this_basis': len(
+                                   group.get('_serving_zones') or group['zones'])},
+                               article=rule['article'])
                 continue
+            # THE BASIS IS THE SERVING SYSTEM'S TOTAL, AND SAYING SO IS THE
+            # POINT. `design_cooling_kw` is a group-level quantity, and this
+            # rule asks whether "the proposed building or space has a cooling
+            # capacity exceeding" the threshold — so whether "building or
+            # space" means the serving system or the one thermal block being
+            # assigned is a Code reading D-101 does not settle. Selection is
+            # per block, so the threshold now decides ONE block's system from a
+            # total that may include other spaces' capacity; that cannot be
+            # resolved by inheritance, and it must not be silent either
+            # (Sol, `143`).
+            serving = tuple(group.get('_serving_zones') or group['zones'])
+            if len(serving) > len(group['zones']):
+                audit.warn(
+                    'selection',
+                    'the cooling-capacity threshold deciding THIS thermal '
+                    f"block's system was measured on the whole serving "
+                    f'system ({len(serving)} blocks), because '
+                    '"the proposed building or space" is not established as '
+                    'the block or the serving system. Another space on the '
+                    'same system may be contributing the capacity that put '
+                    'this block over the threshold',
+                    target=','.join(group['zones']),
+                    inputs={'threshold_kw': rule['min_cooling_kw_exclusive'],
+                            'measured_kw': kw,
+                            'measured_over_blocks': sorted(serving),
+                            'assigned_block': list(group['zones']),
+                            'basis': 'serving system total (unresolved: '
+                                     '"building or space")'},
+                    article=rule['article'], ruling='D-101')
             if not kw > rule['min_cooling_kw_exclusive']:
                 continue
 
@@ -892,13 +932,52 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
             existing[1].articles.extend(a.articles)
         else:
             merged.append([key, a])
+    # TWO NOTES, NOT ONE. Note (3) is marked on System 6 ALONE and is what
+    # authorizes one multizone system to span groups of thermal blocks. Systems
+    # 1, 2 and 5 reach a COMMON VENTILATION SYSTEM through Note (2); they do not
+    # acquire System 6's facade/internal/underground grouping, and auditing a
+    # merged System 1 under Note (3) cited a permission that does not apply to
+    # it (Sol, `143`). Selection stays per block for every row — what differs is
+    # whether the selected units remain separate at CONSTRUCTION.
     if len(merged) < len(assignments):
-        audit.decision('build', 'multizone selection groups merged into whole-building systems',
-                       inputs={'selection_groups': len(assignments), 'merged_groups': len(merged)},
-                       value='one multizone system spans the thermal blocks of all storeys; '
-                             'facade/internal/underground split applied inside the builder',
-                       article=f'Table {_subsection(ruleset)}.7.-B Note (3)',
-                       ruling='D-28')
+        collapsed = {}
+        for key, assignment in merged:
+            if key is None:
+                continue
+            collapsed.setdefault(assignment.reference_system, []).append(assignment)
+        subsection = _subsection(ruleset)
+        for system, group_assignments in sorted(
+                collapsed.items(), key=lambda kv: (kv[0] is None, kv[0])):
+            spanned = sum(len(a.zones) for a in group_assignments)
+            if system == 6:
+                audit.decision(
+                    'build',
+                    'multizone selection groups merged into whole-building systems',
+                    inputs={'selection_groups': len(assignments),
+                            'merged_groups': len(merged),
+                            'reference_system': system,
+                            'thermal_blocks_spanned': spanned},
+                    value='one multizone system spans the thermal blocks of all '
+                          'storeys; facade/internal/underground split applied '
+                          'inside the builder',
+                    article=f'Table {subsection}.7.-B Note (3)',
+                    ruling='D-28')
+            else:
+                audit.decision(
+                    'build',
+                    'one COMMON VENTILATION SYSTEM serves these thermal blocks; '
+                    'the heating and cooling equipment stays block-level',
+                    inputs={'selection_groups': len(assignments),
+                            'merged_groups': len(merged),
+                            'reference_system': system,
+                            'thermal_blocks_spanned': spanned},
+                    value='Note (2) permits a common ventilation system for '
+                          'Systems 1, 2 and 5 and distinguishes it from the '
+                          'block-level systems; it grants none of Note (3)\'s '
+                          'facade/internal/underground grouping, which is '
+                          'marked on System 6 alone',
+                    article=f'Table {subsection}.7.-B Note (2)',
+                    ruling='D-101')
     assignments = [m[1] for m in merged]
 
     purchased_cooling_chillers = []

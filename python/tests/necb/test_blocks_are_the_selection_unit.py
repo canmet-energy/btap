@@ -618,3 +618,127 @@ class TestDistinctSourceLoopServiceSetsStayDISTINCT(unittest.TestCase):
             [tuple(sorted(groups[0]['zones'])), tuple(sorted(groups[1]['zones']))],
             affected,
             'two service sets, two disclosures, each naming its own blocks')
+
+
+class TestTheMergeCitesTheNOTEThatApplies(unittest.TestCase):
+    """Sol's `143` blocker 4. Table 8.4.x.7.-B marks its own notes, and the
+    structured payload carries the markers in both editions even though it
+    omits the note text:
+
+        System 1   Unitary air conditioner with baseboard heating(2)
+        System 2   Four-pipe fan-coil(2)
+        System 3   Single-zone packaged rooftop unit with baseboard heating
+        System 4   Single-zone make-up air unit with baseboard heating
+        System 5   Two-pipe fan-coil(2)
+        System 6(3)  Multi-zone built-up system with baseboard heating
+
+    Note (3), on the System 6 name alone, authorizes one multizone system to
+    span groups of thermal blocks. Note (2), on Systems 1, 2 and 5, authorizes
+    a common VENTILATION system and distinguishes it from the block-level HVAC
+    systems. A merged System 1 was audited under Note (3), citing a permission
+    that is not marked on it.
+    """
+
+    MZ = MULTIZONE_PROPOSED
+
+    def merge_entries(self, audit):
+        return [e for e in audit.entries
+                if 'Note (' in str(e.get('article') or '')]
+
+    def test_system_6_cites_Note_3_and_D_28(self):
+        for code in EDITIONS:
+            with self.subTest(code=code):
+                proposed = proposed_with_hvac(self.MZ)
+                _, audit = reference_of(proposed, code=code, storeys=3)
+                entries = self.merge_entries(audit)
+                self.assertEqual(1, len(entries))
+                self.assertIn('Note (3)', entries[0]['article'])
+                self.assertEqual('D-28', entries[0]['ruling'])
+                self.assertEqual(6, entries[0]['inputs']['reference_system'])
+
+    def test_system_1_cites_Note_2_and_NOT_Note_3(self):
+        for code in EDITIONS:
+            with self.subTest(code=code):
+                proposed = proposed_with_hvac(self.MZ)
+                _, audit = reference_of(proposed, code=code, storeys=1,
+                                        space_type='Dwelling unit')
+                entries = self.merge_entries(audit)
+                self.assertEqual(1, len(entries))
+                self.assertIn('Note (2)', entries[0]['article'],
+                              'Note (2) is what is marked on System 1')
+                self.assertNotIn(
+                    'Note (3)', entries[0]['article'],
+                    "System 6's grouping permission is not System 1's")
+                self.assertEqual(1, entries[0]['inputs']['reference_system'])
+                self.assertIn('ventilation', entries[0]['action'].lower(),
+                              'what Note (2) actually permits is a common '
+                              'VENTILATION system')
+
+
+class TestTheCoolingThresholdBASISIsDeclared(unittest.TestCase):
+    """Sol's `143` blocker 5. Table 8.4.x.7.-A sends a Data Processing Area to
+    a different system "where the proposed building or space has a cooling
+    capacity exceeding" a threshold. `design_cooling_kw` is a SERVING-SYSTEM
+    total, and a block view inherits it unchanged.
+
+    Whether "building or space" means the serving system or the one thermal
+    block being assigned is a Code reading D-101 does not settle. Inheriting
+    the total silently would decide it by accident, so the runtime says which
+    basis it used — "record a narrow, visible gap with a non-silent runtime
+    consequence".
+
+    These call `_assign` directly. The threshold is only reached on a SIZED
+    model, which the selection-level fixtures are not: an unsized group takes
+    the "needs a sized model" branch instead, so a pipeline test would exercise
+    the wrong path.
+    """
+
+    def rule_selection(self):
+        from btap.codes import resolve
+
+        return resolve('necb2020').rules('hvac')['selection']
+
+    def assign(self, *, zones, serving, cooling_kw):
+        from btap.codes.necb.hvac import reference as ref
+
+        group = {'zones': list(zones), 'air_loop': 'Loop 1',
+                 'design_cooling_kw': cooling_kw,
+                 '_serving_zones': tuple(serving),
+                 'heated': True, 'cooled': True,
+                 'heating_energy_types': ['Electricity'],
+                 'heat_pump': False, 'heat_pump_sources': [],
+                 'heat_pump_source_loops': []}
+        building = {'storeys': 2,
+                    'zone_types': {z: 'Computer/Server room' for z in serving}}
+        audit = AuditLog()
+        selection = self.rule_selection()
+        category = ref._category_for(group, building, selection, audit)
+        assignment = ref._assign(group, category, building, selection, audit)
+        basis = [e for e in audit.entries
+                 if 'threshold deciding THIS thermal block' in str(e.get('action'))]
+        return assignment, basis
+
+    def test_a_block_assigned_on_the_SERVING_SYSTEM_total_says_so(self):
+        serving = ('Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5')
+        _, basis = self.assign(zones=('Zone 1',), serving=serving,
+                               cooling_kw=500.0)
+        self.assertEqual(
+            1, len(basis),
+            'assigning ONE block from a five-block total must not be silent')
+        inputs = basis[0]['inputs']
+        self.assertEqual(['Zone 1'], inputs['assigned_block'])
+        self.assertEqual(sorted(serving), inputs['measured_over_blocks'])
+        self.assertEqual(500.0, inputs['measured_kw'])
+        self.assertIn('building or space', inputs['basis'],
+                      'the entry must name the unresolved term')
+        self.assertEqual('D-101', basis[0]['ruling'])
+
+    def test_a_single_block_serving_system_says_NOTHING(self):
+        """The control: where the serving system IS one block, the two readings
+        of "building or space" agree and there is no gap to declare.
+        """
+        _, basis = self.assign(zones=('Zone 1',), serving=('Zone 1',),
+                               cooling_kw=500.0)
+        self.assertEqual([], basis,
+                         'no ambiguity, so no warning — otherwise the gap '
+                         'notice becomes noise on every sized run')
