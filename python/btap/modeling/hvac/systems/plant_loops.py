@@ -16,7 +16,10 @@ BOILER_PART_LOAD_CLASS_FEATURE = 'btap_part_load_curve_class'
 #: Feature stamped on a boiler to say which half of a staged plant it is
 #: ('primary' / 'secondary'), so the NECB 8.4.x.9.(6) staging rules identify the
 #: pair by the builder's own mark rather than by matching its display name
-#: (DF-13). Set only where this layer builds the pair; nothing here reads it.
+#: (DF-13). Set where this layer builds the pair, and read in TWO places: by
+#: `_boiler_role` below, as the first source of a loop's primary/secondary
+#: order for reuse matching, and by the codes-side D-90 staging pass
+#: (`btap.codes.necb.hvac.efficiency._plant_role`).
 BOILER_PLANT_ROLE_FEATURE = 'btap_plant_role'
 
 
@@ -71,10 +74,15 @@ def _boiler_role(boiler):
 def _ordered_boiler_fuels(loop):
     """``(primary_fuel, secondary_fuel)`` for a staged pair, else None.
 
-    None means the ORDER could not be established — an imported loop whose
-    boilers carry no role marks, or a plant that is not a two-boiler pair.
-    A caller that supplied an explicit backup must then NOT reuse the loop:
-    unknown order may not silently count as a match (Sol, `153`).
+    None means the ORDER could not be established, and a caller that supplied
+    an explicit backup must then NOT reuse the loop: unknown order may not
+    silently count as a match (Sol, `153`).
+
+    Order IS established for two WHOLLY UNMARKED boilers, by the loop's own
+    supply order — D-90's third source, which is what lets an imported pair
+    match at all. What returns None is a plant that is not a two-boiler pair,
+    a HALF-marked pair (one boiler claiming a role, one not), or a pair whose
+    marks do not form one primary and one secondary.
     """
     boilers = [component.to_BoilerHotWater().get()
                for component in loop.supplyComponents(
@@ -200,7 +208,22 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
 
     :param model: openstudio.model.Model
     :param fuel: primary boiler fuel (OpenStudio Boiler fuel type keyword)
-    :param backup_fuel: secondary boiler fuel (defaults to primary)
+    :param backup_fuel: secondary boiler fuel. IT ALSO SELECTS THE REUSE RULE,
+        because supplying it states an ordered two-role realization while
+        omitting it does not:
+
+        * omitted — REUSE returns any compatible plant that CONTAINS ``fuel``,
+          whatever its other role carries, because the caller is attaching
+          demand rather than electing a pair; NEW CONSTRUCTION defaults the
+          secondary to ``fuel``. So a caller asking for NaturalGas may be
+          handed an existing Electricity-primary/NaturalGas-secondary plant,
+          and that plant's roles are NOT re-defaulted.
+        * supplied — REUSE requires the loop's primary and secondary to match
+          ``(fuel, backup_fuel)`` IN THAT ORDER; NEW CONSTRUCTION uses the
+          supplied value as the secondary fuel.
+
+        The omitted-backup reuse branch is what samples 11 and 12 depend on
+        (Sol, `153`).
     :param reuse: return an existing boiler loop when present (default True)
     :param source: 'boiler' (default) or 'district' (DistrictHeating object
         instead of boilers — the CBECS 'district hot water' pattern)

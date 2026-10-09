@@ -1443,12 +1443,15 @@ class TestAnEXPLICITBackupIsAnORDEREDRealization(unittest.TestCase):
         self.assertTrue(reused)
         self.assertEqual(1, plants)
 
-    def test_an_UNMARKED_imported_pair_refuses_an_explicit_match(self):
+    def test_a_HALF_MARKED_pair_refuses_an_explicit_match(self):
         """`153`: unknown order must not silently count as a match.
 
-        D-90's last resort orders an unmarked two-boiler plant by supply order,
-        which this honours — but a HALF-marked plant, where one boiler claims a
-        role and the other does not, has no established order and is refused.
+        This was called `..._an_UNMARKED_imported_pair_...`, which named the
+        wrong thing: a WHOLLY unmarked two-boiler plant DOES establish its
+        order, by the loop's supply order — D-90's third source, and what lets
+        an imported pair match at all. What is refused is a HALF-marked pair,
+        where one boiler claims a role and the other does not, so no
+        primary/secondary assignment is established (Sol, `155`).
         """
         import openstudio
 
@@ -1471,3 +1474,39 @@ class TestAnEXPLICITBackupIsAnORDEREDRealization(unittest.TestCase):
             str(loop.handle()), str(got.handle()),
             'a half-marked pair has no established order, so an explicit '
             'ordered request must not adopt it')
+
+    def test_a_WHOLLY_unmarked_pair_DOES_match_by_supply_order(self):
+        """The control the rename needs, and D-90's third source.
+
+        Two unmarked boilers on one loop ARE the pair, ordered by the loop's
+        own supply order, so an explicit request matching that order reuses the
+        plant. Without this case the refusal above would read as "imported
+        pairs never match", which is not the contract.
+        """
+        import openstudio
+
+        from btap.modeling.hvac.systems import plant_loops
+
+        model = openstudio.model.Model()
+        loop = plant_loops.hot_water(model, fuel=self.GAS,
+                                     backup_fuel=self.ELECTRIC, reuse=False)
+        boilers = [c.to_BoilerHotWater().get()
+                   for c in loop.supplyComponents(
+                       openstudio.model.BoilerHotWater.iddObjectType())]
+        for index, boiler in enumerate(boilers):
+            boiler.additionalProperties().resetFeature(
+                plant_loops.BOILER_PLANT_ROLE_FEATURE)
+            boiler.setName('Imported Boiler {}'.format(index))
+        self.assertEqual(
+            [self.GAS, self.ELECTRIC], plant_loops.boiler_fuels(loop),
+            'precondition: unmarked, gas then electric in supply order')
+
+        same = plant_loops.hot_water(model, fuel=self.GAS,
+                                     backup_fuel=self.ELECTRIC)
+        self.assertEqual(str(loop.handle()), str(same.handle()),
+                         'supply order establishes the roles, so the matching '
+                         'request reuses the plant')
+        reversed_ = plant_loops.hot_water(model, fuel=self.ELECTRIC,
+                                          backup_fuel=self.GAS)
+        self.assertNotEqual(str(loop.handle()), str(reversed_.handle()),
+                            'and the reversed request still does not')
