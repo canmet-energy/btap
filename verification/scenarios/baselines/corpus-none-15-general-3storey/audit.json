@@ -238,14 +238,21 @@
  },
  {
   "step": "build",
-  "action": "multizone selection groups merged into whole-building systems",
+  "action": "multizone selection groups merged into ONE multizone system",
   "inputs": {
-   "selection_groups": 5,
-   "merged_groups": 1,
    "reference_system": 6,
-   "thermal_blocks_spanned": 5
+   "catalogue": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
+   "selection_assignments_absorbed": 5,
+   "thermal_blocks_spanned": 5,
+   "thermal_blocks": [
+    "Thermal Zone 1",
+    "Thermal Zone 2",
+    "Thermal Zone 3",
+    "Thermal Zone 4",
+    "Thermal Zone 5"
+   ]
   },
-  "value": "one multizone system spans the thermal blocks of all storeys; facade/internal/underground split applied inside the builder",
+  "value": "Note (3) permits one multizone system to span these thermal blocks; the facade/internal/underground split is applied inside this construction. Another merged System 6 construction elsewhere in the building is a SEPARATE record, because a different catalogue realisation cannot be the same system",
   "article": "Table 8.4.4.7.-B Note (3)",
   "ruling": "D-28",
   "building": "reference building",
