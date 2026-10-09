@@ -742,3 +742,185 @@ class TestTheCoolingThresholdBASISIsDeclared(unittest.TestCase):
         self.assertEqual([], basis,
                          'no ambiguity, so no warning — otherwise the gap '
                          'notice becomes noise on every sized run')
+
+
+class TestTheCOOLINGPlantOwnershipToo(unittest.TestCase):
+    """Sol's `145` blocker 1: the reservation protected hot water only.
+
+    `reference.py` says it reserves EVERY surviving plant and passes all their
+    handles, but `builder.py` forwarded them only to `plant_loops.hot_water`.
+    The chilled-water call had no exclusion, `find_chilled_water` tested no
+    blocked set, and the composite recursion dropped the argument — so built
+    System 2 cooling coils joined the copied block's proposed chiller plant
+    while the hot-water split looked correct.
+    """
+
+    MARKER = 'PROPOSED MARKER'
+    SYS = 'FPFC MAU DX Coils with Scroll Chiller'
+
+    def mixed_proposed(self):
+        """Block 1 residential (`copy_proposed`); blocks 2-5 a Museum archive,
+        which Table -A sends to System 2 — a family needing BOTH plants."""
+        proposed = proposed_with_hvac(self.SYS)
+        zones = sorted(proposed.getThermalZones(), key=lambda z: z.nameString())
+        for index, zone in enumerate(zones):
+            wanted = 'Dwelling unit' if index == 0 else 'Museum archive'
+            for space in zone.spaces():
+                space_type = space.spaceType()
+                if space_type.is_initialized():
+                    clone = space_type.get().clone(proposed).to_SpaceType().get()
+                    clone.setName('Block type {}'.format(index))
+                    clone.setStandardsSpaceType(wanted)
+                    space.setSpaceType(clone)
+        for index, boiler in enumerate(sorted(proposed.getBoilerHotWaters(),
+                                              key=lambda b: b.nameString())):
+            boiler.setName('{} boiler {}'.format(self.MARKER, index))
+        chillers = sorted(proposed.getChillerElectricEIRs(),
+                          key=lambda c: c.nameString())
+        self.assertTrue(chillers, 'fixture: the proposed model has chillers')
+        for index, chiller in enumerate(chillers):
+            chiller.setName('{} chiller {}'.format(self.MARKER, index))
+        return proposed, [zone.nameString() for zone in zones]
+
+    def plants(self, model):
+        """(marked, unmarked) plant loops, split by whether a marked proposed
+        device sits on the supply side."""
+        marked, unmarked = [], []
+        for plant in model.getPlantLoops():
+            bucket = marked if any(
+                self.MARKER in component.nameString()
+                for component in plant.supplyComponents()) else unmarked
+            bucket.append(plant)
+        return marked, unmarked
+
+    @staticmethod
+    def demand(plant, kind):
+        return sorted(component.nameString()
+                      for component in plant.demandComponents()
+                      if kind in component.nameString())
+
+    def test_the_copied_block_keeps_its_CHILLER_plant_alone(self):
+        proposed, blocks = self.mixed_proposed()
+        reference, audit = reference_of(proposed, storeys=1)
+
+        retained = [e for e in audit.entries
+                    if 'retained in reference' in str(e.get('action'))]
+        self.assertEqual(1, len(retained), 'fixture: one copy_proposed block')
+        self.assertEqual(blocks[0], str(retained[0].get('target')))
+
+        marked, unmarked = self.plants(reference)
+        marked_chilled = [p for p in marked if self.demand(p, 'Coil Cooling')]
+        self.assertEqual(
+            1, len(marked_chilled),
+            'the proposed chiller plant must survive for the copied block')
+        self.assertEqual(
+            ['Coil Cooling Water 1'], self.demand(marked_chilled[0], 'Coil Cooling'),
+            'and ONLY the copied block may draw on it — five more cooling '
+            'coils here was the defect')
+
+        built_chilled = [p for p in unmarked if self.demand(p, 'Coil Cooling')]
+        self.assertEqual(
+            1, len(built_chilled),
+            'the built blocks need a separately planned reference chiller plant')
+        built_coils = self.demand(built_chilled[0], 'Coil Cooling')
+        self.assertNotIn(
+            'Coil Cooling Water 1', built_coils,
+            "the copied block's coil stays on the retained plant")
+        # Five, not four: System 2 builds one coil per block PLUS the Note (2)
+        # make-up air unit's coil. The count is not the point — the ownership
+        # split is — so it is asserted as "every remaining coil".
+        self.assertEqual(
+            5, len(built_coils),
+            'four block coils plus the common make-up air coil')
+
+    def test_BOTH_plants_split_the_same_way(self):
+        """Hot and chilled must agree: a fix to one is not a fix to the other,
+        which is exactly how this defect hid behind a passing hot-water test.
+        """
+        proposed, _ = self.mixed_proposed()
+        reference, _ = reference_of(proposed, storeys=1)
+        marked, unmarked = self.plants(reference)
+        self.assertEqual(
+            [1, 1],
+            [len(self.demand(p, 'Coil Heating Water')) for p in marked
+             if self.demand(p, 'Coil Heating Water')]
+            + [len(self.demand(p, 'Coil Cooling Water')) for p in marked
+               if self.demand(p, 'Coil Cooling Water')],
+            'each marked plant serves exactly the one copied block')
+        # Only plants that serve ZONE COILS are compared. A water-cooled
+        # chiller sits on its condenser loop's DEMAND side, so the proposed
+        # condenser loop legitimately carries a marked device and is not a
+        # reference plant adopting proposed equipment.
+        for plant in unmarked:
+            coils = (self.demand(plant, 'Coil Heating Water')
+                     + self.demand(plant, 'Coil Cooling Water'))
+            if not coils:
+                continue
+            for name in coils:
+                self.assertNotIn(
+                    self.MARKER, name,
+                    'no proposed device may appear on a reference plant')
+
+
+class TestTheUnsizedWarningDoesNotDependOnORDER(unittest.TestCase):
+    """Sol's `145` blocker 2.
+
+    The unsized-threshold warning was emitted only from the block marked
+    `_first_block`, but an office block never VISITS the data-processing
+    threshold rule. So with the office first the warning vanished entirely,
+    and with the data block first it fired while claiming both blocks were
+    assigned on that basis. Selection order cannot decide whether a material
+    assumption is disclosed.
+    """
+
+    MZ = MULTIZONE_PROPOSED
+
+    def run_with(self, data_indices):
+        proposed = proposed_with_hvac(self.MZ)
+        zones = sorted(proposed.getThermalZones(), key=lambda z: z.nameString())
+        for index, zone in enumerate(zones):
+            wanted = ('Computer/Server room' if index in data_indices
+                      else 'Office - enclosed')
+            for space in zone.spaces():
+                space_type = space.spaceType()
+                if space_type.is_initialized():
+                    clone = space_type.get().clone(proposed).to_SpaceType().get()
+                    clone.setName('Block type {}'.format(index))
+                    clone.setStandardsSpaceType(wanted)
+                    space.setSpaceType(clone)
+        names = [zone.nameString() for zone in zones]
+        _, audit = reference_of(proposed, storeys=2)
+        hits = [e for e in audit.entries
+                if 'needs a sized model' in str(e.get('action'))]
+        return names, hits
+
+    def test_a_LATER_data_block_is_still_disclosed(self):
+        """Office first. This emitted NOTHING."""
+        names, hits = self.run_with({4})
+        self.assertEqual(1, len(hits),
+                         'the assumption must be disclosed wherever the data '
+                         'block sorts')
+        self.assertEqual([names[4]],
+                         hits[0]['inputs']['blocks_assigned_on_this_basis'])
+
+    def test_a_FIRST_data_block_does_not_over_claim(self):
+        """Data first. This claimed every block on the serving system."""
+        names, hits = self.run_with({0})
+        self.assertEqual(1, len(hits))
+        self.assertEqual([names[0]],
+                         hits[0]['inputs']['blocks_assigned_on_this_basis'],
+                         'only the block whose smaller-system branch was '
+                         'assumed')
+
+    def test_SEVERAL_data_blocks_are_aggregated_into_one_entry(self):
+        names, hits = self.run_with({1, 3})
+        self.assertEqual(1, len(hits), 'one serving system, one entry')
+        self.assertEqual([names[1], names[3]],
+                         hits[0]['inputs']['blocks_assigned_on_this_basis'])
+
+    def test_NO_data_block_says_nothing(self):
+        """The control: the rule is never reached, so there is no assumption to
+        disclose and the entry must not appear at all.
+        """
+        _, hits = self.run_with(set())
+        self.assertEqual([], hits)

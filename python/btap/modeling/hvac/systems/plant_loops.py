@@ -213,16 +213,57 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
     return hw_loop
 
 
-def find_chilled_water(model):
+def _chillers(loop):
+    return loop.supplyComponents(
+        openstudio.model.ChillerElectricEIR.iddObjectType())
+
+
+def _district_cooled(loop):
+    return len(loop.supplyComponents(
+        openstudio.model.DistrictCooling.iddObjectType())) > 0
+
+
+def _cooling_source(loop):
+    """'district', 'air_cooled', 'water_cooled', or None for neither."""
+    if _district_cooled(loop):
+        return 'district'
+    condensers = set()
+    for component in _chillers(loop):
+        chiller = component.to_ChillerElectricEIR()
+        if chiller.is_initialized():
+            condensers.add(chiller.get().condenserType())
+    if not condensers:
+        return None
+    return 'air_cooled' if condensers == {'AirCooled'} else 'water_cooled'
+
+
+def find_chilled_water(model, exclude=(), source=None):
     """Find an existing chilled-water loop (one with a chiller on the supply side),
-    or None."""
-    return next(
-        (pl for pl in model.getPlantLoops()
-         if len(pl.supplyComponents(openstudio.model.ChillerElectricEIR.iddObjectType())) > 0),
-        None)
+    or None.
+
+    :param exclude: handles (as strings) of loops that must NOT be adopted. The
+        NECB reference path uses it for a PROPOSED plant kept alive by a
+        `copy_proposed` block (D-101; Sol, `145`).
+    :param source: when given, only a loop of that cooling source matches —
+        'water_cooled', 'air_cooled' or 'district'. A caller asking for
+        district cooling must never be handed a chiller loop, and vice versa,
+        which is the cooling analogue of the hot-water source guard.
+    """
+    blocked = {str(handle) for handle in exclude}
+    for loop in model.getPlantLoops():
+        if str(loop.handle()) in blocked:
+            continue
+        if source is None:
+            if len(_chillers(loop)) > 0:
+                return loop
+            continue
+        if _cooling_source(loop) == source:
+            return loop
+    return None
 
 
-def chilled_water(model, chiller_type='Scroll', reuse=True, source='water_cooled'):
+def chilled_water(model, chiller_type='Scroll', reuse=True, source='water_cooled',
+                  exclude=()):
     """Build a chilled-water loop (7C exit / 6K dT, variable-speed pump, primary +
     secondary water-cooled chillers, constant 7C setpoint) AND its condenser-water
     loop (29C / 6K, single-speed cooling tower 24/35/5/6 design temps, constant 29C
@@ -239,10 +280,23 @@ def chilled_water(model, chiller_type='Scroll', reuse=True, source='water_cooled
     :return: openstudio.model.PlantLoop (the chilled-water loop)
     """
     if reuse:
-        existing = find_chilled_water(model)
+        # SOURCE-MATCHED and EXCLUSION-AWARE, for the same two reasons the
+        # hot-water side already is. A district-cooling caller must not be
+        # handed a chiller loop, and a loop reserved to a retained
+        # `copy_proposed` block must not be adopted by a block the reference
+        # REPLACES — the exclusion reached hot water only, so built System 2
+        # cooling coils joined the copied block's proposed chiller plant
+        # (Sol, `145`).
+        blocked = {str(handle) for handle in exclude}
+        existing = find_chilled_water(model, exclude=exclude, source=source)
         if existing is None:
+            # The name fallback catches a loop with no chiller YET. It honours
+            # the exclusion too: on the hot-water side this exact fallback
+            # silently defeated the first reservation fix.
             existing = next((pl for pl in model.getPlantLoops()
-                             if pl.nameString() == 'Chilled Water Loop'), None)
+                             if pl.nameString() == 'Chilled Water Loop'
+                             and str(pl.handle()) not in blocked
+                             and _cooling_source(pl) in (None, source)), None)
         if existing is not None:
             return existing
 

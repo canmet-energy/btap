@@ -106,10 +106,15 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
     if resolved['family'] == 'composite':
         air_loops = []
         for part in resolved['parts']:
+            # The exclusion travels into the parts. A composite is where the
+            # plants actually get built for several families at once, so
+            # dropping it here left the documented contract unmet for exactly
+            # the systems that need it most (Sol, `145`).
             air_loops.extend(
                 build_system(model, part['name'], zones,
                              control_zone=control_zone, namer=namer,
-                             config=part.get('config')).air_loops)
+                             config=part.get('config'),
+                             exclude_plants=exclude_plants).air_loops)
         return Result(system_name=system_name, family='composite',
                       air_loops=air_loops, control_zone=control_zone)
 
@@ -131,7 +136,8 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
     if resolved.get('needs_chiller'):
         chw_loop = plant_loops.chilled_water(model,
                                              chiller_type=resolved.get('chiller_type', 'Scroll'),
-                                             source=resolved.get('chw_source', 'water_cooled'))
+                                             source=resolved.get('chw_source', 'water_cooled'),
+                                             exclude=exclude_plants or ())
 
     # The INSTANCE is kept, not discarded: a builder may record structured
     # evidence about a decision only it can see.

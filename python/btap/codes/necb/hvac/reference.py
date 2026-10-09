@@ -143,10 +143,26 @@ def _select_reference_systems(*, facts, building, ruleset, audit=None,
         # block cannot see the others' actions, so the actions are decided
         # first and the substituted set is stamped on every view.
         planned = []
+        unsized = []
         for block in _blocks_of(group, election_key):
             category = _category_for(block, building, selection, audit)
             planned.append((block, _assign(block, category, building,
-                                           selection, audit)))
+                                           selection, audit,
+                                           unsized=unsized)))
+        if unsized:
+            # ONE warning per serving system, naming exactly the blocks whose
+            # smaller-system branch was assumed — not the first block, and not
+            # every block on the system.
+            reached = sorted({name for zones, _ in unsized for name in zones})
+            articles = sorted({article for _, article in unsized})
+            audit.warn(
+                'selection',
+                'cooling-capacity threshold rule needs a sized model — '
+                'smaller-system branch assumed',
+                target=','.join(reached),
+                inputs={'blocks_assigned_on_this_basis': reached,
+                        'serving_system': group['air_loop'] or reached[0]},
+                article='; '.join(articles))
         substituted = sorted(
             name for block, assignment in planned
             if assignment is not None and assignment.action != 'copy_proposed'
@@ -269,7 +285,7 @@ def _audit_museum_row(group, building, category, audit):
 
 # ---- rule application per category ----
 
-def _assign(group, category, building, selection, audit):
+def _assign(group, category, building, selection, audit, unsized=None):
     cat = next(c for c in selection['categories'] if c['category'] == category)
     articles = [selection['article']]
     storeys = int(building.get('storeys') or 0)
@@ -287,15 +303,28 @@ def _assign(group, category, building, selection, audit):
         if rule.get('min_cooling_kw_exclusive'):
             kw = group['design_cooling_kw']
             if kw is None:
-                # Once per serving system: the model's sizing state is a fact
-                # about the group, not about each of its blocks.
-                if group.get('_first_block', True):
+                # COLLECTED, NOT EMITTED HERE. Keying this on the first block
+                # made the disclosure depend on SELECTION ORDER: an office
+                # block never visits the data-processing threshold rule, so
+                # when it sorted first the data block that did visit was
+                # silenced, and when the data block sorted first the warning
+                # claimed both blocks were assigned on this basis. Selection
+                # order cannot decide whether a material assumption is
+                # disclosed (Sol, `145`).
+                #
+                # The caller aggregates the blocks that ACTUALLY reached the
+                # rule and emits once per serving system. A direct call with
+                # no accumulator still warns immediately, so unit-testing
+                # `_assign` alone keeps working.
+                if unsized is None:
                     audit.warn('selection',
                                'cooling-capacity threshold rule needs a sized model — smaller-system branch assumed',
                                target=group['air_loop'] or group['zones'][0],
-                               inputs={'blocks_assigned_on_this_basis': len(
-                                   group.get('_serving_zones') or group['zones'])},
+                               inputs={'blocks_assigned_on_this_basis':
+                                       list(group['zones'])},
                                article=rule['article'])
+                else:
+                    unsized.append((tuple(group['zones']), rule['article']))
                 continue
             # THE BASIS IS THE SERVING SYSTEM'S TOTAL, AND SAYING SO IS THE
             # POINT. `design_cooling_kw` is a group-level quantity, and this
