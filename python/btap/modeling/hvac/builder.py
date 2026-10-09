@@ -70,9 +70,13 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
     descriptive name.
 
     ``exclude_plants`` names plant-loop handles this build must NOT adopt even
-    when they match, which the NECB reference path uses to keep a reference
-    system off a PROPOSED plant that survived teardown for a `copy_proposed`
-    block (D-101). The default adopts as before.
+    when they match. The NECB reference path uses it to keep a reference system
+    off ANY proposed plant that survived its teardown pass, whatever retained
+    it — a `copy_proposed` block, process or service water on a
+    ``WaterUseConnections``, or another non-zone demand. The retaining demand
+    keeps the plant; a replaced block does not join it (D-101). It applies to
+    hot-water, chilled-water and district loops alike, and travels into
+    composite parts. The default adopts as before.
 
     Topology only: run your sizing and code-efficiency passes afterwards (e.g. with
     openstudio-standards, whose efficiency application is data-driven and applies to

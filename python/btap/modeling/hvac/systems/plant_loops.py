@@ -46,10 +46,11 @@ def find_hot_water(model, part_load_curve_class=None, exclude=()):
     :param model: openstudio.model.Model
     :param exclude: handles (as strings) of loops that must NOT be adopted,
         however well they otherwise match. The NECB reference path uses it for
-        a PROPOSED plant that survived teardown because a `copy_proposed`
-        block still draws on it: a reference system being built must connect
-        to a planned reference plant, not to proposed equipment kept alive for
-        another block (D-101; Sol, `143`).
+        any PROPOSED plant that survived teardown — because a `copy_proposed`
+        block, process or service water, or another non-zone demand still
+        draws on it: a reference system being built must connect to a planned
+        reference plant, not to proposed equipment kept alive for something
+        else (D-101; Sol, `143`/`149`).
     :return: openstudio.model.PlantLoop or None
     """
     # Source matching is EXCLUSIVE: a hybrid loop (boilers AND a district
@@ -242,8 +243,10 @@ def find_chilled_water(model, exclude=(), source=None):
     or None.
 
     :param exclude: handles (as strings) of loops that must NOT be adopted. The
-        NECB reference path uses it for a PROPOSED plant kept alive by a
-        `copy_proposed` block (D-101; Sol, `145`).
+        NECB reference path uses it for any PROPOSED plant kept alive by
+        something the teardown does not remove — a `copy_proposed` block,
+        process or service water, or another non-zone demand
+        (D-101; Sol, `145`/`149`).
     :param source: when given, only a loop of that cooling source matches —
         'water_cooled', 'air_cooled' or 'district'. A caller asking for
         district cooling must never be handed a chiller loop, and vice versa,
@@ -282,11 +285,12 @@ def chilled_water(model, chiller_type='Scroll', reuse=True, source='water_cooled
     if reuse:
         # SOURCE-MATCHED and EXCLUSION-AWARE, for the same two reasons the
         # hot-water side already is. A district-cooling caller must not be
-        # handed a chiller loop, and a loop reserved to a retained
-        # `copy_proposed` block must not be adopted by a block the reference
-        # REPLACES — the exclusion reached hot water only, so built System 2
-        # cooling coils joined the copied block's proposed chiller plant
-        # (Sol, `145`).
+        # handed a chiller loop, and a loop reserved to whatever retained it
+        # must not be adopted by a block the reference REPLACES — the exclusion
+        # reached hot water only, so built System 2 cooling coils joined the
+        # copied block's proposed chiller plant (Sol, `145`). The retainer need
+        # not be a copied block: process cooling on a `WaterUseConnections`
+        # keeps a chilled-water loop alive the same way (`149`).
         blocked = {str(handle) for handle in exclude}
         existing = find_chilled_water(model, exclude=exclude, source=source)
         if existing is None:

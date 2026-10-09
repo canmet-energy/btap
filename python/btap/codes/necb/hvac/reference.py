@@ -981,48 +981,59 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
     # merged System 1 under Note (3) cited a permission that does not apply to
     # it (Sol, `143`). Selection stays per block for every row — what differs is
     # whether the selected units remain separate at CONSTRUCTION.
-    if len(merged) < len(assignments):
-        collapsed = {}
-        for key, assignment, absorbed in merged:
-            # Only a key that ABSORBED another assignment merged. A singleton
-            # survivor is not a merge, whatever happened elsewhere in the
-            # building.
-            if key is None or absorbed < 2:
-                continue
-            collapsed.setdefault(assignment.reference_system, []).append(assignment)
-        subsection = _subsection(ruleset)
-        for system, group_assignments in sorted(
-                collapsed.items(), key=lambda kv: (kv[0] is None, kv[0])):
-            spanned = sum(len(a.zones) for a in group_assignments)
-            if system == 6:
-                audit.decision(
-                    'build',
-                    'multizone selection groups merged into whole-building systems',
-                    inputs={'selection_groups': len(assignments),
-                            'merged_groups': len(merged),
-                            'reference_system': system,
-                            'thermal_blocks_spanned': spanned},
-                    value='one multizone system spans the thermal blocks of all '
-                          'storeys; facade/internal/underground split applied '
-                          'inside the builder',
-                    article=f'Table {subsection}.7.-B Note (3)',
-                    ruling='D-28')
-            else:
-                audit.decision(
-                    'build',
-                    'one COMMON VENTILATION SYSTEM serves these thermal blocks; '
-                    'the heating and cooling equipment stays block-level',
-                    inputs={'selection_groups': len(assignments),
-                            'merged_groups': len(merged),
-                            'reference_system': system,
-                            'thermal_blocks_spanned': spanned},
-                    value='Note (2) permits a common ventilation system for '
-                          'Systems 1, 2 and 5 and distinguishes it from the '
-                          'block-level systems; it grants none of Note (3)\'s '
-                          'facade/internal/underground grouping, which is '
-                          'marked on System 6 alone',
-                    article=f'Table {subsection}.7.-B Note (2)',
-                    ruling='D-101')
+    # ONE RECORD PER MERGED CONSTRUCTION KEY, not per system number.
+    #
+    # Measuring multiplicity per key and then grouping the survivors by
+    # `reference_system` threw the identity away again: two independent
+    # proposed serving systems whose blocks all select System 6 — a gas
+    # hot-water variant over three blocks and an electric variant over two —
+    # are two legitimate Note (3) merges that CANNOT become one construction,
+    # because their heating realisations differ. The audit claimed one system
+    # spanned all five, with `merged_groups: 2` beside a singular value
+    # contradicting it, and erased the gas/electric boundary an AHJ-facing
+    # audit has to preserve (Sol, `149`).
+    #
+    # Each record's counts are its OWN scope. Whole-building
+    # `len(assignments)`/`len(merged)` numbers in a per-key record invite the
+    # same conflation from the other direction.
+    subsection = _subsection(ruleset)
+    for key, assignment, absorbed in merged:
+        # Only a key that ABSORBED another assignment merged. A singleton
+        # survivor is not a merge, whatever happened elsewhere in the building.
+        if key is None or absorbed < 2:
+            continue
+        blocks = sorted(assignment.zones)
+        scope = {'reference_system': assignment.reference_system,
+                 'catalogue': assignment.catalog_name,
+                 'selection_assignments_absorbed': absorbed,
+                 'thermal_blocks_spanned': len(blocks),
+                 'thermal_blocks': blocks}
+        if assignment.reference_system == 6:
+            audit.decision(
+                'build',
+                'multizone selection groups merged into ONE multizone system',
+                inputs=scope,
+                value='Note (3) permits one multizone system to span these '
+                      'thermal blocks; the facade/internal/underground split '
+                      'is applied inside this construction. Another merged '
+                      'System 6 construction elsewhere in the building is a '
+                      'SEPARATE record, because a different catalogue '
+                      'realisation cannot be the same system',
+                article=f'Table {subsection}.7.-B Note (3)',
+                ruling='D-28')
+        else:
+            audit.decision(
+                'build',
+                'one COMMON VENTILATION SYSTEM serves these thermal blocks; '
+                'the heating and cooling equipment stays block-level',
+                inputs=scope,
+                value='Note (2) permits a common ventilation system for '
+                      'Systems 1, 2 and 5 and distinguishes it from the '
+                      'block-level systems; it grants none of Note (3)\'s '
+                      'facade/internal/underground grouping, which is '
+                      'marked on System 6 alone',
+                article=f'Table {subsection}.7.-B Note (2)',
+                ruling='D-101')
     assignments = [m[1] for m in merged]
 
     purchased_cooling_chillers = []

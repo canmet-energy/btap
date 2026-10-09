@@ -1059,3 +1059,87 @@ class TestAHETEROGENEOUSMergeAuditsOnlyWhatMerged(unittest.TestCase):
         self.assertEqual(6, merges[0]['inputs']['reference_system'])
         self.assertIn('Note (3)', merges[0]['article'])
         self.assertEqual(4, merges[0]['inputs']['thermal_blocks_spanned'])
+
+
+class TestTWOMergedSystem6ConstructionsStaySEPARATE(unittest.TestCase):
+    """Sol's `149`: measuring multiplicity per merge key and then grouping the
+    survivors by `reference_system` throws that identity away again.
+
+    Two independent proposed serving systems whose blocks all select System 6 —
+    a gas hot-water variant over three blocks and an electric variant over two
+    — are two legitimate Note (3) merges. They cannot become one construction,
+    because their heating realisations differ. The audit claimed ONE system
+    spanned all five, with `merged_groups: 2` beside a singular value
+    contradicting it, erasing the gas/electric boundary an AHJ-facing audit has
+    to preserve.
+    """
+
+    GAS = 'MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard'
+    ELECTRIC = ('MZ BU RTU Electric Heating Coil Scroll Chiller and '
+                'Electric Baseboard')
+
+    def two_service_sets(self):
+        from btap import modeling
+
+        from .hvac_helpers import load_fixture, sorted_zones
+
+        model = load_fixture()
+        zones = sorted_zones(model)
+        modeling.build_system(model, self.GAS, zones[:3])
+        modeling.build_system(model, self.ELECTRIC, zones[3:])
+        facts = modeling.characterize(model, audit=None)
+        self.assertEqual(2, len(facts['zone_groups']),
+                         'fixture precondition: two proposed serving systems')
+        return model, [zone.nameString() for zone in zones]
+
+    def test_each_merged_construction_gets_its_OWN_record(self):
+        model, blocks = self.two_service_sets()
+        # 5 storeys sends every block to System 6.
+        _, audit = reference_of(model, storeys=5)
+        systems = selected_systems(audit)
+        self.assertEqual(['System 6'] * 5, systems,
+                         'fixture precondition: all five select System 6')
+
+        merges = [e for e in audit.entries
+                  if 'Note (' in str(e.get('article') or '')]
+        self.assertEqual(
+            2, len(merges),
+            'two distinct catalogue realisations are two merges, not one')
+
+        by_blocks = {tuple(e['inputs']['thermal_blocks']): e for e in merges}
+        self.assertEqual(
+            [tuple(blocks[:3]), tuple(blocks[3:])],
+            sorted(by_blocks),
+            'each record names its OWN blocks')
+
+        gas = by_blocks[tuple(blocks[:3])]
+        electric = by_blocks[tuple(blocks[3:])]
+        self.assertEqual(3, gas['inputs']['selection_assignments_absorbed'])
+        self.assertEqual(2, electric['inputs']['selection_assignments_absorbed'])
+        self.assertIn('Hot Water', gas['inputs']['catalogue'])
+        self.assertIn('Electric', electric['inputs']['catalogue'])
+
+        # And no record may claim a system spanning the union.
+        for entry in merges:
+            self.assertNotEqual(
+                len(blocks), entry['inputs']['thermal_blocks_spanned'],
+                'no single System 6 realisation spans all five blocks')
+
+    def test_the_counts_are_the_RECORD_scope_not_the_building(self):
+        """`selection_groups`/`merged_groups` were whole-building numbers in a
+        per-key record, which invites the same conflation from the other side.
+        """
+        model, _ = self.two_service_sets()
+        _, audit = reference_of(model, storeys=5)
+        for entry in [e for e in audit.entries
+                      if 'Note (' in str(e.get('article') or '')]:
+            inputs = entry['inputs']
+            self.assertNotIn('selection_groups', inputs)
+            self.assertNotIn('merged_groups', inputs)
+            self.assertEqual(
+                inputs['thermal_blocks_spanned'], len(inputs['thermal_blocks']),
+                'the span is this record\'s own block list')
+            self.assertEqual(
+                inputs['selection_assignments_absorbed'],
+                len(inputs['thermal_blocks']),
+                'and each absorbed assignment was one thermal block')
