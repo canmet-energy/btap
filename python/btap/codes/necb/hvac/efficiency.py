@@ -499,8 +499,15 @@ def _apply_fan_power_curve(fan, ruleset, audit):
         flow = (fan.autosizedMaximumFlowRate().get()
                 if fan.autosizedMaximumFlowRate().is_initialized() else None)
     if flow is None:
-        audit.warn('efficiency', f'{fan.nameString()}: flow not sized — 8.4.4.17 fan curve selection needs the '
-                                 'rated power; run sizing first (curve not applied)')
+        # The subsection is per-edition; line 481's own comment says
+        # "(2025: 8.4.5.17)" while this literal said 8.4.4.17 on every run.
+        # Same class as Fable's `131` F6, found by sweeping both editions for
+        # foreign-prefix citations rather than reported — in NECB 2025, 8.4.4
+        # is the archetype-EUI subsection entirely.
+        audit.warn('efficiency', f'{fan.nameString()}: flow not sized — '
+                                 f"{ruleset.article('reference_subsection')}.17 fan curve "
+                                 'selection needs the rated power; run sizing first '
+                                 '(curve not applied)')
         return
 
     power_kw = fan.pressureRise() * flow / (fan.fanTotalEfficiency() * 1000.0)
@@ -540,6 +547,11 @@ def _apply_pump_rules(model, ruleset, rule, audit, proposed=None):
     minimum-flow clamp at D x rated flow — the polynomial at D equals E
     within the table's rounding (riding curve 0.691 vs 0.68, VSD 0.043 vs
     0.04)."""
+    # The hydronic-pump article is 8.4.4.14 in NECB 2020 and 8.4.5.14 in 2025.
+    # The action text here spelled 2020's on every run (Fable's `133` G3),
+    # beside an `article=` field that was already correct.
+    pump_article = f"{ruleset.article('reference_subsection')}.14"
+
     if rule is None:
         return
 
@@ -556,7 +568,8 @@ def _apply_pump_rules(model, ruleset, rule, audit, proposed=None):
         # fleet passed the same code path only by arithmetic luck.
         if _swh_loop(loop_):
             audit.info('efficiency',
-                       'service water heating loop — outside 8.4.4.14 (HVAC hydronic pumps); pump left as built',
+                       f'service water heating loop — outside {pump_article} (HVAC hydronic pumps); '
+                       'pump left as built',
                        target=loop_.nameString(), ruling='D-27')
             continue
 
@@ -1180,7 +1193,7 @@ def _pump_characteristics_known(pump):
     return head_known, bool(stated and _hydraulic_efficiency(pump) is not None)
 
 
-def _corresponding_loop(reference_loop, proposed):
+def _corresponding_loop(reference_loop, proposed, prefix=None):
     """The proposed hydronic system this reference loop corresponds to, or a
     reason it has none (Sol, DF-11 increment B).
 
@@ -1203,7 +1216,10 @@ def _corresponding_loop(reference_loop, proposed):
     """
     role = _loop_role(reference_loop)
     if role in (None, 'service_water'):
-        return None, f'{role or "unclassified"} loop is outside {LITERAL_PUMP_ARTICLE}', False
+        # `prefix` when the caller has it; LITERAL_PUMP_ARTICLE is the 2020
+        # fallback the literal already was (Fable's `133` G3).
+        article = f'{prefix}.14' if prefix else LITERAL_PUMP_ARTICLE
+        return None, f'{role or "unclassified"} loop is outside {article}', False
 
     reference_zones = _served_zone_names(reference_loop)
     if not reference_zones:
@@ -1404,7 +1420,7 @@ def _transfer_by_correspondence(reference_loop, proposed, prefix, audit):
     if not reference_pumps:
         return
 
-    match, reason, n_to_1 = _corresponding_loop(reference_loop, proposed)
+    match, reason, n_to_1 = _corresponding_loop(reference_loop, proposed, prefix)
     if match is None:
         if _loop_role(reference_loop) == 'service_water':
             return  # D-27 already said so, at the top of the pass
@@ -1417,6 +1433,16 @@ def _transfer_by_correspondence(reference_loop, proposed, prefix, audit):
         # false comfort. Every other decline keeps D-93's existing text —
         # the same is arguably true of them, but that is a D-93 question and
         # not a side effect of this ruling (Fable, PR #63).
+        # AHJ-16 applies to the three shapes Sol's `126` named: N:1
+        # consolidation, ambiguous overlap, and no corresponding proposed
+        # system. It does NOT apply to a loop outside the article's scope, nor
+        # to a reference loop serving no thermal block — there is nothing for a
+        # correspondence to be drawn BETWEEN, so that is a degenerate model and
+        # not an interpretation an authority can settle. (2) and (3) settle
+        # multiple pumps within one system and missing characteristics on an
+        # otherwise corresponding pump, and neither reaches this branch.
+        in_scope = (_loop_role(reference_loop) not in (None, 'service_water')
+                    and bool(_served_zone_names(reference_loop)))
         if n_to_1:
             return audit.warn('efficiency',
                               f'{reference_loop.nameString()}: {prefix}.14.(1)-(3) NOT applied — '
@@ -1425,12 +1451,14 @@ def _transfer_by_correspondence(reference_loop, proposed, prefix, audit):
                               'bias the reference in either direction. 5.2.6.3 supplies only an '
                               'upper cap',
                               target=reference_loop.nameString(), article=f'{prefix}.14.(1)-(3)',
-                              ruling='D-93 D-97')
+                              ruling='D-93 D-97',
+                              ahj='AHJ-16' if in_scope else None)
         return audit.warn('efficiency', f'{reference_loop.nameString()}: {prefix}.14.(1)-(3) NOT '
                                         f'applied — {reason}. The pump keeps the modelling default, '
                                         f'which is not a Code value; 5.2.6.3 still caps it',
                           target=reference_loop.nameString(), article=f'{prefix}.14.(1)-(3)',
-                          ruling='D-93')
+                          ruling='D-93',
+                          ahj='AHJ-16' if in_scope else None)
 
     proposed_pumps = _applicable_pumps(match)
     sentence = _governing_sentence(proposed_pumps)
@@ -1685,8 +1713,9 @@ def _align_heat_pump_heating_capacity(model, audit, ruleset):
         cool_w = (optional_f(cool.ratedTotalCoolingCapacity())
                   or optional_f(cool.autosizedRatedTotalCoolingCapacity()))
         if cool_w is None:
-            audit.warn('efficiency', f'{heat.nameString()}: cooling capacity unavailable — 8.4.4.13.(2)(c) '
-                                     'heating=cooling alignment skipped (run sizing first)')
+            audit.warn('efficiency', f'{heat.nameString()}: cooling capacity unavailable — '
+                                     f'{hp_article} heating=cooling alignment skipped '
+                                     '(run sizing first)')
             continue
 
         heat.setRatedTotalHeatingCapacity(cool_w)
@@ -1711,7 +1740,7 @@ def _align_staged_heat_pump(heat, cool, audit, hp_article='8.4.4.13.(2)(c)'):
              for i, h in enumerate(heat_stages)]
     if any(c is None for _, c in pairs):
         audit.warn('efficiency', f'{heat.nameString()}: staged heat pump has MORE heating stages than cooling '
-                                 'stages — 8.4.4.13.(2)(c) alignment applied only to the matched stages',
+                                 f'stages — {hp_article} alignment applied only to the matched stages',
                    target=heat.nameString(), article=hp_article, ruling='D-22')
     top = None
     for heat_stage, cool_stage in pairs:
@@ -1726,7 +1755,8 @@ def _align_staged_heat_pump(heat, cool, audit, hp_article='8.4.4.13.(2)(c)'):
         heat_stage.setGrossRatedHeatingCapacity(cool_w)
         top = cool_w
     if top is None:
-        audit.warn('efficiency', f'{heat.nameString()}: staged cooling capacity unavailable — 8.4.4.13.(2)(c) '
+        audit.warn('efficiency', f'{heat.nameString()}: staged cooling capacity unavailable — '
+                                 f'{hp_article} '
                                  'heating=cooling alignment skipped (run sizing first)',
                    target=heat.nameString(), article=hp_article, ruling='D-22')
         return
@@ -2436,6 +2466,25 @@ def _part_load_curve(component, tables, equipment, klass, audit, target):
     return built, built.nameString(), row.get('form'), _curve_evidence(tables, row)
 
 
+#: Marks a part-load class THIS pass stamped from the capacity band.
+#:
+#: A separate feature, because the class value cannot carry its own provenance:
+#: the reference BUILDER also propagates `modulating` — for purchased heating,
+#: where Article 6 names it regardless of capacity — and that stamp must
+#: survive a band change. My first version compared the class string alone and
+#: so cleared the builder's class on any sub-352 kW boiler, breaking the
+#: purchased-heating path. A pre-existing part-load test caught it; the
+#: docstring claiming the two were distinguished was simply false.
+BAND_FORCED_CLASS_FEATURE = 'btap_band_forced_part_load_class'
+
+
+def _forced_modulating(boiler) -> bool:
+    """True when THIS pass stamped the class from the capacity band."""
+    marker = boiler.additionalProperties().getFeatureAsBoolean(
+        BAND_FORCED_CLASS_FEATURE)
+    return bool(marker.is_initialized()) and bool(marker.get())
+
+
 def _apply_boiler(boiler, tables, plant, audit):
     """Legacy boiler_hot_water_apply_efficiency_and_curves (NECB2011 hvac_systems.rb:539):
     primary/secondary staging (176/352 kW), the part-load curve of the boiler's own
@@ -2480,9 +2529,33 @@ def _apply_boiler(boiler, tables, plant, audit):
         if modulating:
             boiler.setBoilerFlowMode('LeavingSetpointModulated')
             boiler.setMinimumPartLoadRatio(plant['modulating_min_fraction'])
+            # THE CLASS, not only the controls. (6)(d) names a MODULATING
+            # boiler above the two-boiler threshold, and class resolution ran
+            # later against the unchanged catalogue row — so a 400 kW primary
+            # took the row's `non_condensing` curve AND acquired AHJ-14, when
+            # the Code had already elected its class (Sol, `128`.2). Stamped
+            # as the propagated feature, the channel the reference builder
+            # already uses, so `_part_load_class` reports source
+            # `reference selection` and the ordinary-class referral correctly
+            # does not apply.
+            boiler.additionalProperties().setFeature(
+                PART_LOAD_CLASS_FEATURE, 'modulating')
+            boiler.additionalProperties().setFeature(
+                BAND_FORCED_CLASS_FEATURE, True)
         else:
             boiler.setBoilerFlowMode('ConstantFlow')
             boiler.resetMinimumPartLoadRatio()
+            # CROSSING DOWNWARD must clear it. One pass reads the proposed's
+            # sizing and the next the reference's, so a plant can fall below
+            # the threshold between passes, and a stale forced class would
+            # outlive the band that justified it. Only the class THIS function
+            # stamps is cleared: one the reference builder elected for a
+            # selected variant is not ours to drop.
+            if _forced_modulating(boiler):
+                boiler.additionalProperties().resetFeature(
+                    PART_LOAD_CLASS_FEATURE)
+                boiler.additionalProperties().resetFeature(
+                    BAND_FORCED_CLASS_FEATURE)
     boiler.setNominalCapacity(boiler_capacity)
     _record_capacity(boiler, capacity_w, capacity_source, boiler_capacity, name)
 
@@ -2525,7 +2598,52 @@ def _apply_boiler(boiler, tables, plant, audit):
                                 f"part-load curve {curve_label}",
                           evidence=f"{evidence}; the efficiency curve is evaluated on "
                                    "the EnteringBoiler temperature",
-                          article=article, ruling='D-89 D-90')
+                          article=article, ruling='D-89 D-90',
+                          ahj=_boiler_class_ahj(klass, class_source,
+                                                boiler_capacity))
+
+
+#: Below this, in watts, a boiler object is SUPPRESSED rather than small.
+#:
+#: The staging rules set exactly 0.001 W to stand a Code-required object down,
+#: and the tiny-capacity floor sets exactly 1.0 W for a real but minimal
+#: boiler. One watt therefore separates "an implementation device" from "a
+#: genuine if trivial boiler", and the distinction is load-bearing: a stood-down
+#: object is not a second Code-required boiler and must not raise a second
+#: question (Sol, `128`.3).
+SUPPRESSED_CAPACITY_W = 1.0
+
+
+def _boiler_class_ahj(klass, class_source, final_capacity_w=None):
+    """AHJ-14's narrowing, applied where the class is resolved.
+
+    Sol's `126` narrowed this to equipment for which NO provision elects a
+    curve class. Three exclusions follow, and each matters:
+
+    * `class_source == 'reference selection'` means a provision DID elect it —
+      a purchased boiler is explicitly modulating under Article 6 — so it is
+      not a referral.
+    * `modulating` is what the Code names for a boiler above 352 kW, so a row
+      carrying it was decided by the Code and not by us. Applying a
+      NON-modulating class above 352 kW would be a tool DEFECT, not AHJ-14.
+    * `not_applicable` is equipment with no combustion part-load factor to
+      classify, electric boilers among it.
+
+    What remains is an ordinary fuel-fired boiler whose condensing versus
+    non-condensing class came from the catalogue row's own default — the local
+    default Sol's audit flagged as unresolved.
+    """
+    if class_source != 'row':
+        return None
+    if klass not in ('non_condensing', 'atmospheric', 'condensing'):
+        return None
+    if (final_capacity_w is not None
+            and final_capacity_w < SUPPRESSED_CAPACITY_W):
+        # Stood down by the staging rules. Article 9.(6)(b) requires ONE
+        # single-stage boiler; the zeroed SDK object beside it is how that is
+        # expressed in a model, not a second normative class question.
+        return None
+    return 'AHJ-14'
 
 
 def boiler_thermal_efficiency(row):
@@ -2943,7 +3061,8 @@ def _apply_gas_multi(coil, tables, audit, capacity_w=None):
                           evidence=f"{evidence}; the part-load curve sits on the PARENT "
                                    "staged coil, which carries EnergyPlus' single "
                                    "part-load-fraction field (D-46)",
-                          article=article, ruling='D-46 D-89')
+                          article=article, ruling='D-46 D-89',
+                          ahj=_boiler_class_ahj(klass, class_source))
 
 
 def _apply_dx_heating(coil, tables, audit):
@@ -3021,7 +3140,8 @@ def _apply_gas_coil(coil, tables, audit):
                           value=f'burner efficiency {ruby_round(thermal_eff, 3)} ({label}), '
                                 f'part-load curve {curve_label}',
                           evidence=evidence,
-                          article=article, ruling='D-89')
+                          article=article, ruling='D-89',
+                          ahj=_boiler_class_ahj(klass, class_source))
 
 
 # ---------------- context helpers ----------------

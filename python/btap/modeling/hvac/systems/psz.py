@@ -34,8 +34,18 @@ class PSZ(BaseSystem):
         :return: list of openstudio.model.AirLoopHVAC
 
         Config 'per_zone': true builds ONE packaged unit PER ZONE (each zone its own
-        control zone) — the CBECS/90.1 PSZ convention — instead of the NECB convention
-        of one shared unit over the zone group controlled by ``control_zone``.
+        control zone). The shared alternative puts one unit over the whole zone list,
+        controlled by ``control_zone``.
+
+        THE SHARED FORM IS NOT THE NECB CONVENTION, which this docstring used to
+        claim. A reference System 3 or 4 is "Single-zone" in Table 8.4.x.7.-B, and
+        Division A defines a single-zone secondary system as one serving only ONE
+        thermal block, so a NECB reference takes the per-zone path — see D-101. The
+        shared form came from the pinned gem's `new_auto_zoner: true` default, which
+        is an implementation choice and not a reading of the Code; the same library
+        builds one unit per zone on its own 90.1 Appendix G path. It remains
+        available for a genuinely multiple-zone non-NECB system; it must not be
+        described as what NECB expects.
         """
         if self.config.get('per_zone'):
             return [self._build_unit(model, [zone], zone, namer=namer, hw_loop=hw_loop)

@@ -51,6 +51,7 @@ Licensed **GPL-3.0-or-later** — see [LICENSE](LICENSE).
 | understand what it decided and why | [Reading the results](#reading-the-results) |
 | know which code articles are covered | [What is implemented](#what-is-implemented) |
 | know where it makes a judgement call | [Decisions and assumptions](#decisions-and-assumptions) |
+| know which readings **your authority** must approve | [Questions this tool does not decide](#questions-this-tool-does-not-decide) |
 | know what it does **not** do | [Known limits](#known-limits) |
 | work on the code itself | [docs/DEVELOPERS.md](docs/DEVELOPERS.md) |
 
@@ -225,8 +226,8 @@ usefully, for each partial article's specific gap.
 ## Decisions and assumptions
 
 Where the code needs interpreting, the interpretation is written down rather than
-buried in the source. **84 decisions** are recorded in
-**[necb_decisions.md](docs/necb_decisions.md)** — 40 of them
+buried in the source. **101 decisions** are recorded in
+**[necb_decisions.md](docs/necb_decisions.md)** — 53 of them
 active at runtime, tagging the audit entries they govern.
 
 A decision records what the code says, how we read it, what we rejected, and why.
@@ -236,7 +237,103 @@ energy is represented.
 
 The HTML report's **"Decisions and assumptions applied"** appendix lists the ones
 that actually fired in *your* run — so a reviewer sees the judgement calls that
-affected this building, not all 84.
+affected this building, not all 101.
+
+---
+
+## Questions this tool does not decide
+
+Some questions the Code does not answer, and some it answers in a way this
+tool does not yet meet. Neither is ours to REINTERPRET, so both are written
+down rather than resolved quietly — but a tool gap is still ours to FIX, and
+the status table below says which is which.
+
+They are listed in
+**[NECB_AHJ_QUESTIONS.md](docs/NECB_AHJ_QUESTIONS.md)**, each entry naming
+what the question is, who established it, what this tool does in the meantime,
+and where you meet it in a run. Entries carry one of FOUR statuses, and only
+the first two need an **authority having jurisdiction**:
+
+| status | what it means |
+|---|---|
+| `referral` | the acceptable-solution text does not decide the question, so no tool can |
+| `alternative-solution` | the text DOES decide it and this tool does not comply; an authority can accept that only as an explicitly identified non-conforming substitution |
+| `ruled` | settled against the text; no authority needed |
+| `tool-gap` | implementable, so it is a defect to close — never an interpretation |
+
+That distinction is the point of the register. Calling a tool gap an
+ambiguity would launder a defect as a question for someone else, and twelve
+decisions Sol audited were rejected as referrals for exactly that reason.
+
+**Nine of them change what a run reports: AHJ-1, AHJ-2, AHJ-3, AHJ-10,
+AHJ-11, AHJ-12, AHJ-14, AHJ-15 and AHJ-16.** Where they apply,
+the verdict is still reported, marked as not a determination, and the report
+names what your authority must accept:
+
+```
+  *** NOT A CODE-COMPLIANT DETERMINATION ***
+  2 question(s) in the AHJ register (AHJ-1, AHJ-3) were raised by this
+  run's modelling choices and require approval before the comparison above
+  can support compliance. It is INFORMATIONAL only and is not evidence of
+  compliance.
+  Governing: 8.4.4.9.(5); 8.4.4.9.(6)
+    - Hot Water Loop
+
+  CONDITIONAL: the authority having jurisdiction must accept the conditions
+  below. Each says whether it is an ALTERNATIVE SOLUTION — the text decides
+  the requirement and this tool does not meet it — or an INTERPRETATION the
+  text does not settle.
+    - AHJ-1 (alternative-solution): a single-fuel reference is a
+      NON-CONFORMING substitution — an ALTERNATIVE SOLUTION, which
+      the text DECIDES and this tool does not meet — accepting it
+      means accepting an explicitly identified non-conforming
+      substitution. Applies to: Hot Water Loop — what the
+      reference's final heating equipment carries is NOT established
+      by this tool
+    - AHJ-3 (referral): whether 8.4.4.9.(6)(d) permits more than one
+      boiler — an INTERPRETATION the acceptable-solution text does
+      not settle. Applies to: Hot Water Loop — whether that
+      conflicts with the boiler-count sentence is NOT established
+      here
+
+  VERDICT: COMPLIANT - INFORMATIONAL, AND CONDITIONAL ON APPROVAL BY THE
+           AUTHORITY HAVING JURISDICTION
+  (NECB 2020, Division B, Article 8.4.1.2; see docs/NECB_AHJ_QUESTIONS.md)
+```
+
+**The other eleven do not change the verdict, and not all of them reach you
+at all.** The register's status column says which: `no` where the question does
+not bear on a run's outcome, `not yet` where its runtime treatment is still
+being established. Read it rather than assuming a listed question surfaces.
+
+One caution it states against itself: where an entry says the underlying
+decision is audited, that means the modelling action is recorded — it does NOT
+mean the audit tells you an authority's approval is wanted. AHJ-1, AHJ-2,
+AHJ-3, AHJ-5, AHJ-10, AHJ-11, AHJ-12, AHJ-14, AHJ-15 and AHJ-16 are cited in
+product output today, and AHJ-5 is a settled RULING that explains why a choice
+was made rather than a condition on it.
+
+The HTML report carries the same thing as a **CONDITIONAL — AHJ APPROVAL
+REQUIRED** badge beside the pass/fail badge, so it travels with the submission.
+`report.json` carries it as `compliance_determination`, with the conditions and
+what follows if approval is not given.
+
+The report also carries a **"Code questions referred to an authority"**
+appendix, beside the decisions appendix, listing EVERY disposition the run
+applied — not only the ones that made it conditional. A `ruled` row records a
+judgement call that is settled; a `tool-gap` row records a requirement this
+tool does not implement, which you need to know even though it changes no
+verdict. Each row states its bearing on the verdict rather than leaving you to
+work it out from the status.
+
+The commonest case today is a **proposed heating plant using two fuels**: the
+Code requires the reference building to carry both in the same capacity ratio,
+and this tool elects one energy type at SELECTION and computes no ratio. What
+the reference ends up carrying is not established by that election. Where the
+plant is hydronic there is a further
+question the text does not resolve — how a two-fuel ratio can be represented
+when each simulated boiler has one fixed fuel. The exit code is unchanged for
+these runs; the qualification is in the verdict, not the status code.
 
 ---
 
@@ -249,9 +346,24 @@ Stated plainly, because a compliance tool that hides these is worse than useless
   see exit 3 above.
 - **`--quick` is never a determination.** Article 8.4.1.2 requires a simulated
   year.
+- **Your model must say how many above-ground storeys it has.** The count
+  selects the reference system — Table 8.4.x.7.-A assigns a General Area
+  building System 3 at two storeys and System 6 at three — so this tool will
+  not assume it. A run stops, naming the omission, when the model declares no
+  **Standards Number of Above Ground Stories** on the Building AND has no
+  **BuildingStory** holding a space at or above grade. Either source satisfies
+  it. `--storeys N` remains a deliberate override, and where it contradicts a
+  count the model declares, the run says so and the override wins. This used
+  to default silently to one storey, so a multi-storey model missing the field
+  was compared against the wrong reference building and the result still read
+  as a determination.
 - **Multi-energy capacity ratios (8.4.4.9.(5) / 8.4.4.10.(4)) are not
-  modelled.** A plant drawing on more than one energy source passes into the
-  reference unchanged rather than being apportioned.
+  modelled.** A plant drawing on more than one energy source is elected into
+  ONE energy type at selection, and no capacity ratio is computed. What the
+  reference's final equipment carries is a separate question the tool does not
+  establish — an adopted plant has been measured keeping BOTH proposed fuels, a
+  replaced one carries only the elected fuel, and some variants need no boiler
+  at all.
 - **No article is wholly unimplemented.** Four individual *sentences* are —
   the multi-energy capacity ratios (8.4.4.9.(5) and 8.4.4.10.(4)) and two
   supply-air fan clauses (8.4.4.18.(5)-(6)) — and each is named as its own row

@@ -105,6 +105,13 @@ ALLOWLIST = {
                 "verification/oracle — the shared harness, not a gem tree"),
     },
     # --- cross-language (Leg B) and oracle (Leg C) tests --------------------
+    "python/tests/test_freeze_producer.py": {
+        "refs": ["verification/"],
+        "retires": "R1-adjudicated",
+        "why": ("tests the frozen manifest's producer provenance, which lives "
+                "in verification/scenarios — the shared harness, not a gem "
+                "tree"),
+    },
     "python/tests/support.py": {
         "refs": ["verification/"],
         "retires": "R1-adjudicated",
@@ -128,6 +135,14 @@ ALLOWLIST = {
         "why": ("negative tests for the permanent D-80 inventory validator in "
                 "verification/oracle — verification/ consumption is permitted "
                 "by the invariant"),
+    },
+    "python/tests/test_frozen_article_membership.py": {
+        "refs": ["verification/"],
+        "retires": "R1-adjudicated",
+        "why": ("sweeps the frozen baselines' cited Section 8.4 articles "
+                "against each edition's own snapshot — the corpus is the "
+                "broadest instrument for that, and a fixture-based gate "
+                "demonstrably missed five real sites it sees"),
     },
     "python/tests/necb/test_frozen_scenarios.py": {
         "refs": ["verification/"],

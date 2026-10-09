@@ -184,18 +184,114 @@ def article_sort_key(article: str) -> list[int]:
     return [int(value) for value in re.findall(r"\d+", article)]
 
 
-def python_citation_value(node: ast.expr) -> str | None:
-    if isinstance(node, ast.Constant) and isinstance(node.value, str):
-        return node.value
-    if not isinstance(node, ast.JoinedStr):
+#: A citation resolved through the manifest at runtime, e.g.
+#: ``ruleset.article("heat_pump_aux_fuel")``. Carried as ``@key`` through the
+#: scan and resolved per edition in :meth:`CoverageGenerator.citations_for`,
+#: exactly as ``PREFIX`` already is.
+MANIFEST_TOKEN = "@"
+
+#: Helpers whose return value IS this edition's reference subsection.
+SUBSECTION_HELPERS = {"_subsection"}
+
+
+def article_lookup_key(node: ast.expr) -> str | None:
+    """The manifest KEY behind ``<anything>.article("key")``, or None.
+
+    Matched on the method name and a literal argument only. A computed key
+    cannot be resolved here and must not be guessed at: attributing a citation
+    to the wrong article is worse than not attributing it.
+    """
+    if not isinstance(node, ast.Call):
         return None
+    func = node.func
+    if isinstance(func, ast.Attribute) and func.attr == "article":
+        if len(node.args) == 1 and isinstance(node.args[0], ast.Constant):
+            key = node.args[0].value
+            if isinstance(key, str):
+                return key
+    if isinstance(func, ast.Name) and func.id in SUBSECTION_HELPERS:
+        return "reference_subsection"
+    return None
+
+
+def resolved_name_bindings(tree: ast.AST) -> dict[str, str]:
+    """``name -> token`` for every name a module binds to a manifest lookup.
+
+    The scanner used to understand exactly ONE name, ``prefix``, so a rule that
+    resolved its article through any other variable became invisible — and the
+    project's stated direction is to resolve MORE citations that way, for
+    per-edition correctness. Issue #72: each such fix removed the ``Cited at``
+    row rather than adding one, so the coverage document got quieter as the
+    code got righter.
+
+    Resolved forms, in one pass over the module in source order so a binding
+    built from an earlier one works:
+
+    * ``x = ruleset.article("key")``        -> ``@key``
+    * ``x = _subsection(ruleset)``          -> ``PREFIX``
+    * ``x = f"{y}.12."``                    -> the expansion of ``y`` plus the
+      literal parts, so a two-step binding resolves
+
+    Deliberately NOT resolved: a name bound from a parameter, a subscript or a
+    conditional. Those need interprocedural analysis to be correct, and a
+    wrong attribution is worse than a missing one — the invisible remainder is
+    counted by ``test_coverage_citation_visibility`` instead of guessed at.
+    """
+    bindings: dict[str, str] = {"prefix": "PREFIX"}
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Assign) or len(node.targets) != 1:
+            continue
+        target = node.targets[0]
+        if not isinstance(target, ast.Name):
+            continue
+        key = article_lookup_key(node.value)
+        if key is not None:
+            bindings[target.id] = (
+                "PREFIX" if key == "reference_subsection"
+                else MANIFEST_TOKEN + key)
+            continue
+        if isinstance(node.value, ast.JoinedStr):
+            expanded = joined_str_text(node.value, bindings)
+            if expanded is not None and (
+                    "PREFIX" in expanded or MANIFEST_TOKEN in expanded):
+                bindings[target.id] = expanded
+    return bindings
+
+
+def joined_str_text(node: ast.JoinedStr, bindings: dict[str, str]) -> str | None:
+    """An f-string's text with every KNOWN name substituted.
+
+    An unknown name stays as ``{name}``, which matches no article and is
+    therefore counted as unresolved rather than mis-attributed.
+    """
     parts = []
     for value in node.values:
         if isinstance(value, ast.Constant) and isinstance(value.value, str):
             parts.append(value.value)
-        elif isinstance(value, ast.FormattedValue) and isinstance(value.value, ast.Name):
-            parts.append(f"{{{value.value.id}}}")
+        elif isinstance(value, ast.FormattedValue):
+            inner = value.value
+            if isinstance(inner, ast.Name):
+                parts.append(bindings.get(inner.id, f"{{{inner.id}}}"))
+            else:
+                key = article_lookup_key(inner)
+                parts.append(MANIFEST_TOKEN + key if key
+                             else "{?}")
     return "".join(parts)
+
+
+def python_citation_value(node: ast.expr,
+                          bindings: dict[str, str] | None = None) -> str | None:
+    bindings = bindings if bindings is not None else {"prefix": "PREFIX"}
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return node.value
+    # `article=ruleset.article("key")` with no f-string around it.
+    key = article_lookup_key(node)
+    if key is not None:
+        return ("PREFIX" if key == "reference_subsection"
+                else MANIFEST_TOKEN + key)
+    if not isinstance(node, ast.JoinedStr):
+        return None
+    return joined_str_text(node, bindings)
 
 
 def python_call_kind(call: ast.Call) -> str:
@@ -232,16 +328,21 @@ class CoverageGenerator:
             relative = path.relative_to(self.inputs.source_root).as_posix()
             gem_name = domain_for(relative)
             tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+            bindings = resolved_name_bindings(tree)
             for call in (node for node in ast.walk(tree) if isinstance(node, ast.Call)):
                 for keyword in call.keywords:
                     if keyword.arg != "article":
                         continue
-                    raw = python_citation_value(keyword.value)
+                    raw = python_citation_value(keyword.value, bindings)
                     if raw is None:
                         continue
                     raw = raw.replace("{prefix}", "PREFIX")
+                    # `@key` joins PREFIX and a literal as a resolvable token:
+                    # it names a manifest lookup whose value is this edition's
+                    # own article (issue #72).
                     tokens = re.findall(
-                        r"(?:PREFIX|8\.4)(?:\.\d+)*\.?(?:\(\d+\))?", raw
+                        r"(?:@[a-z_][a-z0-9_]*|PREFIX|8\.4)(?:\.\d+)*\.?(?:\(\d+\))?",
+                        raw
                     )
                     if tokens:
                         citations.append({
@@ -302,7 +403,21 @@ class CoverageGenerator:
                     and any(token.startswith(legacy) for token in citation["tokens"])):
                 continue
             for token in citation["tokens"]:
-                ref = token.replace("PREFIX", reference_prefix, 1)
+                if token.startswith(MANIFEST_TOKEN):
+                    # A manifest lookup: this edition's own number for that
+                    # key, which is the whole point of resolving it that way.
+                    key, _, trailing = token[1:].partition(".")
+                    try:
+                        resolved = manifest_article(manifest, key)
+                    except ValueError:
+                        # A key this edition does not declare is not a citation
+                        # of this edition. Skipping is correct and silent here
+                        # because manifest_article already raises for a key
+                        # that no edition declares.
+                        continue
+                    ref = resolved + (("." + trailing) if trailing else "")
+                else:
+                    ref = token.replace("PREFIX", reference_prefix, 1)
                 if ref.startswith(legacy):
                     if umbrella:
                         if not renumbered:
