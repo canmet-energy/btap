@@ -3270,7 +3270,19 @@ A 5-building full-annual refresh supersedes those rows; the other 10 rows
 stand.
 
 - **Files:** `openstudio-hvac/lib/openstudio_hvac/classify.rb`,
-  `.../necb/reference.rb`; test + golden as above.
+  `.../necb/reference.rb`; test + golden as above. The Ruby paths are the
+  ORIGINAL artifact; the product is Python-only since D-84, and the matrix now
+  lives at `python/tests/fixtures/reference_selection_matrix.json` with
+  `python/tests/necb/test_hvac_reference_selection_matrix.py`.
+- **Superseded in part by D-101, 2026-10-09**, which made the thermal block the
+  selection unit. The adjudicated CONTENT of this matrix — which system,
+  action, energy type and catalog each configuration elects — stands unchanged,
+  and was verified to stand across all 776 comparisons. What changed is the
+  SCHEMA: the test deduplicated assignments, so one assignment per serving
+  group and one per thermal block were indistinguishable. Rows are no longer
+  deduplicated, the per-row `zones` count became `blocks`, and the assignments
+  must partition the retained conditioned blocks. D-101 records the
+  derivation.
 - **Who/when:** Fable under D-10, 2026-08-02.
 
 <a id="d-59"></a>
@@ -6868,6 +6880,40 @@ the proposed building uses 167 150 kWh against the reference's 148 858 kWh —
 could not hold setpoint in four of five blocks. Two consecutive runs agree
 exactly on every reported figure, so the artifact is coherent and repeatable
 and guard 7 for AHJ-16 can be met from it.
+
+### The D-58 matrix migration
+
+D-58's 97-system selection matrix is the shared adjudicated contract and is
+never regenerated from Python (D-79). It encoded ONE assignment per serving
+group, and migrating it needed a schema change rather than an edited number,
+because the test DEDUPLICATED assignments before comparing
+(`if entry not in assignments`): five single-zone units over five thermal
+blocks and one shared unit over one block produced the same row. Changing
+`zones: 5` to `zones: 1` would have left the file unable to express the thing
+this decision changes.
+
+So each scenario now lists one row per assignment, the rows are not
+deduplicated, `zones` is renamed `blocks`, and the test asserts that the
+assignments PARTITION the retained conditioned blocks — computed from the
+model, since five rows naming one block are otherwise indistinguishable from
+five naming five. Renaming the key means a stale golden fails on the schema
+instead of silently comparing two different meanings of one number.
+
+The adjudicated content is preserved verbatim. Only multiplicity was derived,
+by applying this decision's rule to the golden's OWN `*_groups` data: the
+retained conditioned blocks are the sum of `zones` over groups that are heated
+or cooled, and selection yields one assignment per block. Each scenario had
+exactly one deduplicated row (768 of them, 8 empty), so the derivation is
+determinate. Sol verified it independently against the pre-change file at
+`e691421`: 776 comparisons, 0 changed `{system, action, energy_type, catalog}`
+signature sets, 0 multiplicity mismatches, every migrated assignment at
+`blocks: 1`, no stale `zones` key.
+
+One derivation attempt was wrong first and the suite caught it: excepting
+Systems 1/2/5/6 as "merged" gives one assignment of five blocks, but the merge
+runs in the reference BUILD and this matrix exercises SELECTION only — which
+the old golden had already recorded as `zones: 1` for a five-singleton System
+6 case.
 
 ### A declared gap: what "building or space" measures
 

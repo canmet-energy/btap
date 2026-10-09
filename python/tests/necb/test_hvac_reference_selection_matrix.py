@@ -15,6 +15,21 @@ FULL_MATRIX=1 runs all 97. The golden is NEVER regenerated from Python — the
 Ruby suite's UPDATE_GOLDEN escape hatch is deliberately not ported (D-79: the
 adjudicated matrix is the shared contract both ports read).
 
+SCHEMA, since D-101: each scenario lists ONE ROW PER ASSIGNMENT with
+``blocks`` — the thermal blocks that assignment serves — and the rows are NOT
+deduplicated. The old schema carried a ``zones`` count per DEDUPLICATED row
+(`if entry not in assignments`), so five single-zone units over five thermal
+blocks and one shared unit over one block produced the same row, and the
+schema could not express the thing the ruling changed. The adjudicated content
+— system, action, energy type, catalog — is preserved verbatim from the
+pre-change file; only multiplicity was derived, by applying D-101 to the
+golden's own ``*_groups`` data (the conditioned blocks are the sum of ``zones``
+over groups that are heated or cooled). Renaming the key was deliberate: a
+stale golden fails on the schema instead of silently comparing two different
+meanings of one number. The test additionally asserts the assignments PARTITION
+the retained conditioned blocks, computed from the model, because five rows
+naming one block are otherwise indistinguishable from five rows naming five.
+
 One test per system, generated below, so pytest-xdist spreads the matrix over
 every worker. As a single loop it was the longest test in CI (301 s of the
 verify job's 332 s suite on 36 vCPUs); the subset-matching and one-test-per-
@@ -167,7 +182,11 @@ class TestReferenceSelectionMatrix(unittest.TestCase):
     def check_system(self, name):
         expected = next((r for r in self.golden if r['name'] == name), None)
         self.assertIsNotNone(
-            expected, f"'{name}' missing from the golden — regenerate and re-adjudicate (D-58)")
+            expected,
+            f"'{name}' missing from the golden. The golden is NEVER regenerated "
+            f"from Python (D-79): ADD the row and adjudicate it against Table "
+            f"8.4.x.7.-A, or remove the catalogue entry. 'Regenerate' is what "
+            f"the file header forbids, and this message used to say it")
         actual = self.compute_row(name)
         for pass_ in ('catalog', 'scrubbed'):
             for label in SCENARIOS:
