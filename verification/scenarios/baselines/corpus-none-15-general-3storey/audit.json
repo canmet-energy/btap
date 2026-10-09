@@ -241,7 +241,9 @@
   "action": "multizone selection groups merged into whole-building systems",
   "inputs": {
    "selection_groups": 5,
-   "merged_groups": 1
+   "merged_groups": 1,
+   "reference_system": 6,
+   "thermal_blocks_spanned": 5
   },
   "value": "one multizone system spans the thermal blocks of all storeys; facade/internal/underground split applied inside the builder",
   "article": "Table 8.4.4.7.-B Note (3)",

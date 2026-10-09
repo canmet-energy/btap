@@ -129,7 +129,7 @@
  },
  {
   "step": "selection",
-  "target": "Thermal Zone 1",
+  "target": "Thermal Zone 1,Thermal Zone 2,Thermal Zone 3,Thermal Zone 4,Thermal Zone 5",
   "action": "no proposed annual data (simulate: :sizing/:none, or the annual run predates this feature) \u2014 the 8.4.4.13.(2)(g) auxiliary-fuel election cannot run; the structural 8.4.4.9.(4) proxy elects the fuel instead",
   "article": "8.4.4.13.(2)(g)",
   "ruling": "D-52",
@@ -146,6 +146,21 @@
     "NaturalGas"
    ],
    "serving_system": "Thermal Zone 1,Thermal Zone 2,Thermal Zone 3,Thermal Zone 4,Thermal Zone 5",
+   "affected_blocks": [
+    "Thermal Zone 1",
+    "Thermal Zone 2",
+    "Thermal Zone 3",
+    "Thermal Zone 4",
+    "Thermal Zone 5"
+   ],
+   "affected_block_count": 5,
+   "service_set": [
+    "Thermal Zone 1",
+    "Thermal Zone 2",
+    "Thermal Zone 3",
+    "Thermal Zone 4",
+    "Thermal Zone 5"
+   ],
    "reconciled": false,
    "plant_energy_types": [
     "NaturalGas"

@@ -213,6 +213,13 @@
     "NaturalGas"
    ],
    "serving_system": "Thermal Zone 1",
+   "affected_blocks": [
+    "Thermal Zone 1"
+   ],
+   "affected_block_count": 1,
+   "service_set": [
+    "Thermal Zone 1"
+   ],
    "reconciled": false,
    "group_shares": "UNRESOLVED: no single plant carries every energy type this group uses, so a plant-only capacity split would omit the others from the denominator"
   },
@@ -259,6 +266,13 @@
     "NaturalGas"
    ],
    "serving_system": "Thermal Zone 2",
+   "affected_blocks": [
+    "Thermal Zone 2"
+   ],
+   "affected_block_count": 1,
+   "service_set": [
+    "Thermal Zone 2"
+   ],
    "reconciled": false,
    "group_shares": "UNRESOLVED: no single plant carries every energy type this group uses, so a plant-only capacity split would omit the others from the denominator"
   },
@@ -305,6 +319,13 @@
     "NaturalGas"
    ],
    "serving_system": "Thermal Zone 3",
+   "affected_blocks": [
+    "Thermal Zone 3"
+   ],
+   "affected_block_count": 1,
+   "service_set": [
+    "Thermal Zone 3"
+   ],
    "reconciled": false,
    "group_shares": "UNRESOLVED: no single plant carries every energy type this group uses, so a plant-only capacity split would omit the others from the denominator"
   },
@@ -351,6 +372,13 @@
     "NaturalGas"
    ],
    "serving_system": "Thermal Zone 4",
+   "affected_blocks": [
+    "Thermal Zone 4"
+   ],
+   "affected_block_count": 1,
+   "service_set": [
+    "Thermal Zone 4"
+   ],
    "reconciled": false,
    "group_shares": "UNRESOLVED: no single plant carries every energy type this group uses, so a plant-only capacity split would omit the others from the denominator"
   },
@@ -397,6 +425,13 @@
     "NaturalGas"
    ],
    "serving_system": "Thermal Zone 5",
+   "affected_blocks": [
+    "Thermal Zone 5"
+   ],
+   "affected_block_count": 1,
+   "service_set": [
+    "Thermal Zone 5"
+   ],
    "reconciled": false,
    "group_shares": "UNRESOLVED: no single plant carries every energy type this group uses, so a plant-only capacity split would omit the others from the denominator"
   },

@@ -106,11 +106,28 @@ nonconformity with 8.4.x.9.(6)(e).
 
 ## How often a run is conditional, measured
 
-**69% of the frozen corpus — 25 of the 36 scenarios carrying an audit — would
-return a CONDITIONAL determination if run annually.** Measured 2026-10-08 by
-resolving every `ahj` citation in every frozen audit against this register's
-own statuses. By id: AHJ-1 on 11 scenarios, AHJ-14 on 10, AHJ-15 on 10, AHJ-3
-on 3, AHJ-16 on 1.
+**76% of the frozen corpus — 29 of the 38 scenarios carrying an audit — would
+return a CONDITIONAL determination if run annually.** Re-measured 2026-10-09
+after D-101 by resolving every `ahj` citation in every frozen audit against
+this register's own statuses. By id: AHJ-15 on 14 scenarios, AHJ-1 on 13,
+AHJ-14 on 12, AHJ-3 on 4, AHJ-5 on 3, AHJ-16 on 2.
+
+It was 69% (25 of 36) on 2026-10-08, and the rise is a consequence of D-101
+rather than a new question. Five scenarios NEWLY cite AHJ-15 — samples 02, 03
+and 04 across their tiers — because AHJ-15 is about the one-unit-per-thermal-
+block topology, and that topology is now what a reference System 3 or 4 is.
+Two scenarios were added: the full-year determination witnesses for AHJ-1/AHJ-3
+and for AHJ-16.
+
+One caveat on the comparison, since the number is cited elsewhere: re-running
+this method over the PRE-D-101 baselines gives 24 of 36 (67%), not the recorded
+25 of 36, differing by one AHJ-15 scenario. So the 69% figure is not exactly
+reproducible by the method described here — either it was measured slightly
+differently or a later change moved one scenario without the figure being
+updated. The 76% above IS reproducible: resolve every `ahj` token in every
+`verification/scenarios/baselines/*/audit.json` against
+`btap/codes/data/ahj.json`, and count a scenario conditional when any resolved
+status is `referral` or `alternative-solution`.
 
 Before AHJ-14 and AHJ-15 were wired it was roughly a third. The jump is not a
 regression: both questions were always live, and wiring them only made the

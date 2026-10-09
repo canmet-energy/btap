@@ -158,6 +158,21 @@
     "NaturalGas"
    ],
    "serving_system": "Thermal Zone 1,Thermal Zone 2,Thermal Zone 3,Thermal Zone 4,Thermal Zone 5",
+   "affected_blocks": [
+    "Thermal Zone 1",
+    "Thermal Zone 2",
+    "Thermal Zone 3",
+    "Thermal Zone 4",
+    "Thermal Zone 5"
+   ],
+   "affected_block_count": 5,
+   "service_set": [
+    "Thermal Zone 1",
+    "Thermal Zone 2",
+    "Thermal Zone 3",
+    "Thermal Zone 4",
+    "Thermal Zone 5"
+   ],
    "reconciled": false,
    "plant_energy_types": [
     "NaturalGas"

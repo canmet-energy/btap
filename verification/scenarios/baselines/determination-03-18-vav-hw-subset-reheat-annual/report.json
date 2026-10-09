@@ -2,72 +2,72 @@
  "edition": "2020",
  "code": "necb2020",
  "code_label": "NECB 2020",
- "hdd": 3890,
+ "hdd": 3890.0,
  "simulate": "annual",
  "proposed": {
-  "mechanical_cooling": false,
+  "mechanical_cooling": true,
   "clean_run": true,
-  "total_site_kwh": 117908.3,
-  "electricity_kwh": 40102.8,
-  "natural_gas_kwh": 77805.6,
+  "total_site_kwh": 167150.0,
+  "electricity_kwh": 130972.2,
+  "natural_gas_kwh": 36177.8,
   "district_heating_kwh": 0.0,
   "district_cooling_kwh": 0.0,
   "end_uses_kwh": {
-   "heating": 63591.7,
-   "cooling": 0.0,
-   "fans": 0.0,
-   "pumps": 1013.9,
+   "heating": 94566.7,
+   "cooling": 7483.3,
+   "fans": 6594.4,
+   "pumps": 5025.0,
    "interior_lighting": 16775.0,
    "interior_equipment": 22311.1,
-   "water_systems": 14219.4
+   "water_systems": 14263.9
   },
   "floor_area_m2": 800.0,
-  "eui_kwh_per_m2": 147.4,
+  "eui_kwh_per_m2": 208.9,
   "unmet_occupied_hours": {
-   "heating": 41.75,
-   "cooling": 1709.75
+   "heating": 0.0,
+   "cooling": 4.0
   },
   "zone_unmet_occupied_hours": {
    "THERMAL ZONE 1": {
-    "heating": 0.25,
-    "cooling": 1452.75
+    "heating": 0.0,
+    "cooling": 4.0
    },
    "THERMAL ZONE 2": {
-    "heating": 0.5,
-    "cooling": 1241.25
+    "heating": 0.0,
+    "cooling": 0.0
    },
    "THERMAL ZONE 3": {
-    "heating": 0.5,
-    "cooling": 965.25
+    "heating": 0.0,
+    "cooling": 0.0
    },
    "THERMAL ZONE 4": {
-    "heating": 0.5,
-    "cooling": 1340.75
+    "heating": 0.0,
+    "cooling": 0.0
    },
    "THERMAL ZONE 5": {
-    "heating": 41.75,
-    "cooling": 880.75
+    "heating": 0.0,
+    "cooling": 0.0
    }
   }
  },
  "reference": {
   "clean_run": true,
-  "total_site_kwh": 147977.8,
-  "electricity_kwh": 60983.3,
-  "natural_gas_kwh": 86994.4,
+  "total_site_kwh": 148858.3,
+  "electricity_kwh": 60786.1,
+  "natural_gas_kwh": 88075.0,
   "district_heating_kwh": 0.0,
   "district_cooling_kwh": 0.0,
   "end_uses_kwh": {
-   "heating": 72722.2,
+   "heating": 73800.0,
    "cooling": 2561.1,
    "fans": 24977.8,
-   "pumps": 383.3,
+   "pumps": 186.1,
    "interior_lighting": 9402.8,
    "interior_equipment": 22311.1,
    "water_systems": 14275.0
   },
   "floor_area_m2": 800.0,
-  "eui_kwh_per_m2": 185.0,
+  "eui_kwh_per_m2": 186.1,
   "unmet_occupied_hours": {
    "heating": 0.0,
    "cooling": 4.75
@@ -96,20 +96,14 @@
   }
  },
  "capacity_iterations": [],
- "percent_of_target": 79.7,
- "tier": 1,
+ "percent_of_target": 112.3,
+ "tier": null,
  "annual": true,
  "ahj_applied": [
   {
    "id": "AHJ-1",
    "status": "alternative-solution",
    "title": "a single-fuel reference is a NON-CONFORMING substitution",
-   "count": 5
-  },
-  {
-   "id": "AHJ-3",
-   "status": "referral",
-   "title": "whether 8.4.4.9.(6)(d) permits more than one boiler",
    "count": 1
   },
   {
@@ -117,6 +111,12 @@
    "status": "referral",
    "title": "which part-load class a reference boiler or furnace takes",
    "count": 6
+  },
+  {
+   "id": "AHJ-16",
+   "status": "referral",
+   "title": "N:1 system correspondence for hydronic pumps",
+   "count": 1
   }
  ],
  "ahj_register": "docs/NECB_AHJ_QUESTIONS.md",
@@ -127,69 +127,24 @@
   "if_not_approved": "the comparison does not establish compliance and no verdict from it may be submitted as a determination",
   "ahj_ids": [
    "AHJ-1",
-   "AHJ-3",
-   "AHJ-14"
+   "AHJ-14",
+   "AHJ-16"
   ],
   "ahj_register": "docs/NECB_AHJ_QUESTIONS.md",
   "ahj_must_approve": [
-   "AHJ-1 (alternative-solution): a single-fuel reference is a NON-CONFORMING substitution \u2014 an ALTERNATIVE SOLUTION, which the text DECIDES and this tool does not meet \u2014 accepting it means accepting an explicitly identified non-conforming substitution. Applies to: Thermal Zone 1, Thermal Zone 2, Thermal Zone 3, Thermal Zone 4, Thermal Zone 5 \u2014 each of the 5 choices above makes this same departure; the conditions list carries what was established at each one",
-   "AHJ-3 (referral): whether 8.4.4.9.(6)(d) permits more than one boiler \u2014 an INTERPRETATION the acceptable-solution text does not settle. Applies to: Hot Water Loop \u2014 UNRESOLVED: ONE hydronic heating plant carries every energy type the serving systems use, so 8.4.4.9.(6) bands a requirement on the REFERENCE plant by its heating capacity \u2014 which does not exist at selection time, so no subclause is claimed. How many reference boiler plants correspond to this proposed plant is an N:1 correspondence question the acceptable-solution text does not settle",
-   "AHJ-14 (referral): which part-load class a reference boiler or furnace takes \u2014 an INTERPRETATION the acceptable-solution text does not settle. Applies to: Primary Boiler, CoilHeatingGasMultiStage_gas, CoilHeatingGasMultiStage_gas 1, CoilHeatingGasMultiStage_gas 2, CoilHeatingGasMultiStage_gas 3, CoilHeatingGasMultiStage_gas 4 \u2014 each of the 6 choices above makes this same unresolved election; the conditions list carries what was established at each one"
+   "AHJ-1 (alternative-solution): a single-fuel reference is a NON-CONFORMING substitution \u2014 an ALTERNATIVE SOLUTION, which the text DECIDES and this tool does not meet \u2014 accepting it means accepting an explicitly identified non-conforming substitution. Applies to: Thermal Zone 1,Thermal Zone 2,Thermal Zone 3,Thermal Zone 4,Thermal Zone 5 \u2014 UNRESOLVED: the heating equipment serving this group uses MORE THAN ONE ENERGY TYPE. 8.4.4.9.(5) requires the reference heating capacities to follow the proposed energy-type allocation, and this tool does NOT compute or enforce that allocation \u2014 it elects ONE energy type for the group. Whether the reference happens to match the proposed allocation is therefore NOT VERIFIED here, in either direction, and a passing annual result is not evidence that it does",
+   "AHJ-14 (referral): which part-load class a reference boiler or furnace takes \u2014 an INTERPRETATION the acceptable-solution text does not settle. Applies to: Primary Boiler, CoilHeatingGasMultiStage_gas, CoilHeatingGasMultiStage_gas 1, CoilHeatingGasMultiStage_gas 2, CoilHeatingGasMultiStage_gas 3, CoilHeatingGasMultiStage_gas 4 \u2014 each of the 6 choices above makes this same unresolved election; the conditions list carries what was established at each one",
+   "AHJ-16 (referral): N:1 system correspondence for hydronic pumps \u2014 an INTERPRETATION the acceptable-solution text does not settle. Applies to: Hot Water Loop \u2014 Hot Water Loop: 8.4.4.14.(1)-(3) NOT applied \u2014 the one overlapping proposed hot_water loop shares 3 of this reference loop's 5 thermal blocks and serves 3 in all \u2014 a partial overlap is not a correspondence. The pump keeps the modelling default, which is not a Code value; 5.2.6.3 still caps it"
   ],
   "conditions": [
    {
     "id": "AHJ-1",
     "status": "alternative-solution",
     "title": "a single-fuel reference is a NON-CONFORMING substitution",
-    "article": "8.4.4.9.(5); 8.4.4.9.(6)",
-    "target": "Thermal Zone 1",
-    "detail": "UNRESOLVED: the PROPOSED heating system puts MORE THAN ONE ENERGY TYPE on ONE BOILER PLANT that carries every energy type the group uses. What the REFERENCE plant ends up with is not established here: it depends on the selected system variant, on whether the plant is adopted or torn down, and on a post-sizing staging pass that acts on primary/secondary ROLE blind to energy type and whose effect differs by capacity band and by whether any role is recognised at all. Whether that conflicts with 8.4.4.9.(6) is NOT established here, because its applicable subclause depends on the reference plant capacity. NEITHER 8.4.4.9.(5)'s capacity-ratio clause (a) nor its operating-priority clause (b) is computed or enforced, so the allocation is NOT VERIFIED in either direction, and a passing annual result is not evidence that it is satisfied",
-    "entry_index": 16
-   },
-   {
-    "id": "AHJ-3",
-    "status": "referral",
-    "title": "whether 8.4.4.9.(6)(d) permits more than one boiler",
-    "article": "8.4.4.9.(6)",
-    "target": "Hot Water Loop",
-    "detail": "UNRESOLVED: ONE hydronic heating plant carries every energy type the serving systems use, so 8.4.4.9.(6) bands a requirement on the REFERENCE plant by its heating capacity \u2014 which does not exist at selection time, so no subclause is claimed. How many reference boiler plants correspond to this proposed plant is an N:1 correspondence question the acceptable-solution text does not settle",
-    "entry_index": 17
-   },
-   {
-    "id": "AHJ-1",
-    "status": "alternative-solution",
-    "title": "a single-fuel reference is a NON-CONFORMING substitution",
-    "article": "8.4.4.9.(5); 8.4.4.9.(6)",
-    "target": "Thermal Zone 2",
-    "detail": "UNRESOLVED: the PROPOSED heating system puts MORE THAN ONE ENERGY TYPE on ONE BOILER PLANT that carries every energy type the group uses. What the REFERENCE plant ends up with is not established here: it depends on the selected system variant, on whether the plant is adopted or torn down, and on a post-sizing staging pass that acts on primary/secondary ROLE blind to energy type and whose effect differs by capacity band and by whether any role is recognised at all. Whether that conflicts with 8.4.4.9.(6) is NOT established here, because its applicable subclause depends on the reference plant capacity. NEITHER 8.4.4.9.(5)'s capacity-ratio clause (a) nor its operating-priority clause (b) is computed or enforced, so the allocation is NOT VERIFIED in either direction, and a passing annual result is not evidence that it is satisfied",
-    "entry_index": 19
-   },
-   {
-    "id": "AHJ-1",
-    "status": "alternative-solution",
-    "title": "a single-fuel reference is a NON-CONFORMING substitution",
-    "article": "8.4.4.9.(5); 8.4.4.9.(6)",
-    "target": "Thermal Zone 3",
-    "detail": "UNRESOLVED: the PROPOSED heating system puts MORE THAN ONE ENERGY TYPE on ONE BOILER PLANT that carries every energy type the group uses. What the REFERENCE plant ends up with is not established here: it depends on the selected system variant, on whether the plant is adopted or torn down, and on a post-sizing staging pass that acts on primary/secondary ROLE blind to energy type and whose effect differs by capacity band and by whether any role is recognised at all. Whether that conflicts with 8.4.4.9.(6) is NOT established here, because its applicable subclause depends on the reference plant capacity. NEITHER 8.4.4.9.(5)'s capacity-ratio clause (a) nor its operating-priority clause (b) is computed or enforced, so the allocation is NOT VERIFIED in either direction, and a passing annual result is not evidence that it is satisfied",
-    "entry_index": 21
-   },
-   {
-    "id": "AHJ-1",
-    "status": "alternative-solution",
-    "title": "a single-fuel reference is a NON-CONFORMING substitution",
-    "article": "8.4.4.9.(5); 8.4.4.9.(6)",
-    "target": "Thermal Zone 4",
-    "detail": "UNRESOLVED: the PROPOSED heating system puts MORE THAN ONE ENERGY TYPE on ONE BOILER PLANT that carries every energy type the group uses. What the REFERENCE plant ends up with is not established here: it depends on the selected system variant, on whether the plant is adopted or torn down, and on a post-sizing staging pass that acts on primary/secondary ROLE blind to energy type and whose effect differs by capacity band and by whether any role is recognised at all. Whether that conflicts with 8.4.4.9.(6) is NOT established here, because its applicable subclause depends on the reference plant capacity. NEITHER 8.4.4.9.(5)'s capacity-ratio clause (a) nor its operating-priority clause (b) is computed or enforced, so the allocation is NOT VERIFIED in either direction, and a passing annual result is not evidence that it is satisfied",
-    "entry_index": 23
-   },
-   {
-    "id": "AHJ-1",
-    "status": "alternative-solution",
-    "title": "a single-fuel reference is a NON-CONFORMING substitution",
-    "article": "8.4.4.9.(5); 8.4.4.9.(6)",
-    "target": "Thermal Zone 5",
-    "detail": "UNRESOLVED: the PROPOSED heating system puts MORE THAN ONE ENERGY TYPE on ONE BOILER PLANT that carries every energy type the group uses. What the REFERENCE plant ends up with is not established here: it depends on the selected system variant, on whether the plant is adopted or torn down, and on a post-sizing staging pass that acts on primary/secondary ROLE blind to energy type and whose effect differs by capacity band and by whether any role is recognised at all. Whether that conflicts with 8.4.4.9.(6) is NOT established here, because its applicable subclause depends on the reference plant capacity. NEITHER 8.4.4.9.(5)'s capacity-ratio clause (a) nor its operating-priority clause (b) is computed or enforced, so the allocation is NOT VERIFIED in either direction, and a passing annual result is not evidence that it is satisfied",
-    "entry_index": 25
+    "article": "8.4.4.9.(5)",
+    "target": "Thermal Zone 1,Thermal Zone 2,Thermal Zone 3,Thermal Zone 4,Thermal Zone 5",
+    "detail": "UNRESOLVED: the heating equipment serving this group uses MORE THAN ONE ENERGY TYPE. 8.4.4.9.(5) requires the reference heating capacities to follow the proposed energy-type allocation, and this tool does NOT compute or enforce that allocation \u2014 it elects ONE energy type for the group. Whether the reference happens to match the proposed allocation is therefore NOT VERIFIED here, in either direction, and a passing annual result is not evidence that it does",
+    "entry_index": 13
    },
    {
     "id": "AHJ-14",
@@ -198,7 +153,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
     "target": "Primary Boiler",
     "detail": "boiler efficiency applied",
-    "entry_index": 240
+    "entry_index": 232
    },
    {
     "id": "AHJ-14",
@@ -207,7 +162,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "CoilHeatingGasMultiStage_gas",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 262
+    "entry_index": 254
    },
    {
     "id": "AHJ-14",
@@ -216,7 +171,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "CoilHeatingGasMultiStage_gas 1",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 263
+    "entry_index": 255
    },
    {
     "id": "AHJ-14",
@@ -225,7 +180,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "CoilHeatingGasMultiStage_gas 2",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 264
+    "entry_index": 256
    },
    {
     "id": "AHJ-14",
@@ -234,7 +189,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "CoilHeatingGasMultiStage_gas 3",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 265
+    "entry_index": 257
    },
    {
     "id": "AHJ-14",
@@ -243,18 +198,22 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "CoilHeatingGasMultiStage_gas 4",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 266
+    "entry_index": 258
+   },
+   {
+    "id": "AHJ-16",
+    "status": "referral",
+    "title": "N:1 system correspondence for hydronic pumps",
+    "article": "8.4.4.14.(1)-(3)",
+    "target": "Hot Water Loop",
+    "detail": "Hot Water Loop: 8.4.4.14.(1)-(3) NOT applied \u2014 the one overlapping proposed hot_water loop shares 3 of this reference loop's 5 thermal blocks and serves 3 in all \u2014 a partial overlap is not a correspondence. The pump keeps the modelling default, which is not a Code value; 5.2.6.3 still caps it",
+    "entry_index": 260
    }
   ]
  },
- "compliant": true,
+ "compliant": false,
  "warnings": [
-  "UNRESOLVED: the PROPOSED heating system puts MORE THAN ONE ENERGY TYPE on ONE BOILER PLANT that carries every energy type the group uses. What the REFERENCE plant ends up with is not established here: it depends on the selected system variant, on whether the plant is adopted or torn down, and on a post-sizing staging pass that acts on primary/secondary ROLE blind to energy type and whose effect differs by capacity band and by whether any role is recognised at all. Whether that conflicts with 8.4.4.9.(6) is NOT established here, because its applicable subclause depends on the reference plant capacity. NEITHER 8.4.4.9.(5)'s capacity-ratio clause (a) nor its operating-priority clause (b) is computed or enforced, so the allocation is NOT VERIFIED in either direction, and a passing annual result is not evidence that it is satisfied",
-  "UNRESOLVED: ONE hydronic heating plant carries every energy type the serving systems use, so 8.4.4.9.(6) bands a requirement on the REFERENCE plant by its heating capacity \u2014 which does not exist at selection time, so no subclause is claimed. How many reference boiler plants correspond to this proposed plant is an N:1 correspondence question the acceptable-solution text does not settle",
-  "UNRESOLVED: the PROPOSED heating system puts MORE THAN ONE ENERGY TYPE on ONE BOILER PLANT that carries every energy type the group uses. What the REFERENCE plant ends up with is not established here: it depends on the selected system variant, on whether the plant is adopted or torn down, and on a post-sizing staging pass that acts on primary/secondary ROLE blind to energy type and whose effect differs by capacity band and by whether any role is recognised at all. Whether that conflicts with 8.4.4.9.(6) is NOT established here, because its applicable subclause depends on the reference plant capacity. NEITHER 8.4.4.9.(5)'s capacity-ratio clause (a) nor its operating-priority clause (b) is computed or enforced, so the allocation is NOT VERIFIED in either direction, and a passing annual result is not evidence that it is satisfied",
-  "UNRESOLVED: the PROPOSED heating system puts MORE THAN ONE ENERGY TYPE on ONE BOILER PLANT that carries every energy type the group uses. What the REFERENCE plant ends up with is not established here: it depends on the selected system variant, on whether the plant is adopted or torn down, and on a post-sizing staging pass that acts on primary/secondary ROLE blind to energy type and whose effect differs by capacity band and by whether any role is recognised at all. Whether that conflicts with 8.4.4.9.(6) is NOT established here, because its applicable subclause depends on the reference plant capacity. NEITHER 8.4.4.9.(5)'s capacity-ratio clause (a) nor its operating-priority clause (b) is computed or enforced, so the allocation is NOT VERIFIED in either direction, and a passing annual result is not evidence that it is satisfied",
-  "UNRESOLVED: the PROPOSED heating system puts MORE THAN ONE ENERGY TYPE on ONE BOILER PLANT that carries every energy type the group uses. What the REFERENCE plant ends up with is not established here: it depends on the selected system variant, on whether the plant is adopted or torn down, and on a post-sizing staging pass that acts on primary/secondary ROLE blind to energy type and whose effect differs by capacity band and by whether any role is recognised at all. Whether that conflicts with 8.4.4.9.(6) is NOT established here, because its applicable subclause depends on the reference plant capacity. NEITHER 8.4.4.9.(5)'s capacity-ratio clause (a) nor its operating-priority clause (b) is computed or enforced, so the allocation is NOT VERIFIED in either direction, and a passing annual result is not evidence that it is satisfied",
-  "UNRESOLVED: the PROPOSED heating system puts MORE THAN ONE ENERGY TYPE on ONE BOILER PLANT that carries every energy type the group uses. What the REFERENCE plant ends up with is not established here: it depends on the selected system variant, on whether the plant is adopted or torn down, and on a post-sizing staging pass that acts on primary/secondary ROLE blind to energy type and whose effect differs by capacity band and by whether any role is recognised at all. Whether that conflicts with 8.4.4.9.(6) is NOT established here, because its applicable subclause depends on the reference plant capacity. NEITHER 8.4.4.9.(5)'s capacity-ratio clause (a) nor its operating-priority clause (b) is computed or enforced, so the allocation is NOT VERIFIED in either direction, and a passing annual result is not evidence that it is satisfied",
+  "UNRESOLVED: the heating equipment serving this group uses MORE THAN ONE ENERGY TYPE. 8.4.4.9.(5) requires the reference heating capacities to follow the proposed energy-type allocation, and this tool does NOT compute or enforce that allocation \u2014 it elects ONE energy type for the group. Whether the reference happens to match the proposed allocation is therefore NOT VERIFIED here, in either direction, and a passing annual result is not evidence that it does",
   "CoilCoolingDXMultiSpeed_dx: staged capacity unavailable (model not sized?) \u2014 8.4.4.10.(8) stage count NOT set; run sizing first",
   "CoilHeatingGasMultiStage_gas: staged capacity unavailable (model not sized?) \u2014 8.4.4.9.(7) stage count NOT set; run sizing first",
   "CoilCoolingDXMultiSpeed_dx 1: staged capacity unavailable (model not sized?) \u2014 8.4.4.10.(8) stage count NOT set; run sizing first",
@@ -317,7 +276,8 @@
   "model object named 'DXCOOL-REF-CAPFFLOW' does not state this edition's Quadratic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-CAPFFLOW (D-89)'",
   "model object named 'DXCOOL-REF-COOLEIRFT' does not state this edition's BiQuadratic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-COOLEIRFT (D-89)'",
   "model object named 'DXCOOL-REF-COOLPLFFPLR' does not state this edition's Cubic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-COOLPLFFPLR (D-89)'",
-  "INFORMATIONAL AND CONDITIONAL: 3 register question(s) requiring approval by the authority having jurisdiction were raised by this run's modelling choices, so the verdict below is NOT a Code-compliance determination. AHJ-1 (alternative-solution); AHJ-3 (referral); AHJ-1 (alternative-solution); AHJ-1 (alternative-solution); AHJ-1 (alternative-solution); AHJ-1 (alternative-solution); AHJ-14 (referral); AHJ-14 (referral)",
+  "Hot Water Loop: 8.4.4.14.(1)-(3) NOT applied \u2014 the one overlapping proposed hot_water loop shares 3 of this reference loop's 5 thermal blocks and serves 3 in all \u2014 a partial overlap is not a correspondence. The pump keeps the modelling default, which is not a Code value; 5.2.6.3 still caps it",
+  "INFORMATIONAL AND CONDITIONAL: 3 register question(s) requiring approval by the authority having jurisdiction were raised by this run's modelling choices, so the verdict below is NOT a Code-compliance determination. AHJ-1 (alternative-solution); AHJ-14 (referral); AHJ-14 (referral); AHJ-14 (referral); AHJ-14 (referral); AHJ-14 (referral); AHJ-14 (referral); AHJ-16 (referral)",
   "Calculation Methods \u2014 partial. Applied: the energy model accounts for the annual energy use of what the model contains. Gaps: elevators/escalators ((1)(j)) and other loads absent from the model are not added by the pipeline"
  ]
 }
