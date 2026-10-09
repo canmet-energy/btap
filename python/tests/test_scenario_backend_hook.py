@@ -262,10 +262,13 @@ class TestTheApiSeam(unittest.TestCase):
                         code = self.worker.main(
                             ["api_worker", str(call), str(run_dir)])
 
-        self.assertEqual(0, code,
-                         f"the worker failed: "
-                         f"{(run_dir / 'observations.json').read_text()[:300]
-                            if (run_dir / 'observations.json').exists() else ''}")
+        # Built as a statement, not inside the f-string: a line break in a
+        # replacement field is 3.12-only syntax and this project targets 3.11
+        # (`target-version = "py311"`), where it is a SyntaxError. Ruff caught
+        # it; the local interpreter happened to be 3.12 and did not.
+        observations = run_dir / "observations.json"
+        detail = observations.read_text()[:300] if observations.exists() else ""
+        self.assertEqual(0, code, f"the worker failed: {detail}")
         self.assertEqual(
             1, len(installed),
             "main() did not install a backend — deleting its "
