@@ -103,10 +103,33 @@ class TestFrozenScenarios(unittest.TestCase):
                 ["git", "-C", str(REPO_ROOT), "merge-base", "--is-ancestor",
                  commit, "HEAD"], capture_output=True, check=False).returncode
 
+        def shallow():
+            done = subprocess.run(
+                ["git", "-C", str(REPO_ROOT), "rev-parse",
+                 "--is-shallow-repository"], capture_output=True, check=False)
+            return done.stdout.decode().strip() == "true"
+
         rc = is_ancestor()
-        if rc == 128:
-            # Shallow CI clone: the object is unreachable. FETCH it and the
-            # local history so ancestry is PROVEN, not shrugged at (review
+        # A SHALLOW clone cannot answer this, and it does not say so: git
+        # returns 128 when the object is missing entirely, but 1 — the same
+        # code as a genuine "no" — for a commit that IS present and sits
+        # beyond the graft boundary, because it cannot walk past it. Recovering
+        # on 128 alone therefore believed a traversal that never happened.
+        #
+        # The consequence was worse than a skipped check. The failure below
+        # accuses the baselines of having "come from another line of history",
+        # which is specific, alarming, and was false: the commit was a real
+        # ancestor the clone simply could not reach. It stayed hidden because a
+        # push to main carries a manifest commit inside the shallow window and
+        # every PR that reached this check had re-frozen, which rewrites that
+        # commit to a recent one — so the first PR that did NOT re-freeze found
+        # it.
+        #
+        # Deepening is still conditional on the clone actually being shallow, so
+        # a genuine "not an ancestor" on a full clone fails immediately and is
+        # never softened into a fetch-and-shrug.
+        if rc != 0 and shallow():
+            # FETCH, so ancestry is PROVEN rather than shrugged at (review
             # Medium: the common CI path must not routinely skip this).
             subprocess.run(["git", "-C", str(REPO_ROOT), "fetch", "--quiet",
                             "--unshallow"], capture_output=True, check=False)

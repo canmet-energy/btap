@@ -67,6 +67,9 @@ class VAVReheat(BaseSystem):
         return air_loops
 
     def _zone_groups(self, model, zones):
+        # Always defined, so a consumer need not distinguish 'no evidence'
+        # from 'the attribute is missing'.
+        self.grouping_evidence = []
         underground = [z for z in zones if self._is_underground_zone(z)]
         above = [z for z in zones if not self._is_underground_zone(z)]
         groups = []
@@ -85,6 +88,21 @@ class VAVReheat(BaseSystem):
                     groups.append(face)
             if internal:
                 groups.append(internal)
+            # STRUCTURED EVIDENCE for whoever interprets this choice, and
+            # nothing more. This module is `btap.modeling` — the generic,
+            # code-family-neutral builder — so it must not learn NECB articles
+            # or register ids. It records WHAT it measured and WHAT it elected;
+            # the NECB layer decides whether that raises a question
+            # (Sol, `127`: a metadata handoff from the one implementation of
+            # the choice, not a duplicate predicate).
+            self.grouping_evidence = [
+                {'zone': zone.nameString(),
+                 'facade_areas_m2': {d: round(a, 3) for d, a
+                                     in sorted(self._facade_wall_areas(zone).items())
+                                     if a > 0.0},
+                 'elected': self._dominant_orientation(zone),
+                 'tie_break': 'largest exterior wall area, then N/E/S/W'}
+                for zone in external]
         if underground:
             groups.append(underground)
         return groups

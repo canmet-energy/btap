@@ -43,6 +43,7 @@ import re
 
 from btap._compat import opt, ruby_div, ruby_round, ruby_str
 from btap.audit import AuditLog
+from btap.codes import ahj as _ahj
 from btap.codes import compliance, pipeline, resolve
 from btap.codes.necb import tiers
 from btap.codes.pipeline import Verdict
@@ -289,14 +290,18 @@ def build_reference(run):
                 article=f"{prefix}.5.(9)-(12)", ruling="D-51")
         shw_reference._reference_shw(reference, ruleset, audit=audit)
     audit.building = None
+    # The reference-subsection prefix, for the two article numbers quoted in
+    # the text below. They were 2020 literals on every 2025 run (Fable's
+    # `133` G3), in the `compliance` step every frozen 2025 run carries.
+    _sub = run.ruleset.article('reference_subsection')
     audit.info(
         "compliance",
         "8.4.3.2 operating schedules and occupancy/receptacle loads are "
         "identical between proposed and reference by construction (the "
         "reference is a clone; neither reset touches schedules or those "
         "loads); interior lighting power is reset to the Part 4 allowance per "
-        "8.4.4.5.(1) (reference_lighting); service water heating efficiencies "
-        "are reset to the Part 6 minimums per 8.4.4.20 (reference_shw). "
+        f"{_sub}.5.(1) (reference_lighting); service water heating efficiencies "
+        f"are reset to the Part 6 minimums per {_sub}.20 (reference_shw). "
         "Representativeness of the loads for the building type remains the "
         "modeller's input (see the loads domain for NECB space-use data).",
         article="8.4.3.2.(1)-(2)")
@@ -336,7 +341,8 @@ def _size_reference(run):
         hvac.energy_recovery._apply_energy_recovery(reference, run.ruleset,
                                                     hdd=run.hdd, audit=audit)
         # T3: 5.2.2.7 economizer trigger is likewise a post-sizing determination
-        hvac.apply_economizer_thresholds(reference, audit=audit)
+        hvac.apply_economizer_thresholds(reference, audit=audit,
+                                         code=run.ruleset.id)
         audit.info("compliance",
                    "reference sized; efficiencies re-applied and the 5.2.10.1 "
                    "energy-recovery determination evaluated on sized flows",
@@ -372,14 +378,282 @@ def _compare_and_iterate(run):
                             step=opts["capacity_step"], audit=audit)
         run.compliant = compliance._evaluate(run.report, run.ruleset,
                                              opts["run_period"], audit)
+        _resolve_ahj_conditions(run, audit)
     elif opts["simulate"] == "sizing":
         audit.info("compliance",
                    "simulate: :sizing — both models generated and sized; no "
                    "energy comparison performed (compliance undetermined)")
 
 
-# 8. Part 11 operational GHG performance level, for the editions that have
-#    one (NECB 2025 today) — needs a province
+def _resolve_ahj_conditions(run, audit):
+    """Collect the AHJ dispositions the rule sites CITED, and set the
+    determination from their registry statuses.
+
+    Ownership, per Sol's `127`: the deciding rule site owns APPLICABILITY,
+    because it has the selected system, topology, equipment and branch
+    outcome. This function owns POLICY only — resolve the cited ids, keep the
+    ones whose status requires approval, and make an annual determination
+    conditional when that set is non-empty.
+
+    It therefore does NOT: inspect the proposed model, re-characterize HVAC,
+    parse audit action text, infer anything from `level`, or know any
+    individual question's predicate. The previous
+    `_mark_informational_if_multi_energy` recomputed
+    a `multi_energy_serving_systems` helper here to decide whether AHJ-1 and
+    AHJ-3 had
+    fired, which was a second source of truth beside the branch that already
+    knew — the drift this design removes.
+
+    All four statuses are collected for traceability. Only `referral` and
+    `alternative-solution` change the verdict: a `tool-gap` stays a defect and
+    a `ruled` question stays settled, and neither may be described as
+    something an authority must accept.
+    """
+    code = getattr(run.ruleset, "code", None) or run.report.get("code")
+    # SUPERSESSION FIRST. A later pass that re-makes the same choice must
+    # replace the earlier record even when it cites NOTHING — Fable's `131` F3:
+    # dedup kept the last CITING entry, so a 400 kW boiler whose class the Code
+    # elected on the second pass still carried AHJ-14 from the first, and the
+    # authority was told its class was an unresolved local default while the
+    # final audit entry said `modulating, reference selection`.
+    #
+    # "The same choice" is identified structurally, never from action text:
+    # same step, same target, and the same INPUT FIELDS recorded. One
+    # `_apply_boiler` pass emits one decision per boiler carrying
+    # `part_load_curve_class` and `class_source`, so a second pass over the
+    # same boiler matches and supersedes it, while an unrelated entry about the
+    # same target records different fields and does not.
+    latest_by_choice = {}
+    for index, entry in enumerate(audit.entries):
+        fields = frozenset((entry.get("inputs") or {}).keys())
+        if not fields:
+            # NEVER supersede an entry that records no inputs. Fable's `133`
+            # G1: AHJ-11's System 5 decision records none, so its identity
+            # collapsed to (step, target) and the purchased-cooling decision
+            # emitted after it on the same zones — also input-less — "re-made
+            # the choice" and retired the referral. A heated refrigerated block
+            # on district cooling reported `code` with no conditions at all,
+            # which is the silent-drop this whole axis exists to prevent, and
+            # my own supersession fix introduced it.
+            #
+            # An empty field set is not an identity. It is the ABSENCE of one,
+            # and treating absence as a match is what let two unrelated
+            # decisions collide. AHJ-16's five input-less warns had the same
+            # fragility without colliding yet.
+            continue
+        key = (entry.get("step"), entry.get("target"), fields,
+               # `ruling` too: non-prose and site-specific, so two genuinely
+               # different decisions that happen to record the same field
+               # names stay distinct.
+               entry.get("ruling"))
+        latest_by_choice[key] = index
+    superseded = set()
+    for index, entry in enumerate(audit.entries):
+        fields = frozenset((entry.get("inputs") or {}).keys())
+        if not fields:
+            continue
+        key = (entry.get("step"), entry.get("target"), fields,
+               entry.get("ruling"))
+        if latest_by_choice.get(key) != index:
+            superseded.add(index)
+
+    fired, conditions = [], []
+    for index, entry in enumerate(audit.entries):
+        citation = entry.get("ahj")
+        if not citation:
+            continue
+        if index in superseded:
+            # A later entry re-made this exact choice, recording the same
+            # fields under the same ruling.
+            continue
+        malformed = _ahj.malformed_ids_in(citation)
+        if malformed:
+            raise _ahj.UnknownAHJ(
+                "audit entry {} cites {!r}, which is not a well-formed AHJ "
+                "citation; expected space-separated ids like "
+                "'AHJ-1 AHJ-5'".format(index, malformed))
+        for record in _ahj.resolve(citation, code=code):
+            fired.append(record["id"])
+            conditions.append({
+                "id": record["id"],
+                "status": record["status"],
+                "title": record["title"],
+                "article": entry.get("article"),
+                "target": entry.get("target"),
+                # The firing entry's own words, QUOTED not parsed. Sol's `127`
+                # forbids inferring POLICY from action text, and this infers
+                # nothing — it carries the site's substance to the reader.
+                # Without it the report would lose the disclosure wording eight
+                # review rounds produced, including that what the reference's
+                # final equipment carries is NOT established by this tool.
+                "detail": entry.get("action"),
+                "entry_index": index,
+            })
+    # ONE QUESTION PER FINAL CHOICE. The efficiency pass runs twice — once
+    # against the proposed's sizing, once against the reference's — so the same
+    # boiler's same class decision was recorded as two conditions, and the
+    # full-year baseline showed four where there was one live choice (Sol,
+    # `128`.3). Deduped by (id, target) keeping the LAST occurrence. The
+    # supersession filter above is what makes that safe: on its own, keeping
+    # the last CITING entry left a stale condition whenever the final pass
+    # cited nothing (Fable, `131` F3). The audit history is untouched; only the
+    # derived condition set collapses.
+    latest = {}
+    for record in conditions:
+        latest[(record["id"], record.get("target"))] = record
+    conditions = list(latest.values())
+    fired = [record["id"] for record in conditions]
+
+    if not fired:
+        # Sol's `127`: "no approval-required id -> compliance_determination:
+        # 'code'". The POSITIVE statement matters — a reader must be able to
+        # tell an unqualified determination from a run where the question was
+        # never asked, and a missing key cannot say that. Only an ANNUAL run
+        # has a determination to state.
+        if run.report.get("annual"):
+            run.report["compliance_determination"] = "code"
+        return
+
+    order = {record["id"]: position for position, record
+             in enumerate(_ahj.registry()["entries"])}
+    unique = sorted(set(fired), key=lambda ident: order.get(ident, 10**6))
+    run.report["ahj_applied"] = [
+        {"id": ident,
+         "status": _ahj.by_id()[ident]["status"],
+         "title": _ahj.by_id()[ident]["title"],
+         # UNIQUE final choices, not audit entries: two efficiency passes over
+         # one boiler are one question.
+         "count": fired.count(ident)}
+        for ident in unique]
+    run.report["ahj_register"] = "docs/NECB_AHJ_QUESTIONS.md"
+
+    approval = tuple(_ahj.approval_required_statuses())
+    required = [ident for ident in unique
+                if _ahj.by_id()[ident]["status"] in approval]
+    if not required:
+        # Citations still travel as provenance, and the determination is
+        # UNQUALIFIED: a `ruled` or `tool-gap` citation does not qualify a
+        # verdict, so saying "code" here is the honest positive statement.
+        if run.report.get("annual"):
+            run.report["compliance_determination"] = "code"
+        return
+    if not run.report.get("annual"):
+        # A `none`, `sizing` or shortened run has no determination to qualify.
+        # Turning "no determination" into a conditional verdict would invent a
+        # determination the run never reached.
+        return
+    _set_conditional(run, audit, required, conditions, approval)
+
+
+def _set_conditional(run, audit, required, conditions, approval):
+    """Write the conditional determination from the FIRED condition records.
+
+    Generic by construction: the condition text is built from each record's
+    status, title, article and target, so an AHJ-11 System-5 condition is not
+    rendered as a boiler-capacity condition (Sol, `127`).
+    """
+    active = [record for record in conditions
+              if record["id"] in set(required)]
+    run.report["compliance_determination"] = "conditional"
+    # ONE APPROVAL LINE PER REGISTER ID, with its equipment listed inside it
+    # (Sol's `128`.3: "the approval banner itself remains once per AHJ id").
+    # The CONDITIONS still enumerate every unique final choice — six gas coils
+    # each making the same unresolved class choice are six choices — but an
+    # authority reads ONE statement of the question, not six copies of it.
+    by_id = {}
+    for record in active:
+        by_id.setdefault(record["id"], []).append(record)
+
+    deduped = []
+    for ident in sorted(by_id, key=lambda value: int(value.split("-")[1])):
+        group = by_id[ident]
+        first = group[0]
+        if first["status"] == "alternative-solution":
+            kind = ("an ALTERNATIVE SOLUTION, which the text DECIDES and this "
+                    "tool does not meet — accepting it means accepting an "
+                    "explicitly identified non-conforming substitution")
+        else:
+            kind = ("an INTERPRETATION the acceptable-solution text does not "
+                    "settle")
+        seen_targets, targets = set(), []
+        for record in group:
+            target = record.get("target")
+            if target and target not in seen_targets:
+                seen_targets.add(target)
+                targets.append(str(target))
+        where = " Applies to: {}".format(", ".join(targets)) if targets else ""
+        # QUOTE ONE SITE'S ACCOUNT ONLY WHEN IT IS THE ONLY SITE.
+        #
+        # This took `details[0]` for the whole id group, so AHJ-14's frozen
+        # line described five gas furnace coils as "boiler efficiency applied"
+        # (Fable's `131` F8). One equipment's account is not the group's
+        # account, and the id that fires most is the one it misdescribed.
+        #
+        # With several sites the line states the QUESTION and lets the
+        # `conditions` list carry each site's own `detail`. The question is
+        # what an authority rules on; the per-site accounts are the evidence
+        # under it, and they are already in the report.
+        #
+        # " — " not " ": without a separator the quoted detail ran straight
+        # into "Applies to: Hot Water Loop", which an authority has to read.
+        details = [str(r["detail"]) for r in group if r.get("detail")]
+        if len(group) == 1 and details:
+            detail = " — " + details[0]
+        elif details:
+            # KEYED ON STATUS, like the `kind` clause before it. The one
+            # sentence said "this same unresolved election" for every status,
+            # so an AHJ-1 line read "which the text DECIDES ... this same
+            # unresolved election" in a single breath (Fable's `133` G5). An
+            # alternative solution is not an unresolved question; it is a
+            # requirement the text settles and this tool does not meet.
+            shared = ("departure" if first["status"] == "alternative-solution"
+                      else "unresolved election")
+            detail = (" — each of the {} choices above makes this same {}; "
+                      "the conditions list carries what was established at "
+                      "each one".format(len(group), shared))
+        else:
+            detail = ""
+        deduped.append("{} ({}): {} — {}.{}{}".format(
+            ident, first["status"], first["title"], kind, where, detail))
+    run.report["compliance_determination_reason"] = {
+        "why": ("{} register question(s) requiring approval were raised by "
+                "this run's modelling choices, so the comparison is "
+                "INFORMATIONAL and is NOT a Code-compliance determination. "
+                "Each condition below names the question, its register status "
+                "and the deciding entry's own account of what was and was not "
+                "established.".format(len(set(required)))),
+        "condition": "approval by the authority having jurisdiction",
+        "if_not_approved": (
+            "the comparison does not establish compliance and no verdict "
+            "from it may be submitted as a determination"),
+        "ahj_ids": list(required),
+        "ahj_register": "docs/NECB_AHJ_QUESTIONS.md",
+        "ahj_must_approve": deduped,
+        "conditions": active,
+    }
+    # Warnings are never silent (the AuditLog contract), and the determination
+    # must be visible in the audit as well as the report. Generic by
+    # construction: it enumerates the resolved ids and statuses rather than
+    # naming any one question, so an AHJ-11 condition does not arrive wearing
+    # multi-energy wording.
+    audit.warn(
+        'compliance',
+        'INFORMATIONAL AND CONDITIONAL: {} register question(s) requiring '
+        'approval by the authority having jurisdiction were raised by this '
+        "run's modelling choices, so the verdict below is NOT a "
+        'Code-compliance determination. {}'.format(
+            len(set(required)),
+            '; '.join('{} ({})'.format(record['id'], record['status'])
+                      for record in active[:8])),
+        target=', '.join(sorted({str(record['target']) for record in active
+                                 if record.get('target')})) or None,
+        inputs={'ahj_ids': list(required),
+                'ahj_register': 'docs/NECB_AHJ_QUESTIONS.md'},
+        article=', '.join(sorted({str(record['article']) for record in active
+                                  if record.get('article')})) or None,
+        ruling='D-99 D-100')
+
+
 def _score_ghg(run):
     opts = run.opts
     report = run.report
@@ -475,7 +749,7 @@ def _eui_compliance(model, *, ruleset, weather, hdd, run_dir, simulate,
                 if not weather.get(k):
                     raise ValueError(f"weather['{k}'] required")
             runner.attach_weather(proposed, epw=weather["epw"],
-                                  ddy=weather["ddy"])
+                                  ddy=weather["ddy"], audit=audit)
         if hdd is None:
             hdd = envelope.hdd18(proposed, edition=ruleset.edition, audit=audit)
 

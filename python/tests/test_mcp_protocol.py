@@ -124,7 +124,7 @@ class TestMCPClient(unittest.TestCase):
             self.assertIn("HTTP 404", str(cm.exception))
 
     def test_http_5xx_retries_with_backoff(self):
-        """5xx and 429 errors retry with exponential backoff."""
+        """5xx and 429 errors retry with exponential backoff (0.5s, 1.0s, ...)."""
         with patch("urllib.request.urlopen") as mock_urlopen, \
              patch("time.sleep") as mock_sleep:
 
@@ -141,10 +141,10 @@ class TestMCPClient(unittest.TestCase):
             self.assertEqual(result, {"ok": True})
             self.assertEqual(mock_urlopen.call_count, 3)
 
-            # Verify exponential backoff: 2^0=1, 2^1=2
+            # Verify exponential backoff: backoff(0.5) * 2^0=0.5, * 2^1=1.0
             self.assertEqual(mock_sleep.call_count, 2)
-            self.assertEqual(mock_sleep.call_args_list[0][0][0], 1)
-            self.assertEqual(mock_sleep.call_args_list[1][0][0], 2)
+            self.assertEqual(mock_sleep.call_args_list[0][0][0], 0.5)
+            self.assertEqual(mock_sleep.call_args_list[1][0][0], 1.0)
 
     def test_retry_exhaustion(self):
         """After N failed attempts, raise with attempt count."""
@@ -158,46 +158,28 @@ class TestMCPClient(unittest.TestCase):
             with self.assertRaises(MCPError) as cm:
                 client.call("tool", {}, attempts=3)
 
-            self.assertIn("after 3 attempts", str(cm.exception))
-
-    def test_env_var_expansion(self):
-        """${VAR} and ${VAR:-default} placeholders are expanded."""
-        with patch.dict("os.environ", {"TEST_VAR": "expanded_value"}):
-            client = MCPClient("test", endpoint="https://test.example.com/mcp", api_key="key")
-
-            # Direct value
-            self.assertEqual(client._expand_vars("${TEST_VAR}"), "expanded_value")
-
-            # With default (unused because var is set)
-            self.assertEqual(client._expand_vars("${TEST_VAR:-fallback}"), "expanded_value")
-
-            # Unset var with default
-            self.assertEqual(client._expand_vars("${UNSET:-fallback}"), "fallback")
-
-            # Unset var without default returns None
-            self.assertIsNone(client._expand_vars("${UNSET}"))
+            self.assertIn("after 3 attempt(s)", str(cm.exception))
 
     def test_missing_api_key_raises(self):
-        """Client raises clear error when API key is unavailable."""
-        with patch.dict("os.environ", {}, clear=True), \
-             patch("pathlib.Path.is_file", return_value=False):
+        """Client raises a clear error on first call when no API key is configured."""
+        with patch.dict("os.environ", {}, clear=True):
+            client = MCPClient("test-server", endpoint="https://test.example.com/mcp")
 
             with self.assertRaises(MCPError) as cm:
-                MCPClient("test-server", endpoint="https://test.example.com/mcp")
+                client.call("tool", {})
 
-            self.assertIn("no test-server API key", str(cm.exception))
+            self.assertIn("No API key configured", str(cm.exception))
             self.assertIn("HBIX_API_KEY", str(cm.exception))
 
-    def test_missing_endpoint_raises(self):
-        """Client raises clear error when endpoint is unavailable."""
-        with patch.dict("os.environ", {"HBIX_API_KEY": "test-key"}, clear=True), \
-             patch("pathlib.Path.is_file", return_value=False):
+    def test_missing_endpoint_falls_back_to_default_base_url(self):
+        """With no endpoint/base_url/env configured, the client falls back to
+        the built-in default base URL instead of raising (unlike the fork this
+        replaces, which required HBIX_MCP_BASE_URL or .mcp.json)."""
+        with patch.dict("os.environ", {}, clear=True):
+            client = MCPClient("test-server")
 
-            with self.assertRaises(MCPError) as cm:
-                MCPClient("test-server")
-
-            self.assertIn("no test-server MCP url", str(cm.exception))
-            self.assertIn("HBIX_MCP_BASE_URL", str(cm.exception))
+            self.assertTrue(client.endpoint.endswith("/test-server/mcp"))
+            self.assertTrue(client.endpoint.startswith("https://"))
 
     def test_base_url_construction(self):
         """Base URL + server name builds correct endpoint."""
@@ -206,52 +188,32 @@ class TestMCPClient(unittest.TestCase):
             base_url="https://api.example.com/prod",
             api_key="key"
         )
-        self.assertEqual(client._endpoint, "https://api.example.com/prod/my-server/mcp")
+        self.assertEqual(client.endpoint, "https://api.example.com/prod/my-server/mcp")
 
-    def test_mcp_config_parsing(self):
-        """Load .mcp.json and extract server config."""
-        mock_config = {
-            "mcpServers": {
-                "test-server": {
-                    "url": "https://configured.example.com/test-server/mcp",
-                    "headers": {"X-API-Key": "configured-key"}
-                }
+    def test_hbix_mcp_base_url_env_compat_alias(self):
+        """HBIX_MCP_BASE_URL (this repo's historical env var) still works as
+        a compat alias behind the preferred HBIX_API_URL."""
+        with patch.dict(
+            "os.environ",
+            {"HBIX_MCP_BASE_URL": "https://legacy.example.com/prod"},
+            clear=True,
+        ):
+            client = MCPClient("my-server", api_key="key")
+            self.assertEqual(client.endpoint, "https://legacy.example.com/prod/my-server/mcp")
+
+    def test_list_tools(self):
+        """list_tools() returns the server's tool list from tools/list."""
+        with patch("urllib.request.urlopen") as mock_urlopen:
+            tools_response = {
+                "result": {"tools": [{"name": "list_codes", "description": "..."}]}
             }
-        }
+            sse = f'data: {json.dumps(tools_response)}\n'
+            mock_urlopen.return_value = MockHTTPResponse(sse.encode("utf-8"))
 
-        patches = (
-            patch.dict("os.environ", {}, clear=True),
-            patch("pathlib.Path.is_file", return_value=True),
-            patch("pathlib.Path.read_text", return_value=json.dumps(mock_config)),
-        )
-        with patches[0], patches[1], patches[2]:
-            client = MCPClient("test-server")
+            client = MCPClient("test", endpoint="https://test.example.com/mcp", api_key="key")
+            tools = client.list_tools()
 
-            self.assertEqual(client._endpoint, "https://configured.example.com/test-server/mcp")
-            self.assertEqual(client._api_key, "configured-key")
-
-    def test_mcp_config_with_env_expansion(self):
-        """${VAR} placeholders in .mcp.json are expanded from env."""
-        mock_config = {
-            "mcpServers": {
-                "test-server": {
-                    "url": "${BASE_URL}/test-server/mcp",
-                    "headers": {"X-API-Key": "${API_KEY}"}
-                }
-            }
-        }
-
-        env = {"BASE_URL": "https://env.example.com", "API_KEY": "env-key"}
-        patches = (
-            patch.dict("os.environ", env, clear=True),
-            patch("pathlib.Path.is_file", return_value=True),
-            patch("pathlib.Path.read_text", return_value=json.dumps(mock_config)),
-        )
-        with patches[0], patches[1], patches[2]:
-            client = MCPClient("test-server")
-
-            self.assertEqual(client._endpoint, "https://env.example.com/test-server/mcp")
-            self.assertEqual(client._api_key, "env-key")
+            self.assertEqual(tools, [{"name": "list_codes", "description": "..."}])
 
 
 if __name__ == "__main__":

@@ -31,7 +31,12 @@ DATA_DIR = Path(__file__).parent / "data"
 
 #: Every consumer of a ruling string parses it with this — mirrors the
 #: joined-citation convention already used for ``article``.
-ID_PATTERN = re.compile(r"\bD-\d{2}\b")
+#: Unbounded digits. `\bD-\d{2}\b` did NOT match `D-100`, so a decision the
+#: generator accepted would have had INVISIBLE citations: no audit entry
+#: would resolve its ruling and it would never reach the report appendix. I
+#: described that trap in the commit that widened the generator and did not
+#: actually edit this file (Sol, clearance review of be2118d).
+ID_PATTERN = re.compile(r"\bD-\d+\b")
 
 _all: list[dict] | None = None
 _by_id: dict[str, dict] | None = None

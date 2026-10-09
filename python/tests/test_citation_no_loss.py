@@ -153,15 +153,26 @@ class TestForeignGateCatchesRealRegressions(unittest.TestCase):
                         self.count(before, "static", "5.2.6.3.(1)"),
                         "a deleted Part 5 citation must drop its own key")
 
-    def test_deleting_the_foreign_half_of_a_mixed_literal_is_caught(self):
-        """``'8.4.4.12.; 5.2.2.7.(1)'`` is counted by the 8.4 gate under
-        8.4.4.12, so its Part 5 half once fired nothing in either gate."""
-        key = "8.4.4.12.; 5.2.2.7.(1)"
+    def test_deleting_the_foreign_half_of_the_economizer_citation_is_caught(self):
+        """The economizer citation is counted by the 8.4 gate under its own
+        subsection, so its Part 5 half once fired nothing in either gate.
+
+        It was the static literal `'8.4.4.12.; 5.2.2.7.(1)'` until Fable's
+        `133` G3: that spelled NECB 2020's subsection into the ARTICLE FIELD on
+        every 2025 run, where `8.4.4.12` does not exist at all. It is now
+        `f'{economizer_article}; 5.2.2.7.(1)'`, so the guarded key is DYNAMIC —
+        the Part 5 half, which is what makes it foreign, is unchanged.
+        """
+        key = "f'{economizer_article}; 5.2.2.7.(1)'"
         before = load_foreign_baseline()
+        self.assertGreater(self.count(before, "dynamic", key), 0,
+                           "precondition: the mixed citation is in the baseline")
         after = self.mutate("btap/codes/necb/hvac/reference.py",
-                            "article='8.4.4.12.; 5.2.2.7.(1)'", "article='8.4.4.12.'")
-        self.assertLess(self.count(after, "static", key), self.count(before, "static", key),
-                        "the foreign half of a mixed literal must be guarded")
+                            "article=f'{economizer_article}; 5.2.2.7.(1)'",
+                            "article=f'{economizer_article}'")
+        self.assertLess(self.count(after, "dynamic", key),
+                        self.count(before, "dynamic", key),
+                        "the foreign half of a mixed citation must be guarded")
 
     def test_deleting_the_foreign_half_of_a_mixed_DYNAMIC_citation_is_caught(self):
         """D-38's own clamp entry, ``f'5.2.6.3.(1); {prefix}.1.(2)'``. Gated

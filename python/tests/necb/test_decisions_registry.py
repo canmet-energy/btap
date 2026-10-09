@@ -45,8 +45,8 @@ from pathlib import Path
 PYTHON_ROOT = Path(__file__).resolve().parents[2]
 REGISTRY = PYTHON_ROOT / "btap" / "codes" / "data" / "decisions.json"
 
-ID_TOKEN = re.compile(r"\bD-\d{2}\b")
-LITERAL_GRAMMAR = re.compile(r"\AD-\d{2}( D-\d{2})*\Z")
+ID_TOKEN = re.compile(r"\bD-\d+\b")
+LITERAL_GRAMMAR = re.compile(r"\AD-\d+( D-\d+)*\Z")
 AUDIT_METHODS = frozenset({"decision", "info", "warn"})
 
 #: A future forwarding call that legitimately passes a variable would be

@@ -46,16 +46,46 @@ def rotate_model(model, degrees):
     return model
 
 
+class UndeterminedStoreys(ValueError):
+    """The model does not say how many above-ground storeys it has."""
+
+
 def above_ground_storeys(model):
-    """Above-ground storey count: the declared standards value when set, else
-    counted from storeys with any at-or-above-grade space. Lived in hvac's
-    costing module historically, but it is pure geometry and the authoring
-    systems (vav_reheat zoning) need it — so it lives here and costing
-    delegates."""
+    """Above-ground storey count, from the MODEL. Raises if it cannot say.
+
+    Two sources, in order: the declared
+    ``standardsNumberOfAboveGroundStories``, then a count of storeys holding
+    any at-or-above-grade space. Both are real information the model carries.
+
+    **A model that carries NEITHER is an error, not a one-storey building.**
+    This used to return a fabricated 1, and the storey count decides the
+    reference system — Table 8.4.x.7.-A sends a General Area building to
+    System 3 at two storeys and System 6 at three — so guessing it chooses a
+    different reference building and reports the comparison as a
+    determination. `pipeline.py`'s preflight already warned that the fallback
+    "would silently treat the building as ONE storey"; phylroy's direction
+    (2026-10-08) is that a missing storey count is the MODELLER's omission and
+    must reach them, not be papered over.
+
+    Lived in hvac's costing module historically, but it is pure geometry and
+    the authoring systems (vav_reheat zoning) need it — so it lives here and
+    costing delegates.
+
+    :raises UndeterminedStoreys: the model declares no standards storey count
+        and has no storey holding an at-or-above-grade space
+    """
     declared = opt(model.getBuilding().standardsNumberOfAboveGroundStories())
     if declared is not None:
         return declared
 
     count = sum(1 for story in model.getBuildingStorys()
                 if any(float(s.zOrigin()) >= -0.01 for s in story.spaces()))
-    return min(max(count, 1), 1000)
+    if count < 1:
+        raise UndeterminedStoreys(
+            "the model does not say how many ABOVE-GROUND STOREYS it has: "
+            "OS:Building has no 'Standards Number of Above Ground Stories' "
+            "and no OS:BuildingStory holds a space at or above grade. The "
+            "storey count selects the reference system (Table 8.4.x.7.-A), so "
+            "it cannot be assumed — set the standards field on the Building, "
+            "or assign spaces to BuildingStory objects")
+    return min(count, 1000)

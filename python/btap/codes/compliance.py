@@ -48,10 +48,10 @@ class PreflightError(ValueError):
 class ComplianceResult:
     proposed_model: object = None
     reference_model: object = None
-    report: dict = None
+    report: dict | None = None
     audit: object = None
     compliant: bool | None = None
-    run_dir: str = None
+    run_dir: str | None = None
 
 
 def performance_compliance(model, *, code="necb2020", weather=None, building=None,

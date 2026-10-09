@@ -43,7 +43,7 @@
       "method": "transcribed",
       "source_verification": "manual",
       "note": "The umbrella carries only article_coverage: what the pipeline itself determines. Article numbers and titles were transcribed from NECB 2020 Division B Section 8.4 and cross-checked against the building-codes MCP; the status/how/code fields are the pipeline's self-declaration and have no external source to re-fetch. The code pointers are checked by tests/test_coverage_code_refs.py, the article text by the packaged coverage/articles_8_4.json. The 20 h floor under 8.4.1.2.(4)'s cooling unmet-hours allowance moved from a code literal in compliance.py into this file (unmet_cooling.minimum_allowance_h) on 2026-09-08, multi-edition plan Stage 5; the value is unchanged and the source is unchanged.",
-      "result_sha256": "f14f9e3fdeaec86a29baca0b1648f14dec3367967db303984f9a22e6a8b00168"
+      "result_sha256": "990b63dcec506be6f09b3dba152e897069fb0dc8026d45f8abe00c9adc9b4516"
     },
     "envelope_rules.json": {
       "source": "mcp:necb:2020",
@@ -209,7 +209,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "The archived set is the three tables this file's provenance names plus the eight articles in its own `articles` list. The category keywords extending the Table 8.4.4.7.-A space lists with synonyms are a maintainer addition, not code text, and are marked as such in the file.",
-      "result_sha256": "30d45d0ac5b6d16fd55c7c93fb8dd50a92f2ac3c2a2d7528b385db3fbd5f7c82"
+      "result_sha256": "997c7b00d280d4c65f4707360dddd829aa0610812aaef22289ddadd401f76ac3"
     },
     "efficiencies.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",

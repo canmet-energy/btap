@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "why": [
+    "Coverage code-references RETIRED because the coverage claim that carried",
+    "them was deleted, not because the code moved. The R6 -> R7 ledgers record",
+    "RENAMES and assert that R-B 'moved paths, it did not add, drop or merge an",
+    "owner'. A deleted claim is a different event and must not be recorded by",
+    "rewriting a ledger in place, which those files forbid.",
+    "",
+    "This file is the third term that keeps R6's total of 313 PROVABLE rather",
+    "than edited: every reference R7 names is either live in a manifest today",
+    "or retired here, with the authority that retired it. A silent edit to a",
+    "ledger still fails; a deliberate retirement is recorded and passes."
+  ],
+  "retirements": [
+    {
+      "ref": "python/btap/codes/compliance.py#_build_reference",
+      "uses": 1,
+      "article": "8.4.2.2.(6)",
+      "edition": "necb2020",
+      "authority": "Sol, `137`, 2026-10-08",
+      "reason": [
+        "NECB 2020 contains neither Article 8.4.2.12 nor Sentence 8.4.2.2.(6).",
+        "Verified against the official NRC NECB 2020 second printing including",
+        "the 2025-02-27 errata: Division B page 8-3 gives Article 8.4.2.2",
+        "Sentences (1) to (5) only, and page 8-5 makes 8.4.2.10 the last",
+        "article of Subsection 8.4.2. The HBIX 2020-to-2025 Part 8 comparison",
+        "labels 8.4.2.12 NEW in 2025.",
+        "",
+        "So this coverage row described a provision that edition does not have.",
+        "Sol ruled it DELETED rather than mapped onto the Code's general",
+        "alternative-solution framework, because an alternative solution and",
+        "the 2025 exceptional-calculation method are not the same requirement.",
+        "The 2025 claim for 8.4.2.12 is untouched: it exists there."
+      ]
+    }
+  ]
+}

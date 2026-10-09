@@ -72,3 +72,63 @@ def proposed_with_hvac(system="Baseboard gas boiler"):
 def zone_types_for(model):
     return {z.nameString(): "Office - enclosed"
             for z in model.getThermalZones()}
+
+
+def real_conditional_report(conditions, *, code_label="NECB 2020",
+                            compliant=True, annual=True):
+    """A report built by the REAL `_set_conditional`, not by hand.
+
+    The renderer fixtures used to hand-write `ahj_must_approve`, so they could
+    not carry what the builder actually appends — and a hand-written fixture
+    that mirrors the builder's assumptions hides exactly the shape bugs these
+    tests exist to catch. The builder is cheap and pure; use it.
+    """
+    from btap.audit import AuditLog
+    from btap.codes.necb import path as necb_path
+
+    class _Run:
+        pass
+
+    run = _Run()
+    run.report = {"compliant": compliant, "annual": annual,
+                  "code_label": code_label,
+                  "compliance_determination": "conditional"}
+    required = sorted({c["id"] for c in conditions},
+                      key=lambda i: int(i.split("-")[1]))
+    necb_path._set_conditional(run, AuditLog(), required, conditions,
+                               ("referral", "alternative-solution"))
+    return run.report
+
+
+#: One alternative-solution condition, the multi-energy case.
+MULTI_ENERGY_CONDITION = {
+    "id": "AHJ-1", "status": "alternative-solution",
+    "title": "a single-fuel reference is a NON-CONFORMING substitution",
+    "article": "8.4.4.9.(5)", "target": "Hot Water Loop",
+    "detail": ("what the reference's final heating equipment carries is NOT "
+               "established by this tool"),
+    "entry_index": 0,
+}
+
+#: The (6) cardinality question, AHJ-3, which rides with AHJ-1 where one
+#: hydronic plant carries the group's fuels.
+CARDINALITY_CONDITION = {
+    "id": "AHJ-3", "status": "referral",
+    "title": "whether 8.4.4.9.(6)(d) permits more than one boiler",
+    "article": "8.4.4.9.(5); 8.4.4.9.(6)", "target": "Hot Water Loop",
+    "detail": ("whether that conflicts with the boiler-count sentence is NOT "
+               "established here"),
+    "entry_index": 1,
+}
+
+#: A referral that has NOTHING to do with multi-energy heating. Sol's `127`
+#: requires the renderers to show this truthfully rather than in
+#: capacity-ratio language.
+SYSTEM_5_CONDITION = {
+    "id": "AHJ-11", "status": "referral",
+    "title": "heating in a two-pipe System 5 reference",
+    "article": "8.4.4.1.(5)", "target": "Thermal Zone 7",
+    "detail": ("the tool retains heating although the table's cell for this "
+               "system says None"),
+    "entry_index": 0,
+}
