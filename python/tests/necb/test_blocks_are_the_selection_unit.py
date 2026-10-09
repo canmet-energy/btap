@@ -1855,9 +1855,18 @@ class TestTheClassifierMatchesTheREUSEPathsExactly(unittest.TestCase):
                 self.assertEqual(
                     expected, reused,
                     'precondition: what the reuse path does with this shape')
-                if reused:
-                    self.assertTrue(candidate,
-                                    'an adoptable survivor must be audited')
+                # UNCONDITIONALLY, in both directions. `if reused:` asserted
+                # only that adoptable loops classify true, so restoring the
+                # exact `160` false positive — `candidate or
+                # _district_heated(loop)` — left this test passing (Sol,
+                # `164`). An over-broad classifier is the noise this filter
+                # exists to remove, so the negative half is the half that
+                # matters.
+                self.assertEqual(
+                    expected, candidate,
+                    'the classifier must agree with the reuse path in BOTH '
+                    'directions: an adoptable survivor is audited, and a loop '
+                    'no lookup can return is not')
 
     def test_a_retained_sourceless_CHW_loop_is_NAMED_in_the_reservation(self):
         """Sol's `162` second required control, through the full reference path.
@@ -1906,3 +1915,23 @@ class TestTheClassifierMatchesTheREUSEPathsExactly(unittest.TestCase):
                  if 'Coil Cooling' in c.nameString()]
         self.assertEqual([], coils,
                          'no reference cooling coil may join the retained loop')
+        self.assertTrue(
+            [c for c in retained.demandComponents()
+             if 'PROCESS COOLING CONNECTIONS' in c.nameString()],
+            'and the demand that retained it is still on it')
+
+        # BOTH HALVES of the ownership claim. Asserting only that the retained
+        # loop has no reference coil would also pass if the built blocks had
+        # no cooling plant at all, which is not what the contract says
+        # (Sol, `164`).
+        built = [p for p in reference.getPlantLoops()
+                 if str(p.handle()) != str(retained.handle())
+                 and [c for c in p.demandComponents()
+                      if 'Coil Cooling' in c.nameString()]]
+        self.assertEqual(
+            1, len(built),
+            'the built blocks need exactly one new chilled-water plant')
+        self.assertEqual(
+            5, len([c for c in built[0].demandComponents()
+                    if 'Coil Cooling' in c.nameString()]),
+            'carrying all five built blocks\' cooling coils')

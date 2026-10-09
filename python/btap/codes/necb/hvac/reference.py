@@ -6,7 +6,14 @@ article-level provenance); this code is a rules interpreter, not a rules store.
 
 Port notes (D-79): Ruby's symbol keys collapse to str throughout — the
 characterization facts dict, the building info dict and the assignment actions
-('build' / 'copy_proposed' / 'through_the_wall') are all str-keyed/str-valued.
+are all str-keyed/str-valued.
+
+SELECTION produces one of three actions: 'build', 'copy_proposed' or
+'through_the_wall'. A RETURNED post-merge assignment may carry a fourth,
+`MIXED_SOURCE_ACTIONS` ('mixed'), because the merge keys on
+``[catalog_name, config]`` and not on action, so one construction can cover
+blocks that reached it by different branches. Its `source_actions` map holds
+the per-block truth; see that field and the constant.
 """
 
 from __future__ import annotations
@@ -68,7 +75,10 @@ class Assignment:
     #: deliberately — adding action would split one Note (2) common ventilation
     #: system into two central MAUs — so one construction can legitimately
     #: cover blocks whose SELECTION branches differed. `action` is then a
-    #: scalar that cannot describe all of them, and publishing it for the whole
+    #: scalar that cannot describe all of them, so a HETEROGENEOUS merge sets
+    #: it to `MIXED_SOURCE_ACTIONS` and this map carries which block took
+    #: which branch; a homogeneous merge keeps its common branch there.
+    #: Publishing the first absorbed branch for the whole
     #: construction claimed one branch applied to every block: a `build` Data
     #: Processing block and a `through_the_wall` residential block on one
     #: proposed VAV loop resolve to the same gas System 1 catalogue and config,
@@ -1261,11 +1271,14 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
                 if str(boiler.handle()) not in existing_boilers:
                     boiler.additionalProperties().setFeature(
                         BOILER_PART_LOAD_CLASS_FEATURE, boiler_class)
-        # PER-BLOCK ACTIONS, not a scalar. `assignment.action` is the first
-        # absorbed assignment's branch and cannot speak for the others; this
-        # record targets every block it built, so a scalar label claimed one
-        # selection branch applied to all of them. Where every block agrees the
-        # map says so once.
+        # PER-BLOCK ACTIONS, not a scalar. This record targets every block it
+        # built, so a scalar label claimed one selection branch applied to all
+        # of them. `assignment.action` WAS the first absorbed branch when this
+        # comment was written; a heterogeneous merge now sets it to
+        # `MIXED_SOURCE_ACTIONS` and a homogeneous one keeps its common
+        # branch, so it no longer lies — but the map is still what this record
+        # publishes, because a sentinel cannot say WHICH block took which
+        # branch. Where every block agrees the map says so once.
         source_actions = assignment.source_actions or {
             zone: assignment.action for zone in assignment.zones}
         distinct_actions = sorted({str(action) for action in source_actions.values()})
