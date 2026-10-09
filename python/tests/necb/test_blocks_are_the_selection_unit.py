@@ -338,3 +338,42 @@ class TestTheArticle13ElectionTRACKSTHEHEATPUMP(unittest.TestCase):
         entries, _ = self.elections(model)
         self.assertEqual(2, len(entries),
                          'two source water loops are two elections')
+
+
+class TestPurchasedEnergyStillGetsBlocks(unittest.TestCase):
+    """The purchased-energy path has its own capacity-share rule under
+    `8.4.x.6.` and RETURNS before the multi-energy disclosure, so it is the one
+    place a block could plausibly have been lost on the way to the builder.
+
+    Sol's `141` asked for a purchased-heating AND purchased-cooling witness.
+    Both fire here on one fixture, and what is asserted is that the per-block
+    rule survives them: the article that makes the reference's heating and
+    cooling plant purchased says nothing about how many secondary systems serve
+    how many thermal blocks.
+    """
+
+    SYS = 'DOAS with fan coil district chilled water with district hot water'
+
+    def test_both_purchased_services_keep_one_unit_per_block(self):
+        proposed = proposed_with_hvac(self.SYS)
+        reference, audit = reference_of(proposed, storeys=2)
+        blocks = sorted(z.nameString() for z in reference.getThermalZones())
+        self.assertEqual(
+            [(b,) for b in blocks], loop_zones(reference),
+            'the purchased path must not reintroduce a shared unit')
+
+        applied = [str(e.get('action')) for e in audit.entries
+                   if 'Purchased Energy' in str(e.get('action'))]
+        self.assertTrue(
+            any('purchased HEATING' in a for a in applied),
+            'fixture precondition: purchased heating applied')
+        self.assertTrue(
+            any('purchased COOLING' in a for a in applied),
+            'fixture precondition: purchased cooling applied')
+
+        # And 8.4.x.6. owns it, so the 8.4.x.9.(5) disclosure must stay silent
+        # — the purchased branch returns above it (Sol's `110`).
+        self.assertEqual(
+            [], [e for e in audit.entries
+                 if 'AHJ-1' in str(e.get('ahj') or '')],
+            'purchased energy never reaches the multi-energy disclosure')
