@@ -6,7 +6,7 @@
    "spaces": 5,
    "thermal_zones": 5,
    "surfaces": 30,
-   "storeys_source": "building: override",
+   "storeys_source": "derived from BuildingStorys",
    "zones_with_thermostats": 5,
    "openstudio_version": "3.11.0"
   },
@@ -127,7 +127,7 @@
  },
  {
   "step": "selection",
-  "target": "Thermal Zone 1,Thermal Zone 2,Thermal Zone 3,Thermal Zone 4,Thermal Zone 5",
+  "target": "Thermal Zone 1",
   "action": "purchased heating energy -> represented by gas-fired modulating boiler",
   "inputs": {
    "part_load_curve_class": "modulating"
@@ -139,11 +139,128 @@
  },
  {
   "step": "selection",
-  "target": "DOAS ventilation only",
+  "target": "Thermal Zone 1",
   "action": "reference system selected",
   "inputs": {
    "category": "General Area",
    "energy_type": "gas",
+   "serving_system": "DOAS ventilation only",
+   "heated": true,
+   "cooled": true,
+   "cooling_kw": null
+  },
+  "value": "System 3 -> 'PSZ RTU Gas and DX Coils and Hot Water Baseboard'",
+  "article": "8.4.4.7.(1)",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "selection",
+  "target": "Thermal Zone 2",
+  "action": "purchased heating energy -> represented by gas-fired modulating boiler",
+  "inputs": {
+   "part_load_curve_class": "modulating"
+  },
+  "article": "8.4.4.6.(1)",
+  "ruling": "D-89",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "selection",
+  "target": "Thermal Zone 2",
+  "action": "reference system selected",
+  "inputs": {
+   "category": "General Area",
+   "energy_type": "gas",
+   "serving_system": "DOAS ventilation only",
+   "heated": true,
+   "cooled": true,
+   "cooling_kw": null
+  },
+  "value": "System 3 -> 'PSZ RTU Gas and DX Coils and Hot Water Baseboard'",
+  "article": "8.4.4.7.(1)",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "selection",
+  "target": "Thermal Zone 3",
+  "action": "purchased heating energy -> represented by gas-fired modulating boiler",
+  "inputs": {
+   "part_load_curve_class": "modulating"
+  },
+  "article": "8.4.4.6.(1)",
+  "ruling": "D-89",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "selection",
+  "target": "Thermal Zone 3",
+  "action": "reference system selected",
+  "inputs": {
+   "category": "General Area",
+   "energy_type": "gas",
+   "serving_system": "DOAS ventilation only",
+   "heated": true,
+   "cooled": true,
+   "cooling_kw": null
+  },
+  "value": "System 3 -> 'PSZ RTU Gas and DX Coils and Hot Water Baseboard'",
+  "article": "8.4.4.7.(1)",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "selection",
+  "target": "Thermal Zone 4",
+  "action": "purchased heating energy -> represented by gas-fired modulating boiler",
+  "inputs": {
+   "part_load_curve_class": "modulating"
+  },
+  "article": "8.4.4.6.(1)",
+  "ruling": "D-89",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "selection",
+  "target": "Thermal Zone 4",
+  "action": "reference system selected",
+  "inputs": {
+   "category": "General Area",
+   "energy_type": "gas",
+   "serving_system": "DOAS ventilation only",
+   "heated": true,
+   "cooled": true,
+   "cooling_kw": null
+  },
+  "value": "System 3 -> 'PSZ RTU Gas and DX Coils and Hot Water Baseboard'",
+  "article": "8.4.4.7.(1)",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "selection",
+  "target": "Thermal Zone 5",
+  "action": "purchased heating energy -> represented by gas-fired modulating boiler",
+  "inputs": {
+   "part_load_curve_class": "modulating"
+  },
+  "article": "8.4.4.6.(1)",
+  "ruling": "D-89",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "selection",
+  "target": "Thermal Zone 5",
+  "action": "reference system selected",
+  "inputs": {
+   "category": "General Area",
+   "energy_type": "gas",
+   "serving_system": "DOAS ventilation only",
    "heated": true,
    "cooled": true,
    "cooling_kw": null
@@ -156,10 +273,27 @@
  {
   "step": "build",
   "target": "Thermal Zone 1,Thermal Zone 2,Thermal Zone 3,Thermal Zone 4,Thermal Zone 5",
+  "action": "proposed HVAC torn down for every thermal block the reference replaces, in ONE pass before any reference system is built \u2014 a plant shared by several blocks must not survive one block's teardown and be re-adopted",
+  "inputs": {
+   "blocks": 5,
+   "assignments": 5
+  },
+  "ruling": "D-101",
+  "building": "reference building",
+  "level": "info"
+ },
+ {
+  "step": "build",
+  "target": "Thermal Zone 1",
   "action": "reference system built",
   "inputs": {
    "system": 3,
-   "action": "build",
+   "source_actions": {
+    "Thermal Zone 1": "build"
+   },
+   "selection_branches": [
+    "build"
+   ],
    "boiler_part_load_curve_class": "modulating"
   },
   "value": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
@@ -214,16 +348,422 @@
  },
  {
   "step": "rules",
-  "target": "Thermal Zone 1,Thermal Zone 2,Thermal Zone 3,Thermal Zone 4,Thermal Zone 5",
+  "target": "Thermal Zone 1",
   "action": "terminal/secondary capacity split accounted at zone sizing",
   "inputs": {
-   "zones": 5,
+   "zones": 1,
    "reference_system": 3,
    "strategy": "NeutralSupplyAir"
   },
   "value": "terminal sized on the space load alone; the make-up-air unit carries the ventilation load at system level",
   "article": "8.4.4.9.(3); 8.4.4.10.(7)",
   "ruling": "D-50",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "rules",
+  "target": "Thermal Zone 1",
+  "action": "zone dispatch: the rooftop air terminal runs before the baseboard",
+  "inputs": {
+   "zones": 1,
+   "reference_system": 3,
+   "load_distribution": "SequentialLoad",
+   "air_terminal_priority": 1,
+   "baseboard_priority": 2,
+   "sequential_fractions": 1.0
+  },
+  "value": "the rooftop unit is offered the full zone load and the baseboard serves the residual; heating energy moves from the baseboards and hot-water plant to the rooftop coil \u2014 accepted, because the article sets installed capacities, not annual shares",
+  "article": "8.4.4.9.(3); 8.4.2.10.(2)",
+  "ruling": "D-91",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "build",
+  "target": "Thermal Zone 2",
+  "action": "reference system built",
+  "inputs": {
+   "system": 3,
+   "source_actions": {
+    "Thermal Zone 2": "build"
+   },
+   "selection_branches": [
+    "build"
+   ],
+   "boiler_part_load_curve_class": "modulating"
+  },
+  "value": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+  "article": "8.4.4.7.(1)",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "rules",
+  "target": "sys_3 Supply Fan 1",
+  "action": "supply fan set to reference spec",
+  "value": "640 Pa @ 40% combined fan-motor efficiency",
+  "article": "8.4.4.18.(3)-(4)",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "build",
+  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 2",
+  "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
+  "article": "8.4.4.12. (Table -12 -> 5.2.2.8)",
+  "ruling": "D-20",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "rules",
+  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 2",
+  "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
+  "inputs": {
+   "proposed_loops": [
+    "DOAS ventilation only"
+   ]
+  },
+  "article": "8.4.4.15.(2)",
+  "ruling": "D-54",
+  "building": "reference building",
+  "level": "info"
+ },
+ {
+  "step": "build",
+  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 2",
+  "action": "reference system operates on the proposed operating schedule",
+  "inputs": {
+   "schedule": "Always On Discrete"
+  },
+  "value": "Always On Discrete",
+  "article": "8.4.3.2.(1)",
+  "ruling": "D-14",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "rules",
+  "target": "Thermal Zone 2",
+  "action": "terminal/secondary capacity split accounted at zone sizing",
+  "inputs": {
+   "zones": 1,
+   "reference_system": 3,
+   "strategy": "NeutralSupplyAir"
+  },
+  "value": "terminal sized on the space load alone; the make-up-air unit carries the ventilation load at system level",
+  "article": "8.4.4.9.(3); 8.4.4.10.(7)",
+  "ruling": "D-50",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "rules",
+  "target": "Thermal Zone 2",
+  "action": "zone dispatch: the rooftop air terminal runs before the baseboard",
+  "inputs": {
+   "zones": 1,
+   "reference_system": 3,
+   "load_distribution": "SequentialLoad",
+   "air_terminal_priority": 1,
+   "baseboard_priority": 2,
+   "sequential_fractions": 1.0
+  },
+  "value": "the rooftop unit is offered the full zone load and the baseboard serves the residual; heating energy moves from the baseboards and hot-water plant to the rooftop coil \u2014 accepted, because the article sets installed capacities, not annual shares",
+  "article": "8.4.4.9.(3); 8.4.2.10.(2)",
+  "ruling": "D-91",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "build",
+  "target": "Thermal Zone 3",
+  "action": "reference system built",
+  "inputs": {
+   "system": 3,
+   "source_actions": {
+    "Thermal Zone 3": "build"
+   },
+   "selection_branches": [
+    "build"
+   ],
+   "boiler_part_load_curve_class": "modulating"
+  },
+  "value": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+  "article": "8.4.4.7.(1)",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "rules",
+  "target": "sys_3 Supply Fan 2",
+  "action": "supply fan set to reference spec",
+  "value": "640 Pa @ 40% combined fan-motor efficiency",
+  "article": "8.4.4.18.(3)-(4)",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "build",
+  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 3",
+  "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
+  "article": "8.4.4.12. (Table -12 -> 5.2.2.8)",
+  "ruling": "D-20",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "rules",
+  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 3",
+  "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
+  "inputs": {
+   "proposed_loops": [
+    "DOAS ventilation only"
+   ]
+  },
+  "article": "8.4.4.15.(2)",
+  "ruling": "D-54",
+  "building": "reference building",
+  "level": "info"
+ },
+ {
+  "step": "build",
+  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 3",
+  "action": "reference system operates on the proposed operating schedule",
+  "inputs": {
+   "schedule": "Always On Discrete"
+  },
+  "value": "Always On Discrete",
+  "article": "8.4.3.2.(1)",
+  "ruling": "D-14",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "rules",
+  "target": "Thermal Zone 3",
+  "action": "terminal/secondary capacity split accounted at zone sizing",
+  "inputs": {
+   "zones": 1,
+   "reference_system": 3,
+   "strategy": "NeutralSupplyAir"
+  },
+  "value": "terminal sized on the space load alone; the make-up-air unit carries the ventilation load at system level",
+  "article": "8.4.4.9.(3); 8.4.4.10.(7)",
+  "ruling": "D-50",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "rules",
+  "target": "Thermal Zone 3",
+  "action": "zone dispatch: the rooftop air terminal runs before the baseboard",
+  "inputs": {
+   "zones": 1,
+   "reference_system": 3,
+   "load_distribution": "SequentialLoad",
+   "air_terminal_priority": 1,
+   "baseboard_priority": 2,
+   "sequential_fractions": 1.0
+  },
+  "value": "the rooftop unit is offered the full zone load and the baseboard serves the residual; heating energy moves from the baseboards and hot-water plant to the rooftop coil \u2014 accepted, because the article sets installed capacities, not annual shares",
+  "article": "8.4.4.9.(3); 8.4.2.10.(2)",
+  "ruling": "D-91",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "build",
+  "target": "Thermal Zone 4",
+  "action": "reference system built",
+  "inputs": {
+   "system": 3,
+   "source_actions": {
+    "Thermal Zone 4": "build"
+   },
+   "selection_branches": [
+    "build"
+   ],
+   "boiler_part_load_curve_class": "modulating"
+  },
+  "value": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+  "article": "8.4.4.7.(1)",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "rules",
+  "target": "sys_3 Supply Fan 3",
+  "action": "supply fan set to reference spec",
+  "value": "640 Pa @ 40% combined fan-motor efficiency",
+  "article": "8.4.4.18.(3)-(4)",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "build",
+  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 4",
+  "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
+  "article": "8.4.4.12. (Table -12 -> 5.2.2.8)",
+  "ruling": "D-20",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "rules",
+  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 4",
+  "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
+  "inputs": {
+   "proposed_loops": [
+    "DOAS ventilation only"
+   ]
+  },
+  "article": "8.4.4.15.(2)",
+  "ruling": "D-54",
+  "building": "reference building",
+  "level": "info"
+ },
+ {
+  "step": "build",
+  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 4",
+  "action": "reference system operates on the proposed operating schedule",
+  "inputs": {
+   "schedule": "Always On Discrete"
+  },
+  "value": "Always On Discrete",
+  "article": "8.4.3.2.(1)",
+  "ruling": "D-14",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "rules",
+  "target": "Thermal Zone 4",
+  "action": "terminal/secondary capacity split accounted at zone sizing",
+  "inputs": {
+   "zones": 1,
+   "reference_system": 3,
+   "strategy": "NeutralSupplyAir"
+  },
+  "value": "terminal sized on the space load alone; the make-up-air unit carries the ventilation load at system level",
+  "article": "8.4.4.9.(3); 8.4.4.10.(7)",
+  "ruling": "D-50",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "rules",
+  "target": "Thermal Zone 4",
+  "action": "zone dispatch: the rooftop air terminal runs before the baseboard",
+  "inputs": {
+   "zones": 1,
+   "reference_system": 3,
+   "load_distribution": "SequentialLoad",
+   "air_terminal_priority": 1,
+   "baseboard_priority": 2,
+   "sequential_fractions": 1.0
+  },
+  "value": "the rooftop unit is offered the full zone load and the baseboard serves the residual; heating energy moves from the baseboards and hot-water plant to the rooftop coil \u2014 accepted, because the article sets installed capacities, not annual shares",
+  "article": "8.4.4.9.(3); 8.4.2.10.(2)",
+  "ruling": "D-91",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "build",
+  "target": "Thermal Zone 5",
+  "action": "reference system built",
+  "inputs": {
+   "system": 3,
+   "source_actions": {
+    "Thermal Zone 5": "build"
+   },
+   "selection_branches": [
+    "build"
+   ],
+   "boiler_part_load_curve_class": "modulating"
+  },
+  "value": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+  "article": "8.4.4.7.(1)",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "rules",
+  "target": "sys_3 Supply Fan 4",
+  "action": "supply fan set to reference spec",
+  "value": "640 Pa @ 40% combined fan-motor efficiency",
+  "article": "8.4.4.18.(3)-(4)",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "build",
+  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 5",
+  "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
+  "article": "8.4.4.12. (Table -12 -> 5.2.2.8)",
+  "ruling": "D-20",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "rules",
+  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 5",
+  "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
+  "inputs": {
+   "proposed_loops": [
+    "DOAS ventilation only"
+   ]
+  },
+  "article": "8.4.4.15.(2)",
+  "ruling": "D-54",
+  "building": "reference building",
+  "level": "info"
+ },
+ {
+  "step": "build",
+  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 5",
+  "action": "reference system operates on the proposed operating schedule",
+  "inputs": {
+   "schedule": "Always On Discrete"
+  },
+  "value": "Always On Discrete",
+  "article": "8.4.3.2.(1)",
+  "ruling": "D-14",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "rules",
+  "target": "Thermal Zone 5",
+  "action": "terminal/secondary capacity split accounted at zone sizing",
+  "inputs": {
+   "zones": 1,
+   "reference_system": 3,
+   "strategy": "NeutralSupplyAir"
+  },
+  "value": "terminal sized on the space load alone; the make-up-air unit carries the ventilation load at system level",
+  "article": "8.4.4.9.(3); 8.4.4.10.(7)",
+  "ruling": "D-50",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "rules",
+  "target": "Thermal Zone 5",
+  "action": "zone dispatch: the rooftop air terminal runs before the baseboard",
+  "inputs": {
+   "zones": 1,
+   "reference_system": 3,
+   "load_distribution": "SequentialLoad",
+   "air_terminal_priority": 1,
+   "baseboard_priority": 2,
+   "sequential_fractions": 1.0
+  },
+  "value": "the rooftop unit is offered the full zone load and the baseboard serves the residual; heating energy moves from the baseboards and hot-water plant to the rooftop coil \u2014 accepted, because the article sets installed capacities, not annual shares",
+  "article": "8.4.4.9.(3); 8.4.2.10.(2)",
+  "ruling": "D-91",
   "building": "reference building",
   "level": "decision"
  },
@@ -273,6 +813,70 @@
  },
  {
   "step": "efficiency",
+  "action": "CoilCoolingDXMultiSpeed_dx 1: staged capacity unavailable (model not sized?) \u2014 8.4.4.10.(8) stage count NOT set; run sizing first",
+  "article": "8.4.4.10.(8)",
+  "ruling": "D-46",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "efficiency",
+  "action": "CoilHeatingGasMultiStage_gas 1: staged capacity unavailable (model not sized?) \u2014 8.4.4.9.(7) stage count NOT set; run sizing first",
+  "article": "8.4.4.9.(7)",
+  "ruling": "D-46",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "efficiency",
+  "action": "CoilCoolingDXMultiSpeed_dx 2: staged capacity unavailable (model not sized?) \u2014 8.4.4.10.(8) stage count NOT set; run sizing first",
+  "article": "8.4.4.10.(8)",
+  "ruling": "D-46",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "efficiency",
+  "action": "CoilHeatingGasMultiStage_gas 2: staged capacity unavailable (model not sized?) \u2014 8.4.4.9.(7) stage count NOT set; run sizing first",
+  "article": "8.4.4.9.(7)",
+  "ruling": "D-46",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "efficiency",
+  "action": "CoilCoolingDXMultiSpeed_dx 3: staged capacity unavailable (model not sized?) \u2014 8.4.4.10.(8) stage count NOT set; run sizing first",
+  "article": "8.4.4.10.(8)",
+  "ruling": "D-46",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "efficiency",
+  "action": "CoilHeatingGasMultiStage_gas 3: staged capacity unavailable (model not sized?) \u2014 8.4.4.9.(7) stage count NOT set; run sizing first",
+  "article": "8.4.4.9.(7)",
+  "ruling": "D-46",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "efficiency",
+  "action": "CoilCoolingDXMultiSpeed_dx 4: staged capacity unavailable (model not sized?) \u2014 8.4.4.10.(8) stage count NOT set; run sizing first",
+  "article": "8.4.4.10.(8)",
+  "ruling": "D-46",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "efficiency",
+  "action": "CoilHeatingGasMultiStage_gas 4: staged capacity unavailable (model not sized?) \u2014 8.4.4.9.(7) stage count NOT set; run sizing first",
+  "article": "8.4.4.9.(7)",
+  "ruling": "D-46",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "efficiency",
   "target": "CoilCoolingDXMultiSpeed_dx",
   "action": "staged DX cooling capacity unavailable (model not sized?) \u2014 not set",
   "building": "reference building",
@@ -280,7 +884,63 @@
  },
  {
   "step": "efficiency",
+  "target": "CoilCoolingDXMultiSpeed_dx 1",
+  "action": "staged DX cooling capacity unavailable (model not sized?) \u2014 not set",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "efficiency",
+  "target": "CoilCoolingDXMultiSpeed_dx 2",
+  "action": "staged DX cooling capacity unavailable (model not sized?) \u2014 not set",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "efficiency",
+  "target": "CoilCoolingDXMultiSpeed_dx 3",
+  "action": "staged DX cooling capacity unavailable (model not sized?) \u2014 not set",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "efficiency",
+  "target": "CoilCoolingDXMultiSpeed_dx 4",
+  "action": "staged DX cooling capacity unavailable (model not sized?) \u2014 not set",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "efficiency",
   "target": "CoilHeatingGasMultiStage_gas",
+  "action": "staged gas coil capacity unavailable (model not sized?) \u2014 not set",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "efficiency",
+  "target": "CoilHeatingGasMultiStage_gas 1",
+  "action": "staged gas coil capacity unavailable (model not sized?) \u2014 not set",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "efficiency",
+  "target": "CoilHeatingGasMultiStage_gas 2",
+  "action": "staged gas coil capacity unavailable (model not sized?) \u2014 not set",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "efficiency",
+  "target": "CoilHeatingGasMultiStage_gas 3",
+  "action": "staged gas coil capacity unavailable (model not sized?) \u2014 not set",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "efficiency",
+  "target": "CoilHeatingGasMultiStage_gas 4",
   "action": "staged gas coil capacity unavailable (model not sized?) \u2014 not set",
   "building": "reference building",
   "level": "warning"
@@ -337,11 +997,11 @@
    "boilers": 2,
    "chillers": 0,
    "dx_cooling": 0,
-   "dx_cooling_staged": 1,
+   "dx_cooling_staged": 5,
    "dx_heating": 0,
    "dx_heating_staged": 0,
    "gas_coils": 0,
-   "gas_coils_staged": 1
+   "gas_coils_staged": 5
   },
   "building": "reference building",
   "level": "info"
@@ -421,7 +1081,7 @@
   "action": "Purchased Energy \u2014 partial. Applied: purchased HEATING is represented by a gas-fired modulating boiler ((1)(a)) via the energy-type election. Gaps: the (1)(b) capacity-ratio adjustment is sizing-time and not enforced",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 1,
+   "decisions_citing": 5,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_reference_energy_type",
     "python/btap/modeling/hvac/systems/plant_loops.py#hot_water"
@@ -436,7 +1096,7 @@
   "action": "Purchased Energy \u2014 partial. Applied: purchased COOLING forces an air-cooled electric chiller ((2)(a)) via the chw_source config. Gaps: the (2)(b) capacity-ratio adjustment is sizing-time and not enforced",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 1,
+   "decisions_citing": 5,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_reference_energy_type",
     "python/btap/modeling/hvac/systems/plant_loops.py#chilled_water"
@@ -451,7 +1111,7 @@
   "action": "Purchased Energy \u2014 host scope: purchased service water heating belongs to openstudio-shw (8.4.4.20.)",
   "inputs": {
    "status": "host_scope",
-   "decisions_citing": 1,
+   "decisions_citing": 5,
    "code": [
     "python/btap/codes/necb/shw/reference.py#reference_shw"
    ]
@@ -465,7 +1125,7 @@
   "action": "Purchased Energy \u2014 partial. Applied: operating schedules carry over to the representing equipment by clone. Gaps: priority-of-use and other operational characteristics of the purchased supply are not explicitly modelled",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 1,
+   "decisions_citing": 5,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_clone_model"
    ]
@@ -479,7 +1139,7 @@
   "action": "HVAC System Selection (Tables -A/-B) \u2014 implemented: Category election per Table -A (space type + storeys + cooling-kW threshold), closest-type fallback per sentence (3), residential special rules (D-34: heat-pump blocks take the sentence-(4) ASHP redirect before the compatible-cooling copy; water-loop HPs fall back to the Table -A rules per D-37), HP redirect per sentence (4), and the D-39 System 5 conditional (Table -B heating 'None' honoured for cooled-but-unheated blocks; 8.4.4.1.(5) presence override keeps the changeover heating when the proposed block heats).",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 2,
+   "decisions_citing": 10,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#select_reference_systems",
     "python/btap/codes/necb/hvac/reference.py#_assign"
@@ -508,7 +1168,7 @@
   "action": "Heating System \u2014 implemented: reference heating system selected per Table 8.4.4.7.-A and this Article",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 2,
+   "decisions_citing": 15,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_assign"
    ]
@@ -522,7 +1182,7 @@
   "action": "Heating System \u2014 implemented: purchased energy routes to Article 8.4.4.6.",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 2,
+   "decisions_citing": 15,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_reference_energy_type"
    ]
@@ -536,7 +1196,7 @@
   "action": "Heating System \u2014 partial. Applied: terminal/secondary capacity split accounted for systems 1/2/5 via Sizing:Zone dedicated-outdoor-air accounting with a neutral supply-air strategy (D-50). Gaps: systems 3, 4 and 6 mix outdoor air into the supply stream, so their split is approximated by ordinary mixed-air zone sizing with baseboards taking the residual \u2014 audited as an approximation, not claimed",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 2,
+   "decisions_citing": 15,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_audit_terminal_secondary_split",
     "python/btap/codes/necb/hvac/reference.py#_apply_zone_fan_rules"
@@ -548,24 +1208,24 @@
  },
  {
   "step": "coverage",
-  "action": "Heating System \u2014 implemented: reference heating energy type modeled identical to the proposed (structural election; see also 8.4.4.13.(2)(g))",
+  "action": "Heating System \u2014 partial. Applied: reference heating energy type modeled identical to the proposed where the catalog PRESERVES that source, namely natural gas and electricity (see also 8.4.4.13.(2)(g)). Gaps: two distinct gaps. (i) The sentence opens \"Except as provided in Sentence (5)\", so it does NOT govern a group whose proposed heating system uses more than one energy type; for those the structural election is a SURROGATE for the unimplemented 8.4.4.9.(5), and no single-fuel basis, whether the fossil-first cascade, capacity-dominant, lead-fuel or annual-dominant, satisfies (5)(a)'s capacity ratio. The multi-energy case is disclosed as UNRESOLVED once per serving system. (ii) Even for a SINGLE-energy system the reference is not always identical: the election maps FuelOilNo2 and PropaneGas to the GAS catalog VARIANT. What the reference's final equipment burns FOLLOWS the election for every BUILT block, and is measured rather than inferred: both variants give the same answer, an oil-fired proposed plant is torn down and the reference builds NaturalGas boilers, whether the proposed system is zonal baseboards or a hot-water-baseboard PSZ. The earlier text said the zonal variant ADOPTS the oil plant and keeps FuelOilNo2, so the mismatch was 'real but not universal'. D-101 made that false for every BUILT block: destruction is phased ahead of construction and every plant surviving teardown is reserved to whatever retained it, so a built block cannot adopt a proposed plant. The gap is therefore that the catalog offers no oil or propane variant and a reference built from it burns gas, UNIVERSALLY for a built block. A `copy_proposed` block still retains its proposed plant with its own fuel, which is a different branch. (4) requires the energy type to be identical and Division A's building-energy-target definition requires the same energy SOURCES for the same functions, so oil and propane remain unsupported. That is a catalog gap, not a Code reading.",
   "inputs": {
-   "status": "implemented",
-   "decisions_citing": 2,
+   "status": "partial",
+   "decisions_citing": 15,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_reference_energy_type"
    ]
   },
   "article": "8.4.4.9.(4)",
   "building": "reference building",
-  "level": "info"
+  "level": "warning"
  },
  {
   "step": "coverage",
-  "action": "Heating System \u2014 not implemented. Gaps: multi-energy capacity ratios are not modelled: a proposed plant drawing on more than one energy type passes into the reference unchanged rather than being apportioned",
+  "action": "Heating System \u2014 not implemented. Gaps: multi-energy capacity ratios are neither computed nor enforced: a proposed heating system drawing on more than one energy type is elected into ONE energy type at SELECTION. What the reference's final equipment carries is a separate question this tool does not establish: a replaced plant carries only the elected energy type. ADOPTION of the proposed plant is NOT among the outcomes of this gap \u2014 this disclosure fires only for a block whose heating was collapsed to one energy type, which is always an action=build assignment, and D-101 keeps a built block off a plant retained for a copy_proposed block. The measured adoption was an all-copy_proposed residential service, which raises no 8.4.x.9.(5) question at all. Whether the reference happens to match the proposed allocation is therefore NOT VERIFIED in either direction \u2014 it is not asserted to be unmet, since a reference may carry capacity for a non-elected type through an air-loop coil or heat pump. Clause (b)'s operating priority is not transferred at all. An UNRESOLVED warning is emitted once per serving system, in two shapes: where ONE plant carries every energy type the group uses it also cites sentence 8.4.4.9.(6), WITHOUT a subclause, because which of (6)(b)/(c)/(d) applies depends on a reference plant capacity that does not exist at selection time, and it records that the plant's live capacity is set after sizing by primary/secondary role rather than by the proposed allocation; a group whose plant covers only part of it gets a generic entry that makes no claim about boilers and leaves the group-wide shares unresolved rather than reporting a plant-only split that would omit the other types from the denominator.",
   "inputs": {
    "status": "not_implemented",
-   "decisions_citing": 2
+   "decisions_citing": 15
   },
   "article": "8.4.4.9.(5)",
   "building": "reference building",
@@ -573,10 +1233,10 @@
  },
  {
   "step": "coverage",
-  "action": "Heating System \u2014 implemented: hydronic heating plant per the article: boiler staging 176/352 kW, modulating flow mode with the 25% floor, HWST 82/60 reset \u2014 plant defaults + the efficiency pass",
+  "action": "Heating System \u2014 partial. Applied: hydronic heating plant per the article: boiler staging 176/352 kW, modulating flow mode with the 25% floor, HWST 82/60 reset \u2014 plant defaults + the efficiency pass. Gaps: sentence (6) bands the reference plant's boiler count and staging by its heating capacity, and the reference plant is NOT determined at selection time: it may be a DIFFERENT plant built by the selected variant after the proposed one is torn down, holding none of its devices; or may not exist at all where the variant needs no boiler. What the implementation does after sizing is set the plant's live capacity by primary/secondary ROLE \u2014 builder feature, then device name, then supply order \u2014 and BLIND to energy type. MEASURED outcomes, each on its own configuration and none generalised: two role-labelled 200 kW boilers in the two-boiler band become 100/100 kW, so an equal ratio IS preserved; a recognised secondary below the single-boiler threshold is driven to ~0 W, so there the allocation is not preserved and the surviving fuel need not be the elected one; and three generically-named 52 kW boilers keep 52/52/52, because the role resolver returns nothing unless there are exactly TWO boilers \u2014 such a plant has ZERO recognised roles, not two. Which outcome applies, and therefore whether 8.4.4.9.(5)(a) survives, is unverified against the Article. MEASURED on SAMPLE 11 ONLY, under this edition, and not generalised; no sample-12 experiment has been run. On that one fixture the boiler count made no difference to the annual result for the model fed to the sizing run, while dropping the sizing factor to 0.5 changed it by -616.6 kWh, and the secondary never fired in either. Separately, no boiler sizingFactor is set at all, so each parallel boiler sizes for the whole loop where the legacy realisation sets 1.0/n.",
   "inputs": {
-   "status": "implemented",
-   "decisions_citing": 2,
+   "status": "partial",
+   "decisions_citing": 15,
    "code": [
     "python/btap/modeling/hvac/systems/plant_loops.py#hot_water",
     "python/btap/codes/necb/hvac/efficiency.py#_apply_boiler"
@@ -584,14 +1244,14 @@
   },
   "article": "8.4.4.9.(6)",
   "building": "reference building",
-  "level": "info"
+  "level": "warning"
  },
  {
   "step": "coverage",
   "action": "Heating System \u2014 partial. Applied: furnace staging IS modelled since D-46: gas-heated reference systems 3/4 build as an AirLoopHVACUnitarySystem holding a multi-stage gas coil, stage COUNT set post-sizing from the sized capacity with every stage capacity left autosized. Gaps: electric-resistance heating is not a furnace so it is not staged (D-49); zone-terminal and make-up-air equipment stays single-stage (D-48); more than four equal stages is CLAMPED at four with a shouted warning \u2014 EnergyPlus multispeed objects cannot hold a fifth (D-47)",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 2,
+   "decisions_citing": 15,
    "code": [
     "python/btap/codes/necb/hvac/efficiency.py#apply_staging",
     "python/btap/codes/necb/hvac/efficiency.py#_stage_multispeed_coil"
@@ -606,7 +1266,7 @@
   "action": "Heating System \u2014 implemented: heating part-load performance applied from this edition's own part-load tables by equipment class (Subsection 8.4.5.: Table 8.4.5.2.-A and the ten points of Table 8.4.5.2.-B for boilers, Table 8.4.5.3 for furnaces); the as-applied class, table row and curve points are audited per D-89",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 2,
+   "decisions_citing": 15,
    "code": [
     "python/btap/modeling/hvac/components/curves.py#build",
     "python/btap/codes/necb/hvac/efficiency.py#apply"
@@ -621,7 +1281,7 @@
   "action": "Cooling Systems \u2014 implemented: reference cooling system selected per Table 8.4.4.7.-A and this Article",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 2,
+   "decisions_citing": 10,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_assign"
    ]
@@ -635,7 +1295,7 @@
   "action": "Cooling Systems \u2014 implemented: purchased energy routes to Article 8.4.4.6.",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 2,
+   "decisions_citing": 10,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_reference_energy_type"
    ]
@@ -649,7 +1309,7 @@
   "action": "Cooling Systems \u2014 implemented: reference cooling energy type modeled identical to the proposed",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 2,
+   "decisions_citing": 10,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_reference_energy_type"
    ]
@@ -660,10 +1320,10 @@
  },
  {
   "step": "coverage",
-  "action": "Cooling Systems \u2014 not implemented. Gaps: multi-energy capacity ratios are not modelled \u2014 the same gap as the heating article, sentence (5)",
+  "action": "Cooling Systems \u2014 not implemented. Gaps: multi-energy COOLING capacity ratios are not modelled \u2014 the same gap as the heating article, sentence (5) of 8.4.4.9. A proposed cooling system drawing on more than one energy type is elected into ONE energy type at SELECTION, with no capacity ratio computed. What the reference's final cooling equipment carries is not established here; the adoption-versus-replacement outcomes measured for the HEATING plant were not measured for cooling and are not claimed for it, so clause (a)'s capacity ratio and clause (b)'s operating priority are both unaddressed. No cooling diagnostic is emitted yet and no cooling behaviour has been measured: the heating-side measurement does not transfer.",
   "inputs": {
    "status": "not_implemented",
-   "decisions_citing": 2
+   "decisions_citing": 10
   },
   "article": "8.4.4.10.(4)",
   "building": "reference building",
@@ -674,7 +1334,7 @@
   "action": "Cooling Systems \u2014 implemented: cooling part-load performance applied from the Subsection 8.4.5. curve set (chiller and unitary curves; the as-applied coefficients are audited)",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 2,
+   "decisions_citing": 10,
    "code": [
     "python/btap/modeling/hvac/components/curves.py#build",
     "python/btap/codes/necb/hvac/efficiency.py#apply"
@@ -689,7 +1349,7 @@
   "action": "Cooling Systems \u2014 implemented: hydronic cooling plant per the article: 2100 kW chiller split, 7 C CHWST, 25% modulating floor \u2014 plant defaults + the efficiency pass",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 2,
+   "decisions_citing": 10,
    "code": [
     "python/btap/modeling/hvac/systems/plant_loops.py#chilled_water",
     "python/btap/codes/necb/hvac/efficiency.py#_apply_chiller"
@@ -704,7 +1364,7 @@
   "action": "Cooling Systems \u2014 partial. Applied: terminal/secondary split accounted for systems 1/2/5 via Sizing:Zone dedicated-outdoor-air accounting (D-50). Gaps: systems 3, 4 and 6 have no separate ventilation stream, so their split is approximated by mixed-air zone sizing and audited as such",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 2,
+   "decisions_citing": 10,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_audit_terminal_secondary_split"
    ]
@@ -718,7 +1378,7 @@
   "action": "Cooling Systems \u2014 partial. Applied: DX staging IS modelled since D-46: multispeed DX cooling inside an AirLoopHVACUnitarySystem on reference systems 3/4 and the ASHP, stage COUNT set post-sizing, efficiencies and curves binned by the top-stage capacity. Gaps: zone-terminal DX stays single-speed (packaged terminal units cannot host a multispeed coil in EnergyPlus) and make-up-air tempering DX likewise (D-48); stage counts above four are CLAMPED with a shouted warning (D-47)",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 2,
+   "decisions_citing": 10,
    "code": [
     "python/btap/codes/necb/hvac/efficiency.py#apply_staging",
     "python/btap/codes/necb/hvac/efficiency.py#_apply_dx_cooling_multi"
@@ -733,7 +1393,7 @@
   "action": "Cooling Systems \u2014 implemented: water-cooled systems pair to the cooling tower built per Article 8.4.4.11.",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 2,
+   "decisions_citing": 10,
    "code": [
     "python/btap/codes/necb/hvac/efficiency.py#_apply_tower_rules"
    ]
@@ -846,7 +1506,7 @@
   "action": "Cooling with Outside Air (economizers) \u2014 implemented: air economizers (Table -12 -> 5.2.2.8) applied to reference systems 1/3/4/6 + HP with mechanical cooling: DifferentialEnthalpy control, up to 100% OA. DX staging clauses 5.2.2.8.(4)-(5) enforced since D-62: economizer systems' staged cooling gets a stage-count FLOOR so the lowest stage is <= 25% of capacity at >= 70 kW and <= 50% at > 25 kW (economizer_dx_staging rules; sentence (6)'s OA-reduction permission is not exercised - stage flows are floored at the minimum-OA fraction per D-46). Systems 2/5 get the 5.2.2.9 WATER-side economizer since D-56: a HeatExchangerFluidToFluid between the condenser and chilled-water loops, UA and both design flows autosized at sizing factor 1.0 (sized for the loop's full design cooling load), CoolingSetpointModulated onto the loop design exit temperature, plus the condenser setpoint reset to the outdoor wet-bulb + tower approach without which the tower stays at 29 C and the economizer is inert. The 5.2.2.9 capability is INTEGRATED and measured: 100% of the chilled-water load in every hour at outdoor wet-bulb 7 C or lower, partial share above the band; sentence (1) binds because the reference rejects heat evaporatively, (2) declared inapplicable; air-cooled/purchased chilled water warns (no evaporatively-cooled fluid).",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 1,
+   "decisions_citing": 5,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_apply_economizers",
     "python/btap/codes/necb/hvac/efficiency.py#_economizer_stage_floor"
@@ -893,7 +1553,7 @@
   "action": "Hydronic Pumps \u2014 implemented: Table 8.4.4.14. riding-curve coefficients + below-D minimum-flow clamp on every reference PumpVariableSpeed ((4)-(5)), applied POST-SIZING by the efficiency pass; proposed combined peak W/(L/s) per plant-loop type transferred to reference pump rated power ((1)-(3), needs the sized proposed via apply_efficiencies proposed:) \u2014 unknown proposed pumps or unsized flows warn loudly. D-38: the transferred power is then clamped min-wins at the Table 5.2.6.3 combined-pump maximum (W per kW of loop peak thermal demand; 8.4.4.1.(2) makes Part 5 a ceiling for the reference).",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 2,
+   "decisions_citing": 1,
    "code": [
     "python/btap/codes/necb/hvac/efficiency.py#_apply_pump_rules"
    ]
@@ -907,7 +1567,7 @@
   "action": "Outdoor Air \u2014 partial. Applied: spaces and their DesignSpecificationOutdoorAir are retained by the clone; rebuilt reference systems draw the same peak OA specifications. Gaps: the identity holds only for DSOA-driven proposeds \u2014 hard-set proposed minimum-OA controller values draw a runtime warning (T7)",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 1,
+   "decisions_citing": 5,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_clone_model",
     "python/btap/codes/necb/hvac/reference.py#reference_hvac"
@@ -922,7 +1582,7 @@
   "action": "Outdoor Air \u2014 partial. Applied: DCV strategies ARE copied since D-54: each proposed air loop\u2019s demand-controlled-ventilation flag and outdoor-air method are recorded per thermal block before teardown and re-applied to the rebuilt reference controller. Gaps: peak-rate outdoor-air methods (ZoneSum, 62.1 VRP) are deliberately NOT copied because they determine the peak rate sentence (1) governs; where a reference system merges blocks of which only some carry DCV, the single controller applies the strategy to all and warns",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 1,
+   "decisions_citing": 5,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_apply_dcv",
     "python/btap/codes/necb/hvac/reference.py#_audit_dcv_caveats"
@@ -978,7 +1638,7 @@
   "action": "Supply Air Systems (airflow rates, fan specs) \u2014 partial. Applied: secondary-system supply airflow is the sum of the block airflows via zone-level sizing. Gaps: the determination is sizing-time; the sentence\u2019s arithmetic is not re-verified against the sized result",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 1,
+   "decisions_citing": 5,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_apply_zone_fan_rules"
    ]
@@ -992,7 +1652,7 @@
   "action": "Supply Air Systems (airflow rates, fan specs) \u2014 partial. Applied: block supply airflow comes from zone sizing. Gaps: the greater-of criteria at the 21/11 C supply-air deltas are not explicitly enforced",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 1,
+   "decisions_citing": 5,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_apply_zone_fan_rules"
    ]
@@ -1006,7 +1666,7 @@
   "action": "Supply Air Systems (airflow rates, fan specs) \u2014 implemented: systems 1-5 fan specs applied: supply 640 Pa at 40% combined efficiency, no return-fan spec",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 1,
+   "decisions_citing": 5,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_apply_fan_rules"
    ]
@@ -1020,7 +1680,7 @@
   "action": "Supply Air Systems (airflow rates, fan specs) \u2014 implemented: system 6 fan specs applied: supply 1000 Pa at 55% + return 250 Pa at 30%, 13 C SAT via the catalog sizing block",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 1,
+   "decisions_citing": 5,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_apply_fan_rules"
    ]
@@ -1034,7 +1694,7 @@
   "action": "Supply Air Systems (airflow rates, fan specs) \u2014 not implemented. Gaps: the identical-fan-power fallback for secondaries failing 5.2.3.1.(1)(b) is not modeled",
   "inputs": {
    "status": "not_implemented",
-   "decisions_citing": 1
+   "decisions_citing": 5
   },
   "article": "8.4.4.18.(5)",
   "building": "reference building",
@@ -1045,7 +1705,7 @@
   "action": "Supply Air Systems (airflow rates, fan specs) \u2014 not implemented. Gaps: the exemption for equipment whose fan energy is included in the Tables 5.2.12.1 minimum performance is not modeled",
   "inputs": {
    "status": "not_implemented",
-   "decisions_citing": 1
+   "decisions_citing": 5
   },
   "article": "8.4.4.18.(6)",
   "building": "reference building",
@@ -1098,7 +1758,7 @@
   "action": "HVAC Systems \u2014 implemented: Reference HVAC systems are built explicitly from the Table 8.4.4.7. topologies \u2014 components are constructed, not approximated by thermodynamically-similar substitutes.",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 0,
+   "decisions_citing": 5,
    "code": [
     "python/btap/modeling/hvac/builder.py#build_system",
     "python/btap/codes/necb/hvac/reference.py#reference_hvac"
@@ -1536,10 +2196,10 @@
  },
  {
   "step": "coverage",
-  "action": "Lightweight construction + space thermal characteristics \u2014 implemented: opaque assemblies rebuilt as massless (zero thermal mass) layers at unchanged Ut; space thermal characteristics satisfied by clone",
+  "action": "Lightweight construction + space thermal characteristics \u2014 implemented: opaque assemblies rebuilt as a single light-frame layer calibrated to the thermal-mass Note's wood-frame example (40.8 kg/m2, 45.5 kJ/(m2.K)) at unchanged Ut; space thermal characteristics satisfied by clone",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 3,
+   "decisions_citing": 2,
    "code": [
     "python/btap/codes/necb/envelope/reference.py#_apply_lightweight_construction"
    ]
@@ -2226,7 +2886,7 @@
   "action": "Service water heating loads representative of the building \u2014 implemented: per-space WaterUseEquipment from the NECB space-type peak flows, target temperatures and NECB-<letter> SWH schedules (openstudio-loads data)",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 1,
+   "decisions_citing": 5,
    "code": [
     "python/btap/codes/necb/shw/demand.py#apply_shw",
     "python/btap/codes/necb/shw/demand.py#_add_water_use"
@@ -2329,19 +2989,6 @@
  },
  {
   "step": "coverage",
-  "action": "Treatment of Process Loads \u2014 satisfied by clone: (2): process loads included in the proposed model are automatically included in the reference \u2014 the reference is a clone and no transform touches process loads. (1) exclusion-by-default is the modeller's input decision.",
-  "inputs": {
-   "status": "satisfied_by_clone",
-   "decisions_citing": 0,
-   "code": [
-    "python/btap/codes/compliance.py#_build_reference"
-   ]
-  },
-  "article": "8.4.1.5.",
-  "level": "info"
- },
- {
-  "step": "coverage",
   "action": "General \u2014 implemented: Compliance is assessed through modeling: the umbrella is the only gem permitted to run EnergyPlus, and a determination requires sizing + annual runs of BOTH models (simulate: :annual); any other mode is flagged non-determining.",
   "inputs": {
    "status": "implemented",
@@ -2398,7 +3045,7 @@
  },
  {
   "step": "coverage",
-  "action": "Calculation Methods \u2014 implemented: software conformance rests on EnergyPlus\u2019s ANSI/ASHRAE 140 testing (see 8.4.2.11.)",
+  "action": "Calculation Methods \u2014 implemented: software conformance rests on EnergyPlus\u2019s ANSI/ASHRAE 140 testing",
   "inputs": {
    "status": "implemented",
    "decisions_citing": 0,
@@ -2418,17 +3065,6 @@
    "gap_owner": "modeller"
   },
   "article": "8.4.2.2.(5)",
-  "level": "info"
- },
- {
-  "step": "coverage",
-  "action": "Calculation Methods \u2014 not implemented, modeller scope. Modeller's responsibility: routing un-modelable systems through an 8.4.2.12. exceptional calculation method is a modeller decision",
-  "inputs": {
-   "status": "not_implemented",
-   "decisions_citing": 0,
-   "gap_owner": "modeller"
-  },
-  "article": "8.4.2.2.(6)",
   "level": "info"
  },
  {

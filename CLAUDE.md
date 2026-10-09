@@ -41,11 +41,18 @@ unless a moved link itself is wrong.
   `decisions.json`, the Section 8.4 disposition and `ATTRIBUTION.md` — stays
   in `btap/codes/data/`.
 - **One AuditLog schema:**
-  `{step, target, action, inputs, value, article, ruling, evidence, building, level}`.
+  `{step, target, action, inputs, value, article, ruling, ahj, evidence, building, level}`.
   Levels are `decision`, `info`, and `warning`; warnings are never silent.
-- **Two citation axes.** `article` cites the code requirement; `ruling` cites
-  the adjudicated D-XX interpretation. Keep `ruling` top-level, never nested in
-  `inputs`.
+- **THREE citation axes** (D-100). `article` cites the code requirement;
+  `ruling` cites the adjudicated D-XX interpretation; `ahj` cites the
+  `docs/NECB_AHJ_QUESTIONS.md` disposition that applies to THIS runtime
+  choice. Keep all three top-level, never nested in `inputs`.
+  `ahj` means "this disposition applies here", NOT "approval is required":
+  all four register statuses may be cited, and only `referral` and
+  `alternative-solution` make a run conditional. `btap.audit` stores and
+  renders the field and decides nothing about it — the status mapping lives in
+  `btap.codes.ahj`, generated from the authored register. A static
+  coverage-manifest entry may never carry `ahj`.
 - **Audit text is case-sensitive.** Violations are SHOUTED and passes are
   lowercase because the report checklist classifier relies on that distinction.
 - **One public selector: the code id.** `performance_compliance(model, *,
@@ -74,7 +81,7 @@ python3 python/scripts/generate_necb_coverage.py
 python3 python/scripts/generate_necb_8_4_coverage.py
 python3 python/scripts/generate_necb_edition_delta.py --check
 python3 python/scripts/generate_necb_vintage_match.py --check
-python3 python/scripts/generate_decisions_toc.py --check
+python3 python/scripts/generate_decisions.py --check
 python3 python/scripts/legacy_whatsnew.py
 ```
 
@@ -84,16 +91,86 @@ runs in the `verify` CI job. Live oracle checks run only in `parity`.
 
 ## Decisions and coverage
 
-`python/btap/codes/data/decisions.json` is canonical. The authored document is
-`docs/necb_decisions.md`; its TOC is generated. Adding a `## D-XX` heading means
-adding the registry entry, and vice versa. A `kind: runtime` entry must be cited
-by product Python source.
+One decision is one file: `docs/decisions/D-NN.md`, TOML front matter
+(`id`, `title`, `kind`, `articles`, `editions`, `summary`) plus the authored
+Markdown body,
+whose first line is its own `## D-NN —` heading. That file is CANONICAL.
+Both `docs/necb_decisions.md` and `python/btap/codes/data/decisions.json` are
+GENERATED from the sources by `generate_decisions.py`, in numeric id order, and
+are never hand-edited. Anchors and the index are inserted by the generator; by
+convention a body does not declare its own `d-NN` anchor. The front-matter
+`title` is the
+compact index title and the body's heading is authored prose, which differ on
+purpose. A `kind: runtime` entry must be cited by product Python source.
+
+`editions` lists the CODE IDS a decision governs — `necb2020`, `necb2025`,
+both comma-separated — or the single literal `unverified`. It is validated
+against the editions DISCOVERED under `btap/codes/necb/data/`, so registering a
+new edition does not leave the check stale, and it never takes a collective
+word: "both" stops meaning anything once a third edition exists, and `vintage`
+is retired vocabulary. `unverified` may not be mixed with a code id — either a
+decision has been checked against that edition or it has not. Of the 99
+decisions, 98 are `unverified`: they were authored before the field existed,
+mostly against one edition's text, and asserting a list for them would be a
+guess. That is a DECLARED gap where it used to be a silent one; establishing
+them is open work.
+
+`articles` groups citations by an AUTHORED REQUIREMENT IDENTITY, then by code
+id inside it. A flat list was ambiguous — the same number can name a DIFFERENT
+requirement in each edition (`8.4.5.9` is Heating System in NECB 2025 and
+Fuel-Fired Service Water Heater in NECB 2020) — but per-edition nesting alone
+was necessary and insufficient: it left correspondence to be INFERRED, and
+inferring it from shared title vocabulary accepted "Service Water Heating
+Systems" as 2025's counterpart to "Heating System" because both contain
+"heating" (Sol, clearance review of `be2118d`). Semantic matching on
+vocabulary cannot be made safe, so correspondence is authored:
+
+```toml
+[articles.multi_energy_heating]
+label = "Multi-energy heating capacity allocation and operating priority"
+necb2020 = ["8.4.4.9.(4)", "8.4.4.9.(5)", "8.4.4.9.(6)"]
+necb2025 = ["8.4.5.9.(4)", "8.4.5.9.(5)", "8.4.5.9.(6)"]
+```
+
+The requirement key and its `label` ARE the cross-edition equivalence
+assertion, so the generator checks structure instead of guessing meaning, and
+PER REQUIREMENT rather than across the file — a global coverage check let one
+requirement's missing edition hide behind another that listed it. Four rules:
+a non-empty requirement KEY and label; every edition in `editions` present in
+EVERY requirement; a citation that FULLMATCHES the grammar, so nothing rides
+along before or after it; and that citation validated against the edition's
+own snapshot to the depth the snapshot carries — the article, the sentence,
+the clause scoped to ITS sentence, and a table's suffix. The `unverified`
+holding key may not be mixed with authored requirements, `editions` may not
+repeat a code id, and one requirement may not mix Section 8.4 citations with
+uncheckable ones, within an edition or across them.
+
+**Correspondence is NOT checked by numbering, deliberately.** An equal-suffix
+rule was tried and refused a correct mapping: D-89's modulating-boiler
+part-load requirement is `8.4.5.2.(3)` in NECB 2020 and `8.4.6.2.(2)` in NECB
+2025, because the 2020 article has three sentences and the 2025 article has
+two. Whether two citations are the same requirement is an authored assertion
+carried by the key and label; a second correct citation and a wrong existing
+one are not structurally distinguishable, and Sol ruled that case out of
+scope rather than admitting another heuristic.
+
+**The id grammar is `^D-\d+$`, unbounded.** `^D-\d{2}$` allowed exactly 100
+ids and D-01 through D-99 all exist, so the registry had run out; a fixed three
+digits would only move the wall, and thousands are expected as other code
+families arrive. Widening means FOUR patterns, and the one that matters most is
+`btap/codes/decisions.py`'s `ID_PATTERN`: `\bD-\d{2}\b` does not match
+`D-100`, so widening only the generator produces a decision whose citations are
+invisible — no audit ruling resolves and it never reaches the report appendix.
+The test files `test_decisions_registry*.py` carry the same grammar and must
+move with it.
 
 ```bash
-python3 python/scripts/generate_decisions_toc.py --check
+python3 python/scripts/generate_decisions.py        # regenerate both outputs
+python3 python/scripts/generate_decisions.py --check
 cd python && python3 -m unittest \
   tests.necb.test_decisions_registry_sync \
-  tests.necb.test_decisions_registry
+  tests.necb.test_decisions_registry \
+  tests.necb.test_decisions_generator
 ```
 
 Coverage is declared at the depth the evidence supports. Match article ids by
@@ -140,11 +217,53 @@ both in the decision and the provenance entry. When they disagree, the
 Code wins and the gem's version is recorded as a finding, not adopted;
 `docs/NECB_VINTAGE_MATCH.md` is the pattern.
 
+## Questions referred to an authority
+
+`docs/NECB_AHJ_QUESTIONS.md` is the AUTHORED register of questions this tool
+does not decide. NOT all of them are ambiguities, which is why the heading no
+longer says "interpretations": two of the four statuses need no authority at
+all. It is tracked, unlike `.reviews/`,
+which is gitignored and so was never a record of them. Entries are `AHJ-NN`,
+each stating the ambiguity, who established it, what the tool does meanwhile,
+and where a reader meets it at runtime.
+
+Entries carry one of FOUR statuses, and only `referral` means the text does
+not decide the question. `alternative-solution` is for a requirement the text
+DOES decide and we do not meet — an authority can accept it only as an
+explicitly identified non-conforming substitution, which is what AHJ-1 is.
+`ruled` is settled and needs no authority. `tool-gap` is implementable and is
+a defect to close, not an interpretation. Calling a tool gap a referral would
+launder a defect as an ambiguity, and Sol's `122` lists twelve decisions that
+are tool or data gaps for that reason.
+
+Adding an entry means picking a status and saying whether it sets a run
+conditional. The register's own status table is the contract, and the first
+version of this section stated a one-status rule that two of its own six
+entries already broke.
+
+Where Claude, Sol and Fable cannot resolve a question after real effort,
+phylroy's direction (2026-10-07) is to emit a CONDITIONAL result naming the
+approval required rather than stall. That is
+`report['compliance_determination'] = 'conditional'`, set in
+`btap/codes/necb/path.py`, with a reason block carrying `conditions` — one
+record per unique final choice, each with its id, status, title, article,
+target and the deciding entry's own account — plus `ahj_must_approve` (ONE
+line per register id, not per choice), `if_not_approved` and `ahj_ids`. There
+is no `serving_systems` key: that was the pre-D-100 shape. The CLI prints it inside the verdict string — not beside it —
+and the HTML report badges it beside the pass/fail badge, because the report
+is the AHJ-facing artifact. The exit code is deliberately unchanged, pinned by
+`test_the_exit_code_is_UNCHANGED_by_the_label`.
+
+`python/tests/necb/test_ahj_register.py` keeps the register honest: it fails
+if the runtime cites an id with no entry, if the file becomes gitignored, or
+if an entry omits its article, who established it, or its interim behaviour.
+Add the entry in the same change as the condition that cites it.
+
 ## Verification
 
 The post-R6 verification model has two independent parts:
 
-- `verification/scenarios/` holds 45 frozen Python pipeline scenarios across
+- `verification/scenarios/` holds 47 frozen Python pipeline scenarios across
   `python`, `verify`, and `parity` lanes. Intentional output changes use
   `verification/scenarios/freeze.py` on a clean tree and commit the baseline
   changes with the code.
@@ -167,7 +286,8 @@ boundary; post-R6 freezes do not recreate cross-language evidence.
 
 ## CI
 
-`.github/workflows/test.yml` has six jobs:
+`.github/workflows/test.yml` has six jobs, and
+`.github/workflows/decisions.yml` is a separate PATH-UNFILTERED gate beside it:
 
 - **`lint`**: stdlib-oriented Python checks, coverage pointers/doc drift, and
   the decisions registry.
@@ -195,9 +315,27 @@ current Dockerfile. With the repository variable `CI_RUNNER=necb-ci`, every job
 but `lint` runs on a 36-vCPU CodeBuild runner (`infra/aws-ci/README.md`);
 deleting the variable falls back to `ubuntu-latest`.
 
+`.github/workflows/decisions.yml` is a SEPARATE workflow, not a seventh job,
+and carries **no `paths` or `paths-ignore`** deliberately. The property it
+enforces is exactly: **path-unfiltered and reachable on pushes to main/develop, pull requests, merge groups and manual dispatch**. It is not
+"unskippable" — `[skip ci]` or `[ci skip]` in a head commit message skips it,
+like any push- or PR-triggered workflow — and it is not merge-blocking. It runs
+`generate_decisions.py --check` plus the three decision test modules on every
+push and pull request, stdlib-only with no dependency install. It exists because
+`docs/decisions/D-NN.md` is the canonical source of the RUNTIME registry while
+`test.yml` path-ignores `docs/**`: a source edit WITHOUT a regenerate touches
+only ignored paths, so `test.yml` would not run at all, and `main` has no branch
+protection to require it. `python/tests/test_decisions_gate_is_path_unfiltered.py`
+asserts the filter stays absent.
+
 There is no scheduled parity trigger. Dispatch parity whenever `legacy_pin/REF`
-moves. Documentation-only pushes are path-ignored by the workflow, so run local
-doc checks before merging documentation changes.
+moves. Documentation-only pushes are path-ignored by **`test.yml`**, so run local
+doc checks before merging documentation changes — but the decisions gate still
+runs, so a forgotten `generate_decisions.py` shows up as a RED run rather than
+no run at all. It does not block the merge: `main` has no branch protection and
+no rulesets, and `main-red` is a job inside `test.yml`, so a docs-only push to
+`main` with stale outputs turns `decisions` red while `test.yml` never runs and
+no incident is opened. The gate makes that failure visible, not impossible.
 
 ## Traps
 

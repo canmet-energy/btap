@@ -873,7 +873,7 @@ cd python
 BTAP_SCENARIO_LANES=verify BTAP_SCENARIOS_REQUIRED=1 .venv/bin/pytest -q tests/necb/test_frozen_scenarios.py
 BTAP_SCENARIO_LANES=parity BTAP_SCENARIOS_REQUIRED=1 .venv/bin/pytest -q tests/necb/test_frozen_scenarios.py
 .venv/bin/lint-imports && .venv/bin/ruff check .
-cd .. && python3 python/scripts/necb_orphan_keys.py && python3 python/scripts/generate_decisions_toc.py --check
+cd .. && python3 python/scripts/necb_orphan_keys.py && python3 python/scripts/generate_decisions.py --check
 python3 python/scripts/generate_necb_coverage.py && python3 python/scripts/generate_necb_8_4_coverage.py \
   && python3 python/scripts/generate_necb_edition_delta.py && git diff --exit-code docs/
 ```

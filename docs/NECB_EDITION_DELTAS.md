@@ -29,7 +29,7 @@ there rather than silently dropped from the comparison.
 
 | File | Identical | Renumbered | Changed | Added | Removed |
 |---|---|---|---|---|---|
-| envelope (`envelope_rules.json`) | 76 | 1 | 0 | 0 | 0 |
+| envelope (`envelope_rules.json`) | 75 | 2 | 0 | 0 | 0 |
 | hvac (`reference_rules.json`) | 320 | 23 | 1 | 1 | 0 |
 | hvac_efficiencies (`efficiencies.json`) | 2704 | 25 | 111 | 427 | 48 |
 | lighting (`lighting_rules.json`) | 6 | 0 | 0 | 0 | 0 |
@@ -42,18 +42,19 @@ there rather than silently dropped from the comparison.
 | tables/schedules (`tables/schedules.json`) | 7473 | 0 | 0 | 0 | 0 |
 | tables/space_types (`tables/space_types.json`) | 24024 | 0 | 0 | 0 | 0 |
 | tables/table_c1 (`tables/table_c1.json`) | 8827 | 0 | 0 | 0 | 0 |
-| **Total** | **46054** | **51** | **117** | **428** | **48** |
+| **Total** | **46053** | **52** | **117** | **428** | **48** |
 
 ## necb2020 → necb2025
 
 <details>
-<summary><b>envelope</b> (`envelope_rules.json`) — 77 leaves: 76 identical, 1 renumbered, 0 changed, 0 added, 0 removed (click to expand)</summary>
+<summary><b>envelope</b> (`envelope_rules.json`) — 77 leaves: 75 identical, 2 renumbered, 0 changed, 0 added, 0 removed (click to expand)</summary>
 
 #### Renumbered
 
 | Old path | Old value | New path | New value |
 |---|---|---|---|
 | `reference_envelope.article` | 8.4.4.1.(2), 8.4.4.3., 8.4.4.4. | `reference_envelope.article` | 8.4.5.1.(2), 8.4.5.3., 8.4.5.4. |
+| `reference_envelope.note` | populated fully in P4 (lightweight layers from Note A-8.4.4.4.(1), air leakage from 8.4.3.3.(3)) | `reference_envelope.note` | populated fully in P4 (lightweight layers from Note A-8.4.5.4.(1), air leakage from 8.4.3.3.(3)) |
 
 </details>
 

@@ -6,7 +6,14 @@ article-level provenance); this code is a rules interpreter, not a rules store.
 
 Port notes (D-79): Ruby's symbol keys collapse to str throughout — the
 characterization facts dict, the building info dict and the assignment actions
-('build' / 'copy_proposed' / 'through_the_wall') are all str-keyed/str-valued.
+are all str-keyed/str-valued.
+
+SELECTION produces one of three actions: 'build', 'copy_proposed' or
+'through_the_wall'. A RETURNED post-merge assignment may carry a fourth,
+`MIXED_SOURCE_ACTIONS` ('mixed'), because the merge keys on
+``[catalog_name, config]`` and not on action, so one construction can cover
+blocks that reached it by different branches. Its `source_actions` map holds
+the per-block truth; see that field and the constant.
 """
 
 from __future__ import annotations
@@ -37,6 +44,20 @@ def rules(edition):
     return rulesdata.load("hvac", code_id(edition))
 
 
+#: `Assignment.action` when a merge absorbed assignments whose SELECTION
+#: branches differed. The merge keys on `[catalog_name, config]` and not on
+#: action — adding action would split one Note (2) common ventilation system
+#: into two central MAUs — so one construction can cover blocks that reached
+#: it by different branches, and no single branch describes it.
+#:
+#: It is deliberately not `None` (which reads as "never set") and deliberately
+#: not one of the branch names. `source_actions` carries the per-block truth.
+#: Every post-merge consumer compares against `'copy_proposed'`, and a copied
+#: assignment is never merged, so this value behaves as "replaced" everywhere
+#: it is tested (Sol, `162`).
+MIXED_SOURCE_ACTIONS = 'mixed'
+
+
 @dataclass
 class Assignment:
     """One reference-system assignment for a group of zones."""
@@ -49,6 +70,20 @@ class Assignment:
     energy_type: str | None = None
     action: str | None = None
     articles: list = field(default_factory=list)
+    #: ``{block: action}`` for every selection assignment this one absorbed.
+    #: The merge keys on ``[catalog_name, config]`` and NOT on ``action``,
+    #: deliberately — adding action would split one Note (2) common ventilation
+    #: system into two central MAUs — so one construction can legitimately
+    #: cover blocks whose SELECTION branches differed. `action` is then a
+    #: scalar that cannot describe all of them, so a HETEROGENEOUS merge sets
+    #: it to `MIXED_SOURCE_ACTIONS` and this map carries which block took
+    #: which branch; a homogeneous merge keeps its common branch there.
+    #: Publishing the first absorbed branch for the whole
+    #: construction claimed one branch applied to every block: a `build` Data
+    #: Processing block and a `through_the_wall` residential block on one
+    #: proposed VAV loop resolve to the same gas System 1 catalogue and config,
+    #: and whichever sorted first supplied the label for both (Sol, `160`).
+    source_actions: dict = field(default_factory=dict)
 
 
 def select_reference_systems(*, facts, building, code='necb2020', audit=None,
@@ -80,17 +115,138 @@ def _select_reference_systems(*, facts, building, ruleset, audit=None,
     hp_rules = rules_data['heat_pump_reference']
 
     assignments = []
+    # The multi-energy disclosure dedupes per serving system. The set is
+    # scoped to THIS call rather than written into `facts`, which is the
+    # caller's dict and documented as pure input — two calls on one dict used
+    # to yield one disclosure (Fable, `117`).
+    disclosed: set = set()
+    #: Article 13.(2)(g) elections already made in THIS selector call,
+    #: keyed by `_election_scope`. Call-scoped for the same reason
+    #: `disclosed` is: `facts` is the caller's dict and documented as
+    #: pure input, so two calls on one dict must not share state.
+    elected: dict = {}
     for group in facts['zone_groups']:
         if not (group['heated'] or group['cooled']):
             continue  # unconditioned: no reference system
 
-        category = _category_for(group, building, selection, audit)
-        assignment = _assign(group, category, building, selection, audit)
-        result = _finalize(assignment, group, definitions, selection, facts, audit,
-                           hp_rules=hp_rules, proposed_annual=proposed_annual)
-        if result is not None:
-            assignments.append(result)
+        # ONE ASSIGNMENT PER THERMAL BLOCK, not per serving system.
+        #
+        # This iterated the GROUP — zones sharing one PROPOSED air loop — and
+        # treated it as the unit Sentence 8.4.x.7.(1) assigns a system to. It
+        # is not: it is a serving set. The consequence was a reference
+        # "single-zone" System 3 built as ONE air loop over five thermal
+        # blocks, its supply temperature following one elected control zone
+        # while the other four drifted — 932 unmet heating hours in sample
+        # 18's reference, which fails 8.4.1.2.(3) and made the run report NOT
+        # COMPLIANT for the reference's failure rather than the proposed
+        # building's performance.
+        #
+        # Sol's `139` ruled it, against the Code and the NRC User's Guide
+        # rather than the legacy gem: Division A defines a single-zone
+        # secondary system as one serving only ONE thermal block; 8.4.x.1.(4)(c)
+        # keeps the proposed building's thermal blocks in the reference; and the
+        # Guide's Figures 8-3, 8-4 and 8-7 each say "each thermal block is
+        # considered separate from all other thermal blocks". Its Example 8-4
+        # is decisive: to serve two proposed zones with one System 4 unit the
+        # modeller must MERGE the zones, not attach two retained zones to one
+        # "single-zone" unit.
+        #
+        # The architecture already separated these concerns and only this
+        # iteration conflated them: the merge step below re-groups by catalogue
+        # identity, so selecting per block gives Systems 3 and 4 and the
+        # heat-pump redirects one unit each while 1/2/5/6 recombine.
+        #
+        # System 1 MERGES, which the first version of this comment had wrong.
+        # Only Systems 3 and 4 are labelled "Single-zone" in Table 8.4.x.7.-B;
+        # System 1 is a "Unitary air conditioner" whose Note (2) central
+        # make-up air unit serves its blocks together, and Note (3)'s facade
+        # split belongs to System 6 alone (Sol, `143`/`145`).
+        #
+        # The serving GROUP stays the source of truth for service-set facts —
+        # fuels, plant correspondence, DCV, dispatch, Article 9/10 allocation —
+        # which is Sol's first disposition item: keep `zone_groups`, stop using
+        # it as the block partition.
+        # The Article 13 election's scope, computed from the ORIGINAL group
+        # BEFORE it is split: `_election_scope` reads `group['zones']`, and a
+        # block view has one. (g)(ii) also reaches sibling groups sharing a
+        # source water loop, which only the unsplit group can see.
+        scope_loops, scope_zones, scope_sentence = _election_scope(group, facts)
+        election_key = (tuple(sorted(scope_loops)), tuple(sorted(scope_zones)),
+                        scope_sentence)
+        # TWO PASSES over the blocks, because the 8.4.x.9.(5) disclosure must
+        # name the blocks that actually RECEIVE the single-fuel substitution.
+        # A mixed service set — one residential block retained by
+        # `copy_proposed`, four replaced — kept both proposed fuels on the
+        # copied block, so listing it among the affected blocks over-claims the
+        # reach of a question it never faced (Sol, `143`). `_finalize` for one
+        # block cannot see the others' actions, so the actions are decided
+        # first and the substituted set is stamped on every view.
+        planned = []
+        unsized = []
+        for block in _blocks_of(group, election_key):
+            category = _category_for(block, building, selection, audit)
+            planned.append((block, _assign(block, category, building,
+                                           selection, audit,
+                                           unsized=unsized)))
+        if unsized:
+            # ONE warning per serving system, naming exactly the blocks whose
+            # smaller-system branch was assumed — not the first block, and not
+            # every block on the system.
+            reached = sorted({name for zones, _ in unsized for name in zones})
+            articles = sorted({article for _, article in unsized})
+            audit.warn(
+                'selection',
+                'cooling-capacity threshold rule needs a sized model — '
+                'smaller-system branch assumed',
+                target=','.join(reached),
+                inputs={'blocks_assigned_on_this_basis': reached,
+                        'serving_system': group['air_loop'] or reached[0]},
+                article='; '.join(articles))
+        substituted = sorted(
+            name for block, assignment in planned
+            if assignment is not None and assignment.action != 'copy_proposed'
+            for name in block['zones'])
+        for block, assignment in planned:
+            block['_substituted_blocks'] = substituted
+            result = _finalize(assignment, block, definitions, selection, facts,
+                               audit, hp_rules=hp_rules,
+                               proposed_annual=proposed_annual,
+                               ruleset=ruleset, disclosed=disclosed,
+                               elected=elected)
+            if result is not None:
+                assignments.append(result)
     return assignments
+
+
+def _blocks_of(group, election_key=None):
+    """One view per retained thermal block in ``group``.
+
+    Each view narrows ``zones`` to a single block and inherits every other
+    key, so the block carries its serving system's facts without the group
+    pretending to be one block.
+
+    ``design_cooling_kw`` is inherited UNCHANGED, deliberately. It is a
+    group-level quantity and the one rule that reads it — Table 8.4.x.7.-A's
+    "Where the proposed building or space has a cooling capacity exceeding
+    20 kW" for a Data Processing Area — turns on whether "building or space"
+    means the serving system or the block. That is a separate Code reading,
+    not something to decide by inheritance: this change alters WHICH blocks get
+    their own unit, not WHAT a capacity threshold measures. Splitting it would
+    silently move a Code threshold's basis.
+    """
+    serving = tuple(group['zones'])
+    # `_origin_group` is the UNSPLIT group, carried because some questions are
+    # not the block's to answer. The Article 13 election is one: it weighs the
+    # proposed heat pump's auxiliary energy over every block that heat pump
+    # serves, so handing it a one-block view makes it elect from one block's
+    # auxiliary fuel and call that the answer for all of them.
+    extra = {'_serving_zones': serving, '_election_key': election_key,
+             '_origin_group': group}
+    if len(serving) == 1:
+        return [dict(group, **extra)]
+    return [dict(group, zones=[zone], **extra) for zone in serving]
+
+
 
 
 # ---- category election: majority space-type keyword match over the group's zones ----
@@ -109,12 +265,24 @@ def _category_for(group, building, selection, audit):
     category = max(votes.items(),
                    key=lambda kv: (kv[1], 0 if kv[0] is None else 1))[0]
     named = [k for k in votes if k is not None]
-    if len(named) > 1:
+    # D-22's majority warning is UNREACHABLE since D-101 and is kept as a
+    # guard rather than deleted. `_category_for` now receives one block, so
+    # `named` can never hold two categories — the condition is false by
+    # construction. If a future change hands this a multi-block group again,
+    # the warning should fire rather than a majority being applied silently,
+    # which is the defect D-22 recorded (Fable, `167` G5).
+    #
+    # Its article stays the 2020 literal because this whole function hardcodes
+    # 2020 articles (see the 8.4.4.7.(3) warning below) and threading the
+    # ruleset through for an unreachable branch would be a bigger change than
+    # the finding. Noted rather than fixed: were it ever to fire under
+    # NECB 2025, both literals would name the wrong subsection.
+    if len(named) > 1:  # pragma: no cover - unreachable with per-block views
         audit.warn('selection',
                    '8.4.4.7.(1) assigns systems PER THERMAL BLOCK, but this zone group mixes '
                    f"categories {' / '.join(named)} — majority ({category}) applied "
                    'to the whole group',
-                   target=group['air_loop'] or group['zones'][0],
+                   target=','.join(group['zones']),
                    article='8.4.4.7.(1)', ruling='D-22')
     if category is None:
         category = selection['default_category']
@@ -123,10 +291,15 @@ def _category_for(group, building, selection, audit):
             t = (building.get('zone_types') or {}).get(z)
             if t is not None and t not in seen:
                 seen.append(t)
+        # TARGET THE BLOCK, like the selection record it precedes. This ran
+        # per block while naming the serving system, which is F1's class
+        # (Fable, `167` G5); no baseline shows a duplicate yet only because
+        # no corpus model has an unlisted space type.
         audit.warn('selection',
                    'space type not listed in Table 8.4.4.7.-A — closest-corresponding category assumed',
-                   target=group['air_loop'] or group['zones'][0],
-                   inputs={'zone_types': seen},
+                   target=','.join(group['zones']),
+                   inputs={'zone_types': seen,
+                           'serving_system': group['air_loop']},
                    value=category, article='8.4.4.7.(3)')
     _audit_museum_row(group, building, category, audit)
     return category
@@ -163,7 +336,21 @@ def _audit_museum_row(group, building, category, audit):
 
 # ---- rule application per category ----
 
-def _assign(group, category, building, selection, audit):
+def _assign(group, category, building, selection, audit, unsized=None):
+    # Every `Assignment` COPIES `group['zones']`. It used to share the list
+    # object, and `_blocks_of` copies the group dict shallowly — so for a
+    # single-zone group an assignment's `zones` WAS
+    # `facts['zone_groups'][i]['zones']`, and the merge's
+    # `existing[1].zones.extend(...)` mutated the characterised facts:
+    #
+    #   before merge  [['Zone 1'], ['Zone 2'], ...]
+    #   after  merge  [['Zone 1','Zone 2','Zone 3','Zone 4','Zone 5'], ['Zone 2'], ...]
+    #
+    # Nothing visible changed today — the one post-merge reader of group zones
+    # is a superset either way — but D-101 made single-zone views the normal
+    # shape and added System 1 to the merged set, so this was one reader away
+    # from a real defect (Fable, `158` F4).
+
     cat = next(c for c in selection['categories'] if c['category'] == category)
     articles = [selection['article']]
     storeys = int(building.get('storeys') or 0)
@@ -181,22 +368,70 @@ def _assign(group, category, building, selection, audit):
         if rule.get('min_cooling_kw_exclusive'):
             kw = group['design_cooling_kw']
             if kw is None:
-                audit.warn('selection',
-                           'cooling-capacity threshold rule needs a sized model — smaller-system branch assumed',
-                           target=group['air_loop'] or group['zones'][0], article=rule['article'])
+                # COLLECTED, NOT EMITTED HERE. Keying this on the first block
+                # made the disclosure depend on SELECTION ORDER: an office
+                # block never visits the data-processing threshold rule, so
+                # when it sorted first the data block that did visit was
+                # silenced, and when the data block sorted first the warning
+                # claimed both blocks were assigned on this basis. Selection
+                # order cannot decide whether a material assumption is
+                # disclosed (Sol, `145`).
+                #
+                # The caller aggregates the blocks that ACTUALLY reached the
+                # rule and emits once per serving system. A direct call with
+                # no accumulator still warns immediately, so unit-testing
+                # `_assign` alone keeps working.
+                if unsized is None:
+                    audit.warn('selection',
+                               'cooling-capacity threshold rule needs a sized model — smaller-system branch assumed',
+                               target=group['air_loop'] or group['zones'][0],
+                               inputs={'blocks_assigned_on_this_basis':
+                                       list(group['zones'])},
+                               article=rule['article'])
+                else:
+                    unsized.append((tuple(group['zones']), rule['article']))
                 continue
+            # THE BASIS IS THE SERVING SYSTEM'S TOTAL, AND SAYING SO IS THE
+            # POINT. `design_cooling_kw` is a group-level quantity, and this
+            # rule asks whether "the proposed building or space has a cooling
+            # capacity exceeding" the threshold — so whether "building or
+            # space" means the serving system or the one thermal block being
+            # assigned is a Code reading D-101 does not settle. Selection is
+            # per block, so the threshold now decides ONE block's system from a
+            # total that may include other spaces' capacity; that cannot be
+            # resolved by inheritance, and it must not be silent either
+            # (Sol, `143`).
+            serving = tuple(group.get('_serving_zones') or group['zones'])
+            if len(serving) > len(group['zones']):
+                audit.warn(
+                    'selection',
+                    'the cooling-capacity threshold deciding THIS thermal '
+                    f"block's system was measured on the whole serving "
+                    f'system ({len(serving)} blocks), because '
+                    '"the proposed building or space" is not established as '
+                    'the block or the serving system. Another space on the '
+                    'same system may be contributing the capacity that put '
+                    'this block over the threshold',
+                    target=','.join(group['zones']),
+                    inputs={'threshold_kw': rule['min_cooling_kw_exclusive'],
+                            'measured_kw': kw,
+                            'measured_over_blocks': sorted(serving),
+                            'assigned_block': list(group['zones']),
+                            'basis': 'serving system total (unresolved: '
+                                     '"building or space")'},
+                    article=rule['article'], ruling='D-101')
             if not kw > rule['min_cooling_kw_exclusive']:
                 continue
 
         if rule.get('article'):
             articles.append(rule['article'])
-        return Assignment(zones=group['zones'], category=category,
+        return Assignment(zones=list(group['zones']), category=category,
                           reference_system=rule['reference_system'],
                           action='build', articles=[a for a in articles if a is not None])
 
     # no rule matched (e.g. storey band gap) — fall back to the last, most general rule
     fallback = [r for r in cat['rules'] if not r.get('special')][-1]
-    return Assignment(zones=group['zones'], category=category,
+    return Assignment(zones=list(group['zones']), category=category,
                       reference_system=fallback['reference_system'],
                       action='build', articles=[a for a in articles if a is not None])
 
@@ -248,12 +483,12 @@ def _residential_assignment(group, category, selection, articles, audit):
         audit.decision('selection',
                        'residential with heat pump -> ASHP reference redirect (A1/D-34: follow legacy)',
                        target=','.join(group['zones']), article='8.4.4.7.(4)', ruling='D-34')
-        return Assignment(zones=group['zones'], category=category, reference_system=1,
+        return Assignment(zones=list(group['zones']), category=category, reference_system=1,
                           action='build', articles=articles + ['8.4.4.7.(4)'])
     if group['heated'] and not group['cooled']:
         audit.decision('selection', 'residential heated-only -> System 1',
                        target=','.join(group['zones']), article=res['article'])
-        return Assignment(zones=group['zones'], category=category, reference_system=1,
+        return Assignment(zones=list(group['zones']), category=category, reference_system=1,
                           action='build', articles=articles)
     if group['cooled'] and _residential_compatible_cooling(group):
         audit.decision('selection', 'residential with compatible cooling -> reference identical to proposed',
@@ -262,7 +497,7 @@ def _residential_assignment(group, category, selection, articles, audit):
                                'loop_dx_cooling': group.get('loop_dx_cooling'),
                                'family': group.get('family') or group.get('family_guess')},
                        article=res['article'], ruling='D-58')
-        return Assignment(zones=group['zones'], category=category, reference_system=None,
+        return Assignment(zones=list(group['zones']), category=category, reference_system=None,
                           action='copy_proposed', articles=articles)
     audit.decision('selection', 'residential otherwise -> through-the-wall systems',
                    target=','.join(group['zones']),
@@ -270,7 +505,7 @@ def _residential_assignment(group, category, selection, articles, audit):
                            'loop_dx_cooling': group.get('loop_dx_cooling'),
                            'family': group.get('family') or group.get('family_guess')},
                    article=res['article'], ruling='D-58')
-    return Assignment(zones=group['zones'], category=category, reference_system=1,
+    return Assignment(zones=list(group['zones']), category=category, reference_system=1,
                       action='through_the_wall', articles=articles)
 
 
@@ -331,8 +566,64 @@ def _residential_compatible_cooling(group):
 
 # ---- finalize: heat-pump override, energy type, catalog name ----
 
+def _subsection(ruleset):
+    """This edition's reference subsection prefix — `8.4.4` or `8.4.5`.
+
+    Read from the edition's manifest, never written as a literal: the same
+    article NUMBER names a different requirement in each edition, so a
+    hardcoded citation is wrong for every edition but the one it was written
+    against. `None` falls back to 2020's, which is what the hardcoded value
+    already was — but the fallback is now visible instead of implicit.
+    """
+    if ruleset is None:
+        return '8.4.4'
+    return ruleset.article('reference_subsection')
+
+
+def _audit_corner_block_grouping(result, assignment, prefix, audit):
+    """AHJ-10: which facade a CORNER block was assigned to, and that we chose it.
+
+    The register used to claim this choice was audited. It was not — Sol's `127`
+    traced the deciding code to `VAVReheat._dominant_orientation`, which has no
+    audit object, and the later `multizone selection groups merged` entry
+    records neither the corner block's identity nor the elected facade. So a
+    reviewer could not see which facade a corner block was given.
+
+    The fix is the metadata handoff Sol specified, not a second copy of the
+    rule: the generic builder records WHAT it measured and elected, and this
+    function — in `btap.codes`, where NECB ids belong — decides whether that
+    raises a question and writes it down.
+
+    Table -B Note (3) says only that blocks are "grouped together based on
+    facade orientation". It supplies neither the metric nor the tie-break, so a
+    block with exposure on MORE THAN ONE orientation is assigned by a rule we
+    chose. A single-facade block is unambiguous and raises nothing.
+    """
+    evidence = getattr(result, 'grouping_evidence', None)
+    if not evidence or assignment.reference_system != 6:
+        return
+    corners = [record for record in evidence
+               if len(record.get('facade_areas_m2') or {}) > 1]
+    if not corners:
+        return
+    audit.decision(
+        'selection',
+        'corner thermal blocks assigned to ONE facade group by largest '
+        'exterior wall area, with an N/E/S/W tie-break — Note (3) says only '
+        'that blocks are grouped by facade orientation and supplies neither '
+        'the metric nor the tie-break, so this assignment is ours',
+        target=','.join(record['zone'] for record in corners),
+        inputs={'corner_blocks': {record['zone']: {
+                    'facade_areas_m2': record['facade_areas_m2'],
+                    'elected': record['elected']} for record in corners},
+                'tie_break': corners[0].get('tie_break')},
+        article=f'Table {prefix}.7.-B Note (3)', ruling='D-18',
+        ahj='AHJ-10')
+
+
 def _finalize(assignment, group, definitions, selection, facts, audit,
-              hp_rules=None, proposed_annual=None):
+              hp_rules=None, proposed_annual=None, ruleset=None,
+              disclosed=None, elected=None):
     if assignment.action == 'copy_proposed':
         return assignment
 
@@ -340,7 +631,8 @@ def _finalize(assignment, group, definitions, selection, facts, audit,
     hp_article = heat_pump_article_base(selection)
     if _heat_pump_redirects(group) and assignment.reference_system in hp_rule['applies_to_systems']:
         audit.decision('selection',
-                       'proposed heat pump -> reference is an air-source heat pump (Table 8.4.4.13)',
+                       'proposed heat pump -> reference is an air-source heat pump '
+                       f'(Table {hp_article})',
                        target=','.join(group['zones']),
                        inputs={'selected_system': assignment.reference_system,
                                'heat_pump_sources': group.get('heat_pump_sources')},
@@ -357,11 +649,49 @@ def _finalize(assignment, group, definitions, selection, facts, audit,
     assignment.energy_type = None
     boiler_part_load_curve_class = None
     if assignment.reference_system == 'hp':
-        assignment.energy_type = heat_pump_aux_energy_type(
-            group, facts, hp_rules, proposed_annual, audit, article_base=hp_article)
+        # ONE ELECTION PER HEAT PUMP OR SOURCE-LOOP SET, reused on every block
+        # it serves. (2)(g) states its own comparison scope and it is not the
+        # thermal block: see `_election_scope`. Without this, five blocks served
+        # by one ASHP ran five identical annual comparisons and audited five
+        # times, which is not five questions — it is one question, obscured
+        # (Sol, `141`; D-52's existing contract).
+        scope = group.get('_election_key')
+        if elected is not None and scope is not None and scope in elected:
+            assignment.energy_type = elected[scope]
+        else:
+            # The ORIGINAL proposed group, not this block's view. Keying the
+            # cache on the full scope stopped a second call; it did not make
+            # the FIRST call full-scope. Measured on one ASHP over two blocks
+            # with 10 GJ of auxiliary gas on the first and 100 GJ of
+            # auxiliary electricity on the second: the one-block view elects
+            # `gas` from `{'NaturalGas': 10.0}` with `scope_zone_count: 1`,
+            # where (g)(i)'s proposed-heat-pump scope elects `electric` from
+            # `{'NaturalGas': 10.0, 'Electricity': 100.0}` (Sol, `143`).
+            assignment.energy_type = heat_pump_aux_energy_type(
+                group.get('_origin_group') or group, facts, hp_rules,
+                proposed_annual, audit, article_base=hp_article)
+            if elected is not None and scope is not None:
+                elected[scope] = assignment.energy_type
     if assignment.energy_type is None:
         assignment.energy_type, boiler_part_load_curve_class = \
             _reference_energy_type(group, selection, facts, audit)
+    # The 8.4.x.9.(5) disclosure runs on EVERY election path, not only the
+    # structural one. It used to live inside _reference_energy_type, which
+    # `_finalize` skips whenever heat_pump_aux_energy_type elects a type —
+    # so an ANNUAL run of a mixed ASHP group produced the 8.4.4.13.(2)(g)
+    # election and NO multi-energy disclosure at all (Sol, `114`).
+    #
+    # The scope question is now RULED (`119`, on fetched normative text):
+    # 8.4.x.13 does NOT supersede 8.4.x.9.(5). They operate concurrently,
+    # with Article 13 controlling heat-pump topology and the terminal or
+    # auxiliary energy-type election under its own (2)(g), while (5)'s
+    # capacity-allocation and operating-characteristic obligations survive
+    # for the serving system. Clause 13.(2)(f) expressly incorporates
+    # Subsections 8.4.1, 8.4.2 and 8.4.4/8.4.5. So the disclosure belongs on
+    # this path as a matter of ruling, not of caution — and it must not say
+    # the auxiliary election eliminates electric reference heating.
+    _disclose_multi_energy(group, selection, facts, audit,
+                           ruleset=ruleset, disclosed=disclosed)
     definition = definitions[str(assignment.reference_system)]
     variant = definition[assignment.energy_type]
     assignment.catalog_name = variant['name']
@@ -386,25 +716,52 @@ def _finalize(assignment, group, definitions, selection, facts, audit,
     # absence of heating per thermal block to be IDENTICAL to the proposed.
     # Reconciliation: the table's "None" governs the default composition
     # (cooling-only TPFC when the proposed block is unheated); sentence (5)
-    # overrides presence when the proposed block IS heated (the existing
-    # two-pipe changeover heating is kept — no system invented).
+    # overrides presence when the proposed block IS heated.
+    #
+    # "THE EXISTING TWO-PIPE CHANGEOVER HEATING IS KEPT — NO SYSTEM INVENTED"
+    # was the old wording here and it was false (Sol, `129`.4). There is no
+    # existing changeover heating to keep: this path BUILDS a hot-water loop, a
+    # boiler and heating coils — and an MAU heating coil — inside a FOUR-PIPE
+    # fan-coil surrogate. The Code does not select that topology, which is the
+    # substance of the AHJ-11 referral, and the surrogate's missing plant-side
+    # changeover is AHJ-18.
     if assignment.reference_system == 5:
+        # PER EDITION. These were hardcoded to 2020's numbering, so a necb2025
+        # run told an authority its System-5 condition came from 8.4.4.1.(5)
+        # and Table 8.4.4.7.-B — the other edition's articles (Sol, `129`.5).
+        # `8.4.5.9` naming a different requirement in each edition is the exact
+        # collision the repository contract warns about, and here it reached
+        # product output.
+        prefix = _subsection(ruleset)
+        presence_article = f'{prefix}.1.(5); Table {prefix}.7.-B'
         if group['heated']:
             audit.decision('selection',
-                           'System 5 reference keeps its heating — proposed block is heated, '
-                           '8.4.4.1.(5) presence override of the Table -B "None" heating column',
+                           'System 5 reference MODELS HEATING in the two-pipe surrogate — the '
+                           f'proposed block is heated, so {prefix}.1.(5)\'s presence requirement '
+                           'overrides the Table -B "None" heating column. The Code does not '
+                           'select the topology of that heating: a hot-water loop, boiler and '
+                           'heating coils are BUILT here, inside a four-pipe fan-coil surrogate',
                            target=','.join(group['zones']),
-                           article='8.4.4.1.(5); Table 8.4.4.7.-B', ruling='D-39')
+                           article=presence_article,
+                           ruling='D-39',
+                           # AHJ-11, on THIS branch only. Sentence (5) requires
+                           # identical heating presence while Table -B's cell
+                           # for this system says "None" — a genuine internal
+                           # tension Sol's `126` confirmed in both editions.
+                           # The `else` branch below honours the table on an
+                           # UNHEATED block, which is text-consistent and must
+                           # not cite anything (Sol, `127`).
+                           ahj='AHJ-11')
         else:
             merged = dict(assignment.config or {})
             merged.update({'heating': 'none', 'needs_boiler': False,
                            'mau_heating_coil_type': 'None'})
             assignment.config = merged
             audit.decision('selection',
-                           'System 5 reference built COOLING-ONLY — Table 8.4.4.7.-B heating "None" '
-                           'honoured (proposed block is unheated)',
+                           f'System 5 reference built COOLING-ONLY — Table {prefix}.7.-B heating '
+                           '"None" honoured (proposed block is unheated)',
                            target=','.join(group['zones']),
-                           article='Table 8.4.4.7.-B; 8.4.4.1.(5)', ruling='D-39')
+                           article=f'Table {prefix}.7.-B; {prefix}.1.(5)', ruling='D-39')
 
     # 8.4.4.6.(2)/8.4.5.6.(2): purchased cooling is represented by an air-cooled
     # electric chiller.
@@ -419,9 +776,19 @@ def _finalize(assignment, group, definitions, selection, facts, audit,
         audit.decision('selection', 'purchased cooling energy -> represented by air-cooled electric chiller',
                        target=','.join(group['zones']), article=pc['article'])
 
+    # THE TARGET IS THE THERMAL BLOCK. This is the record OF the 8.4.x.7.(1)
+    # decision, which D-101 makes per block, and it inherited `air_loop` from
+    # the group — so five blocks on one proposed loop wrote five byte-identical
+    # records with no block identity anywhere in them. In a heterogeneous
+    # serving set the audit then held one System 2 and four System 6 records
+    # all targeted at the same loop, and nothing said which block was the
+    # museum: a reader could not reconstruct the per-block assignment from the
+    # per-block audit (Fable, `158` F1). The serving system moves into `inputs`,
+    # where it is still available and no longer impersonates the subject.
     audit.decision('selection', 'reference system selected',
-                   target=group['air_loop'] or ','.join(group['zones']),
+                   target=','.join(group['zones']),
                    inputs={'category': assignment.category, 'energy_type': assignment.energy_type,
+                           'serving_system': group['air_loop'],
                            'heated': group['heated'], 'cooled': group['cooled'],
                            'cooling_kw': group['design_cooling_kw']},
                    value=f"System {assignment.reference_system} -> '{assignment.catalog_name}'",
@@ -507,6 +874,66 @@ def reference_hvac(model, code='necb2020', building=None, audit=None, proposed_a
                            audit=audit, proposed_annual=proposed_annual)
 
 
+def _reconcile_declared_storeys(reference, building, audit):
+    """Stamp the storey count the SELECTOR used onto the reference's Building.
+
+    The two halves of the System 6 grouping disagreed (Fable's `131` F2). The
+    selector reads `building['storeys']` — the `--storeys` override — while
+    `VAVReheat` reads `helpers.above_ground_storeys(model)`, which falls back to
+    a BuildingStory count and then to 1. Nothing wrote the override onto the
+    model, so a building the selector had just classified as more than four
+    storeys was GROUPED as one storey: one whole-building VAV, no facade split,
+    no Note (3) corner assignment, and no AHJ-10 citation.
+
+    That is worse than the missing citation. `pipeline.py`'s own preflight
+    warns that the fallback "would silently treat the building as ONE storey";
+    with the override supplied it did exactly that, one layer down.
+
+    Writing it on the REFERENCE only, never the proposed: the selector's
+    premise is what the reference must be built on, and the caller's model is
+    not ours to edit.
+
+    THE OVERRIDE WINS, including over a model that declares its own count.
+    The first version skipped those, calling it deference to the model — and
+    Fable's `133` G4 showed that reproduces the very defect F2 fixed: a model
+    declaring 2 with `--storeys 6` selected on 6 and GROUPED on 2, one
+    whole-building VAV, no facade split, no citation, and no audit entry
+    either. As he put it, that is not deference, it is the same split with the
+    roles swapped — because `_building_info` already lets the override win in
+    the selector. Deference would have to mean refusing the override there
+    too.
+
+    So the override wins in both halves, and a CONTRADICTION is warned with
+    both numbers named. The audit contract is that warnings are never silent,
+    and holding two storey counts while saying nothing breaks it whichever
+    number wins.
+    """
+    declared = (building or {}).get('storeys')
+    if not declared:
+        return
+    declared = int(declared)
+    existing = opt(reference.getBuilding().standardsNumberOfAboveGroundStories())
+    if existing is not None and int(existing) != declared:
+        audit.warn('build',
+                   f'the supplied building data says {declared} above-ground '
+                   f'storeys and the model DECLARES {int(existing)} — the '
+                   'supplied value is an override and wins, here and in the '
+                   'reference-system selection, so both halves group on one '
+                   'premise; correct the model or drop the override if that '
+                   'is not intended',
+                   inputs={'storeys': declared,
+                           'model_declared_storeys': int(existing)},
+                   ruling='D-18')
+    elif existing is not None:
+        return
+    reference.getBuilding().setStandardsNumberOfAboveGroundStories(declared)
+    audit.info('build',
+               'declared above-ground storey count stamped on the reference '
+               'from the supplied building data — the selector and the system '
+               'builder must group on the SAME premise',
+               inputs={'storeys': declared}, ruling='D-18')
+
+
 def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=None):
     """The proposed -> reference HVAC transform against ONE resolved edition.
 
@@ -520,6 +947,7 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
 
     audit = audit if audit is not None else AuditLog()
     reference = _clone_model(model)
+    _reconcile_declared_storeys(reference, building, audit)
     _clear_proposed_part_load_classes(reference, audit)
     _clear_proposed_capacity_ownership(reference, audit)
 
@@ -566,7 +994,8 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
     # Table 8.4.4.7.-B note (1) (D-55): record every proposed thermal block's
     # humidification and its energy source BEFORE the teardown destroys the loops
     # that carry it — the rebuild happens once the reference loops exist.
-    proposed_humidification = _capture_humidification(reference, audit)
+    proposed_humidification = _capture_humidification(
+        reference, audit, table=f'Table {_subsection(ruleset)}.7.-B')
     # D-28 (LargeOffice end-use isolation): Note (3) to Table 8.4.4.7.-B
     # scopes a MULTIZONE reference system to the thermal blocks of ALL
     # storeys — one system at <=4 above-ground storeys, per-facade splits
@@ -576,29 +1005,253 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
     # 12-storey LargeOffice got 3 storey-groups x (4 facades + internal)
     # = 17 systems instead of ~6, multiplying fans and dodging the
     # per-loop 5.2.10.1/5.2.2.7 flow thresholds. Merge same-catalog
-    # multizone (sys 2/5/6) build assignments; single-zone families
-    # (1/3/4/hp) keep their selection grouping.
+    # assignments for Systems 1, 2, 5 and 6; Systems 3 and 4 and the
+    # heat-pump redirects — the rows Table 8.4.x.7.-B labels "Single-zone" —
+    # keep one unit per thermal block. System 1 joined this list under
+    # Note (2) at D-101; it is not a single-zone family.
     merged = []
     for a in assignments:
+        # SYSTEM 1 MERGES TOO. Only Systems 3 and 4 are labelled
+        # "Single-zone" in Table 8.4.x.7.-B, which is the wording Sol's `139`
+        # turns on; System 1 is a "Unitary air conditioner with baseboard
+        # heating" whose Note (2) central make-up air unit serves the blocks
+        # together. Selecting per block and merging 1 alongside 2/5/6 keeps
+        # that one central unit while 3, 4 and the heat-pump redirects get one
+        # unit per block.
+        #
+        # Splitting System 1 was the one thing my per-block change got wrong:
+        # `test_hvac_necb_through_the_wall_build` asserts "System 1 = one
+        # central MAU for ventilation air" and saw five.
+        # `through_the_wall` is System 1 too — `_residential_assignment`
+        # returns it with `reference_system=1`, realised as a central MAU plus
+        # per-zone PTACs. Keying on the action alone excluded it, so five
+        # blocks produced five MAUs where the Note (2) central unit is one.
         key = ([a.catalog_name, a.config]
-               if a.action == 'build' and a.reference_system in (2, 5, 6) else None)
+               if a.action in ('build', 'through_the_wall')
+               and a.reference_system in (1, 2, 5, 6)
+               else None)
+        if not a.source_actions:
+            a.source_actions = {zone: a.action for zone in a.zones}
         existing = None
         if key is not None:
             existing = next((m for m in merged if m[0] == key), None)
         if existing is not None:
             existing[1].zones.extend([z for z in a.zones if z not in existing[1].zones])
             existing[1].articles.extend(a.articles)
+            existing[1].source_actions.update(a.source_actions)
+            # THE RETURNED OBJECT TOO, not only the audit. `existing[1]` is
+            # published in `ReferenceResult.assignments`, so leaving the first
+            # absorbed assignment's scalar there kept an order-dependent false
+            # label on the public API: the same merged construction reported
+            # `build` or `through_the_wall` purely by which block sorted first.
+            # A truthful map beside a contradictory scalar does not make the
+            # scalar true for existing callers (Sol, `162`).
+            if len(set(existing[1].source_actions.values())) > 1:
+                existing[1].action = MIXED_SOURCE_ACTIONS
+            # PER-KEY multiplicity. A global `len(merged) < len(assignments)`
+            # only says SOMETHING merged; it cannot say which key did, and a
+            # family that survived as one assignment was then reported as a
+            # merge. One Museum-archive System 2 beside four merging Office
+            # System 6 blocks produced a Note (2) record claiming a common
+            # ventilation system for ONE block (Sol, `147`).
+            existing[2] += 1
         else:
-            merged.append([key, a])
-    if len(merged) < len(assignments):
-        audit.decision('build', 'multizone selection groups merged into whole-building systems',
-                       inputs={'selection_groups': len(assignments), 'merged_groups': len(merged)},
-                       value='one multizone system spans the thermal blocks of all storeys; '
-                             'facade/internal/underground split applied inside the builder',
-                       article='Table 8.4.4.7.-B Note (3)', ruling='D-28')
+            merged.append([key, a, 1])
+    # TWO NOTES, NOT ONE. Note (3) is marked on System 6 ALONE and is what
+    # authorizes one multizone system to span groups of thermal blocks. Systems
+    # 1, 2 and 5 reach a COMMON VENTILATION SYSTEM through Note (2); they do not
+    # acquire System 6's facade/internal/underground grouping, and auditing a
+    # merged System 1 under Note (3) cited a permission that does not apply to
+    # it (Sol, `143`). Selection stays per block for every row — what differs is
+    # whether the selected units remain separate at CONSTRUCTION.
+    # ONE RECORD PER MERGED CONSTRUCTION KEY, not per system number.
+    #
+    # Measuring multiplicity per key and then grouping the survivors by
+    # `reference_system` threw the identity away again: two independent
+    # proposed serving systems whose blocks all select System 6 — a gas
+    # hot-water variant over three blocks and an electric variant over two —
+    # are two legitimate Note (3) merges that CANNOT become one construction,
+    # because their heating realisations differ. The audit claimed one system
+    # spanned all five, with `merged_groups: 2` beside a singular value
+    # contradicting it, and erased the gas/electric boundary an AHJ-facing
+    # audit has to preserve (Sol, `149`).
+    #
+    # Each record's counts are its OWN scope. Whole-building
+    # `len(assignments)`/`len(merged)` numbers in a per-key record invite the
+    # same conflation from the other direction.
+    subsection = _subsection(ruleset)
+    for key, assignment, absorbed in merged:
+        # Only a key that ABSORBED another assignment merged. A singleton
+        # survivor is not a merge, whatever happened elsewhere in the building.
+        if key is None or absorbed < 2:
+            continue
+        blocks = sorted(assignment.zones)
+        # THE COMPLETE MERGE KEY, not half of it. The runtime identity is
+        # `[catalog_name, config]`, and serializing only the catalogue left two
+        # records that differ solely by config — Systems 2 and 5 use one
+        # catalogue name for their gas and electric variants — exposing the
+        # same system and catalogue with nothing saying why they are separate
+        # (Sol, `151`). `energy_type` rides along because it is what a reader
+        # is usually after, and `config` covers the differences that do not
+        # reduce to it, such as purchased-energy overrides and System 5's
+        # cooling-only realisation.
+        scope = {'reference_system': assignment.reference_system,
+                 'catalogue': assignment.catalog_name,
+                 'config': (dict(sorted(assignment.config.items()))
+                            if isinstance(assignment.config, dict)
+                            else assignment.config),
+                 'energy_type': assignment.energy_type,
+                 'selection_assignments_absorbed': absorbed,
+                 'thermal_blocks_spanned': len(blocks),
+                 'thermal_blocks': blocks}
+        if assignment.reference_system == 6:
+            audit.decision(
+                'build',
+                'multizone selection groups merged into ONE multizone system',
+                inputs=scope,
+                value='Note (3) permits one multizone system to span these '
+                      'thermal blocks; the facade/internal/underground split '
+                      'is applied inside this construction. Another merged '
+                      'System 6 construction elsewhere in the building is a '
+                      'SEPARATE record, because a different catalogue '
+                      'realisation cannot be the same system',
+                article=f'Table {subsection}.7.-B Note (3)',
+                ruling='D-28')
+        else:
+            audit.decision(
+                'build',
+                'one COMMON VENTILATION SYSTEM serves these thermal blocks; '
+                'the heating and cooling equipment stays block-level',
+                inputs=scope,
+                value='Note (2) permits a common ventilation system for '
+                      'Systems 1, 2 and 5 and distinguishes it from the '
+                      'block-level systems; it grants none of Note (3)\'s '
+                      'facade/internal/underground grouping, which is '
+                      'marked on System 6 alone',
+                article=f'Table {subsection}.7.-B Note (2)',
+                ruling='D-101')
     assignments = [m[1] for m in merged]
 
     purchased_cooling_chillers = []
+    # DESTRUCTION IS PHASED AHEAD OF CONSTRUCTION, for the whole affected
+    # closure at once.
+    #
+    # `replace_system` is `build_system(..., remove_existing=True)`, so a
+    # per-assignment call tore down and built in one step. That was harmless
+    # while one assignment covered a whole serving system, and wrong once
+    # selection became per thermal block: five block assignments tore down five
+    # times, and a plant SHARED by those blocks survived whichever teardown ran
+    # first and was then re-adopted by name. Sample 13's own fixture
+    # description had warned of exactly that — "with several single-zone groups
+    # the district loop survives the per-group teardown and is adopted by name,
+    # so the article is only half-applied" — and the multi-energy witnesses
+    # caught it: a plant the Code REPLACES kept its proposed markers.
+    #
+    # Sol's `141`: "Destructive replacement must be planned for the whole
+    # affected HVAC closure and completed before replacement construction
+    # begins." Phasing it also makes the outcome assignment-order invariant,
+    # which a per-assignment teardown can never be.
+    replaced_zone_names = [name for assignment in assignments
+                           if assignment.action != 'copy_proposed'
+                           for name in assignment.zones]
+    if replaced_zone_names:
+        modeling.remove_hvac_from_zones(
+            reference, [zones_by_name[name] for name in replaced_zone_names])
+        audit.info('build',
+                   'proposed HVAC torn down for every thermal block the '
+                   'reference replaces, in ONE pass before any reference '
+                   'system is built — a plant shared by several blocks must '
+                   'not survive one block\'s teardown and be re-adopted',
+                   target=','.join(replaced_zone_names),
+                   inputs={'blocks': len(replaced_zone_names),
+                           'assignments': sum(1 for a in assignments
+                                              if a.action != 'copy_proposed')},
+                   ruling='D-101')
+
+    # PLANT OWNERSHIP ACROSS A MIXED CLOSURE. Phasing the teardown fixed the
+    # all-build ordering defect and not this one: `remove_hvac_from_zones`
+    # removes a plant only when its demand side empties, so a plant shared by a
+    # RETAINED `copy_proposed` block and replaced blocks correctly survives for
+    # the copied block — and the first reference builder then finds it by
+    # boiler presence and part-load class and connects the built blocks to it.
+    #
+    # Measured on one four-pipe fan-coil serving group over five blocks, block 1
+    # residential (`copy_proposed`) and blocks 2-5 office (System 3): the marked
+    # PROPOSED plant ended up with `Coil Heating Water 1` plus four
+    # `Coil Heating Water Baseboard` objects on its demand side — four
+    # `action == 'build'` blocks drawing on proposed equipment, now through
+    # retained demand rather than teardown order (Sol, `143`).
+    #
+    # The two ownership outcomes are therefore explicit: a copied block may
+    # retain its proposed plant, and a built block connects to a planned
+    # REFERENCE plant. `copy_proposed` is the only retention branch the Code
+    # gives us, and no conformance check exists that would let a built block
+    # adopt proposed plant equipment.
+    retained_plants = []
+    if replaced_zone_names:
+        # EVERY SURVIVOR, whatever kept it alive. Nothing of the reference has
+        # been built yet, so any plant still present after the teardown pass is
+        # a PROPOSED plant that something retained — and what retained it does
+        # not change whether a replaced block may join it.
+        #
+        # Gating this on `copy_proposed` missed the other retainers.
+        # `remove_hvac_from_zones` drops a plant only when its DEMAND SIDE
+        # empties, and zone coils are not the only demand: a
+        # `WaterUseConnections` carrying process or service water keeps the loop
+        # alive with no copied block anywhere. Measured on five office blocks
+        # all selected as build System 3, with 0.001 m3/s of process water on
+        # the proposed loop: the marked plant kept the process demand AND all
+        # five newly built reference baseboards, with no reservation audit at
+        # all (Sol, `147`).
+        #
+        # Reference systems built later still share one another's plants,
+        # because this list is captured BEFORE construction and holds only
+        # pre-existing loops.
+        surviving = list(reference.getPlantLoops())
+        retained_plants = [str(plant.handle()) for plant in surviving]
+        # THE EXCLUSION STAYS BROAD; THE AUDIT DOES NOT. Every corpus model
+        # carries a `Main Service Water Loop`, which teardown skips by design,
+        # so an unclassified record fired on all 35 corpus scenarios with
+        # `copied_blocks: 0` and told an AHJ that proposed plant equipment had
+        # been reserved — making the one run where it MATTERS indistinguishable
+        # from the ones where nothing could have been adopted anyway
+        # (Fable, `158` F2). An SWH loop was never a candidate for
+        # `find_hot_water` or `find_chilled_water`.
+        #
+        # So the audit reports only the survivors a reference build could
+        # actually have adopted, and counts the rest separately. Reserving them
+        # all is still right: the exclusion costs nothing and a loop this
+        # classifier misjudges would otherwise be adoptable.
+        adoptable = [plant for plant in surviving
+                     if modeling.plant_is_hvac_candidate(plant)]
+        if adoptable:
+            audit.decision(
+                'build',
+                'proposed plant equipment RESERVED to whatever retained it: a '
+                'reference system built for a replaced block may not connect '
+                'to a plant that survived teardown, whether a copied block, '
+                'process or service water, or another non-zone demand is '
+                'keeping it alive',
+                target=','.join(sorted(p.nameString() for p in adoptable)),
+                inputs={'retained_plants': len(adoptable),
+                        # NOT "non-HVAC": this counts survivors NO REUSE PATH
+                        # CAN RETURN, which is a different set. A copied
+                        # residential WSHP block retains its CONDENSER loop —
+                        # `wshp` is in both compatible sets — and a condenser
+                        # loop carries no boiler, district object, chiller or
+                        # builder hot/chilled-water name, so it fails all five
+                        # branches while being plainly HVAC (Fable, `167` G3).
+                        'retained_unadoptable_plants':
+                            len(surviving) - len(adoptable),
+                        'reserved_plants': len(retained_plants),
+                        'copied_blocks': sum(len(a.zones) for a in assignments
+                                             if a.action == 'copy_proposed'),
+                        'replaced_blocks': len(replaced_zone_names)},
+                value='a built block connects to a planned reference plant; '
+                      'proposed equipment stays with the demand that retained '
+                      'it',
+                ruling='D-101')
+
     for assignment in assignments:
         if assignment.action == 'copy_proposed':
             audit.info('build', 'proposed system retained in reference (residential rule)',
@@ -611,8 +1264,14 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
                              for chiller in reference.getChillerElectricEIRs()}
         existing_boilers = {str(boiler.handle())
                             for boiler in reference.getBoilerHotWaters()}
-        result = modeling.replace_system(reference, assignment.catalog_name, zones,
-                                         config=assignment.config)
+        # NOT `replace_system`: the teardown already ran above for the whole
+        # closure. Removing again here would destroy a plant another block's
+        # system has already been built onto.
+        result = modeling.build_system(reference, assignment.catalog_name, zones,
+                                       config=assignment.config,
+                                       exclude_plants=retained_plants)
+        _audit_corner_block_grouping(result, assignment,
+                                     _subsection(ruleset), audit)
         purchased_cooling_cop = (assignment.config or {}).get(
             'purchased_cooling_reference_cop')
         if purchased_cooling_cop is not None:
@@ -637,7 +1296,21 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
                 if str(boiler.handle()) not in existing_boilers:
                     boiler.additionalProperties().setFeature(
                         BOILER_PART_LOAD_CLASS_FEATURE, boiler_class)
-        built_inputs = {'system': assignment.reference_system, 'action': assignment.action}
+        # PER-BLOCK ACTIONS, not a scalar. This record targets every block it
+        # built, so a scalar label claimed one selection branch applied to all
+        # of them. `assignment.action` WAS the first absorbed branch when this
+        # comment was written; a heterogeneous merge now sets it to
+        # `MIXED_SOURCE_ACTIONS` and a homogeneous one keeps its common
+        # branch, so it no longer lies — but the map is still what this record
+        # publishes, because a sentinel cannot say WHICH block took which
+        # branch. Where every block agrees the map says so once.
+        source_actions = assignment.source_actions or {
+            zone: assignment.action for zone in assignment.zones}
+        distinct_actions = sorted({str(action) for action in source_actions.values()})
+        built_inputs = {'system': assignment.reference_system,
+                        'source_actions': {zone: source_actions[zone]
+                                           for zone in sorted(source_actions)},
+                        'selection_branches': distinct_actions}
         if boiler_class is not None:
             built_inputs['boiler_part_load_curve_class'] = boiler_class
         audit.decision('build', 'reference system built', target=','.join(assignment.zones),
@@ -654,7 +1327,27 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
         _apply_operating_schedules(result.air_loops, proposed_availability, audit)
         _audit_terminal_secondary_split(zones, assignment.reference_system,
                                         ruleset.id, audit)
-        _apply_zone_dispatch(zones, assignment.reference_system, ruleset.id, audit)
+        # The (5)(b) fact, for THIS ASSIGNMENT'S groups.
+        #
+        # This read `group`, which the assignment loop never binds — its only
+        # binding is the DCV capture loop far above, so every assignment got
+        # whichever zone group iterated LAST. Fable's `131` F1 reproduced both
+        # directions through the real build: four single-fuel System 3 zones
+        # lost the citation they are owed when a multi-fuel zonal group
+        # iterated last, and a multi-fuel zone carried AHJ-1 and AHJ-15
+        # together — the claim that its priority is prescribed and the claim
+        # that it is not — when it iterated first.
+        #
+        # The comment that stood here said the fact "is established HERE, where
+        # the group's energy types are known". It was established for one group
+        # and applied to all of them.
+        assignment_zones = set(assignment.zones)
+        prescribed = any(
+            len(service_set_heating_fuels(candidate, facts)[0]) > 1
+            for candidate in (facts.get('zone_groups') or ())
+            if assignment_zones & set(candidate.get('zones') or ()))
+        _apply_zone_dispatch(zones, assignment.reference_system, ruleset.id,
+                             audit, priority_prescribed=prescribed)
 
     _rebuild_humidification(reference, proposed_humidification, rules_data,
                             ruleset.id, audit)
@@ -715,7 +1408,49 @@ _CONSTANT_VOLUME_TERMINALS = ('OS_AirTerminal_SingleDuct_ConstantVolume_NoReheat
                               'OS_AirTerminal_SingleDuct_Uncontrolled')
 
 
-def _apply_zone_dispatch(zones, reference_system, code, audit):
+def _visibly_zero_capacity(component):
+    """True only when a component's capacity is KNOWN and is zero.
+
+    Unknown is not zero. An autosized component has no capacity before sizing,
+    and treating that as zero would silently drop AHJ-15 on the ordinary
+    unsized path — under-disclosing a question, which is the direction that
+    hides things. So an unreadable capacity counts as present.
+    """
+    baseboard = component.to_ZoneHVACBaseboardConvectiveElectric()
+    if baseboard.is_initialized():
+        value = baseboard.get().nominalCapacity()
+        return bool(value.is_initialized()) and float(value.get()) <= 0.0
+    water = component.to_ZoneHVACBaseboardConvectiveWater()
+    if water.is_initialized():
+        coil = water.get().heatingCoil().to_CoilHeatingWaterBaseboard()
+        if coil.is_initialized():
+            value = coil.get().heatingDesignCapacity()
+            return bool(value.is_initialized()) and float(value.get()) <= 0.0
+    return False
+
+
+def _dispatch_ahj(priority_prescribed, ordered, zeroed):
+    """AHJ-15's narrowing, applied where the dispatch order is chosen.
+
+    Sol's `126` narrowed it to the case where Article 9.(5)(b) does NOT already
+    prescribe the proposed priority — where it does, the priority is carried
+    over rather than chosen by us, and there is nothing to refer. `127` adds
+    that a zero-capacity component is not a second competing path.
+
+    The (5)(b) fact is CARRIED IN from the selection rather than rediscovered
+    here: this function knows the final topology but not the proposed group's
+    energy types, and rebuilding that knowledge would be the duplicated
+    predicate D-100 exists to remove.
+    """
+    if priority_prescribed:
+        return None
+    if not [zone for zone in ordered if zone not in set(zeroed)]:
+        return None
+    return 'AHJ-15'
+
+
+def _apply_zone_dispatch(zones, reference_system, code, audit,
+                         priority_prescribed=False):
     """D-91 — zone equipment dispatch for one-unit-per-block Systems 3 and 4.
 
     Legacy creation order puts the baseboard first in `SequentialLoad`, so it
@@ -740,7 +1475,7 @@ def _apply_zone_dispatch(zones, reference_system, code, audit):
     untouched."""
     if reference_system not in (3, 4):
         return
-    ordered = []
+    ordered, zeroed = [], []
     for zone in zones:
         loop = zone.airLoopHVAC()
         if not loop.is_initialized() or len(loop.get().thermalZones()) != 1:
@@ -755,6 +1490,11 @@ def _apply_zone_dispatch(zones, reference_system, code, audit):
         if len(equipment) != 2 or len(terminals) != 1 or len(baseboards) != 1:
             continue
         terminal, baseboard = terminals[0], baseboards[0]
+        # AHJ-15 needs BOTH to be able to serve overlapping demand, so a
+        # component whose capacity is visibly ZERO excludes the zone — it is
+        # not a second path competing for the load (Sol, `127`).
+        if _visibly_zero_capacity(baseboard):
+            zeroed.append(zone.nameString())
         zone.setLoadDistributionScheme('SequentialLoad')
         zone.setHeatingPriority(terminal, 1)
         zone.setCoolingPriority(terminal, 1)
@@ -778,7 +1518,8 @@ def _apply_zone_dispatch(zones, reference_system, code, audit):
                          'the residual; heating energy moves from the baseboards and hot-water plant '
                          'to the rooftop coil — accepted, because the article sets installed '
                          'capacities, not annual shares',
-                   article=f'{prefix}.9.(3); 8.4.2.10.(2)', ruling='D-91')
+                   article=f'{prefix}.9.(3); 8.4.2.10.(2)', ruling='D-91',
+                   ahj=_dispatch_ahj(priority_prescribed, ordered, zeroed))
 
 
 def _apply_zone_fan_rules(zones, reference_system, rules_data, audit):
@@ -818,7 +1559,7 @@ def _apply_zone_fan_rules(zones, reference_system, rules_data, audit):
                    article='8.4.4.18.(3)', ruling='D-22')
 
 
-def apply_economizer_thresholds(model, audit=None):
+def apply_economizer_thresholds(model, audit=None, code=None):
     """T3 (audit 2026-07-25): 8.4.4.12 economizers apply only where Article
     5.2.2.7 applies to the proposed system — mechanical cooling AND (sized
     supply > 1500 L/s OR cooling capacity > 20 kW); dwelling-only/hotel
@@ -829,8 +1570,15 @@ def apply_economizer_thresholds(model, audit=None):
 
     :param model: sized reference openstudio.model.Model (modified in place)
     :param audit: AuditLog or None (a new one is created if None)
+    :param code: code id, for the edition's own article prefix. `None` keeps
+        2020's, which is what the hardcoded value already was — the economizer
+        article is 8.4.4.12 in NECB 2020 and 8.4.5.12 in NECB 2025, and both
+        entries here spelled 2020's into the ARTICLE FIELD on every 2025 run
+        (Fable's `133` G3). In NECB 2025 `8.4.4.12` does not exist at all:
+        that subsection stops at `.2`.
     :return: AuditLog — the audit carrying every keep/strip decision
     """
+    economizer_article = f'{_subsection(resolve(code) if code else None)}.12.'
     from btap.audit import AuditLog
 
     audit = audit if audit is not None else AuditLog()
@@ -885,14 +1633,14 @@ def apply_economizer_thresholds(model, audit=None):
                            inputs={'supply_l_s': ruby_round(supply * 1000, 0),
                                    'cooling_kw': ruby_round(cooling_w / 1000.0, 1)},
                            value=ctrl.getEconomizerControlType(),
-                           article='8.4.4.12.; 5.2.2.7.(1)', ruling='D-22')
+                           article=f'{economizer_article}; 5.2.2.7.(1)', ruling='D-22')
         else:
             ctrl.setEconomizerControlType('NoEconomizer')
             audit.decision('rules', 'economizer REMOVED — below the 5.2.2.7 trigger (<=1500 L/s and <=20 kW)',
                            target=air_loop.nameString(),
                            inputs={'supply_l_s': ruby_round(supply * 1000, 0),
                                    'cooling_kw': ruby_round(cooling_w / 1000.0, 1)},
-                           value='NoEconomizer', article='8.4.4.12.; 5.2.2.7.(1)', ruling='D-22')
+                           value='NoEconomizer', article=f'{economizer_article}; 5.2.2.7.(1)', ruling='D-22')
     return audit
 
 
@@ -1092,10 +1840,16 @@ def _clone_model(model):
 
 def _building_info(model, overrides, audit):
     """Building info defaults derived from the model, overridable by the caller."""
-    info = {'storeys': _costing_geometry.above_ground_storeys(model),
-            'zone_types': _zone_space_types(model)}
+    # DERIVED LAZILY. The model is the source of truth for its own storey
+    # count, and asking it now raises when it cannot say — so a caller who has
+    # already supplied the count must not be made to answer for the model's
+    # silence. Computing first and overriding second would fail the very runs
+    # the override exists for.
+    info = {'zone_types': _zone_space_types(model)}
     if overrides:
         info.update(overrides)
+    if info.get('storeys') is None:
+        info['storeys'] = _costing_geometry.above_ground_storeys(model)
     audit.info('characterize', 'building info for selection',
                inputs={'storeys': info['storeys'],
                        'typed_zones': sum(1 for v in info['zone_types'].values()
@@ -1362,7 +2116,7 @@ def _air_loop_humidifier(air_loop):
     return None
 
 
-def _capture_humidification(reference, audit):
+def _capture_humidification(reference, audit, table='Table 8.4.4.7.-B'):
     """Record, per zone, the humidification of the proposed loop serving it, plus the
     material needed to rebuild a working control: the proposed's own scheduled
     minimum-humidity setpoint, if it used one. (A ZoneControlHumidistat lives on the
@@ -1386,7 +2140,7 @@ def _capture_humidification(reference, audit):
                            'zones': len(air_loop.thermalZones()),
                            'scheduled_setpoint': record['scheduled_setpoint'] is not None},
                    value=component.nameString(),
-                   article='Table 8.4.4.7.-B Note (1)', ruling='D-55')
+                   article=f'{table} Note (1)', ruling='D-55')
 
     orphans = [h for h in (list(reference.getHumidifierSteamElectrics())
                            + list(reference.getHumidifierSteamGass()))
@@ -1396,7 +2150,7 @@ def _capture_humidification(reference, audit):
         audit.warn('build', f'{len(orphans)} proposed humidifier(s) sit on NO air loop serving a thermal block '
                             f'({names}) — the reference humidification they '
                             'correspond to CANNOT be determined and is not rebuilt',
-                   article='Table 8.4.4.7.-B Note (1)', ruling='D-55')
+                   article=f'{table} Note (1)', ruling='D-55')
     return captured
 
 
@@ -1437,6 +2191,13 @@ def _rebuild_humidification(reference, captured, rules_data, code, audit):
             if name not in served:
                 served.append(name)
         if _air_loop_humidifier(air_loop):
+            # NO AHJ-12 here, deliberately. The reference kept the proposed
+            # loop, so its identity independently settles whether
+            # humidification is present and no choice was made — Sol's `127`
+            # excludes exactly that case. A missing citation looks identical to
+            # a forgotten one, which is the risk site-owned applicability
+            # trades for removing a duplicated predicate, so the reason sits
+            # here rather than only in the register.
             audit.info('build', 'proposed humidification retained on this reference loop — the loop was not replaced',
                        target=air_loop.nameString(), article=article, ruling='D-55')
             continue
@@ -1446,10 +2207,15 @@ def _rebuild_humidification(reference, captured, rules_data, code, audit):
     if not missed:
         return
 
+    # TARGETED. Fable's `131` F10: this passed no `target=`, so the condition
+    # reached the report as ('AHJ-12', None) and its approval line carried no
+    # "Applies to" — the loop names existed only inside the action text, where
+    # the resolver cannot and must not read them.
     audit.warn('build', f"the proposed humidification on {', '.join(sorted(missed))} has NO reference loop to carry "
                         'it — the thermal blocks it served are unconditioned or zonally served in the reference, '
                         'so it is not rebuilt',
-               article=article, ruling='D-55')
+               target=','.join(sorted(missed)),
+               article=article, ruling='D-55', ahj='AHJ-12')
 
 
 def _build_reference_humidifier(air_loop, records, spec, article, audit):
@@ -1466,7 +2232,8 @@ def _build_reference_humidifier(air_loop, records, spec, article, audit):
     if not humidifier.addToNode(air_loop.supplyOutletNode()):
         humidifier.remove()
         audit.warn('build', 'the SDK REFUSED the reference humidifier on this supply path — humidification is NOT '
-                            'rebuilt on this loop', target=air_loop.nameString(), article=article, ruling='D-55')
+                            'rebuilt on this loop', target=air_loop.nameString(),
+                   article=article, ruling='D-55', ahj='AHJ-12')
         return
 
     control = _attach_humidity_control(air_loop, humidifier, records, spec)
@@ -1475,7 +2242,8 @@ def _build_reference_humidifier(air_loop, records, spec, article, audit):
         audit.warn('build', 'the proposed humidification on this thermal block has NO determinable humidity '
                             'control (no zone humidistat survives and the proposed used no scheduled minimum-humidity '
                             'setpoint) — an uncontrolled humidifier is INERT, so none is rebuilt',
-                   target=air_loop.nameString(), article=article, ruling='D-55')
+                   target=air_loop.nameString(), article=article,
+                   ruling='D-55', ahj='AHJ-12')
         return
 
     audit.decision('build', 'reference humidification rebuilt on the proposed energy source',
@@ -1483,7 +2251,8 @@ def _build_reference_humidifier(air_loop, records, spec, article, audit):
                    inputs={'energy_source': source,
                            'proposed_systems': _uniq([r['air_loop'] for r in records]),
                            'control': control, 'capacity': 'autosized'},
-                   value=humidifier.nameString(), article=article, ruling='D-55')
+                   value=humidifier.nameString(), article=article,
+                   ruling='D-55', ahj='AHJ-12')
 
 
 def _elect_humidifier_kind(air_loop, records, article, audit):
@@ -1811,13 +2580,27 @@ def heat_pump_aux_energy_type(group, facts, hp_rules, annual, audit, article_bas
     :param audit: AuditLog or None
     :return: str or None — elected reference energy-type variant ('gas', 'electric'),
         or None when sentence (g) does not elect (proxy applies)"""
+    # The STRUCTURAL proxy lives in a different article from the one
+    # article_base names, so it needs the subsection on its own. Fable's `131`
+    # F6: these said '8.4.4.9.(4)' on a 2025 run whose `article=` correctly
+    # said 8.4.5.13, and the resolver quotes the action verbatim as the
+    # condition detail — so an authority was handed a 2020 number, which in
+    # 2025 is the archetype-EUI subsection entirely.
+    #
+    # This block sat ABOVE the docstring, which made it a leading comment and
+    # left `__doc__` None (Fable's `133` G6).
+    proxy = '.'.join(article_base.split('.')[:3]) + '.9.(4)'
     audit = audit if audit is not None else NullAudit()
     threshold = (hp_rules or {}).get('aux_energy_type_threshold_fraction') or 0.33
     if annual is None:
+        # NO AHJ-2. Sol's `127`: the absence of annual data in a `none` or
+        # `sizing` run is a MODE limitation, not a question an authority can
+        # settle — (2)(g)'s basis is only live once the comparison is actually
+        # made.
         audit.info('selection',
                    'no proposed annual data (simulate: :sizing/:none, or the annual run predates this '
-                   'feature) — the 8.4.4.13.(2)(g) auxiliary-fuel election cannot run; the structural '
-                   '8.4.4.9.(4) proxy elects the fuel instead',
+                   f'feature) — the {article_base}.(2)(g) auxiliary-fuel election cannot run; the '
+                   f'structural {proxy} proxy elects the fuel instead',
                    target=','.join(group['zones']), article=f'{article_base}.(2)(g)', ruling='D-52')
         return None
 
@@ -1838,9 +2621,12 @@ def heat_pump_aux_energy_type(group, facts, hp_rules, annual, audit, article_bas
 
     total_j = hp_j + sum(aux_by_fuel.values())
     if not aux_by_fuel or total_j <= 0.0:
+        # NO AHJ-2 either: with no auxiliary energy there is nothing for the
+        # (2)(g) comparison to weigh, so no basis question arises.
         audit.info('selection',
                    'the proposed thermal blocks have no terminal or auxiliary heating energy in the annual '
-                   'run — 8.4.4.13.(2)(g) has nothing to elect; the structural 8.4.4.9.(4) proxy elects the fuel',
+                   f'run — {article_base}.(2)(g) has nothing to elect; the structural {proxy} '
+                   'proxy elects the fuel',
                    target=','.join(group['zones']),
                    inputs={'hp_gj': ruby_round(hp_j / 1e9, 2)},
                    article=f'{article_base}.(2)(g)', ruling='D-52')
@@ -1851,11 +2637,12 @@ def heat_pump_aux_energy_type(group, facts, hp_rules, annual, audit, article_bas
         audit.decision('selection',
                        f"the heat pump carries {ruby_round(share * 100, 1)}% of the blocks' annual space-heating "
                        f'energy — NOT above the {ruby_round(threshold * 100)}% proviso, so sentence (g) does not '
-                       'elect; the structural 8.4.4.9.(4) proxy elects the fuel',
+                       f'elect; the structural {proxy} proxy elects the fuel',
                        target=','.join(group['zones']),
                        inputs={'hp_gj': ruby_round(hp_j / 1e9, 2), 'total_gj': ruby_round(total_j / 1e9, 2),
                                'share': ruby_round(share, 3), 'threshold': threshold, 'sentence': sentence},
-                       article=f'{article_base}.(2){sentence}', ruling='D-52')
+                       article=f'{article_base}.(2){sentence}', ruling='D-52',
+                       ahj='AHJ-2')
         return None
 
     elected_fuel, elected_j = max(aux_by_fuel.items(), key=lambda kv: kv[1])
@@ -1863,14 +2650,25 @@ def heat_pump_aux_energy_type(group, facts, hp_rules, annual, audit, article_bas
     if variant is None:
         audit.warn('selection',
                    f"the largest terminal/aux energy type is '{elected_fuel}', which maps to NO reference "
-                   'system variant — the structural 8.4.4.9.(4) proxy elects the fuel instead',
+                   f'system variant — the structural {proxy} proxy elects the fuel instead',
                    target=','.join(group['zones']),
                    inputs={'by_fuel_gj': {f: ruby_round(j / 1e9, 2) for f, j in aux_by_fuel.items()}},
-                   article=f'{article_base}.(2){sentence}', ruling='D-52')
+                   article=f'{article_base}.(2){sentence}', ruling='D-52',
+                   # CITES, even though the election could not be carried out.
+                   # Fable's `131` F5: by this point BOTH of Sol's `127`
+                   # positive conditions have happened — the (2)(g) share
+                   # comparison was made and the largest auxiliary type was
+                   # elected on the delivered-heat basis AHJ-2 is about. That
+                   # the elected fuel then maps to no variant is a mapping
+                   # limitation, not a reason the disposition stops applying.
+                   # `_energy_type_variant` covers gas|oil|propane|purchased
+                   # and electric, so a hydronic coil on a loop with no
+                   # recognised fuel ('Unknown') lands here.
+                   ahj='AHJ-2')
         return None
     audit.decision('selection',
-                   'auxiliary heating energy type ELECTED from the proposed annual run: the terminal/aux '
-                   f'energy type with the largest annual energy use is {elected_fuel} '
+                   "auxiliary heating energy type ELECTED from the proposed run's simulated period: "
+                   f'the terminal/aux energy type with the largest energy use over that period is {elected_fuel} '
                    f"({ruby_round(elected_j / 1e9, 2)} GJ delivered), and the heat pump's "
                    f'{ruby_round(share * 100, 1)}% share exceeds the {ruby_round(threshold * 100)}% proviso '
                    '((h) inapplicable: the source is classified air/water/ground)',
@@ -1879,7 +2677,8 @@ def heat_pump_aux_energy_type(group, facts, hp_rules, annual, audit, article_bas
                            'hp_gj': ruby_round(hp_j / 1e9, 2), 'share': ruby_round(share, 3),
                            'sentence': sentence, 'scope_loops': scope_loops,
                            'scope_zone_count': len(scope_zones)},
-                   value=variant, article=f'{article_base}.(2){sentence}', ruling='D-52')
+                   value=variant, article=f'{article_base}.(2){sentence}',
+                   ruling='D-52', ahj='AHJ-2')
     return variant
 
 
@@ -1921,6 +2720,459 @@ def _energy_type_variant(fuel):
     return None
 
 
+def _heating_plant(group, facts):
+    """The single hot-water plant serving this group, by fuel-set intersection.
+
+    Intersection finds the plant that carries ANY of the group's heating
+    energy types, which is NOT the same as a plant that carries them all:
+    samples 16/17/18 have a GAS-ONLY hot-water plant plus electric heating
+    elsewhere in the serving group, and they intersect on NaturalGas alone.
+    Callers must therefore ask `_plant_is_multi_fuel` before saying anything
+    about boilers per energy type (Sol, `113`).
+    """
+    wanted = {str(f) for f in group.get('heating_energy_types') or ()}
+    candidates = [pl for pl in (facts.get('plants') or ())
+                  if pl.get('type') == 'hot_water'
+                  and wanted & set(pl.get('fuels') or ())]
+    return candidates[0] if len(candidates) == 1 else None
+
+
+def _heating_plant_name(group, facts):
+    plant = _heating_plant(group, facts)
+    return None if plant is None else plant.get('name')
+
+
+def _plant_covers_group(plant, group, facts=None):
+    """True when ONE plant carries EVERY energy type the serving group uses.
+
+    `len(plant.fuels) > 1` is NOT enough, and Sol built the counter-example
+    (`114`): a group of {Electricity, NaturalGas, FuelOilNo2} served by a
+    gas+oil plant took the plant-specific branch and reported shares of
+    {NaturalGas: 0.6, FuelOilNo2: 0.4} — electricity dropped out of the
+    DENOMINATOR entirely. A plant-only allocation may be described as the
+    group's allocation only when the plant accounts for the whole group.
+    """
+    if plant is None:
+        return False
+    plant_fuels = {str(f) for f in (plant.get('fuels') or ())}
+    # The SERVICE SET, per AHJ-5. A water-loop heat-pump group's service set
+    # includes its source-loop boiler's fuel, which the terminal hot-water
+    # plant does not carry — so this correctly reports NO coverage there and
+    # the (6) cardinality condition does not fire for that shape.
+    if facts is None:
+        group_fuels = {str(f) for f in (group.get('heating_energy_types') or ())}
+    else:
+        group_fuels, _added = service_set_heating_fuels(group, facts)
+    return len(plant_fuels) > 1 and group_fuels <= plant_fuels
+
+
+def multi_energy_articles(selection, ruleset=None):
+    """``(capacity_ratio, single_boiler)`` for the RESOLVED edition.
+
+    8.4.4.9.(5)/(6)(b) in 2020 and 8.4.5.9.(5)/(6)(b) in 2025. A hardcoded
+    literal here cited 2020's numbers to the AHJ on every 2025 run (Sol,
+    `113`).
+
+    The subsection comes from the manifest's own `reference_subsection`
+    registry when a ruleset is in hand, as `_audit_terminal_secondary_split`
+    already does. Deriving it from the heat-pump article instead had a SILENT
+    2020 fallback: `heat_pump_article_base` returns '8.4.4.13' when that rule
+    value is missing or malformed, so a 2025 selection would have cited 2020
+    without a word (Fable, `117`). The derivation is kept only as the
+    fallback for a caller with no ruleset, and it is the narrower risk of the
+    two.
+    """
+    if ruleset is not None:
+        subsection = ruleset.article('reference_subsection')
+    else:
+        subsection = heat_pump_article_base(selection).rsplit('.', 1)[0]
+    return f'{subsection}.9.(5)', f'{subsection}.9.(6)(b)'
+
+
+def _heating_allocation(group, facts):
+    """``(shares, watts_by_fuel)`` for a multi-energy heating group, or None.
+
+    8.4.4.9.(5) ratios the proposed building's heating equipment CAPACITY
+    allocation per energy type. `classify` records that allocation on the
+    plant it belongs to; this finds the plant serving THIS group by fuel-set
+    intersection and returns the shares when every capacity is known.
+
+    Returns None when the allocation cannot be established — an autosized
+    plant, no sizing run, or more than one candidate plant. That is the common
+    case rather than the edge: every multi-fuel plant in the sample corpus is
+    autosized, and a `--simulate none` run never sizes at all. The caller must
+    say UNKNOWN rather than guess a fraction (Sol, `110`).
+    """
+    wanted = {str(f) for f in group.get('heating_energy_types') or ()}
+    candidates = [pl for pl in (facts.get('plants') or ())
+                  if pl.get('type') == 'hot_water'
+                  and wanted & set(pl.get('fuels') or ())]
+    if len(candidates) != 1:
+        return None
+    watts = candidates[0].get('fuel_capacities_w') or {}
+    known = {f: w for f, w in watts.items() if w}
+    if len(known) < 2 or len(known) != len(watts):
+        return None
+    total = sum(known.values())
+    if total <= 0:
+        return None
+    return {f: w / total for f, w in known.items()}, known
+
+
+#: What was ACTUALLY measured, named precisely enough to be checked. My
+#: previous wording said the annual result was "unchanged at the legacy gem's
+#: 0.5 sizing factor", which is false: it changed by -616.6 kWh. What was
+#: unchanged across BOTH experiments is that the secondary boiler never
+#: fired. Sol caught the conflation (`114`), and the two statements are not
+#: the same claim.
+#:
+#: Both experiments ran on sample 11's necb2020 reference model (gas-primary)
+#: with CWEC2020 Toronto weather. Neither says anything about a 2025 runtime,
+#: a different sample, or a cooling plant.
+#: The subsection the measurement was taken under. The experiments ran on one
+#: edition, so the note travels only to that edition: attaching it elsewhere
+#: would present it as verifying a model it never touched (Sol, `114`).
+_MEASURED_SUBSECTION = '8.4.4'
+_FIXTURE_MEASUREMENT = (
+    'MEASURED on sample 11 only, necb2020, gas-primary, annual, on the model '
+    'FED TO THE SIZING RUN (both boilers autosized, 64,396 W each) — which is '
+    'NOT the model the annual pipeline runs, where the staging pass has '
+    'already driven the secondary to ~0 W: '
+    '(i) BOILER COUNT at sizingFactor 1.0 — two boilers 158,219.4 kWh vs one '
+    'boiler 158,219.4 kWh, identical to 0.1 kWh; (ii) SIZING FACTOR at two '
+    'boilers — 1.0 gives 158,219.4 kWh and 0.5 gives 157,602.8 kWh, a CHANGE '
+    'of -616.6 kWh (-0.39%). What held in BOTH experiments is that the '
+    'secondary boiler never fired, which is NOT the same statement as the '
+    'annual kWh being unchanged. These are measurements on that one fixture, '
+    'edition and model state, NOT a property of this model.')
+
+
+def service_set_heating_fuels(group, facts):
+    """The energy types a group's HEATING SERVICE SET uses, which is not the
+    same as the energy types its own terminal equipment burns.
+
+    AHJ-5, ruled by Sol's `126` against fetched text. A water-loop heat-pump
+    group's own `heating_energy_types` carries only the compressor fuel, but
+    Division A defines a primary system as equipment converting fuel or
+    electricity to heating and distributing it to secondary systems — giving
+    boilers as the example — and the Article 13 Appendix note says a water-loop
+    heat-pump system's source loop may include an auxiliary heat source, "e.g.
+    a boiler". Article 13.(1) routes that case back to Table 7-A and does not
+    exclude Article 9. So an active fuel-fired source-loop boiler is a SECOND
+    energy type used by the heating service set, and 8.4.x.9.(5) fires.
+
+    In Sol's words: "classifying only the group-local compressor fuel and
+    ignoring the source-loop heat is a predicate defect."
+
+    **The 8.4.2.2.(5) exclusion is NOT detected.** A genuinely redundant source
+    whose controls operate it only when the primary is not operating may be
+    excluded — the mutually-exclusive-controls test AHJ-4 settled — and nothing
+    here inspects control schemes. A normal source-loop boiler that runs while
+    compressors run does not qualify for that exclusion, so including it is the
+    right default; a true standby boiler is OVER-disclosed, and that direction
+    is deliberate because it over-reports a question rather than hiding one.
+    """
+    fuels = {str(f) for f in (group.get('heating_energy_types') or ())}
+    loops = {str(n) for n in (group.get('heat_pump_source_loops') or ())}
+    if not loops:
+        return fuels, set()
+    added = set()
+    for plant in (facts.get('plants') or ()):
+        if str(plant.get('name')) not in loops:
+            continue
+        for fuel in (plant.get('fuels') or ()):
+            text = str(fuel)
+            if text and text not in fuels:
+                added.add(text)
+    return fuels | added, added
+
+
+def _disclosure_ahj(source_loop_fuels, covers):
+    """The register ids this multi-energy disclosure branch owns.
+
+    SITE-OWNED applicability (Sol's `127`): this branch has the selected
+    topology, so it declares which dispositions apply rather than letting the
+    final collector re-characterize the model to guess. `path.py` previously
+    recomputed a `multi_energy_serving_systems` helper for exactly that, which
+    was a
+    second source of truth beside the branch that already knew.
+
+    * AHJ-1 always — an affected run's single-fuel reference is the
+      non-conforming substitution an authority must accept.
+    * AHJ-3 only where ONE hydronic plant carries the group's fuels, because
+      the (6) cardinality question needs such a plant to exist.
+    * AHJ-5 only where the SOURCE LOOP contributed a fuel, as the `ruled`
+      explanation of why this group entered scope. It adds no condition.
+    """
+    ids = ['AHJ-1']
+    if source_loop_fuels:
+        ids.append('AHJ-5')
+    return ' '.join(ids)
+
+
+def _plant_cardinality_ahj():
+    """AHJ-3 alone, because its scope is the PLANT and not the service set.
+
+    It used to ride on the AHJ-1 entry, which forced one dedupe key for two
+    different questions: AHJ-1 follows each proposed heating service and
+    allocation choice, AHJ-3 follows the hydronic plant cardinality choice, and
+    one plant can carry two service sets. Keying the pair by plant collapsed
+    the two AHJ-1 records into one (Sol, `143`).
+    """
+    return 'AHJ-3'
+
+
+def multi_energy_serving_groups(facts):
+    """Serving groups whose PROPOSED heating system uses more than one energy
+    type, excluding the purchased-energy route.
+
+    These are exactly the groups 8.4.x.9.(5) governs and this tool does not
+    implement: it elects ONE reference energy type, and Sol ruled on fetched
+    normative text (`119`) that no single-fuel basis satisfies (5)(a)'s
+    capacity ratio. A run containing any of them therefore cannot carry an
+    unqualified Code-compliance determination.
+
+    A pure function of `facts`, deliberately: the caller needs this to label
+    the verdict, and deriving it by scanning audit prose would couple the
+    determination to wording. It is the same predicate
+    `_disclose_multi_energy` applies per group.
+    """
+    out = []
+    for group in facts.get('zone_groups') or ():
+        fuels, _added = service_set_heating_fuels(group, facts)
+        if 'Purchased' in fuels or len(fuels) < 2:
+            continue
+        out.append(group)
+    return out
+
+
+def _disclose_multi_energy(group, selection, facts, audit, ruleset=None,
+                           disclosed=None):
+    """8.4.x.9.(5): disclose a multi-energy proposed heating system.
+
+    Called from `_finalize` on EVERY election path. It states what is
+    UNRESOLVED and nothing else — four separate corrections from Sol's `113`
+    and `114` all came from this entry claiming more than the model supports:
+
+    * a gas-only plant was described as holding one boiler per energy type;
+    * a plant covering only part of the group had its fuels reported as the
+      group's whole allocation;
+    * the ratio was called NOT MET when it is not verified or enforced —
+      sample 16's reference does carry electric ASHP heating stages, so
+      "the other types carry no reference capacity" was simply false;
+    * (6)(b) was cited as a demonstrated departure without any capacity to
+      establish which of (6)(b)/(c)/(d) even applies.
+    """
+    fuels, source_loop_fuels = service_set_heating_fuels(group, facts)
+    # 8.4.x.6 is the separate route for THIS group only. The building-wide
+    # `facts.purchased_energy.heating` flag used to suppress the diagnostic
+    # everywhere, so district heat on one primary system hid the (5) finding
+    # for an unrelated gas+electric serving system. 8.4.x.6 governs the
+    # purchased-energy system's CORRESPONDING system, not every group
+    # (Sol, `119`/`120`).
+    if 'Purchased' in fuels:
+        return
+    distinct = {str(f) for f in fuels}
+    if len(distinct) < 2:
+        return
+
+    ratio_article, boiler_article = multi_energy_articles(selection, ruleset)
+    sentence_six = boiler_article.split('(')[0] + '(6)'
+    plant = _heating_plant(group, facts)
+    covers = _plant_covers_group(plant, group, facts)
+    plant_name = (plant or {}).get('name')
+    # ONE DISCLOSURE PER CODE DECISION SCOPE, listing every affected block.
+    #
+    # The scope is the proposed HEATING SERVICE/ALLOCATION choice, not the
+    # thermal block: 8.4.x.9.(5) transfers one capacity allocation and one
+    # operating priority from one proposed heating system. One multi-energy
+    # plant and one control sequence serving five blocks is ONE unresolved
+    # choice affecting five block-level reference systems — "repeating the
+    # same warning five times does not disclose five questions; it obscures
+    # one question" (Sol, `141`).
+    #
+    # Where a plant COVERS the service set, the plant is that scope and the key
+    # was already right — which is why a shared plant stayed at one disclosure
+    # through the block refactor. Where no plant covers it, the scope is the
+    # SERVICE SET, so the key must name the original serving zones rather than
+    # the narrowed block. Sol is explicit that `plant:<name>` is not a
+    # universal service identity: 8.4.x.9.(6)(a) distinguishes a plant from the
+    # systems it serves, so both keys are kept.
+    service_set = tuple(group.get('_serving_zones') or group['zones'])
+    # THE AHJ-1 SCOPE IS THE SERVICE SET, ALWAYS. `plant:<name>` was used
+    # whenever a plant covered the group, which is not a service identity: two
+    # independent proposed serving systems drawing on ONE dual-fuel hot-water
+    # plant are two 8.4.x.9.(5) allocation choices, and the plant key emitted a
+    # single warning for both. 8.4.x.9.(6)(a) itself distinguishes a plant from
+    # the systems it serves, and AHJ-3's cardinality question — which IS
+    # per-plant — is emitted separately below.
+    key = 'service:' + ','.join(sorted(service_set))
+    # `disclosed` is the caller's call-scoped set; the `facts` fallback keeps
+    # a direct unit-test call working without leaking into a pipeline run.
+    seen = facts.setdefault('_multi_energy_warned', set()) \
+        if disclosed is None else disclosed
+    if key in seen:
+        return
+    seen.add(key)
+
+    # Every affected block is listed, so a reader sees the one question's full
+    # reach rather than one block of it.
+    # The TARGET is the affected blocks, not the plant: a plant name told a
+    # reader nothing about this question's reach, and the test that was meant
+    # to prove the entry "names every affected block" only required the target
+    # to be non-empty, which a plant name satisfies.
+    # The blocks that RECEIVE the substitution, which is not always the whole
+    # service set: a `copy_proposed` block keeps the proposed system and both
+    # its fuels, so it faces no single-fuel substitution and must not be
+    # counted among the affected.
+    affected = list(group.get('_substituted_blocks') or service_set)
+    target = ','.join(affected)
+    inputs = {'proposed_energy_types': sorted(distinct),
+              'serving_system': target,
+              'affected_blocks': sorted(affected),
+              'affected_block_count': len(affected),
+              'service_set': sorted(service_set),
+              'reconciled': False}
+    if plant is not None:
+        # The fuels are recorded whenever a plant is IDENTIFIED. Gating this on
+        # the name meant an unnamed plant silently lost the one input a reader
+        # needs to check the claim.
+        inputs['plant_energy_types'] = sorted(
+            {str(f) for f in (plant.get('fuels') or ())})
+        if plant_name:
+            inputs['serving_plant'] = plant_name
+    if not covers:
+        # Nothing may be said about boilers per energy type, nor about the
+        # group's shares, because the plant does not account for the group.
+        inputs['group_shares'] = (
+            'UNRESOLVED: no single plant carries every energy type this '
+            'group uses, so a plant-only capacity split would omit the '
+            'others from the denominator')
+        audit.warn(
+            'selection',
+            'UNRESOLVED: the heating equipment serving this group uses MORE '
+            f'THAN ONE ENERGY TYPE. {ratio_article} requires the reference '
+            'heating capacities to follow the proposed energy-type '
+            'allocation, and this tool does NOT compute or enforce that '
+            'allocation — it elects ONE energy type for the group. Whether '
+            'the reference happens to match the proposed allocation is '
+            'therefore NOT VERIFIED here, in either direction, and a '
+            'passing annual result is not evidence that it does',
+            target=target, inputs=inputs, article=ratio_article,
+            ahj=_disclosure_ahj(source_loop_fuels, covers=False))
+        return
+
+    allocation = _heating_allocation(group, facts)
+    if allocation is None:
+        inputs['proposed_capacity_shares'] = 'unavailable without sizing'
+    else:
+        shares, watts = allocation
+        inputs['proposed_capacity_shares'] = {
+            f: round(s, 4) for f, s in sorted(shares.items())}
+        inputs['proposed_capacity_w'] = {
+            f: round(w, 1) for f, w in sorted(watts.items())}
+    # Which of (6)(b)/(c)/(d) applies depends on the REFERENCE plant's
+    # heating capacity, which does not exist at selection time. Cite the
+    # sentence, never a subclause we cannot establish (Sol, `114`.4).
+    inputs['plant_boiler_count'] = plant.get('boiler_count')
+    inputs['boiler_count_subclause'] = (
+        f'NOT ESTABLISHED: {sentence_six} bands the requirement by the '
+        f'reference plant capacity, which is not known at selection time, '
+        f'so no subclause is claimed')
+    # NOTHING about the reference plant is asserted here. Sol reproduced four
+    # outcomes (`120`, `121`) and the entry listed them rather than choosing;
+    # ADOPTION is no longer among them, which is a finding rather than an edit.
+    #
+    # This disclosure only ever fires for a block whose heating was collapsed
+    # to one energy type, and such a block is always a REPLACED assignment —
+    # `build` or `through_the_wall`, both of which reach the election, which
+    # the earlier wording narrowed to `build` alone (Fable, `167` G4) — `_finalize` returns before the election and before this
+    # function for a `copy_proposed` block, so a retained block raises no
+    # question here at all. The one measured adoption was an
+    # all-`copy_proposed` residential service with ZERO records from this
+    # branch, which Sol's `143` refused as evidence for AHJ-1, and D-101's
+    # plant-ownership split now keeps a built block off the proposed plant
+    # besides. No conformance check exists that would let one adopt it.
+    #
+    # So the remaining outcomes are: torn down and REPLACED by a newly built
+    # plant of the selected variant (a one-group mixed gas/electric loop
+    # became a different two-boiler NaturalGas plant, with no proposed handle
+    # on either boiler); torn down and not rebuilt where the variant needs no
+    # boiler; and, if a hydronic plant does result, the post-sizing staging
+    # pass acting on primary/secondary ROLE blind to fuel, whose effect differs
+    # by capacity band and by whether any role is recognised at all --
+    # `_plant_role` returns None unless there are exactly two boilers.
+    inputs['live_capacity_outcome'] = (
+        'NOT ESTABLISHED at selection time. The reference plant may be a '
+        'DIFFERENT plant, built by the selected '
+        'variant after this one is torn down, holding none of these devices; '
+        'or may not exist at all, where the variant needs no boiler. If a '
+        'hydronic plant does result, the post-sizing '
+        'staging pass acts on primary/secondary ROLE and is blind to energy '
+        'type: an equal role-labelled pair in the two-boiler band is '
+        'PRESERVED, a recognised secondary below the single-boiler threshold '
+        'is driven to ~0 W, and a plant whose devices take no recognised '
+        'role is not staged at all. Which of these applies, and therefore '
+        'whether the proposed allocation survives, is not known here')
+    if ratio_article.startswith(_MEASURED_SUBSECTION):
+        inputs['fixture_measurement'] = _FIXTURE_MEASUREMENT
+    else:
+        inputs['fixture_measurement'] = (
+            'NONE for this edition: the boiler-count and sizing-factor '
+            'experiments were run under '
+            f'{_MEASURED_SUBSECTION} and say nothing about this one')
+    audit.warn(
+        'selection',
+        'UNRESOLVED: the PROPOSED heating system puts MORE THAN ONE ENERGY '
+        'TYPE on ONE BOILER PLANT that carries every energy type the group '
+        'uses. What the REFERENCE plant ends up with is not established '
+        'here: it depends on the selected system variant and on a '
+        'post-sizing staging pass '
+        'that acts on primary/secondary ROLE blind to energy type and whose '
+        'effect differs by capacity band and by whether any role is '
+        'recognised at all. '
+        f'Whether that conflicts with {sentence_six} is NOT established '
+        f'here, because its applicable subclause depends on the reference '
+        f'plant capacity. NEITHER {ratio_article}\'s capacity-ratio clause '
+        f'(a) nor its operating-priority clause (b) is computed or enforced, '
+        'so the allocation is NOT VERIFIED in either direction, and a '
+        'passing annual result is not evidence that it is satisfied',
+        target=target, inputs=inputs,
+        article=f'{ratio_article}; {sentence_six}',
+        ahj=_disclosure_ahj(source_loop_fuels, covers=True))
+
+    # AHJ-3 IS A SEPARATE RECORD, SCOPED TO THE PLANT. The (6) cardinality
+    # question is asked once of the hydronic plant however many serving systems
+    # draw on it, so it dedupes on the plant while the allocation disclosure
+    # above dedupes on the service set. One plant with two multi-energy service
+    # sets therefore yields two AHJ-1 records and ONE AHJ-3 record, a shape the
+    # single combined entry could not express (Sol, `143`).
+    plant_key = f'plant:{plant_name}'
+    if plant_key not in seen:
+        seen.add(plant_key)
+        audit.warn(
+            'selection',
+            'UNRESOLVED: ONE hydronic heating plant carries every energy type '
+            f'the serving systems use, so {sentence_six} bands a requirement '
+            'on the REFERENCE plant by its heating capacity — which does not '
+            'exist at selection time, so no subclause is claimed. How many '
+            'reference boiler plants correspond to this proposed plant is an '
+            'N:1 correspondence question the acceptable-solution text does '
+            'not settle',
+            target=plant_name or 'unnamed hydronic plant',
+            inputs={'serving_plant': plant_name,
+                    'plant_energy_types': sorted(
+                        {str(f) for f in (plant.get('fuels') or ())}),
+                    'plant_boiler_count': plant.get('boiler_count'),
+                    'service_sets_drawing_on_it': 'NOT ESTABLISHED at '
+                    'selection time: each serving system is disclosed '
+                    'separately, and this record is the plant-scoped question',
+                    'boiler_count_subclause': inputs[
+                        'boiler_count_subclause']},
+            article=sentence_six,
+            ahj=_plant_cardinality_ahj())
+
+
 def _reference_energy_type(group, selection, facts, audit):
     """8.4.4.9.(4)/8.4.4.10.(3): reference energy type follows the proposed system;
     8.4.4.6.(1): purchased heating is represented by a gas-fired boiler.
@@ -1931,6 +3183,11 @@ def _reference_energy_type(group, selection, facts, audit):
     rule file (never a literal here), so a future edition that names a
     different class changes data, not code.
     """
+    # GROUP-LOCAL on purpose. AHJ-5's service set decides whether 8.4.x.9.(5)
+    # FIRES; it does not decide the reference's energy type. Electing a
+    # source-loop boiler's gas here would change a water-loop heat-pump
+    # group's whole reference system type, which Sol's `126` ruling does not
+    # ask for and no measurement supports.
     fuels = group['heating_energy_types']
     if 'Purchased' in fuels or (facts.get('purchased_energy') or {}).get('heating'):
         purchased_heating = selection['special_rules']['purchased_heating']
@@ -1940,6 +3197,25 @@ def _reference_energy_type(group, selection, facts, audit):
                        inputs={'part_load_curve_class': part_load_curve_class},
                        article=purchased_heating['article'], ruling='D-89')
         return 'gas', part_load_curve_class
+    # MULTI-ENERGY: this function ELECTS one energy type and says nothing
+    # about 8.4.x.9.(5). The disclosure moved out to
+    # `_disclose_multi_energy`, which `_finalize` calls after EVERY election
+    # path — including the heat-pump auxiliary election, which used to skip
+    # this function entirely and so emitted no disclosure at all (Sol, `114`).
+    #
+    # The cascade below prefers a fossil fuel whenever one is present. It does
+    # NOT weigh the proposed capacity allocation: a capacity-dominant election
+    # was written, measured to flip the reference's whole system type on a
+    # sized electric-dominant plant, and separated onto its own branch because
+    # no frozen scenario exercised it (Sol, `113`).
+    #
+    # Sol's `112` REJECTED the hydronic carve-out I proposed, and Fable's
+    # `117` confirmed the reading against the live text of both editions: (5)
+    # is conditioned on the PROPOSED system's energy types with no hydronic
+    # exclusion, (6) constrains a reference plant without replacing (5), and
+    # (4) shows the Code writes "Except as provided in Sentence (5)" when it
+    # intends an exception. Table -B's System 2 is inherently hydronic and
+    # dual-fuel-capable, so a carve-out would silently exempt it.
     if any(re.search(r'gas|oil|propane', str(f), re.IGNORECASE) for f in fuels):
         return 'gas', None
     if 'Electricity' in fuels:

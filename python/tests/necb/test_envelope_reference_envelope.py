@@ -147,6 +147,38 @@ class TestReferenceEnvelope(unittest.TestCase):
             .layers()[0].to_OpaqueMaterial().get()
         self.assertAlmostEqual(0.7, outer.solarAbsorptance(), delta=1e-6)
 
+    def test_thermal_mass_note_citation_is_edition_owned(self):
+        """The D-35 citation must name EACH edition's own Appendix note.
+
+        The normative article number was already resolved through the ruleset
+        (`8.4.4.4.` / `8.4.5.4.`), but the Note beside it was a hard-coded
+        literal — so a 2025 run emitted `8.4.5.4.(1) (Note A-8.4.4.4.(1))`,
+        a 2025 article number paired with a 2020 note number (Sol, D-100
+        envelope batch).
+        """
+        from btap.audit import AuditLog
+        from btap.codes import resolve
+        from btap.codes.necb import envelope
+
+        expected = {"necb2020": ("8.4.4.4.(1)", "A-8.4.4.4.(1)"),
+                    "necb2025": ("8.4.5.4.(1)", "A-8.4.5.4.(1)")}
+        for code, (article, note) in expected.items():
+            with self.subTest(code=code):
+                self.assertEqual(note, resolve(code).article("thermal_mass_note"))
+
+                audit = AuditLog()
+                envelope.reference_envelope(proposed_model(), code=code, hdd=HDD,
+                                            audit=audit)
+                cited = " ".join(e.get("article", "") for e in audit.entries
+                                 if e.get("ruling") == "D-35" and e.get("article"))
+                self.assertTrue(cited, "D-35 emitted no article citation")
+                self.assertIn(article, cited)
+                self.assertIn(note, cited)
+                other_note = expected["necb2025" if code == "necb2020"
+                                      else "necb2020"][1]
+                self.assertNotIn(other_note, cited,
+                                 f"{code} cited the other edition's Note")
+
     def test_lightweight_and_air_leakage(self):
         model = proposed_model()
         audit = reference(model)
@@ -157,7 +189,9 @@ class TestReferenceEnvelope(unittest.TestCase):
         c = wall.construction().get().to_Construction().get()
         self.assertRegex(c.nameString(), r'Lightweight')
         self.assertEqual(1, len(c.layers()))
-        # D-35 / Note A-8.4.4.4.(1): "lightweight" = light FRAME, not zero-mass
+        # D-35 / the thermal-mass Note: "lightweight" = light FRAME, not
+        # zero-mass. The Note's number is edition-owned; see
+        # test_thermal_mass_note_citation_is_edition_owned below.
         # — the note's wood-frame example is 40.8 kg/m2 with 45.5 kJ/(m2.K)
         # heat capacity; the rebuilt layer is calibrated to exactly that.
         m = c.layers()[0].to_StandardOpaqueMaterial()

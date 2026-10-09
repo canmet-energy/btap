@@ -15,6 +15,10 @@ options:
   --code {necb2020,necb2025}
                         code edition: necb2020 or necb2025 (default necb2020)
   --storeys N           above-ground storey count override
+  --refrigerated-zones NAME[,NAME...]
+                        thermal zones that are refrigerated space; the model
+                        cannot express this, and Table 8.4.x.7.-A selects
+                        System 5 for them
   --simulate {annual,sizing,none}
                         annual (default), sizing, or none
   --quick               one-week run period - NOT a code determination

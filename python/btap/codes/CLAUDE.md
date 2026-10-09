@@ -11,6 +11,36 @@ reference transforms; ONE AuditLog spans everything.
 
 [README.md](README.md) is the API guide. This file is the traps.
 
+## The AHJ citation axis (D-100)
+
+This subpackage OWNS the third citation axis, which is why it is documented
+here: `btap.audit` carries the field and decides nothing about it.
+
+- `btap/codes/ahj.py` is the resolver. `btap/codes/data/ahj.json` is its data
+  and is GENERATED from `docs/NECB_AHJ_QUESTIONS.md` by
+  `python/scripts/generate_ahj_registry.py` — documentation is not a wheel
+  dependency, and a second `{id: status}` map anywhere else is the drift this
+  design removes. No `sets_conditional` boolean is serialized, because a
+  boolean can contradict the status it came from.
+- **The deciding rule site declares applicability**, on its own NARROWED
+  branch, not merely "this function ran". The determination owns policy only:
+  resolve the cited ids, keep those whose status is `referral` or
+  `alternative-solution`, and make an ANNUAL determination conditional when
+  that set is non-empty. It does not inspect the model, re-characterize HVAC
+  or parse action text.
+- The resolver REJECTS rather than drops an unknown id, an unknown status, a
+  malformed citation, or an id whose `editions` exclude the run's code. A
+  citation that resolved to nothing would turn a missing disclosure into a
+  clean non-conditional success.
+- `python/tests/necb/test_ahj_citations.py` is the AST gate: every `ahj=` is a
+  literal (or a literal-only conditional, or one of the named narrowing
+  helpers), sits on the audit surface, resolves in the generated register, and
+  never appears on a coverage path. It also holds the register's own
+  conditional column to the code in both directions.
+- A missing citation looks identical to a forgotten one, so every EXCLUSION is
+  explained at the site that makes it, and a test asserts the explanation is
+  there.
+
 ## Three modules, one determination (Stage 9a)
 
 `compliance.performance_compliance` is still the entry point, but the
@@ -152,12 +182,17 @@ learns *why* we read the article that way.
 
 - TOP-LEVEL keyword, never inside `inputs=`; a string LITERAL; several ids as
   one space-separated string (`ruling='D-19 D-21'`), scanned as
-  `\bD-\d{2}\b`.
-- **`data/decisions.json` is CANONICAL — edit it directly.** This inverted at
-  R6: the Ruby mirror and `sync_decisions_registry.py` are both gone. Edit
-  this file plus the `## D-XX` section in `docs/necb_decisions.md`, then run
-  `python3 python/scripts/generate_decisions_toc.py` for the TOC.
-- **Adding a `## D-XX` heading means adding a registry entry**, and a
+  `\bD-\d+\b`, unbounded.
+- **`data/decisions.json` is GENERATED — do not edit it.** The canonical
+  source is one file per decision, `docs/decisions/D-NN.md`: TOML front matter
+  (`id`, `title`, `kind`, `articles`, `editions`, `summary`) plus the authored
+  body. `articles` groups citations by an AUTHORED requirement key carrying a
+  `label` and one list per code id, never a flat list: the same number names a
+  different requirement in each edition. Edit
+  that file, then run `python3 python/scripts/generate_decisions.py`, which
+  rewrites this registry and `docs/necb_decisions.md` together in numeric id
+  order. `--check` is the drift gate.
+- **A source file is a registry entry**, and a
   `kind: runtime` entry must be cited by ≥1 `ruling=` tag.
   `tests/necb/test_decisions_registry.py` enforces both directions with an
   **AST walker** — a name, an f-string, or a `**{'ruling': …}` expansion on an

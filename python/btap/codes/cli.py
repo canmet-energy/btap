@@ -197,6 +197,10 @@ def build_parser():
                         f"(default {DEFAULT_CODE})")
     p.add_argument("--storeys", type=int, metavar="N",
                    help="above-ground storey count override")
+    p.add_argument("--refrigerated-zones", metavar="NAME[,NAME...]",
+                   help="thermal zones that are refrigerated space; the model "
+                        "cannot express this, and Table 8.4.x.7.-A selects "
+                        "System 5 for them")
     p.add_argument("--simulate", choices=["annual", "sizing", "none"],
                    default="annual", help="annual (default), sizing, or none")
     p.add_argument("--quick", action="store_true",
@@ -245,6 +249,7 @@ def _collect(o, namespace):
     """argparse namespace -> the Ruby-shaped options dict."""
     ns = vars(namespace)
     for key in ("epw", "ddy", "hdd", "city", "run_dir", "code", "storeys",
+                "refrigerated_zones",
                 "simulate", "quick", "backend", "report_html", "json", "quiet",
                 "space_type", "space_type_map", "costs_csv"):
         if ns.get(key) is not None:
@@ -315,8 +320,20 @@ def compliance_kwargs(o):
         kw["weather"] = {"epw": o["epw"], "ddy": o["ddy"]}
     if o.get("hdd") is not None:
         kw["hdd"] = o["hdd"]
+    # ONE `building` dict, built up: a second assignment silently dropped
+    # whichever key was set first. AHJ-11 was unreachable from the CLI
+    # altogether (Fable's `131` F9) — the register's reachability statement was
+    # true of the Python API only, and a `btap-compliance` user could never
+    # meet the referral the register discloses to them.
+    building = {}
     if o.get("storeys") is not None:
-        kw["building"] = {"storeys": o["storeys"]}
+        building["storeys"] = o["storeys"]
+    if o.get("refrigerated_zones"):
+        building["refrigerated_zones"] = [name.strip() for name
+                                          in str(o["refrigerated_zones"]).split(",")
+                                          if name.strip()]
+    if building:
+        kw["building"] = building
     if o.get("quick"):
         kw["run_period"] = dict(QUICK_RUN_PERIOD)
     if o.get("costs_csv"):
@@ -522,13 +539,31 @@ def unmet_line(p_sec, r_sec):
         num(p_unmet.get("cooling")), num(r_unmet.get("cooling")))
 
 
+def _wrap_condition(text, width=62, indent=6):
+    """Wrap one AHJ condition for the terminal block. The conditions are
+    sentences, not labels, and a reader has to be able to act on them."""
+    import textwrap
+
+    lines = textwrap.wrap(str(text), width=width)
+    pad = " " * indent
+    return ("\n" + pad).join(lines) if lines else ""
+
+
 def determination(result, rep):
     if rep.get("annual") is False:
         return "NO DETERMINATION - run period shortened"
     if result.compliant is None:
         return "NO DETERMINATION - no annual simulation"
-
-    return "COMPLIANT" if result.compliant else "NOT COMPLIANT"
+    verdict = "COMPLIANT" if result.compliant else "NOT COMPLIANT"
+    # 8.4.x.9.(5) is not implemented for a multi-energy serving system, so the
+    # comparison is reported but is NOT a certification. phylroy's decision is
+    # INFORMATIONAL: the verdict stays visible and the exit code is unchanged,
+    # so the qualification travels INSIDE the verdict string rather than beside
+    # it — a one-line summary is the thing most likely to be quoted alone.
+    if rep.get("compliance_determination") == "conditional":
+        return (f"{verdict} - INFORMATIONAL, AND CONDITIONAL ON APPROVAL BY "
+                "THE AUTHORITY HAVING JURISDICTION")
+    return verdict
 
 
 def verdict_block(result, rep):
@@ -545,6 +580,56 @@ def verdict_block(result, rep):
             "", f"  VERDICT: NO DETERMINATION (simulate: {rep.get('simulate')})",
             "  Run with --simulate annual for an 8.4.1.2 determination.", rule])
     verdict = "COMPLIANT" if result.compliant else "NOT COMPLIANT"
+    if rep.get("compliance_determination") == "conditional":
+        # GENERIC, per D-100. This block used to describe the multi-energy
+        # capacity ratio in hardcoded prose, so an AHJ-11 System-5 condition
+        # would have been rendered as a boiler-capacity condition. Everything
+        # specific now comes from the resolved condition records, which carry
+        # each question's own status, title, article, target and the deciding
+        # entry's own account.
+        reason = rep.get("compliance_determination_reason") or {}
+        conditions = reason.get("conditions") or []
+        approve = reason.get("ahj_must_approve") or []
+        targets = [c["target"] for c in conditions if c.get("target")]
+        seen, where = set(), []
+        for target in targets:
+            if target not in seen:
+                seen.add(target)
+                where.append(target)
+        # SPLIT on ';' first: a condition's article may itself be compound
+        # ("8.4.4.9.(5); 8.4.4.9.(6)"), and deduping whole strings printed
+        # "8.4.4.9.(5); 8.4.4.9.(5); 8.4.4.9.(6)".
+        articles = sorted({part.strip()
+                           for c in conditions if c.get("article")
+                           for part in str(c["article"]).split(";")
+                           if part.strip()})
+        ids = reason.get("ahj_ids") or []
+        return "\n".join([
+            "", "  *** NOT A CODE-COMPLIANT DETERMINATION ***",
+            f"  {len(ids)} question(s) in the AHJ register "
+            f"({', '.join(ids)}) were raised by this",
+            "  run's modelling choices and require approval before the "
+            "comparison above",
+            "  can support compliance. It is INFORMATIONAL only and is not "
+            "evidence of",
+            "  compliance.",
+            *([f"  Governing: {'; '.join(articles)}"] if articles else []),
+            *([f"    - {s}" for s in where] if where else []),
+            "",
+            "  CONDITIONAL: the authority having jurisdiction must accept the "
+            "conditions",
+            "  below. Each says whether it is an ALTERNATIVE SOLUTION — the "
+            "text decides",
+            "  the requirement and this tool does not meet it — or an "
+            "INTERPRETATION the",
+            "  text does not settle.",
+            *[f"    - {_wrap_condition(a)}" for a in approve],
+            "",
+            f"  VERDICT: {verdict} - INFORMATIONAL, AND CONDITIONAL ON "
+            "APPROVAL BY THE",
+            "           AUTHORITY HAVING JURISDICTION",
+            f"  ({rep.get('code_label')}, Division B, Article 8.4.1.2; "
+            f"see {reason.get('ahj_register')})", rule])
     return "\n".join([
         "", f"  VERDICT: {verdict}   ({rep.get('code_label')}, Division B, "
             "Article 8.4.1.2)", rule])

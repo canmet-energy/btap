@@ -4,9 +4,12 @@
   "edition": "2025",
   "label": "NECB 2025",
   "articles": {
-    "reference_subsection": "8.4.5",
+    "assembly_inclination": "3.1.1.7.(4)",
+    "enclosed_unconditioned_credit": "3.1.1.7.(3)",
+    "heat_pump_aux_fuel": "8.4.5.13.(2)(c)",
     "lighting_subsection": "8.4.5",
-    "heat_pump_aux_fuel": "8.4.5.13.(2)(c)"
+    "reference_subsection": "8.4.5",
+    "thermal_mass_note": "A-8.4.5.4.(1)"
   },
   "literal_remaps": {
     "8.4.4.": "8.4.5."
@@ -132,7 +135,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "This edition states the door requirements in their own Table 3.2.2.4. Re-verified 2026-08-02 against the post-hbix-fix extraction (D-61). The performance-path articles this file cites are in Subsection 8.4.5.",
-      "result_sha256": "74713f008e3c939ab484566bcca0a6870bd35f7cf1e5dce4b6e6c81de74a41af"
+      "result_sha256": "879f8b5f064a33ffd3b2a6fc4a6ff3858e30eff719fa31fc737965ea44905dd4"
     },
     "reference_rules.json": {
       "source": "mcp:necb:2025",
@@ -222,7 +225,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "This edition carries the reference-building rules at Subsection 8.4.5 and the part-load curves at 8.4.6; the archived set is the three tables this file's provenance names plus the articles in its own `articles` list. The category keywords extending the Table 8.4.5.7.-A space lists with synonyms are a maintainer addition, not code text, and are marked as such in the file.",
-      "result_sha256": "3e84d19bb3c8aebcbea70138b1957aa43db85afba4e19f9ff461f0728af3bc63"
+      "result_sha256": "4661ff6948380cd61f89509e57d14d35861c2e2252a86ffe8be614a308bd3bd4"
     },
     "efficiencies.json": {
       "source": "mcp:necb:2025",

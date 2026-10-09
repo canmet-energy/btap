@@ -1,0 +1,195 @@
+{
+  "generated_from": "docs/NECB_AHJ_QUESTIONS.md",
+  "statuses": [
+    "referral",
+    "alternative-solution",
+    "ruled",
+    "tool-gap"
+  ],
+  "approval_required": [
+    "referral",
+    "alternative-solution"
+  ],
+  "entries": [
+    {
+      "id": "AHJ-1",
+      "title": "a single-fuel reference is a NON-CONFORMING substitution",
+      "status": "alternative-solution",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ]
+    },
+    {
+      "id": "AHJ-2",
+      "title": "the annual-energy basis (2)(g) compares, and an irreconcilable Article 13 case",
+      "status": "referral",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ]
+    },
+    {
+      "id": "AHJ-3",
+      "title": "whether 8.4.4.9.(6)(d) permits more than one boiler",
+      "status": "referral",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ]
+    },
+    {
+      "id": "AHJ-4",
+      "title": "the 8.4.2.2.(5) backup-equipment exclusion",
+      "status": "ruled",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ]
+    },
+    {
+      "id": "AHJ-5",
+      "title": "a water-loop heat pump's source-loop boiler IS an energy type",
+      "status": "ruled",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ]
+    },
+    {
+      "id": "AHJ-6",
+      "title": "the catalog offers no oil or propane variant",
+      "status": "tool-gap",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ]
+    },
+    {
+      "id": "AHJ-7",
+      "title": "three published chiller EIR_FT rows are arithmetically wrong",
+      "status": "alternative-solution",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ]
+    },
+    {
+      "id": "AHJ-8",
+      "title": "Table 4.2.1.6's A and B control marks are not carried at all",
+      "status": "tool-gap",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ]
+    },
+    {
+      "id": "AHJ-9",
+      "title": "two table-structure errata with definitive guidance",
+      "status": "ruled",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ]
+    },
+    {
+      "id": "AHJ-10",
+      "title": "how corner thermal blocks are grouped",
+      "status": "referral",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ]
+    },
+    {
+      "id": "AHJ-11",
+      "title": "heating in a two-pipe System 5 reference",
+      "status": "referral",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ]
+    },
+    {
+      "id": "AHJ-12",
+      "title": "\"where present\" humidification",
+      "status": "referral",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ]
+    },
+    {
+      "id": "AHJ-13",
+      "title": "Path B is permitted; whether we meet its IPLV is unverified",
+      "status": "ruled",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ]
+    },
+    {
+      "id": "AHJ-14",
+      "title": "which part-load class a reference boiler or furnace takes",
+      "status": "referral",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ]
+    },
+    {
+      "id": "AHJ-15",
+      "title": "whether (3) governs dispatch priority at all",
+      "status": "referral",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ]
+    },
+    {
+      "id": "AHJ-16",
+      "title": "N:1 system correspondence for hydronic pumps",
+      "status": "referral",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ]
+    },
+    {
+      "id": "AHJ-17",
+      "title": "no air-cooled chiller performance curve is shipped",
+      "status": "tool-gap",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ]
+    },
+    {
+      "id": "AHJ-18",
+      "title": "the two-pipe fan-coil surrogate has no plant-side changeover",
+      "status": "tool-gap",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ]
+    },
+    {
+      "id": "AHJ-19",
+      "title": "real refrigeration is invisible to classification, teardown and end-use reporting",
+      "status": "tool-gap",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ]
+    },
+    {
+      "id": "AHJ-20",
+      "title": "System 5's chilled-water loop is a 7 °C comfort loop",
+      "status": "tool-gap",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ]
+    }
+  ]
+}

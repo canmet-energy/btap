@@ -34,12 +34,34 @@ class TestFreezeSealTransition(unittest.TestCase):
     def test_all_scenarios_are_accounted_without_active_ruby(self):
         active, retired, attestation = freeze.seal_accounting(scenarios())
         # 31 converted at R6, plus the python-only seals authored after the
-        # retirement: 4 from R6; since the multi-edition Stage 0 (R-A),
-        # 4 "first frozen post-R6 for NECB 2025" scenarios; since D-89
-        # step 3 (R-O-a), the 2 purchased-heating scenarios; and since DF-17,
-        # the 4 hydronic-VAV scenarios — none of which has cross-language
-        # history to convert from.
-        self.assertEqual({"python-only:post-handoff": 31, "python-only": 14}, active)
+        # retirement, none of which has cross-language history to convert
+        # from. The tally, which must add up:
+        #
+        #   4  from R6 itself (the two environment-shaped CLI/remote cases and
+        #      the two synthetic-result-construction cases)
+        #   4  "first frozen post-R6 for NECB 2025", since multi-edition
+        #      Stage 0 (R-A)
+        #   2  purchased-heating, since D-89 step 3 (R-O-a)
+        #   4  hydronic-VAV, since DF-17
+        #   2  the 8.4.x.9.(5) conditional determination: sample 11 for AHJ-1
+        #      (Sol's `122`.5 — the determination had focused tests and zero
+        #      frozen coverage) and sample 09 for AHJ-5 (Sol's `126` — the
+        #      WSHP shape had the same hole once its predicate was fixed)
+        #   1  the first guard-7 witness: determination-02, sample 11 run
+        #      FULL-YEAR for AHJ-1 and AHJ-3 (Sol's `127` — both fired only in
+        #      tiers that cannot reach a determination, so nothing proved they
+        #      survive a real year)
+        #   1  guard 7 for AHJ-16: determination-03, sample 18 run FULL-YEAR
+        #      under D-101 (Sol's `139` item 7 held the guard unmet while that
+        #      run's reference could not hold setpoint — 932.25 unmet heating
+        #      hours against the 100 h limit — and `143` required the corrected
+        #      run frozen once it did)
+        #   = 18
+        #
+        # This enumeration was ALREADY one behind before sample 09: it listed
+        # 4+4+2+4 = 14 beside an assertion of 15, having never recorded sample
+        # 11. A provenance narrative that does not add up is not provenance.
+        self.assertEqual({"python-only:post-handoff": 31, "python-only": 18}, active)
         self.assertEqual({"ruby": 29, "ruby-api": 2}, retired)
         self.assertEqual({
             "commit": "85ab14352677093e24038d933cf1071e5b03431a",

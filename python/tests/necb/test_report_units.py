@@ -271,10 +271,14 @@ class TestReportUnits(unittest.TestCase):
         self.assertIn("No ruled code paths fired in this run.", html)
 
     def test_rulings_appendix_tolerates_an_unregistered_id(self):
+        """`D-00` rather than `D-99`: D-99 is now a real decision, and
+        D-01..D-99 are ALL taken, so `D-00` is the only remaining id that
+        matches `^D-\\d{2}$` and is not registered. That the example had to
+        move is the id grammar running out, not a quirk of this test."""
         html = Sections.rulings_appendix(
             {"audit_entries": [{"step": "build", "action": "x",
-                                "ruling": "D-99"}]})
-        self.assertIn("D-99", html)
+                                "ruling": "D-00"}]})
+        self.assertIn("D-00", html)
         self.assertIn("not in registry", html)
 
     def test_building_stamp_traces_issues_to_their_model(self):

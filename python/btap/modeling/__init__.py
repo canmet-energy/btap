@@ -359,6 +359,13 @@ def remove_hvac_from_zones(model, zones):
     return teardown.remove_hvac_from_zones(model, zones)
 
 
+def plant_is_hvac_candidate(loop):
+    """Could a reference HVAC build adopt this plant loop? See
+    hvac.systems.plant_loops.plant_is_hvac_candidate."""
+    from btap.modeling.hvac.systems import plant_loops
+    return plant_loops.plant_is_hvac_candidate(loop)
+
+
 def characterize(model, audit=None):
     """Characterize ANY model's HVAC into a neutral, serializable facts dict."""
     from btap.modeling.hvac import classify

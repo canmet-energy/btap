@@ -15,6 +15,21 @@ FULL_MATRIX=1 runs all 97. The golden is NEVER regenerated from Python — the
 Ruby suite's UPDATE_GOLDEN escape hatch is deliberately not ported (D-79: the
 adjudicated matrix is the shared contract both ports read).
 
+SCHEMA, since D-101: each scenario lists ONE ROW PER ASSIGNMENT with
+``blocks`` — the thermal blocks that assignment serves — and the rows are NOT
+deduplicated. The old schema carried a ``zones`` count per DEDUPLICATED row
+(`if entry not in assignments`), so five single-zone units over five thermal
+blocks and one shared unit over one block produced the same row, and the
+schema could not express the thing the ruling changed. The adjudicated content
+— system, action, energy type, catalog — is preserved verbatim from the
+pre-change file; only multiplicity was derived, by applying D-101 to the
+golden's own ``*_groups`` data (the conditioned blocks are the sum of ``zones``
+over groups that are heated or cooled). Renaming the key was deliberate: a
+stale golden fails on the schema instead of silently comparing two different
+meanings of one number. The test additionally asserts the assignments PARTITION
+the retained conditioned blocks, computed from the model, because five rows
+naming one block are otherwise indistinguishable from five rows naming five.
+
 One test per system, generated below, so pytest-xdist spreads the matrix over
 every worker. As a single loop it was the longest test in CI (301 s of the
 verify job's 332 s suite on 36 vCPUs); the subset-matching and one-test-per-
@@ -63,7 +78,12 @@ SUBSET = [
     'Water source heat pumps',
 ]
 
-_KEYS = ('system', 'action', 'energy_type', 'catalog', 'zones')
+#: `blocks` replaced `zones` with D-101. The old key counted the zones of
+#: ONE assignment under serving-set grouping; this one counts the thermal
+#: blocks of one assignment with every assignment listed, so the schema
+#: change itself fails a stale golden instead of silently comparing two
+#: different meanings of the same number.
+_KEYS = ('system', 'action', 'energy_type', 'catalog', 'blocks')
 
 #: The prefix every generated per-system test carries.
 PER_SYSTEM_PREFIX = 'test_reference_assignments_match_the_adjudicated_golden__'
@@ -119,18 +139,37 @@ class TestReferenceSelectionMatrix(unittest.TestCase):
                     for z in g['zones']:
                         if z not in zone_names:
                             zone_names.append(z)
+                # The retained CONDITIONED blocks — what the assignments must
+                # partition. An unheated, uncooled group gets no system.
+                conditioned = []
+                for g in facts['zone_groups']:
+                    if not (g['heated'] or g['cooled']):
+                        continue
+                    for z in g['zones']:
+                        if z not in conditioned:
+                            conditioned.append(z)
                 zone_types = {z: scenario['type'] for z in zone_names}
                 info = {'storeys': scenario['storeys'], 'zone_types': zone_types,
                         'winter_design_temp_c': -20}
                 assignments = []
+                covered = []
                 for a in hvac.select_reference_systems(facts=facts, building=info,
                                                        code='necb2020', audit=None):
-                    entry = {'system': a.reference_system, 'action': str(a.action),
-                             'energy_type': a.energy_type, 'catalog': a.catalog_name,
-                             'zones': len(a.zones)}
-                    if entry not in assignments:
-                        assignments.append(entry)
+                    # NO DEDUPE. Multiplicity is the point since D-101: five
+                    # single-zone units over five thermal blocks is a different
+                    # reference from one unit over five, and collapsing
+                    # identical rows hid exactly that. `blocks` replaces
+                    # `zones` so a stale golden fails loudly rather than
+                    # comparing a count against a count that now means
+                    # something else.
+                    assignments.append(
+                        {'system': a.reference_system, 'action': str(a.action),
+                         'energy_type': a.energy_type, 'catalog': a.catalog_name,
+                         'blocks': len(a.zones)})
+                    covered.extend(a.zones)
                 record[f'{pass_}_{label}'] = assignments
+                record[f'{pass_}_{label}__covered'] = covered
+                record[f'{pass_}_{label}__conditioned'] = conditioned
         return record
 
     @staticmethod
@@ -143,7 +182,11 @@ class TestReferenceSelectionMatrix(unittest.TestCase):
     def check_system(self, name):
         expected = next((r for r in self.golden if r['name'] == name), None)
         self.assertIsNotNone(
-            expected, f"'{name}' missing from the golden — regenerate and re-adjudicate (D-58)")
+            expected,
+            f"'{name}' missing from the golden. The golden is NEVER regenerated "
+            f"from Python (D-79): ADD the row and adjudicate it against Table "
+            f"8.4.x.7.-A, or remove the catalogue entry. 'Regenerate' is what "
+            f"the file header forbids, and this message used to say it")
         actual = self.compute_row(name)
         for pass_ in ('catalog', 'scrubbed'):
             for label in SCENARIOS:
@@ -151,6 +194,19 @@ class TestReferenceSelectionMatrix(unittest.TestCase):
                 self.assertEqual(
                     self.normalize(expected[key]), self.normalize(actual[key]),
                     f'{name} / {key}: reference assignment drifted from the adjudicated matrix')
+                # D-101: the assignments must PARTITION the retained
+                # conditioned blocks — every one covered, none twice. The row
+                # comparison above would accept five assignments that all name
+                # the same block, or four that leave one unconditioned.
+                covered = actual[f'{key}__covered']
+                conditioned = actual[f'{key}__conditioned']
+                self.assertEqual(
+                    sorted(conditioned), sorted(covered),
+                    f'{name} / {key}: the assignments must cover every retained '
+                    f'conditioned block exactly once')
+                self.assertEqual(
+                    len(set(covered)), len(covered),
+                    f'{name} / {key}: a block is served by two assignments')
 
     def test_every_subset_entry_matches_a_catalog_system(self):
         _names, unmatched = names_under_test()
