@@ -1504,6 +1504,51 @@
         "necb2025"
       ],
       "summary": "Decided: Sol's 127, 2026-10-07, adopting a THIRD audit citation axis. `ahj` joins `article` (what the Code requires) and `ruling` (our adjudicated reading) and carries the AHJ-NN register dispositions that apply to one runtime choice. The DECIDING RULE SITE declares applicability, because it holds the selected system, topology, equipment and branch outcome; the final determination owns POLICY only — resolve the cited ids against the generated register, keep those whose status is `referral` or `alternative-solution`, and make an ANNUAL determination conditional when that set is non-empty. It does not inspect the model, re-characterize HVAC, parse audit action text or infer from `level`. This replaced `_mark_informational_if_multi_energy`, which re-characterized the proposed model inside the determination to decide whether AHJ-1 and AHJ-3 had fired — a second source of truth beside the disclosure branch that already knew, and the drift this design removes. Writing seven standalone predicates for the seven narrowed referrals was rejected for the same reason: their reachability conditions are properties of the SELECTION, so reimplementing them would duplicate selection logic. All four statuses may be cited, for traceability: `ahj` means THIS DISPOSITION APPLIES HERE, not approval is required, so a `ruled` entry explains why a choice was made and a `tool-gap` entry marks a defect, and neither may be described as something an authority must accept. `btap.audit` stores, serializes and renders the field and decides nothing about it, because it is the SDK-free code-family-neutral floor; the status mapping lives in `btap.codes.ahj`, read from `btap/codes/data/ahj.json`, which is GENERATED from the authored register by `generate_ahj_registry.py`. No `sets_conditional` boolean is serialized, so nothing can contradict a status. The resolver REJECTS an unknown id, an unknown status and an id whose editions exclude the run's code id, rather than dropping them, because a citation that resolves to nothing turns a missing disclosure into a clean non-conditional success. A static coverage-manifest entry may never carry `ahj`: a warning emitted on every run is not evidence a building reached the question."
+    },
+    {
+      "id": "D-101",
+      "title": "The thermal block is the selection unit; plant, election and disclosure scopes stay larger",
+      "kind": "runtime",
+      "articles": {
+        "plant_sizing_scope": {
+          "label": "A hydronic plant is sized from the systems it serves",
+          "necb2020": [
+            "8.4.4.9.(6)",
+            "8.4.4.10.(6)"
+          ],
+          "necb2025": [
+            "8.4.5.9.(6)",
+            "8.4.5.10.(6)"
+          ]
+        },
+        "reference_system_selection": {
+          "label": "Reference HVAC system assigned to each thermal block",
+          "necb2020": [
+            "8.4.4.7.(1)",
+            "8.4.4.9.(1)",
+            "8.4.4.10.(1)"
+          ],
+          "necb2025": [
+            "8.4.5.7.(1)",
+            "8.4.5.9.(1)",
+            "8.4.5.10.(1)"
+          ]
+        },
+        "thermal_block_identity": {
+          "label": "The reference retains the proposed building's thermal blocks",
+          "necb2020": [
+            "8.4.4.1.(4)"
+          ],
+          "necb2025": [
+            "8.4.5.1.(4)"
+          ]
+        }
+      },
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ],
+      "summary": "Decided: Sol's 139 and 141, 2026-10-09, against the Code and the NRC User's Guide rather than the pinned gem. Sentence 8.4.x.7.(1) assigns an HVAC system to EACH THERMAL BLOCK, and Table 8.4.x.7.-B labels Systems 3 and 4 `Single-zone`; Division A defines a single-zone secondary system as one serving only ONE thermal block, and 8.4.x.1.(4)(c) keeps the proposed building's thermal blocks in the reference. The selector instead iterated `facts['zone_groups']` — the zones sharing one PROPOSED air loop, which is a SERVING SET — so a `single-zone` System 3 was built as ONE air loop over five thermal blocks, its supply temperature following one elected control zone while the other four drifted: 932.25 unmet heating hours in sample 18's reference against 8.4.1.2.(3)'s 100 h, reported as NOT COMPLIANT for the reference's failure rather than the proposed building's performance. The pinned gem builds the same shared unit by default (`new_auto_zoner: true`, passed by `autozone.rb`), its stale comments claim the opposite, and the SAME library's ASHRAE 90.1 Appendix G path builds one packaged unit per zone unconditionally — so the shared default was an implementation choice, not evidence that `single-zone` has a special NECB meaning. Per-block selection does NOT make every rule per-block, because the Code uses three nouns for three scopes: the THERMAL BLOCK selects the system (8.4.x.7.(1), .9.(1), .10.(1)); the SYSTEMS SERVED BY A PLANT size the plant (8.4.x.9.(6)(a), .10.(6)(a)), so a plant is built once for the reference systems it serves and is not multiplied because those systems were selected per block; and the PROPOSED HEAT PUMP or source-loop SET scopes the Article 13.(2)(g) election, which is D-52's existing contract. Only Systems 3, 4 and the heat-pump redirects are per block: System 1 is a `Unitary air conditioner` whose Note (2) central make-up air unit serves its blocks together, so it joins 2/5/6 in the post-selection merge. Destruction is PHASED ahead of construction for the whole replacement closure, because a per-assignment teardown left a plant shared by several blocks non-empty long enough for the next block's builder to adopt it, making the reference plant's fuel depend on assignment order; `copy_proposed` is the only explicit retention branch, and a plant surviving mutation is not one. The 8.4.x.9.(5) disclosure is emitted once per Code decision scope listing every affected block, since one multi-energy plant and one control sequence serving five blocks is one unresolved choice and repeating the warning five times obscures it rather than disclosing five questions."
     }
   ]
 }

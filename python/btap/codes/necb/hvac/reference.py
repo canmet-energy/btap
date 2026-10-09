@@ -846,8 +846,13 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
         # Splitting System 1 was the one thing my per-block change got wrong:
         # `test_hvac_necb_through_the_wall_build` asserts "System 1 = one
         # central MAU for ventilation air" and saw five.
+        # `through_the_wall` is System 1 too — `_residential_assignment`
+        # returns it with `reference_system=1`, realised as a central MAU plus
+        # per-zone PTACs. Keying on the action alone excluded it, so five
+        # blocks produced five MAUs where the Note (2) central unit is one.
         key = ([a.catalog_name, a.config]
-               if a.action == 'build' and a.reference_system in (1, 2, 5, 6)
+               if a.action in ('build', 'through_the_wall')
+               and a.reference_system in (1, 2, 5, 6)
                else None)
         existing = None
         if key is not None:

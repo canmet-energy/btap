@@ -81,15 +81,51 @@ class TestZoneDispatch(unittest.TestCase):
         for zone in reference.getThermalZones():
             self.assert_air_terminal_first(zone)
 
-    def test_a_shared_system_3_unit_is_left_alone(self):
+    def test_a_system_3_reference_gives_EVERY_BLOCK_ITS_OWN_UNIT(self):
+        """This asserted the opposite until D-101, and its precondition is now
+        unreachable.
+
+        It read "a shared System 3 unit is left alone" and began by REQUIRING
+        one air loop serving several zones — the configuration Table
+        8.4.x.7.-B's "Single-zone packaged rooftop unit" forbids and Sol's
+        `139` removed. A reference can no longer produce it, so the test now
+        guards the rule instead of the defect: one loop per thermal block, each
+        loop serving exactly its own block, and dispatch still makes no
+        decision because every zone has its own air terminal.
+        """
         proposed = proposed_with_hvac('PSZ RTU Gas and DX Coils and Hot Water Baseboard')
         reference, audit = build_reference(proposed)
         loops = list(reference.getAirLoopHVACs())
-        self.assertTrue(any(len(loop.thermalZones()) > 1 for loop in loops),
-                        'fixture precondition: one unit serving several zones')
-        self.assertFalse(dispatch_decisions(audit))
+        blocks = list(reference.getThermalZones())
+        self.assertEqual(
+            len(blocks), len(loops),
+            'one single-zone unit per thermal block: {} blocks, {} loops'
+            .format(len(blocks), len(loops)))
+        shared = [loop.nameString() for loop in loops
+                  if len(loop.thermalZones()) != 1]
+        self.assertEqual([], shared,
+                         'no System 3 loop may serve more than one block')
+        served = sorted(zone.nameString() for loop in loops
+                        for zone in loop.thermalZones())
+        self.assertEqual(sorted(z.nameString() for z in blocks), served,
+                         'the loops must PARTITION the retained blocks')
+        # And dispatch now FIRES on every block, which is the same change
+        # seen from the other side: D-90/D-91 put the rooftop air terminal
+        # before the baseboard wherever a zone has its own terminal, and under
+        # a shared unit four of these five zones had none. The old test
+        # asserted baseboard-first and no dispatch decision — both true only
+        # because the reference was built wrong.
+        decisions = dispatch_decisions(audit)
+        self.assertEqual(
+            len(blocks), len(decisions),
+            'every block has its own terminal now, so every block is '
+            'dispatched: {} blocks, {} decisions'.format(len(blocks),
+                                                         len(decisions)))
         for zone in reference.getThermalZones():
-            self.assertIn('Baseboard', types(zone.equipmentInHeatingOrder())[0])
+            first = types(zone.equipmentInHeatingOrder())[0]
+            self.assertNotIn('Baseboard', first,
+                             'the air terminal runs before the baseboard '
+                             '(D-90/D-91); got {!r} first'.format(first))
 
     def test_a_system_4_zone_exhaust_fan_does_not_block_dispatch(self):
         # Sol, PR #49 P1: teardown keeps FanZoneExhaust (code-required exhaust),
