@@ -185,3 +185,100 @@ class TestTheLargerScopesDoNotMULTIPLY(unittest.TestCase):
         self.assertTrue(
             str(disclosures[0].get('target') or ''),
             'the disclosure must name what it affects')
+
+
+class TestTheArticle13ElectionTRACKSTHEHEATPUMP(unittest.TestCase):
+    """Sol's `141`: the election's scope is the proposed heat pump or the set
+    sharing a source water loop — `8.4.x.13.(2)(g)(i)` and `(g)(ii)` — and it
+    is neither the thermal block nor the whole building.
+
+    This is D-52's existing contract, and the block refactor violated it by
+    running the comparison once per block. Four boundaries, each measured on a
+    real build, because a cache can fail in both directions: too coarse merges
+    two genuine elections, too fine multiplies one.
+    """
+
+    SYS3_ASHP = ('PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils '
+                 'and Electric Baseboard')
+    GSHP = 'DOAS with water source heat pumps with ground source heat pump'
+
+    def elections(self, model, *, storeys=2):
+        audit = AuditLog()
+        hvac.reference_hvac(model, code='necb2020',
+                            building={'storeys': storeys}, audit=audit)
+        return [e for e in audit.entries
+                if '13.(2)(g)' in str(e.get('article'))], audit
+
+    def built(self, system, splits):
+        """A proposed model with `system` built over each zone slice."""
+        from btap import modeling
+
+        from .hvac_helpers import load_fixture, sorted_zones
+
+        model = load_fixture()
+        zones = sorted_zones(model)
+        for start, stop in splits:
+            modeling.build_system(model, system, zones[start:stop])
+        return model
+
+    def test_ONE_air_source_heat_pump_over_five_blocks_elects_ONCE(self):
+        """(g)(i). Five reference systems, ONE comparison: the election reads
+        the PROPOSED heat pump's annual split, which does not become five
+        questions because the reference was realised per block.
+        """
+        model = self.built(self.SYS3_ASHP, [(0, None)])
+        self.assertEqual(1, len(model.getAirLoopHVACs()),
+                         'fixture precondition: one proposed heat-pump loop')
+        entries, _ = self.elections(model)
+        self.assertEqual(
+            1, len(entries),
+            'one proposed heat pump is one election, not one per block')
+
+    def test_TWO_air_source_heat_pumps_elect_TWICE(self):
+        """The other direction: a cache keyed too coarsely would answer the
+        second heat pump's question with the first one's annual data.
+        """
+        model = self.built(self.SYS3_ASHP, [(0, 3), (3, None)])
+        self.assertEqual(2, len(model.getAirLoopHVACs()),
+                         'fixture precondition: two proposed heat-pump loops')
+        entries, _ = self.elections(model)
+        self.assertEqual(2, len(entries),
+                         'two proposed heat pumps are two elections')
+
+    def test_zone_groups_SHARING_a_source_loop_elect_ONCE(self):
+        """(g)(ii). An 'external'-source heat pump elects over the thermal
+        blocks of ALL heat pumps on the same source water loop, so two zone
+        groups on one loop raise ONE question.
+        """
+        model = self.built(self.GSHP, [(0, 3), (3, None)])
+        loops = [p.nameString() for p in model.getPlantLoops()]
+        self.assertEqual(
+            1, len(loops),
+            'fixture precondition: the second build joins the SAME source '
+            'loop; got {}'.format(loops))
+        entries, _ = self.elections(model)
+        self.assertEqual(1, len(entries),
+                         'one source water loop is one election')
+
+    def test_DISTINCT_source_loops_elect_TWICE(self):
+        """And two source loops are two questions. The first loop is renamed so
+        the second build cannot join it — without that the builder reuses
+        `Heat Pump Loop` and the case silently becomes the shared one above.
+        """
+        from btap import modeling
+
+        from .hvac_helpers import load_fixture, sorted_zones
+
+        model = load_fixture()
+        zones = sorted_zones(model)
+        modeling.build_system(model, self.GSHP, zones[:3])
+        for plant in model.getPlantLoops():
+            if 'Heat Pump' in plant.nameString():
+                plant.setName('East Heat Pump Loop')
+        modeling.build_system(model, self.GSHP, zones[3:])
+        self.assertEqual(
+            2, len(model.getPlantLoops()),
+            'fixture precondition: two DISTINCT source water loops')
+        entries, _ = self.elections(model)
+        self.assertEqual(2, len(entries),
+                         'two source water loops are two elections')
