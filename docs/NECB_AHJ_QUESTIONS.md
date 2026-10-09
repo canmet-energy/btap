@@ -569,10 +569,15 @@ unsettled, how many times the run applied it, a link to the first audit entry,
 and its bearing on the verdict — stated per row, because a status alone does
 not tell a reader whether the verdict moved.
 
-What remains open is EVIDENCE, not wiring: AHJ-2, AHJ-3, AHJ-10, AHJ-11,
-AHJ-12 and AHJ-16 have no frozen artifact that reaches a determination, because
-the annual tier runs `--quick` and the shapes that would exercise them sit in
-tiers that stop earlier. The status column says so per entry.
+What remains open is EVIDENCE, not wiring: AHJ-2, AHJ-10, AHJ-11 and AHJ-12
+have no frozen artifact that reaches a determination, because the annual tier
+runs `--quick` and the shapes that would exercise them sit in tiers that stop
+earlier. The status column says so per entry.
+
+AHJ-1, AHJ-3 and AHJ-16 DO have one. AHJ-1 and AHJ-3 ride on
+`determination-02` (sample 11, full year, Sol's `127`), and AHJ-16 on
+`determination-03` (sample 18, full year) — the latter only once D-101 gave
+that run a reference building that holds setpoint.
 
 ## AHJ-10 — how corner thermal blocks are grouped
 
@@ -765,24 +770,45 @@ default may bias the reference in EITHER direction. Declining to guess is
 defensible; calling the result conservative was not.
 
 
-**Guard 7 is UNMET, and the reason is a finding of its own.** Sol's `127`
-requires one full-year frozen artifact per approval-required id. AHJ-16 fires
-on exactly one corpus model, sample 18 (`18-vav-hw-subset-reheat`), and only
-in the SIZING tier, which reaches no determination. Driven through a real
-annual run on 2026-10-08 it does reach one — `conditional`, with AHJ-16 on the
-Hot Water Loop — so the wiring is sound.
+**Guard 7 is MET since 2026-10-09, and how it was unmet is a finding worth
+keeping.** Sol's `127` requires one full-year frozen artifact per
+approval-required id. AHJ-16 fires on exactly one corpus model, sample 18
+(`18-vav-hw-subset-reheat`), and only in the SIZING tier, which reaches no
+determination. Driven through a real annual run on 2026-10-08 it reached one —
+`conditional`, with AHJ-16 on the Hot Water Loop — so the wiring was sound.
 
-It is not frozen, because that run's REFERENCE building does not hold
-setpoint: 932.25 unmet heating hours and 542.25 unmet cooling, against the
-proposed building's 0.0 and 4.0. Article 8.4.1.2.(3) allows 100 h, so the
-non-compliant verdict is the reference failing, not the proposed building. Sol
+That run was still refused as a baseline, because its REFERENCE building did
+not hold setpoint: 932.25 unmet heating hours and 542.25 unmet cooling against
+the proposed building's 0.0 and 4.0, where Article 8.4.1.2.(3) allows 100 h. The
+non-compliant verdict was the reference failing, not the proposed building. Sol
 refused exactly this standard of evidence for AHJ-11 in `130` — a reference
 that completes without conditioning is not a comparison, and "EnergyPlus
-exited zero is not the Code's test".
+exited zero is not the Code's test". Freezing it would have recorded a broken
+reference as the expected baseline.
 
-So AHJ-16 needs either a model that triggers the N:1 shape with a valid
-reference, or the sample-18 reference's unmet hours understood first. Freezing
-the run as it stands would record a broken reference as the expected baseline.
+The cause was not sample 18. It was the selector: one "single-zone" System 3
+air loop served all five retained thermal blocks, following one elected control
+zone while the other four drifted. **D-101** made the thermal block the
+selection unit, and the corrected full-year run was measured twice with every
+reported figure agreeing:
+
+| | before D-101 | after |
+|---|---:|---:|
+| reference unmet heating | 932.25 h | **0.0 h** |
+| reference unmet cooling | 542.25 h | **4.75 h** |
+| proposed unmet cooling | 4.0 h | 4.0 h |
+
+Every block is now 0.0 h heating and 0.5–1.75 h cooling, so the comparison
+basis holds setpoint. The run still reports NOT COMPLIANT and that is now a
+statement about the PROPOSED building — 167 150 kWh against the reference's
+148 858 kWh, 112.3% of target — which is what a performance path is for.
+
+The witness is the frozen scenario
+`determination-03-18-vav-hw-subset-reheat-annual` (parity lane, full year, not
+`--quick`, since Article 8.4.1.2 makes a quick run a non-determination). Its
+assertions pin the determination, `ahj_ids` of AHJ-1/AHJ-14/AHJ-16, the
+reference's unmet hours per block, and that the verdict is the proposed
+building's.
 
 ## AHJ-17 — no air-cooled chiller performance curve is shipped
 
