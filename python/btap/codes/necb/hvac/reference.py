@@ -117,11 +117,15 @@ def _select_reference_systems(*, facts, building, ruleset, audit=None,
         # "single-zone" unit.
         #
         # The architecture already separated these concerns and only this
-        # iteration conflated them — the merge step below re-groups the
-        # MULTIZONE families (2/5/6) by catalogue identity and deliberately
-        # leaves "single-zone families (1/3/4/hp) ... their selection
-        # grouping". So selecting per block gives 3/4/1/hp one unit each while
-        # 2/5/6 recombine exactly as before, Note (3)'s facade split included.
+        # iteration conflated them: the merge step below re-groups by catalogue
+        # identity, so selecting per block gives Systems 3 and 4 and the
+        # heat-pump redirects one unit each while 1/2/5/6 recombine.
+        #
+        # System 1 MERGES, which the first version of this comment had wrong.
+        # Only Systems 3 and 4 are labelled "Single-zone" in Table 8.4.x.7.-B;
+        # System 1 is a "Unitary air conditioner" whose Note (2) central
+        # make-up air unit serves its blocks together, and Note (3)'s facade
+        # split belongs to System 6 alone (Sol, `143`/`145`).
         #
         # The serving GROUP stays the source of truth for service-set facts —
         # fuels, plant correspondence, DCV, dispatch, Article 9/10 allocation —
@@ -930,8 +934,10 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
     # 12-storey LargeOffice got 3 storey-groups x (4 facades + internal)
     # = 17 systems instead of ~6, multiplying fans and dodging the
     # per-loop 5.2.10.1/5.2.2.7 flow thresholds. Merge same-catalog
-    # multizone (sys 2/5/6) build assignments; single-zone families
-    # (1/3/4/hp) keep their selection grouping.
+    # assignments for Systems 1, 2, 5 and 6; Systems 3 and 4 and the
+    # heat-pump redirects — the rows Table 8.4.x.7.-B labels "Single-zone" —
+    # keep one unit per thermal block. System 1 joined this list under
+    # Note (2) at D-101; it is not a single-zone family.
     merged = []
     for a in assignments:
         # SYSTEM 1 MERGES TOO. Only Systems 3 and 4 are labelled
@@ -2711,7 +2717,8 @@ def _disclosure_ahj(source_loop_fuels, covers):
     SITE-OWNED applicability (Sol's `127`): this branch has the selected
     topology, so it declares which dispositions apply rather than letting the
     final collector re-characterize the model to guess. `path.py` previously
-    recomputed `multi_energy_serving_systems` for exactly that, which was a
+    recomputed a `multi_energy_serving_systems` helper for exactly that, which
+    was a
     second source of truth beside the branch that already knew.
 
     * AHJ-1 always — an affected run's single-fuel reference is the
@@ -2761,37 +2768,6 @@ def multi_energy_serving_groups(facts):
             continue
         out.append(group)
     return out
-
-
-def multi_energy_serving_systems(facts, *, hydronic_only=False):
-    """The DEDUPED serving-system identities behind `multi_energy_serving_groups`.
-
-    The group list overcounts: sample 11 is five thermal blocks served by ONE
-    plant, so the disclosure emits ONE finding while the group list has five
-    entries. A verdict label built from the group count would say "5
-    multi-energy serving systems" where there is one — the same overcounting
-    mistake in a new place. This applies the disclosure's own dedupe key, so
-    the label and the findings always agree.
-    """
-    seen: dict = {}
-    for group in multi_energy_serving_groups(facts):
-        plant = _heating_plant(group, facts)
-        if _plant_covers_group(plant, group, facts):
-            key = f"plant:{plant.get('name')}"
-            label = plant.get('name') or 'the shared heating plant'
-        elif hydronic_only:
-            # `hydronic_only` selects the systems a BOILER question can apply
-            # to. Sentence (6) governs "where a hydronic system is modeled",
-            # so a mixed group with no plant carrying its fuels cannot raise a
-            # boiler-cardinality conflict — asking it to was Sol's `122`
-            # blocker 3, where a bare dual-fuel thermal-block group with no
-            # hydronic plant was handed the boiler question anyway.
-            continue
-        else:
-            key = 'group:' + ','.join(sorted(group['zones']))
-            label = ','.join(group['zones'])
-        seen.setdefault(key, label)
-    return [seen[k] for k in sorted(seen)]
 
 
 def _disclose_multi_energy(group, selection, facts, audit, ruleset=None,
@@ -2928,19 +2904,30 @@ def _disclose_multi_energy(group, selection, facts, audit, ruleset=None,
         f'reference plant capacity, which is not known at selection time, '
         f'so no subclause is claimed')
     # NOTHING about the reference plant is asserted here. Sol reproduced four
-    # outcomes (`120`, `121`), and the entry lists them rather than choosing:
-    # the proposed plant may be adopted; it may be torn down and REPLACED by
-    # a newly built plant of the selected variant (a one-group mixed
-    # gas/electric loop became a different two-boiler NaturalGas plant, with
-    # no proposed handle on either boiler); it may be torn down and not
-    # rebuilt where the variant needs no boiler; and if a hydronic plant does
-    # result, the post-sizing staging pass acts on primary/secondary ROLE
-    # blind to fuel, whose effect differs by capacity band and by whether any
-    # role is recognised at all -- `_plant_role` returns None unless there
-    # are exactly two boilers.
+    # outcomes (`120`, `121`) and the entry listed them rather than choosing;
+    # ADOPTION is no longer among them, which is a finding rather than an edit.
+    #
+    # This disclosure only ever fires for a block whose heating was collapsed
+    # to one energy type, and such a block is always an `action == "build"`
+    # assignment — `_finalize` returns before the election and before this
+    # function for a `copy_proposed` block, so a retained block raises no
+    # question here at all. The one measured adoption was an
+    # all-`copy_proposed` residential service with ZERO records from this
+    # branch, which Sol's `143` refused as evidence for AHJ-1, and D-101's
+    # plant-ownership split now keeps a built block off the proposed plant
+    # besides. No conformance check exists that would let one adopt it.
+    #
+    # So the remaining outcomes are: torn down and REPLACED by a newly built
+    # plant of the selected variant (a one-group mixed gas/electric loop
+    # became a different two-boiler NaturalGas plant, with no proposed handle
+    # on either boiler); torn down and not rebuilt where the variant needs no
+    # boiler; and, if a hydronic plant does result, the post-sizing staging
+    # pass acting on primary/secondary ROLE blind to fuel, whose effect differs
+    # by capacity band and by whether any role is recognised at all --
+    # `_plant_role` returns None unless there are exactly two boilers.
     inputs['live_capacity_outcome'] = (
-        'NOT ESTABLISHED at selection time. The reference plant may be this '
-        'plant adopted; may be a DIFFERENT plant, built by the selected '
+        'NOT ESTABLISHED at selection time. The reference plant may be a '
+        'DIFFERENT plant, built by the selected '
         'variant after this one is torn down, holding none of these devices; '
         'or may not exist at all, where the variant needs no boiler. If a '
         'hydronic plant does result, the post-sizing '

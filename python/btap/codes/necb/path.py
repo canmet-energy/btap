@@ -399,7 +399,8 @@ def _resolve_ahj_conditions(run, audit):
     parse audit action text, infer anything from `level`, or know any
     individual question's predicate. The previous
     `_mark_informational_if_multi_energy` recomputed
-    `multi_energy_serving_systems` here to decide whether AHJ-1 and AHJ-3 had
+    a `multi_energy_serving_systems` helper here to decide whether AHJ-1 and
+    AHJ-3 had
     fired, which was a second source of truth beside the branch that already
     knew — the drift this design removes.
 

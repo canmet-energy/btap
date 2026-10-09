@@ -173,11 +173,24 @@ implementation's behaviour with code.
 **What the tool does meanwhile.** It elects ONE energy type for the reference
 SELECTION and computes no capacity ratio, so it satisfies neither clause of
 (5). What the reference's FINAL equipment carries is a separate question this
-tool does not establish — the selected variant may adopt the proposed plant,
-replace it, tear it down, or stage it by role blind to fuel. It says so: an
-UNRESOLVED audit warning per serving system, `8.4.x.9.(5)` held at
+tool does not establish — the selected variant may REPLACE the proposed plant
+with a newly built one of the elected variant, tear it down and not rebuild it
+where the variant needs no boiler, or stage it by role blind to fuel. It says
+so: an UNRESOLVED audit warning per serving system, `8.4.x.9.(5)` held at
 `not_implemented`, and the run's determination set to `conditional` naming
 this question.
+
+**`adopted` was removed from this list on 2026-10-09**, and the removal is a
+finding rather than an edit. An AHJ-1-cited choice is a block whose heating was
+collapsed to ONE energy type, and such a block is always an `action == "build"`
+assignment: `_finalize` returns before the election and this disclosure for a
+`copy_proposed` block, so a retained block raises no AHJ-1 question at all. The
+only measured adoption was an all-`copy_proposed` residential service with
+ZERO AHJ-1 records, which Sol's `143` refused as evidence for this entry, and
+after D-101's plant-ownership split a built block cannot reach the proposed
+plant either. No conformance check exists that would let one. So `copy_proposed`
+CAN retain a proposed plant — that statement stands on its own and is tested —
+but it is not an outcome of the question this entry asks.
 
 **Status: `alternative-solution`, not `referral`.** Sol's `122` corrected my
 framing: (5)(a) says the capacities "shall match the ratio", so whether one

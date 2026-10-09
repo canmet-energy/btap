@@ -705,9 +705,15 @@ class TestTheOutcomesAreReachableInABuiltModel(unittest.TestCase):
     as asserting the HTML contains the new wording without asserting the
     withdrawn claim is gone.
 
-    All four are now reachable in a built model: ADOPTED and REPLACED here,
-    TORN DOWN here, and the role-staging pair in
-    `TestTheStagingOutcomeIsCONDITIONAL`.
+    THREE outcomes are reachable in a built model, not four: REPLACED and TORN
+    DOWN here, and the role-staging pair in
+    `TestTheStagingOutcomeIsCONDITIONAL`. ADOPTION was removed from AHJ-1's
+    outcome list on 2026-10-09 (Sol's `145`), because this disclosure fires
+    only for a block whose heating was collapsed to one energy type — always an
+    `action == "build"` assignment — and `_finalize` returns before the
+    election and the disclosure for a `copy_proposed` block. The retention
+    tests below therefore prove that `copy_proposed` CAN keep a proposed plant,
+    which is true and separate, and no longer claim it as an AHJ-1 outcome.
 
     Two discriminators do NOT work, and both were tried first:
 
@@ -776,18 +782,18 @@ class TestTheOutcomesAreReachableInABuiltModel(unittest.TestCase):
                                      building={"storeys": 1}, audit=audit)
         return result.model, audit
 
-    def test_the_ADOPTED_outcome_is_reachable(self):
+    def test_copy_proposed_RETAINS_the_plant_but_raises_no_AHJ_1(self):
         """Measured on residential four-pipe fan coils with one boiler switched
-        to Electricity: both markers survive into the reference. So the proposed
-        plant IS adopted here, and an entry claiming the plant is always
-        rebuilt or always removed would be false.
+        to Electricity: both markers survive into the reference, so
+        `copy_proposed` genuinely retains the proposed plant with both fuels.
 
-        The fixture CHANGED with D-101 and the outcome did not. It used to be
-        `Baseboard gas boiler`, where the plant survived only because teardown
-        ran per assignment; adoption now has to come through `copy_proposed`,
-        which is the branch the Code provides. AHJ-1's four-outcome prose
-        therefore stands unchanged — what was withdrawn is one illegitimate
-        route to one of them, not the outcome.
+        What this does NOT show is an AHJ-1 outcome, and asserting that is the
+        point of the test now. Sol's `143` and `145`: this fixture emits ZERO
+        AHJ-1 records, because `_finalize` returns for a `copy_proposed` block
+        before the single-fuel election and before `_disclose_multi_energy`.
+        Preserving a multi-fuel system is not the non-conforming single-fuel
+        substitution AHJ-1 describes, so `adopted` was removed from that
+        entry's outcome list rather than being evidenced by this run.
         """
         proposed = self._residential_mixed_proposed()
         reference, _audit = self._reference_of(proposed)
@@ -795,8 +801,14 @@ class TestTheOutcomesAreReachableInABuiltModel(unittest.TestCase):
                     if self.MARKER in b.nameString()]
         self.assertEqual(
             2, len(survived),
-            "both marked boilers should survive adoption; got {}".format(
+            "both marked boilers should survive retention; got {}".format(
                 [b.nameString() for b in reference.getBoilerHotWaters()]))
+        self.assertEqual(
+            [], [e for e in _audit.entries
+                 if "AHJ-1" in str(e.get("ahj") or "")],
+            "and this is NOT an AHJ-1 outcome: a retained block never reaches "
+            "the election or the disclosure, so the entry must not list "
+            "`adopted` among its possibilities")
 
     def test_the_adopted_reference_RETAINS_BOTH_FUELS(self):
         """The direct refutation of the claim withdrawn over eight rounds.
