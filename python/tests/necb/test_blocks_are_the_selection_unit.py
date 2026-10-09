@@ -36,15 +36,24 @@ MULTIZONE_PROPOSED = 'MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Wa
 EDITIONS = ('necb2020', 'necb2025')
 
 
-def reference_of(proposed, *, code='necb2020', storeys=2, space_type=None):
+def reference_of(proposed, *, code='necb2020', storeys=2, space_type=None,
+                 **building):
     if space_type is not None:
         for st in proposed.getSpaceTypes():
             if st.spaces():
                 st.setStandardsSpaceType(space_type)
     audit = AuditLog()
     result = hvac.reference_hvac(proposed, code=code,
-                                 building={'storeys': storeys}, audit=audit)
+                                 building=dict(building, storeys=storeys),
+                                 audit=audit)
     return result.model, audit
+
+
+def selected_systems(audit):
+    """The reference system each block was assigned, in audit order."""
+    return [str(entry.get('value') or '').split('->')[0].strip()
+            for entry in audit.entries
+            if entry.get('action') == 'reference system selected']
 
 
 def loop_zones(model):
@@ -80,16 +89,63 @@ class TestOneProposedLoopBecomesOneUnitPerBlock(unittest.TestCase):
                     'block, each serving only its own block')
 
     def test_a_single_zone_system_4_gets_one_unit_per_block(self):
-        # A kitchen selects System 4 (the make-up air unit) rather than 3.
+        """System 4 needs the HOOD, not just the space type.
+
+        This test first used `Food preparation area` alone and asserted only the
+        loop topology — which passed while selecting System 3, because the
+        Supermarket/Food Service row elects System 4 only for a HOODED space and
+        a hood is a condition the model cannot express. So it asserts the
+        selected system too, and supplies `kitchen_hood_zones`.
+        """
         for code in EDITIONS:
             with self.subTest(code=code):
                 proposed = proposed_with_hvac(MULTIZONE_PROPOSED)
                 blocks = self.assert_proposed_is_one_multizone_loop(proposed)
-                reference, _ = reference_of(proposed, code=code, storeys=2,
-                                            space_type='Food preparation area')
+                audit_model, audit = None, None
+                audit_model, audit = reference_of(
+                    proposed, code=code, storeys=2,
+                    space_type='Food preparation area',
+                    kitchen_hood_zones=list(blocks))
                 self.assertEqual(
-                    [(b,) for b in blocks], loop_zones(reference),
+                    ['System 4'] * len(blocks), selected_systems(audit),
+                    'the hooded Supermarket/Food Service row selects System 4')
+                self.assertEqual(
+                    [(b,) for b in blocks], loop_zones(audit_model),
                     'System 4 is "Single-zone" in the same table')
+
+    def test_a_MIXED_proposed_loop_selects_PER_BLOCK_not_by_majority(self):
+        """Sol's `139` item 5: selection, not only construction.
+
+        One proposed air loop, five blocks, and a condition that holds for only
+        two of them. `_category_for` used to MAJORITY-VOTE over the serving
+        group and warn that it was applying one row to the whole thing (D-22);
+        with the block as the unit each block answers for itself, and the
+        warning has nothing left to report.
+        """
+        proposed = proposed_with_hvac(MULTIZONE_PROPOSED)
+        blocks = self.assert_proposed_is_one_multizone_loop(proposed)
+        hooded = blocks[:2]
+        reference, audit = reference_of(
+            proposed, storeys=2, space_type='Food preparation area',
+            kitchen_hood_zones=list(hooded))
+        systems = selected_systems(audit)
+        self.assertEqual(
+            {'System 3': 3, 'System 4': 2},
+            {name: systems.count(name) for name in sorted(set(systems))},
+            'the two hooded blocks take System 4 and the other three take '
+            'System 3 — one serving system, two Table -A rows')
+        self.assertEqual(
+            [(b,) for b in blocks], loop_zones(reference),
+            'and each block still gets its own single-zone unit')
+        # The D-22 warning says "mixes categories". A bare 'mixes' also matches
+        # "system 4 mixes outdoor air into the supply stream", which fires five
+        # times here and has nothing to do with selection.
+        mixed = [e for e in audit.entries
+                 if 'mixes categories' in str(e.get('action') or '')]
+        self.assertEqual(
+            [], mixed,
+            'no majority was applied, so the D-22 mixed-category warning must '
+            'not fire: {}'.format([e.get('action') for e in mixed]))
 
     def test_a_multizone_system_6_KEEPS_its_Note_3_grouping(self):
         """The control. Note (3) is marked on System 6 ALONE, and the express
