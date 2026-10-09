@@ -244,100 +244,179 @@ class TestTheLargerScopesDoNotMULTIPLY(unittest.TestCase):
 
 
 class TestTheArticle13ElectionTRACKSTHEHEATPUMP(unittest.TestCase):
-    """Sol's `141`: the election's scope is the proposed heat pump or the set
-    sharing a source water loop — `8.4.x.13.(2)(g)(i)` and `(g)(ii)` — and it
-    is neither the thermal block nor the whole building.
+    """Sol's `141` and `143`: the election's scope is the proposed heat pump, or
+    the set sharing a source water loop — `8.4.x.13.(2)(g)(i)` and `(g)(ii)` —
+    and it is neither the thermal block nor the whole building.
 
-    This is D-52's existing contract, and the block refactor violated it by
-    running the comparison once per block. Four boundaries, each measured on a
-    real build, because a cache can fail in both directions: too coarse merges
-    two genuine elections, too fine multiplies one.
+    These tests COUNTED election entries in their first version and passed no
+    annual data, so they proved the cache fires once or twice and nothing else.
+    That missed a live defect: the cache key was computed on the unsplit group,
+    but the election itself was handed the one-BLOCK view, so it weighed one
+    block's auxiliary energy and answered for all of them. Keying the cache on
+    the full scope stopped a second call; it did not make the first call
+    full-scope.
+
+    Every case therefore supplies `proposed_annual` SPLIT so that the
+    first-block answer differs from the full-scope answer, and asserts the
+    elected value, the affected blocks, `scope_zone_count` and the per-fuel
+    totals — not the entry count.
     """
 
     SYS3_ASHP = ('PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils '
                  'and Electric Baseboard')
     GSHP = 'DOAS with water source heat pumps with ground source heat pump'
 
-    def elections(self, model, *, storeys=2):
-        audit = AuditLog()
-        hvac.reference_hvac(model, code='necb2020',
-                            building={'storeys': storeys}, audit=audit)
-        return [e for e in audit.entries
-                if '13.(2)(g)' in str(e.get('article'))], audit
-
-    def built(self, system, splits):
-        """A proposed model with `system` built over each zone slice."""
+    def built(self, system, splits, *, rename_first_loop=None):
         from btap import modeling
 
         from .hvac_helpers import load_fixture, sorted_zones
 
         model = load_fixture()
         zones = sorted_zones(model)
-        for start, stop in splits:
+        for index, (start, stop) in enumerate(splits):
+            if index == 1 and rename_first_loop:
+                for plant in model.getPlantLoops():
+                    if 'Heat Pump' in plant.nameString():
+                        plant.setName(rename_first_loop)
             modeling.build_system(model, system, zones[start:stop])
-        return model
+        return model, modeling.characterize(model, audit=None)
 
-    def test_ONE_air_source_heat_pump_over_five_blocks_elects_ONCE(self):
-        """(g)(i). Five reference systems, ONE comparison: the election reads
-        the PROPOSED heat pump's annual split, which does not become five
-        questions because the reference was realised per block.
-        """
-        model = self.built(self.SYS3_ASHP, [(0, None)])
-        self.assertEqual(1, len(model.getAirLoopHVACs()),
-                         'fixture precondition: one proposed heat-pump loop')
-        entries, _ = self.elections(model)
-        self.assertEqual(
-            1, len(entries),
-            'one proposed heat pump is one election, not one per block')
+    @staticmethod
+    def annual_for(groups, fuels):
+        """Delivered heat on every group's loop, and ONE auxiliary fuel per
+        group so a scope error shows up as the wrong winner."""
+        annual = {'loops': {}, 'zones': {}}
+        for group in groups:
+            if group.get('air_loop'):
+                annual['loops'][group['air_loop']] = {'hp_j': 1000e9, 'aux': []}
+        for group, (fuel, gj) in zip(groups, fuels):
+            for zone in group['zones']:
+                annual['zones'][zone] = [{'role': 'aux', 'fuel': fuel,
+                                          'j': gj * 1e9}]
+        return annual
 
-    def test_TWO_air_source_heat_pumps_elect_TWICE(self):
-        """The other direction: a cache keyed too coarsely would answer the
-        second heat pump's question with the first one's annual data.
-        """
-        model = self.built(self.SYS3_ASHP, [(0, 3), (3, None)])
-        self.assertEqual(2, len(model.getAirLoopHVACs()),
-                         'fixture precondition: two proposed heat-pump loops')
-        entries, _ = self.elections(model)
-        self.assertEqual(2, len(entries),
-                         'two proposed heat pumps are two elections')
+    def elections(self, model, annual):
+        audit = AuditLog()
+        hvac.reference_hvac(model, code='necb2020', building={'storeys': 2},
+                            audit=audit, proposed_annual=annual)
+        out = []
+        for entry in audit.entries:
+            if 'ELECTED' not in str(entry.get('action')):
+                continue
+            inputs = entry.get('inputs') or {}
+            out.append({
+                'elected': str(entry.get('value') or ''),
+                'target': str(entry.get('target') or ''),
+                'zones': inputs.get('scope_zone_count'),
+                'by_fuel': inputs.get('by_fuel_gj'),
+                'article': str(entry.get('article') or ''),
+                'level': entry.get('level'),
+            })
+        return out
 
-    def test_zone_groups_SHARING_a_source_loop_elect_ONCE(self):
-        """(g)(ii). An 'external'-source heat pump elects over the thermal
-        blocks of ALL heat pumps on the same source water loop, so two zone
-        groups on one loop raise ONE question.
+    @staticmethod
+    def groups_of(facts):
+        return sorted(facts['zone_groups'], key=lambda g: sorted(g['zones']))
+
+    def test_ONE_heat_pump_elects_over_EVERY_block_it_serves(self):
+        """(g)(i), and the case that found the defect.
+
+        One ASHP over five blocks, with 10 GJ of auxiliary GAS on the first
+        block and 100 GJ of auxiliary ELECTRICITY on the second. The first
+        block alone elects `gas`; the proposed heat pump's full scope elects
+        `electric`. Only the second is the Code's answer.
         """
-        model = self.built(self.GSHP, [(0, 3), (3, None)])
+        model, facts = self.built(self.SYS3_ASHP, [(0, None)])
+        groups = self.groups_of(facts)
+        self.assertEqual(1, len(groups), 'precondition: one proposed heat pump')
+        blocks = list(groups[0]['zones'])
+        self.assertEqual(5, len(blocks), 'precondition: five blocks')
+
+        annual = {'loops': {groups[0]['air_loop']: {'hp_j': 1000e9, 'aux': []}},
+                  'zones': {blocks[0]: [{'role': 'aux', 'fuel': 'NaturalGas',
+                                         'j': 10e9}],
+                            blocks[1]: [{'role': 'aux', 'fuel': 'Electricity',
+                                         'j': 100e9}]}}
+        found = self.elections(model, annual)
+        self.assertEqual(1, len(found),
+                         'one proposed heat pump is ONE election')
+        got = found[0]
+        self.assertEqual('electric', got['elected'],
+                         'the largest auxiliary energy type over ALL blocks '
+                         'the heat pump serves; the first block alone would '
+                         'elect gas')
+        self.assertEqual({'NaturalGas': 10.0, 'Electricity': 100.0},
+                         got['by_fuel'],
+                         'both blocks must be weighed')
+        self.assertEqual(5, got['zones'],
+                         'the scope is five blocks, not one')
+        self.assertEqual(sorted(blocks), sorted(got['target'].split(',')),
+                         'the entry must name every affected block')
+        self.assertEqual('decision', got['level'])
+
+    def test_TWO_heat_pumps_elect_INDEPENDENTLY(self):
+        """Each proposed heat pump answers from its own members only, so a
+        cache keyed too coarsely would hand the second one the first one's
+        data and elect the same fuel twice.
+        """
+        model, facts = self.built(self.SYS3_ASHP, [(0, 3), (3, None)])
+        groups = self.groups_of(facts)
+        self.assertEqual(2, len(groups), 'precondition: two proposed heat pumps')
+        annual = self.annual_for(groups, [('NaturalGas', 50), ('Electricity', 50)])
+        found = sorted(self.elections(model, annual), key=lambda r: r['zones'])
+        self.assertEqual(2, len(found), 'two heat pumps are two elections')
+        self.assertEqual(['electric', 'gas'],
+                         sorted(r['elected'] for r in found),
+                         'they must elect DIFFERENTLY from their own data')
+        self.assertEqual([{'Electricity': 100.0}, {'NaturalGas': 150.0}],
+                         [found[0]['by_fuel'], found[1]['by_fuel']],
+                         'neither may see the other heat pump\'s auxiliary '
+                         'energy')
+        self.assertEqual([2, 3], [r['zones'] for r in found])
+
+    def test_a_SHARED_source_loop_COMBINES_its_members_once(self):
+        """(g)(ii): an 'external'-source heat pump elects over the thermal
+        blocks of ALL heat pumps on the same source water loop. Two zone
+        groups, 10 GJ of gas across one and 100 GJ of electricity across the
+        other, must COMBINE into one election — and each group alone would
+        elect the other way.
+        """
+        model, facts = self.built(self.GSHP, [(0, 3), (3, None)])
         loops = [p.nameString() for p in model.getPlantLoops()]
-        self.assertEqual(
-            1, len(loops),
-            'fixture precondition: the second build joins the SAME source '
-            'loop; got {}'.format(loops))
-        entries, _ = self.elections(model)
-        self.assertEqual(1, len(entries),
-                         'one source water loop is one election')
+        self.assertEqual(1, len(loops),
+                         'precondition: the second build JOINS the same source '
+                         'loop; got {}'.format(loops))
+        groups = self.groups_of(facts)
+        annual = self.annual_for(groups, [('NaturalGas', 10), ('Electricity', 100)])
+        found = self.elections(model, annual)
+        self.assertEqual(1, len(found), 'one source water loop is one election')
+        got = found[0]
+        self.assertEqual('electric', got['elected'])
+        self.assertEqual({'NaturalGas': 30.0, 'Electricity': 200.0},
+                         got['by_fuel'],
+                         'the union of both groups on the loop')
+        self.assertEqual(5, got['zones'], 'every block on the source loop')
+        self.assertIn('(g)(ii)', got['article'],
+                      'the shared-source-loop sentence, not (g)(i)')
 
-    def test_DISTINCT_source_loops_elect_TWICE(self):
+    def test_DISTINCT_source_loops_elect_from_THEIR_OWN_members(self):
         """And two source loops are two questions. The first loop is renamed so
         the second build cannot join it — without that the builder reuses
-        `Heat Pump Loop` and the case silently becomes the shared one above.
+        `Heat Pump Loop` and this silently becomes the shared case above.
         """
-        from btap import modeling
-
-        from .hvac_helpers import load_fixture, sorted_zones
-
-        model = load_fixture()
-        zones = sorted_zones(model)
-        modeling.build_system(model, self.GSHP, zones[:3])
-        for plant in model.getPlantLoops():
-            if 'Heat Pump' in plant.nameString():
-                plant.setName('East Heat Pump Loop')
-        modeling.build_system(model, self.GSHP, zones[3:])
-        self.assertEqual(
-            2, len(model.getPlantLoops()),
-            'fixture precondition: two DISTINCT source water loops')
-        entries, _ = self.elections(model)
-        self.assertEqual(2, len(entries),
-                         'two source water loops are two elections')
+        model, facts = self.built(self.GSHP, [(0, 3), (3, None)],
+                                  rename_first_loop='East Heat Pump Loop')
+        self.assertEqual(2, len(model.getPlantLoops()),
+                         'precondition: two DISTINCT source water loops')
+        groups = self.groups_of(facts)
+        annual = self.annual_for(groups, [('NaturalGas', 50), ('Electricity', 50)])
+        found = sorted(self.elections(model, annual), key=lambda r: r['zones'])
+        self.assertEqual(2, len(found), 'two source loops are two elections')
+        self.assertEqual(['electric', 'gas'],
+                         sorted(r['elected'] for r in found))
+        self.assertEqual([{'Electricity': 100.0}, {'NaturalGas': 150.0}],
+                         [found[0]['by_fuel'], found[1]['by_fuel']],
+                         'neither loop may see the other loop\'s members')
 
 
 class TestPurchasedEnergyStillGetsBlocks(unittest.TestCase):

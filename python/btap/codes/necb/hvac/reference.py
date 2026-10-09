@@ -164,7 +164,13 @@ def _blocks_of(group, election_key=None):
     silently move a Code threshold's basis.
     """
     serving = tuple(group['zones'])
-    extra = {'_serving_zones': serving, '_election_key': election_key}
+    # `_origin_group` is the UNSPLIT group, carried because some questions are
+    # not the block's to answer. The Article 13 election is one: it weighs the
+    # proposed heat pump's auxiliary energy over every block that heat pump
+    # serves, so handing it a one-block view makes it elect from one block's
+    # auxiliary fuel and call that the answer for all of them.
+    extra = {'_serving_zones': serving, '_election_key': election_key,
+             '_origin_group': group}
     if len(serving) == 1:
         return [dict(group, **extra)]
     return [dict(group, zones=[zone], **extra) for zone in serving]
@@ -503,9 +509,17 @@ def _finalize(assignment, group, definitions, selection, facts, audit,
         if elected is not None and scope is not None and scope in elected:
             assignment.energy_type = elected[scope]
         else:
+            # The ORIGINAL proposed group, not this block's view. Keying the
+            # cache on the full scope stopped a second call; it did not make
+            # the FIRST call full-scope. Measured on one ASHP over two blocks
+            # with 10 GJ of auxiliary gas on the first and 100 GJ of
+            # auxiliary electricity on the second: the one-block view elects
+            # `gas` from `{'NaturalGas': 10.0}` with `scope_zone_count: 1`,
+            # where (g)(i)'s proposed-heat-pump scope elects `electric` from
+            # `{'NaturalGas': 10.0, 'Electricity': 100.0}` (Sol, `143`).
             assignment.energy_type = heat_pump_aux_energy_type(
-                group, facts, hp_rules, proposed_annual, audit,
-                article_base=hp_article)
+                group.get('_origin_group') or group, facts, hp_rules,
+                proposed_annual, audit, article_base=hp_article)
             if elected is not None and scope is not None:
                 elected[scope] = assignment.energy_type
     if assignment.energy_type is None:
