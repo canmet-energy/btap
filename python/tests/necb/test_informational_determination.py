@@ -53,7 +53,6 @@ class TestThePredicate(unittest.TestCase):
     def test_a_single_fuel_building_is_NOT_affected(self):
         facts = _facts([_group(["Z1"], ["NaturalGas"])])
         self.assertEqual([], reference.multi_energy_serving_groups(facts))
-        self.assertEqual([], reference.multi_energy_serving_systems(facts))
 
     def test_a_dual_fuel_group_IS_affected(self):
         facts = _facts([_group(["Z1"], ["NaturalGas", "Electricity"])])
@@ -64,26 +63,20 @@ class TestThePredicate(unittest.TestCase):
         facts = _facts([_group(["Z1"], ["Purchased", "Electricity"])])
         self.assertEqual([], reference.multi_energy_serving_groups(facts))
 
-    def test_five_blocks_on_ONE_plant_are_ONE_serving_system(self):
-        """The group list overcounts and the label must not: sample 11 is five
-        thermal blocks on one plant and ONE disclosure finding. My first
-        version of this label said "5 multi-energy serving systems"."""
-        plant = {"type": "hot_water", "name": "Hot Water Loop",
-                 "fuels": ["NaturalGas", "Electricity"], "boiler_count": 2,
-                 "fuel_capacities_w": {"NaturalGas": None, "Electricity": None}}
-        groups = [_group([f"Zone {i}"], ["NaturalGas", "Electricity"])
-                  for i in range(5)]
-        facts = _facts(groups, plants=[plant])
-        self.assertEqual(5, len(reference.multi_energy_serving_groups(facts)))
-        self.assertEqual(["Hot Water Loop"],
-                         reference.multi_energy_serving_systems(facts),
-                         "deduped to the plant, matching the one finding")
-
-    def test_two_groups_with_no_covering_plant_stay_two(self):
-        """The control: dedupe must not collapse genuinely separate systems."""
-        facts = _facts([_group(["A"], ["NaturalGas", "Electricity"]),
-                        _group(["B"], ["NaturalGas", "Electricity"])])
-        self.assertEqual(2, len(reference.multi_energy_serving_systems(facts)))
+    # `test_five_blocks_on_ONE_plant_are_ONE_serving_system` and
+    # `test_two_groups_with_no_covering_plant_stay_two` lived here and were
+    # REMOVED with `multi_energy_serving_systems` on 2026-10-09 (Sol, `145`).
+    # That helper existed to apply "the disclosure's own dedupe key" for a
+    # verdict label; the determination stopped using it at D-100, and D-101
+    # moved the disclosure to a per-SERVICE-SET key with a separate per-plant
+    # AHJ-3 record — so the helper's one reason to exist became a claim that
+    # it returned the opposite of the live disclosure.
+    #
+    # The properties they guarded are asserted against the real disclosure in
+    # `test_multi_energy_disclosure.py`:
+    # `test_one_plant_serving_five_blocks_warns_once` (one service choice, one
+    # allocation record naming all five blocks, one plant record) and
+    # `test_TWO_service_sets_on_ONE_plant_give_two_allocations_and_one_plant_record`.
 
 
 class TestTheLabel(unittest.TestCase):
@@ -338,12 +331,18 @@ class TestTheREALHelperOnRealModels(unittest.TestCase):
         statuses = {c["id"]: c["status"] for c in reason["conditions"]}
         self.assertEqual("alternative-solution", statuses["AHJ-1"])
         self.assertEqual("referral", statuses["AHJ-3"])
-        targets = {c["target"] for c in reason["conditions"]}
-        self.assertEqual(
-            {"Hot Water Loop"}, targets,
-            "the condition names the PLANT, because that is what the firing "
-            "entry targets when one plant carries every fuel — more useful to "
-            "a reviewer than the zone list")
+        targets = {c["id"]: c["target"] for c in reason["conditions"]}
+        # EACH ID NAMES ITS OWN SCOPE since D-101 (Sol, `143`). Both conditions
+        # used to name the plant, because one combined entry carried both ids
+        # and targeted the plant. AHJ-1 follows the proposed heating service
+        # and allocation choice, so it names the affected thermal blocks;
+        # AHJ-3 follows the hydronic plant cardinality choice, so it names the
+        # plant. One plant can carry two service sets, which the single
+        # plant-targeted entry could not express.
+        self.assertEqual("Zone 1", targets["AHJ-1"],
+                         "the allocation condition names the affected blocks")
+        self.assertEqual("Hot Water Loop", targets["AHJ-3"],
+                         "the cardinality condition names the plant")
         joined = " ".join(reason["ahj_must_approve"])
         self.assertIn("ALTERNATIVE SOLUTION", joined)
         # The cardinality question now arrives as AHJ-3's own TITLE, not as
@@ -395,16 +394,31 @@ class TestTheREALHelperOnRealModels(unittest.TestCase):
         fuels was handed the boiler-cardinality question anyway. Driven
         through the selector rather than a built model, because the shape is
         a group whose fuels no single plant covers."""
+        from btap.audit import AuditLog
+
         facts = {"zone_groups": [_group(["Z1"],
                                         ["NaturalGas", "Electricity"])],
                  "plants": [], "purchased_energy": {}}
+        # Asserted against the LIVE disclosure rather than the retired
+        # `multi_energy_serving_systems` helper, which is stricter: it checks
+        # the records the run actually emits instead of a helper's agreement
+        # with them (Sol, `145`).
+        audit = AuditLog()
+        selection = {"special_rules": {
+            "purchased_heating": {"article": "8.4.4.6.(1)",
+                                  "part_load_curve_class": "modulating"},
+            "heat_pump": {"article": "8.4.4.13.(1)-(2)"}}}
+        reference._disclose_multi_energy(facts["zone_groups"][0], selection,
+                                         facts, audit)
+        cited = [str(e.get("ahj") or "") for e in audit.entries
+                 if e.get("level") == "warning"]
         self.assertEqual(
-            [], reference.multi_energy_serving_systems(facts,
-                                                       hydronic_only=True),
-            "no plant carries both fuels, so no boiler question arises")
+            [], [c for c in cited if "AHJ-3" in c],
+            "no plant carries both fuels, so no boiler-cardinality question "
+            "arises")
         self.assertEqual(
-            1, len(reference.multi_energy_serving_systems(facts)),
-            "but the ratio question still applies to the group")
+            1, len([c for c in cited if "AHJ-1" in c]),
+            "but the ratio question still applies to the serving system")
 
 
 class TestANonMultiEnergyConditionRendersTruthfully(unittest.TestCase):

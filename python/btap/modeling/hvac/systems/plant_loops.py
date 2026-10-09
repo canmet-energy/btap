@@ -16,7 +16,10 @@ BOILER_PART_LOAD_CLASS_FEATURE = 'btap_part_load_curve_class'
 #: Feature stamped on a boiler to say which half of a staged plant it is
 #: ('primary' / 'secondary'), so the NECB 8.4.x.9.(6) staging rules identify the
 #: pair by the builder's own mark rather than by matching its display name
-#: (DF-13). Set only where this layer builds the pair; nothing here reads it.
+#: (DF-13). Set where this layer builds the pair, and read in TWO places: by
+#: `_boiler_role` below, as the first source of a loop's primary/secondary
+#: order for reuse matching, and by the codes-side D-90 staging pass
+#: (`btap.codes.necb.hvac.efficiency._plant_role`).
 BOILER_PLANT_ROLE_FEATURE = 'btap_plant_role'
 
 
@@ -31,6 +34,111 @@ def boiler_part_load_class(loop):
     return None
 
 
+def boiler_fuels(loop):
+    """The boiler fuels on a loop's supply side, in supply order.
+
+    Part of a hot-water loop's REUSE IDENTITY. Without it, two reference
+    assignments that differ only in `config` — Systems 2 and 5 use one
+    catalogue name for their gas and electric variants — both adopted whichever
+    plant was built first, so the second assignment's fuel never reached plant
+    construction. Renaming only the PROPOSED air loops, which `characterize()`
+    sorts, then flipped the whole reference plant between NaturalGas and
+    Electricity (Sol, `151`).
+    """
+    return [component.to_BoilerHotWater().get().fuelType()
+            for component in loop.supplyComponents(
+                openstudio.model.BoilerHotWater.iddObjectType())]
+
+
+def _boiler_role(boiler):
+    """``'primary'``, ``'secondary'`` or None, by D-90's three sources.
+
+    The same contract `btap.codes.necb.hvac.efficiency._plant_role` applies on
+    the codes side — the builder's own feature, then the conventional name,
+    then a two-boiler plant's supply order. It is reimplemented here rather
+    than imported because `btap.modeling` may not depend on `btap.codes`
+    (the D-77 direction), and the FEATURE itself is modeling-owned.
+    """
+    stored = boiler.additionalProperties().getFeatureAsString(
+        BOILER_PLANT_ROLE_FEATURE)
+    if stored.is_initialized() and stored.get() in ('primary', 'secondary'):
+        return stored.get()
+    name = boiler.nameString()
+    if 'Primary Boiler' in name:
+        return 'primary'
+    if 'Secondary Boiler' in name:
+        return 'secondary'
+    return None
+
+
+def _ordered_boiler_fuels(loop):
+    """``(primary_fuel, secondary_fuel)`` for a staged pair, else None.
+
+    None means the ORDER could not be established, and a caller that supplied
+    an explicit backup must then NOT reuse the loop: unknown order may not
+    silently count as a match (Sol, `153`).
+
+    Order IS established for two WHOLLY UNMARKED boilers, by the loop's own
+    supply order — D-90's third source, which is what lets an imported pair
+    match at all. What returns None is a plant that is not a two-boiler pair,
+    a HALF-marked pair (one boiler claiming a role, one not), or a pair whose
+    marks do not form one primary and one secondary.
+    """
+    boilers = [component.to_BoilerHotWater().get()
+               for component in loop.supplyComponents(
+                   openstudio.model.BoilerHotWater.iddObjectType())]
+    if len(boilers) != 2:
+        return None
+    roles = [_boiler_role(boiler) for boiler in boilers]
+    if set(roles) == {'primary', 'secondary'}:
+        by_role = dict(zip(roles, boilers))
+        return (by_role['primary'].fuelType(),
+                by_role['secondary'].fuelType())
+    if any(role is not None for role in roles):
+        # Half-marked: one boiler claims a role and the other does not. The
+        # order is not established, so refuse rather than guess.
+        return None
+    # D-90's last resort: exactly two unmarked boilers on one loop ARE the
+    # pair, ordered by the loop's own supply order so the choice is
+    # deterministic.
+    return (boilers[0].fuelType(), boilers[1].fuelType())
+
+
+def _fuels_compatible(loop, fuel, backup_fuel):
+    """Whether `loop` can serve a caller asking for this boiler realization.
+
+    TWO DIFFERENT REQUESTS, because `backup_fuel` carries meaning (Sol, `153`):
+
+    * **backup omitted** — the caller is attaching demand to whatever plant
+      already realises its fuel and is NOT electing the other role. It needs
+      its fuel PRESENT, nothing more. This is the sample 11/12 shape: a mixed
+      gas-lead/electric-backup plant is built, then `Baseboard gas boiler`
+      asks for NaturalGas and must join it.
+    * **backup supplied** — this is an ordered primary/secondary plant
+      realization, and reuse must match BOTH roles IN ORDER. A reversed pair
+      is a different plant: the roles are durable runtime facts that D-90's
+      staging pass consumes, so adopting the reversal changes which fuel
+      occupies which role before that pass runs, and 8.4.x.9.(5)(b) makes
+      cross-energy operating priority substantive. An explicit gas/gas request
+      is likewise not satisfied by one gas and one electric boiler.
+
+    A set subset satisfied all three of those wrongly — it loses order AND
+    multiplicity. Plain equality fails the omitted-backup case instead, which
+    the frozen corpus caught by way of sample 11 losing AHJ-1/AHJ-3.
+
+    A loop with no boilers is compatible with anything.
+    """
+    existing = boiler_fuels(loop)
+    if not existing:
+        return True
+    if backup_fuel is None:
+        return fuel in existing
+    ordered = _ordered_boiler_fuels(loop)
+    if ordered is None:
+        return False
+    return ordered == (fuel, backup_fuel)
+
+
 _HOT_WATER_LOOP_NAME = re.compile(r'^Hot Water Loop( \d+)?$')
 
 
@@ -40,19 +148,30 @@ def _named_hot_water_loop(loop):
     return bool(_HOT_WATER_LOOP_NAME.match(loop.nameString()))
 
 
-def find_hot_water(model, part_load_curve_class=None):
+def find_hot_water(model, part_load_curve_class=None, exclude=(), fuel=None,
+                   backup_fuel=None):
     """Find an existing hot-water loop (one with a boiler on the supply side), or None.
 
     :param model: openstudio.model.Model
+    :param exclude: handles (as strings) of loops that must NOT be adopted,
+        however well they otherwise match. The NECB reference path uses it for
+        any PROPOSED plant that survived teardown — because a `copy_proposed`
+        block, process or service water, or another non-zone demand still
+        draws on it: a reference system being built must connect to a planned
+        reference plant, not to proposed equipment kept alive for something
+        else (D-101; Sol, `143`/`149`).
     :return: openstudio.model.PlantLoop or None
     """
     # Source matching is EXCLUSIVE: a hybrid loop (boilers AND a district
     # object on the supply side) is neither a boiler loop nor a district loop
     # for reuse, so the two callers can never be handed the same object.
+    blocked = {str(handle) for handle in exclude}
     return next(
         (pl for pl in model.getPlantLoops()
-         if _boiler_heated(pl) and not _district_heated(pl)
-         and boiler_part_load_class(pl) == part_load_curve_class),
+         if str(pl.handle()) not in blocked
+         and _boiler_heated(pl) and not _district_heated(pl)
+         and boiler_part_load_class(pl) == part_load_curve_class
+         and (fuel is None or _fuels_compatible(pl, fuel, backup_fuel))),
         None)
 
 
@@ -83,13 +202,28 @@ def _boiler_heated(loop):
 
 
 def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='boiler',
-              part_load_curve_class=None):
+              part_load_curve_class=None, exclude=()):
     """Build a hot-water loop: primary + secondary boiler, variable-speed pump,
     82C design exit / 16K dT, OA-reset 82C@-16C down to 60C@0C.
 
     :param model: openstudio.model.Model
     :param fuel: primary boiler fuel (OpenStudio Boiler fuel type keyword)
-    :param backup_fuel: secondary boiler fuel (defaults to primary)
+    :param backup_fuel: secondary boiler fuel. IT ALSO SELECTS THE REUSE RULE,
+        because supplying it states an ordered two-role realization while
+        omitting it does not:
+
+        * omitted — REUSE returns any compatible plant that CONTAINS ``fuel``,
+          whatever its other role carries, because the caller is attaching
+          demand rather than electing a pair; NEW CONSTRUCTION defaults the
+          secondary to ``fuel``. So a caller asking for NaturalGas may be
+          handed an existing Electricity-primary/NaturalGas-secondary plant,
+          and that plant's roles are NOT re-defaulted.
+        * supplied — REUSE requires the loop's primary and secondary to match
+          ``(fuel, backup_fuel)`` IN THAT ORDER; NEW CONSTRUCTION uses the
+          supplied value as the secondary fuel.
+
+        The omitted-backup reuse branch is what samples 11 and 12 depend on
+        (Sol, `153`).
     :param reuse: return an existing boiler loop when present (default True)
     :param source: 'boiler' (default) or 'district' (DistrictHeating object
         instead of boilers — the CBECS 'district hot water' pattern)
@@ -108,11 +242,15 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
             # Name-guarded: a ground-loop condenser loop is modelled with a
             # DistrictHeating object too (hp_plant_fancoils), and must never
             # serve as the hot-water loop (independent review, 2026-09-13).
+            blocked = {str(handle) for handle in exclude}
             existing = next((pl for pl in model.getPlantLoops()
-                             if _named_hot_water_loop(pl)
+                             if str(pl.handle()) not in blocked
+                             and _named_hot_water_loop(pl)
                              and _district_heated(pl) and not _boiler_heated(pl)), None)
         else:
-            existing = find_hot_water(model, part_load_curve_class)
+            existing = find_hot_water(model, part_load_curve_class,
+                                      exclude=exclude, fuel=fuel,
+                                      backup_fuel=backup_fuel)
         # The name fallback catches a loop that has no boiler YET. It must not
         # adopt a loop heated by a DIFFERENT SOURCE than the one asked for:
         # every loop this builder makes is named 'Hot Water Loop', district
@@ -127,13 +265,26 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
         # reference kept purchased heating while its energy type said gas.
         # Refusing the adoption lets the district loop drain group by group and
         # be removed by the teardown's own fixpoint.
+        #
+        # The fallback honours `exclude` too. It did not, and an excluded loop
+        # came straight back through it by NAME: `find_hot_water` returned None
+        # and this matched `Hot Water Loop` anyway, so reserving a retained
+        # proposed plant had no effect at all (measured while fixing Sol's
+        # `143` blocker 3).
         if existing is None:
+            blocked_by_name = {str(handle) for handle in exclude}
             existing = next(
                 (pl for pl in model.getPlantLoops()
-                 if _named_hot_water_loop(pl)
+                 if str(pl.handle()) not in blocked_by_name
+                 and _named_hot_water_loop(pl)
                  and _district_heated(pl) == (source == 'district')
                  and not (source == 'district' and _boiler_heated(pl))
-                 and boiler_part_load_class(pl) == part_load_curve_class),
+                 and boiler_part_load_class(pl) == part_load_curve_class
+                 # FUEL-AWARE here too. The typed lookup above and this
+                 # fallback are two paths to the same adoption, and fixing one
+                 # of a pair has already been the shape of two defects in this
+                 # function.
+                 and _fuels_compatible(pl, fuel, backup_fuel)),
                 None)
         if existing is not None:
             return existing
@@ -194,16 +345,113 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
     return hw_loop
 
 
-def find_chilled_water(model):
+def _chillers(loop):
+    return loop.supplyComponents(
+        openstudio.model.ChillerElectricEIR.iddObjectType())
+
+
+def _district_cooled(loop):
+    return len(loop.supplyComponents(
+        openstudio.model.DistrictCooling.iddObjectType())) > 0
+
+
+def _cooling_source(loop):
+    """'district', 'air_cooled', 'water_cooled', or None for neither."""
+    if _district_cooled(loop):
+        return 'district'
+    condensers = set()
+    for component in _chillers(loop):
+        chiller = component.to_ChillerElectricEIR()
+        if chiller.is_initialized():
+            condensers.add(chiller.get().condenserType())
+    if not condensers:
+        return None
+    return 'air_cooled' if condensers == {'AirCooled'} else 'water_cooled'
+
+
+def plant_is_hvac_candidate(loop):
+    """Whether a reference HVAC build could ever ADOPT this loop.
+
+    The NECB reference path reserves every plant surviving its teardown pass,
+    which is right — the exclusion costs nothing and a loop misjudged here
+    would otherwise be adoptable. But the AUDIT of that reservation should name
+    only the loops a build could have taken: every corpus model carries a
+    `Main Service Water Loop` that teardown skips by design, so an
+    unclassified record fired on all 35 corpus scenarios and made the one run
+    where a reservation MATTERS indistinguishable from the rest
+    (Fable, `158` F2).
+
+    The classification MIRRORS the lookups rather than approximating them,
+    which the first version did not: it counted `_district_heated` alone as
+    enough, while district hot-water reuse is NAME-guarded and boiler reuse
+    explicitly EXCLUDES a district-heated loop. A district-heated
+    `DISTRICT PROCESS LOOP` was therefore audited as an adoptable survivor
+    though neither source-specific lookup can return it and the reference
+    builds its own plant — the same false reservation signal this filter
+    exists to remove, on a less common source boundary (Sol, `160`).
+
+    Mirroring the four reuse paths exactly:
+
+    * boiler hot water — boiler-heated and NOT district-heated, which also
+      rejects a boiler/district HYBRID, as `find_hot_water` does;
+    * district hot water — district-heated, NOT boiler-heated, AND carrying
+      the builder's own hot-water name;
+    * the hot-water name fallback — the builder's name, with a source that
+      matches or no boilers yet;
+    * chilled water — chillers or district cooling, which `chilled_water`
+      reaches by source;
+    * the CHILLED-WATER name fallback — an exact `Chilled Water Loop` with no
+      cooling source yet, which `chilled_water` returns for ANY requested
+      source. Omitting it hid a real survivor: a source-less
+      `Chilled Water Loop` retained by process demand classified False while
+      the builder would have adopted it without the broad exclusion — the
+      false-NEGATIVE counterpart of the service-water noise this filter
+      removed (Sol, `162`). Its name test is EXACT, unlike the hot-water
+      suffix regex, so it is not broadened beyond what `chilled_water` can
+      return.
+
+    A service-water loop satisfies none of them.
+    """
+    boiler_hw = _boiler_heated(loop) and not _district_heated(loop)
+    district_hw = (_district_heated(loop) and not _boiler_heated(loop)
+                   and _named_hot_water_loop(loop))
+    hw_name_fallback = _named_hot_water_loop(loop) and not boiler_fuels(loop)
+    cooling = bool(_chillers(loop) or _district_cooled(loop))
+    chw_name_fallback = (loop.nameString() == 'Chilled Water Loop'
+                         and _cooling_source(loop) is None)
+    return bool(boiler_hw or district_hw or hw_name_fallback or cooling
+                or chw_name_fallback)
+
+
+def find_chilled_water(model, exclude=(), source=None):
     """Find an existing chilled-water loop (one with a chiller on the supply side),
-    or None."""
-    return next(
-        (pl for pl in model.getPlantLoops()
-         if len(pl.supplyComponents(openstudio.model.ChillerElectricEIR.iddObjectType())) > 0),
-        None)
+    or None.
+
+    :param exclude: handles (as strings) of loops that must NOT be adopted. The
+        NECB reference path uses it for any PROPOSED plant kept alive by
+        something the teardown does not remove — a `copy_proposed` block,
+        process or service water, or another non-zone demand
+        (D-101; Sol, `145`/`149`).
+    :param source: when given, only a loop of that cooling source matches —
+        'water_cooled', 'air_cooled' or 'district'. A caller asking for
+        district cooling must never be handed a chiller loop, and vice versa,
+        which is the cooling analogue of the hot-water source guard.
+    """
+    blocked = {str(handle) for handle in exclude}
+    for loop in model.getPlantLoops():
+        if str(loop.handle()) in blocked:
+            continue
+        if source is None:
+            if len(_chillers(loop)) > 0:
+                return loop
+            continue
+        if _cooling_source(loop) == source:
+            return loop
+    return None
 
 
-def chilled_water(model, chiller_type='Scroll', reuse=True, source='water_cooled'):
+def chilled_water(model, chiller_type='Scroll', reuse=True, source='water_cooled',
+                  exclude=()):
     """Build a chilled-water loop (7C exit / 6K dT, variable-speed pump, primary +
     secondary water-cooled chillers, constant 7C setpoint) AND its condenser-water
     loop (29C / 6K, single-speed cooling tower 24/35/5/6 design temps, constant 29C
@@ -220,10 +468,24 @@ def chilled_water(model, chiller_type='Scroll', reuse=True, source='water_cooled
     :return: openstudio.model.PlantLoop (the chilled-water loop)
     """
     if reuse:
-        existing = find_chilled_water(model)
+        # SOURCE-MATCHED and EXCLUSION-AWARE, for the same two reasons the
+        # hot-water side already is. A district-cooling caller must not be
+        # handed a chiller loop, and a loop reserved to whatever retained it
+        # must not be adopted by a block the reference REPLACES — the exclusion
+        # reached hot water only, so built System 2 cooling coils joined the
+        # copied block's proposed chiller plant (Sol, `145`). The retainer need
+        # not be a copied block: process cooling on a `WaterUseConnections`
+        # keeps a chilled-water loop alive the same way (`149`).
+        blocked = {str(handle) for handle in exclude}
+        existing = find_chilled_water(model, exclude=exclude, source=source)
         if existing is None:
+            # The name fallback catches a loop with no chiller YET. It honours
+            # the exclusion too: on the hot-water side this exact fallback
+            # silently defeated the first reservation fix.
             existing = next((pl for pl in model.getPlantLoops()
-                             if pl.nameString() == 'Chilled Water Loop'), None)
+                             if pl.nameString() == 'Chilled Water Loop'
+                             and str(pl.handle()) not in blocked
+                             and _cooling_source(pl) in (None, source)), None)
         if existing is not None:
             return existing
 

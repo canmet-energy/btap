@@ -51,12 +51,17 @@ class TestFreezeSealTransition(unittest.TestCase):
         #      FULL-YEAR for AHJ-1 and AHJ-3 (Sol's `127` — both fired only in
         #      tiers that cannot reach a determination, so nothing proved they
         #      survive a real year)
-        #   = 17
+        #   1  guard 7 for AHJ-16: determination-03, sample 18 run FULL-YEAR
+        #      under D-101 (Sol's `139` item 7 held the guard unmet while that
+        #      run's reference could not hold setpoint — 932.25 unmet heating
+        #      hours against the 100 h limit — and `143` required the corrected
+        #      run frozen once it did)
+        #   = 18
         #
         # This enumeration was ALREADY one behind before sample 09: it listed
         # 4+4+2+4 = 14 beside an assertion of 15, having never recorded sample
         # 11. A provenance narrative that does not add up is not provenance.
-        self.assertEqual({"python-only:post-handoff": 31, "python-only": 17}, active)
+        self.assertEqual({"python-only:post-handoff": 31, "python-only": 18}, active)
         self.assertEqual({"ruby": 29, "ruby-api": 2}, retired)
         self.assertEqual({
             "commit": "85ab14352677093e24038d933cf1071e5b03431a",

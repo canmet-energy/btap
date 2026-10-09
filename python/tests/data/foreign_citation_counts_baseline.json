@@ -227,9 +227,6 @@
     "pc['article']": {
       "cited": 1
     },
-    "f'Table {_subsection(ruleset)}.7.-B Note (3)'": {
-      "cited": 1
-    },
     "f'{prefix}.12. (Table -12 -> 5.2.2.8)'": {
       "cited": 1
     },
@@ -243,8 +240,14 @@
     "ratio_article": {
       "warn": 1
     },
+    "sentence_six": {
+      "warn": 1
+    },
     "purchased_heating['article']": {
       "cited": 1
+    },
+    "'; '.join(articles)": {
+      "warn": 1
     },
     "f'{hp_article}.(1); Note A-{hp_article}'": {
       "cited": 1
@@ -265,7 +268,13 @@
       "cited": 1
     },
     "rule['article']": {
-      "warn": 1
+      "warn": 2
+    },
+    "f'Table {subsection}.7.-B Note (3)'": {
+      "cited": 1
+    },
+    "f'Table {subsection}.7.-B Note (2)'": {
+      "cited": 1
     },
     "'4.2.1.6.' if building_type == 'Space Function' else '4.2.1.5.'": {
       "cited": 1
@@ -319,6 +328,9 @@
     "Re-baselined 2026-10-08 for Sol's `129`.5. The System 5 presence decision cited `8.4.4.1.(5); Table 8.4.4.7.-B` as a LITERAL, so a necb2025 run told an authority its AHJ-11 condition came from the other edition's articles. Both branches now derive the citation from the edition's own `reference_subsection`, which is why four per-edition literal counts drop by one each: 2020/8.4.4.1 and 2020/8.4.4.7 cited 5->4 and 6->5, and the 2025 counterparts the same. Nothing is lost from the PRODUCT — the citation is now correct for both editions rather than correct for one — but a literal-only per-edition scanner can no longer see it, which is the same trade every other prefix-derived citation in this file already made. One dynamic key is added, `presence_article`; it is a NAME, so the foreign scanner counts it conservatively rather than inspecting its content, and the unheated branch's inline f-string cites only Section 8.4 articles and so is not foreign at all. Verified end to end in the frozen full-year determination-02 run: the AHJ-11 condition carries '8.4.5.1.(5); Table 8.4.5.7.-B'.",
     "Re-baselined 2026-10-08 for Fable's `131` F6. Three citations in reference.py stopped spelling NECB 2020's subsection as a literal and now derive the run's own: the D-28 multizone merge decision's `Table 8.4.x.7.-B Note (3)`, and the humidification capture decision and orphan warning's `Table 8.4.x.7.-B Note (1)`. Each becomes a DYNAMIC site, which this scanner counts conservatively because it cannot inspect the content — the same treatment `presence_article` got, and the reason the total rises by three (187 to 190) for citations that are not foreign at all: every one resolves wholly inside Section 8.4. The static halves they replaced are gone from the other baseline for the same edit.",
     "Re-baselined 2026-10-08 for Fable's `133` G3. The economizer pair's mixed literal `'8.4.4.12.; 5.2.2.7.(1)'` becomes a dynamic citation, so its two static sites leave this file and the derived form is counted conservatively instead — the same trade the two entries above made. The 5.2.2.7 half, which is what makes it foreign, is unchanged and still cited.",
-    "Re-baselined 2026-10-08 for issue #72: the scanner now resolves manifest-looked-up citations, so sites that were invisible to BOTH gates are counted again here too."
+    "Re-baselined 2026-10-08 for issue #72: the scanner now resolves manifest-looked-up citations, so sites that were invisible to BOTH gates are counted again here too.",
+    "Re-baselined 2026-10-09 for D-101 and Sol's `143`: AHJ-3's plant cardinality question left the AHJ-1 allocation disclosure and is emitted as its own plant-scoped record, adding one dynamic `article=sentence_six` warn site. AHJ-1 now dedupes on the SERVICE SET rather than the plant, because two proposed serving systems drawing on one dual-fuel plant are two 8.4.x.9.(5) allocation choices and the plant key emitted a single warning for both.",
+    "Re-baselined 2026-10-09 for Sol's `143` blockers 4 and 5: the post-selection merge audit split by note — Table 8.4.x.7.-B Note (3) for System 6, Note (2) for Systems 1/2/5, which is what the table marks on them — so the Note (3) key is re-spelled against a local `subsection` and a Note (2) key joins it; and the Data Processing cooling threshold now declares whether it measured the block or the serving system, adding one warn site on `rule['article']`.",
+    "Re-baselined 2026-10-09 for Sol's `145` blocker 2: the unsized data-processing threshold warning moved out of `_assign` to the caller, which aggregates the blocks that actually reached the rule, so its citation is now `'; '.join(articles)` instead of `rule['article']` — the order-dependent `_first_block` dedupe could suppress the only warning entirely."
   ]
 }

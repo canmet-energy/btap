@@ -106,11 +106,28 @@ nonconformity with 8.4.x.9.(6)(e).
 
 ## How often a run is conditional, measured
 
-**69% of the frozen corpus — 25 of the 36 scenarios carrying an audit — would
-return a CONDITIONAL determination if run annually.** Measured 2026-10-08 by
-resolving every `ahj` citation in every frozen audit against this register's
-own statuses. By id: AHJ-1 on 11 scenarios, AHJ-14 on 10, AHJ-15 on 10, AHJ-3
-on 3, AHJ-16 on 1.
+**76% of the frozen corpus — 29 of the 38 scenarios carrying an audit — would
+return a CONDITIONAL determination if run annually.** Re-measured 2026-10-09
+after D-101 by resolving every `ahj` citation in every frozen audit against
+this register's own statuses. By id: AHJ-15 on 14 scenarios, AHJ-1 on 13,
+AHJ-14 on 12, AHJ-3 on 4, AHJ-5 on 3, AHJ-16 on 2.
+
+It was 69% (25 of 36) on 2026-10-08, and the rise is a consequence of D-101
+rather than a new question. Five scenarios NEWLY cite AHJ-15 — samples 02, 03
+and 04 across their tiers — because AHJ-15 is about the one-unit-per-thermal-
+block topology, and that topology is now what a reference System 3 or 4 is.
+Two scenarios were added: the full-year determination witnesses for AHJ-1/AHJ-3
+and for AHJ-16.
+
+One caveat on the comparison, since the number is cited elsewhere: re-running
+this method over the PRE-D-101 baselines gives 24 of 36 (67%), not the recorded
+25 of 36, differing by one AHJ-15 scenario. So the 69% figure is not exactly
+reproducible by the method described here — either it was measured slightly
+differently or a later change moved one scenario without the figure being
+updated. The 76% above IS reproducible: resolve every `ahj` token in every
+`verification/scenarios/baselines/*/audit.json` against
+`btap/codes/data/ahj.json`, and count a scenario conditional when any resolved
+status is `referral` or `alternative-solution`.
 
 Before AHJ-14 and AHJ-15 were wired it was roughly a third. The jump is not a
 regression: both questions were always live, and wiring them only made the
@@ -156,11 +173,24 @@ implementation's behaviour with code.
 **What the tool does meanwhile.** It elects ONE energy type for the reference
 SELECTION and computes no capacity ratio, so it satisfies neither clause of
 (5). What the reference's FINAL equipment carries is a separate question this
-tool does not establish — the selected variant may adopt the proposed plant,
-replace it, tear it down, or stage it by role blind to fuel. It says so: an
-UNRESOLVED audit warning per serving system, `8.4.x.9.(5)` held at
+tool does not establish — the selected variant may REPLACE the proposed plant
+with a newly built one of the elected variant, tear it down and not rebuild it
+where the variant needs no boiler, or stage it by role blind to fuel. It says
+so: an UNRESOLVED audit warning per serving system, `8.4.x.9.(5)` held at
 `not_implemented`, and the run's determination set to `conditional` naming
 this question.
+
+**`adopted` was removed from this list on 2026-10-09**, and the removal is a
+finding rather than an edit. An AHJ-1-cited choice is a block whose heating was
+collapsed to ONE energy type, and such a block is always an `action == "build"`
+assignment: `_finalize` returns before the election and this disclosure for a
+`copy_proposed` block, so a retained block raises no AHJ-1 question at all. The
+only measured adoption was an all-`copy_proposed` residential service with
+ZERO AHJ-1 records, which Sol's `143` refused as evidence for this entry, and
+after D-101's plant-ownership split a built block cannot reach the proposed
+plant either. No conformance check exists that would let one. So `copy_proposed`
+CAN retain a proposed plant — that statement stands on its own and is tested —
+but it is not an outcome of the question this entry asks.
 
 **Status: `alternative-solution`, not `referral`.** Sol's `122` corrected my
 framing: (5)(a) says the capacities "shall match the ratio", so whether one
@@ -252,6 +282,17 @@ forbidden above 352 kW is not established by the text.
 **What the tool does meanwhile.** The (6) coverage gap states that the
 applicable subclause is not established at selection time and claims none.
 
+**Where a reader meets it.** Since D-101, AHJ-3 has its OWN audit record,
+targeted at the hydronic PLANT and emitted once per plant however many serving
+systems draw on it — `UNRESOLVED: ONE hydronic heating plant carries every
+energy type the serving systems use`, citing the (6) sentence alone. It used
+to ride on AHJ-1's allocation entry under one plant-keyed dedupe, which could
+not express one plant carrying two service sets: AHJ-1 follows each proposed
+heating service and allocation choice, AHJ-3 follows the plant. In the
+conditional determination the two therefore appear as separate conditions, the
+AHJ-1 ones naming their affected thermal blocks and the AHJ-3 one naming the
+plant (Fable, `158` F7).
+
 ## AHJ-4 — the 8.4.2.2.(5) backup-equipment exclusion
 
 **Status: `ruled`. Does not set a run conditional.**
@@ -332,13 +373,26 @@ functions. `_reference_energy_type` elects by a cascade returning `'gas'` for
 any recognised fossil fuel, so oil and propane both get the GAS catalog
 variant — there is no oil or propane variant to get.
 
-**That is a SELECTION fact, and the final equipment is configuration-dependent**
-(Sol, `125`.1). Measured on an oil-fired proposed building: where the hot-water
-plant is ADOPTED the reference keeps `FuelOilNo2`, and where a
-hot-water-baseboard variant tears it down the reference carries `NaturalGas`.
-So a final-fuel mismatch is real but not universal, and the earlier wording —
-"an oil- or propane-heated building is compared against a natural-gas
-reference" — stated the selector's answer as the reference's.
+**That is a SELECTION fact** (Sol, `125`.1), and the final equipment used to be
+configuration-dependent. It is not any more, for a BUILT block. Re-measured on
+an oil-fired proposed building on 2026-10-09, both variants give the same
+answer: the proposed plant is torn down and the reference carries
+`NaturalGas`, whether the proposed system is zonal baseboards or a
+hot-water-baseboard PSZ.
+
+The earlier account said the zonal variant ADOPTED the oil plant and kept
+`FuelOilNo2`, so a final-fuel mismatch was "real but not universal". D-101
+made it universal for a built block: destruction is phased ahead of
+construction and every plant surviving teardown is reserved to whatever
+retained it, so a built block cannot adopt a proposed plant. A `copy_proposed`
+block does still retain its proposed plant and its fuel — a different branch,
+and not this entry's subject.
+
+The wording before that — "an oil- or propane-heated building is compared
+against a natural-gas reference" — stated the selector's answer as the
+reference's, which was a separate error; it happens to describe the current
+built-block outcome correctly, but for the reference's reason rather than the
+selector's.
 
 Sol ruled the sources stay distinct and that this is a catalog gap, not a Code
 reading. Unlike AHJ-1 it IS fixable tool-side by adding the variants, and
@@ -569,10 +623,15 @@ unsettled, how many times the run applied it, a link to the first audit entry,
 and its bearing on the verdict — stated per row, because a status alone does
 not tell a reader whether the verdict moved.
 
-What remains open is EVIDENCE, not wiring: AHJ-2, AHJ-3, AHJ-10, AHJ-11,
-AHJ-12 and AHJ-16 have no frozen artifact that reaches a determination, because
-the annual tier runs `--quick` and the shapes that would exercise them sit in
-tiers that stop earlier. The status column says so per entry.
+What remains open is EVIDENCE, not wiring: AHJ-2, AHJ-10, AHJ-11 and AHJ-12
+have no frozen artifact that reaches a determination, because the annual tier
+runs `--quick` and the shapes that would exercise them sit in tiers that stop
+earlier. The status column says so per entry.
+
+AHJ-1, AHJ-3 and AHJ-16 DO have one. AHJ-1 and AHJ-3 ride on
+`determination-02` (sample 11, full year, Sol's `127`), and AHJ-16 on
+`determination-03` (sample 18, full year) — the latter only once D-101 gave
+that run a reference building that holds setpoint.
 
 ## AHJ-10 — how corner thermal blocks are grouped
 
@@ -765,24 +824,45 @@ default may bias the reference in EITHER direction. Declining to guess is
 defensible; calling the result conservative was not.
 
 
-**Guard 7 is UNMET, and the reason is a finding of its own.** Sol's `127`
-requires one full-year frozen artifact per approval-required id. AHJ-16 fires
-on exactly one corpus model, sample 18 (`18-vav-hw-subset-reheat`), and only
-in the SIZING tier, which reaches no determination. Driven through a real
-annual run on 2026-10-08 it does reach one — `conditional`, with AHJ-16 on the
-Hot Water Loop — so the wiring is sound.
+**Guard 7 is MET since 2026-10-09, and how it was unmet is a finding worth
+keeping.** Sol's `127` requires one full-year frozen artifact per
+approval-required id. AHJ-16 fires on exactly one corpus model, sample 18
+(`18-vav-hw-subset-reheat`), and only in the SIZING tier, which reaches no
+determination. Driven through a real annual run on 2026-10-08 it reached one —
+`conditional`, with AHJ-16 on the Hot Water Loop — so the wiring was sound.
 
-It is not frozen, because that run's REFERENCE building does not hold
-setpoint: 932.25 unmet heating hours and 542.25 unmet cooling, against the
-proposed building's 0.0 and 4.0. Article 8.4.1.2.(3) allows 100 h, so the
-non-compliant verdict is the reference failing, not the proposed building. Sol
+That run was still refused as a baseline, because its REFERENCE building did
+not hold setpoint: 932.25 unmet heating hours and 542.25 unmet cooling against
+the proposed building's 0.0 and 4.0, where Article 8.4.1.2.(3) allows 100 h. The
+non-compliant verdict was the reference failing, not the proposed building. Sol
 refused exactly this standard of evidence for AHJ-11 in `130` — a reference
 that completes without conditioning is not a comparison, and "EnergyPlus
-exited zero is not the Code's test".
+exited zero is not the Code's test". Freezing it would have recorded a broken
+reference as the expected baseline.
 
-So AHJ-16 needs either a model that triggers the N:1 shape with a valid
-reference, or the sample-18 reference's unmet hours understood first. Freezing
-the run as it stands would record a broken reference as the expected baseline.
+The cause was not sample 18. It was the selector: one "single-zone" System 3
+air loop served all five retained thermal blocks, following one elected control
+zone while the other four drifted. **D-101** made the thermal block the
+selection unit, and the corrected full-year run was measured twice with every
+reported figure agreeing:
+
+| | before D-101 | after |
+|---|---:|---:|
+| reference unmet heating | 932.25 h | **0.0 h** |
+| reference unmet cooling | 542.25 h | **4.75 h** |
+| proposed unmet cooling | 4.0 h | 4.0 h |
+
+Every block is now 0.0 h heating and 0.5–1.75 h cooling, so the comparison
+basis holds setpoint. The run still reports NOT COMPLIANT and that is now a
+statement about the PROPOSED building — 167 150 kWh against the reference's
+148 858 kWh, 112.3% of target — which is what a performance path is for.
+
+The witness is the frozen scenario
+`determination-03-18-vav-hw-subset-reheat-annual` (parity lane, full year, not
+`--quick`, since Article 8.4.1.2 makes a quick run a non-determination). Its
+assertions pin the determination, `ahj_ids` of AHJ-1/AHJ-14/AHJ-16, the
+reference's unmet hours per block, and that the verdict is the proposed
+building's.
 
 ## AHJ-17 — no air-cooled chiller performance curve is shipped
 

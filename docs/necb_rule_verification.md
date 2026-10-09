@@ -101,12 +101,18 @@ hostile tests must not flag them:
   - a proposed oil or propane system, whose reference may burn a DIFFERENT
     fuel. `_reference_energy_type` elects by a cascade returning `'gas'` for
     any fossil fuel it recognises — `re.search(r'gas|oil|propane', fuel)` — so
-    all three get the gas catalog variant. **That is a SELECTION fact, and the
-    final equipment is configuration-dependent.** Measured: an oil-fired
-    hot-water plant is ADOPTED and the reference keeps `FuelOilNo2`, while a
-    hot-water-baseboard variant tears it down and builds `NaturalGas` boilers
-    from the same election. So a final-fuel mismatch is real and reportable —
-    AHJ-6, a tool gap — and the exemption must not cover it. My first version
+    all three get the gas catalog variant. **That is a SELECTION fact, and since
+    D-101 the final equipment follows it for every BUILT block.** Re-measured
+    2026-10-09 in both editions: an oil-fired plant is torn down and the
+    reference builds `NaturalGas` boilers whether the proposed system is zonal
+    baseboards or a hot-water-baseboard PSZ. The earlier text said the zonal
+    variant was ADOPTED and kept `FuelOilNo2`, so the mismatch was
+    configuration-dependent; phased teardown plus the ungated plant
+    reservation removed that, and a proposed plant now survives only for the
+    demand that retained it — a `copy_proposed` block or process water — which
+    no built block joins. So a final-fuel mismatch is real, reportable and
+    UNIVERSAL for a built block — AHJ-6, a tool gap — and the exemption must
+    not cover it. My first version
     of this entry said every oil building "becomes a GAS reference", which was
     the selector's answer presented as the reference's (Sol, `125`.1).
   - a MULTI-energy system is not governed by (4) at all. (4) opens "Except as

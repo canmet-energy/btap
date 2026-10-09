@@ -163,6 +163,7 @@
   "inputs": {
    "category": "General Area",
    "energy_type": "gas",
+   "serving_system": null,
    "heated": true,
    "cooled": false,
    "cooling_kw": 0.0
@@ -179,6 +180,7 @@
   "inputs": {
    "category": "General Area",
    "energy_type": "gas",
+   "serving_system": null,
    "heated": true,
    "cooled": false,
    "cooling_kw": 0.0
@@ -195,6 +197,7 @@
   "inputs": {
    "category": "General Area",
    "energy_type": "gas",
+   "serving_system": null,
    "heated": true,
    "cooled": false,
    "cooling_kw": 0.0
@@ -211,6 +214,7 @@
   "inputs": {
    "category": "General Area",
    "energy_type": "gas",
+   "serving_system": null,
    "heated": true,
    "cooled": false,
    "cooling_kw": 0.0
@@ -227,6 +231,7 @@
   "inputs": {
    "category": "General Area",
    "energy_type": "gas",
+   "serving_system": null,
    "heated": true,
    "cooled": false,
    "cooling_kw": 0.0
@@ -238,11 +243,28 @@
  },
  {
   "step": "build",
+  "target": "Thermal Zone 1,Thermal Zone 2,Thermal Zone 3,Thermal Zone 4,Thermal Zone 5",
+  "action": "proposed HVAC torn down for every thermal block the reference replaces, in ONE pass before any reference system is built \u2014 a plant shared by several blocks must not survive one block's teardown and be re-adopted",
+  "inputs": {
+   "blocks": 5,
+   "assignments": 5
+  },
+  "ruling": "D-101",
+  "building": "reference building",
+  "level": "info"
+ },
+ {
+  "step": "build",
   "target": "Thermal Zone 1",
   "action": "reference system built",
   "inputs": {
    "system": 3,
-   "action": "build"
+   "source_actions": {
+    "Thermal Zone 1": "build"
+   },
+   "selection_branches": [
+    "build"
+   ]
   },
   "value": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
   "article": "8.4.5.7.(1)",
@@ -326,7 +348,12 @@
   "action": "reference system built",
   "inputs": {
    "system": 3,
-   "action": "build"
+   "source_actions": {
+    "Thermal Zone 2": "build"
+   },
+   "selection_branches": [
+    "build"
+   ]
   },
   "value": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
   "article": "8.4.5.7.(1)",
@@ -410,7 +437,12 @@
   "action": "reference system built",
   "inputs": {
    "system": 3,
-   "action": "build"
+   "source_actions": {
+    "Thermal Zone 3": "build"
+   },
+   "selection_branches": [
+    "build"
+   ]
   },
   "value": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
   "article": "8.4.5.7.(1)",
@@ -494,7 +526,12 @@
   "action": "reference system built",
   "inputs": {
    "system": 3,
-   "action": "build"
+   "source_actions": {
+    "Thermal Zone 4": "build"
+   },
+   "selection_branches": [
+    "build"
+   ]
   },
   "value": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
   "article": "8.4.5.7.(1)",
@@ -578,7 +615,12 @@
   "action": "reference system built",
   "inputs": {
    "system": 3,
-   "action": "build"
+   "source_actions": {
+    "Thermal Zone 5": "build"
+   },
+   "selection_branches": [
+    "build"
+   ]
   },
   "value": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
   "article": "8.4.5.7.(1)",
@@ -1097,7 +1139,7 @@
  },
  {
   "step": "coverage",
-  "action": "Heating System \u2014 partial. Applied: reference heating energy type modeled identical to the proposed where the catalog PRESERVES that source, namely natural gas and electricity (see also 8.4.5.13.(2)(g)). Gaps: two distinct gaps. (i) The sentence opens \"Except as provided in Sentence (5)\", so it does NOT govern a group whose proposed heating system uses more than one energy type; for those the structural election is a SURROGATE for the unimplemented 8.4.5.9.(5), and no single-fuel basis, whether the fossil-first cascade, capacity-dominant, lead-fuel or annual-dominant, satisfies (5)(a)'s capacity ratio. The multi-energy case is disclosed as UNRESOLVED once per serving system. (ii) Even for a SINGLE-energy system the reference is not always identical: the election maps FuelOilNo2 and PropaneGas to the GAS catalog VARIANT. What the reference's final equipment burns is configuration-dependent and MEASURED, not inferred from the election: with an oil-fired hot-water plant the reference ADOPTS it and keeps FuelOilNo2, while a hot-water-baseboard variant tears it down and builds NaturalGas boilers from the same 'gas' election. So the gap is that the catalog offers no oil or propane variant, and a reference built from it burns gas; it is NOT that every oil building gets a gas reference. (4) requires the energy type to be identical and Division A's building-energy-target definition requires the same energy SOURCES for the same functions, so oil and propane remain unsupported. That is a catalog gap, not a Code reading.",
+  "action": "Heating System \u2014 partial. Applied: reference heating energy type modeled identical to the proposed where the catalog PRESERVES that source, namely natural gas and electricity (see also 8.4.5.13.(2)(g)). Gaps: two distinct gaps. (i) The sentence opens \"Except as provided in Sentence (5)\", so it does NOT govern a group whose proposed heating system uses more than one energy type; for those the structural election is a SURROGATE for the unimplemented 8.4.5.9.(5), and no single-fuel basis, whether the fossil-first cascade, capacity-dominant, lead-fuel or annual-dominant, satisfies (5)(a)'s capacity ratio. The multi-energy case is disclosed as UNRESOLVED once per serving system. (ii) Even for a SINGLE-energy system the reference is not always identical: the election maps FuelOilNo2 and PropaneGas to the GAS catalog VARIANT. What the reference's final equipment burns FOLLOWS the election for every BUILT block, and is measured rather than inferred: both variants give the same answer, an oil-fired proposed plant is torn down and the reference builds NaturalGas boilers, whether the proposed system is zonal baseboards or a hot-water-baseboard PSZ. The earlier text said the zonal variant ADOPTS the oil plant and keeps FuelOilNo2, so the mismatch was 'real but not universal'. D-101 made that false for every BUILT block: destruction is phased ahead of construction and every plant surviving teardown is reserved to whatever retained it, so a built block cannot adopt a proposed plant. The gap is therefore that the catalog offers no oil or propane variant and a reference built from it burns gas, UNIVERSALLY for a built block. A `copy_proposed` block still retains its proposed plant with its own fuel, which is a different branch. (4) requires the energy type to be identical and Division A's building-energy-target definition requires the same energy SOURCES for the same functions, so oil and propane remain unsupported. That is a catalog gap, not a Code reading.",
   "inputs": {
    "status": "partial",
    "decisions_citing": 15,
@@ -1111,7 +1153,7 @@
  },
  {
   "step": "coverage",
-  "action": "Heating System \u2014 not implemented. Gaps: multi-energy capacity ratios are neither computed nor enforced: a proposed heating system drawing on more than one energy type is elected into ONE energy type at SELECTION. What the reference's final equipment carries is a separate question this tool does not establish: an adopted plant has been measured retaining BOTH proposed fuels, while a replaced plant carries only the elected one. Whether the reference happens to match the proposed allocation is therefore NOT VERIFIED in either direction \u2014 it is not asserted to be unmet, since a reference may carry capacity for a non-elected type through an air-loop coil or heat pump. Clause (b)'s operating priority is not transferred at all. An UNRESOLVED warning is emitted once per serving system, in two shapes: where ONE plant carries every energy type the group uses it also cites sentence 8.4.5.9.(6), WITHOUT a subclause, because which of (6)(b)/(c)/(d) applies depends on a reference plant capacity that does not exist at selection time, and it records that the plant's live capacity is set after sizing by primary/secondary role rather than by the proposed allocation; a group whose plant covers only part of it gets a generic entry that makes no claim about boilers and leaves the group-wide shares unresolved rather than reporting a plant-only split that would omit the other types from the denominator.",
+  "action": "Heating System \u2014 not implemented. Gaps: multi-energy capacity ratios are neither computed nor enforced: a proposed heating system drawing on more than one energy type is elected into ONE energy type at SELECTION. What the reference's final equipment carries is a separate question this tool does not establish: a replaced plant carries only the elected energy type. ADOPTION of the proposed plant is NOT among the outcomes of this gap \u2014 this disclosure fires only for a block whose heating was collapsed to one energy type, which is always an action=build assignment, and D-101 keeps a built block off a plant retained for a copy_proposed block. The measured adoption was an all-copy_proposed residential service, which raises no 8.4.x.9.(5) question at all. Whether the reference happens to match the proposed allocation is therefore NOT VERIFIED in either direction \u2014 it is not asserted to be unmet, since a reference may carry capacity for a non-elected type through an air-loop coil or heat pump. Clause (b)'s operating priority is not transferred at all. An UNRESOLVED warning is emitted once per serving system, in two shapes: where ONE plant carries every energy type the group uses it also cites sentence 8.4.5.9.(6), WITHOUT a subclause, because which of (6)(b)/(c)/(d) applies depends on a reference plant capacity that does not exist at selection time, and it records that the plant's live capacity is set after sizing by primary/secondary role rather than by the proposed allocation; a group whose plant covers only part of it gets a generic entry that makes no claim about boilers and leaves the group-wide shares unresolved rather than reporting a plant-only split that would omit the other types from the denominator.",
   "inputs": {
    "status": "not_implemented",
    "decisions_citing": 15
@@ -1122,7 +1164,7 @@
  },
  {
   "step": "coverage",
-  "action": "Heating System \u2014 partial. Applied: hydronic heating plant per the article: boiler staging 176/352 kW, modulating flow mode with the 25% floor, HWST 82/60 reset \u2014 plant defaults + the efficiency pass. Gaps: sentence (6) bands the reference plant's boiler count and staging by its heating capacity, and the reference plant is NOT determined at selection time: it may be the adopted proposed plant; may be a DIFFERENT plant built by the selected variant after the proposed one is torn down, holding none of its devices; or may not exist at all where the variant needs no boiler. What the implementation does after sizing is set the plant's live capacity by primary/secondary ROLE \u2014 builder feature, then device name, then supply order \u2014 and BLIND to energy type. MEASURED outcomes, each on its own configuration and none generalised: two role-labelled 200 kW boilers in the two-boiler band become 100/100 kW, so an equal ratio IS preserved; a recognised secondary below the single-boiler threshold is driven to ~0 W, so there the allocation is not preserved and the surviving fuel need not be the elected one; and three generically-named 52 kW boilers keep 52/52/52, because the role resolver returns nothing unless there are exactly TWO boilers \u2014 such a plant has ZERO recognised roles, not two. Which outcome applies, and therefore whether 8.4.5.9.(5)(a) survives, is unverified against the Article. NO ANNUAL MEASUREMENT HAS BEEN TAKEN FOR THIS EDITION. Separately, no boiler sizingFactor is set at all, so each parallel boiler sizes for the whole loop where the legacy realisation sets 1.0/n.",
+  "action": "Heating System \u2014 partial. Applied: hydronic heating plant per the article: boiler staging 176/352 kW, modulating flow mode with the 25% floor, HWST 82/60 reset \u2014 plant defaults + the efficiency pass. Gaps: sentence (6) bands the reference plant's boiler count and staging by its heating capacity, and the reference plant is NOT determined at selection time: it may be a DIFFERENT plant built by the selected variant after the proposed one is torn down, holding none of its devices; or may not exist at all where the variant needs no boiler. What the implementation does after sizing is set the plant's live capacity by primary/secondary ROLE \u2014 builder feature, then device name, then supply order \u2014 and BLIND to energy type. MEASURED outcomes, each on its own configuration and none generalised: two role-labelled 200 kW boilers in the two-boiler band become 100/100 kW, so an equal ratio IS preserved; a recognised secondary below the single-boiler threshold is driven to ~0 W, so there the allocation is not preserved and the surviving fuel need not be the elected one; and three generically-named 52 kW boilers keep 52/52/52, because the role resolver returns nothing unless there are exactly TWO boilers \u2014 such a plant has ZERO recognised roles, not two. Which outcome applies, and therefore whether 8.4.5.9.(5)(a) survives, is unverified against the Article. NO ANNUAL MEASUREMENT HAS BEEN TAKEN FOR THIS EDITION. Separately, no boiler sizingFactor is set at all, so each parallel boiler sizes for the whole loop where the legacy realisation sets 1.0/n.",
   "inputs": {
    "status": "partial",
    "decisions_citing": 15,

@@ -148,6 +148,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-98** — A baseline records its producer; freezing stays local until an image digest is obtainable _(process)_
 - **D-99** — A reference that cannot satisfy a requirement yields a CONDITIONAL result, not a certification _(runtime)_
 - **D-100** — AHJ dispositions are cited by the deciding rule site; the determination owns only policy _(runtime)_
+- **D-101** — The thermal block is the selection unit; plant, election and disclosure scopes stay larger _(runtime)_
 
 <!-- TOC END -->
 
@@ -3269,7 +3270,19 @@ A 5-building full-annual refresh supersedes those rows; the other 10 rows
 stand.
 
 - **Files:** `openstudio-hvac/lib/openstudio_hvac/classify.rb`,
-  `.../necb/reference.rb`; test + golden as above.
+  `.../necb/reference.rb`; test + golden as above. The Ruby paths are the
+  ORIGINAL artifact; the product is Python-only since D-84, and the matrix now
+  lives at `python/tests/fixtures/reference_selection_matrix.json` with
+  `python/tests/necb/test_hvac_reference_selection_matrix.py`.
+- **Superseded in part by D-101, 2026-10-09**, which made the thermal block the
+  selection unit. The adjudicated CONTENT of this matrix — which system,
+  action, energy type and catalog each configuration elects — stands unchanged,
+  and was verified to stand across all 776 comparisons. What changed is the
+  SCHEMA: the test deduplicated assignments, so one assignment per serving
+  group and one per thermal block were indistinguishable. Rows are no longer
+  deduplicated, the per-row `zones` count became `blocks`, and the assignments
+  must partition the retained conditioned blocks. D-101 records the
+  derivation.
 - **Who/when:** Fable under D-10, 2026-08-02.
 
 <a id="d-59"></a>
@@ -6613,7 +6626,19 @@ while the claim stays honest.
 
 ### What is NOT claimed
 
-Nothing about the reference's final equipment. Four outcomes are reachable and
+Nothing about the reference's final equipment.
+
+**SUPERSEDED IN PART BY [D-101](#d-101), 2026-10-09: there are now THREE
+reachable outcomes, not four.** Adoption of the proposed plant is no longer
+among them. D-101 phases destruction ahead of construction and reserves every
+plant surviving that pass to whatever retained it, so a BUILT block cannot
+join a surviving proposed plant; and a `copy_proposed` block never reaches
+this disclosure, because `_finalize` returns before the election. `adopted`
+was removed from AHJ-1's outcome list accordingly. The four below were
+reachable in the 2026-10-07 implementation this decision records and are kept
+as that period's measured evidence, not as today's contract.
+
+Four outcomes were reachable and
 the entry lists them without electing one: the proposed plant adopted; a
 different plant built by the selected variant after this one is torn down; no
 plant at all where the variant needs no boiler; or a hydronic plant staged
@@ -6719,3 +6744,257 @@ there, which is the state Fable's `131` F7 found: AHJ-5 fired fifteen times
 per frozen corpus and no reader of a report saw it once.
 
 The exit code is deliberately unchanged by any of this.
+
+<a id="d-101"></a>
+
+## D-101 — the block selects the system; the plant, the heat pump and the choice keep their own scopes
+
+Sentence 8.4.x.7.(1) says the type of HVAC system assigned to **each thermal
+block** of the reference building shall be determined from that block's
+building or space type. The selector read that as the set of zones sharing a
+proposed air loop.
+
+Those are different things. A serving set is how the PROPOSED building happens
+to be ducted. A thermal block is what the Code assigns to.
+
+### What it cost
+
+Table 8.4.x.7.-B calls System 3 a "Single-zone packaged rooftop unit" and
+System 4 a "Single-zone make-up air unit", while System 6 is "Multi-zone". The
+table draws that distinction deliberately, and Division A supplies its
+meaning: a single-zone secondary system serves only one thermal block, a
+multiple-zone secondary system serves one or more.
+
+So a System 3 reference built as one constant-volume air loop over five
+retained blocks, with its supply temperature following one elected control
+zone, is a multiple-zone realisation wearing a single-zone name. Measured on
+corpus sample 18, full year, NECB 2020:
+
+    reference   ONE AirLoopHVAC for an assignment listing five thermal zones
+    proposed    unmet heating   0.0 h    cooling   4.0 h
+    reference   unmet heating 932.25 h   cooling 542.25 h
+
+Article 8.4.1.2.(3) allows 100 h. The run reported NOT COMPLIANT, and the
+cause was the reference building failing to hold setpoint — one thermostat for
+five blocks, four of them drifting. A reference that cannot condition is not a
+comparison basis, so the verdict was not about the proposed building at all.
+
+### Why the gem is not the authority here
+
+The pinned `openstudio-standards` builds the same shared unit, and that is
+where our port inherited it. It is not evidence for it:
+
+* the NECB System 3 builder takes `new_auto_zoner: true` as its DEFAULT, and
+  `autozone.rb` passes `true` explicitly; that branch creates one loop around
+  `determine_control_zone(zones)` and attaches every supplied zone;
+* the `false` branch — the one that builds per zone — is the legacy path;
+* both System 3 and System 4 still carry comments saying they create one
+  packaged single-zone unit "for each zone in the building", describing the
+  path no longer taken, so reading the source casually yields the opposite of
+  what it does;
+* the SAME library's ASHRAE 90.1 Appendix G path builds one packaged unit per
+  zone unconditionally, with no such switch.
+
+The NRC *User's Guide* removes the remaining doubt. Figures 8-3, 8-4 and 8-7
+each state that "each thermal block is considered separate from all other
+thermal blocks", interior and perimeter spaces may not be combined into one
+block, and Example 8-4 instructs a modeller who wants one System 4 unit over
+two proposed zones to **merge the zones** — not to attach two retained zones to
+one single-zone unit.
+
+### Three nouns, three scopes
+
+Per-block selection does not make every rule per-block. The Code is explicit
+about which scope each question has, and collapsing them was the deeper error:
+
+| scope | provisions | what it governs |
+|---|---|---|
+| the thermal block | 8.4.x.7.(1), .9.(1), .10.(1) | which system serves it |
+| the systems served by a plant | 8.4.x.9.(6)(a), .10.(6)(a) | plant sizing and cardinality |
+| the proposed heat pump, or the set sharing a source water loop | 8.4.x.13.(2)(g)(i), (g)(ii) | the auxiliary-fuel election |
+
+So one ASHP serving five blocks produces five reference systems but ONE annual
+comparison, one elected energy type and one audit entry — which is what D-52
+already said. A plant is built once for the reference systems it serves, and
+is not multiplied because those systems are now selected per block.
+
+SELECTION IS PER BLOCK FOR EVERY ROW. What differs is whether the selected
+units REMAIN SEPARATE AT CONSTRUCTION: Systems 3 and 4 and the heat-pump
+redirects do, and Systems 1, 2, 5 and 6 are merged by the post-selection pass.
+
+Those two merges rest on DIFFERENT notes, and the table marks them itself. In
+both editions the structured payload carries the markers even though it omits
+the note text:
+
+    System 1   Unitary air conditioner with baseboard heating(2)
+    System 2   Four-pipe fan-coil(2)
+    System 3   Single-zone packaged rooftop unit with baseboard heating
+    System 4   Single-zone make-up air unit with baseboard heating
+    System 5   Two-pipe fan-coil(2)
+    System 6(3)  Multi-zone built-up system with baseboard heating
+
+Note (3) is marked on the SYSTEM 6 NAME alone and is what authorizes one
+multizone system to span groups of thermal blocks. Note (2) is marked on
+Systems 1, 2 and 5 and authorizes a COMMON VENTILATION SYSTEM, which it
+distinguishes from the block-level HVAC systems; it grants none of Note (3)'s
+facade/internal/underground grouping. Systems 3 and 4 carry neither.
+
+So System 1 merges its central make-up air unit under Note (2) — nothing in the
+table calls it single-zone — while its heating and cooling equipment stays
+block-level, and the audit cites the note that actually applies to each. One
+merged System 1 reported under Note (3) was citing System 6's permission (Sol,
+`143`).
+
+### Destruction is phased, because order must not decide the outcome
+
+`replace_system` is `build_system(..., remove_existing=True)`. Calling it per
+assignment tore down and built in turn, and `remove_hvac_from_zones` removes a
+plant only when its demand side is empty. With five block assignments the
+proposed plant still served four blocks after the first teardown, the first
+reference system was connected before those four were removed, and the plant
+was then found and reused — so the reference plant's fuel depended on which
+block happened to be processed first.
+
+The closure is therefore removed in ONE pass before any reference system is
+built. `copy_proposed` is the only explicit retention branch; a plant that
+survives mutation is not a decision to retain it, and an `action == "build"`
+plant is not adopted merely because sequential teardown kept it non-empty.
+Object reuse is not forbidden in principle — a future explicit plant plan
+could prove a cloned proposed plant already carries every required reference
+property — but the builder performs no such conformance check today.
+
+### One disclosure per choice, not per application of it
+
+Sentence 8.4.x.9.(5) transfers one capacity allocation and one operating
+priority from one proposed heating system. One multi-energy plant and one
+control sequence serving five blocks is therefore ONE unresolved choice
+affecting five block-level reference systems. Emitting the warning five times
+does not disclose five questions; it obscures one.
+
+The disclosure is keyed to the SERVICE SET, always, and names the blocks that
+RECEIVE the single-fuel substitution — which excludes a `copy_proposed` block,
+since it keeps the proposed system and both its fuels and therefore faces no
+substitution. `plant:<name>` was used wherever a plant covered the group, and
+that is not a service identity: two independent proposed serving systems
+drawing on ONE dual-fuel plant are two 8.4.x.9.(5) allocation choices, and the
+plant key emitted a single warning for both.
+
+AHJ-3's plant-cardinality question is a SEPARATE record keyed per plant,
+because 8.4.x.9.(6)(a) itself distinguishes a plant from the systems it serves:
+AHJ-1 follows each proposed heating service and allocation choice while AHJ-3
+follows the hydronic plant, and one plant can carry two service sets. One
+combined entry keyed by plant could not express that shape.
+
+### What this does not settle
+
+Sample 18's corrected annual run IS now measured, per block, twice. Five
+single-zone units bring every retained block inside 8.4.1.2.(3)-(5), which was
+the thing Sol required to be measured rather than assumed:
+
+    reference unmet heating    932.25 h  ->  0.0 h   (limit 100 h)
+    reference unmet cooling    542.25 h  ->  4.75 h  (proposed 4.0 h)
+    per block, heating             -         0.0 h   x5
+    per block, cooling             -         0.5 - 1.75 h
+
+The run still reports NOT COMPLIANT, and that is now a statement about the
+PROPOSED BUILDING: both models are clean runs within the unmet-hour limits, and
+the proposed building uses 167 150 kWh against the reference's 148 858 kWh —
+112.3% of target. Before, the same verdict was produced by a reference that
+could not hold setpoint in four of five blocks. Two consecutive runs agree
+exactly on every reported figure, so the artifact is coherent and repeatable
+and guard 7 for AHJ-16 can be met from it.
+
+### The D-58 matrix migration
+
+D-58's 97-system selection matrix is the shared adjudicated contract and is
+never regenerated from Python (D-79). It encoded ONE assignment per serving
+group, and migrating it needed a schema change rather than an edited number,
+because the test DEDUPLICATED assignments before comparing
+(`if entry not in assignments`): five single-zone units over five thermal
+blocks and one shared unit over one block produced the same row. Changing
+`zones: 5` to `zones: 1` would have left the file unable to express the thing
+this decision changes.
+
+So each scenario now lists one row per assignment, the rows are not
+deduplicated, `zones` is renamed `blocks`, and the test asserts that the
+assignments PARTITION the retained conditioned blocks — computed from the
+model, since five rows naming one block are otherwise indistinguishable from
+five naming five. Renaming the key means a stale golden fails on the schema
+instead of silently comparing two different meanings of one number.
+
+The adjudicated content is preserved verbatim. Only multiplicity was derived,
+by applying this decision's rule to the golden's OWN `*_groups` data: the
+retained conditioned blocks are the sum of `zones` over groups that are heated
+or cooled, and selection yields one assignment per block. Each scenario had
+exactly one deduplicated row (768 of them, 8 empty), so the derivation is
+determinate. Sol verified it independently against the pre-change file at
+`e691421`: 776 comparisons, 0 changed `{system, action, energy_type, catalog}`
+signature sets, 0 multiplicity mismatches, every migrated assignment at
+`blocks: 1`, no stale `zones` key.
+
+One derivation attempt was wrong first and the suite caught it: excepting
+Systems 1/2/5/6 as "merged" gives one assignment of five blocks, but the merge
+runs in the reference BUILD and this matrix exercises SELECTION only — which
+the old golden had already recorded as `zones: 1` for a five-singleton System
+6 case.
+
+### A declared gap: what "building or space" measures
+
+Table 8.4.x.7.-A sends a Data Processing Area to a different system "where the
+proposed building or space has a cooling capacity exceeding" a threshold.
+`design_cooling_kw` is a SERVING-SYSTEM total, and a block view inherits it
+unchanged — so with selection per block the threshold can decide ONE block's
+system from a capacity that includes other spaces on the same system. Whether
+"building or space" means the serving system or the thermal block being
+assigned is a Code reading this decision does not make, and inheriting the
+total silently would decide it by accident.
+
+So the runtime says which basis it used. Where the serving system covers more
+blocks than the one being assigned, the selection warns, names the assigned
+block and the blocks the capacity was measured over, and records the
+unresolved term. Where the serving system IS one block the two readings agree
+and nothing is said, so the notice does not become noise. Resolving the term —
+and deriving capacity for whichever scope it names — is open work.
+
+The same pass fixed a quieter multiplication beside it: the
+"needs a sized model" warning for this threshold was emitted once per block
+with the same air-loop target. The model's sizing state is a fact about the
+serving system, so it is reported once.
+
+### One construction can cover blocks that chose differently
+
+The post-selection merge keys on `[catalog_name, config]` and deliberately NOT
+on the selection `action`: adding it would split one Note (2) common
+ventilation system into two central make-up air units. So one construction can
+legitimately cover blocks that reached it by different branches — an unsized
+Data Processing block falls through to System 1 as a `build`, and a cooled
+residential block reaches System 1 as `through_the_wall`, and both resolve to
+the same catalogue and config.
+
+A scalar `action` cannot describe that construction. `Assignment` therefore
+carries `source_actions`, a `{block: action}` map, and a heterogeneous merge
+sets the scalar to `MIXED_SOURCE_ACTIONS`; a homogeneous merge keeps its common
+branch. The `reference system built` record publishes the map and
+`selection_branches` rather than a scalar. Without this the first absorbed
+assignment's branch was published for every block it covered, so the same
+construction reported `build` or `through_the_wall` according to which block
+sorted first — in the returned `ReferenceResult.assignments` as well as the
+audit (Sol, `160`/`162`).
+
+### What this decision leaves alone
+
+`per_zone` on the catalogue's sys_3/sys_4 rows is deliberately unchanged: those
+rows also serve the PROPOSED builder, where one unit over several zones is a
+legitimate thing for a modeller to have built, so the constraint lives on the
+reference path that realises a reference, not in shared data.
+
+An earlier version of this section claimed the ADOPTED plant outcome survived
+because `copy_proposed` reaches it for a residential system with compatible
+cooling, and therefore that AHJ-1's four-outcome prose stood. That was WRONG
+and is withdrawn. A `copy_proposed` block emits no AHJ-1 record at all —
+`_finalize` returns before the single-fuel election and before the disclosure —
+so retaining a multi-fuel system is not the non-conforming substitution AHJ-1
+describes. `adopted` was removed from that entry's outcome list. What remains
+true, and is tested separately, is that `copy_proposed` CAN retain a proposed
+plant with both its fuels; it is simply not an outcome of the question AHJ-1
+asks.

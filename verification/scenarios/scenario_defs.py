@@ -352,6 +352,67 @@ API_SCENARIOS = [
 #: with the NECB 2025 evidence it was authored as; it predates this list and its
 #: own comment explains that placement.
 DETERMINATION_SCENARIOS = [
+    # GUARD 7 for AHJ-16, and the artifact that proves D-101 fixed the
+    # topology rather than only the audit text.
+    #
+    # Sample 18's full-year run was the DIAGNOSIS of the defect, not a
+    # baseline: one "single-zone" System 3 air loop served five retained
+    # thermal blocks, its supply temperature followed one elected control
+    # zone, and the reference building logged 932.25 unmet heating hours
+    # against Article 8.4.1.2.(3)'s 100 h. The run reported NOT COMPLIANT for
+    # the REFERENCE's failure. Sol's `139` item 7 therefore held guard 7 unmet
+    # and refused that artifact; `143` accepted the corrected measurements and
+    # required this freeze.
+    #
+    # It is a FULL YEAR, deliberately not `--quick`: Article 8.4.1.2 makes a
+    # quick run a non-determination, which is the whole reason the other
+    # annual-tier scenarios cannot serve as guard-7 witnesses.
+    #
+    # Every value below was read off two consecutive runs of the unmodified
+    # product that agreed on every reported figure (necb2020, Toronto
+    # CWEC2020). The reference's unmet hours are the substance of the guard:
+    # 0.0 h heating and 4.75 h cooling, where the proposed building logs 4.0 h
+    # cooling, so the comparison basis now holds setpoint. The remaining NOT
+    # COMPLIANT is the proposed building at 112.3% of target — a statement
+    # about the proposed building, which is what a performance path is for.
+    {"id": "determination-03-18-vav-hw-subset-reheat-annual",
+     "lane": "parity", "kind": "cli", "replaces": [],
+     "argv": ["<CORPUS>/18-vav-hw-subset-reheat.osm",
+              "--simulate", "annual", "--epw", "<EPW>",
+              *BASE_ARGS, "-o", "<RUN_DIR>"],
+     "env": {}, "expect_exit": 1, "timeout_s": 5400,
+     "files": CORPUS_FILES, "text_files": CORPUS_TEXT,
+     "streams": {"stdout": "exact", "stderr": "exact"},
+     "seal": GUARD7_SEAL,
+     "asserts": [
+         {"op": "json_equals", "file": "report.json", "path": "annual",
+          "value": True},
+         {"op": "json_equals", "file": "report.json",
+          "path": "compliance_determination", "value": "conditional"},
+         {"op": "json_equals", "file": "report.json",
+          "path": "compliance_determination_reason.ahj_ids",
+          "value": ["AHJ-1", "AHJ-14", "AHJ-16"]},
+         # The guard's substance: the reference holds setpoint.
+         {"op": "json_equals", "file": "report.json",
+          "path": "reference.unmet_occupied_hours.heating", "value": 0.0},
+         {"op": "json_equals", "file": "report.json",
+          "path": "reference.unmet_occupied_hours.cooling", "value": 4.75},
+         {"op": "json_equals", "file": "report.json",
+          "path": "proposed.unmet_occupied_hours.cooling", "value": 4.0},
+         # Per block, because an aggregate can hide four drifting blocks.
+         {"op": "json_equals", "file": "report.json",
+          "path": "reference.zone_unmet_occupied_hours.THERMAL ZONE 5.heating",
+          "value": 0.0},
+         {"op": "json_equals", "file": "report.json",
+          "path": "reference.zone_unmet_occupied_hours.THERMAL ZONE 3.heating",
+          "value": 0.0},
+         # And the verdict is about the PROPOSED building.
+         {"op": "json_equals", "file": "report.json",
+          "path": "percent_of_target", "value": 112.3},
+         {"op": "json_equals", "file": "report.json", "path": "compliant",
+          "value": False},
+     ]},
+
     # GUARD 7 for AHJ-1 and AHJ-3 (Sol's `127`: one ANNUAL frozen artifact per
     # approval-required id). Both fired only in tiers that structurally cannot
     # reach a determination — the annual tier runs `--quick`, which Article

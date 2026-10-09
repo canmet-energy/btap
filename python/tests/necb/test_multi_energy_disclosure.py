@@ -19,7 +19,9 @@ established:
   * `(6)(b)` cited without any capacity to establish which of (6)(b)/(c)/(d)
     applies;
   * "the reference retains one boiler per energy type", when the reference
-    ADOPTS the proposed plant with its own device count and the post-sizing
+    ADOPTED the proposed plant with its own device count — present tense when
+    written, and D-101 made it unreachable for a replaced block
+    (Fable, `167` G4) — and the post-sizing
     staging pass then sets live capacity by primary/secondary ROLE, blind to
     fuel — the committed baselines show the reference secondary at
     `capacity_kw: 0.0` against a real design capacity.
@@ -39,14 +41,36 @@ from btap.codes.necb.hvac import reference
 from tests.support import needs_sdk
 
 
+def allocation_records(audit):
+    """The 8.4.x.9.(5) allocation disclosures — the AHJ-1 service-set scope."""
+    return [e for e in audit.entries
+            if e["level"] == "warning"
+            and "UNRESOLVED" in str(e.get("action"))
+            and "AHJ-1" in str(e.get("ahj") or "")]
+
+
+def plant_records(audit):
+    """The 8.4.x.9.(6) plant-cardinality disclosures — the AHJ-3 plant scope."""
+    return [e for e in audit.entries
+            if e["level"] == "warning"
+            and "UNRESOLVED" in str(e.get("action"))
+            and "AHJ-3" in str(e.get("ahj") or "")]
+
+
 class _Fixture(unittest.TestCase):
     def _audit(self):
         from btap.audit import AuditLog
 
         return AuditLog()
 
-    def _group(self, fuels, zones=("Zone 1",)):
-        return {"zones": list(zones), "heating_energy_types": list(fuels)}
+    def _group(self, fuels, zones=("Zone 1",), serving=None):
+        group = {"zones": list(zones), "heating_energy_types": list(fuels)}
+        if serving is not None:
+            # What `_blocks_of` stamps on each block view: the SERVICE SET the
+            # block belongs to. The AHJ-1 allocation disclosure dedupes on it,
+            # so a synthetic block split that omits it is not the real shape.
+            group["_serving_zones"] = tuple(serving)
+        return group
 
     def _facts(self, plants=()):
         # a FRESH dict each call: the per-plant dedupe state lives in `facts`,
@@ -69,10 +93,13 @@ class _Fixture(unittest.TestCase):
         # `_finalize` calls these two in sequence, and the disclosure now runs
         # on EVERY election path rather than only this one (Sol, `114`.2).
         reference._disclose_multi_energy(group, selection, facts, audit)
-        warnings = [e for e in audit.entries
-                    if e["level"] == "warning"
-                    and "UNRESOLVED" in str(e.get("action"))]
-        return result, warnings, audit
+        # THE ALLOCATION RECORD ONLY. AHJ-3's plant-cardinality question is a
+        # separate entry with its own scope since D-101 (Sol, `143`): AHJ-1
+        # follows each proposed heating service and allocation choice, AHJ-3
+        # follows the hydronic plant, and one plant can carry two service sets.
+        # Every test in this file is about the allocation half; `plant_records`
+        # below is the other one.
+        return result, allocation_records(audit), audit
 
 
 class TestTheCollapseIsDisclosed(_Fixture):
@@ -255,18 +282,68 @@ class TestTheWarningIsDeduplicated(_Fixture):
                                        "Electricity": None}}
         facts = self._facts([plant])
         audit = AuditLog()
-        for block in range(5):
+        blocks = tuple(f"Zone {n}" for n in range(5))
+        for block in blocks:
+            # Each call is one BLOCK VIEW of one service set, which is what
+            # `_blocks_of` produces — so `_serving_zones` is set. Without it
+            # these are five independent service sets, and under D-101 five
+            # separate allocation choices legitimately disclose five times.
             reference._disclose_multi_energy(
                 self._group(["NaturalGas", "Electricity"],
-                            zones=(f"Zone {block}",)),
+                            zones=(block,), serving=blocks),
                 self._selection(), facts, audit)
-        warnings = [e for e in audit.entries
-                    if e["level"] == "warning"
-                    and "UNRESOLVED" in str(e.get("action"))]
-        self.assertEqual(1, len(warnings),
-                         f"one plant, one warning — got {len(warnings)}")
-        self.assertEqual("Hot Water Loop", warnings[0]["target"],
-                         "the warning must name the plant, not a zone list")
+        allocations = allocation_records(audit)
+        self.assertEqual(
+            1, len(allocations),
+            f"one service choice, one allocation record — got {len(allocations)}")
+        self.assertEqual(
+            list(blocks), sorted(allocations[0]["target"].split(",")),
+            "and it must name every affected block, not the plant: a plant "
+            "name told a reader nothing about this question's reach")
+        self.assertEqual(
+            list(blocks), allocations[0]["inputs"]["affected_blocks"])
+
+        plants = plant_records(audit)
+        self.assertEqual(1, len(plants),
+                         "the (6) cardinality question is asked ONCE of the plant")
+        self.assertEqual("Hot Water Loop", plants[0]["target"],
+                         "and THAT record is the one that names the plant")
+
+    def test_TWO_service_sets_on_ONE_plant_give_two_allocations_and_one_plant_record(self):
+        """Sol's `143`, the shape the combined entry could not express.
+
+        Two independent proposed serving systems drawing on one dual-fuel
+        hot-water plant are TWO 8.4.x.9.(5) allocation choices and ONE
+        8.4.x.9.(6) plant-cardinality question. Keying both ids by plant
+        emitted a single warning for all of it.
+        """
+        from btap.audit import AuditLog
+        from btap.codes.necb.hvac import reference
+
+        plant = {"name": "Hot Water Loop", "type": "hot_water",
+                 "fuels": ["NaturalGas", "Electricity"],
+                 "fuel_capacities_w": {"NaturalGas": None,
+                                       "Electricity": None}}
+        facts = self._facts([plant])
+        audit = AuditLog()
+        first = ("Zone 1", "Zone 2", "Zone 3")
+        second = ("Zone 4", "Zone 5")
+        for service_set in (first, second):
+            for block in service_set:
+                reference._disclose_multi_energy(
+                    self._group(["NaturalGas", "Electricity"],
+                                zones=(block,), serving=service_set),
+                    self._selection(), facts, audit)
+        allocations = allocation_records(audit)
+        self.assertEqual(2, len(allocations),
+                         "two service choices are two allocation records")
+        self.assertEqual(
+            [list(first), list(second)],
+            sorted(sorted(e["inputs"]["affected_blocks"]) for e in allocations),
+            "each names its OWN blocks")
+        self.assertEqual(
+            1, len(plant_records(audit)),
+            "but the plant is asked once, however many systems draw on it")
 
     def test_TWO_plants_warn_twice(self):
         """The control: dedupe must not swallow a genuinely second finding."""
@@ -279,22 +356,30 @@ class TestTheWarningIsDeduplicated(_Fixture):
              "fuel_capacities_w": {"NaturalGas": None, "Electricity": None}},
         ])
         audit = AuditLog()
+        # DISTINCT ZONES, because the allocation record dedupes on the SERVICE
+        # SET since D-101. Both calls used the default `Zone 1`, which under a
+        # plant key were two findings and under a service key are one service
+        # set asked twice — so the control now says what it means: two serving
+        # systems, two plants, two of each record.
         reference._disclose_multi_energy(
-            self._group(["NaturalGas", "Electricity"]), self._selection(),
-            facts, audit)
+            self._group(["NaturalGas", "Electricity"], zones=("Zone 1",)),
+            self._selection(), facts, audit)
         facts["plants"] = [
             {"name": "Hot Water Loop B", "type": "hot_water",
              "fuels": ["FuelOilNo2", "Electricity"],
              "fuel_capacities_w": {"FuelOilNo2": None, "Electricity": None}}]
         reference._disclose_multi_energy(
-            self._group(["FuelOilNo2", "Electricity"]), self._selection(),
-            facts, audit)
-        warnings = [e for e in audit.entries
-                    if e["level"] == "warning"
-                    and "UNRESOLVED" in str(e.get("action"))]
-        self.assertEqual(2, len(warnings))
-        self.assertEqual({"Hot Water Loop A", "Hot Water Loop B"},
-                         {w["target"] for w in warnings})
+            self._group(["FuelOilNo2", "Electricity"], zones=("Zone 2",)),
+            self._selection(), facts, audit)
+        self.assertEqual(2, len(allocation_records(audit)))
+        self.assertEqual(
+            ["Hot Water Loop A", "Hot Water Loop B"],
+            sorted(e["target"] for e in plant_records(audit)),
+            "two plants are two cardinality questions")
+        # The old assertion here required the ALLOCATION warnings to name the
+        # plants, which is the conflation D-101 removed: those records now name
+        # their affected blocks, and the plant assertion above carries the
+        # per-plant intent.
 
 
 #: Sample 16's real shape, from `classify.characterize` on the generated
@@ -399,9 +484,12 @@ class TestTheDisclosureSurvivesTheHeatPumpPath(unittest.TestCase):
 
 class TestTheEntryAssertsNothingAboutTheReferencePlant(_Fixture):
     """The entry must describe the PROPOSED plant and claim nothing about the
-    reference one, because four outcomes are reachable (Sol, `120`/`121`):
+    reference one. Sol's `120`/`121` found FOUR reachable outcomes; since D-101
+    there are THREE, because adoption is no longer among them — phased
+    teardown plus the ungated plant reservation mean a built block cannot join
+    a surviving proposed plant, and a `copy_proposed` block never reaches this
+    disclosure at all (Sol, `160`):
 
-    * the proposed plant is adopted;
     * it is torn down and REPLACED by a newly built plant of the selected
       variant, holding none of its devices;
     * it is torn down and not rebuilt, where the variant needs no boiler;
@@ -622,9 +710,15 @@ class TestTheOutcomesAreReachableInABuiltModel(unittest.TestCase):
     as asserting the HTML contains the new wording without asserting the
     withdrawn claim is gone.
 
-    All four are now reachable in a built model: ADOPTED and REPLACED here,
-    TORN DOWN here, and the role-staging pair in
-    `TestTheStagingOutcomeIsCONDITIONAL`.
+    THREE outcomes are reachable in a built model, not four: REPLACED and TORN
+    DOWN here, and the role-staging pair in
+    `TestTheStagingOutcomeIsCONDITIONAL`. ADOPTION was removed from AHJ-1's
+    outcome list on 2026-10-09 (Sol's `145`), because this disclosure fires
+    only for a block whose heating was collapsed to one energy type — always an
+    `action == "build"` assignment — and `_finalize` returns before the
+    election and the disclosure for a `copy_proposed` block. The retention
+    tests below therefore prove that `copy_proposed` CAN keep a proposed plant,
+    which is true and separate, and no longer claim it as an AHJ-1 outcome.
 
     Two discriminators do NOT work, and both were tried first:
 
@@ -653,6 +747,37 @@ class TestTheOutcomesAreReachableInABuiltModel(unittest.TestCase):
             boiler.setName("{} {}".format(self.MARKER, index))
         return proposed
 
+    def _residential_mixed_proposed(self):
+        """Residential four-pipe fan coils on a dual-fuel plant — adoption by
+        the branch the Code actually provides.
+
+        Until D-101 the ADOPTED outcome was reached with `Baseboard gas boiler`,
+        a `build` group whose plant merely SURVIVED a per-assignment teardown
+        long enough to be found again by name. Sol's `141`: "an `action ==
+        'build'` plant must not be adopted merely because sequential teardown
+        has kept it non-empty", and phased destruction removed that route.
+
+        `copy_proposed` is the explicit retention branch. It needs a residential
+        space type AND compatible cooling, so heating-only baseboards fall
+        through to a System 1 build and only a cooled residential system
+        reaches it. Measured on this fixture: the audit records "proposed
+        system retained in reference (residential...)", both markers survive,
+        and the plant keeps Electricity and NaturalGas.
+        """
+        from .support import proposed_with_hvac
+
+        proposed = proposed_with_hvac("FPFC MAU DX Coils with Scroll Chiller")
+        for space_type in proposed.getSpaceTypes():
+            if space_type.spaces():
+                space_type.setStandardsSpaceType("Dwelling unit")
+        boilers = sorted(proposed.getBoilerHotWaters(),
+                         key=lambda b: b.nameString())
+        if len(boilers) > 1:
+            boilers[0].setFuelType("Electricity")
+        for index, boiler in enumerate(boilers):
+            boiler.setName("{} {}".format(self.MARKER, index))
+        return proposed
+
     def _reference_of(self, proposed):
         from btap.audit import AuditLog
         from btap.codes.necb import hvac
@@ -662,22 +787,35 @@ class TestTheOutcomesAreReachableInABuiltModel(unittest.TestCase):
                                      building={"storeys": 1}, audit=audit)
         return result.model, audit
 
-    def test_the_ADOPTED_outcome_is_reachable(self):
-        """Measured on the compliance fixture with `Baseboard gas boiler` and
-        one boiler switched to Electricity: both markers survive into the
-        reference, renamed with their efficiency suffix. So the proposed plant
-        IS adopted here, and an entry claiming the plant is always rebuilt or
-        always removed would be false."""
-        proposed = self._mixed_proposed()
+    def test_copy_proposed_RETAINS_the_plant_but_raises_no_AHJ_1(self):
+        """Measured on residential four-pipe fan coils with one boiler switched
+        to Electricity: both markers survive into the reference, so
+        `copy_proposed` genuinely retains the proposed plant with both fuels.
+
+        What this does NOT show is an AHJ-1 outcome, and asserting that is the
+        point of the test now. Sol's `143` and `145`: this fixture emits ZERO
+        AHJ-1 records, because `_finalize` returns for a `copy_proposed` block
+        before the single-fuel election and before `_disclose_multi_energy`.
+        Preserving a multi-fuel system is not the non-conforming single-fuel
+        substitution AHJ-1 describes, so `adopted` was removed from that
+        entry's outcome list rather than being evidenced by this run.
+        """
+        proposed = self._residential_mixed_proposed()
         reference, _audit = self._reference_of(proposed)
         survived = [b.nameString() for b in reference.getBoilerHotWaters()
                     if self.MARKER in b.nameString()]
         self.assertEqual(
             2, len(survived),
-            "both marked boilers should survive adoption; got {}".format(
+            "both marked boilers should survive retention; got {}".format(
                 [b.nameString() for b in reference.getBoilerHotWaters()]))
+        self.assertEqual(
+            [], [e for e in _audit.entries
+                 if "AHJ-1" in str(e.get("ahj") or "")],
+            "and this is NOT an AHJ-1 outcome: a retained block never reaches "
+            "the election or the disclosure, so the entry must not list "
+            "`adopted` among its possibilities")
 
-    def test_the_adopted_reference_RETAINS_BOTH_FUELS(self):
+    def test_the_RETAINED_reference_plant_keeps_BOTH_FUELS(self):
         """The direct refutation of the claim withdrawn over eight rounds.
 
         The SELECTION elects one energy type. On this configuration the
@@ -685,13 +823,19 @@ class TestTheOutcomesAreReachableInABuiltModel(unittest.TestCase):
         so "the reference elects ONE energy type" was false as a statement
         about final equipment, which is why the disclosure now separates
         selection from outcome.
+
+        Re-pointed at the residential retention fixture with D-101, and
+        RENAMED from `test_the_adopted_reference_RETAINS_BOTH_FUELS`: what it
+        exercises is `copy_proposed` retention, which is not "adoption" in the
+        sense AHJ-1's withdrawn outcome used — a retained block never reaches
+        the election or the disclosure at all (Fable, `158` F3).
         """
-        proposed = self._mixed_proposed()
+        proposed = self._residential_mixed_proposed()
         reference, _audit = self._reference_of(proposed)
         fuels = {b.fuelType() for b in reference.getBoilerHotWaters()}
         self.assertEqual(
             {"Electricity", "NaturalGas"}, fuels,
-            "the adopted reference plant carries both proposed fuels")
+            "the RETAINED reference plant carries both proposed fuels")
 
     def test_the_REPLACED_outcome_is_reachable(self):
         """Sol's `121` found this outcome by hand and "adopted or absent"
@@ -699,10 +843,13 @@ class TestTheOutcomesAreReachableInABuiltModel(unittest.TestCase):
         carries the marker, so the proposed plant was torn down and a
         different one built.
 
-        What decides adoption versus replacement is the terminal type, not the
-        fuels: `Baseboard gas boiler` is adopted, while
-        `... and Hot Water Baseboard` is replaced. Measured on three variants;
-        this uses one.
+        The sentence here used to say that the terminal type decides adoption
+        versus replacement — `Baseboard gas boiler` adopted, `... and Hot Water
+        Baseboard` replaced. That stopped being true on this branch: D-101
+        phases destruction ahead of construction and reserves every surviving
+        proposed plant, so a BUILT block is replaced either way, and
+        re-measuring both variants on an oil-fired plant gives NaturalGas
+        boilers for both (Fable, `158` F3).
         """
         proposed = self._mixed_proposed(
             "PSZ RTU Electric and DX Coils and Hot Water Baseboard")
@@ -854,13 +1001,28 @@ class TestTheSINGLEEnergyELECTIONIsNotAlwaysIdentical(_Fixture):
 
 @needs_sdk
 class TestAnOILProposedBuildingsFinalREFERENCEFuel(unittest.TestCase):
-    """The selection elects `gas` for oil. The FINAL reference fuel is
-    configuration-dependent, and Sol's `125`.1 established both outcomes.
+    """The selection elects `gas` for oil, and so does the FINAL reference
+    plant — now that replacement is phase-ordered.
+
+    Sol's `125`.1 established BOTH outcomes, adopted and replaced, and this
+    class pinned both. His `141` withdraws the adopted one for an
+    `action == "build"` assignment: it existed only because teardown ran
+    per assignment, so a plant shared by several blocks stayed non-empty long
+    enough for the next block's builder to find and reuse it. "Do not preserve
+    the newly observed adoption. It is caused by mutation order, not by a Code
+    requirement" — and "`copy_proposed` is an explicit retention branch; a
+    surviving plant discovered during mutation is not."
+
+    Measured both ways after the fix: the zonal-baseboard fixture and the PSZ
+    fixture now each give two NaturalGas boilers and zero proposed markers.
+    Explicit retention still exists — that is `copy_proposed`, which the
+    teardown closure excludes by construction.
 
     Reproduced here so the claim is a measurement rather than an inference
     from the selector. This is the twelfth overclaim on this branch: my fix
     for the eleventh wrote "a proposed oil system becomes a GAS reference",
-    which is the selector's answer presented as the reference's.
+    which is the selector's answer presented as the reference's — and it has
+    become true of the final plant for a different reason than I wrote it.
     """
 
     MARKER = "PROPOSED MARKER"
@@ -884,12 +1046,53 @@ class TestAnOILProposedBuildingsFinalREFERENCEFuel(unittest.TestCase):
         return ({b.fuelType() for b in built},
                 sum(1 for b in built if self.MARKER in b.nameString()))
 
-    def test_an_ADOPTED_oil_plant_keeps_FuelOilNo2(self):
-        """So the reference does NOT burn gas here, and a blanket claim that
-        oil becomes a gas reference is false."""
+    def test_a_ZONAL_proposed_plant_is_REPLACED_not_adopted(self):
+        """The outcome `125`.1 recorded as adoption, re-measured under
+        phase-ordered replacement (`141`).
+
+        A zonal baseboard proposed plant used to survive into the reference
+        because its five single-zone assignments tore down one at a time and
+        the loop never emptied. It is replaced now, like every other
+        `action == "build"` plant, and the result no longer depends on which
+        block is processed first."""
         fuels, kept = self._oil_reference("Baseboard gas boiler")
-        self.assertEqual(2, kept, "the plant is adopted, so markers survive")
-        self.assertEqual({"FuelOilNo2"}, fuels)
+        self.assertEqual(0, kept,
+                         "a build-action plant is replaced; adoption via "
+                         "sequential teardown is the artifact `141` removed")
+        self.assertEqual({"NaturalGas"}, fuels)
+
+    def test_the_outcome_does_not_depend_on_BLOCK_ORDER(self):
+        """Sol's gate 2: "Reversing a list of block assignments cannot be
+        allowed to change the reference plant's fuel, equipment, or
+        provenance." Block assignments follow the group's zone order, so
+        reversing the proposed zones reverses them."""
+        from btap.audit import AuditLog
+        from btap.codes.necb import hvac
+
+        from .support import proposed_with_hvac
+
+        seen = []
+        for reverse in (False, True):
+            proposed = proposed_with_hvac("Baseboard gas boiler")
+            for index, boiler in enumerate(proposed.getBoilerHotWaters()):
+                boiler.setFuelType("FuelOilNo2")
+                boiler.setName("{} {}".format(self.MARKER, index))
+            if reverse:
+                # Rename the zones so sorted order inverts, which inverts the
+                # order blocks are selected and built in.
+                zones = list(proposed.getThermalZones())
+                for index, zone in enumerate(zones):
+                    zone.setName("ZZ Reordered {}".format(len(zones) - index))
+            reference = hvac.reference_hvac(
+                proposed, code="necb2020", building={"storeys": 1},
+                audit=AuditLog()).model
+            built = list(reference.getBoilerHotWaters())
+            seen.append((sorted({b.fuelType() for b in built}),
+                         sum(1 for b in built if self.MARKER in b.nameString()),
+                         len(built)))
+        self.assertEqual(seen[0], seen[1],
+                         "the reference plant's fuel, provenance and count "
+                         "must not depend on block order: {}".format(seen))
 
     def test_a_REPLACED_plant_carries_NaturalGas_from_the_same_election(self):
         """The opposite outcome from the same `gas` election, which is why the
@@ -1273,8 +1476,7 @@ class TestTheAllocationIsRecordedByClassify(unittest.TestCase):
                 "article": "8.4.4.6.(1)", "part_load_curve_class": "modulating"},
                 "heat_pump": {"article": "8.4.4.13.(1)-(2)"}}},
             {"plants": facts["plants"], "purchased_energy": {}}, audit)
-        warned = [e for e in audit.entries
-                  if "UNRESOLVED" in str(e.get("action"))]
+        warned = allocation_records(audit)
         self.assertEqual(1, len(warned))
         self.assertEqual({"NaturalGas": 0.6, "Electricity": 0.4},
                          warned[0]["inputs"]["proposed_capacity_shares"])
@@ -1346,10 +1548,12 @@ class TestTheWarningDoesNotOVERCLAIM(_Fixture):
                                       "part_load_curve_class": "modulating"},
                 "heat_pump": {"article": "8.4.5.13.(1)-(2) + Table 8.4.5.13"}}},
             facts, audit)
-        warned = [e for e in audit.entries
-                  if "UNRESOLVED" in str(e.get("action"))]
+        warned = allocation_records(audit)
         self.assertEqual(1, len(warned))
         self.assertEqual("8.4.5.9.(5); 8.4.5.9.(6)", warned[0]["article"])
+        # The plant record cites the (6) sentence alone, in the same edition.
+        self.assertEqual(["8.4.5.9.(6)"],
+                         [e["article"] for e in plant_records(audit)])
         self.assertNotIn("8.4.4.", warned[0]["action"],
                          "a 2025 run must not cite a 2020 article to the AHJ")
 
