@@ -16,13 +16,72 @@ import openstudio
 import btap.modeling as modeling
 from btap.audit import AuditLog
 from btap.codes.necb import hvac
+from btap.codes.necb.hvac import efficiency
+from btap.codes.necb.hvac.efficiency import (
+    DEFAULT_MOTOR_EFFICIENCY,
+    DEFAULT_PUMP_EFFICIENCY,
+    _corresponding_loop,
+    _hydraulic_efficiency,
+    _loop_role,
+    _pump_cap_basis,
+    _pump_characteristics_known,
+    _pump_power_from_triple,
+    _served_zone_names,
+)
 from tests.necb.hvac_helpers import load_fixture, sorted_zones
 from tests.support import needs_sdk
 
 RIDING = {'a': 0.227143, 'b': 1.178929, 'c': -0.41071, 'd': 0.47, 'e': 0.68}
 
 
-def loop_with_vsd_pump(model, type_, flow=None, power=None):
+def serve_zones(model, loop_, zones):
+    """Give a loop a demand side, so it serves named thermal blocks.
+
+    D-93 corresponds pumps between buildings by ROLE plus SERVED THERMAL
+    BLOCKS, so a loop with no demand side corresponds to nothing and the
+    transfer declines — correctly, but it makes a bare fixture untestable. A
+    water baseboard per zone is the smallest demand side that reaches a zone
+    through the same traversal the product code uses.
+    """
+    created = []
+    for name in zones:
+        zone = openstudio.model.ThermalZone(model)
+        zone.setName(name)
+        created.append(zone)
+    return serve_existing_zones(model, loop_, created)
+
+
+def serve_existing_zones(model, loop_, zones):
+    """The same demand side, but onto thermal blocks that ALREADY exist.
+
+    Passing `serve_zones` a name the model already uses does not reach that
+    zone: OpenStudio keeps names unique, so it renames the new one ('Zone B' ->
+    'Zone B 1') and the loop serves a phantom that no other loop can correspond
+    to. A fixture built that way declines for a reason unrelated to what it
+    means to test.
+    """
+    schedule = model.alwaysOnDiscreteSchedule()
+    for zone in zones:
+        # The product builders' own idiom (modeling/hvac/systems/baseboards.py):
+        # a hot-water baseboard carries CoilHeatingWaterBaseboard, which is not
+        # CoilHeatingWater.
+        coil = openstudio.model.CoilHeatingWaterBaseboard(model)
+        loop_.addDemandBranchForComponent(coil)
+        baseboard = openstudio.model.ZoneHVACBaseboardConvectiveWater(model, schedule, coil)
+        baseboard.addToThermalZone(zone)
+    return loop_
+
+
+def loop_with_vsd_pump(model, type_, flow=None, power=None, zones=('Block A',),
+                       distribution_flow=None):
+    """A plant loop with one variable-speed pump, serving `zones`.
+
+    `distribution_flow` is the loop's own design flow — the denominator
+    8.4.x.14.(3) divides by, counted once per fluid stream. It defaults to the
+    pump's flow, which is what a single-pump loop sizes to; pass it explicitly
+    where a fixture has pumps in series, because summing their rated flows is
+    exactly the double-count D-93 exists to prevent.
+    """
     loop_ = openstudio.model.PlantLoop(model)
     loop_.sizingPlant().setLoopType(type_)
     pump = openstudio.model.PumpVariableSpeed(model)
@@ -31,6 +90,10 @@ def loop_with_vsd_pump(model, type_, flow=None, power=None):
     if power:
         pump.setRatedPowerConsumption(power)
     pump.addToNode(loop_.supplyInletNode())
+    if zones:
+        serve_zones(model, loop_, zones)
+    if distribution_flow or flow:
+        loop_.setMaximumLoopFlowRate(distribution_flow or flow)
     return loop_, pump
 
 
@@ -63,26 +126,989 @@ class TestNecbPumpRules(unittest.TestCase):
                             for e in audit.entries),
                         'transfer skip is noted, never silent')
 
-    def test_power_transfer_uses_combined_w_per_l_s_by_loop_type(self):
+    def test_two_pumps_on_one_proposed_system_combine_over_its_distribution_flow(self):
+        """Two pumps in one system, heads defaulted, so (3) governs the group.
+
+        The denominator is the SYSTEM's distribution flow counted once — not
+        the sum of the pumps' rated flows. In series they circulate the same
+        water, and summing them would halve the intensity.
+        """
         proposed = openstudio.model.Model()
-        loop_with_vsd_pump(proposed, 'Heating', flow=0.010, power=800.0)
-        # combined: 1500 W / 15 L/s
-        loop_with_vsd_pump(proposed, 'Heating', flow=0.005, power=700.0)
+        loop_, first = loop_with_vsd_pump(proposed, 'Heating', flow=0.010, power=800.0,
+                                          zones=('Block A',), distribution_flow=0.015)
+        second = openstudio.model.PumpVariableSpeed(proposed)
+        second.setRatedFlowRate(0.005)
+        second.setRatedPowerConsumption(700.0)
+        second.addToNode(loop_.supplyInletNode())
 
         reference = openstudio.model.Model()
-        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.020)  # 20 L/s
+        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.020, zones=('Block A',))
         audit = AuditLog()
         hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
 
-        self.assertAlmostEqual(2000.0, ref_pump.ratedPowerConsumption().get(), delta=0.1,
-                               msg='combined proposed intensity (100 W per L/s) x reference '
-                                   'flow (20 L/s)')
-        decision = next((e for e in audit.entries
-                         if e.get('article') == '8.4.4.14.(1)-(3)'), None)
-        self.assertIsNotNone(decision, 'transfer decision audited')
-        self.assertEqual(2, decision['inputs']['proposed_pumps'],
-                         'sentence (2): both pumps combined')
+        self.assertTrue(ref_pump.ratedPowerConsumption().empty(),
+                        'the reference pump is left autosized for E+ to size')
+        # 1500 W over the 15 L/s distribution flow = 100 W/(L/s) x 20 L/s
+        self.assertAlmostEqual(2000.0, _pump_power_from_triple(ref_pump, 0.020), delta=0.1)
+        decision = next(e for e in audit.entries if e.get('article') == '8.4.4.14.(3)')
+        self.assertEqual(2, decision['inputs']['proposed_pumps'])
         self.assertAlmostEqual(100.0, decision['inputs']['proposed_w_per_l_s'], delta=0.01)
+        self.assertAlmostEqual(15.0, decision['inputs']['distribution_flow_l_s'], delta=0.01,
+                               msg='the system flow, counted once — not 10 + 5')
+
+    def test_served_zones_reach_coils_held_inside_other_equipment(self):
+        """Fable, PR #53. A water coil answers one of THREE accessors: zone
+        equipment (`containingZoneHVACComponent`), an air loop's main branch
+        (`airLoopHVAC`), or — inside a unitary system or a VAV reheat terminal —
+        only `containingHVACComponent`. Checking the first two made a hot-water
+        loop serving VAV reheat resolve to no zones at all, so an ordinary
+        rooftop-with-hydronic-reheat building either declined loudly or, with a
+        second loop present, reported a confident "one-to-one" for what is
+        really an N:1 consolidation."""
+        model = openstudio.model.Model()
+        schedule = model.alwaysOnDiscreteSchedule()
+        loop_ = openstudio.model.PlantLoop(model)
+        loop_.sizingPlant().setLoopType('Heating')
+        air_loop = openstudio.model.AirLoopHVAC(model)
+
+        unitary_zone = openstudio.model.ThermalZone(model)
+        unitary_zone.setName('Block U')
+        held_coil = openstudio.model.CoilHeatingWater(model, schedule)
+        loop_.addDemandBranchForComponent(held_coil)
+        unitary = openstudio.model.AirLoopHVACUnitarySystem(model)
+        unitary.setHeatingCoil(held_coil)
+        unitary.setCoolingCoil(openstudio.model.CoilCoolingDXSingleSpeed(model))
+        unitary.setSupplyFan(openstudio.model.FanOnOff(model, schedule))
+        unitary.addToNode(air_loop.supplyOutletNode())
+        air_loop.addBranchForZone(
+            unitary_zone,
+            openstudio.model.AirTerminalSingleDuctConstantVolumeNoReheat(
+                model, schedule).to_StraightComponent())
+
+        reheat_zone = openstudio.model.ThermalZone(model)
+        reheat_zone.setName('Block R')
+        reheat_coil = openstudio.model.CoilHeatingWater(model, schedule)
+        loop_.addDemandBranchForComponent(reheat_coil)
+        air_loop.addBranchForZone(
+            reheat_zone,
+            openstudio.model.AirTerminalSingleDuctVAVReheat(
+                model, schedule, reheat_coil).to_StraightComponent())
+
+        self.assertEqual({'Block U', 'Block R'}, _served_zone_names(loop_),
+                         'a coil held inside other equipment still serves its zone')
+
+    def _rooftop_with_reheat_on_one_zone(self, model, loop_):
+        """One air loop, two zones, hot-water reheat on the FIRST zone only.
+
+        The discriminating shape: the test above puts a unitary system on the
+        air loop's main branch, so the loop's whole zone list is the right
+        answer there and a union cannot be told apart from a per-terminal
+        attribution. Here it can.
+        """
+        schedule = model.alwaysOnDiscreteSchedule()
+        air_loop = openstudio.model.AirLoopHVAC(model)
+
+        served = openstudio.model.ThermalZone(model)
+        served.setName('Zone A (reheat)')
+        reheat_coil = openstudio.model.CoilHeatingWater(model, schedule)
+        loop_.addDemandBranchForComponent(reheat_coil)
+        air_loop.addBranchForZone(
+            served,
+            openstudio.model.AirTerminalSingleDuctVAVReheat(
+                model, schedule, reheat_coil).to_StraightComponent())
+
+        bystander = openstudio.model.ThermalZone(model)
+        bystander.setName('Zone B (no reheat)')
+        air_loop.addBranchForZone(
+            bystander,
+            openstudio.model.AirTerminalSingleDuctConstantVolumeNoReheat(
+                model, schedule).to_StraightComponent())
+        return served, bystander
+
+    def test_a_reheat_terminal_serves_its_own_zone_not_the_whole_air_loop(self):
+        """Fable, PR #53, second round. A unitary system on the air loop's main
+        branch conditions every zone on the loop; an air terminal conditions
+        exactly one. Both answer `airLoopHVAC()`, so taking the loop's zone
+        list for both attributed a one-zone reheat coil to every zone on the
+        rooftop unit."""
+        model = openstudio.model.Model()
+        loop_ = openstudio.model.PlantLoop(model)
+        loop_.sizingPlant().setLoopType('Heating')
+        self._rooftop_with_reheat_on_one_zone(model, loop_)
+
+        self.assertEqual(
+            {'Zone A (reheat)'}, _served_zone_names(loop_),
+            'the hot-water loop reaches only the zone whose terminal holds its coil')
+
+    def test_a_unitary_system_used_as_zone_equipment_still_reaches_its_zone(self):
+        """Fable, PR #53, third round. A unitary system is also a
+        `ZoneHVACComponent` and can sit directly in a thermal zone, with no air
+        loop at all. The cast is the whole point: `containingHVACComponent()`
+        returns a base `HVACComponent`, which carries no `thermalZone`
+        accessor, so reaching for one by name finds nothing and the loop
+        resolves to no served block."""
+        model = openstudio.model.Model()
+        schedule = model.alwaysOnDiscreteSchedule()
+        loop_ = openstudio.model.PlantLoop(model)
+        loop_.sizingPlant().setLoopType('Heating')
+
+        zone = openstudio.model.ThermalZone(model)
+        zone.setName('Unitary Zone')
+        coil = openstudio.model.CoilHeatingWater(model, schedule)
+        loop_.addDemandBranchForComponent(coil)
+        unitary = openstudio.model.AirLoopHVACUnitarySystem(model)
+        unitary.setHeatingCoil(coil)
+        unitary.setCoolingCoil(openstudio.model.CoilCoolingDXSingleSpeed(model))
+        unitary.setSupplyFan(openstudio.model.FanOnOff(model, schedule))
+        self.assertTrue(unitary.addToThermalZone(zone),
+                        'the fixture must actually be zone equipment')
+        self.assertFalse(
+            coil.containingZoneHVACComponent().is_initialized(),
+            'the coil is reached through containingHVACComponent, not the zone accessor')
+
+        self.assertEqual({'Unitary Zone'}, _served_zone_names(loop_),
+                         'zone equipment conditions its own zone, air loop or not')
+
+    def test_partial_overlap_through_a_reheat_terminal_still_declines(self):
+        """The consequence the over-attribution actually had, which is worse
+        than an over-count: correspondence matches on served-zone SETS, so an
+        inflated set made a partly-overlapping proposed loop look exact. The
+        loud "consolidated onto this one" decline became a confident one-to-one
+        and the second proposed loop's pump vanished from the transfer."""
+        proposed = openstudio.model.Model()
+        reheat_loop = openstudio.model.PlantLoop(proposed)
+        reheat_loop.setName('Proposed Reheat')
+        reheat_loop.sizingPlant().setLoopType('Heating')
+        _, bystander = self._rooftop_with_reheat_on_one_zone(proposed, reheat_loop)
+
+        # The SECOND loop heats the zone the reheat loop does not — the same
+        # zone object, not a same-named new one.
+        baseboard_loop = openstudio.model.PlantLoop(proposed)
+        baseboard_loop.setName('Proposed Baseboard')
+        baseboard_loop.sizingPlant().setLoopType('Heating')
+        serve_existing_zones(proposed, baseboard_loop, (bystander,))
+
+        reference = openstudio.model.Model()
+        consolidated = openstudio.model.PlantLoop(reference)
+        consolidated.setName('Reference Hot Water')
+        consolidated.sizingPlant().setLoopType('Heating')
+        serve_zones(reference, consolidated,
+                    ('Zone A (reheat)', 'Zone B (no reheat)'))
+
+        match, reason, n_to_1 = _corresponding_loop(consolidated, proposed)
+
+        self.assertIsNone(
+            match, 'two proposed loops consolidated onto one reference loop is '
+                   'an N:1 case increment B does not adjudicate')
+        self.assertIn('distinct hydronic systems consolidated', reason)
+        self.assertTrue(n_to_1, 'the two loops partition {A, B} exactly, which IS the shape '
+                                'D-97 adjudicated')
+
+    def test_sentence_2_conserves_electrical_power_across_unequal_motors(self):
+        """The adjudicated equivalent motor efficiency, which nothing pinned.
+
+        D-93 rules `η_m,ref = ΣS/ΣPₑ` — an electrical-weighted arithmetic mean —
+        because a flow-weighted mean preserves shaft power while LEAKING
+        electrical power, and electrical is what D-38's Part 5 cap binds. Every
+        other (2) fixture sets the motor efficiencies equal, where all weightings
+        collapse to the same answer, so regressing to the wrong one failed no
+        test (Fable, PR #53). Unequal motors are the only shape that tells them
+        apart.
+        """
+        proposed = openstudio.model.Model()
+        loop_ = openstudio.model.PlantLoop(proposed)
+        loop_.sizingPlant().setLoopType('Heating')
+        serve_zones(proposed, loop_, ('Block A',))
+        loop_.setMaximumLoopFlowRate(0.008)
+        # Both triples must be physically possible, or the group falls to (3)
+        # before (2) is reached — the validity check doing its job. At 4 L/s and
+        # 150 kPa: 1000 W at 95 % implies 63.2 % hydraulic, 1200 W at 60 %
+        # implies 83.3 %.
+        for power, motor_eff in ((1000.0, 0.95), (1200.0, 0.60)):
+            pump = openstudio.model.PumpVariableSpeed(proposed)
+            pump.setRatedFlowRate(0.004)
+            pump.setRatedPumpHead(150_000.0)
+            pump.setMotorEfficiency(motor_eff)
+            pump.setRatedPowerConsumption(power)
+            pump.addToNode(loop_.supplyInletNode())
+
+        reference = openstudio.model.Model()
+        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.008, zones=('Block A',))
+        audit = AuditLog()
+        hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
+
+        decision = next(e for e in audit.entries if e.get('article') == '8.4.4.14.(2)')
+        self.assertAlmostEqual(1670.0, decision['inputs']['combined_shaft_w'], delta=0.5)
+        self.assertAlmostEqual(2200.0, decision['inputs']['combined_electrical_w'], delta=0.5)
+        # ΣS/ΣPₑ = 1670/2200 = 0.7591, NOT the flow-weighted 0.7750
+        self.assertAlmostEqual(0.7591, decision['inputs']['motor_efficiency'], delta=1e-3)
+        self.assertAlmostEqual(2200.0, _pump_power_from_triple(ref_pump, 0.008), delta=0.5,
+                               msg='electrical power is conserved; a flow-weighted mean gives 2154.8 W')
+
+    def test_sentence_2_reproduces_the_codes_own_appendix_example(self):
+        """A-8.4.4.14.(2)'s worked example, which nothing tested before.
+
+        Three proposed pumps — 86 L/min @ 60 kPa @ 60 %, 78 @ 100 @ 50 %, 103 @
+        120 @ 45 % — combining to 861 W of shaft power, and a reference pump at
+        179.4 L/min (the flow 8.4.4.9.(6)(f) fixes from a 200 kW plant at a
+        16 °C drop). The Article preserves the shaft watts ABSOLUTELY, so the
+        smaller reference flow does not scale them down.
+
+        This is the case D-11 got wrong: intensity x reference flow gives
+        578.6 W, a third short of what the Code requires.
+        """
+        proposed = openstudio.model.Model()
+        loop_ = openstudio.model.PlantLoop(proposed)
+        loop_.sizingPlant().setLoopType('Heating')
+        serve_zones(proposed, loop_, ('Block A',))
+        loop_.setMaximumLoopFlowRate(267 / 60000.0)
+        for flow_lpm, head_kpa, pump_eff in ((86, 60, 0.60), (78, 100, 0.50), (103, 120, 0.45)):
+            pump = openstudio.model.PumpVariableSpeed(proposed)
+            pump.setRatedFlowRate(flow_lpm / 60000.0)
+            pump.setRatedPumpHead(head_kpa * 1000.0)
+            pump.setDesignShaftPowerPerUnitFlowRatePerUnitHead(1.0 / pump_eff)
+            pump.setMotorEfficiency(1.0)  # the note quotes SHAFT power
+            pump.addToNode(loop_.supplyInletNode())
+
+        reference = openstudio.model.Model()
+        reference_flow = 179.4 / 60000.0
+        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=reference_flow,
+                                         zones=('Block A',))
+        audit = AuditLog()
+        hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
+
+        decision = next(e for e in audit.entries if e.get('article') == '8.4.4.14.(2)')
+        self.assertAlmostEqual(861.11, decision['inputs']['combined_shaft_w'], delta=0.05,
+                               msg="the note's 861 W")
+        self.assertAlmostEqual(861.11, _pump_power_from_triple(ref_pump, reference_flow), delta=0.5,
+                               msg='preserved ABSOLUTELY at the smaller reference flow')
+        # Sol, DF-11: the note's own stated method is a flow-weighted mean,
+        # which is 51.292 % — its published 54.2 % reproduces the published
+        # 156.1 kPa but follows no stated method, and is reported as an erratum.
+        self.assertAlmostEqual(0.51292, decision['inputs']['pump_efficiency'], delta=1e-4)
+        self.assertAlmostEqual(147.72, ref_pump.ratedPumpHead() / 1000.0, delta=0.05)
+        self.assertAlmostEqual(578.6, 861.11 / (267 / 60.0) * (179.4 / 60.0), delta=0.5,
+                               msg="what D-11's superseded method would have given")
+
+    def test_the_cap_and_the_curve_both_reach_a_demand_side_pump(self):
+        """Sol, PR #53 P1 — a FALSE COMPLIANCE RESULT.
+
+        D-93's collector was fixed to scan both plant sides, but the two older
+        paths kept their own supply-only scans. A 100 W supply pump beside a
+        10,000 W demand-side pump on a 100 kW loop therefore reported
+        `combined_w=100` against a 450 W cap and was certified "within the
+        maximum", while the demand pump kept all 10,000 W and never received
+        its (4)-(5) riding curve.
+        """
+        model = openstudio.model.Model()
+        loop_ = openstudio.model.PlantLoop(model)
+        loop_.sizingPlant().setLoopType('Heating')
+        self.add_boiler(loop_, 100.0)  # cap = 4.5 W/kW x 100 kW = 450 W
+        supply = openstudio.model.PumpVariableSpeed(model)
+        supply.setRatedFlowRate(0.004)
+        supply.setRatedPowerConsumption(100.0)
+        supply.addToNode(loop_.supplyInletNode())
+        demand = openstudio.model.PumpVariableSpeed(model)
+        demand.setRatedFlowRate(0.004)
+        demand.setRatedPowerConsumption(10_000.0)
+        self.assertTrue(demand.addToNode(loop_.demandInletNode()),
+                        'precondition: the second pump really is on the demand side')
+
+        audit = AuditLog()
+        hvac.apply_efficiencies(model, code='necb2020', audit=audit)
+
+        self.assertEqual([], [e for e in audit.entries
+                              if 'within the Table 5.2.6.3 maximum' in e['action']],
+                         'a 10,100 W loop is NEVER certified against a 450 W cap')
+        clamp = next(e for e in audit.entries if 'exceeds Table 5.2.6.3' in e['action'])
+        self.assertAlmostEqual(10_100.0, clamp['inputs']['before_w'], delta=1.0,
+                               msg='the demand-side pump is counted')
+        self.assertLess(demand.ratedPowerConsumption().get(), 500.0,
+                        'and it is actually clamped, not merely reported')
+        self.assertAlmostEqual(RIDING['a'], demand.coefficient1ofthePartLoadPerformanceCurve(),
+                               delta=1e-6, msg='(4)-(5) reaches it too')
+
+    def test_a_variable_speed_wshp_loop_is_classified_like_a_constant_speed_one(self):
+        """Sol, PR #53 P2: three places carried their own partial list of
+        water-to-air coil types, so a variable-speed WSHP loop read as plain hot
+        water and took the Heating cap row instead of the water-source one."""
+        model = openstudio.model.Model()
+        loop_ = openstudio.model.PlantLoop(model)
+        loop_.sizingPlant().setLoopType('Heating')
+        coil = openstudio.model.CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit(model)
+        loop_.addDemandBranchForComponent(coil)
+
+        self.assertEqual('heat_pump_source', _loop_role(loop_))
+        self.assertEqual('Water-source heat pump', _pump_cap_basis(loop_, 'Heating')[0])
+
+    def test_a_secondary_pump_on_the_demand_side_is_counted(self):
+        """Sol, PR #53 P1. A primary-secondary arrangement puts the primary
+        pump on the supply side and the secondary on the DEMAND side. Scanning
+        only the supply side found one pump where the system has two — which
+        mistakes (2) for (1), and drops the secondary's power out of (3)
+        entirely, on exactly the topology the Appendix example describes."""
+        proposed = openstudio.model.Model()
+        loop_, primary = loop_with_vsd_pump(proposed, 'Heating', flow=0.010, power=600.0,
+                                            zones=('Block A',), distribution_flow=0.010)
+        secondary = openstudio.model.PumpVariableSpeed(proposed)
+        secondary.setRatedFlowRate(0.010)
+        secondary.setRatedPowerConsumption(400.0)
+        self.assertTrue(secondary.addToNode(loop_.demandInletNode()),
+                        'precondition: the secondary pump really is on the demand side')
+
+        reference = openstudio.model.Model()
+        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.020, zones=('Block A',))
+        audit = AuditLog()
+        hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
+
+        decision = next(e for e in audit.entries if e.get('article') == '8.4.4.14.(3)'
+                        and e['level'] == 'decision')
+        self.assertEqual(2, decision['inputs']['proposed_pumps'],
+                         'both pumps combine, not just the supply-side one')
+        # (600 + 400) W over the 10 L/s stream = 100 W/(L/s) x 20 L/s
+        self.assertAlmostEqual(2000.0, _pump_power_from_triple(ref_pump, 0.020), delta=0.1,
+                               msg='the secondary\'s power is not dropped')
+
+    def test_sentence_1_transfers_the_efficiency_the_proposed_actually_states(self):
+        """Sol, PR #53 P1. A hard flow/head/power triple DEFINES the hydraulic
+        efficiency, but the shaft-coefficient field on such a pump still holds
+        the untouched default — so reading that field transferred 78 % where
+        the proposed stated 50 %, turning 888.9 W into 569.8 W."""
+        proposed = openstudio.model.Model()
+        loop_, pump = loop_with_vsd_pump(proposed, 'Heating', flow=0.004, zones=('Block A',))
+        pump.setRatedPumpHead(100_000.0)
+        pump.setRatedPowerConsumption(0.004 * 100_000.0 / 0.5 / 0.9)  # implies exactly 50 %
+
+        reference = openstudio.model.Model()
+        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.004, zones=('Block A',))
+        audit = AuditLog()
+        hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
+
+        decision = next(e for e in audit.entries if e.get('article') == '8.4.4.14.(1)')
+        self.assertAlmostEqual(0.5, decision['inputs']['pump_efficiency'], delta=1e-4,
+                               msg='the stated efficiency, not the default field')
+        self.assertAlmostEqual(888.9, _pump_power_from_triple(ref_pump, 0.004), delta=0.5,
+                               msg='at equal flow, (1) reproduces the proposed power')
+
+    def test_a_malformed_pump_in_a_group_never_crashes_the_determination(self):
+        """Sol, PR #53 P1. A two-pump group holding 1000 W and -100 W reached
+        sum() with a None and raised, terminating compliance processing. It must
+        route to (3) or decline — never crash."""
+        proposed = openstudio.model.Model()
+        loop_, _ = loop_with_vsd_pump(proposed, 'Heating', flow=0.004, power=1000.0,
+                                      zones=('Block A',), distribution_flow=0.004)
+        for pump in proposed.getPumpVariableSpeeds():
+            pump.setRatedPumpHead(100_000.0)
+        broken = openstudio.model.PumpVariableSpeed(proposed)
+        broken.setRatedFlowRate(0.004)
+        broken.setRatedPumpHead(100_000.0)
+        broken.setRatedPowerConsumption(-100.0)
+        broken.addToNode(loop_.supplyInletNode())
+
+        reference = openstudio.model.Model()
+        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.004, zones=('Block A',))
+        audit = AuditLog()
+        hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)  # no raise
+
+        self.assertTrue(any('no pump can draw' in w['action'] for w in audit.warnings),
+                        'the malformed pump is named, never silently absorbed')
+        self.assertTrue(any(e.get('article') == '8.4.4.14.(3)' and e['level'] == 'decision'
+                            for e in audit.entries),
+                        'an unreadable efficiency sends the group to (3) — the DECISION, not just\n                         the exclusion warning, which would satisfy this vacuously')
+
+    def test_an_impossible_shaft_coefficient_is_not_a_known_efficiency(self):
+        """A coefficient of 0.5 states a 200 % pump. 'Known' means defaulted,
+        missing OR INVALID — validity decided by the same resolver that would
+        transfer the value."""
+        model = openstudio.model.Model()
+        pump = openstudio.model.PumpVariableSpeed(model)
+        pump.setRatedPumpHead(100_000.0)
+        pump.setDesignShaftPowerPerUnitFlowRatePerUnitHead(0.5)
+        self.assertIsNone(_hydraulic_efficiency(pump))
+        self.assertEqual((True, False), _pump_characteristics_known(pump),
+                         'head is stated; the efficiency it claims is not one a pump can have')
+
+    def test_two_separate_proposed_systems_on_one_reference_loop_decline(self):
+        """N:1 consolidation, adjudicated as D-97.
+
+        Sentence (2) combines pumps only WITHIN one hydronic system — "in a
+        given hydronic system" is the scope word. Several independent proposed
+        systems consolidated onto one reference loop is a different shape, and
+        no sentence supplies a value: (1) has no single corresponding pump,
+        (2) is same-system only, and (3) is a missing-CHARACTERISTICS fallback
+        for a corresponding pump rather than a fallback for missing
+        correspondence.
+
+        Note A-8.4.x.14.(2) does not enlarge that scope. It is non-normative,
+        and its example — a primary and two wing secondaries — is ONE
+        primary-secondary system: zone disjointness is not system independence
+        (Sol, 2026-09-28).
+        """
+        proposed = openstudio.model.Model()
+        loop_with_vsd_pump(proposed, 'Heating', flow=0.010, power=800.0, zones=('Block A',))
+        loop_with_vsd_pump(proposed, 'Heating', flow=0.005, power=700.0, zones=('Block B',))
+
+        reference = openstudio.model.Model()
+        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.020,
+                                         zones=('Block A', 'Block B'))
+        audit = AuditLog()
+        hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
+
+        warning = next((w for w in audit.warnings
+                        if 'distinct hydronic systems consolidated' in w['action']), None)
+        self.assertIsNotNone(warning, 'the decline names the reason')
+        self.assertIn("partition this one reference loop's thermal blocks", warning['action'],
+                      'the predicate is an exact disjoint partition of the reference blocks, and '
+                      'nothing more. An earlier round also required the loops to lie in separate '
+                      '"hydraulically connected networks"; Sol withdrew that, because sharing a '
+                      'source or rejection loop couples equipment and moves energy rather than '
+                      'letting one fluid circulate through both loops (Sol, PR #63)')
+        self.assertEqual('D-93 D-97', warning['ruling'],
+                         'the N:1 decline cites the ruling that decided it')
+        self.assertIn('combines pumps only WITHIN one hydronic system', warning['action'],
+                      'the warning states WHY, in the scope words the Code uses')
+        self.assertIn('not a Code value and not a conservative bound', warning['action'],
+                      'the retained default may bias the reference in either direction; '
+                      'calling it conservative would be false comfort')
+        self.assertIn('5.2.6.3 supplies only an upper cap', warning['action'],
+                      'a ceiling is not a substitute for a transferred value')
+        for name in ('Plant Loop 1', 'Plant Loop 2'):
+            self.assertIn(name, warning['action'],
+                          'the consolidated proposed loops are named, so a manual '
+                          'reviewer can identify them')
+        # The (4)-(5) riding curve still applies — it needs no correspondence.
+        # What must NOT happen is a value transfer under (1), (2) or (3).
+        self.assertEqual([], [e for e in audit.entries if e['level'] == 'decision'
+                              and str(e.get('article') or '') in ('8.4.4.14.(1)', '8.4.4.14.(2)',
+                                                                  '8.4.4.14.(3)')],
+                         'nothing is transferred on a correspondence the Code does not define')
+
+    def test_the_other_declines_do_not_cite_the_ruling_that_never_saw_them(self):
+        """D-97 adjudicated N:1 and nothing else.
+
+        The first implementation put the citation and the "not a conservative
+        bound" wording in the shared ``match is None`` branch, so a
+        partial-overlap decline — a shape D-97 never considered — attested to
+        it, and the frozen sizing scenario `corpus-sizing-18-vav-hw-subset-reheat`
+        moved to record the mis-citation. A ruling axis that fires on shapes its
+        ruling never examined is worse than no citation: it makes the rulings
+        appendix report D-97 as applied in runs that contain no N:1 at all
+        (Fable, PR #63).
+
+        One proposed loop overlapping partially is the cheapest of the four
+        non-N:1 declines to author, and it is the one that actually regressed.
+        """
+        proposed = openstudio.model.Model()
+        loop_with_vsd_pump(proposed, 'Heating', flow=0.010, power=800.0,
+                           zones=('Block A', 'Block C'))
+
+        reference = openstudio.model.Model()
+        loop_with_vsd_pump(reference, 'Heating', flow=0.020, zones=('Block A', 'Block B'))
+        audit = AuditLog()
+        hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
+
+        warning = next((w for w in audit.warnings
+                        if 'a partial overlap is not a correspondence' in w['action']), None)
+        self.assertIsNotNone(warning, 'the partial overlap still declines, loudly')
+        self.assertEqual('D-93', warning['ruling'],
+                         'D-97 ruled on N:1; citing it here attributes a ruling to a shape it '
+                         'never considered')
+        self.assertIn('which is not a Code value; 5.2.6.3 still caps it', warning['action'],
+                      "D-93's existing wording is unchanged — generalising D-97's 'not a "
+                      'conservative bound\' language to every decline is arguably right but is a '
+                      'D-93 question, not a side effect of the N:1 ruling')
+        self.assertNotIn('D-97', warning['ruling'])
+        self.assertNotIn('conservative bound', warning['action'])
+
+    def test_multiple_overlap_that_is_not_a_consolidation_does_not_cite_d97(self):
+        """Sol, PR #63. `len(overlapping) > 1` is not D-97's predicate.
+
+        D-97 is scoped to several proposed systems consolidated ONTO one
+        reference loop. Mere multiplicity also catches shapes that leave
+        reference blocks with no counterpart, or that reach blocks the
+        reference does not serve — multiple partial overlaps, which the D-97
+        record itself calls a shape D-97 never considered.
+
+        My previous negative test authored ONE overlapping loop, so it took the
+        `== 1` branch and could not falsify the `> 1` flag at all: a guard
+        aimed at a different branch from the broken one. These three cases,
+        against a reference serving {A, B}, are Sol's own counterexamples and
+        each reaches the `> 1` branch.
+        """
+        for label, first, second in (
+            ('both loops serve only A, so reference block B has no counterpart',
+             ('Block A',), ('Block A',)),
+            ('overlapping proposed sets that also reach outside the reference',
+             ('Block A', 'Block C'), ('Block A', 'Block D')),
+            ('disjoint proposed sets that reach outside the reference',
+             ('Block A', 'Block C'), ('Block B', 'Block D')),
+        ):
+            with self.subTest(shape=label):
+                proposed = openstudio.model.Model()
+                # The zones are authored ONCE and shared between the loops.
+                # `serve_zones` would create a second 'Block A', which
+                # OpenStudio renames to 'Block A 1' — the loops would then
+                # overlap nothing, take the `== 1` branch, and these fixtures
+                # would pass whatever the predicate does. Two of these three
+                # did exactly that before the mutation run caught it.
+                blocks = {}
+                for name in set(first) | set(second) | {'Block A', 'Block B'}:
+                    zone = openstudio.model.ThermalZone(proposed)
+                    zone.setName(name)
+                    blocks[name] = zone
+                for flow, power, served in ((0.010, 800.0, first), (0.005, 700.0, second)):
+                    loop_, _ = loop_with_vsd_pump(proposed, 'Heating', flow=flow,
+                                                  power=power, zones=None)
+                    serve_existing_zones(proposed, loop_, [blocks[n] for n in served])
+
+                reference = openstudio.model.Model()
+                loop_with_vsd_pump(reference, 'Heating', flow=0.020,
+                                   zones=('Block A', 'Block B'))
+                audit = AuditLog()
+                hvac.apply_efficiencies(reference, code='necb2020', audit=audit,
+                                        proposed=proposed)
+
+                declines = [w for w in audit.warnings if '14.(1)-(3) NOT applied' in w['action']]
+                self.assertTrue(declines, 'the shape still declines, loudly')
+                for warning in declines:
+                    self.assertEqual('D-93', warning['ruling'],
+                                     f'{label}: D-97 ruled on exact consolidation; citing it '
+                                     'here attributes a ruling to a shape it never examined')
+                    self.assertIn('not a correspondence', warning['action'])
+                    self.assertNotIn('conservative bound', warning['action'])
+
+    def test_the_notes_own_hx_coupled_system_is_not_claimed_as_n_to_1(self):
+        """DF-18's shape must not attest to D-97.
+
+        Note A-8.4.x.14.(2)'s example — a primary plus two wing secondaries —
+        can only be authored in OpenStudio as a primary loop plus
+        heat-exchanger-coupled wing loops, because one PlantLoop carries one
+        demand-side pump. That is several loops and ONE hydronic system, and
+        the D-97 record expressly leaves it undecided as DF-18. So it must not
+        arrive labelled 'D-97 adjudicated this'.
+
+        It is excluded structurally rather than by a special case:
+        `_served_zone_names` recurses THROUGH the heat exchanger, so the
+        primary's block set is a strict superset of the wings' and the sets are
+        not disjoint. The partition predicate rejects it.
+
+        The reference serves two of the three wings. That is deliberate: with
+        the reference serving ALL of them, the primary's set EQUALS the
+        reference's and the pass takes the one-to-one branch instead — which is
+        DF-18's other half, the silent transfer from the primary pump alone.
+        This test is about the N:1 branch, so it authors the shape that
+        actually reaches it.
+        """
+        proposed = openstudio.model.Model()
+        wings = [loop_with_vsd_pump(proposed, 'Heating', flow=0.004, power=power,
+                                    zones=(block,))[0]
+                 for block, power in (('Block A', 300.0), ('Block B', 400.0),
+                                      ('Block E', 500.0))]
+        primary, _ = loop_with_vsd_pump(proposed, 'Heating', flow=0.012, power=300.0,
+                                        zones=None)
+        for wing in wings:
+            hx = openstudio.model.HeatExchangerFluidToFluid(proposed)
+            primary.addDemandBranchForComponent(hx)
+            hx.addToNode(wing.supplyInletNode())
+
+        self.assertEqual({'Block A', 'Block B', 'Block E'}, _served_zone_names(primary),
+                         "the primary reaches the wings' blocks through the heat exchangers, "
+                         'which is what makes its set a superset and the partition fail')
+
+        reference = openstudio.model.Model()
+        ref_loop, _ = loop_with_vsd_pump(reference, 'Heating', flow=0.016,
+                                         zones=('Block A', 'Block B'))
+        match, reason, n_to_1 = _corresponding_loop(ref_loop, proposed)
+
+        self.assertIsNone(match, 'three overlapping loops; no single one corresponds')
+        self.assertFalse(n_to_1,
+                         'one primary-secondary system is NOT several systems consolidated; '
+                         'DF-18 is expressly undecided, so D-97 must not be cited here')
+        self.assertIn('not a correspondence', reason)
+
+    def test_sharing_a_condenser_loop_does_not_merge_two_hydronic_systems(self):
+        """Sol, PR #63. A shared plant loop is not hydraulic continuity.
+
+        Two hot-water loops each serve one block, so they partition the
+        reference's blocks exactly, and both draw on ONE shared condenser loop
+        through heat exchangers. They remain TWO hydronic systems: the heat
+        exchangers transfer energy between separate fluid circuits rather than
+        letting one fluid circulate through both loops. 5.2.6.3.(1)'s table note
+        fixes the unit at the LOOP and 8.4.x.9.(6)(a) distinguishes a plant from
+        the systems it serves, so this IS several systems consolidated onto one
+        reference loop and D-97 fires.
+
+        An earlier round asserted the opposite here, on a "hydraulically
+        connected network" reading Sol withdrew as an over-expansion from
+        common-fluid primary-secondary pumping into arbitrary thermal coupling.
+        The name and this docstring are part of that correction: a test whose
+        stated purpose teaches the rejected model invites its restoration.
+        """
+        proposed = openstudio.model.Model()
+        shared_plant = openstudio.model.PlantLoop(proposed)
+        shared_plant.setName('Shared Condenser')
+        shared_plant.sizingPlant().setLoopType('Condenser')
+
+        wings = []
+        for block, power in (('Block A', 300.0), ('Block B', 400.0)):
+            wing, _ = loop_with_vsd_pump(proposed, 'Heating', flow=0.004, power=power,
+                                         zones=(block,))
+            hx = openstudio.model.HeatExchangerFluidToFluid(proposed)
+            shared_plant.addDemandBranchForComponent(hx)
+            hx.addToNode(wing.supplyInletNode())
+            wings.append(wing)
+
+        # The premise: the block sets DO partition, exactly.
+        self.assertEqual([{'Block A'}, {'Block B'}], [_served_zone_names(w) for w in wings],
+                         'disjoint, and together exactly the reference blocks')
+        # They share equipment through ANOTHER fluid circuit, which is not
+        # hydraulic continuity between these two loops.
+        # No connectivity test any more: a shared condenser loop couples the
+        # EQUIPMENT and moves energy; it does not let the same hydronic fluid
+        # circulate through both wings (Sol, PR #63).
+
+        reference = openstudio.model.Model()
+        ref_loop, _ = loop_with_vsd_pump(reference, 'Heating', flow=0.008,
+                                         zones=('Block A', 'Block B'))
+        match, reason, n_to_1 = _corresponding_loop(ref_loop, proposed)
+
+        self.assertIsNone(match, 'neither wing corresponds on its own')
+        self.assertTrue(n_to_1,
+                        'two distinct hot-water PlantLoops are two hydronic systems even when '
+                        'their chillers share one condenser loop. 5.2.6.3.(1) fixes the unit at '
+                        'the LOOP and 8.4.x.9.(6)(a) distinguishes a plant from the systems it '
+                        'serves, so this IS several systems consolidated onto one reference '
+                        'loop (Sol, PR #63)')
+        self.assertIn('distinct hydronic systems consolidated', reason)
+
+    def test_water_to_water_heat_pumps_on_one_source_loop_stay_distinct(self):
+        """Two wings on one shared ground loop remain two hydronic systems.
+
+        `HeatPumpWaterToWaterEquationFitHeating` is what `hp_plant_fancoils.py`
+        wires to the GLHX source loop for the HS14 GSHP system, so this is the
+        repository's own topology. The shared ground loop is a third fluid
+        circuit: the heat pumps move energy between it and each wing, so the
+        wings' fluid never mixes and they stay distinct hydronic systems. Their
+        block sets partition the reference exactly, so D-97 fires.
+
+        This test was written to prove the opposite, under a network-classifier
+        reading Sol later withdrew (PR #63). It is kept because the topology is
+        worth pinning; only the expected answer and the reason changed.
+        """
+        proposed = openstudio.model.Model()
+        source = openstudio.model.PlantLoop(proposed)
+        source.setName('Ground Loop')
+        source.sizingPlant().setLoopType('Condenser')
+
+        wings = []
+        for block, power in (('Block A', 300.0), ('Block B', 400.0)):
+            wing, _ = loop_with_vsd_pump(proposed, 'Heating', flow=0.004, power=power,
+                                         zones=(block,))
+            hp = openstudio.model.HeatPumpWaterToWaterEquationFitHeating(proposed)
+            hp.addToNode(wing.supplyInletNode())
+            source.addDemandBranchForComponent(hp)
+            wings.append(wing)
+
+        self.assertEqual([{'Block A'}, {'Block B'}], [_served_zone_names(w) for w in wings],
+                         'the exact partition is what makes this eligible for D-97, '
+                         'independently of the shared source loop: the two load-side loops stay '
+                         'distinct fluid circuits')
+        # A shared ground loop is a separate fluid circuit, not continuity.
+
+        reference = openstudio.model.Model()
+        ref_loop, _ = loop_with_vsd_pump(reference, 'Heating', flow=0.008,
+                                         zones=('Block A', 'Block B'))
+        match, reason, n_to_1 = _corresponding_loop(ref_loop, proposed)
+
+        self.assertIsNone(match)
+        self.assertTrue(n_to_1,
+                        'a shared GROUND loop is another fluid circuit; the two hot-water loops '
+                        'remain distinct hydronic systems, so this is D-97 consolidation')
+        self.assertIn('distinct hydronic systems consolidated', reason)
+
+    def test_a_shared_tertiary_loop_does_not_merge_two_systems(self):
+        """A shared TERTIARY loop is a third circuit, not continuity.
+
+        `CentralHeatPumpSystem` initializes cooling, source AND heating
+        connections. Two chilled-water loops whose systems share one heating
+        loop through their tertiary sides therefore share a PLANT — which under
+        Sol's ruling is energy transfer between circuits, not one hydronic
+        system. Their block sets partition the reference exactly, so D-97 fires.
+
+        The three-loop shape is still worth pinning: it is the only place the
+        tertiary side is exercised, and reading only two sides was a real defect
+        in an earlier round. What changed is the expected answer, not the model.
+        """
+        proposed = openstudio.model.Model()
+        shared_heating = openstudio.model.PlantLoop(proposed)
+        shared_heating.setName('Shared Heating')
+        shared_heating.sizingPlant().setLoopType('Heating')
+
+        wings = []
+        for block, power in (('Block A', 300.0), ('Block B', 400.0)):
+            wing, _ = loop_with_vsd_pump(proposed, 'Cooling', flow=0.004, power=power,
+                                         zones=(block,))
+            source = openstudio.model.PlantLoop(proposed)
+            source.sizingPlant().setLoopType('Condenser')
+            chps = openstudio.model.CentralHeatPumpSystem(proposed)
+            wing.addSupplyBranchForComponent(chps)
+            source.addDemandBranchForComponent(chps)
+            chps.addToTertiaryNode(shared_heating.supplyInletNode())
+            wings.append(wing)
+
+        self.assertEqual([{'Block A'}, {'Block B'}], [_served_zone_names(w) for w in wings],
+                         'the block sets partition the reference exactly')
+        # The shared heating loop is a third fluid circuit, not continuity.
+
+        reference = openstudio.model.Model()
+        ref_loop, _ = loop_with_vsd_pump(reference, 'Cooling', flow=0.008,
+                                         zones=('Block A', 'Block B'))
+        match, reason, n_to_1 = _corresponding_loop(ref_loop, proposed)
+
+        self.assertIsNone(match)
+        self.assertTrue(n_to_1,
+                        'a shared tertiary heating loop transfers ENERGY between circuits; it is '
+                        'not hydraulic continuity, so the two chilled-water loops stay distinct '
+                        'hydronic systems')
+        self.assertIn('distinct hydronic systems consolidated', reason)
+
+    def test_every_tertiary_load_cast_is_verified_against_the_sdk(self):
+        """The list is a measured fact, not an assertion.
+
+        Each entry must expose an SDK accessor that NAMES its tertiary as a
+        load. It does NOT check that the named accessor and `tertiaryPlantLoop`
+        are the same loop — an earlier version of this docstring claimed it did,
+        which the module comment on `TERTIARY_LOAD_CASTS` already corrects.
+        Absorption chillers must stay out, because theirs is `generatorLoop` —
+        a heat SOURCE (Fable, PR #63).
+        """
+        model = openstudio.model.Model()
+        for caster in efficiency.TERTIARY_LOAD_CASTS:
+            name = caster[len('to_'):]
+            cls = getattr(openstudio.model, name, None)
+            if cls is None:
+                continue  # not in this SDK version
+            with self.subTest(cls=name):
+                obj = cls(model)
+                named = [a for a in ('heatRecoveryLoop', 'heatingPlantLoop')
+                         if hasattr(obj, a)]
+                self.assertTrue(named,
+                                f'{name} is listed as having a LOAD tertiary but exposes no '
+                                'load-named accessor; the SDK name is the evidence')
+        for name in ('ChillerAbsorption', 'ChillerAbsorptionIndirect'):
+            cls = getattr(openstudio.model, name, None)
+            if cls is None:
+                continue
+            with self.subTest(cls=name):
+                obj = cls(model)
+                self.assertTrue(hasattr(obj, 'generatorLoop'),
+                                f'{name} draws heat FROM its tertiary')
+                self.assertNotIn(f'to_{name}', efficiency.TERTIARY_LOAD_CASTS,
+                                 f"{name}'s tertiary is a generator loop — a SOURCE. Listing it "
+                                 'would attribute its blocks to the loop that supplies it and '
+                                 'produce a silent false one-to-one transfer')
+
+    def test_an_absorption_generator_loop_is_not_a_served_loop(self):
+        """Fable, PR #63 — the regression this PR briefly introduced.
+
+        An absorption chiller draws heat from its generator loop. Treating
+        every tertiary as a load made that generator loop "served", so the
+        condenser loop inherited the generator's blocks, matched the reference
+        one-to-one, and transferred under (3) with NO warning — strictly worse
+        than the loud decline it replaced, because a wrong value with no warning
+        is invisible.
+        """
+        if not hasattr(openstudio.model, 'ChillerAbsorptionIndirect'):
+            self.skipTest('ChillerAbsorptionIndirect not in this SDK')
+        proposed = openstudio.model.Model()
+        chilled, _ = loop_with_vsd_pump(proposed, 'Cooling', flow=0.004, power=300.0,
+                                        zones=('Block A',))
+        generator, _ = loop_with_vsd_pump(proposed, 'Heating', flow=0.004, power=200.0,
+                                          zones=('Block G',))
+        condenser, _ = loop_with_vsd_pump(proposed, 'Condenser', flow=0.006, power=400.0,
+                                          zones=None)
+        chiller = openstudio.model.ChillerAbsorptionIndirect(proposed)
+        chilled.addSupplyBranchForComponent(chiller)
+        condenser.addDemandBranchForComponent(chiller)
+        chiller.addToTertiaryNode(generator.demandInletNode())
+
+        self.assertEqual({'Block A'}, _served_zone_names(condenser),
+                         'the condenser serves the blocks its chiller COOLS. The generator '
+                         'loop supplies the chiller with heat; its blocks are not served '
+                         'through it, and attributing them creates a false correspondence')
+
+    def test_each_conjunct_of_the_d97_predicate_is_load_bearing(self):
+        """M4, Fable PR #63: a conjunct no test can falsify is not a conjunct.
+
+        `disjoint` had no discriminating case — every fixture that failed it
+        also failed the coverage check, so hard-coding it True passed the whole
+        suite. This is the shape that needs three blocks: two proposed loops
+        that together COVER the reference exactly but OVERLAP each other.
+        """
+        proposed = openstudio.model.Model()
+        blocks = {}
+        for name in ('Block A', 'Block B', 'Block C'):
+            zone = openstudio.model.ThermalZone(proposed)
+            zone.setName(name)
+            blocks[name] = zone
+        for flow, power, served in ((0.010, 800.0, ('Block A', 'Block B')),
+                                    (0.005, 700.0, ('Block B', 'Block C'))):
+            loop_, _ = loop_with_vsd_pump(proposed, 'Heating', flow=flow, power=power,
+                                          zones=None)
+            serve_existing_zones(proposed, loop_, [blocks[n] for n in served])
+
+        reference = openstudio.model.Model()
+        ref_loop, _ = loop_with_vsd_pump(reference, 'Heating', flow=0.020,
+                                         zones=('Block A', 'Block B', 'Block C'))
+        match, reason, n_to_1 = _corresponding_loop(ref_loop, proposed)
+
+        self.assertIsNone(match)
+        self.assertFalse(n_to_1,
+                         'the two loops cover {A,B,C} exactly but share Block B, so they are '
+                         'not a partition — overlapping loops are not several systems '
+                         'consolidated, and D-97 must not fire')
+
+    def test_an_exact_match_that_is_not_the_only_overlap_declines(self):
+        """Sol, PR #63. An exact match is one-to-one only if it is the ONLY
+        loop touching the reference loop.
+
+        Reference {A, B}; proposed {A, B} at 800 W and proposed {B} at 500 W.
+        The old order returned the exact candidate before computing overlaps,
+        so it transferred under (3) from that pump alone and dropped the second
+        loop's pump with NO warning. Two proposed loops serve block B, so it is
+        not an unambiguous one-to-one; their sets overlap, so it is not D-97's
+        disjoint partition either. It declines under D-93 and names both.
+        """
+        proposed = openstudio.model.Model()
+        blocks = {}
+        for name in ('Block A', 'Block B'):
+            zone = openstudio.model.ThermalZone(proposed)
+            zone.setName(name)
+            blocks[name] = zone
+        for flow, power, served, label in ((0.010, 800.0, ('Block A', 'Block B'), 'Exact AB'),
+                                           (0.004, 500.0, ('Block B',), 'Extra B')):
+            loop_, _ = loop_with_vsd_pump(proposed, 'Heating', flow=flow, power=power, zones=None)
+            loop_.setName(label)
+            serve_existing_zones(proposed, loop_, [blocks[n] for n in served])
+
+        reference = openstudio.model.Model()
+        ref_loop, _ = loop_with_vsd_pump(reference, 'Heating', flow=0.020,
+                                         zones=('Block A', 'Block B'))
+        match, reason, n_to_1 = _corresponding_loop(ref_loop, proposed)
+
+        self.assertIsNone(match, 'the exact candidate is not the sole overlap, so it is not an '
+                                 'unambiguous one-to-one correspondence')
+        self.assertFalse(n_to_1, "the proposed sets overlap at B, so this is not D-97's disjoint "
+                                 'partition either')
+        self.assertIn('the correspondence is ambiguous', reason)
+        for label in ('Exact AB', 'Extra B'):
+            self.assertIn(label, reason, 'both candidates are named, so a reviewer can see which '
+                                         "loops' pumps were NOT transferred")
+
+        audit = AuditLog()
+        hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
+        self.assertEqual([], [e for e in audit.entries if e['level'] == 'decision'
+                              and str(e.get('article') or '') in ('8.4.4.14.(1)', '8.4.4.14.(2)',
+                                                                  '8.4.4.14.(3)')],
+                         'nothing is transferred, so no pump is silently dropped')
+        decline = next((w for w in audit.warnings
+                        if 'the correspondence is ambiguous' in w['action']), None)
+        self.assertIsNotNone(decline, 'and the decline is loud')
+        self.assertEqual('D-93', decline['ruling'],
+                         'ambiguity is D-93 alone; D-97 ruled on the disjoint partition')
+
+    def test_disjoint_loops_that_under_cover_the_reference_do_not_fire_d97(self):
+        """Fable, PR #63. The coverage conjunct was tested in ONE direction.
+
+        Weakening `covered == reference_zones` to `<=` survived the whole suite,
+        because no fixture had disjoint loops that under-cover: reference
+        {A,B,C} against proposed {A},{B} would then fire D-97 and claim the
+        loops "partition this one reference loop's thermal blocks" while block C
+        has no counterpart at all. That is the mis-citation class the earlier
+        rounds were about.
+        """
+        proposed = openstudio.model.Model()
+        blocks = {}
+        for name in ('Block A', 'Block B'):
+            zone = openstudio.model.ThermalZone(proposed)
+            zone.setName(name)
+            blocks[name] = zone
+        for flow, power, served in ((0.010, 800.0, ('Block A',)), (0.005, 700.0, ('Block B',))):
+            loop_, _ = loop_with_vsd_pump(proposed, 'Heating', flow=flow, power=power, zones=None)
+            serve_existing_zones(proposed, loop_, [blocks[n] for n in served])
+
+        reference = openstudio.model.Model()
+        ref_loop, _ = loop_with_vsd_pump(reference, 'Heating', flow=0.020,
+                                         zones=('Block A', 'Block B', 'Block C'))
+        match, reason, n_to_1 = _corresponding_loop(ref_loop, proposed)
+
+        self.assertIsNone(match)
+        self.assertFalse(n_to_1,
+                         'the loops are disjoint but leave Block C with no counterpart, so they '
+                         'do not partition the reference loop and D-97 must not fire')
+        # And the reason must name what actually failed. It previously asserted
+        # a disjunction — "overlap each other or reach blocks it does not serve"
+        # — of which NEITHER clause holds on this shape (Fable, PR #63).
+        self.assertIn('together they cover only 2 of its 3 thermal blocks', reason)
+        self.assertNotIn('they overlap each other', reason)
+
+    def test_a_listed_tertiary_load_cast_actually_contributes_served_blocks(self):
+        """Fable, PR #63. The POSITIVE half of `TERTIARY_LOAD_CASTS` was unpinned.
+
+        Removing `to_CentralHeatPumpSystem`, removing `to_ChillerElectricEIR`,
+        or emptying the list entirely all left the suite green: nothing showed a
+        heat-recovery or `heatingPlantLoop` tertiary contributing blocks. The
+        omission direction is safe — a loud decline, not a silent value — but an
+        unpinned rule is not a rule.
+        """
+        if not hasattr(openstudio.model, 'CentralHeatPumpSystem'):
+            self.skipTest('CentralHeatPumpSystem not in this SDK')
+        model = openstudio.model.Model()
+        cooling, _ = loop_with_vsd_pump(model, 'Cooling', flow=0.004, power=300.0,
+                                        zones=('Block A',))
+        heating, _ = loop_with_vsd_pump(model, 'Heating', flow=0.004, power=300.0,
+                                       zones=('Block H',))
+        source, _ = loop_with_vsd_pump(model, 'Condenser', flow=0.008, power=400.0, zones=None)
+        chps = openstudio.model.CentralHeatPumpSystem(model)
+        cooling.addSupplyBranchForComponent(chps)
+        source.addDemandBranchForComponent(chps)
+        chps.addToTertiaryNode(heating.supplyInletNode())
+
+        self.assertEqual({'Block A', 'Block H'}, _served_zone_names(source),
+                         'the source loop serves BOTH load sides of a central heat-pump '
+                         "system: the cooling loop through plantLoop() and the heating loop "
+                         'through the tertiary. Dropping the tertiary from TERTIARY_LOAD_CASTS '
+                         'must lose Block H here')
+
+    def test_a_heat_recovery_chillers_tertiary_contributes_served_blocks(self):
+        """The second listed cast, pinned behaviourally.
+
+        `ChillerElectricEIR`'s tertiary is `heatRecoveryLoop` — a LOAD, since the
+        chiller rejects heat into it. Removing it from `TERTIARY_LOAD_CASTS`
+        survived the suite until this fixture existed.
+
+        The wiring is worth recording: `addToTertiaryNode` succeeds on the
+        recovery loop's DEMAND inlet and is refused on its supply inlet or
+        supply outlet, so the obvious "it supplies heat, put it on the supply
+        side" reading does not build.
+        """
+        model = openstudio.model.Model()
+        chilled, _ = loop_with_vsd_pump(model, 'Cooling', flow=0.004, power=300.0,
+                                        zones=('Block A',))
+        recovery, _ = loop_with_vsd_pump(model, 'Heating', flow=0.004, power=300.0,
+                                         zones=('Block R',))
+        condenser, _ = loop_with_vsd_pump(model, 'Condenser', flow=0.008, power=400.0, zones=None)
+        chiller = openstudio.model.ChillerElectricEIR(model)
+        chilled.addSupplyBranchForComponent(chiller)
+        condenser.addDemandBranchForComponent(chiller)
+        self.assertTrue(chiller.addToTertiaryNode(recovery.demandInletNode()),
+                        'the recovery loop DEMAND inlet is the connection the SDK accepts')
+        self.assertTrue(chiller.heatRecoveryLoop().is_initialized())
+
+        self.assertEqual({'Block A', 'Block R'}, _served_zone_names(condenser),
+                         "the condenser reaches the chiller's cooling load through plantLoop() "
+                         'and its heat-recovery load through the tertiary; dropping '
+                         'to_ChillerElectricEIR from TERTIARY_LOAD_CASTS must lose Block R')
 
     def test_constant_speed_reference_pump_gets_transfer_but_no_curve(self):
         proposed = openstudio.model.Model()
@@ -92,12 +1118,17 @@ class TestNecbPumpRules(unittest.TestCase):
         reference = openstudio.model.Model()
         loop_ = openstudio.model.PlantLoop(reference)
         loop_.sizingPlant().setLoopType('Condenser')
+        serve_zones(reference, loop_, ('Block A',))
+        loop_.setMaximumLoopFlowRate(0.005)
         pump = openstudio.model.PumpConstantSpeed(reference)
         pump.setRatedFlowRate(0.005)
         pump.addToNode(loop_.supplyInletNode())
         hvac.apply_efficiencies(reference, code='necb2020', audit=AuditLog(), proposed=proposed)
-        self.assertAlmostEqual(600.0, pump.ratedPowerConsumption().get(), delta=0.1,
+        self.assertAlmostEqual(600.0, _pump_power_from_triple(pump, 0.005), delta=0.1,
                                msg='120 W/(L/s) x 5 L/s')
+        # "no curve" is structural, not an assertable value: PumpConstantSpeed
+        # has no part-load coefficient fields for (4)-(5) to write.
+        self.assertFalse(hasattr(pump, 'coefficient1ofthePartLoadPerformanceCurve'))
 
     def test_undeterminable_proposed_pumps_warn_never_silent(self):
         proposed = openstudio.model.Model()
@@ -108,8 +1139,12 @@ class TestNecbPumpRules(unittest.TestCase):
         audit = AuditLog()
         hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
 
-        self.assertTrue(any('NOT transferred' in w['action'] for w in audit.warnings),
-                        'undeterminable proposed pumps warn loudly')
+        warning = next((w for w in audit.warnings if 'NOT applied' in w['action']), None)
+        self.assertIsNotNone(warning, 'undeterminable proposed pumps warn loudly')
+        self.assertIn('distribution flow', warning['action'],
+                      'and name what could not be determined')
+        self.assertIn('circulate the same water', warning['action'],
+                      'saying why the sum of the pumps\' own flows is not a substitute')
         self.assertTrue(ref_pump.ratedPowerConsumption().empty(),
                         'no transfer happened — autosizing retained')
         self.assertAlmostEqual(RIDING['a'], ref_pump.coefficient1ofthePartLoadPerformanceCurve(),
@@ -120,12 +1155,15 @@ class TestNecbPumpRules(unittest.TestCase):
         loop_with_vsd_pump(proposed, 'Heating', flow=0.010, power=800.0)
 
         reference = openstudio.model.Model()
-        loop_with_vsd_pump(reference, 'Cooling', flow=0.02)  # no Cooling pumps in proposed
+        loop_with_vsd_pump(reference, 'Cooling', flow=0.02)  # no chilled-water loop in proposed
         audit = AuditLog()
         hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
 
-        self.assertTrue(any('NO Cooling-type loop pumps' in w['action'] for w in audit.warnings),
-                        'missing loop-type correspondence warns')
+        warning = next((w for w in audit.warnings
+                        if 'has no chilled_water loop' in w['action']), None)
+        self.assertIsNotNone(warning, 'a missing counterpart warns')
+        self.assertIn('not a Code value', warning['action'],
+                      'and says the retained default is a modelling default, not a Code one')
 
     def test_2025_citations_renumbered(self):
         model = openstudio.model.Model()
@@ -161,29 +1199,48 @@ class TestNecbPumpRules(unittest.TestCase):
         self.assertTrue(any(e['level'] == 'info' and 'service water heating loop' in e['action']
                             for e in audit.entries))
         # heating intensity clean of the SWH pump: 800 W / 10 L/s = 80 W/(L/s) x 20 L/s
-        self.assertAlmostEqual(1600.0, ref_pump.ratedPowerConsumption().get(), delta=0.1,
+        self.assertAlmostEqual(1600.0, _pump_power_from_triple(ref_pump, 0.020), delta=0.1,
                                msg='Heating intensity excludes the proposed SWH circulator')
 
-    def test_transfer_reconciles_unphysical_inherited_head(self):
+    # D-92 replaced the repair with a statement. The pass writes head, shaft
+    # coefficient and motor efficiency and leaves power autosized, so there is
+    # no hard-set power for an inherited head to contradict: the legacy head is
+    # OVERWRITTEN rather than reduced after the fact, and the E+ fatal
+    # ("Calculated Pump Efficiency > 100%") is unreachable by construction.
+    def test_unphysical_inherited_head_is_replaced_not_reconciled(self):
         proposed = openstudio.model.Model()
-        # weak: 10 W/(L/s)
-        loop_with_vsd_pump(proposed, 'Heating', flow=0.010, power=100.0)
+        # weak: 10 W/(L/s), head left at the SDK default so (3) governs
+        loop_with_vsd_pump(proposed, 'Heating', flow=0.010, power=100.0, zones=('Block A',))
 
         reference = openstudio.model.Model()
-        # -> 10 W transferred
-        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.001)
+        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.001, zones=('Block A',))
         # legacy SWH-scale head: flow x head / power >> motor eff
         ref_pump.setRatedPumpHead(1_927_540.0)
         audit = AuditLog()
         hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
 
-        power = ref_pump.ratedPowerConsumption().get()
-        self.assertAlmostEqual(10.0, power, delta=0.1, msg='transferred power is authoritative')
-        implied = 0.001 * ref_pump.ratedPumpHead() / power
-        self.assertLessEqual(implied, ref_pump.motorEfficiency() + 1e-6,
-                             'head reconciled so implied efficiency stays physical '
-                             '(E+ fatal otherwise)')
-        self.assertTrue(any('head reduced' in e['action'] for e in audit.warnings))
+        # 10 W/(L/s) x 1000 x 0.9 motor x 0.78 pump
+        self.assertAlmostEqual(7020.0, ref_pump.ratedPumpHead(), delta=1.0,
+                               msg='the legacy head is replaced by the stated one')
+        # Pin the factors, not just their product: 7020 alone is satisfied by
+        # any compensating pair, and the adjudicated 90% is what the decision's
+        # own "modelling split" wording asserts below (Fable, PR #53).
+        self.assertEqual(0.9, DEFAULT_MOTOR_EFFICIENCY)
+        self.assertAlmostEqual(0.9, ref_pump.motorEfficiency(), delta=1e-9,
+                               msg='the adjudicated motor efficiency reaches the model')
+        self.assertAlmostEqual(10.0, _pump_power_from_triple(ref_pump, 0.001), delta=0.1,
+                               msg='the intensity still lands on the reference flow')
+        self.assertGreaterEqual(ref_pump.designShaftPowerPerUnitFlowRatePerUnitHead(), 1.0,
+                                'the stated pump efficiency is one a pump can have')
+        self.assertEqual([], [e for e in audit.warnings if 'head reduced' in e['action']],
+                         'nothing to reconcile: no hard-set power was ever written')
+        # The proposed pump's head is an SDK default, so (3) governs and the
+        # split is a declared modelling choice — stated in the decision itself
+        # rather than in a separate fallback note.
+        decision = next(e for e in audit.entries if e.get('article') == '8.4.4.14.(3)'
+                        and e['level'] == 'decision')
+        self.assertIn('declared', decision['value'])
+        self.assertIn('modelling split', decision['value'])
 
     @staticmethod
     def add_boiler(loop_, kw):
@@ -207,17 +1264,143 @@ class TestNecbPumpRules(unittest.TestCase):
         audit = AuditLog()
         hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
 
-        power = ref_pump.ratedPowerConsumption().get()
-        self.assertAlmostEqual(450.0, power, delta=0.5,
+        # D-92: the cap moves HEAD at constant efficiency, so the clamped pump
+        # is exactly as physical as the unclamped one.
+        self.assertAlmostEqual(450.0, _pump_power_from_triple(ref_pump, 0.020), delta=0.5,
                                msg='combined power clamped to 4.5 W/kW x 100 kW')
-        implied = 0.020 * ref_pump.ratedPumpHead() / power
-        self.assertLessEqual(implied, ref_pump.motorEfficiency() + 1e-6,
-                             'clamped triple stays physical')
+        self.assertGreaterEqual(ref_pump.designShaftPowerPerUnitFlowRatePerUnitHead(), 1.0,
+                                'clamping does not invent an impossible efficiency')
         decision = next((e for e in audit.entries
                          if str(e.get('article') or '') == '5.2.6.3.(1); 8.4.4.1.(2)'), None)
         self.assertIsNotNone(decision, 'clamp decision audited with both articles')
         self.assertEqual('Heating', decision['inputs']['system_type'])
         self.assertAlmostEqual(4000.0, decision['inputs']['before_w'], delta=1.0)
+
+    # Sol, PR #50 P1: every cap test above runs the transfer first, so all of
+    # them see a pump D-92 has already normalized to PowerPerFlowPerPressure
+    # with autosized power — the one shape where scaling head moves the power.
+    # The cap is documented to apply "with or without a proposed model", and on
+    # the other two power sources head is absent from E+'s sizing equation, so
+    # a head-only clamp reported a reduction it never made.
+    def capped_loop(self, mode, flow=0.020):
+        """A 100 kW heating loop (cap = 4.5 W/kW x 100 kW = 450 W) whose pump
+        draws 10 kW through the given power source, and NO proposed model."""
+        model = openstudio.model.Model()
+        loop_, pump = loop_with_vsd_pump(model, 'Heating', flow=flow)
+        self.add_boiler(loop_, 100.0)
+        if mode == 'hard':
+            pump.setRatedPowerConsumption(10_000.0)
+        elif mode == 'per_flow':
+            pump.setDesignPowerSizingMethod('PowerPerFlow')
+            pump.setDesignElectricPowerPerUnitFlowRate(10_000.0 / flow)
+        return model, pump
+
+    def test_cap_clamps_a_hard_set_pump_with_no_proposed_model(self):
+        model, pump = self.capped_loop('hard')
+        audit = AuditLog()
+        hvac.apply_efficiencies(model, code='necb2020', audit=audit)
+
+        self.assertAlmostEqual(450.0, _pump_power_from_triple(pump, 0.020), delta=0.5,
+                               msg='the clamp reaches a hard-set power, not just the head')
+        self.assertAlmostEqual(450.0, pump.ratedPowerConsumption().get(), delta=0.5,
+                               msg='and it is the hard value E+ reads that moved')
+        implied = 0.020 * pump.ratedPumpHead() / 450.0 / pump.motorEfficiency()
+        self.assertLessEqual(implied, 1.0 + 1e-9,
+                             'head scaled with power, so cutting it cannot imply >100% efficiency')
+
+    def test_cap_clamps_a_power_per_flow_pump_with_no_proposed_model(self):
+        model, pump = self.capped_loop('per_flow')
+        audit = AuditLog()
+        hvac.apply_efficiencies(model, code='necb2020', audit=audit)
+
+        self.assertAlmostEqual(450.0, _pump_power_from_triple(pump, 0.020), delta=0.5,
+                               msg='PowerPerFlow sizes from W/(m3/s); head is not in the equation')
+        self.assertAlmostEqual(450.0 / 0.020, pump.designElectricPowerPerUnitFlowRate(), delta=1.0,
+                               msg='so the intensity itself is what the clamp must move')
+
+    def test_an_impossible_efficiency_sends_the_whole_group_to_sentence_3(self):
+        """D-92 kept an impossible pump's power in a (2)-style total while
+        dropping only its efficiency from the average. Sol overruled that
+        (DF-11 increment B): (2) cannot preserve a combined shaft power it
+        cannot compute, so the COMPLETE group takes (3) and the efficiency is a
+        declared modelling split, not a blend of whatever happened to be valid.
+        """
+        proposed = openstudio.model.Model()
+        loop_, _ = loop_with_vsd_pump(proposed, 'Heating', flow=0.010, power=1000.0,
+                                      zones=('Block A',), distribution_flow=0.011)
+        for pump in proposed.getPumpVariableSpeeds():
+            pump.setRatedPumpHead(50_000.0)
+        impossible = openstudio.model.PumpVariableSpeed(proposed)
+        impossible.setRatedFlowRate(0.001)
+        impossible.setRatedPowerConsumption(100.0)
+        impossible.setRatedPumpHead(100_000.0)  # implies 111 % — no pump can do this
+        impossible.addToNode(loop_.supplyInletNode())
+
+        reference = openstudio.model.Model()
+        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.020, zones=('Block A',))
+        audit = AuditLog()
+        hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
+
+        decision = next(e for e in audit.entries if e.get('article') == '8.4.4.14.(3)'
+                        and e['level'] == 'decision')
+        self.assertEqual(2, decision['inputs']['proposed_pumps'],
+                         'both pumps combine under (3) — neither efficiency is inherited')
+        self.assertAlmostEqual(DEFAULT_PUMP_EFFICIENCY,
+                               1.0 / ref_pump.designShaftPowerPerUnitFlowRatePerUnitHead(), delta=1e-6,
+                               msg='a declared physical split, not the valid pump\'s 55.6 %')
+        # 1100 W over the 11 L/s distribution flow = 100 W/(L/s) x 20 L/s
+        self.assertAlmostEqual(2000.0, _pump_power_from_triple(ref_pump, 0.020), delta=0.1)
+
+    # Sol, PR #50 (residual risk): the SDK refuses a motor efficiency outside
+    # (0,1], a non-positive shaft coefficient and a non-finite head — but it
+    # ACCEPTS a negative head and a negative rated power. Those reach the cap as
+    # negative watts, and because the clamp only fires ABOVE the cap, one
+    # malformed pump can drag the combined power under it.
+    def test_a_malformed_pump_cannot_certify_an_over_cap_loop(self):
+        model = openstudio.model.Model()
+        loop_, good = loop_with_vsd_pump(model, 'Heating', flow=0.020)  # 5,110 W, genuinely over cap
+        bad = openstudio.model.PumpVariableSpeed(model)
+        bad.setRatedFlowRate(0.020)
+        bad.setRatedPumpHead(-179_352.0)  # -5,110 W: sums with the good pump to exactly zero
+        bad.addToNode(loop_.supplyInletNode())
+        self.add_boiler(loop_, 100.0)  # cap = 450 W
+        audit = AuditLog()
+        hvac.apply_efficiencies(model, code='necb2020', audit=audit)
+
+        self.assertEqual([], [e for e in audit.entries
+                              if 'within the Table 5.2.6.3 maximum' in e['action']],
+                         'a loop whose combined power cannot be measured is NEVER certified compliant')
+        warning = next((w for w in audit.warnings if 'cap NOT APPLIED' in w['action']), None)
+        self.assertIsNotNone(warning, 'refusing to evaluate shouts — the cap really was not applied')
+        self.assertIn(bad.nameString(), warning['action'], 'the offending pump is named')
+        self.assertEqual('5.2.6.3.(1)', warning['article'])
+
+    def test_a_negative_power_proposed_pump_is_left_out_of_the_combination(self):
+        """A negative wattage must not subtract from the (2) combination, or the
+        reference inherits an intensity lower than any proposed pump draws."""
+        proposed = openstudio.model.Model()
+        loop_, _ = loop_with_vsd_pump(proposed, 'Heating', flow=0.010, power=800.0,
+                                      zones=('Block A',), distribution_flow=0.010)
+        negative = openstudio.model.PumpVariableSpeed(proposed)
+        negative.setRatedFlowRate(0.010)
+        negative.setRatedPowerConsumption(-500.0)
+        negative.addToNode(loop_.supplyInletNode())
+
+        reference = openstudio.model.Model()
+        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.020, zones=('Block A',))
+        audit = AuditLog()
+        hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
+
+        # 800 W over the 10 L/s distribution flow = 80 W/(L/s) x 20 L/s —
+        # NOT (800-500)/10 = 30 W/(L/s)
+        self.assertAlmostEqual(1600.0, _pump_power_from_triple(ref_pump, 0.020), delta=0.1,
+                               msg='the malformed pump is excluded, not netted off')
+        decision = next(e for e in audit.entries if e.get('article') == '8.4.4.14.(3)'
+                        and e['level'] == 'decision')
+        self.assertEqual(1, decision['inputs']['proposed_pumps'],
+                         'and it is not counted among the pumps combined')
+        self.assertTrue(any('no pump can draw' in w['action'] for w in audit.warnings),
+                        'the exclusion is shouted, never silent')
 
     def test_pump_power_cap_leaves_compliant_transfer_untouched(self):
         proposed = openstudio.model.Model()
@@ -231,7 +1414,7 @@ class TestNecbPumpRules(unittest.TestCase):
         audit = AuditLog()
         hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
 
-        self.assertAlmostEqual(800.0, ref_pump.ratedPowerConsumption().get(), delta=0.1,
+        self.assertAlmostEqual(800.0, _pump_power_from_triple(ref_pump, 0.020), delta=0.1,
                                msg='below-cap transfer untouched (min-wins)')
         self.assertTrue(any(e['level'] == 'info'
                             and 'within the Table 5.2.6.3 maximum' in e['action']
@@ -284,6 +1467,90 @@ class TestNecbOperatingSchedules(unittest.TestCase):
         self.assertTrue(any(e.get('article') == '8.4.3.2.(1)'
                             and 'default retained' in e['action']
                             for e in result.audit.entries))
+
+
+@needs_sdk
+class TestAHJ16IsCitedOnlyWhereTheQuestionArises(unittest.TestCase):
+    """AHJ-16: a reference hydronic system with no UNIQUE proposed counterpart.
+
+    Sol's `126` narrowed it to three shapes — N:1 consolidation, ambiguous
+    overlap, and no corresponding proposed system. Sentence (2) settles several
+    pumps within ONE proposed system and (3) settles missing characteristics on
+    an otherwise corresponding pump, so neither may acquire the citation; nor
+    may a loop outside the article's scope.
+    """
+
+    PREFIX = "8.4.4"
+
+    def _decline(self, reference_loop, proposed):
+        from btap.audit import AuditLog
+        from btap.codes.necb.hvac import efficiency
+
+        audit = AuditLog()
+        efficiency._transfer_by_correspondence(
+            reference_loop, proposed, self.PREFIX, audit)
+        return audit
+
+    @staticmethod
+    def _cited(audit):
+        return [e for e in audit.entries
+                if "AHJ-16" in str(e.get("ahj") or "").split()]
+
+    def test_NO_corresponding_proposed_loop_cites_AHJ_16(self):
+        proposed = openstudio.model.Model()
+        reference = openstudio.model.Model()
+        # WITH a pump: `_transfer_by_correspondence` returns before any decline
+        # when the reference loop has no applicable pump, so a pumpless loop
+        # would have made every assertion below vacuous.
+        loop, _pump = loop_with_vsd_pump(reference, "Heating", zones=("Block A",))
+        loop.setName("Reference Hot Water")
+
+        audit = self._decline(loop, proposed)
+        cited = self._cited(audit)
+        self.assertEqual(1, len(cited), [e.get("action") for e in audit.entries])
+        self.assertEqual("Reference Hot Water", cited[0]["target"])
+        self.assertIn("8.4.4.14", cited[0]["article"])
+
+    def test_a_SERVICE_WATER_loop_cites_nothing(self):
+        """Out of scope for the article, so out of scope for the question."""
+        proposed = openstudio.model.Model()
+        reference = openstudio.model.Model()
+        loop, _pump = loop_with_vsd_pump(reference, "Heating", zones=("Block A",))
+        loop.setName("Reference SWH")
+        connections = openstudio.model.WaterUseConnections(reference)
+        connections.addToNode(loop.demandInletNode())
+
+        audit = self._decline(loop, proposed)
+        self.assertEqual([], self._cited(audit))
+        self.assertEqual(
+            "service_water", efficiency._loop_role(loop),
+            "guards the negative: if the role were not service_water this "
+            "would pass for the wrong reason")
+
+    def test_a_loop_serving_NO_thermal_block_cites_nothing(self):
+        """Nothing for a correspondence to be drawn between: a degenerate
+        model, not an interpretation an authority can settle."""
+        proposed = openstudio.model.Model()
+        reference = openstudio.model.Model()
+        loop, _pump = loop_with_vsd_pump(reference, "Heating", zones=())
+        loop.setName("Reference Orphan")
+
+        audit = self._decline(loop, proposed)
+        self.assertEqual([], self._cited(audit))
+        self.assertTrue(audit.entries, "but the decline is still recorded")
+
+    def test_a_ONE_TO_ONE_correspondence_cites_nothing(self):
+        """The control that matters: where the correspondence IS unique, the
+        article applies and there is no question to refer."""
+        proposed = openstudio.model.Model()
+        proposed_loop, _ = loop_with_vsd_pump(proposed, "Heating",
+                                              zones=("Block A",))
+        reference = openstudio.model.Model()
+        loop, _pump = loop_with_vsd_pump(reference, "Heating", zones=("Block A",))
+        loop.setName("Reference Hot Water")
+
+        audit = self._decline(loop, proposed)
+        self.assertEqual([], self._cited(audit))
 
 
 if __name__ == '__main__':

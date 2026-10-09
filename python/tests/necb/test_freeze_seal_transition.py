@@ -34,16 +34,59 @@ class TestFreezeSealTransition(unittest.TestCase):
     def test_all_scenarios_are_accounted_without_active_ruby(self):
         active, retired, attestation = freeze.seal_accounting(scenarios())
         # 31 converted at R6, plus the python-only seals authored after the
-        # retirement: 4 from R6 and, since the multi-edition Stage 0 (R-A),
-        # 4 "first frozen post-R6 for NECB 2025" scenarios that have no
-        # cross-language history to convert from.
-        self.assertEqual({"python-only:post-handoff": 31, "python-only": 8}, active)
+        # retirement, none of which has cross-language history to convert
+        # from. The tally, which must add up:
+        #
+        #   4  from R6 itself (the two environment-shaped CLI/remote cases and
+        #      the two synthetic-result-construction cases)
+        #   4  "first frozen post-R6 for NECB 2025", since multi-edition
+        #      Stage 0 (R-A)
+        #   2  purchased-heating, since D-89 step 3 (R-O-a)
+        #   4  hydronic-VAV, since DF-17
+        #   2  the 8.4.x.9.(5) conditional determination: sample 11 for AHJ-1
+        #      (Sol's `122`.5 — the determination had focused tests and zero
+        #      frozen coverage) and sample 09 for AHJ-5 (Sol's `126` — the
+        #      WSHP shape had the same hole once its predicate was fixed)
+        #   1  the first guard-7 witness: determination-02, sample 11 run
+        #      FULL-YEAR for AHJ-1 and AHJ-3 (Sol's `127` — both fired only in
+        #      tiers that cannot reach a determination, so nothing proved they
+        #      survive a real year)
+        #   1  guard 7 for AHJ-16: determination-03, sample 18 run FULL-YEAR
+        #      under D-101 (Sol's `139` item 7 held the guard unmet while that
+        #      run's reference could not hold setpoint — 932.25 unmet heating
+        #      hours against the 100 h limit — and `143` required the corrected
+        #      run frozen once it did)
+        #   = 18
+        #
+        # This enumeration was ALREADY one behind before sample 09: it listed
+        # 4+4+2+4 = 14 beside an assertion of 15, having never recorded sample
+        # 11. A provenance narrative that does not add up is not provenance.
+        self.assertEqual({"python-only:post-handoff": 31, "python-only": 18}, active)
         self.assertEqual({"ruby": 29, "ruby-api": 2}, retired)
         self.assertEqual({
             "commit": "85ab14352677093e24038d933cf1071e5b03431a",
             "run_id": 33544573991,
             "run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
         }, attestation)
+
+    def test_every_post_handoff_slug_predates_the_attestation(self):
+        """Structural, not by count. A slug added after 85ab143 was run must
+        appear in `POST_R6_PYTHON_LANE_SEALS`, or `_corpus`'s default "ruby"
+        seal is converted by `all_scenarios()` into `python-only:post-handoff`
+        and the scenario claims a cross-language run that was never made for
+        it. The counts pinned above would catch that only if someone noticed
+        the number moved; this names the rule instead (Fable, PR #54)."""
+        attested = set(scenario_defs.R6_CORPUS_SLUGS)
+        exempt = set(scenario_defs.POST_R6_PYTHON_LANE_SEALS)
+        slugs = json.loads(
+            (REPO_ROOT / "python" / "scripts" / "sample_manifest.json")
+            .read_text(encoding="utf-8"))["samples"]
+        unclaimed = [s for s in slugs if s not in attested and s not in exempt]
+        self.assertEqual(
+            [], unclaimed,
+            "slugs added after the final cross-language attestation must carry "
+            "their own python-only seal in POST_R6_PYTHON_LANE_SEALS, or they "
+            "inherit an attestation never run for them: " + ", ".join(unclaimed))
 
     def test_missing_transition_metadata_is_rejected(self):
         sample = deepcopy(scenarios())

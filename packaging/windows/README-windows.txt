@@ -72,7 +72,7 @@ Licences
 --------
 The regimes are deliberately kept separate:
 
-  LICENSE                 canmet-btap source - LGPL-3.0-or-later.
+  LICENSE                 canmet-btap source - GPL-3.0-or-later.
   THIRD-PARTY-NOTICES.txt CPython and every installed wheel, with the path to
                           each redistributed licence text under
                           python\Lib\site-packages or licenses\.

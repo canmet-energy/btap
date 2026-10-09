@@ -30,10 +30,105 @@ POST_HANDOFF_REASON = (
 # The corpus tiers mirror verification/run_corpus.rb's recipe exactly —
 # same base args, same subsets — so the frozen baselines describe the
 # same runs Leg B compared.
-BASE_ARGS = ["--hdd", "3890", "--storeys", "1", "--no-report", "--quiet"]
+#: No `--storeys`. The OSM is the source of truth for its own storey count and
+#: every corpus sample says: 14 and 15 set
+#: `standardsNumberOfAboveGroundStories` (to 2 and 3), and the other fifteen
+#: carry a BuildingStory holding their spaces, which derives 1.
+#:
+#: This passed `--storeys 1` to all of them, which overrode the two that
+#: declare — and sample 15's own generator description is
+#: "the same building at 3 storeys crosses the threshold and selects System 6".
+#: The harness was preventing the fixture from demonstrating the thing it was
+#: built to demonstrate, and the corpus froze System 3 for it and asserted that
+#: as correct (phylroy, 2026-10-08).
+BASE_ARGS = ["--hdd", "3890", "--no-report", "--quiet"]
 FIXTURE_ARGS = BASE_ARGS + ["--space-type", "Space Function/Office enclosed > 25 m2"]
 SIZING_SUBSET = ["01-baseboard-gas", "02-psz-gas-dx", "09-water-source-hp"]
 ANNUAL_SUBSET = ["01-baseboard-gas", "02-psz-gas-dx"]
+
+#: D-89 step 3 (R-O-a): the purchased-heating corpus model, sized (verify
+#: lane) and simulated (parity lane), so the 8.4.4.6.(1) modulating
+#: reference boiler is exercised by a frozen baseline. Authored after the
+#: Ruby product retired: these carry their own python-only seal and NO
+#: cross-language attestation (see FIRST_FREEZE_SEAL's rationale).
+D89_SIZING_SUBSET = ["13-district-heating"]
+D89_ANNUAL_SUBSET = ["13-district-heating"]
+D89_SEAL = ("python-only:first frozen at D-89 step 3 (R-O-a) — authored "
+            "after the Ruby product retired; no cross-language attestation "
+            "exists for this scenario")
+
+#: DF-17, two models, doing two different jobs. Both sized: the 8.4.x.14
+#: transfer runs in the POST-SIZING efficiency pass, so the python lane never
+#: reaches it and the annual tier would add EnergyPlus cost for nothing new.
+#:
+#: ``17-vav-hw-reheat`` is the catalog-authored one, a real NECB System 6. It
+#: is the only frozen scenario where correspondence SUCCEEDS through a loop
+#: resolved by air-loop coil UNION held coils — it transfers
+#: ``proposed_pumps=1`` at 255.49 W/(L/s), where 18 declines and 01/02 resolve
+#: through baseboards. So it witnesses the held accessor's contribution
+#: reaching a transferred W/(L/s); it cannot DETECT the accessor's absence,
+#: because its air-loop coil is hot water too and contributes every zone
+#: through the second accessor.
+#:
+#: ``18-vav-hw-subset-reheat`` is the one that discriminates — hot-water reheat
+#: on 3 of 5 terminals of an all-electric VAV, so the loop reaches its blocks
+#: only through the held accessor and only for the zones it truly serves. Its
+#: System 3 reference resolves through baseboards (first accessor) and is
+#: untouched by either defect, so it is the PROPOSED set that moves: real
+#: ``[Zone 1-3]`` partial-overlap decline, round one ``[]`` "no proposed
+#: hot_water loop serves these thermal blocks", round two ``[Zone 1-5]`` a
+#: FALSE one-to-one. Either PR #53 defect moves this baseline. Hand-built
+#: because no catalog row produces the shape; all 97 were swept.
+DF17_SIZING_SUBSET = ["17-vav-hw-reheat", "18-vav-hw-subset-reheat"]
+DF17_SEAL = ("python-only:first frozen at DF-17 — authored after the Ruby "
+             "product retired; no cross-language attestation exists for this "
+             "scenario")
+
+#: Guard-7 witnesses are authored NOW, so they cannot claim the final
+#: cross-language attestation (85ab143) that `python-only:post-handoff`
+#: carries. The freeze refused that seal for exactly this reason, which is the
+#: gate working: a seal is a provenance claim, and these scenarios post-date
+#: the evidence.
+GUARD7_SEAL = ("python-only:first frozen as a guard-7 witness — authored "
+               "after the Ruby product retired; no cross-language attestation "
+               "exists for this scenario")
+
+#: The 8.4.x.9.(5) conditional determination is set AFTER the annual
+#: comparison, and no annual scenario was multi-energy: the dual-fuel samples
+#: existed only in the `none` and `sizing` tiers, which never reach the
+#: determination at all. So it had focused tests and ZERO frozen coverage
+#: (Sol, `122`.5). Sample 11 joins the annual tier to pin the helper's
+#: serialised output; see the subset below for what that does NOT cover.
+MULTI_ENERGY_SEAL = ("python-only:first frozen for the 8.4.x.9.(5) conditional "
+                     "determination — authored after the Ruby product "
+                     "retired; no cross-language attestation exists for this "
+                     "scenario")
+
+#: The dual-fuel plant whose reference cannot satisfy 8.4.x.9.(5).
+#:
+#: WHAT THIS SCENARIO DOES AND DOES NOT COVER. The annual tier runs
+#: `--simulate annual --quick --no-report`, so the baseline records
+#: `annual: false`, expects the no-determination exit, and its stdout says
+#: `VERDICT: NO DETERMINATION`. It therefore freezes the determination
+#: HELPER's output — `compliance_determination`, its reason block and the
+#: D-99 audit ruling, which is real evidence — but it never executes the
+#: conditional CLI verdict line and never renders HTML at all.
+#:
+#: That gap is why the eighth overclaim survived on the HTML surface after
+#: being removed from `path.py` and `cli.py` (Sol, clearance review of
+#: be2118d). I had called this "end to end" and said it "reaches a verdict";
+#: neither was true. The conditional verdict string and the report banner are
+#: covered by focused tests instead, which now assert the ABSENCE of the
+#: withdrawn claim and not merely the presence of the new text.
+#:
+#: Sample 09 joins it for AHJ-5. Sol's `126` ruled that a water-loop heat
+#: pump's source-loop boiler IS a second energy type, so sample 09's twelve
+#: serving groups now disclose (5) — 55 warnings became 60. Without an annual
+#: tier that disclosure never reaches the determination at all, which is the
+#: exact gap Sol's `122`.5 found for AHJ-1: the shape existed only in tiers
+#: that stop before the verdict, so the conditional had focused tests and zero
+#: frozen coverage.
+MULTI_ENERGY_ANNUAL_SUBSET = ["11-staged-boilers-gas-lead", "09-water-source-hp"]
 
 CORPUS_FILES = ["audit.json", "report.json"]
 CORPUS_TEXT = {"audit.txt": "normalized"}
@@ -75,7 +170,7 @@ def edition_of(code):
     return match.group(1)
 
 
-def _corpus(slug, tier, lane, *, code=DEFAULT_CODE, extra=()):
+def _corpus(slug, tier, lane, *, code=DEFAULT_CODE, extra=(), seal=None):
     sim = (["--simulate", "annual", "--quick"] if tier == "annual"
            else ["--simulate", tier])
     epw = [] if tier == "none" else ["--epw", "<EPW>"]
@@ -94,7 +189,8 @@ def _corpus(slug, tier, lane, *, code=DEFAULT_CODE, extra=()):
         "expect_exit": 6,
         "files": CORPUS_FILES, "text_files": CORPUS_TEXT,
         "streams": {"stdout": "exact", "stderr": "exact"},
-        "seal": ("ruby" if code == DEFAULT_CODE
+        "seal": (seal if seal is not None
+                 else "ruby" if code == DEFAULT_CODE
                  else FIRST_FREEZE_SEAL.format(edition=edition_of(code))),
     }
     if tier == "annual":
@@ -102,10 +198,44 @@ def _corpus(slug, tier, lane, *, code=DEFAULT_CODE, extra=()):
     return scenario
 
 
+#: The corpus slugs that existed when the final cross-language attestation
+#: (85ab143) was run, so their python-lane scenarios may legitimately convert
+#: to ``python-only:post-handoff`` and carry it. Anything added later may not.
+R6_CORPUS_SLUGS = (
+    "01-baseboard-gas", "02-psz-gas-dx", "03-vav-reheat-chiller",
+    "04-fancoil-chiller", "05-ptac-electric", "06-unit-heaters-gas",
+    "07-furnace-forced-air", "08-vrf", "09-water-source-hp", "10-ashp-pthp",
+    "11-staged-boilers-gas-lead", "12-staged-boilers-electric-lead",
+    "13-district-heating", "14-general-2storey", "15-general-3storey",
+    "16-ashp-electric-supp-hw-baseboard",
+)
+
+#: Slugs whose python-lane scenario was authored AFTER the Ruby product
+#: retired. Without this the default "ruby" seal is converted by
+#: ``all_scenarios()`` into ``python-only:post-handoff``, which carries the
+#: final cross-language attestation (85ab143) — an attestation these scenarios
+#: never had. A seal is a provenance claim, so the default must not be
+#: inherited by a scenario that post-dates the evidence.
+#: ``test_every_post_handoff_slug_predates_the_attestation`` is the gate.
+POST_R6_PYTHON_LANE_SEALS = {
+    "17-vav-hw-reheat": DF17_SEAL,
+    "18-vav-hw-subset-reheat": DF17_SEAL,
+}
+
+
 def corpus_scenarios(slugs):
-    out = [_corpus(s, "none", "python") for s in [*slugs, "5zone-onramp"]]
+    out = [_corpus(s, "none", "python", seal=POST_R6_PYTHON_LANE_SEALS.get(s))
+           for s in [*slugs, "5zone-onramp"]]
     out += [_corpus(s, "sizing", "verify") for s in SIZING_SUBSET]
     out += [_corpus(s, "annual", "parity") for s in ANNUAL_SUBSET]
+    out += [_corpus(s, "sizing", "verify", seal=D89_SEAL)
+            for s in D89_SIZING_SUBSET]
+    out += [_corpus(s, "annual", "parity", seal=D89_SEAL)
+            for s in D89_ANNUAL_SUBSET]
+    out += [_corpus(s, "sizing", "verify", seal=DF17_SEAL)
+            for s in DF17_SIZING_SUBSET]
+    out += [_corpus(s, "annual", "parity", seal=MULTI_ENERGY_SEAL)
+            for s in MULTI_ENERGY_ANNUAL_SUBSET]
     return out
 
 
@@ -212,6 +342,144 @@ API_SCENARIOS = [
      "streams": {}, "seal": "ruby-api:audit ruby_reference.rb"},
 ]
 
+#: GUARD 7 witnesses: one FULL-YEAR frozen artifact per approval-required AHJ
+#: id, which is Sol's `127` requirement. `--quick` is never a determination
+#: (Article 8.4.1.2 wants a simulated year) and the sizing tier has no verdict,
+#: so an id can be wired, cited and resolvable while nothing proves it survives
+#: a real year — which was true of every id but AHJ-14 and AHJ-15.
+#:
+#: `determination-01-baseboard-gas-necb2025` is a witness too and stays below
+#: with the NECB 2025 evidence it was authored as; it predates this list and its
+#: own comment explains that placement.
+DETERMINATION_SCENARIOS = [
+    # GUARD 7 for AHJ-16, and the artifact that proves D-101 fixed the
+    # topology rather than only the audit text.
+    #
+    # Sample 18's full-year run was the DIAGNOSIS of the defect, not a
+    # baseline: one "single-zone" System 3 air loop served five retained
+    # thermal blocks, its supply temperature followed one elected control
+    # zone, and the reference building logged 932.25 unmet heating hours
+    # against Article 8.4.1.2.(3)'s 100 h. The run reported NOT COMPLIANT for
+    # the REFERENCE's failure. Sol's `139` item 7 therefore held guard 7 unmet
+    # and refused that artifact; `143` accepted the corrected measurements and
+    # required this freeze.
+    #
+    # It is a FULL YEAR, deliberately not `--quick`: Article 8.4.1.2 makes a
+    # quick run a non-determination, which is the whole reason the other
+    # annual-tier scenarios cannot serve as guard-7 witnesses.
+    #
+    # Every value below was read off two consecutive runs of the unmodified
+    # product that agreed on every reported figure (necb2020, Toronto
+    # CWEC2020). The reference's unmet hours are the substance of the guard:
+    # 0.0 h heating and 4.75 h cooling, where the proposed building logs 4.0 h
+    # cooling, so the comparison basis now holds setpoint. The remaining NOT
+    # COMPLIANT is the proposed building at 112.3% of target — a statement
+    # about the proposed building, which is what a performance path is for.
+    {"id": "determination-03-18-vav-hw-subset-reheat-annual",
+     "lane": "parity", "kind": "cli", "replaces": [],
+     "argv": ["<CORPUS>/18-vav-hw-subset-reheat.osm",
+              "--simulate", "annual", "--epw", "<EPW>",
+              *BASE_ARGS, "-o", "<RUN_DIR>"],
+     "env": {}, "expect_exit": 1, "timeout_s": 5400,
+     "files": CORPUS_FILES, "text_files": CORPUS_TEXT,
+     "streams": {"stdout": "exact", "stderr": "exact"},
+     "seal": GUARD7_SEAL,
+     "asserts": [
+         {"op": "json_equals", "file": "report.json", "path": "annual",
+          "value": True},
+         {"op": "json_equals", "file": "report.json",
+          "path": "compliance_determination", "value": "conditional"},
+         {"op": "json_equals", "file": "report.json",
+          "path": "compliance_determination_reason.ahj_ids",
+          "value": ["AHJ-1", "AHJ-14", "AHJ-16"]},
+         # The guard's substance: the reference holds setpoint.
+         {"op": "json_equals", "file": "report.json",
+          "path": "reference.unmet_occupied_hours.heating", "value": 0.0},
+         {"op": "json_equals", "file": "report.json",
+          "path": "reference.unmet_occupied_hours.cooling", "value": 4.75},
+         {"op": "json_equals", "file": "report.json",
+          "path": "proposed.unmet_occupied_hours.cooling", "value": 4.0},
+         # Per block, because an aggregate can hide four drifting blocks.
+         {"op": "json_equals", "file": "report.json",
+          "path": "reference.zone_unmet_occupied_hours.THERMAL ZONE 5.heating",
+          "value": 0.0},
+         {"op": "json_equals", "file": "report.json",
+          "path": "reference.zone_unmet_occupied_hours.THERMAL ZONE 3.heating",
+          "value": 0.0},
+         # And the verdict is about the PROPOSED building.
+         {"op": "json_equals", "file": "report.json",
+          "path": "percent_of_target", "value": 112.3},
+         {"op": "json_equals", "file": "report.json", "path": "compliant",
+          "value": False},
+     ]},
+
+    # GUARD 7 for AHJ-1 and AHJ-3 (Sol's `127`: one ANNUAL frozen artifact per
+    # approval-required id). Both fired only in tiers that structurally cannot
+    # reach a determination — the annual tier runs `--quick`, which Article
+    # 8.4.1.2 makes a non-determination, and the sizing tier has no verdict at
+    # all. So the ids were wired, cited and resolvable with nothing proving
+    # they survive a real year.
+    #
+    # Sample 11 is the shape: a staged gas-lead plant whose ONE hot-water loop
+    # carries the group's fuels, which is exactly the `covers` branch AHJ-3
+    # needs — the (6) cardinality question requires such a plant to exist.
+    # AHJ-1 rides with it, and this is ALSO its first full-year witness: it is
+    # the only `alternative-solution` in the register, the most serious status,
+    # and it had no determination-reaching artifact either.
+    #
+    # Every value below was read off an authoring run of the unmodified
+    # product on 2026-10-08 (necb2020, Toronto CWEC2020, ONTARIO) and is
+    # asserted, not assumed. `compliant: True` WITH `conditional` is the
+    # combination an authority actually meets, and the one a later
+    # simplification is most likely to break: the condition must not move the
+    # exit code.
+    {"id": "determination-02-staged-boilers-gas-lead",
+     "lane": "parity", "kind": "api", "replaces": [],
+     "api_call": {"code": "necb2020", "simulate": "annual",
+                  "province_state": "ONTARIO",
+                  "model": "<CORPUS>/11-staged-boilers-gas-lead.osm",
+                  "weather": {"epw": "<EPW>", "ddy": "<DDY>"}},
+     "env": {}, "expect_exit": 0, "timeout_s": 5400,
+     "files": CORPUS_FILES, "text_files": CORPUS_TEXT, "streams": {},
+     "seal": GUARD7_SEAL,
+     "asserts": [
+         {"op": "json_equals", "file": "report.json", "path": "annual",
+          "value": True},
+         {"op": "json_equals", "file": "report.json",
+          "path": "compliance_determination", "value": "conditional"},
+         # The ids the RESOLVER made this run conditional on — not the ids the
+         # register says could. Pinned as the EXACT list, so a new id
+         # appearing or one of these dropping both fail loudly.
+         #
+         # (`json_in` is the inverse of what this needs: it asserts the value
+         # AT the path is one of a given list. Membership of a list at the path
+         # is `json_equals` on the whole list.)
+         {"op": "json_equals", "file": "report.json",
+          "path": "compliance_determination_reason.ahj_ids",
+          "value": ["AHJ-1", "AHJ-3", "AHJ-14"]},
+         # 8.4.1.2.(3): a reference that cannot hold setpoint is not a valid
+         # comparison basis, so the witness pins BOTH sides' unmet hours.
+         {"op": "json_exists", "file": "report.json",
+          "path": "proposed.unmet_occupied_hours"},
+         {"op": "json_exists", "file": "report.json",
+          "path": "reference.unmet_occupied_hours"},
+         {"op": "json_gt", "file": "report.json",
+          "path": "proposed.total_site_kwh", "value": 0},
+         {"op": "json_gt", "file": "report.json",
+          "path": "reference.total_site_kwh", "value": 0},
+         {"op": "json_equals", "file": "report.json", "path": "tier",
+          "value": 1},
+         {"op": "audit_entry", "step": "compliance", "level": "decision",
+          "action": "unmet heating hours within 100 h for both buildings",
+          "article": "8.4.1.2.(3)", "count": 1},
+         # The exit code is deliberately UNCHANGED by the conditional label.
+         {"op": "observation_equals", "key": "compliant", "value": True},
+         {"op": "observation_equals", "key": "reference_model_present",
+          "value": True},
+     ]},
+]
+
+
 VERDICT_SCENARIOS = [
     # Exits 0 and 1 — the CLI's two determination statuses, frozen at the
     # verdict/emit unit level (live Leg B never covered them end-to-end
@@ -264,8 +532,9 @@ NEWLY_COVERED = [
                    "the CLI's own argument parsing and process wiring are "
                    "outside what this freezes",
      "scenario": "determination-01-baseboard-gas-necb2025",
-     "cost": "about 3 minutes on the corpus model (189 s, three reference "
-             "capacity iterations, when authored on 2026-09-08) — the 40-90 "
+     "cost": "about 1 minute on the corpus model since D-90 + D-91 (57 s, no "
+             "capacity iterations, 2026-09-15; 189 s with three reference "
+             "capacity iterations when authored on 2026-09-08) — the 40-90 "
              "minute figure that kept it uncovered was the oracle archetypes' "
              "cost, not the corpus's; it stays parity-lane by policy (a real "
              "EnergyPlus annual run), not by cost",
@@ -321,13 +590,25 @@ EDITION_SCENARIOS = [
     # capacity increases (8.4.1.2.(5)); the energy verdict itself passes
     # (76.0 % of target, tier 1); GHG level "F" at 95.3 % of the GHG
     # target. The asserts tie the pinned exit to that reason.
+    # R-O (D-89, 2026-09-11): the reference building's own-edition part-load
+    # curves raise its energy, so the proposed's ratio crosses the tier-2
+    # boundary and the GHG level moves one step; tier and level re-pinned
+    # from the R-O freeze run. exit and compliant unchanged.
+    # D-90 + D-91 (DF-1, 2026-09-15): the reference boiler follows the
+    # reference's own sizing (D-90) and its per-zone System 3 rooftop
+    # terminals run before the baseboards (D-91), so the reference meets
+    # its heating setpoint without capacity increases: reference unmet
+    # heating 0.0 h (was 802.25 h), 147,977.8 kWh. The building is now
+    # COMPLIANT: exit 0, tier 1 (79.7 % of target), GHG level E, no
+    # 8.4.1.2.(5) warning. Re-pinned from the authoring run on the D-90 +
+    # D-91 tree; the asserts tie the exit to the new reason.
     {"id": f"determination-01-baseboard-gas-{NECB2025_EDITION}",
      "lane": "parity", "kind": "api", "replaces": [],
      "api_call": {"code": NECB2025_EDITION, "simulate": "annual",
                   "province_state": "ONTARIO",
                   "model": "<CORPUS>/01-baseboard-gas.osm",
                   "weather": _WEATHER_2025, "building": {"storeys": 1}},
-     "env": {}, "expect_exit": 1, "timeout_s": 5400,
+     "env": {}, "expect_exit": 0, "timeout_s": 5400,
      "files": CORPUS_FILES, "text_files": CORPUS_TEXT, "streams": {},
      "seal": FIRST_FREEZE_SEAL.format(edition="2025"),
      "asserts": [
@@ -347,16 +628,20 @@ EDITION_SCENARIOS = [
           "value": 1},
          {"op": "json_exists", "file": "report.json", "path": "ghg"},
          {"op": "json_equals", "file": "report.json", "path": "ghg.level",
-          "value": "F"},
+          "value": "E"},
          {"op": "audit_entry", "step": "compliance", "level": "decision",
           "action": "proposed does not exceed the building energy target",
           "article": "8.4.1.2.(2)", "count": 1},
          {"op": "audit_entry", "step": "compliance", "level": "decision",
-          "action": "unmet heating hours EXCEED 100 h",
+          "action": "unmet heating hours within 100 h for both buildings",
           "article": "8.4.1.2.(3)", "count": 1},
          {"op": "audit_entry", "level": "warning", "article": "8.4.1.2.(5)",
-          "count": 1},
-         {"op": "observation_equals", "key": "compliant", "value": False},
+          "count": 0},
+         {"op": "audit_entry", "step": "rules", "level": "decision",
+          "ruling": "D-91", "count": 5},
+         {"op": "audit_entry", "step": "efficiency", "level": "info",
+          "ruling": "D-90", "count": 1},
+         {"op": "observation_equals", "key": "compliant", "value": True},
          {"op": "observation_equals", "key": "reference_model_present",
           "value": True},
      ]},
@@ -401,7 +686,8 @@ EDITION_SCENARIOS = [
 
 def all_scenarios(slugs):
     scenarios = (corpus_scenarios(slugs) + API_SCENARIOS + FAILURE_SCENARIOS
-                 + VERDICT_SCENARIOS + EDITION_SCENARIOS)
+                 + VERDICT_SCENARIOS + DETERMINATION_SCENARIOS
+                 + EDITION_SCENARIOS)
     for scenario in scenarios:
         seal = scenario["seal"]
         if seal == "ruby" or seal.startswith("ruby-api:"):

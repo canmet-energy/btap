@@ -275,6 +275,74 @@ def optional_curve_coeffs(optional_curve: Any) -> list[float] | None:
     return curve_coeffs(optional_curve.get()) if optional_curve.is_initialized() else None
 
 
+def curve_points(curve: Any) -> list[tuple[float, float]] | None:
+    """The (x, y) nodes of a `Table:Lookup` over ONE independent variable.
+
+    D-89 applies the boiler and furnace part-load classes as `Table:Lookup`
+    objects — they carry no coefficients at all, so a coefficient-only reader
+    sees "no curve attached" where a curve is in fact applied."""
+    lookup = curve.to_TableLookup()
+    if not lookup.is_initialized():
+        return None
+    table = lookup.get()
+    variables = table.independentVariables()
+    if len(variables) != 1:
+        return None
+    values = [float(v) for v in variables[0].values()]
+    outputs = [float(v) for v in table.outputValues()]
+    if len(values) != len(outputs) or not values:
+        return None
+    return list(zip(values, outputs))
+
+
+def applied_curve(optional_curve: Any) -> dict[str, Any] | None:
+    """``{'form': 'polynomial', 'coefficients': [...]}`` or ``{'form': 'table',
+    'points': [...]}`` for whatever form the part-load field holds."""
+    if not optional_curve.is_initialized():
+        return None
+    curve = optional_curve.get()
+    points = curve_points(curve)
+    if points is not None:
+        return {"form": "table", "points": points, "name": curve.nameString()}
+    coefficients = curve_coeffs(curve)
+    if coefficients is None:
+        return None
+    return {"form": "polynomial", "coefficients": coefficients,
+            "name": curve.nameString()}
+
+
+def applied_value(applied: Any, x: float) -> float:
+    """The applied curve at one part-load ratio, whatever form it takes.
+    A `Table:Lookup` is evaluated the way the engine does: Linear interpolation
+    between nodes, Constant extrapolation outside them."""
+    if isinstance(applied, list):
+        return poly(applied, x)
+    if applied["form"] == "polynomial":
+        return poly(applied["coefficients"], x)
+    points = applied["points"]
+    if x <= points[0][0]:
+        return points[0][1]
+    if x >= points[-1][0]:
+        return points[-1][1]
+    for (x0, y0), (x1, y1) in zip(points, points[1:]):
+        if x0 <= x <= x1:
+            return y0 + (x - x0) * (y1 - y0) / (x1 - x0)
+    return points[-1][1]
+
+
+def applied_report(applied: Any) -> tuple[list[float] | None, dict[str, Any] | None]:
+    """``(applied_coefficients, applied_table)`` for the JSON report."""
+    if applied is None:
+        return None, None
+    if isinstance(applied, list):
+        return applied, None
+    if applied["form"] == "polynomial":
+        return applied["coefficients"], None
+    return None, {"name": applied["name"], "nodes": len(applied["points"]),
+                  "plr_min": applied["points"][0][0],
+                  "plr_max": applied["points"][-1][0]}
+
+
 def missing_result(article: str, label: str) -> dict[str, Any]:
     return {
         "article": article,
@@ -289,7 +357,7 @@ def missing_result(article: str, label: str) -> dict[str, Any]:
 def compare_fheatplc(
     article: str,
     label: str,
-    applied: list[float] | None,
+    applied: Any,
     code_rows: dict[str, list[float]],
 ) -> dict[str, Any]:
     if applied is None:
@@ -298,7 +366,7 @@ def compare_fheatplc(
     for equipment_type, target in code_rows.items():
         deviations = []
         for part_load_ratio in PLR_GRID:
-            efficiency = poly(applied, part_load_ratio)
+            efficiency = applied_value(applied, part_load_ratio)
             if efficiency <= 0:
                 deviations.append(999.0)
             else:
@@ -307,13 +375,17 @@ def compare_fheatplc(
         candidates.append((equipment_type, max(deviations)))
     matched_row, max_deviation = min(candidates, key=lambda candidate: candidate[1])
     verdict = "EQUIVALENT" if max_deviation <= TOL_SAMPLED else "DEVIATES"
+    coefficients, table = applied_report(applied)
+    shape = (f"`{table['name']}`, a Table:Lookup of {table['nodes']} nodes over PLR "
+             f"{table['plr_min']:g}-{table['plr_max']:g}" if table else "polynomial")
     return {
         "article": article,
         "label": label,
         "verdict": verdict,
         "detail": (
             f"vs {matched_row} row: max dev {max_deviation * 100:.2f}% over PLR "
-            f"{PLR_GRID[0]:.2f}-1.0 (tol {TOL_SAMPLED * 100:.0f}%)"
+            f"{PLR_GRID[0]:.2f}-1.0 (tol {TOL_SAMPLED * 100:.0f}%); applied as "
+            f"{shape}"
         ),
         "metrics": {
             "max_relative_deviation": max_deviation,
@@ -323,7 +395,8 @@ def compare_fheatplc(
             "tolerance": TOL_SAMPLED,
         },
         "matched_row": matched_row,
-        "applied_coefficients": applied,
+        "applied_coefficients": coefficients,
+        "applied_table": table,
         "target_coefficients": code_rows[matched_row],
     }
 
@@ -660,11 +733,11 @@ def run_probe() -> dict[str, Any]:
 
     results.append(compare_fheatplc(
         "8.4.6.2", "Boiler FHeatPLC (via normalized efficiency curve)",
-        optional_curve_coeffs(boiler.normalizedBoilerEfficiencyCurve()), BOILER_FHEATPLC,
+        applied_curve(boiler.normalizedBoilerEfficiencyCurve()), BOILER_FHEATPLC,
     ))
     results.append(compare_fheatplc(
         "8.4.6.3", "Furnace FHeatPLC (via PLF curve on gas coil)",
-        optional_curve_coeffs(gas_coil.partLoadFractionCorrelationCurve()), FURNACE_FHEATPLC,
+        applied_curve(gas_coil.partLoadFractionCorrelationCurve()), FURNACE_FHEATPLC,
     ))
     results.append(compare_biquad_transform(
         "8.4.6.4", "DX CAP_FT",

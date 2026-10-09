@@ -10,7 +10,7 @@ version = "0.3.0"
 description = "NECB 2020/2025 Part 8 performance-path compliance toolchain (Python port of the btap gem family)"
 readme = "README.md"
 requires-python = ">=3.11"
-license = "LGPL-3.0-or-later"
+license = "GPL-3.0-or-later"
 # The wheel must CARRY the licence, not merely name it: the Windows
 # installer redistributes this package, and a metadata field is a
 # claim while a shipped notice is what satisfies the obligation.

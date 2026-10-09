@@ -21,8 +21,11 @@ Scope follows the 1.4.1.2 "building envelope" definition: surfaces of
 unconditioned spaces (attics, crawlspaces) are NOT envelope and keep their
 constructions; assemblies separating conditioned space from enclosed
 unconditioned space ARE envelope — they get the Table 3.2.2.2 row for their
-inclination (3.1.1.7.(6)) with the unconditioned enclosure credited at
-U 6.25 per 3.1.1.7.(4).
+inclination with the unconditioned enclosure credited at U 6.25. Both
+sentence numbers are EDITION-OWNED and resolved through the ruleset:
+NECB 2020 numbers them (6) and (4), NECB 2025 numbers them (4) and (3) — the
+article was restructured from eight sentences to four without its own number
+changing, so a literal was wrong on every 2025 run (Sol, applicability review).
 """
 
 from __future__ import annotations
@@ -51,7 +54,8 @@ SUBSURFACE_CLASS = {
 
 SURFACE_CLASS = {"Wall": "wall", "RoofCeiling": "roofceiling", "Floor": "floor"}
 
-# 3.1.1.7.(4): an enclosed unconditioned space protecting an envelope
+# The enclosed-unconditioned credit (2020 3.1.1.7.(4), 2025 3.1.1.7.(3) —
+# cite through ruleset.article): an enclosed unconditioned space protecting an envelope
 # component may be considered to have an overall U of 6.25 W/(m2.K).
 ENCLOSURE_R = 1.0 / 6.25
 
@@ -199,9 +203,10 @@ def _assign_interzone_envelope(model, surface, surface_class, ruleset, hdd,
     """Assemblies separating conditioned space from ENCLOSED UNCONDITIONED
     space (attic ceilings, walls to unheated storage, floors over crawlspaces)
     are building envelope per 1.4.1.2 and must meet the Table 3.2.2.2 row for
-    their inclination (3.1.1.7.(6) — surfaceType already encodes it). The
-    unconditioned enclosure is credited at U 6.25 per 3.1.1.7.(4); both faces
-    see interior air films. The paired surface gets the same construction so
+    their inclination (the edition's inclination sentence — surfaceType
+    already encodes it). The
+    unconditioned enclosure is credited at U 6.25 per the edition's
+    enclosed-unconditioned sentence; both faces see interior air films. The paired surface gets the same construction so
     the pair stays consistent. (Legacy OSut instead applies the exposed-FLOOR
     row to attic ceilings — floor 0.175 vs roof 0.156 at HDD 3890 — a more
     lenient reading with no inclination-rule basis; divergence logged.)"""
@@ -241,7 +246,10 @@ def _assign_interzone_envelope(model, surface, surface_class, ruleset, hdd,
                        value=("conductance "
                               f"{ruby_str(ruby_round(opt_or(c.thermalConductance(), 0.0), 4))}"
                               " W/m2K"),
-                       article="Table 3.2.2.2.; 3.1.1.7.(4)", ruling="D-24")
+                       article="Table 3.2.2.2.; {}; {}".format(
+                           ruleset.article("enclosed_unconditioned_credit"),
+                           ruleset.article("assembly_inclination")),
+                       ruling="D-24")
         cache[key] = c
     surface.setConstruction(cache[key])
     adj.setConstruction(cache[key])

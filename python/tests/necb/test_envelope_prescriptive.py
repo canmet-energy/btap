@@ -202,8 +202,76 @@ class TestPrescriptive(unittest.TestCase):
 
     # 1.4.1.2 "building envelope" scope: an unconditioned attic's deck/gables
     # are NOT envelope (constructions untouched); the ceiling below IS — set to
-    # the ROOF row (3.1.1.7.(6) inclination rule) with the enclosure credited
-    # at U 6.25 (3.1.1.7.(4)) and interior films on both faces.
+    # the ROOF row by the inclination rule with the enclosure credited at
+    # U 6.25 and interior films on both faces. BOTH sentence numbers are
+    # edition-owned: NECB 2020 numbers them (6) and (4), NECB 2025 (4) and (3).
+    # See test_interzone_citation_is_edition_owned below.
+    @needs_sdk
+    def test_interzone_citation_is_edition_owned(self):
+        """The D-24 interzone citation must name EACH edition's own sentences.
+
+        Article 3.1.1.7 keeps its number across editions but was restructured
+        from eight sentences to four, so the two clauses D-24 rests on MOVED:
+
+            enclosed unconditioned space, U = 6.25   2020 (4)  ->  2025 (3)
+            inclination, wall versus roof at 60 deg  2020 (6)  ->  2025 (4)
+
+        The site emitted the literal `3.1.1.7.(4)` for both editions, so on a
+        2025 run the report cited the INCLINATION clause while claiming the
+        enclosure credit, and never cited inclination at all. An article number
+        surviving unchanged is not evidence its sentences did (Sol, D-100
+        envelope batch).
+        """
+        import openstudio
+
+        from btap.audit import AuditLog
+        from btap.codes import resolve
+
+        expected = {
+            "necb2020": ("3.1.1.7.(4)", "3.1.1.7.(6)"),
+            "necb2025": ("3.1.1.7.(3)", "3.1.1.7.(4)"),
+        }
+        for code, (credit, inclination) in expected.items():
+            with self.subTest(code=code):
+                ruleset = resolve(code)
+                self.assertEqual(credit, ruleset.article("enclosed_unconditioned_credit"))
+                self.assertEqual(inclination, ruleset.article("assembly_inclination"))
+
+                model = openstudio.model.Model()
+                cond = openstudio.model.Space.fromFloorPrint(
+                    print_at(0.0), 3.0, model).get()
+                attic = openstudio.model.Space.fromFloorPrint(
+                    print_at(3.0), 2.0, model).get()
+                spaces = openstudio.model.SpaceVector()
+                for s in (cond, attic):
+                    spaces.append(s)
+                openstudio.model.matchSurfaces(spaces)
+                attic.setPartofTotalFloorArea(False)
+                mat = openstudio.model.StandardOpaqueMaterial(
+                    model, 'MediumSmooth', 0.02, 0.5, 800, 1000)
+                ins = openstudio.model.StandardOpaqueMaterial(
+                    model, 'MediumSmooth', 0.2, 0.03, 45, 1000)
+                seed = openstudio.model.Construction(model)
+                seed.setLayers([mat, ins, mat])
+                for s in model.getSurfaces():
+                    s.setConstruction(seed)
+
+                audit = AuditLog()
+                self.n.apply_prescriptive(model, code=code, hdd=HDD, audit=audit)
+                cited = [e.get("article", "") for e in audit.entries
+                         if e.get("ruling") == "D-24" and e.get("article")]
+                self.assertTrue(cited, "D-24 emitted no article citation")
+                joined = " ".join(cited)
+                self.assertIn(credit, joined,
+                              f"{code} must cite its own enclosure-credit sentence")
+                self.assertIn(inclination, joined,
+                              f"{code} must cite its own inclination sentence")
+                other = expected["necb2025" if code == "necb2020" else "necb2020"]
+                stray = [n for n in other if n not in (credit, inclination)
+                         and n in joined]
+                self.assertEqual([], stray,
+                                 f"{code} cited the other edition's numbering: {stray}")
+
     def test_attic_scope_deck_untouched_ceiling_retargeted(self):
         import openstudio
 

@@ -1,0 +1,78 @@
+name: decisions
+
+# NO `paths` OR `paths-ignore`, DELIBERATELY.
+#
+# The property this enforces is PATH-UNFILTERED AND REACHABLE on pushes to
+# main/develop, pull requests, merge groups and manual dispatch. Not
+# "unskippable" and not merge-blocking: `[skip ci]` / `[ci skip]` in a head
+# commit message skips it like any other push- or PR-triggered workflow, and
+# nothing requires it. See the note on the check step.
+#
+# `test.yml` path-ignores `**.md` and `docs/**`, which was safe while the
+# canonical decision registry lived under `python/`: every canonical edit
+# necessarily touched a non-ignored file and so ran CI. It stopped being safe
+# when `docs/decisions/D-NN.md` became canonical, because the failure mode is
+# exactly a docs-only push:
+#
+#   edit a source AND regenerate -> decisions.json changes -> test.yml runs
+#   edit a source and FORGET     -> only docs/** changed   -> NOTHING runs
+#
+# `main` has no branch protection and no rulesets, so a skipped workflow does
+# not block a merge. The drift gate was therefore anti-correlated with need: it
+# fired only when the author had already done the right thing (Fable, PR #64).
+#
+# The fix is structural rather than a cleverer filter. `test.yml`'s
+# `paths-ignore` cannot be narrowed to exclude `docs/decisions/**` without
+# switching to `paths` with `!` negation, whose override semantics would then
+# have to be modelled in a test to be trusted. An absent filter needs no model,
+# and `python/tests/test_decisions_gate_is_path_unfiltered.py` asserts it stays
+# absent.
+#
+# Cheap by construction: stdlib only, no venv, no SDK, no EnergyPlus.
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+  # Not enabled today (no rulesets), but if a merge queue is ever turned on the
+  # gate must run on the queued commit rather than only on the PR head.
+  merge_group:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: decisions-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  decisions:
+    name: "Decisions: generated outputs match their canonical sources"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # `generate_decisions.py` imports `tomllib`, and `pyproject.toml` declares
+      # requires-python >=3.11. `ubuntu-latest` happens to ship 3.12 today, so
+      # this works unpinned -- but the gate that must stay reachable should not
+      # depend on a runner default (Fable, PR #64). It fails closed either way.
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      # Path-unfiltered, so this is reachable from a docs-only change. It is
+      # NOT unskippable: `[skip ci]` skips it, and nothing requires it —
+      # `main` has no branch protection. It makes the failure visible.
+      - name: generate_decisions.py --check
+        run: python3 python/scripts/generate_decisions.py --check
+
+      # Source schema, both generated outputs, runtime citations, short-link
+      # resolution. stdlib unittest, so no dependency install is needed.
+      - name: decision source and registry gates
+        working-directory: python
+        run: |
+          python3 -m unittest -v \
+            tests.necb.test_decisions_registry \
+            tests.necb.test_decisions_registry_sync \
+            tests.necb.test_decisions_generator

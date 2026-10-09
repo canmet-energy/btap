@@ -4,7 +4,7 @@ readable model carrying the properties the samples exist to demonstrate.
 
 SDK-ONLY — no EnergyPlus. The generator builds and saves models; nothing here
 simulates, so the whole class runs under ``needs_sdk`` alone. It is slow for an
-SDK test (16 models, built once in setUpClass and shared) because the thing
+SDK test (18 models, built once in setUpClass and shared) because the thing
 under test is the corpus, not one model.
 
 Why the both-directions manifest assertion matters: the Ruby original rescues
@@ -74,7 +74,7 @@ class TestGenerateSamples(unittest.TestCase):
                          "exactly — a missing sample and an extra one are both defects")
         self.assertEqual(expected, on_disk,
                          "every manifest slug must exist on disk as a .osm, and nothing else")
-        self.assertEqual(16, len(expected), "the corpus is 16 samples")
+        self.assertEqual(18, len(expected), "the corpus is 18 samples")
 
     def test_every_sample_reloads_through_the_sdk_with_zones(self):
         # model.save() reports nothing about whether the bytes it wrote can be
@@ -85,6 +85,74 @@ class TestGenerateSamples(unittest.TestCase):
                 model = self.load(slug)
                 self.assertGreater(len(model.getThermalZones()), 0,
                                    f"{slug} reloaded with no thermal zones")
+
+    def _reheat_and_coil_census(self, slug):
+        """Terminal reheat fuels, and how each hot-water coil is reached."""
+        import openstudio  # noqa: F401  (SDK types come back from the model)
+
+        model = self.load(slug)
+        terminals = model.getAirTerminalSingleDuctVAVReheats()
+        census = {
+            "terminals": len(terminals),
+            "water_reheat": sum(
+                1 for t in terminals
+                if t.reheatCoil().to_CoilHeatingWater().is_initialized()),
+            "electric_reheat": sum(
+                1 for t in terminals
+                if t.reheatCoil().to_CoilHeatingElectric().is_initialized()),
+            "held": 0,
+            "bare_on_air_loop": 0,
+        }
+        for coil in model.getCoilHeatingWaters():
+            if coil.containingHVACComponent().is_initialized():
+                census["held"] += 1
+            elif coil.airLoopHVAC().is_initialized():
+                census["bare_on_air_loop"] += 1
+        return model, census
+
+    def test_the_df17_pair_carries_the_topology_that_makes_18_discriminating(self):
+        """DF-17's whole point is structural, so pin the structure here rather
+        than only in a frozen baseline (Sol, PR #54).
+
+        The frozen baselines are the BEHAVIOURAL gate, but they cannot protect
+        the premise: if an SDK or catalog change quietly gave sample 18 a coil
+        on every terminal, or put a hot-water coil back on its air loop, the
+        loop's served-zone set would stop depending on the held accessor — and
+        the next re-freeze would bless a sample that no longer discriminates,
+        with every test still green. This fails first instead.
+        """
+        from btap.codes.necb.hvac import efficiency
+
+        model17, c17 = self._reheat_and_coil_census("17-vav-hw-reheat")
+        self.assertEqual(
+            {"terminals": 5, "water_reheat": 5, "electric_reheat": 0,
+             "held": 5, "bare_on_air_loop": 1}, c17,
+            "17 is the catalog hydronic VAV: hot water on every terminal AND a "
+            "bare air-loop coil, which is exactly why it cannot discriminate")
+
+        model18, c18 = self._reheat_and_coil_census("18-vav-hw-subset-reheat")
+        self.assertEqual(
+            {"terminals": 5, "water_reheat": 3, "electric_reheat": 2,
+             "held": 3, "bare_on_air_loop": 0}, c18,
+            "18 must keep hot-water reheat on a STRICT SUBSET and nothing "
+            "hydronic on the air loop, or the held accessor stops being the "
+            "only route to its zones")
+
+        def hot_water_loop(model):
+            loops = [loop for loop in model.getPlantLoops()
+                     if efficiency._loop_role(loop) == "hot_water"]
+            self.assertEqual(1, len(loops), "expected exactly one hot-water loop")
+            return loops[0]
+
+        self.assertEqual(
+            {"Thermal Zone 1", "Thermal Zone 2", "Thermal Zone 3"},
+            efficiency._served_zone_names(hot_water_loop(model18)),
+            "18's hot-water loop must reach ONLY the three zones it serves — "
+            "all five means the subset premise is gone")
+        self.assertEqual(
+            5, len(efficiency._served_zone_names(hot_water_loop(model17))),
+            "17's loop reaches every zone through its bare air-loop coil; that "
+            "is the masking this pair exists to contrast")
 
     def test_the_storey_pair_declares_the_storey_counts_the_flip_needs(self):
         # Table 8.4.4.7.-A selects System 3 at 2 storeys and System 6 at 3.
@@ -125,7 +193,7 @@ class TestGenerateSamples(unittest.TestCase):
 
     def test_the_shipped_readme_is_written(self):
         readme = (self.out / "README.txt").read_text(encoding="utf-8")
-        self.assertIn("Sample models — 16 files, one building", readme)
+        self.assertIn("Sample models — 18 files, one building", readme)
         for slug, _, _ in self.built:
             self.assertIn(slug, readme, f"{slug} is missing from the shipped README")
 

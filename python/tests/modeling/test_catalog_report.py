@@ -299,10 +299,6 @@ class TestCatalogReport(unittest.TestCase):
                           "written file contains argument name {}".format(r['name']))
 
 
-if __name__ == '__main__':
-    unittest.main()
-
-
 @needs_sdk
 class TestSeedModelContracts(unittest.TestCase):
     """Two independent contracts, split deliberately (review, 2026-08-27).
@@ -341,3 +337,7 @@ class TestSeedModelContracts(unittest.TestCase):
         self.assertFalse(empty.is_initialized())
         self.assertEqual(0, len(empty.get().getThermalZones()),
                          "documents the trap: .get() yields an EMPTY model, no raise")
+
+
+if __name__ == '__main__':
+    unittest.main()

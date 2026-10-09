@@ -105,6 +105,22 @@ class TestCostingEquipment(unittest.TestCase):
         _, quantifier = self.quantify(model)
         self.assertTrue(any('district' in w for w in quantifier.warnings))
 
+    def test_district_steam_produces_the_same_warning(self):
+        """Sol's fourth pass: purchased steam is unowned district plant too."""
+        import openstudio
+        model = load_fixture()
+        zones = self.sorted_zones(model)
+        modeling.build_system(model, 'Baseboard district hot water', zones)
+        for water in list(model.getDistrictHeatingWaters()):
+            loop = water.plantLoop().get()
+            steam = openstudio.model.DistrictHeatingSteam(model)
+            steam.setName('Purchased Steam')
+            loop.addSupplyBranchForComponent(steam)
+            water.remove()
+        _, quantifier = self.quantify(model)
+        self.assertTrue(any('Purchased Steam' in w and 'district' in w
+                            for w in quantifier.warnings), quantifier.warnings)
+
     def test_priced_end_to_end_with_placeholders(self):
         model = load_fixture()
         zones = self.sorted_zones(model)

@@ -38,9 +38,13 @@ class TestNecbEfficiency(unittest.TestCase):
         # < 176 kW: primary keeps capacity, secondary parked at 0.001 W (legacy staging rule)
         self.assertAlmostEqual(100_000.0, primary.nominalCapacity().get(), delta=1.0)
         self.assertAlmostEqual(0.001, secondary.nominalCapacity().get(), delta=1e-6)
+        # D-89: the curve is the one this boiler's part-load CLASS names, not a
+        # single curve given to every row
         self.assertTrue(primary.normalizedBoilerEfficiencyCurve().is_initialized())
         self.assertRegex(primary.normalizedBoilerEfficiencyCurve().get().nameString(),
-                         r'BOILER-EFFFPLR')
+                         r'BOILER-PLF-NONCONDENSING')
+        self.assertEqual('EnteringBoiler',
+                         primary.efficiencyCurveTemperatureEvaluationVariable().get())
 
         # Water-cooled scroll chiller 200 kW (~57 tons, 0-75 ton bin): 0.77927 kW/ton
         chiller = sorted_by_name(model.getChillerElectricEIRs())[0]

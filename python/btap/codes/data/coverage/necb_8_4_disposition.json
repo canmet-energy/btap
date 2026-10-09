@@ -72,31 +72,31 @@
         "hvac",
         "shw"
       ],
-      "rationale": "Part-load curves ARE applied by the efficiency passes (boiler/furnace/DX/SWH verified, chiller+others not yet compared) — probed 2026-07-22 (btap-necb/scripts/necb_8_4_6_curve_probe.rb, as-applied model curves vs NECB 2025 coefficients). rake necb:curves is the ongoing gate.",
-      "reviewer": "phylroy — signed off 2026-07-23 (batch review, probe-evidenced, docs/necb_decisions.md D-08)"
+      "rationale": "Part-load curves ARE applied by the efficiency passes: reference boilers and gas furnace coils carry the edition's own FHeatPLC as a Table:Lookup (D-89); DX coils, chillers, air-source heat pumps and service water heaters carry the edition's curve rows. python/scripts/necb_8_4_6_curve_probe.py builds the components, runs the Python appliers and compares the as-applied curves with the published rows (tests/necb/test_necb_8_4_6_curve_probe.py is the gate). The condensing-boiler row is not compared: no reference build selects it.",
+      "reviewer": "phylroy — signed off 2026-07-23 (batch review, probe-evidenced, docs/necb_decisions.md D-08); rationale revised 2026-09-14 for D-89 (Sol's fourth pass), pending re-review"
     },
     "8.4.6.2": {
       "category": "covered_by",
       "covered_by": [
         "hvac"
       ],
-      "rationale": "VERIFIED EQUIVALENT: applied normalized-efficiency curve tracks the Table 8.4.6.2 non-condensing FHeatPLC within 1.88% over PLR 0.25-1.0 — probed 2026-07-22 (btap-necb/scripts/necb_8_4_6_curve_probe.rb, as-applied model curves vs NECB 2025 coefficients). The condensing 6-term row is not compared (no condensing boiler in the reference builds).",
-      "reviewer": "phylroy — signed off 2026-07-23 (batch review, probe-evidenced, docs/necb_decisions.md D-08)"
+      "rationale": "VERIFIED EQUIVALENT (D-89): each reference boiler carries its own edition's FHeatPLC through PLF = PLR / FHeatPLC(PLR) as a Table:Lookup. The classes stated by a quadratic row (non-condensing in both editions, the 2025 modulating row) use a 169-node grid with a node at PLR 0, sampled maximum error 0.1994 % (non-condensing) and 0.7905 % (2025 modulating) against the exact rational; the 2020 modulating table is carried exactly at its ten printed points from PLR 0.10. As applied, the non-condensing table matches its row at 0.00 % over PLR 0.25-1.0 (python/scripts/necb_8_4_6_curve_probe.py, 2026-09-14). The condensing row is not implemented: no reference rule elects a condensing boiler.",
+      "reviewer": "phylroy — signed off 2026-07-23 (batch review, probe-evidenced, docs/necb_decisions.md D-08); rationale revised 2026-09-14 for D-89 (Sol's fourth pass), pending re-review"
     },
     "8.4.6.3": {
       "category": "covered_by",
       "covered_by": [
         "hvac"
       ],
-      "rationale": "VERIFIED EQUIVALENT: gas-coil PLF curve tracks the Table 8.4.6.3 atmospheric FHeatPLC within 0.77% — probed 2026-07-22 (btap-necb/scripts/necb_8_4_6_curve_probe.rb, as-applied model curves vs NECB 2025 coefficients).",
-      "reviewer": "phylroy — signed off 2026-07-23 (batch review, probe-evidenced, docs/necb_decisions.md D-08)"
+      "rationale": "VERIFIED EQUIVALENT (D-89): the gas-coil part-load fraction is the atmospheric FHeatPLC through PLF = PLR / FHeatPLC(PLR), a 100-node Table:Lookup from PLR 0.055 (the first node above EnergyPlus's 0.7 floor on a fuel coil's part-load fraction), sampled maximum error 0.0330 %, with identical coefficients in both editions. As applied it matches the atmospheric row at 0.00 % over PLR 0.25-1.0 (python/scripts/necb_8_4_6_curve_probe.py, 2026-09-14). The modulating furnace class is unreachable and has no representation (a WARNING if ever selected).",
+      "reviewer": "phylroy — signed off 2026-07-23 (batch review, probe-evidenced, docs/necb_decisions.md D-08); rationale revised 2026-09-14 for D-89 (Sol's fourth pass), pending re-review"
     },
     "8.4.6.4": {
       "category": "covered_by",
       "covered_by": [
         "hvac"
       ],
-      "rationale": "VERIFIED EQUIVALENT (fixed 2026-07-22): CAP_FT and EIR_FT are the code surfaces exactly (0.01%/0.00%, exact degF->degC transforms — EIR_FT was regenerated from the code after the probe caught the legacy 2011-derived surface deviating 1.95%); the EIR_FPLR/PLF cycling mapping was refit from the code cubic to its structural floor of ~2.0% (was 3.70%), output clamped to [0.7, 1.0]. NECB 2020 8.4.5.4 and 2025 8.4.6.4 coefficients verified identical. probed by btap-necb/scripts/necb_8_4_6_curve_probe.rb (rake necb:curves).",
+      "rationale": "VERIFIED EQUIVALENT (fixed 2026-07-22): CAP_FT and EIR_FT are the code surfaces exactly (0.01%/0.00%, exact degF->degC transforms — EIR_FT was regenerated from the code after the probe caught the legacy 2011-derived surface deviating 1.95%); the EIR_FPLR/PLF cycling mapping was refit from the code cubic to its structural floor of ~2.0% (was 3.70%), output clamped to [0.7, 1.0]. NECB 2020 8.4.5.4 and 2025 8.4.6.4 coefficients verified identical. Re-probed 2026-09-14 by python/scripts/necb_8_4_6_curve_probe.py on the reference build's own curves: CAP_FT 0.01 %, EIR_FT 0.00 %, EIR_FPLR 2.02 %.",
       "reviewer": "phylroy — signed off 2026-07-23 (batch review, probe-evidenced, docs/necb_decisions.md D-08)"
     },
     "8.4.6.5": {
@@ -104,7 +104,7 @@
       "covered_by": [
         "hvac"
       ],
-      "rationale": "VERIFIED EQUIVALENT (Scroll + Reciprocating, water-cooled): CAP_FT, EIR_FPLR and EIR_FT all match at 0.00%. EIR_FT is compared against ERRATUM-CORRECTED coefficients: the PRINTED Table 8.4.5.5-C (2020) / 8.4.6.5-C (2025) rows carry single misplaced-decimal defects (Scroll d, Reciprocating b; the printed Reciprocating row yields a physically impossible negative power ratio at the AHRI rating point) — a publication error identical in both editions, NOT an extraction defect; errata proposed to NRC Codes Canada 2026-07-22. The corrections are corroborated EXACTLY by the independent legacy NECB-2011-lineage vendored curves (all six coefficients, <4e-6 relative, both rows). Screw/Centrifugal probed 2026-07-23 (D-13): all six curves EXACT vs the printed rows (not erratum-affected; their imperfect rating-point normalization is legacy-corroborated). probed by btap-necb/scripts/necb_8_4_6_curve_probe.rb.",
+      "rationale": "VERIFIED EQUIVALENT (Scroll + Reciprocating, water-cooled): CAP_FT, EIR_FPLR and EIR_FT all match at 0.00%. EIR_FT is compared against ERRATUM-CORRECTED coefficients: the PRINTED Table 8.4.5.5-C (2020) / 8.4.6.5-C (2025) rows carry single misplaced-decimal defects (Scroll d, Reciprocating b; the printed Reciprocating row yields a physically impossible negative power ratio at the AHRI rating point) — a publication error identical in both editions, NOT an extraction defect; errata proposed to NRC Codes Canada 2026-07-22. The corrections are corroborated EXACTLY by the independent legacy NECB-2011-lineage vendored curves (all six coefficients, <4e-6 relative, both rows). Screw/Centrifugal probed 2026-07-23 (D-13): all six curves EXACT vs the printed rows (not erratum-affected; their imperfect rating-point normalization is legacy-corroborated). Re-probed 2026-09-14 by python/scripts/necb_8_4_6_curve_probe.py: all twelve chiller curves 0.00 %.",
       "reviewer": "phylroy — signed off 2026-07-23 (batch review, probe-evidenced, docs/necb_decisions.md D-08)"
     },
     "8.4.6.6": {
@@ -117,12 +117,12 @@
       "covered_by": [
         "hvac"
       ],
-      "rationale": "VERIFIED EQUIVALENT: ASHP heating CAP_FTEAS and EIR_FT are the code cubics exactly (0.00%/0.01%, degF->degC univariate transform); EIR_FPLR via the PLF cycling transform within 1.83%. The -10degC cutoff is separately applied per 8.4.5.13. probed 2026-07-22 (btap-necb/scripts/necb_8_4_6_curve_probe.rb).",
+      "rationale": "VERIFIED EQUIVALENT: ASHP heating CAP_FTEAS and EIR_FT are the code cubics exactly (0.00%/0.01%, degF->degC univariate transform); EIR_FPLR via the PLF cycling transform within 1.83%. The -10degC cutoff is separately applied per 8.4.5.13. Re-probed 2026-09-14 by python/scripts/necb_8_4_6_curve_probe.py: CAP_FTEAS 0.00 %, EIR_FT 0.01 %, EIR_FPLR 1.83 %.",
       "reviewer": "phylroy — signed off 2026-07-23 (batch review, probe-evidenced, docs/necb_decisions.md D-08)"
     },
     "8.4.6.8": {
       "category": "gap",
-      "rationale": "NOT APPLICABLE today: no absorption chiller exists in the reference catalog, no absorption curves are vendored, and apply_chiller's compressor-type detection never selects absorption — NOTE it would silently fall back to Scroll if an absorption chiller ever appeared (a latent silent-fallback to fix before absorption support is claimed). probed 2026-07-22 (btap-necb/scripts/necb_8_4_6_curve_probe.rb).",
+      "rationale": "NOT APPLICABLE today: no absorption chiller exists in the reference catalog, no absorption curves are vendored, and apply_chiller's compressor-type detection never selects absorption — NOTE it would silently fall back to Scroll if an absorption chiller ever appeared (a latent silent-fallback to fix before absorption support is claimed). Re-probed 2026-09-14 by python/scripts/necb_8_4_6_curve_probe.py: still no absorption row, curve or selection.",
       "reviewer": "phylroy — signed off 2026-07-23 (batch review, probe-evidenced, docs/necb_decisions.md D-08)"
     },
     "8.4.6.9": {
@@ -130,8 +130,8 @@
       "covered_by": [
         "shw"
       ],
-      "rationale": "VERIFIED EQUIVALENT: water-heater part-load factor curve tracks the 8.4.6.9.(2) FHeatPLC within 0.98% — probed 2026-07-22 (btap-necb/scripts/necb_8_4_6_curve_probe.rb, as-applied model curves vs NECB 2025 coefficients).",
-      "reviewer": "phylroy — signed off 2026-07-23 (batch review, probe-evidenced, docs/necb_decisions.md D-08)"
+      "rationale": "VERIFIED EQUIVALENT: the water-heater part-load factor curve tracks the service water heater FHeatPLC row (Sentence (2) of this article in both editions) within 0.98 % over PLR 0.25-1.0 — re-probed 2026-09-14 by python/scripts/necb_8_4_6_curve_probe.py on the as-applied model curve.",
+      "reviewer": "phylroy — signed off 2026-07-23 (batch review, probe-evidenced, docs/necb_decisions.md D-08); rationale revised 2026-09-14 for D-89 (Sol's fourth pass), pending re-review"
     }
   }
 }

@@ -200,7 +200,7 @@ ship with the wheel, offline; `btap-necb-coverage` is its console entry point.
 Each edition's article text lives in that edition's own snapshot
 (`necb/data/necb2025/coverage/articles_8_4.json`). The Crown NECB text is
 attributed in `data/coverage/ATTRIBUTION.md` — one notice covering all cached
-text — and is explicitly outside the LGPL that covers the code.
+text — and is explicitly outside the GPL that covers the code.
 
 ## Tests
 

@@ -6,9 +6,11 @@
     "generated": "2026-07-12",
     "articles": [
       "5.2.12.1",
-      "5.2.12.2"
+      "5.2.12.2",
+      "8.4.5.2",
+      "8.4.5.3"
     ],
-    "note": "Capacity match rule (ported from legacy model_find_object): row matches when minimum_capacity < capacity <= maximum_capacity, retried at 0.99x capacity on boundary misses; criteria keys absent from a row act as wildcards. VERIFIED against the printed NECB 2020 tables via MCP 2026-08-02 and corrected under D-59: unitary_acs and heat_pumps = Table 5.2.12.1.-A exact, including SEER 15 for heat pumps below 19 kW; PTAC rows = Table -G exact (formula coefficient 0.3058/kBtu-h = printed 1.0435/kW unit-converted); heat_pumps_heating = Table -A exact; boilers = Table -N exact; furnaces = Table -O exact (strict-side row choices documented); chillers = Table -K PATH B full-load COPc exact. The heat_rejection family is VESTIGIAL for the reference path - never read by apply_efficiencies; the reference tower fan is set by apply_tower_rules from Table 5.2.12.2 plus the 8.4.4.11.(2)-(3) cell rules (D-26). IEER/IPLV/SCOP columns are not modeled: EnergyPlus carries full-load COP plus the vendored NECB reference part-load curves."
+    "note": "Capacity match rule (ported from legacy model_find_object): row matches when minimum_capacity < capacity <= maximum_capacity, retried at 0.99x capacity on boundary misses; criteria keys absent from a row act as wildcards. VERIFIED against the printed NECB 2020 tables via MCP 2026-08-02 and corrected under D-59: unitary_acs and heat_pumps = Table 5.2.12.1.-A exact, including SEER 15 for heat pumps below 19 kW; PTAC rows = Table -G exact (formula coefficient 0.3058/kBtu-h = printed 1.0435/kW unit-converted); heat_pumps_heating = Table -A exact; boilers = Table -N exact; furnaces = Table -O exact (strict-side row choices documented); chillers = Table -K PATH B full-load COPc exact. The 90.1-sourced heat_rejection family left this file under D-89: nothing read it, and the reference tower fan is set by apply_tower_rules from Table 5.2.12.2 plus the 8.4.4.11.(2)-(3) cell rules (D-26). IEER/IPLV/SCOP columns are not modeled: EnergyPlus carries full-load COP plus the reference part-load curves. Those part-load curves are this edition's own since D-89: part_load_fheatplc carries every FHeatPLC class Articles 8.4.5.2. and 8.4.5.3. publish (with a deferred_reason on each class no reference rule elects), part_load_curves maps an equipment class to the curve that represents it, and every boilers and furnaces row declares its part_load_curve_class instead of naming one curve for all of them."
   },
   "vrf_air_source_heat_pumps": [
     {
@@ -62,8 +64,7 @@
     {
       "fluid_type": "Hot Water",
       "fuel_type": "Gas",
-      "condensing": null,
-      "condensing_control": null,
+      "part_load_curve_class": "non_condensing",
       "minimum_capacity": "-",
       "maximum_capacity": 299999.0,
       "start_date": "9/9/1919",
@@ -71,14 +72,12 @@
       "minimum_annual_fuel_utilization_efficiency": 0.9,
       "minimum_thermal_efficiency": null,
       "minimum_combustion_efficiency": null,
-      "efffplr": "BOILER-EFFFPLR",
-      "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N"
+      "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N. class: adjudicated legacy default (D-89)."
     },
     {
       "fluid_type": "Hot Water",
       "fuel_type": "Gas",
-      "condensing": null,
-      "condensing_control": null,
+      "part_load_curve_class": "non_condensing",
       "minimum_capacity": 300000.0,
       "maximum_capacity": 2499999.0,
       "start_date": "9/9/1919",
@@ -86,14 +85,12 @@
       "minimum_annual_fuel_utilization_efficiency": null,
       "minimum_thermal_efficiency": 0.9,
       "minimum_combustion_efficiency": null,
-      "efffplr": "BOILER-EFFFPLR",
-      "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N"
+      "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N. class: adjudicated legacy default (D-89)."
     },
     {
       "fluid_type": "Hot Water",
       "fuel_type": "Gas",
-      "condensing": null,
-      "condensing_control": null,
+      "part_load_curve_class": "non_condensing",
       "minimum_capacity": 2500000.0,
       "maximum_capacity": "9.999999999E9",
       "start_date": "9/9/1919",
@@ -101,14 +98,12 @@
       "minimum_annual_fuel_utilization_efficiency": null,
       "minimum_thermal_efficiency": null,
       "minimum_combustion_efficiency": 0.9,
-      "efffplr": "BOILER-EFFFPLR",
-      "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N"
+      "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N. class: adjudicated legacy default (D-89)."
     },
     {
       "fluid_type": "Hot Water",
       "fuel_type": "Electric",
-      "condensing": null,
-      "condensing_control": null,
+      "part_load_curve_class": "not_applicable",
       "minimum_capacity": 0.0,
       "maximum_capacity": "9.999999999E9",
       "start_date": "9/9/1919",
@@ -116,14 +111,12 @@
       "minimum_annual_fuel_utilization_efficiency": null,
       "minimum_thermal_efficiency": 1.0,
       "minimum_combustion_efficiency": null,
-      "efffplr": "BOILER-EFFFPLR",
-      "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N"
+      "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N. class: adjudicated legacy default (D-89)."
     },
     {
       "fluid_type": "Hot Water",
       "fuel_type": "Oil",
-      "condensing": null,
-      "condensing_control": null,
+      "part_load_curve_class": "non_condensing",
       "minimum_capacity": 0.0,
       "maximum_capacity": 299999.0,
       "start_date": "9/9/1919",
@@ -131,14 +124,12 @@
       "minimum_annual_fuel_utilization_efficiency": 0.86,
       "minimum_thermal_efficiency": null,
       "minimum_combustion_efficiency": null,
-      "efffplr": "BOILER-EFFFPLR",
-      "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N"
+      "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N. class: adjudicated legacy default (D-89)."
     },
     {
       "fluid_type": "Hot Water",
       "fuel_type": "Oil",
-      "condensing": null,
-      "condensing_control": null,
+      "part_load_curve_class": "non_condensing",
       "minimum_capacity": 300000.0,
       "maximum_capacity": 2499999.0,
       "start_date": "9/9/1919",
@@ -146,14 +137,12 @@
       "minimum_annual_fuel_utilization_efficiency": null,
       "minimum_thermal_efficiency": 0.87,
       "minimum_combustion_efficiency": null,
-      "efffplr": "BOILER-EFFFPLR",
-      "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N"
+      "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N. class: adjudicated legacy default (D-89)."
     },
     {
       "fluid_type": "Hot Water",
       "fuel_type": "Oil",
-      "condensing": null,
-      "condensing_control": null,
+      "part_load_curve_class": "non_condensing",
       "minimum_capacity": 2500000.0,
       "maximum_capacity": "9.999999999E9",
       "start_date": "9/9/1919",
@@ -161,16 +150,14 @@
       "minimum_annual_fuel_utilization_efficiency": null,
       "minimum_thermal_efficiency": null,
       "minimum_combustion_efficiency": 0.88,
-      "efffplr": "BOILER-EFFFPLR",
-      "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N"
+      "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N. class: adjudicated legacy default (D-89)."
     }
   ],
   "furnaces": [
     {
       "fluid_type": "Air",
       "fuel_type": "Gas",
-      "condensing": null,
-      "condensing_control": null,
+      "part_load_curve_class": "atmospheric",
       "minimum_capacity": "-",
       "maximum_capacity": 225201.0,
       "start_date": "9/9/1919",
@@ -178,14 +165,12 @@
       "minimum_annual_fuel_utilization_efficiency": 0.95,
       "minimum_thermal_efficiency": null,
       "minimum_combustion_efficiency": null,
-      "efffplr": "FURNACE-EFFPLR",
-      "notes": "From NECB 2020 Table 5.2.12.1.-O"
+      "notes": "From NECB 2020 Table 5.2.12.1.-O. class: adjudicated legacy default (D-89)."
     },
     {
       "fluid_type": "Air",
       "fuel_type": "Gas",
-      "condensing": null,
-      "condensing_control": null,
+      "part_load_curve_class": "atmospheric",
       "minimum_capacity": 225202.0,
       "maximum_capacity": 399221.0,
       "start_date": "9/9/1919",
@@ -193,14 +178,12 @@
       "minimum_annual_fuel_utilization_efficiency": null,
       "minimum_thermal_efficiency": 0.81,
       "minimum_combustion_efficiency": null,
-      "efffplr": "FURNACE-EFFPLR",
-      "notes": "From NECB 2020 Table 5.2.12.1.-O"
+      "notes": "From NECB 2020 Table 5.2.12.1.-O. class: adjudicated legacy default (D-89)."
     },
     {
       "fluid_type": "Air",
       "fuel_type": "Gas",
-      "condensing": null,
-      "condensing_control": null,
+      "part_load_curve_class": "atmospheric",
       "minimum_capacity": 399222.0,
       "maximum_capacity": "9.999999999E9",
       "start_date": "9/9/1919",
@@ -208,8 +191,7 @@
       "minimum_annual_fuel_utilization_efficiency": null,
       "minimum_thermal_efficiency": 0.81,
       "minimum_combustion_efficiency": null,
-      "efffplr": "FURNACE-EFFPLR",
-      "notes": "Added to capture any capacities outside the range specified in the NECB2020 codes Table 5.2.12.1.-O"
+      "notes": "Added to capture any capacities outside the range specified in the NECB2020 codes Table 5.2.12.1.-O. class: adjudicated legacy default (D-89)."
     }
   ],
   "chillers": [
@@ -1788,274 +1770,995 @@
       "notes": "From NECB 2020, Table  5.2.12.1.-A"
     }
   ],
-  "heat_rejection": [
+  "part_load_fheatplc": [
     {
-      "template": "DOE Ref Pre-1980",
-      "equipment_type": "Open Cooling Tower",
-      "fan_type": "Centrifugal",
-      "start_date": "9/9/1919",
-      "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_performance": 20.0,
-      "notes": "From 90.1-2004 Table 6.8.1G"
+      "equipment": "boiler",
+      "class": "non_condensing",
+      "table": "8.4.5.2.-A",
+      "article": "8.4.5.2.",
+      "row": "Non-condensing",
+      "form": "quadratic",
+      "variables": [
+        "Qpartload/Qdesign"
+      ],
+      "formula": "FHeatPLC = a + b(Qpartload/Qdesign) + c(Qpartload/Qdesign)^2",
+      "coefficients": [
+        0.082597,
+        0.996764,
+        -0.079361
+      ],
+      "points": null,
+      "archived_payload": "provenance/vintage_match/8.4.5.2.-A.result.json",
+      "reachable": true
     },
     {
-      "template": "DOE Ref Pre-1980",
-      "equipment_type": "Open Cooling Tower",
-      "fan_type": "Propeller or Axial",
-      "start_date": "9/9/1919",
-      "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_performance": 38.2,
-      "notes": "From 90.1-2004 Table 6.8.1G"
+      "equipment": "boiler",
+      "class": "condensing",
+      "table": "8.4.5.2.-A",
+      "article": "8.4.5.2.",
+      "row": "Condensing",
+      "form": "quadratic",
+      "variables": [
+        "Qpartload/Qdesign"
+      ],
+      "formula": "FHeatPLC = a + b(Qpartload/Qdesign) + c(Qpartload/Qdesign)^2",
+      "coefficients": [
+        0.00533,
+        0.904,
+        0.09066
+      ],
+      "points": null,
+      "archived_payload": "provenance/vintage_match/8.4.5.2.-A.result.json",
+      "reachable": false,
+      "deferred_reason": "not implemented: no reference rule elects condensing equipment, so no model object carries this class. Retained here as the edition's published requirement (D-89)."
     },
     {
-      "template": "DOE Ref Pre-1980",
-      "equipment_type": "Closed Cooling Tower",
-      "fan_type": "Centrifugal",
-      "start_date": "9/9/1919",
-      "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_performance": 20.0,
-      "notes": "From 90.1-2004 Table 6.8.1G"
+      "equipment": "boiler",
+      "class": "modulating",
+      "table": "8.4.5.2.-B",
+      "article": "8.4.5.2.",
+      "row": "Qpartload/Qdesign 0.1 to 1.0",
+      "form": "points",
+      "variables": [
+        "Qpartload/Qdesign"
+      ],
+      "formula": "FHeatPLC values are those listed in the table",
+      "coefficients": null,
+      "points": [
+        [
+          0.1,
+          0.118
+        ],
+        [
+          0.2,
+          0.209
+        ],
+        [
+          0.3,
+          0.308
+        ],
+        [
+          0.4,
+          0.407
+        ],
+        [
+          0.5,
+          0.506
+        ],
+        [
+          0.6,
+          0.605
+        ],
+        [
+          0.7,
+          0.704
+        ],
+        [
+          0.8,
+          0.802
+        ],
+        [
+          0.9,
+          0.901
+        ],
+        [
+          1.0,
+          1.0
+        ]
+      ],
+      "archived_payload": "provenance/vintage_match/8.4.5.2.-B.result.json",
+      "reachable": true
     },
     {
-      "template": "DOE Ref Pre-1980",
-      "equipment_type": "Closed Cooling Tower",
-      "fan_type": "Propeller or Axial",
-      "start_date": "9/9/1919",
-      "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_performance": 44.08,
-      "notes": "From 90.1-2004 Table 6.8.1G"
+      "equipment": "furnace",
+      "class": "atmospheric",
+      "table": "8.4.5.3",
+      "article": "8.4.5.3.",
+      "row": "Atmospheric",
+      "form": "quadratic",
+      "variables": [
+        "Qpartload/Qrated"
+      ],
+      "formula": "FHeatPLC = a + b(Qpartload/Qrated) + c(Qpartload/Qrated)^2",
+      "coefficients": [
+        0.01861,
+        1.094209,
+        -0.112819
+      ],
+      "points": null,
+      "archived_payload": "provenance/vintage_match/8.4.5.3.result.json",
+      "reachable": true
     },
     {
-      "template": "DOE Ref 1980-2004",
-      "equipment_type": "Open Cooling Tower",
-      "fan_type": "Centrifugal",
-      "start_date": "9/9/1919",
-      "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_performance": 20.0,
-      "notes": "From 90.1-2004 Table 6.8.1G"
+      "equipment": "furnace",
+      "class": "condensing",
+      "table": "8.4.5.3",
+      "article": "8.4.5.3.",
+      "row": "Condensing",
+      "form": "quadratic",
+      "variables": [
+        "Qpartload/Qrated"
+      ],
+      "formula": "FHeatPLC = a + b(Qpartload/Qrated) + c(Qpartload/Qrated)^2",
+      "coefficients": [
+        0.00533,
+        0.904,
+        0.09066
+      ],
+      "points": null,
+      "archived_payload": "provenance/vintage_match/8.4.5.3.result.json",
+      "reachable": false,
+      "deferred_reason": "not implemented: no reference rule elects condensing equipment, so no model object carries this class. Retained here as the edition's published requirement (D-89)."
     },
     {
-      "template": "DOE Ref 1980-2004",
-      "equipment_type": "Open Cooling Tower",
-      "fan_type": "Propeller or Axial",
-      "start_date": "9/9/1919",
-      "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_performance": 38.2,
-      "notes": "From 90.1-2004 Table 6.8.1G"
-    },
-    {
-      "template": "DOE Ref 1980-2004",
-      "equipment_type": "Closed Cooling Tower",
-      "fan_type": "Centrifugal",
-      "start_date": "9/9/1919",
-      "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_performance": 20.0,
-      "notes": "From 90.1-2004 Table 6.8.1G"
-    },
-    {
-      "template": "DOE Ref 1980-2004",
-      "equipment_type": "Closed Cooling Tower",
-      "fan_type": "Propeller or Axial",
-      "start_date": "9/9/1919",
-      "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_performance": 44.08,
-      "notes": "From 90.1-2004 Table 6.8.1G"
-    },
-    {
-      "template": "90.1-2004",
-      "equipment_type": "Open Cooling Tower",
-      "fan_type": "Centrifugal",
-      "start_date": "9/9/1919",
-      "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_performance": 20.0,
-      "notes": "From 90.1-2004 Table 6.8.1G"
-    },
-    {
-      "template": "90.1-2004",
-      "equipment_type": "Open Cooling Tower",
-      "fan_type": "Propeller or Axial",
-      "start_date": "9/9/1919",
-      "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_performance": 38.2,
-      "notes": "From 90.1-2004 Table 6.8.1G"
-    },
-    {
-      "template": "90.1-2004",
-      "equipment_type": "Closed Cooling Tower",
-      "fan_type": "Centrifugal",
-      "start_date": "9/9/1919",
-      "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_performance": 20.0,
-      "notes": "From 90.1-2004 Table 6.8.1G"
-    },
-    {
-      "template": "90.1-2004",
-      "equipment_type": "Closed Cooling Tower",
-      "fan_type": "Propeller or Axial",
-      "start_date": "9/9/1919",
-      "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_performance": 44.08,
-      "notes": "From 90.1-2004 Table 6.8.1G"
-    },
-    {
-      "template": "90.1-2007",
-      "equipment_type": "Open Cooling Tower",
-      "fan_type": "Centrifugal",
-      "start_date": "9/9/1919",
-      "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_performance": 20.0,
-      "notes": "From 90.1-2007 Table 6.8.1G"
-    },
-    {
-      "template": "90.1-2007",
-      "equipment_type": "Open Cooling Tower",
-      "fan_type": "Propeller or Axial",
-      "start_date": "9/9/1919",
-      "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_performance": 38.2,
-      "notes": "From 90.1-2007 Table 6.8.1G"
-    },
-    {
-      "template": "90.1-2007",
-      "equipment_type": "Closed Cooling Tower",
-      "fan_type": "Centrifugal",
-      "start_date": "9/9/1919",
-      "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_performance": 20.0,
-      "notes": "From 90.1-2007 Table 6.8.1G"
-    },
-    {
-      "template": "90.1-2007",
-      "equipment_type": "Closed Cooling Tower",
-      "fan_type": "Propeller or Axial",
-      "start_date": "9/9/1919",
-      "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_performance": 44.08,
-      "notes": "From 90.1-2007 Table 6.8.1G"
-    },
-    {
-      "template": "90.1-2010",
-      "equipment_type": "Open Cooling Tower",
-      "fan_type": "Centrifugal",
-      "start_date": "9/9/1919",
-      "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_performance": 20.0,
-      "notes": "From 90.1-2010 Table 6.8.1 G"
-    },
-    {
-      "template": "90.1-2010",
-      "equipment_type": "Open Cooling Tower",
-      "fan_type": "Propeller or Axial",
-      "start_date": "9/9/1919",
-      "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_performance": 38.2,
-      "notes": "From 90.1-2010 Table 6.8.1 G"
-    },
-    {
-      "template": "90.1-2010",
-      "equipment_type": "Closed Cooling Tower",
-      "fan_type": "Centrifugal",
-      "start_date": "9/9/1919",
-      "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_performance": 7.0,
-      "notes": "From 90.1-2010 Table 6.8.1 G"
-    },
-    {
-      "template": "90.1-2010",
-      "equipment_type": "Closed Cooling Tower",
-      "fan_type": "Propeller or Axial",
-      "start_date": "9/9/1919",
-      "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_performance": 16.15,
-      "notes": "From 90.1-2010 Table 6.8.1 G"
-    },
-    {
-      "template": "90.1-2013",
-      "equipment_type": "Open Cooling Tower",
-      "fan_type": "Centrifugal",
-      "start_date": "9/9/1919",
-      "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_performance": 20.0,
-      "notes": "From 90.1-2013 Table 6.8.1-7"
-    },
-    {
-      "template": "90.1-2013",
-      "equipment_type": "Open Cooling Tower",
-      "fan_type": "Propeller or Axial",
-      "start_date": "9/9/1919",
-      "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_performance": 40.2,
-      "notes": "From 90.1-2013 Table 6.8.1-7"
-    },
-    {
-      "template": "90.1-2013",
-      "equipment_type": "Closed Cooling Tower",
-      "fan_type": "Centrifugal",
-      "start_date": "9/9/1919",
-      "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_performance": 7.0,
-      "notes": "From 90.1-2013 Table 6.8.1-7"
-    },
-    {
-      "template": "90.1-2013",
-      "equipment_type": "Closed Cooling Tower",
-      "fan_type": "Propeller or Axial",
-      "start_date": "9/9/1919",
-      "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_performance": 16.15,
-      "notes": "From 90.1-2013 Table 6.8.1-7"
+      "equipment": "furnace",
+      "class": "modulating",
+      "table": "8.4.5.2.-B",
+      "article": "8.4.5.3.",
+      "row": "Qpartload/Qrated 0.1 to 1.0",
+      "form": "points",
+      "variables": [
+        "Qpartload/Qrated"
+      ],
+      "formula": "FHeatPLC values are those listed in the table",
+      "coefficients": null,
+      "points": [
+        [
+          0.1,
+          0.118
+        ],
+        [
+          0.2,
+          0.209
+        ],
+        [
+          0.3,
+          0.308
+        ],
+        [
+          0.4,
+          0.407
+        ],
+        [
+          0.5,
+          0.506
+        ],
+        [
+          0.6,
+          0.605
+        ],
+        [
+          0.7,
+          0.704
+        ],
+        [
+          0.8,
+          0.802
+        ],
+        [
+          0.9,
+          0.901
+        ],
+        [
+          1.0,
+          1.0
+        ]
+      ],
+      "archived_payload": "provenance/vintage_match/8.4.5.2.-B.result.json",
+      "reachable": false,
+      "deferred_reason": "not implemented: the reference building never elects a modulating furnace - purchased heating is represented by a modulating BOILER. Retained here as the edition's published requirement (D-89)."
     }
   ],
+  "part_load_curves": {
+    "boiler": {
+      "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
+      "classes": {
+        "non_condensing": "BOILER-PLF-NONCONDENSING",
+        "modulating": "BOILER-PLF-MODULATING-necb2020",
+        "not_applicable": null
+      }
+    },
+    "furnace": {
+      "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
+      "classes": {
+        "atmospheric": "FURNACE-PLF-ATMOSPHERIC"
+      }
+    }
+  },
   "curves": [
     {
-      "name": "BOILER-EFFFPLR",
+      "name": "BOILER-PLF-MODULATING-necb2020",
       "category": "Boiler",
-      "form": "Cubic",
-      "dependent_variable": "FIRRatio",
-      "independent_variable_1": "QRatio",
+      "form": "TableLookup",
+      "dependent_variable": "PLF",
+      "independent_variable_1": "PLR",
       "independent_variable_2": null,
-      "coeff_1": 0.3831,
-      "coeff_2": 2.0567,
-      "coeff_3": -2.6469,
-      "coeff_4": 1.2148,
-      "coeff_5": null,
-      "coeff_6": null,
-      "coeff_7": null,
-      "coeff_8": null,
-      "coeff_9": null,
-      "coeff_10": null,
-      "minimum_independent_variable_1": 0.0,
+      "interpolation": "Linear",
+      "extrapolation": "Constant",
+      "points": [
+        [
+          0.1,
+          0.847458
+        ],
+        [
+          0.2,
+          0.956938
+        ],
+        [
+          0.3,
+          0.974026
+        ],
+        [
+          0.4,
+          0.982801
+        ],
+        [
+          0.5,
+          0.988142
+        ],
+        [
+          0.6,
+          0.991736
+        ],
+        [
+          0.7,
+          0.994318
+        ],
+        [
+          0.8,
+          0.997506
+        ],
+        [
+          0.9,
+          0.99889
+        ],
+        [
+          1.0,
+          1.0
+        ]
+      ],
+      "minimum_independent_variable_1": 0.1,
       "maximum_independent_variable_1": 1.0,
       "minimum_independent_variable_2": null,
       "maximum_independent_variable_2": null,
-      "minimum_dependent_variable_output": null,
-      "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.21.-A (2) for non-condensing boiler.  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.5.2. (Tables 8.4.5.2.-A and 8.4.5.2.-B)."
+      "minimum_dependent_variable_output": 0.847458,
+      "maximum_dependent_variable_output": 1.0,
+      "implements": {
+        "equipment": "boiler",
+        "class": "modulating",
+        "table": "8.4.5.2.-B",
+        "row": "Qpartload/Qdesign 0.1 to 1.0",
+        "transform": "PLF = PLR / FHeatPLC(PLR)",
+        "grid": "the ten printed points, PLR 0.10 to 1.00 step 0.10",
+        "max_error_vs_exact": 0.0,
+        "error_grid": "exact at all ten printed points (error 0 by construction); the Code publishes no value between or below them, so there is no exact function to measure an interpolation error against."
+      },
+      "notes": "Reference modulating boiler part-load factor for Sentence 8.4.5.2.(3), which states that the values for Qpartload/Qdesign and FHeatPLC \"shall be those listed in Table 8.4.5.2.-B\". The ten printed points are carried verbatim through PLF = PLR / FHeatPLC(PLR), so the representation is exact at every value the Code publishes. The Code prints no interpolation rule between them and nothing below PLR 0.10; Linear interpolation and Constant extrapolation are the implementation choices D-89 records. The name is code-qualified because this edition's modulating content is its own (D-88). Exact to six decimals at every node."
     },
     {
-      "name": "BOILER-EFFFPLR-COND",
+      "name": "BOILER-PLF-NONCONDENSING",
       "category": "Boiler",
-      "form": "Cubic",
-      "dependent_variable": "FIRRatio",
-      "independent_variable_1": "QRatio",
+      "form": "TableLookup",
+      "dependent_variable": "PLF",
+      "independent_variable_1": "PLR",
       "independent_variable_2": null,
-      "coeff_1": 1.0186,
-      "coeff_2": 0.2426,
-      "coeff_3": -0.5059,
-      "coeff_4": 0.2465,
-      "coeff_5": null,
-      "coeff_6": null,
-      "coeff_7": null,
-      "coeff_8": null,
-      "coeff_9": null,
-      "coeff_10": null,
+      "interpolation": "Linear",
+      "extrapolation": "Constant",
+      "points": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          1e-05,
+          0.000121
+        ],
+        [
+          2e-05,
+          0.000242
+        ],
+        [
+          3e-05,
+          0.000363
+        ],
+        [
+          4e-05,
+          0.000484
+        ],
+        [
+          5e-05,
+          0.000605
+        ],
+        [
+          6e-05,
+          0.000726
+        ],
+        [
+          7e-05,
+          0.000847
+        ],
+        [
+          8e-05,
+          0.000968
+        ],
+        [
+          9e-05,
+          0.001088
+        ],
+        [
+          0.0001,
+          0.001209
+        ],
+        [
+          0.0002,
+          0.002416
+        ],
+        [
+          0.0003,
+          0.003619
+        ],
+        [
+          0.0004,
+          0.00482
+        ],
+        [
+          0.0005,
+          0.006017
+        ],
+        [
+          0.0006,
+          0.007212
+        ],
+        [
+          0.0007,
+          0.008404
+        ],
+        [
+          0.0008,
+          0.009593
+        ],
+        [
+          0.0009,
+          0.010779
+        ],
+        [
+          0.001,
+          0.011963
+        ],
+        [
+          0.002,
+          0.023643
+        ],
+        [
+          0.003,
+          0.035052
+        ],
+        [
+          0.004,
+          0.046199
+        ],
+        [
+          0.005,
+          0.057091
+        ],
+        [
+          0.006,
+          0.067739
+        ],
+        [
+          0.007,
+          0.078151
+        ],
+        [
+          0.008,
+          0.088333
+        ],
+        [
+          0.009,
+          0.098295
+        ],
+        [
+          0.01,
+          0.108042
+        ],
+        [
+          0.011,
+          0.117582
+        ],
+        [
+          0.012,
+          0.126921
+        ],
+        [
+          0.013,
+          0.136066
+        ],
+        [
+          0.014,
+          0.145023
+        ],
+        [
+          0.015,
+          0.153798
+        ],
+        [
+          0.016,
+          0.162395
+        ],
+        [
+          0.017,
+          0.170822
+        ],
+        [
+          0.018,
+          0.179081
+        ],
+        [
+          0.019,
+          0.187179
+        ],
+        [
+          0.02,
+          0.195121
+        ],
+        [
+          0.021,
+          0.20291
+        ],
+        [
+          0.022,
+          0.210552
+        ],
+        [
+          0.023,
+          0.21805
+        ],
+        [
+          0.024,
+          0.225408
+        ],
+        [
+          0.025,
+          0.232631
+        ],
+        [
+          0.026,
+          0.239721
+        ],
+        [
+          0.027,
+          0.246684
+        ],
+        [
+          0.028,
+          0.253522
+        ],
+        [
+          0.029,
+          0.260238
+        ],
+        [
+          0.03,
+          0.266836
+        ],
+        [
+          0.031,
+          0.273319
+        ],
+        [
+          0.032,
+          0.27969
+        ],
+        [
+          0.033,
+          0.285952
+        ],
+        [
+          0.034,
+          0.292108
+        ],
+        [
+          0.035,
+          0.29816
+        ],
+        [
+          0.036,
+          0.304111
+        ],
+        [
+          0.037,
+          0.309964
+        ],
+        [
+          0.038,
+          0.315721
+        ],
+        [
+          0.039,
+          0.321384
+        ],
+        [
+          0.04,
+          0.326956
+        ],
+        [
+          0.041,
+          0.332439
+        ],
+        [
+          0.042,
+          0.337835
+        ],
+        [
+          0.043,
+          0.343146
+        ],
+        [
+          0.044,
+          0.348374
+        ],
+        [
+          0.045,
+          0.353522
+        ],
+        [
+          0.046,
+          0.35859
+        ],
+        [
+          0.047,
+          0.363581
+        ],
+        [
+          0.048,
+          0.368497
+        ],
+        [
+          0.049,
+          0.373339
+        ],
+        [
+          0.05,
+          0.37811
+        ],
+        [
+          0.055,
+          0.400936
+        ],
+        [
+          0.06,
+          0.422187
+        ],
+        [
+          0.065,
+          0.442022
+        ],
+        [
+          0.07,
+          0.460582
+        ],
+        [
+          0.075,
+          0.477987
+        ],
+        [
+          0.08,
+          0.494345
+        ],
+        [
+          0.085,
+          0.50975
+        ],
+        [
+          0.09,
+          0.524283
+        ],
+        [
+          0.095,
+          0.53802
+        ],
+        [
+          0.1,
+          0.551026
+        ],
+        [
+          0.11,
+          0.575071
+        ],
+        [
+          0.12,
+          0.596819
+        ],
+        [
+          0.13,
+          0.616596
+        ],
+        [
+          0.14,
+          0.634666
+        ],
+        [
+          0.15,
+          0.651251
+        ],
+        [
+          0.16,
+          0.666534
+        ],
+        [
+          0.17,
+          0.680672
+        ],
+        [
+          0.18,
+          0.693793
+        ],
+        [
+          0.19,
+          0.706012
+        ],
+        [
+          0.2,
+          0.717424
+        ],
+        [
+          0.21,
+          0.728111
+        ],
+        [
+          0.22,
+          0.738146
+        ],
+        [
+          0.23,
+          0.747592
+        ],
+        [
+          0.24,
+          0.756503
+        ],
+        [
+          0.25,
+          0.764928
+        ],
+        [
+          0.26,
+          0.77291
+        ],
+        [
+          0.27,
+          0.780487
+        ],
+        [
+          0.28,
+          0.787692
+        ],
+        [
+          0.29,
+          0.794555
+        ],
+        [
+          0.3,
+          0.801103
+        ],
+        [
+          0.31,
+          0.807361
+        ],
+        [
+          0.32,
+          0.813349
+        ],
+        [
+          0.33,
+          0.819089
+        ],
+        [
+          0.34,
+          0.824597
+        ],
+        [
+          0.35,
+          0.82989
+        ],
+        [
+          0.36,
+          0.834982
+        ],
+        [
+          0.37,
+          0.839888
+        ],
+        [
+          0.38,
+          0.844618
+        ],
+        [
+          0.39,
+          0.849185
+        ],
+        [
+          0.4,
+          0.853598
+        ],
+        [
+          0.41,
+          0.857867
+        ],
+        [
+          0.42,
+          0.862001
+        ],
+        [
+          0.43,
+          0.866007
+        ],
+        [
+          0.44,
+          0.869894
+        ],
+        [
+          0.45,
+          0.873667
+        ],
+        [
+          0.46,
+          0.877334
+        ],
+        [
+          0.47,
+          0.8809
+        ],
+        [
+          0.48,
+          0.88437
+        ],
+        [
+          0.49,
+          0.887751
+        ],
+        [
+          0.5,
+          0.891045
+        ],
+        [
+          0.51,
+          0.894259
+        ],
+        [
+          0.52,
+          0.897395
+        ],
+        [
+          0.53,
+          0.900458
+        ],
+        [
+          0.54,
+          0.903451
+        ],
+        [
+          0.55,
+          0.906379
+        ],
+        [
+          0.56,
+          0.909243
+        ],
+        [
+          0.57,
+          0.912047
+        ],
+        [
+          0.58,
+          0.914793
+        ],
+        [
+          0.59,
+          0.917485
+        ],
+        [
+          0.6,
+          0.920125
+        ],
+        [
+          0.61,
+          0.922715
+        ],
+        [
+          0.62,
+          0.925257
+        ],
+        [
+          0.63,
+          0.927753
+        ],
+        [
+          0.64,
+          0.930206
+        ],
+        [
+          0.65,
+          0.932617
+        ],
+        [
+          0.66,
+          0.934988
+        ],
+        [
+          0.67,
+          0.93732
+        ],
+        [
+          0.68,
+          0.939616
+        ],
+        [
+          0.69,
+          0.941876
+        ],
+        [
+          0.7,
+          0.944103
+        ],
+        [
+          0.71,
+          0.946296
+        ],
+        [
+          0.72,
+          0.948459
+        ],
+        [
+          0.73,
+          0.950591
+        ],
+        [
+          0.74,
+          0.952694
+        ],
+        [
+          0.75,
+          0.95477
+        ],
+        [
+          0.76,
+          0.956819
+        ],
+        [
+          0.77,
+          0.958842
+        ],
+        [
+          0.78,
+          0.96084
+        ],
+        [
+          0.79,
+          0.962814
+        ],
+        [
+          0.8,
+          0.964765
+        ],
+        [
+          0.81,
+          0.966694
+        ],
+        [
+          0.82,
+          0.968602
+        ],
+        [
+          0.83,
+          0.970489
+        ],
+        [
+          0.84,
+          0.972355
+        ],
+        [
+          0.85,
+          0.974203
+        ],
+        [
+          0.86,
+          0.976032
+        ],
+        [
+          0.87,
+          0.977843
+        ],
+        [
+          0.88,
+          0.979637
+        ],
+        [
+          0.89,
+          0.981414
+        ],
+        [
+          0.9,
+          0.983174
+        ],
+        [
+          0.91,
+          0.984919
+        ],
+        [
+          0.92,
+          0.986649
+        ],
+        [
+          0.93,
+          0.988365
+        ],
+        [
+          0.94,
+          0.990066
+        ],
+        [
+          0.95,
+          0.991753
+        ],
+        [
+          0.96,
+          0.993428
+        ],
+        [
+          0.97,
+          0.995089
+        ],
+        [
+          0.98,
+          0.996738
+        ],
+        [
+          0.99,
+          0.998375
+        ],
+        [
+          1.0,
+          1.0
+        ]
+      ],
       "minimum_independent_variable_1": 0.0,
       "maximum_independent_variable_1": 1.0,
       "minimum_independent_variable_2": null,
       "maximum_independent_variable_2": null,
-      "minimum_dependent_variable_output": null,
-      "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.21.-A (2) for condensing boilers.  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.5.2. (Tables 8.4.5.2.-A and 8.4.5.2.-B)."
+      "minimum_dependent_variable_output": 0.0,
+      "maximum_dependent_variable_output": 1.0,
+      "implements": {
+        "equipment": "boiler",
+        "class": "non_condensing",
+        "table": "8.4.5.2.-A",
+        "row": "Non-condensing",
+        "transform": "PLF = PLR / FHeatPLC(PLR)",
+        "grid": "PLR 0 (node value 0), 0.00001 to 0.0001 step 0.00001, 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (169 nodes)",
+        "max_error_vs_exact": 0.001993695,
+        "error_grid": "sampled maximum relative error of the Linear interpolation against the exact rational PLF = PLR / FHeatPLC(PLR), sampled at PLR 0.00001 to 1.00000 step 0.00001: 0.1994 % at PLR 0.00142. The table carries a node at PLR 0 with PLF 0, so the Code equation is represented down to zero load: on (0, 1e-05) the interpolation is PLR x PLF(1e-05)/1e-05, which differs from the exact rational by at most FHeatPLC(0)/FHeatPLC(1e-05) - 1 = 0.0121 % as PLR -> 0. Node values are stored to six decimals (the SDK's field precision), which below PLR 0.0001 is three significant figures — a rounding of at most 0.0456 % at those nodes. There is no extrapolation region. EnergyPlus substitutes 0.01 for a non-positive curve output (Boilers.cc), which only the PLR = 0 node would produce, and at zero load the boiler model returns before the curve is evaluated; it applies no floor to a positive output (measured: a constant 0.005 curve runs unclamped). The Off Cycle Parasitic Fuel Load was evaluated as a carrier for the standby term and rejected: EnergyPlus 25.2 charges it in every timestep the boiler is OFF (measured, 45 of 45 off steps)."
+      },
+      "notes": "Reference non-condensing boiler part-load factor for Article 8.4.5.2. The Code states FHeatPLC as a fuel-INPUT ratio (Fuel_partload = Fuel_design x FHeatPLC), so the EnergyPlus normalized-boiler-efficiency multiplier is PLF = PLR / FHeatPLC(PLR) (the D-53 transform). Table:Lookup with a node at PLR 0, Linear interpolation; exact to six decimals (the SDK's field precision) at every node and the Code equation down to zero load."
     },
     {
       "name": "DXCOOL-REF-CAPFFLOW",
@@ -2308,54 +3011,438 @@
       "notes": "From NECB 2011 Table 8.4.4.21.-E (4).  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.5.7."
     },
     {
-      "name": "FURNACE-EFFPLR",
+      "name": "FURNACE-PLF-ATMOSPHERIC",
       "category": "Gas Heating Coil",
-      "form": "Cubic",
-      "dependent_variable": "FIRRatio",
-      "independent_variable_1": "QRatio",
+      "form": "TableLookup",
+      "dependent_variable": "PLF",
+      "independent_variable_1": "PLR",
       "independent_variable_2": null,
-      "coeff_1": 0.722,
-      "coeff_2": 0.8211,
-      "coeff_3": -1.0396,
-      "coeff_4": 0.5,
-      "coeff_5": null,
-      "coeff_6": null,
-      "coeff_7": null,
-      "coeff_8": null,
-      "coeff_9": null,
-      "coeff_10": null,
-      "minimum_independent_variable_1": 0.0,
+      "interpolation": "Linear",
+      "extrapolation": "Constant",
+      "points": [
+        [
+          0.055,
+          0.701082
+        ],
+        [
+          0.06,
+          0.715509
+        ],
+        [
+          0.065,
+          0.728235
+        ],
+        [
+          0.07,
+          0.739553
+        ],
+        [
+          0.075,
+          0.749692
+        ],
+        [
+          0.08,
+          0.758836
+        ],
+        [
+          0.085,
+          0.76713
+        ],
+        [
+          0.09,
+          0.774694
+        ],
+        [
+          0.095,
+          0.781625
+        ],
+        [
+          0.1,
+          0.788005
+        ],
+        [
+          0.11,
+          0.799373
+        ],
+        [
+          0.12,
+          0.809223
+        ],
+        [
+          0.13,
+          0.817865
+        ],
+        [
+          0.14,
+          0.82553
+        ],
+        [
+          0.15,
+          0.832395
+        ],
+        [
+          0.16,
+          0.838595
+        ],
+        [
+          0.17,
+          0.844238
+        ],
+        [
+          0.18,
+          0.849408
+        ],
+        [
+          0.19,
+          0.854175
+        ],
+        [
+          0.2,
+          0.858594
+        ],
+        [
+          0.21,
+          0.862711
+        ],
+        [
+          0.22,
+          0.866566
+        ],
+        [
+          0.23,
+          0.87019
+        ],
+        [
+          0.24,
+          0.873611
+        ],
+        [
+          0.25,
+          0.876851
+        ],
+        [
+          0.26,
+          0.879931
+        ],
+        [
+          0.27,
+          0.882867
+        ],
+        [
+          0.28,
+          0.885674
+        ],
+        [
+          0.29,
+          0.888365
+        ],
+        [
+          0.3,
+          0.890951
+        ],
+        [
+          0.31,
+          0.893442
+        ],
+        [
+          0.32,
+          0.895846
+        ],
+        [
+          0.33,
+          0.898172
+        ],
+        [
+          0.34,
+          0.900426
+        ],
+        [
+          0.35,
+          0.902614
+        ],
+        [
+          0.36,
+          0.904741
+        ],
+        [
+          0.37,
+          0.906813
+        ],
+        [
+          0.38,
+          0.908834
+        ],
+        [
+          0.39,
+          0.910807
+        ],
+        [
+          0.4,
+          0.912737
+        ],
+        [
+          0.41,
+          0.914626
+        ],
+        [
+          0.42,
+          0.916477
+        ],
+        [
+          0.43,
+          0.918294
+        ],
+        [
+          0.44,
+          0.920078
+        ],
+        [
+          0.45,
+          0.921832
+        ],
+        [
+          0.46,
+          0.923558
+        ],
+        [
+          0.47,
+          0.925258
+        ],
+        [
+          0.48,
+          0.926933
+        ],
+        [
+          0.49,
+          0.928585
+        ],
+        [
+          0.5,
+          0.930216
+        ],
+        [
+          0.51,
+          0.931826
+        ],
+        [
+          0.52,
+          0.933418
+        ],
+        [
+          0.53,
+          0.934992
+        ],
+        [
+          0.54,
+          0.936549
+        ],
+        [
+          0.55,
+          0.938091
+        ],
+        [
+          0.56,
+          0.939618
+        ],
+        [
+          0.57,
+          0.941131
+        ],
+        [
+          0.58,
+          0.942631
+        ],
+        [
+          0.59,
+          0.944119
+        ],
+        [
+          0.6,
+          0.945596
+        ],
+        [
+          0.61,
+          0.947062
+        ],
+        [
+          0.62,
+          0.948517
+        ],
+        [
+          0.63,
+          0.949963
+        ],
+        [
+          0.64,
+          0.9514
+        ],
+        [
+          0.65,
+          0.952828
+        ],
+        [
+          0.66,
+          0.954248
+        ],
+        [
+          0.67,
+          0.955661
+        ],
+        [
+          0.68,
+          0.957066
+        ],
+        [
+          0.69,
+          0.958465
+        ],
+        [
+          0.7,
+          0.959857
+        ],
+        [
+          0.71,
+          0.961244
+        ],
+        [
+          0.72,
+          0.962625
+        ],
+        [
+          0.73,
+          0.964
+        ],
+        [
+          0.74,
+          0.965371
+        ],
+        [
+          0.75,
+          0.966736
+        ],
+        [
+          0.76,
+          0.968098
+        ],
+        [
+          0.77,
+          0.969455
+        ],
+        [
+          0.78,
+          0.970809
+        ],
+        [
+          0.79,
+          0.972158
+        ],
+        [
+          0.8,
+          0.973505
+        ],
+        [
+          0.81,
+          0.974848
+        ],
+        [
+          0.82,
+          0.976188
+        ],
+        [
+          0.83,
+          0.977526
+        ],
+        [
+          0.84,
+          0.978861
+        ],
+        [
+          0.85,
+          0.980193
+        ],
+        [
+          0.86,
+          0.981524
+        ],
+        [
+          0.87,
+          0.982852
+        ],
+        [
+          0.88,
+          0.984178
+        ],
+        [
+          0.89,
+          0.985503
+        ],
+        [
+          0.9,
+          0.986826
+        ],
+        [
+          0.91,
+          0.988148
+        ],
+        [
+          0.92,
+          0.989468
+        ],
+        [
+          0.93,
+          0.990788
+        ],
+        [
+          0.94,
+          0.992106
+        ],
+        [
+          0.95,
+          0.993423
+        ],
+        [
+          0.96,
+          0.99474
+        ],
+        [
+          0.97,
+          0.996055
+        ],
+        [
+          0.98,
+          0.997371
+        ],
+        [
+          0.99,
+          0.998686
+        ],
+        [
+          1.0,
+          1.0
+        ]
+      ],
+      "minimum_independent_variable_1": 0.055,
       "maximum_independent_variable_1": 1.0,
       "minimum_independent_variable_2": null,
       "maximum_independent_variable_2": null,
-      "minimum_dependent_variable_output": null,
-      "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.21.-A (4) for atmospheric furnace.  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.5.3. (Table 8.4.5.3.)."
-    },
-    {
-      "name": "FURNACE-EFFPLR-COND",
-      "category": "Gas Heating Coil",
-      "form": "Cubic",
-      "dependent_variable": "FIRRatio",
-      "independent_variable_1": "QRatio",
-      "independent_variable_2": null,
-      "coeff_1": 1.0186,
-      "coeff_2": 0.2426,
-      "coeff_3": -0.5059,
-      "coeff_4": 0.2465,
-      "coeff_5": null,
-      "coeff_6": null,
-      "coeff_7": null,
-      "coeff_8": null,
-      "coeff_9": null,
-      "coeff_10": null,
-      "minimum_independent_variable_1": 0.0,
-      "maximum_independent_variable_1": 1.0,
-      "minimum_independent_variable_2": null,
-      "maximum_independent_variable_2": null,
-      "minimum_dependent_variable_output": null,
-      "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.21.-A (4) for condensing furnaces.  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.5.3. (Table 8.4.5.3.)."
+      "minimum_dependent_variable_output": 0.701082,
+      "maximum_dependent_variable_output": 1.0,
+      "implements": {
+        "equipment": "furnace",
+        "class": "atmospheric",
+        "table": "8.4.5.3",
+        "row": "Atmospheric",
+        "transform": "PLF = PLR / FHeatPLC(PLR)",
+        "grid": "PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes)",
+        "max_error_vs_exact": 0.00033024,
+        "error_grid": "sampled maximum relative error of the Linear interpolation against the exact rational PLF = PLR / FHeatPLC(PLR), sampled at PLR 0.055 to 1.00000 step 0.00001: 0.0330 % at PLR 0.05745. The first node's value (0.701082) lies above the engine's 0.7 floor on a fuel heating coil's part-load fraction (HeatingCoils.cc, PLF < 0.7 -> 0.7), so the engine never clamps this table; below the first node (PLR 0.055) the table's Constant extrapolation holds PLF at 0.701082, an under-count bounded by the standby term FHeatPLC(0) = 0.01861 x Fuel_rated. The coil's Off Cycle Parasitic Gas Load was evaluated and rejected: EnergyPlus charges it in every timestep the coil is OFF (measured, 659 of 659 off steps).",
+        "engine_floor": {
+          "multiplier_floor": 0.7,
+          "first_node_value": 0.701082,
+          "source": "HeatingCoils.cc CalcFuelHeatingCoil (PLF < 0.7 -> 0.7); never reached by this table"
+        }
+      },
+      "notes": "Reference atmospheric furnace part-load factor for Article 8.4.5.3. The Code states FHeatPLC as a fuel-INPUT ratio (Fuel_partload = Fuel_rated x FHeatPLC), so the EnergyPlus part-load-fraction multiplier is PLF = PLR / FHeatPLC(PLR) (the D-53 transform). Table:Lookup, Linear interpolation, Constant extrapolation; exact to six decimals at every node. The grid starts at PLR 0.055, the first 0.005 step above where the exact fraction meets the engine's floor: EnergyPlus floors a fuel heating coil's PLF at 0.7 (HeatingCoils.cc, CalcFuelHeatingCoil, 'PLF curve values must be >= 0.7'), which the rational reaches at PLR 0.05465, so the first node (0.701082) sits above the floor and the engine never clamps this table. Below PLR 0.055 the Constant extrapolation holds PLF at 0.701082; the departure from the Code there is bounded by a x Fuel_rated (1.86 % of rated fuel) and is stated in D-89."
     },
     {
       "name": "SWH-EFFFPLR",

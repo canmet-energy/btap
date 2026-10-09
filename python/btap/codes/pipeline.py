@@ -118,13 +118,13 @@ class _Run:
     """One determination's context: the option dict plus the mutable state the
     pipeline phases and the code family's hooks hand each other (internal —
     phases read run.opts and write the stateful slots)."""
-    opts: dict = None
+    opts: dict | None = None
     proposed: object = None
     reference: object = None
-    report: dict = None
+    report: dict | None = None
     audit: object = None
     hdd: object = None
-    proposed_annual_data: dict = None
+    proposed_annual_data: dict | None = None
     compliant: bool | None = None
     #: The edition this run is determined against — built ONCE here and reused
     #: by every phase that asks it for an edition-specific behaviour.
@@ -219,7 +219,7 @@ def _attach_weather_and_hdd(run):
                     f"weather['{key}'] is required when simulate: "
                     f"{opts['simulate']}")
         runner.attach_weather(run.proposed, epw=weather["epw"],
-                              ddy=weather["ddy"])
+                              ddy=weather["ddy"], audit=audit)
 
     # An explicit hdd= always wins; otherwise the CODE says where the
     # heating degree-days come from (NECB: Table C-1 from the EPW site, then

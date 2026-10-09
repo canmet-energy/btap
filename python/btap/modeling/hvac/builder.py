@@ -37,6 +37,11 @@ class Result:
     family: str
     air_loops: list
     control_zone: object
+    #: Structured evidence a builder chose to record about a grouping decision,
+    #: or None. The generic layer produces it and names no code family; a
+    #: code layer interprets it. Sol's `127` required this handoff because the
+    #: deciding method lives here and may not learn NECB ids.
+    grouping_evidence: object = None
 
 
 def _system_class(family):
@@ -60,9 +65,18 @@ def _system_class(family):
 
 
 def build_system(model, system_name, zones, control_zone=None, remove_existing=False,
-                 namer='default', config=None):
+                 namer='default', config=None, exclude_plants=None):
     """Build a complete HVAC system topology on a set of thermal zones by
     descriptive name.
+
+    ``exclude_plants`` names plant-loop handles this build must NOT adopt even
+    when they match. The NECB reference path uses it to keep a reference system
+    off ANY proposed plant that survived its teardown pass, whatever retained
+    it — a `copy_proposed` block, process or service water on a
+    ``WaterUseConnections``, or another non-zone demand. The retaining demand
+    keeps the plant; a replaced block does not join it (D-101). It applies to
+    hot-water, chilled-water and district loops alike, and travels into
+    composite parts. The default adopts as before.
 
     Topology only: run your sizing and code-efficiency passes afterwards (e.g. with
     openstudio-standards, whose efficiency application is data-driven and applies to
@@ -96,10 +110,15 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
     if resolved['family'] == 'composite':
         air_loops = []
         for part in resolved['parts']:
+            # The exclusion travels into the parts. A composite is where the
+            # plants actually get built for several families at once, so
+            # dropping it here left the documented contract unmet for exactly
+            # the systems that need it most (Sol, `145`).
             air_loops.extend(
                 build_system(model, part['name'], zones,
                              control_zone=control_zone, namer=namer,
-                             config=part.get('config')).air_loops)
+                             config=part.get('config'),
+                             exclude_plants=exclude_plants).air_loops)
         return Result(system_name=system_name, family='composite',
                       air_loops=air_loops, control_zone=control_zone)
 
@@ -113,18 +132,26 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
     if resolved.get('needs_boiler'):
         hw_loop = plant_loops.hot_water(model,
                                         fuel=resolved.get('boiler_fuel', 'NaturalGas'),
-                                        source=resolved.get('hw_source', 'boiler'))
+                                        source=resolved.get('hw_source', 'boiler'),
+                                        part_load_curve_class=resolved.get(
+                                            'boiler_part_load_curve_class'),
+                                        exclude=exclude_plants or ())
     chw_loop = None
     if resolved.get('needs_chiller'):
         chw_loop = plant_loops.chilled_water(model,
                                              chiller_type=resolved.get('chiller_type', 'Scroll'),
-                                             source=resolved.get('chw_source', 'water_cooled'))
+                                             source=resolved.get('chw_source', 'water_cooled'),
+                                             exclude=exclude_plants or ())
 
-    air_loops = system_class(resolved).build(model, zones,
-                                             control_zone=control_zone,
-                                             namer=namer,
-                                             hw_loop=hw_loop,
-                                             chw_loop=chw_loop)
+    # The INSTANCE is kept, not discarded: a builder may record structured
+    # evidence about a decision only it can see.
+    system = system_class(resolved)
+    air_loops = system.build(model, zones,
+                             control_zone=control_zone,
+                             namer=namer,
+                             hw_loop=hw_loop,
+                             chw_loop=chw_loop)
 
     return Result(system_name=system_name, family=resolved['family'],
-                  air_loops=air_loops, control_zone=control_zone)
+                  air_loops=air_loops, control_zone=control_zone,
+                  grouping_evidence=getattr(system, 'grouping_evidence', None))

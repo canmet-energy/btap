@@ -116,10 +116,6 @@ class TestRubyStr(unittest.TestCase):
         self.assertEqual('[1, "a", 2.5, nil]', ruby_str([1, "a", 2.5, None]))
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class TestRubyDivision(unittest.TestCase):
     """Ruby float division NEVER raises — the family-wide hazard found while
     porting the NECB lighting criteria, where dividing by a zero aperture
@@ -164,3 +160,7 @@ class TestRoundingNonFinite(unittest.TestCase):
         for value in (math.inf, -math.inf, math.nan):
             with self.assertRaises(ValueError):
                 ruby_round(value)
+
+
+if __name__ == "__main__":
+    unittest.main()

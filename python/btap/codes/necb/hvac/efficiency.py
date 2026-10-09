@@ -26,6 +26,10 @@ from btap._compat import NullAudit, ruby_round, sorted_by_name
 from btap.codes import resolve
 from btap.codes.necb import code_id, rulesdata
 from btap.modeling.hvac.components import coils as _coils
+from btap.modeling.hvac.systems.plant_loops import (
+    BOILER_PART_LOAD_CLASS_FEATURE,
+    BOILER_PLANT_ROLE_FEATURE,
+)
 
 
 def data(edition):
@@ -495,8 +499,15 @@ def _apply_fan_power_curve(fan, ruleset, audit):
         flow = (fan.autosizedMaximumFlowRate().get()
                 if fan.autosizedMaximumFlowRate().is_initialized() else None)
     if flow is None:
-        audit.warn('efficiency', f'{fan.nameString()}: flow not sized — 8.4.4.17 fan curve selection needs the '
-                                 'rated power; run sizing first (curve not applied)')
+        # The subsection is per-edition; line 481's own comment says
+        # "(2025: 8.4.5.17)" while this literal said 8.4.4.17 on every run.
+        # Same class as Fable's `131` F6, found by sweeping both editions for
+        # foreign-prefix citations rather than reported — in NECB 2025, 8.4.4
+        # is the archetype-EUI subsection entirely.
+        audit.warn('efficiency', f'{fan.nameString()}: flow not sized — '
+                                 f"{ruleset.article('reference_subsection')}.17 fan curve "
+                                 'selection needs the rated power; run sizing first '
+                                 '(curve not applied)')
         return
 
     power_kw = fan.pressureRise() * flow / (fan.fanTotalEfficiency() * 1000.0)
@@ -536,18 +547,18 @@ def _apply_pump_rules(model, ruleset, rule, audit, proposed=None):
     minimum-flow clamp at D x rated flow — the polynomial at D equals E
     within the table's rounding (riding curve 0.691 vs 0.68, VSD 0.043 vs
     0.04)."""
+    # The hydronic-pump article is 8.4.4.14 in NECB 2020 and 8.4.5.14 in 2025.
+    # The action text here spelled 2020's on every run (Fable's `133` G3),
+    # beside an `article=` field that was already correct.
+    pump_article = f"{ruleset.article('reference_subsection')}.14"
+
     if rule is None:
         return
 
     prefix = ruleset.article('reference_subsection')
-    stats = _proposed_pump_stats(proposed)
     if proposed is None:
         audit.info('efficiency', f'no proposed model supplied — {prefix}.14.(1)-(3) pump power transfer '
-                                 f'skipped (Table {prefix}.14. curves still applied)', ruling='D-11')
-    elif not stats:
-        audit.warn('efficiency', 'proposed model has NO pumps with determinable power+flow — '
-                                 f'{prefix}.14.(1)-(3) power NOT transferred to any reference pump',
-                   ruling='D-11')
+                                 f'skipped (Table {prefix}.14. curves still applied)', ruling='D-11 D-93')
     for loop_ in sorted_by_name(model.getPlantLoops()):
         # 8.4.4.14 scopes HVAC hydronic pumping; a service-water loop's
         # circulator is Part 6 territory and stays as built. Transferring the
@@ -557,20 +568,23 @@ def _apply_pump_rules(model, ruleset, rule, audit, proposed=None):
         # fleet passed the same code path only by arithmetic luck.
         if _swh_loop(loop_):
             audit.info('efficiency',
-                       'service water heating loop — outside 8.4.4.14 (HVAC hydronic pumps); pump left as built',
+                       f'service water heating loop — outside {pump_article} (HVAC hydronic pumps); '
+                       'pump left as built',
                        target=loop_.nameString(), ruling='D-27')
             continue
 
         loop_type = loop_.sizingPlant().loopType()
-        for comp in sorted_by_name(loop_.supplyComponents()):
-            if comp.to_PumpVariableSpeed().is_initialized():
-                pump = comp.to_PumpVariableSpeed().get()
+        # _applicable_pumps, not a supply-side scan: a primary-secondary
+        # arrangement puts the secondary pump on the DEMAND side, and it needs
+        # the (4)-(5) curve exactly as much as the primary does (Sol, PR #53).
+        for pump in _applicable_pumps(loop_):
+            if pump.iddObjectType().valueName() == 'OS_Pump_VariableSpeed':
                 row = rule['curves']['riding pump curve']
                 pump.setCoefficient1ofthePartLoadPerformanceCurve(row['a'])
                 pump.setCoefficient2ofthePartLoadPerformanceCurve(row['b'])
                 pump.setCoefficient3ofthePartLoadPerformanceCurve(row['c'])
                 pump.setCoefficient4ofthePartLoadPerformanceCurve(0.0)
-                flow = optional_f(pump.ratedFlowRate()) or optional_f(pump.autosizedRatedFlowRate())
+                flow = _pump_flow(pump)
                 if flow:
                     pump.setMinimumFlowRate(row['d'] * flow)
                 audit.decision('efficiency', 'variable-flow pump modeled riding its curve',
@@ -581,12 +595,8 @@ def _apply_pump_rules(model, ruleset, rule, audit, proposed=None):
                                       f"{ruby_round(row['d'] * flow, 5)} m3/s") if flow
                                      else 'coefficients set; min-flow clamp deferred (flow not sized)',
                                article=f'{prefix}.14.(4)-(5); Table {prefix}.14.', ruling='D-11')
-                if proposed is not None and stats:
-                    _transfer_pump_power(pump, flow, loop_type, stats, prefix, audit)
-            elif comp.to_PumpConstantSpeed().is_initialized() and proposed is not None and stats:
-                pump = comp.to_PumpConstantSpeed().get()
-                flow = optional_f(pump.ratedFlowRate()) or optional_f(pump.autosizedRatedFlowRate())
-                _transfer_pump_power(pump, flow, loop_type, stats, prefix, audit)
+        if proposed is not None:
+            _transfer_by_correspondence(loop_, proposed, prefix, audit)
         _apply_pump_power_cap(loop_, loop_type, rule.get('power_caps_w_per_kw'), prefix, audit)
 
 
@@ -610,14 +620,33 @@ def _apply_pump_power_cap(loop_, loop_type, caps, prefix, audit):
         audit.info('efficiency', "5.2.6.3 pump-power cap not evaluable — loop's peak thermal demand unsized",
                    target=loop_.nameString(), article='5.2.6.3.(1)', ruling='D-38')
         return
-    pumps = []
-    for c in loop_.supplyComponents():
-        if c.to_PumpVariableSpeed().is_initialized():
-            pumps.append(c.to_PumpVariableSpeed().get())
-        elif c.to_PumpConstantSpeed().is_initialized():
-            pumps.append(c.to_PumpConstantSpeed().get())
-    powers = [optional_f(p.ratedPowerConsumption()) or optional_f(p.autosizedRatedPowerConsumption())
-              for p in pumps]
+    # 5.2.6.3.(1) caps the combined power of ALL the pumps in the hydronic
+    # system, and a primary-secondary arrangement keeps its secondary pump on
+    # the demand side. Scanning only the supply side reported a 10,100 W loop
+    # as 100 W and certified it "within the maximum" against a 450 W cap, while
+    # the demand pump kept every watt (Sol, PR #53). One collector, so a pump
+    # cannot be visible to the transfer and invisible to the cap.
+    pumps = _applicable_pumps(loop_)
+    # D-92: derive each pump's power the way E+ will — from a hard-set value, a
+    # PowerPerFlow intensity, or the flow/head/coefficient triple — rather than
+    # reading a sizing SQL the pass has just invalidated.
+    flows = [_pump_flow(p) for p in pumps]
+    sources = [_pump_power_source(p, f) for p, f in zip(pumps, flows)]
+    powers = [w for _, w in sources]
+    # A pump whose flow is readable but whose power is not states something no
+    # pump can draw (a negative or zero head, a negative rated power). That is a
+    # broken input, not an unsized model, and it must SHOUT rather than be
+    # filed as a quiet "not evaluable": the loop is left unclamped either way,
+    # so a reader has to know the cap was never actually applied here.
+    malformed = [p.nameString() for p, f, w in zip(pumps, flows, powers)
+                 if w is None and f is not None and f > 0]
+    if malformed:
+        audit.warn('efficiency', '5.2.6.3 pump-power cap NOT APPLIED — '
+                                 f'{", ".join(malformed)} state a power no pump can draw (non-positive '
+                                 'or non-finite), so this loop\'s combined power cannot be measured and '
+                                 'a real over-cap pump on it would go unclamped',
+                   target=loop_.nameString(), article='5.2.6.3.(1)', ruling='D-38')
+        return
     if not pumps or any(p is None for p in powers):
         audit.info('efficiency', '5.2.6.3 pump-power cap not evaluable — pump power unsized',
                    target=loop_.nameString(), article='5.2.6.3.(1)', ruling='D-38')
@@ -633,12 +662,12 @@ def _apply_pump_power_cap(loop_, loop_type, caps, prefix, audit):
         return
 
     factor = cap_w / combined
-    for pump, power in zip(pumps, powers):
-        new_power = power * factor
-        flow = optional_f(pump.ratedFlowRate()) or optional_f(pump.autosizedRatedFlowRate())
-        # keep the flow/head/power triple physical (same guard as the transfer)
-        _reconcile_pump_head(pump, new_power, flow)
-        pump.setRatedPowerConsumption(new_power)
+    for pump, (source, _) in zip(pumps, sources):
+        # D-92: clamp through whichever field E+ actually reads, scaling head
+        # with it so the implied efficiency is unchanged — the gem's mechanism
+        # and the one A-8.4.x.14.(2) uses, generalised to the pumps this pass
+        # never transferred.
+        _scale_pump_power(pump, source, factor)
     audit.decision('efficiency', 'combined pump power exceeds Table 5.2.6.3 — clamped to the maximum '
                                  '(min-wins over the pump-power transfer)',
                    target=loop_.nameString(),
@@ -654,17 +683,16 @@ def _pump_cap_basis(loop_, loop_type):
     water-to-air heat pump coils takes the WSHP row regardless of its
     sizing type; otherwise the row follows the Sizing:Plant loop type
     ('Condenser' = heat rejection, demand from the chillers it serves)."""
-    wta = [c for c in loop_.demandComponents()
-           if c.to_CoilCoolingWaterToAirHeatPumpEquationFit().is_initialized()
-           or c.to_CoilHeatingWaterToAirHeatPumpEquationFit().is_initialized()]
+    wta = _water_to_air_coils(loop_)
     if wta:
         kw = 0.0
-        for c in wta:
-            coil = c.to_CoilCoolingWaterToAirHeatPumpEquationFit()
-            if coil.empty():
+        for coil in wta:
+            # Cooling coils carry the loop's sizing basis; the heating halves of
+            # the same units add nothing to it. Both speed controls spell the
+            # capacity getter the same way.
+            if not hasattr(coil, 'ratedTotalCoolingCapacity'):
                 continue
 
-            coil = coil.get()
             kw += (optional_f(coil.ratedTotalCoolingCapacity())
                    or optional_f(coil.autosizedRatedTotalCoolingCapacity()) or 0.0) / 1000.0
         return 'Water-source heat pump', (kw if kw > 0 else None)
@@ -704,102 +732,955 @@ def _swh_loop(loop_):
             or any(c.to_WaterUseConnections().is_initialized() for c in loop_.demandComponents()))
 
 
-# Sentences (1)-(3) through one mechanism: the proposed loop-type's pumps'
-# combined peak power intensity, W/(L/s) — sentence (3)'s own metric, which
-# equals head/efficiency (sentence (1): P = V x head / eff) and absorbs the
-# multi-pump combination of sentence (2) by summing power AND flow. The
-# reference pump's rated power is hard-set to that intensity times its own
-# sized flow (reference flows legitimately differ from proposed flows, so
-# the INTENSITY, not the absolute wattage, is what transfers).
-# The total (wire-to-water) pump efficiency the reconciliation targets when
-# a hard-set power and an inherited head disagree.
-DESIGN_PUMP_EFFICIENCY = 0.65
+# D-92 replaced the MECHANISM and D-93 the value source. What follows describes
+# the mechanism; the value now comes from the correspondence and the sentence
+# that governs it, never from a whole-building blend.
+#
+# (historical) D-92 replaced the MECHANISM, not yet the value source. It was
+# still D-11's: the proposed loop-type's pumps' combined peak power intensity,
+# W/(L/s). What changed is how it reaches the model — the reference pump's
+# head, shaft coefficient and motor efficiency are stated and its power is left
+# autosized, instead of its power being hard-set and the head bent afterwards
+# when the two disagreed. On a single-pump correspondence that collapses
+# algebraically to the proposed pump's own head and efficiency, which is what
+# sentence (1) asks for; DF-11 carries the explicit (1)/(2)/(3) branch.
+#
+# E+ derives pump power from the flow/head/coefficient triple under
+# PowerPerFlowPerPressure: P = V x H x k / motor_eff, where k is the design
+# shaft power per unit flow per unit head (1 / pump efficiency). D-92 writes
+# those three fields and leaves power autosized, so the pump efficiency E+
+# computes IS the one we stated — it cannot exceed the motor efficiency, and
+# the "Calculated Pump Efficiency > 100%" fatal is unreachable by construction.
+POWER_PER_FLOW_PER_PRESSURE = 'PowerPerFlowPerPressure'
+# The other E+ sizing method: P = V x DesignElectricPowerPerUnitFlowRate, with
+# head absent from the equation entirely. A cap that moves head does nothing to
+# a pump in this mode, which is why the clamp branches on the method.
+POWER_PER_FLOW = 'PowerPerFlow'
+# E+'s own defaults, and the physical fallback when the proposed pump's triple
+# implies an efficiency no pump can have. The derived power does NOT depend on
+# how the total splits between motor and impeller — P = V x H x k / motor_eff
+# with H = I x 1000 x motor_eff x pump_eff cancels both — so a non-physical
+# proposed split can be replaced by a physical one without moving a watt.
+DEFAULT_MOTOR_EFFICIENCY = 0.9
+DEFAULT_PUMP_EFFICIENCY = 0.78
 
 
-def _reconcile_pump_head(pump, power_w, flow):
-    """Keep a pump's flow/head/power triple physical whenever the power is
-    hard-set (the 8.4.4.14 transfer and the 5.2.6.3 clamp both do that):
-    EnergyPlus FATALS on a triple implying a pump efficiency above the motor
-    efficiency. The transferred power is authoritative (it IS the article's
-    number), so the inherited head is what gives.
+def _state_pump_characteristics(pump, w_per_l_s, motor_eff, pump_eff):
+    """D-92: state the reference pump as head + shaft coefficient + motor
+    efficiency and leave its power AUTOSIZED, so EnergyPlus derives the power
+    the Article asks for instead of being handed a number that may contradict
+    the head it was given.
 
-    :return: bool — whether the head was changed"""
-    if not (flow is not None and flow > 0 and float(power_w or 0.0) > 0):
-        return False
-    if (flow * pump.ratedPumpHead() / power_w) <= pump.motorEfficiency():
-        return False
+    The head that reproduces an intensity I (W/(L/s)) is I x 1000 x motor_eff x
+    pump_eff, since P = V x H x k / motor_eff with k = 1 / pump_eff. Stating the
+    efficiencies rather than solving for them is what makes the E+ pump
+    efficiency equal the one we declared.
 
-    pump.setRatedPumpHead(DESIGN_PUMP_EFFICIENCY * power_w / flow)
-    return True
+    :return: the head written, in Pa"""
+    head_pa = w_per_l_s * 1000.0 * motor_eff * pump_eff
+    pump.setDesignPowerSizingMethod(POWER_PER_FLOW_PER_PRESSURE)
+    pump.setDesignShaftPowerPerUnitFlowRatePerUnitHead(1.0 / pump_eff)
+    pump.setMotorEfficiency(motor_eff)
+    pump.setRatedPumpHead(head_pa)
+    pump.autosizeRatedPowerConsumption()
+    return head_pa
 
 
-def _transfer_pump_power(pump, flow, loop_type, stats, prefix, audit):
-    s = stats.get(loop_type)
-    if s is None:
-        audit.warn('efficiency', f'{pump.nameString()}: proposed has NO {loop_type}-type loop pumps with known '
-                                 f'power+flow — {prefix}.14.(1)-(3) power NOT transferred (gem default retained)',
-                   ruling='D-11')
-        return
-    if flow is None:
-        audit.warn('efficiency', f'{pump.nameString()}: reference pump flow not sized — {prefix}.14.(1)-(3) '
-                                 'transfer needs the sized flow; run sizing first', ruling='D-11')
-        return
-    w_per_l_s = s['power_w'] / s['flow_l_s']
-    power_w = w_per_l_s * flow * 1000.0
-    # E+ hard-rejects power/head/flow triples implying pump efficiency
-    # above motor efficiency ("Calculated Pump Efficiency > 100%" fatal).
-    # The transferred power is authoritative (it IS the article's number);
-    # reconcile the inherited head to a physical 65% total efficiency.
+def _pump_power_source(pump, flow):
+    """How EnergyPlus will actually arrive at this pump's power, and what that
+    power is — ``(source, watts)``, or ``(source, None)`` when it cannot be read.
+
+    D-92 states the pumps it transfers as PowerPerFlowPerPressure with the power
+    autosized, but the pass reaches pumps it never transfers: the 5.2.6.3 cap
+    runs with or without a proposed model, and a caller's model may hard-set
+    power or choose PowerPerFlow. For those, head does NOT enter E+'s sizing
+    equation, so a cap that only scales head reports a clamp it did not apply
+    (Sol, PR #50). Each source must be clamped on its own terms."""
+    if not pump.isRatedPowerConsumptionAutosized():
+        return 'hard', _usable_watts(optional_f(pump.ratedPowerConsumption()))
+
+    if flow is None or flow <= 0:
+        return 'autosized', None
+
+    if pump.designPowerSizingMethod() == POWER_PER_FLOW:
+        return 'per_flow', _usable_watts(flow * pump.designElectricPowerPerUnitFlowRate())
+
+    motor_eff = pump.motorEfficiency()
+    if not motor_eff:
+        return 'per_flow_per_pressure', None
+
+    return ('per_flow_per_pressure',
+            _usable_watts(flow * pump.ratedPumpHead()
+                          * pump.designShaftPowerPerUnitFlowRatePerUnitHead() / motor_eff))
+
+
+def _usable_watts(watts):
+    """A pump power that can be reasoned about, else ``None``.
+
+    Input hardening (Sol, PR #50). The SDK refuses a motor efficiency outside
+    (0, 1], a non-positive shaft coefficient, and a non-finite head — but it
+    ACCEPTS a negative or zero rated head and a negative rated power. Those
+    reach the 5.2.6.3 cap as a negative contribution to the loop's combined
+    power, and because the clamp only fires when the combined power EXCEEDS the
+    cap, one malformed pump can drag the sum under it: a genuine 5,110 W pump
+    beside a -5,110 W one sums to zero, the loop is certified "within the Table
+    5.2.6.3 maximum", and the real pump escapes the clamp. A compliance check
+    that can be made to pass a violating loop is worse than one that refuses to
+    answer, so an unusable power is reported as unreadable and the caller says
+    so out loud."""
+    if watts is None or not math.isfinite(watts) or watts <= 0.0:
+        return None
+
+    return watts
+
+
+def _pump_power_from_triple(pump, flow):
+    """The power E+ will derive for a PowerPerFlowPerPressure pump: V x H x k /
+    motor_eff. Computed, never read back from a sizing SQL — after the pass
+    writes a new head the stored autosized value is stale until the next sizing
+    run, and the 5.2.6.3 cap has to compare against what the model now says."""
+    return _pump_power_source(pump, flow)[1]
+
+
+def _scale_pump_power(pump, source, factor):
+    """Scale a pump's power by ``factor`` through whichever field E+ actually
+    reads, and scale its head by the same factor so the IMPLIED EFFICIENCY is
+    unchanged.
+
+    Scaling head alongside is not decoration. Cutting a hard-set power while
+    leaving the head raises V x H / P — the efficiency E+ checks — and a big
+    enough cut pushes it past the motor efficiency into the "Calculated Pump
+    Efficiency > 100%" fatal. That is why the pre-D-92 code had to reconcile the
+    head after clamping. Moving both together preserves the ratio instead, so
+    there is nothing to reconcile."""
+    pump.setRatedPumpHead(pump.ratedPumpHead() * factor)
+    if source == 'hard':
+        power = optional_f(pump.ratedPowerConsumption())
+        if power is not None:
+            pump.setRatedPowerConsumption(power * factor)
+    elif source == 'per_flow':
+        pump.setDesignElectricPowerPerUnitFlowRate(pump.designElectricPowerPerUnitFlowRate() * factor)
+    # 'per_flow_per_pressure': power is autosized FROM the head, so the head
+    # scaling above already carried it.
+
+
+#: OpenStudio's own defaults. A field still holding one of these was never
+#: stated by a modeller, which is what 8.4.x.14.(3)'s "not known" means in a
+#: model (Sol, DF-11 increment B). Blank-ness cannot be used instead: the
+#: PumpConstantSpeed constructor WRITES head and motor efficiency as explicit
+#: fields, so isRatedPumpHeadDefaulted() is False on a pump nobody touched,
+#: and the shaft coefficient has no isDefaulted accessor at all.
+SDK_DEFAULT_HEAD_PA = 179352.0
+SDK_DEFAULT_SHAFT_COEFFICIENT = 1.282051282
+#: The hydronic-pump article in the numbering the source literals use; the
+#: active edition's own number comes from the ruleset, as everywhere else.
+LITERAL_PUMP_ARTICLE = '8.4.4.14'
+
+
+#: Water-to-air heat-pump coils, constant-speed and variable-speed alike. ONE
+#: registry, because three places used to carry their own partial list: the
+#: served-zone traversal knew the variable-speed ones, while _loop_role and
+#: _pump_cap_basis knew only the equation-fit pair — so a variable-speed WSHP
+#: loop classified as plain hot water and took the Heating cap row instead of
+#: the water-source one (Sol, PR #53).
+WATER_TO_AIR_HEAT_PUMP_COILS = (
+    'to_CoilCoolingWaterToAirHeatPumpEquationFit',
+    'to_CoilHeatingWaterToAirHeatPumpEquationFit',
+    'to_CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit',
+    'to_CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit',
+)
+
+
+#: Every water coil that delivers a hydronic loop's output to a thermal block.
+#: COMPOSED from the registry above, not a second copy of it: the water-to-air
+#: entries must be the same list the role and cap classifications use, or the
+#: traversal silently stops seeing a coil type the others recognise.
+ZONE_SERVING_WATER_COILS = (
+    'to_CoilHeatingWater', 'to_CoilCoolingWater',
+    # A hot-water baseboard carries CoilHeatingWaterBaseboard, NOT
+    # CoilHeatingWater. Dropping it would strand a baseboard-only loop with no
+    # served zones, on the commonest reference heating terminal there is.
+    'to_CoilHeatingWaterBaseboard',
+    'to_CoilHeatingWaterBaseboardRadiant',
+    'to_CoilCoolingWaterPanelRadiant',
+    'to_CoilHeatingLowTempRadiantVarFlow',
+    'to_CoilCoolingLowTempRadiantVarFlow',
+    'to_CoilHeatingLowTempRadiantConstFlow',
+    'to_CoilCoolingLowTempRadiantConstFlow',
+) + WATER_TO_AIR_HEAT_PUMP_COILS
+
+
+def _water_to_air_coils(loop_):
+    """The loop's water-to-air heat-pump coils, whatever their speed control."""
+    found = []
+    for comp in loop_.demandComponents():
+        for caster in WATER_TO_AIR_HEAT_PUMP_COILS:
+            candidate = getattr(comp, caster, None)
+            if candidate is not None and candidate().is_initialized():
+                found.append(candidate().get())
+                break
+    return found
+
+
+def _loop_role(loop_):
+    """What this hydronic loop is FOR — finer than Sizing:Plant's loop type.
+
+    8.4.x.14 corresponds pumps between buildings, and a correspondence is only
+    meaningful between loops doing the same job. Loop type alone is too coarse:
+    a water-source heat-pump loop carries a boiler and reports 'Heating', so it
+    would match a reference baseboard hot-water loop and transfer characteristics
+    between two quite different systems. _pump_cap_basis already separates that
+    case for the Part 5 cap; this uses the same test.
+    """
+    if _swh_loop(loop_):
+        return 'service_water'
+
+    if _water_to_air_coils(loop_):
+        return 'heat_pump_source'
+
+    return {'Heating': 'hot_water', 'Cooling': 'chilled_water',
+            'Condenser': 'condenser'}.get(loop_.sizingPlant().loopType())
+
+
+def _pump_flow(pump):
+    """A pump's design flow — stated, else the value sizing produced.
+
+    One definition, because this expression appeared inline at six call sites
+    and every defect in this Article's implementation so far has come from two
+    places computing the same thing independently.
+    """
+    return optional_f(pump.ratedFlowRate()) or optional_f(pump.autosizedRatedFlowRate())
+
+
+def _coil_served_zones(coil):
+    """The thermal blocks a water coil conditions, by name.
+
+    THREE accessors, not two. A coil sitting directly in zone equipment answers
+    `containingZoneHVACComponent`, and one on an air loop's main branch answers
+    `airLoopHVAC` — but a coil held inside an `AirLoopHVACUnitarySystem` or an
+    `AirTerminalSingleDuctVAVReheat` answers NEITHER: only
+    `containingHVACComponent` is set. Checking the first two alone made a
+    hot-water loop serving VAV reheat terminals resolve to no zones at all
+    (Fable, PR #53).
+
+    That is worse than a loud decline where the proposed has one loop: with two
+    loops — reheat on one, baseboards on another — the reference matched the
+    baseboard loop alone and reported a confident "one-to-one" for what is
+    really an N:1 consolidation. A silently wrong sentence, on an ordinary
+    rooftop-with-hydronic-reheat building.
+    """
+    zones = set()
+    container = coil.containingZoneHVACComponent()
+    if container.is_initialized() and container.get().thermalZone().is_initialized():
+        zones.add(container.get().thermalZone().get().nameString())
+
+    air_loop = coil.airLoopHVAC()
+    if air_loop.is_initialized():
+        zones |= {z.nameString() for z in air_loop.get().thermalZones()}
+
+    held_by = coil.containingHVACComponent()
+    if held_by.is_initialized():
+        zones |= _holder_zones(held_by.get())
+    return zones
+
+
+def _holder_zones(holder):
+    """The zones a coil's HOLDER conditions — a distinction a union destroys.
+
+    Both kinds of holder answer `airLoopHVAC()`, and they mean opposite things
+    by it. An `AirLoopHVACUnitarySystem` on the loop's main branch conditions
+    EVERY zone on that loop. An air terminal conditions exactly ONE: its own.
+    Attributing the loop's whole zone list to both over-attributes the
+    terminal, so a reheat coil serving one zone claims every zone on the
+    rooftop unit.
+
+    That is not a harmless over-count. Correspondence compares served-zone
+    sets, so the inflated set makes a reference loop look like it matches a
+    proposed loop it only partly overlaps: the loud "partial overlap is not a
+    correspondence" decline becomes a confident, wrong one-to-one, and a second
+    proposed loop's pump is dropped from the transfer without a word (Fable,
+    PR #53).
+    """
+    holder_loop = holder.airLoopHVAC()
+    if not holder_loop.is_initialized():
+        # No air loop does not mean no zone: an `AirLoopHVACUnitarySystem` is
+        # also a `ZoneHVACComponent` and can sit directly in a thermal zone,
+        # where it conditions that one zone. The cast is not optional —
+        # `containingHVACComponent()` hands back a base `HVACComponent`, which
+        # carries no `thermalZone` accessor at all, so reaching for one by
+        # name finds nothing (Fable, PR #53, third round).
+        zone_equipment = holder.to_ZoneHVACComponent()
+        if zone_equipment.is_initialized():
+            zone = zone_equipment.get().thermalZone()
+            if zone.is_initialized():
+                return {zone.get().nameString()}
+        return set()
+    loop_zones = holder_loop.get().thermalZones()
+
+    # Every OpenStudio air terminal is an OS:AirTerminal:* object, so the
+    # prefix recognises one without enumerating sixteen casters that would fall
+    # out of date the next time the SDK adds a terminal. The three dual-duct
+    # types do not map back from their zone, but none of them holds a water
+    # coil, so none reaches here.
+    if not holder.iddObjectType().valueName().startswith('OS_AirTerminal'):
+        return {z.nameString() for z in loop_zones}
+
+    # A terminal no zone claims conditions NO zone. Returning the whole loop
+    # here would reinstate exactly the over-attribution above.
+    return {
+        z.nameString()
+        for z in loop_zones
+        if z.airLoopHVACTerminal().is_initialized()
+        and z.airLoopHVACTerminal().get().handle() == holder.handle()
+    }
+
+
+#: Casts whose TERTIARY connection is a load the component SERVES. Direction is
+#: a per-class fact that no generic accessor carries, and the SDK's own named
+#: accessor is the evidence: `heatRecoveryLoop` and `heatingPlantLoop` receive
+#: heat, so they are loads.
+#:
+#: `ChillerAbsorption` and `ChillerAbsorptionIndirect` are deliberately ABSENT.
+#: Their tertiary is `generatorLoop`, a heat SOURCE the chiller draws from.
+#: Treating every tertiary as a load made an absorption chiller's generator loop
+#: "served", which over-attributed its blocks to the condenser loop and produced
+#: a FALSE one-to-one match — a silent (3) transfer where the previous code
+#: declined loudly (Fable, PR #63). That is the D-93 false-correspondence class
+#: that caused two false-compliance results earlier in this work.
+#:
+#: An omission from this list costs a loud decline, never a silent transfer,
+#: which is why it defaults to "not a load". Its test pins each entry against
+#: the SDK exposing a load-named accessor, and pins that a listed class's
+#: tertiary really is attributed as served. It does NOT prove the named accessor
+#: and `tertiaryPlantLoop` are the same loop; an earlier comment here claimed
+#: that check existed when it did not (Fable, PR #63).
+TERTIARY_LOAD_CASTS = ('to_ChillerElectricEIR', 'to_ChillerElectricReformulatedEIR',
+                       'to_CentralHeatPumpSystem', 'to_HeatPumpPlantLoopEIRHeating',
+                       'to_HeatPumpPlantLoopEIRCooling')
+
+
+def _load_loops(comp):
+    """The loops this component SERVES: its supply-side loop, plus the tertiary
+    where that tertiary is verified to be a load rather than a source."""
+    loops = list(_w2w_loops(comp, ('plantLoop',)))
+    for caster in TERTIARY_LOAD_CASTS:
+        candidate = getattr(comp, caster, None)
+        if candidate is not None and candidate().is_initialized():
+            loops.extend(_w2w_loops(comp, ('tertiaryPlantLoop',)))
+            break
+    return tuple(loops)
+
+
+def _w2w_loops(comp, sides):
+    cast = getattr(comp, 'to_WaterToWaterComponent', None)
+    if cast is None or not cast().is_initialized():
+        return ()
+    w2w = cast().get()
+    loops = []
+    for accessor in sides:
+        handle = getattr(w2w, accessor, None)
+        if handle is not None and handle().is_initialized():
+            loops.append(handle().get())
+    return tuple(loops)
+
+
+def _served_zone_names(loop_, _seen=None):
+    """The thermal zones this loop ultimately conditions, by NAME.
+
+    Names, not handles: the reference is `model.clone()`d from the proposed and
+    clone does not preserve handles, so a handle-keyed map cannot span the two
+    buildings. Zone names survive the clone and the teardown.
+
+    A condenser loop reaches zones only through the chillers it rejects heat
+    for, and a loop behind a heat exchanger only through the loop it serves, so
+    both recurse (guarded against a loop pair that references itself).
+    """
+    seen = _seen if _seen is not None else set()
+    if loop_.handle() in seen:
+        return set()
+
+    seen.add(loop_.handle())
+    zones: set[str] = set()
+    for comp in loop_.demandComponents():
+        coil = None
+        # CoilHeatingWaterBaseboard is a DIFFERENT class from CoilHeatingWater,
+        # and it is what a hot-water baseboard carries — the commonest reference
+        # heating terminal there is. Omitting it made a baseboard-only loop
+        # resolve to no served zones, so the correspondence declined on exactly
+        # the systems this Article most often applies to.
+        # Composed from WATER_TO_AIR_HEAT_PUMP_COILS rather than restating it:
+        # three places carrying their own copy is exactly how a variable-speed
+        # WSHP loop came to classify as plain hot water. A registry that one
+        # caller still duplicates is not shared, it is only currently in
+        # agreement.
+        for caster in ZONE_SERVING_WATER_COILS:
+            candidate = getattr(comp, caster, None)
+            if candidate is not None and candidate().is_initialized():
+                coil = candidate().get()
+                break
+        if coil is not None:
+            zones |= _coil_served_zones(coil)
+            continue
+
+        # Equipment that passes the load on to another loop rather than a zone.
+        # Same dual-loop class as the network walk, so the two cannot disagree
+        # about what couples loops; here the DIRECTION matters.
+        #
+        # `_load_loops` returns the component's supply-side loop, plus a tertiary
+        # verified to be a load. That is right when this loop SUPPLIES the
+        # component — but it is wrong when this loop is itself the component's
+        # load tertiary, because the SDK puts a heat-recovery connection on the
+        # recovery loop's DEMAND side. Walking the recovery loop then finds the
+        # chiller and attributes the CHILLED-water blocks to the HEATING loop the
+        # chiller merely heats, which is a false one-to-one. Pre-existing and
+        # identical on 25d8795; logged as DF-20 rather than repaired here,
+        # because the repair moves attribution (Fable, PR #63).
+        for served in _load_loops(comp):
+            zones |= _served_zone_names(served, seen)
+    return zones
+
+
+def _distribution_flow(loop_):
+    """The design flow delivered through this loop's load-serving circuit, in
+    m3/s — counted ONCE per fluid stream, which is NOT the sum of its pumps'
+    flows (Sol, DF-11 increment B).
+
+    Two pumps in series, or a primary-secondary arrangement, circulate the same
+    water; summing their rated flows counts it twice and halves the resulting
+    W/(L/s). On the Code's own Appendix example that understates the reference
+    pump by a third. The loop's own maximum flow rate is that stream, counted
+    once, whichever sizing option produced it.
+
+    :return: (flow m3/s, source) or (None, reason) — never a silent fallback
+    """
+    hard = optional_f(loop_.maximumLoopFlowRate())
+    if hard is not None and hard > 0:
+        return hard, 'input'
+
+    sized = optional_f(loop_.autosizedMaximumLoopFlowRate())
+    if sized is not None and sized > 0:
+        return sized, 'autosized'
+
+    return None, 'the loop has no design maximum flow rate (not sized)'
+
+
+def _pump_characteristics_known(pump):
+    """Does the proposed state this pump's head AND hydraulic efficiency?
+
+    8.4.x.14.(3) applies where the head OR the efficiency is not known, so (1)
+    requires BOTH — Sol corrected us on that: "any modeller-set field" was too
+    weak a test. Neither can be read from blank-ness (see the constants above),
+    so "stated" means "not holding the SDK's own default".
+
+    Efficiency is known when the model pins the flow/head/power triple — a
+    hard-set rated power against a stated head — or when the shaft coefficient
+    itself was moved off its default.
+
+    :return: (head_known, efficiency_known)
+    """
     head = pump.ratedPumpHead()
-    if _reconcile_pump_head(pump, power_w, flow):
-        audit.warn('efficiency', f'{pump.nameString()}: inherited rated head {ruby_round(head)} Pa implies pump '
-                                 f'efficiency above motor efficiency with the transferred {ruby_round(power_w)} W '
-                                 f'— head reduced to {ruby_round(pump.ratedPumpHead())} Pa (65% total efficiency) '
-                                 'to stay physical', ruling='D-27')
-    pump.setRatedPowerConsumption(power_w)
-    audit.decision('efficiency', 'pump power transferred from the proposed building',
-                   target=pump.nameString(),
-                   inputs={'proposed_pumps': s['count'], 'proposed_w_per_l_s': ruby_round(w_per_l_s, 2),
-                           'reference_flow_l_s': ruby_round(flow * 1000.0, 2), 'loop_type': loop_type},
-                   value=f'rated power {ruby_round(power_w, 0)} W (combined proposed intensity x reference flow)',
-                   article=f'{prefix}.14.(1)-(3)', ruling='D-11')
+    head_known = bool(head) and head > 0 and abs(head - SDK_DEFAULT_HEAD_PA) > 1e-6
+    coefficient = pump.designShaftPowerPerUnitFlowRatePerUnitHead()
+    stated = (
+        abs(coefficient - SDK_DEFAULT_SHAFT_COEFFICIENT) > 1e-9
+        or (head_known and not pump.isRatedPowerConsumptionAutosized()
+            and optional_f(pump.ratedPowerConsumption()) is not None)
+    )
+    # "defaulted, missing OR INVALID" is the test, and validity is decided by
+    # the same resolver that will later TRANSFER the value — otherwise a pump
+    # can be classified known on one field and transferred from another. A
+    # negative power and a shaft coefficient of 0.5 (200 %) both fail here.
+    return head_known, bool(stated and _hydraulic_efficiency(pump) is not None)
 
 
-def _proposed_pump_stats(proposed):
-    """Combined peak power and flow of the PROPOSED building's pumps, grouped
-    by plant-loop type ('Heating'/'Cooling'/'Condenser') — the loop-type
-    correspondence sidesteps the pump-to-pump bijection that cannot exist
-    between different topologies. Pumps whose power or flow cannot be read
-    (unsized, no sql) are excluded; empty groups are dropped so callers can
-    warn loudly instead of transferring zeros."""
-    if proposed is None:
-        return {}
+def _corresponding_loop(reference_loop, proposed, prefix=None):
+    """The proposed hydronic system this reference loop corresponds to, or a
+    reason it has none (Sol, DF-11 increment B).
 
-    stats: dict = {}
-    for loop_ in proposed.getPlantLoops():
-        if _swh_loop(loop_):
-            continue  # SWH circulators must not pollute the Heating-loop intensity
+    Correspondence is by ROLE plus SERVED THERMAL BLOCKS, not by loop type —
+    D-11 matched on 'Heating'/'Cooling'/'Condenser' across the whole building,
+    which blends every heating pump in a mixed building into one intensity and
+    is weakest exactly where a real pump-to-pump correspondence exists.
 
-        type_ = loop_.sizingPlant().loopType()
-        for comp in loop_.supplyComponents():
-            pump = comp.to_PumpVariableSpeed().get() if comp.to_PumpVariableSpeed().is_initialized() else None
-            if pump is None:
-                pump = (comp.to_PumpConstantSpeed().get()
-                        if comp.to_PumpConstantSpeed().is_initialized() else None)
-            if pump is None:
-                continue
+    Increment B is scoped to an UNAMBIGUOUS one-to-one match. Several proposed
+    systems consolidated onto one reference loop is a real case (our own
+    builders reuse a single hot-water loop); D-97 adjudicated it and upheld the
+    decline, because sentence (2) is scoped to one hydronic system.
 
-            power = (optional_f(pump.ratedPowerConsumption())
-                     or optional_f(pump.autosizedRatedPowerConsumption()))
-            flow = optional_f(pump.ratedFlowRate()) or optional_f(pump.autosizedRatedFlowRate())
-            if power is None or flow is None or flow == 0:
-                continue
+    The third element flags THAT branch alone. D-97 adjudicated the N:1 shape
+    and nothing else, so citing it on any other decline would attribute a
+    ruling to shapes it never considered and make D-97 read as fired in runs
+    that contain no consolidation at all (Fable, PR #63).
 
-            entry = stats.setdefault(type_, {'power_w': 0.0, 'flow_l_s': 0.0, 'count': 0})
-            entry['power_w'] += power
-            entry['flow_l_s'] += flow * 1000.0
-            entry['count'] += 1
-    return {k: s for k, s in stats.items() if s['flow_l_s'] != 0}
+    :return: (proposed loop, 'one-to-one', False) or (None, reason, is_n_to_1)
+    """
+    role = _loop_role(reference_loop)
+    if role in (None, 'service_water'):
+        # `prefix` when the caller has it; LITERAL_PUMP_ARTICLE is the 2020
+        # fallback the literal already was (Fable's `133` G3).
+        article = f'{prefix}.14' if prefix else LITERAL_PUMP_ARTICLE
+        return None, f'{role or "unclassified"} loop is outside {article}', False
+
+    reference_zones = _served_zone_names(reference_loop)
+    if not reference_zones:
+        return (None,
+                'the reference loop serves no thermal block, so no correspondence can be drawn',
+                False)
+
+    candidates = [loop_ for loop_ in sorted_by_name(proposed.getPlantLoops())
+                  if _loop_role(loop_) == role]
+    if not candidates:
+        return None, f'the proposed building has no {role} loop', False
+
+    # OVERLAPS FIRST. An exact candidate is a one-to-one correspondence only if
+    # it is the ONLY loop touching this reference loop: with reference {A,B},
+    # proposed {A,B} and proposed {B}, accepting the exact match transferred
+    # from its pump alone and dropped the second loop's pump SILENTLY. That is
+    # neither unambiguous (two proposed loops serve block B) nor D-97's disjoint
+    # partition (their sets overlap), so it declines under D-93 (Sol, PR #63).
+    served = {loop_.nameString(): _served_zone_names(loop_) for loop_ in candidates}
+    overlapping = [loop_ for loop_ in candidates if served[loop_.nameString()] & reference_zones]
+    exact = [loop_ for loop_ in candidates if served[loop_.nameString()] == reference_zones]
+    names = ', '.join(sorted(loop_.nameString() for loop_ in overlapping))
+
+    if len(exact) > 1:
+        return None, (f'{len(exact)} proposed {role} loops serve exactly the same thermal blocks — '
+                      'the correspondence is ambiguous'), False
+    if len(exact) == 1:
+        if len(overlapping) == 1:
+            return exact[0], 'one-to-one', False
+        return None, (f'one proposed {role} loop serves exactly this reference loop\'s thermal '
+                      f'blocks, but {len(overlapping)} overlap it in all ({names}) — the '
+                      'correspondence is ambiguous, and taking the exact one would drop the '
+                      "other loops' pumps without saying so"), False
+
+    if len(overlapping) > 1:
+        covered = set().union(*(served[loop_.nameString()] for loop_ in overlapping))
+        # D-97's predicate is an EXACT DISJOINT PARTITION of the reference
+        # loop's blocks, and nothing more. "More than one overlapping loop" is
+        # not it: that also catches loops serving the same block, partial
+        # overlaps, and loops reaching blocks the reference does not have, which
+        # leave reference blocks uncovered or add proposed ones.
+        #
+        # There is deliberately NO connectivity test here. An earlier round
+        # classified a "hydraulically connected network" through heat
+        # exchangers, chillers and plant heat pumps and required the loops to
+        # lie in separate networks. Sol withdrew that: a shared source,
+        # condenser, oil-cooler, auxiliary or heat-rejection loop, a heat
+        # exchanger, or a refrigerant circuit couples EQUIPMENT and transfers
+        # ENERGY — it does not let the same hydronic fluid circulate through
+        # both loops. 5.2.6.3.(1) fixes the unit at the LOOP (its table note
+        # makes the thermal denominator the peak demand of the loop), and
+        # 8.4.x.9.(6)(a) separately distinguishes a plant from the systems
+        # served by it. So distinct same-role proposed PlantLoops are distinct
+        # hydronic systems even when their equipment shares another loop.
+        disjoint = sum(len(served[loop_.nameString()]) for loop_ in overlapping) == len(covered)
+        if disjoint and covered == reference_zones:
+            return None, (f'{len(overlapping)} proposed {role} loops partition this one reference '
+                          f"loop's thermal blocks between them ({names}) — they are distinct "
+                          'hydronic systems consolidated onto one reference loop. Sentence (2) '
+                          'combines pumps only WITHIN one hydronic system, so the Code prescribes '
+                          'no cross-system transfer value here'), True
+        # The reason names whichever condition actually failed. It used to
+        # assert a disjunction — "overlap each other or reach blocks it does not
+        # serve" — and on disjoint loops that merely UNDER-cover the reference,
+        # neither clause holds (Fable, PR #63).
+        inside = covered & reference_zones
+        faults = []
+        if not disjoint:
+            faults.append('they overlap each other')
+        if inside != reference_zones:
+            faults.append(f'together they cover only {len(inside)} of its '
+                          f'{len(reference_zones)} thermal blocks')
+        if covered - reference_zones:
+            faults.append(f'{len(covered - reference_zones)} of the blocks they serve are not on '
+                          'this reference loop')
+        return None, (f'{len(overlapping)} proposed {role} loops overlap this one reference loop '
+                      f'({names}) without partitioning its thermal blocks between them: '
+                      f"{'; '.join(faults)}. That is multiple partial overlaps, not a "
+                      'correspondence'), False
+    if len(overlapping) == 1:
+        proposed_zones = served[overlapping[0].nameString()]
+        shared = len(proposed_zones & reference_zones)
+        # Both counts, because the shared count alone is ambiguous: a proposed
+        # loop serving a strict SUPERSET reads as 'shares 1 of 1', which looks
+        # like a full match being called partial (Fable, PR #53).
+        return None, (f'the one overlapping proposed {role} loop shares {shared} of this reference '
+                      f"loop's {len(reference_zones)} thermal blocks and serves "
+                      f'{len(proposed_zones)} in all — a partial overlap is not a correspondence'), False
+    return None, f'no proposed {role} loop serves these thermal blocks', False
+
+
+def _applicable_pumps(loop_):
+    """The loop's own circulating pumps, BOTH sides, in name order.
+
+    A primary-secondary arrangement puts the primary pump on the supply side
+    and the secondary on the DEMAND side, so scanning only the supply side
+    finds one pump where the system has two (Sol, PR #53). That mistakes (2)
+    for (1), and drops the secondary's power out of (3) entirely — on exactly
+    the topology the Appendix example describes.
+    """
+    pumps, seen = [], set()
+    for comp in sorted_by_name(list(loop_.supplyComponents()) + list(loop_.demandComponents())):
+        pump = None
+        if comp.to_PumpVariableSpeed().is_initialized():
+            pump = comp.to_PumpVariableSpeed().get()
+        elif comp.to_PumpConstantSpeed().is_initialized():
+            pump = comp.to_PumpConstantSpeed().get()
+        if pump is not None and pump.handle() not in seen:
+            seen.add(pump.handle())
+            pumps.append(pump)
+    return pumps
+
+
+def _hydraulic_efficiency(pump):
+    """The pump efficiency EnergyPlus will actually use, or None if it is not
+    readable or not one a pump can have.
+
+    One resolver for every caller, because the field that DEFINES the
+    efficiency depends on how power is stated, and reading a different field
+    than the one that defines it silently transfers the wrong number (Sol,
+    PR #53: a proposed triple implying 50 % was transferred as the untouched
+    coefficient's 78 %, turning 888.9 W of proposed power into 569.8 W).
+
+    - a hard rated power pins the triple: eta_p = Q x H / (P x motor_eff)
+    - PowerPerFlow states electrical per flow: eta_p = H / (intensity x motor_eff)
+    - otherwise the shaft coefficient IS the statement: eta_p = 1 / k
+    """
+    motor_eff = pump.motorEfficiency()
+    if not motor_eff or not 0.0 < motor_eff <= 1.0:
+        return None
+
+    head = pump.ratedPumpHead()
+    flow = _pump_flow(pump)
+    efficiency = None
+    if not pump.isRatedPowerConsumptionAutosized():
+        power = optional_f(pump.ratedPowerConsumption())
+        if power is not None and power > 0 and head and flow:
+            efficiency = (flow * head) / (power * motor_eff)
+    elif pump.designPowerSizingMethod() == POWER_PER_FLOW:
+        intensity = pump.designElectricPowerPerUnitFlowRate()
+        if intensity and head:
+            efficiency = head / (intensity * motor_eff)
+    else:
+        coefficient = pump.designShaftPowerPerUnitFlowRatePerUnitHead()
+        efficiency = (1.0 / coefficient) if coefficient else None
+
+    return efficiency if (efficiency and 0.0 < efficiency <= 1.0) else None
+
+
+def _governing_sentence(pumps):
+    """Which of 8.4.x.14 (1), (2) or (3) governs this correspondence group.
+
+    Sol's precedence (DF-11 increment B), which the Code does not state and
+    which is therefore itself an adjudication: if ANY applicable pump's head or
+    hydraulic efficiency is unknown the whole group takes (3), because (2)
+    cannot preserve a combined shaft power it is unable to compute and (3) is
+    the Article's explicit missing-data rule. Otherwise more than one pump in
+    the system takes (2), and a single known pump takes (1).
+
+    This replaces D-92's partial treatment, where an unreadable pump still
+    contributed to a (2)-style total while being dropped only from the
+    efficiency average. The group is now all one sentence or the other.
+    """
+    if not pumps:
+        return None
+
+    if any(not all(_pump_characteristics_known(pump)) for pump in pumps):
+        return '3'
+
+    return '2' if len(pumps) > 1 else '1'
+
+
+def _transfer_by_correspondence(reference_loop, proposed, prefix, audit):
+    """Apply 8.4.x.14 (1), (2) or (3) to one reference loop's pumps (D-93).
+
+    The value source follows the correspondence, not the loop type: find the
+    proposed system this loop corresponds to, decide which sentence its pumps
+    put us under, and apply that sentence's own formula. Where no unambiguous
+    correspondence exists the transfer DECLINES and says so — the reference
+    pump keeps the builder's default, which the Part 5 cap still binds. D-11
+    inferred a whole-building intensity instead, which is a number no sentence
+    of the Article asks for.
+
+    The consolidation case — several proposed loops partitioning one reference
+    loop's blocks between them — declines under D-97 rather than aggregating:
+    sentence (2) is scoped to one hydronic system, and two distinct `PlantLoop`s
+    are two hydronic systems however their equipment is coupled. That declined
+    default is an assumption of indeterminate direction, not a safe floor. D-97
+    is cited on that branch ALONE; every other decline remains D-93's, which is
+    the ruling that actually examined them.
+
+    An earlier draft of this docstring said "zone disjointness is not system
+    independence". That was the withdrawn partition premise, and under the final
+    ruling a disjoint partition across distinct loops is precisely what fires
+    D-97 (Fable, PR #63).
+    """
+    reference_pumps = _applicable_pumps(reference_loop)
+    if not reference_pumps:
+        return
+
+    match, reason, n_to_1 = _corresponding_loop(reference_loop, proposed, prefix)
+    if match is None:
+        if _loop_role(reference_loop) == 'service_water':
+            return  # D-27 already said so, at the top of the pass
+
+        # D-97 adjudicated the N:1 shape ONLY, so only that branch cites it and
+        # carries its wording. On N:1 the retained default is not a
+        # conservative bound: 5.2.6.3 is a ceiling, so the default may sit
+        # above or below whatever a transfer would have produced and can bias
+        # the reference in either direction. Calling it conservative would be
+        # false comfort. Every other decline keeps D-93's existing text —
+        # the same is arguably true of them, but that is a D-93 question and
+        # not a side effect of this ruling (Fable, PR #63).
+        # AHJ-16 applies to the three shapes Sol's `126` named: N:1
+        # consolidation, ambiguous overlap, and no corresponding proposed
+        # system. It does NOT apply to a loop outside the article's scope, nor
+        # to a reference loop serving no thermal block — there is nothing for a
+        # correspondence to be drawn BETWEEN, so that is a degenerate model and
+        # not an interpretation an authority can settle. (2) and (3) settle
+        # multiple pumps within one system and missing characteristics on an
+        # otherwise corresponding pump, and neither reaches this branch.
+        in_scope = (_loop_role(reference_loop) not in (None, 'service_water')
+                    and bool(_served_zone_names(reference_loop)))
+        if n_to_1:
+            return audit.warn('efficiency',
+                              f'{reference_loop.nameString()}: {prefix}.14.(1)-(3) NOT applied — '
+                              f'{reason}. The pump keeps the modelling default: a declared '
+                              'assumption, not a Code value and not a conservative bound — it may '
+                              'bias the reference in either direction. 5.2.6.3 supplies only an '
+                              'upper cap',
+                              target=reference_loop.nameString(), article=f'{prefix}.14.(1)-(3)',
+                              ruling='D-93 D-97',
+                              ahj='AHJ-16' if in_scope else None)
+        return audit.warn('efficiency', f'{reference_loop.nameString()}: {prefix}.14.(1)-(3) NOT '
+                                        f'applied — {reason}. The pump keeps the modelling default, '
+                                        f'which is not a Code value; 5.2.6.3 still caps it',
+                          target=reference_loop.nameString(), article=f'{prefix}.14.(1)-(3)',
+                          ruling='D-93',
+                          ahj='AHJ-16' if in_scope else None)
+
+    proposed_pumps = _applicable_pumps(match)
+    sentence = _governing_sentence(proposed_pumps)
+    if sentence is None:
+        return audit.warn('efficiency', f'{reference_loop.nameString()}: the corresponding proposed '
+                                        f'loop {match.nameString()} has no pump — {prefix}.14.(1)-(3) '
+                                        'NOT applied', target=reference_loop.nameString(),
+                          article=f'{prefix}.14.(1)-(3)', ruling='D-93')
+
+    if len(reference_pumps) > 1:
+        return audit.warn('efficiency', f'{reference_loop.nameString()} has {len(reference_pumps)} '
+                                        f'pumps; {prefix}.14 describes ONE reference pump per system '
+                                        '— NOT applied', target=reference_loop.nameString(),
+                          article=f'{prefix}.14.(1)-(3)', ruling='D-93')
+
+    reference_pump = reference_pumps[0]
+    reference_flow = (optional_f(reference_pump.ratedFlowRate())
+                      or optional_f(reference_pump.autosizedRatedFlowRate()))
+    if sentence == '1':
+        return _apply_sentence_1(reference_pump, proposed_pumps[0], prefix, audit)
+    if sentence == '2':
+        return _apply_sentence_2(reference_pump, proposed_pumps, reference_flow, prefix, audit)
+
+    distribution_flow, flow_source = _distribution_flow(match)
+    if distribution_flow is None:
+        return audit.warn('efficiency', f'{reference_loop.nameString()}: {prefix}.14.(3) needs the '
+                                        f'proposed distribution flow and {flow_source} — NOT applied. '
+                                        'The sum of the pumps\' own flows is not a substitute: in '
+                                        'series or primary-secondary they circulate the same water',
+                          target=reference_loop.nameString(), article=f'{prefix}.14.(3)',
+                          ruling='D-93')
+    return _apply_sentence_3(reference_pump, proposed_pumps, distribution_flow, reference_flow,
+                             prefix, audit, flow_source)
+
+
+def _pump_shaft_and_electrical(pump):
+    """(shaft W, electrical W) for a PROPOSED pump, or (None, None).
+
+    Electrical is what the model states or E+ will size; shaft is that times
+    the motor efficiency. Sentence (2) is expressed in shaft power and (3) in
+    power demand "required by the motors" (5.2.6.3's phrase for the same
+    quantity), so both are needed and the distinction is explicit.
+    """
+    flow = _pump_flow(pump)
+    _, electrical = _pump_power_source(pump, flow)
+    if electrical is None:
+        return None, None
+
+    motor_eff = pump.motorEfficiency()
+    if not motor_eff or not 0.0 < motor_eff <= 1.0:
+        return None, None
+
+    return electrical * motor_eff, electrical
+
+
+def _apply_sentence_1(reference_pump, proposed_pump, prefix, audit):
+    """(1): head and efficiency identical to the corresponding proposed pump.
+
+    Power is not transferred at all — it follows from the inherited
+    characteristics at the reference's own flow, which is the sentence's whole
+    point. Flow-invariant: nothing here needs restating after a re-size.
+    """
+    head = proposed_pump.ratedPumpHead()
+    motor_eff = proposed_pump.motorEfficiency()
+    # The efficiency the proposed STATES, resolved from whichever field defines
+    # it — not the shaft-coefficient field, which on a pump that pins its power
+    # through a hard triple still holds the untouched default and would transfer
+    # a number the proposed never claimed.
+    pump_eff = _hydraulic_efficiency(proposed_pump)
+    if pump_eff is None:
+        return audit.warn('efficiency', f'{reference_pump.nameString()}: the corresponding proposed '
+                                        f'pump states no usable efficiency — {prefix}.14.(1) NOT applied',
+                          target=reference_pump.nameString(), article=f'{prefix}.14.(1)', ruling='D-93')
+
+    reference_pump.setDesignPowerSizingMethod(POWER_PER_FLOW_PER_PRESSURE)
+    reference_pump.setRatedPumpHead(head)
+    reference_pump.setDesignShaftPowerPerUnitFlowRatePerUnitHead(1.0 / pump_eff)
+    reference_pump.setMotorEfficiency(motor_eff)
+    reference_pump.autosizeRatedPowerConsumption()
+
+    audit.decision('efficiency', 'pump head and efficiency inherited from the corresponding '
+                                 'proposed pump',
+                   target=reference_pump.nameString(),
+                   inputs={'corresponding_pump': proposed_pump.nameString(),
+                           'head_pa': ruby_round(head),
+                           'pump_efficiency': ruby_round(pump_eff, 4),
+                           'motor_efficiency': ruby_round(motor_eff, 4)},
+                   value=f'head {ruby_round(head)} Pa at {ruby_round(pump_eff * 100.0, 1)}% pump / '
+                         f'{ruby_round(motor_eff * 100.0, 1)}% motor efficiency; power follows the '
+                         f'reference flow',
+                   article=f'{prefix}.14.(1)', ruling='D-93')
+
+
+def _apply_sentence_2(reference_pump, proposed_pumps, reference_flow, prefix, audit):
+    """(2): the reference pump's peak SHAFT power equals the proposed pumps'
+    combined peak shaft power — absolutely, not scaled by flow.
+
+    D-11 transferred an intensity times the reference flow instead. On the
+    Code's own Appendix example that yields 578.6 W where the Article requires
+    861 W, a third short, because the reference flow (179.4 L/min, fixed by
+    8.4.x.9.(6)(f)) is smaller than the proposed's combined 267 L/min.
+
+    The equivalent motor efficiency is NOT a flow-weighted mean — that
+    preserves shaft power while leaking electrical power. Sum-of-shaft over
+    sum-of-electrical conserves both at once (Sol, DF-11 increment B), and it
+    is the electrical figure that D-38's Part 5 cap then binds.
+
+    Head carries the target, so it depends on the reference flow and MUST be
+    restated after every re-size; the pipeline already re-applies efficiencies
+    after each sizing run.
+    """
+    pairs = [_pump_shaft_and_electrical(pump) for pump in proposed_pumps]
+    if any(s is None or e is None for s, e in pairs):
+        # D-92's hostile-input hardening, which this must not regress: a pump
+        # stating a power no pump can draw used to reach sum() as a None and
+        # terminate compliance processing with a TypeError (Sol, PR #53).
+        # (2) cannot preserve a combined shaft power it cannot compute, so the
+        # group declines — it does not silently drop the offending pump, which
+        # would transfer less power than the proposed system draws.
+        return audit.warn('efficiency', f'{reference_pump.nameString()}: a pump in the corresponding '
+                                        f'proposed system states a power no pump can draw, so the '
+                                        f'combined shaft power is not computable — {prefix}.14.(2) '
+                                        'NOT applied',
+                          target=reference_pump.nameString(), article=f'{prefix}.14.(2)',
+                          ruling='D-92 D-93')
+
+    shaft = sum(s for s, _ in pairs)
+    electrical = sum(e for _, e in pairs)
+    flows = [_pump_flow(p)
+             for p in proposed_pumps]
+
+    # The Note's flow-weighted hydraulic efficiency. Numerically inert in
+    # EnergyPlus — it only moves the head we state, never the energy — which is
+    # why the Note's own 54.2 % not reproducing as a flow-weighted mean changes
+    # no result. Recorded in D-93 rather than silently reconciled.
+    # Each pump's own stated efficiency, resolved from the field that defines
+    # it — the same resolver the known-test used to admit the group.
+    efficiencies = [_hydraulic_efficiency(p) for p in proposed_pumps]
+    usable = [(f, e) for f, e in zip(flows, efficiencies) if f and e]
+    weighted = sum(f for f, _ in usable)
+    pump_eff = (sum(f * e for f, e in usable) / weighted) if weighted else None
+    motor_eff = shaft / electrical if electrical else None
+    if not pump_eff or not motor_eff or reference_flow is None or reference_flow <= 0:
+        return audit.warn('efficiency', f'{reference_pump.nameString()}: the proposed system states '
+                                        f'no usable combined shaft power — {prefix}.14.(2) NOT applied',
+                          target=reference_pump.nameString(), article=f'{prefix}.14.(2)',
+                          ruling='D-93')
+
+    head_pa = shaft * pump_eff / reference_flow
+    reference_pump.setDesignPowerSizingMethod(POWER_PER_FLOW_PER_PRESSURE)
+    reference_pump.setRatedPumpHead(head_pa)
+    reference_pump.setDesignShaftPowerPerUnitFlowRatePerUnitHead(1.0 / pump_eff)
+    reference_pump.setMotorEfficiency(motor_eff)
+    reference_pump.autosizeRatedPowerConsumption()
+
+    audit.decision('efficiency', "combined peak shaft power transferred from the proposed system's pumps",
+                   target=reference_pump.nameString(),
+                   inputs={'proposed_pumps': len(proposed_pumps),
+                           'combined_shaft_w': ruby_round(shaft, 1),
+                           'combined_electrical_w': ruby_round(electrical, 1),
+                           'reference_flow_l_s': ruby_round(reference_flow * 1000.0, 2),
+                           'pump_efficiency': ruby_round(pump_eff, 4),
+                           'motor_efficiency': ruby_round(motor_eff, 4)},
+                   value=f'shaft {ruby_round(shaft, 1)} W preserved absolutely (NOT scaled by the '
+                         f'reference flow); head {ruby_round(head_pa)} Pa derived, electrical '
+                         f'{ruby_round(electrical, 1)} W',
+                   article=f'{prefix}.14.(2)', ruling='D-93')
+
+
+def _apply_sentence_3(reference_pump, proposed_pumps, distribution_flow, reference_flow,
+                      prefix, audit, flow_source):
+    """(3): where head or efficiency is not known, the reference pump is based
+    on the proposed's peak power demand in W/(L/s) — electrical, per 5.2.6.3's
+    "required by the motors".
+
+    The denominator is the DISTRIBUTION flow, counted once per fluid stream,
+    never the sum of the pumps' rated flows: pumps in series or in a
+    primary-secondary arrangement circulate the same water, and summing them
+    halves the intensity.
+
+    Head and the efficiency split only have to reproduce that intensity — the
+    split cancels out of the derived power — so a physical default split is
+    used and declared as the modelling fallback it is.
+    """
+    readable, unreadable = [], []
+    for pump in proposed_pumps:
+        _, electrical = _pump_shaft_and_electrical(pump)
+        (readable if electrical is not None else unreadable).append((pump, electrical))
+    if unreadable:
+        # D-92: a pump stating a power no pump can draw is excluded ENTIRELY
+        # rather than netted off the total — a negative wattage would transfer
+        # an intensity lower than any pump in the proposed draws. Sol's ruling
+        # governs unknown head and efficiency; it does not speak to unreadable
+        # power, so this stands.
+        audit.warn('efficiency', f'{reference_pump.nameString()}: '
+                                 f'{", ".join(p.nameString() for p, _ in unreadable)} state a power no '
+                                 f'pump can draw and are excluded from the {prefix}.14.(3) combination',
+                   target=reference_pump.nameString(), article=f'{prefix}.14.(3)', ruling='D-92 D-93')
+    if not readable:
+        return audit.warn('efficiency', f'{reference_pump.nameString()}: no proposed pump states a '
+                                        f'readable power — {prefix}.14.(3) NOT applied',
+                          target=reference_pump.nameString(), article=f'{prefix}.14.(3)',
+                          ruling='D-93')
+
+    electricals = [e for _, e in readable]
+    w_per_l_s = sum(electricals) / (distribution_flow * 1000.0)
+    head_pa = _state_pump_characteristics(reference_pump, w_per_l_s,
+                                          DEFAULT_MOTOR_EFFICIENCY, DEFAULT_PUMP_EFFICIENCY)
+    audit.decision('efficiency', 'pump power intensity transferred from the proposed system',
+                   target=reference_pump.nameString(),
+                   inputs={'proposed_pumps': len(readable),
+                           'combined_electrical_w': ruby_round(sum(electricals), 1),
+                           'distribution_flow_l_s': ruby_round(distribution_flow * 1000.0, 2),
+                           'distribution_flow_source': flow_source,
+                           'proposed_w_per_l_s': ruby_round(w_per_l_s, 2),
+                           'reference_flow_l_s': (ruby_round(reference_flow * 1000.0, 2)
+                                                  if reference_flow else None)},
+                   value=f'{ruby_round(w_per_l_s, 2)} W/(L/s) over the distribution flow (counted once, '
+                         f'not the sum of pump flows); head {ruby_round(head_pa)} Pa at a declared '
+                         f'{ruby_round(DEFAULT_PUMP_EFFICIENCY * 100.0, 1)}% pump / '
+                         f'{ruby_round(DEFAULT_MOTOR_EFFICIENCY * 100.0, 1)}% modelling split',
+                   article=f'{prefix}.14.(3)', ruling='D-93')
 
 
 def _align_heat_pump_heating_capacity(model, audit, ruleset):
@@ -832,8 +1713,9 @@ def _align_heat_pump_heating_capacity(model, audit, ruleset):
         cool_w = (optional_f(cool.ratedTotalCoolingCapacity())
                   or optional_f(cool.autosizedRatedTotalCoolingCapacity()))
         if cool_w is None:
-            audit.warn('efficiency', f'{heat.nameString()}: cooling capacity unavailable — 8.4.4.13.(2)(c) '
-                                     'heating=cooling alignment skipped (run sizing first)')
+            audit.warn('efficiency', f'{heat.nameString()}: cooling capacity unavailable — '
+                                     f'{hp_article} heating=cooling alignment skipped '
+                                     '(run sizing first)')
             continue
 
         heat.setRatedTotalHeatingCapacity(cool_w)
@@ -858,7 +1740,7 @@ def _align_staged_heat_pump(heat, cool, audit, hp_article='8.4.4.13.(2)(c)'):
              for i, h in enumerate(heat_stages)]
     if any(c is None for _, c in pairs):
         audit.warn('efficiency', f'{heat.nameString()}: staged heat pump has MORE heating stages than cooling '
-                                 'stages — 8.4.4.13.(2)(c) alignment applied only to the matched stages',
+                                 f'stages — {hp_article} alignment applied only to the matched stages',
                    target=heat.nameString(), article=hp_article, ruling='D-22')
     top = None
     for heat_stage, cool_stage in pairs:
@@ -873,7 +1755,8 @@ def _align_staged_heat_pump(heat, cool, audit, hp_article='8.4.4.13.(2)(c)'):
         heat_stage.setGrossRatedHeatingCapacity(cool_w)
         top = cool_w
     if top is None:
-        audit.warn('efficiency', f'{heat.nameString()}: staged cooling capacity unavailable — 8.4.4.13.(2)(c) '
+        audit.warn('efficiency', f'{heat.nameString()}: staged cooling capacity unavailable — '
+                                 f'{hp_article} '
                                  'heating=cooling alignment skipped (run sizing first)',
                    target=heat.nameString(), article=hp_article, ruling='D-22')
         return
@@ -1005,82 +1888,309 @@ def w_to_tons(watts):
 
 
 # ---------------- curves ----------------
+#
+# D-89 closes deferred finding DF-4. Until it landed, `curve()` adopted ANY
+# model object whose NAME matched the wanted curve, with no check on its form,
+# its coefficients or its bounds — so a proposed model carrying a differently
+# shaped `BOILER-EFFFPLR` silently supplied the reference building's part-load
+# curve, and a neutral curve identifier could not be trusted once two editions
+# published different numbers under it. Reuse is now TYPED (the lookup for the
+# row's own form) and VALIDATED; a mismatch is a WARNING naming the foreign
+# object, never a silent adoption, and the ruleset then builds its OWN object
+# under a disambiguated name. An unknown form is a WARNING too, not a silent
+# `None` that leaves the component with whatever curve it already had.
+#
+# MEASURED CONSEQUENCE, beyond the part-load curves D-89 is about:
+# `btap/modeling/hvac/data/curves.json` ships DIFFERENT coefficients and bounds
+# under four of the names this catalogue also uses — DXCOOL-REF-CAPFT,
+# DXCOOL-REF-CAPFFLOW, DXCOOL-REF-COOLEIRFT and DXCOOL-REF-COOLPLFFPLR (the
+# last wholly different: cubic [0.0277, 4.9151, -8.184, 4.2702] over x 0.7-1.0
+# against this catalogue's [0.5157488, 2.1061434, -3.4205764, 1.8073371] over
+# 0.25-1.0). Before D-89 the reference building silently ADOPTED the proposed
+# model's versions; it now gets the ruleset's own, with a warning naming the
+# foreign object. That is the rest of DF-4, and it moves reference DX energy in
+# every scenario with a DX coil — not only the boiler/furnace scenarios. The
+# right durable fix is to make the two catalogues agree; narrowing the check to
+# `form == 'TableLookup'` in `curve()` would defer it again.
 
-def curve(model, tables, name):
-    """Build (or reuse by name) a performance curve from a vendored curve row."""
+#: The tolerance a reused object's numbers must agree within. Generous enough
+#: for an .osm/.idf text round-trip of a double, far tighter than any real
+#: divergence between two catalogues.
+CURVE_MATCH_TOL = 1e-9
+
+#: form (as the catalogue spells it) -> how to find, read and build it.
+#: ``coefficients`` are the SDK accessor suffixes in the catalogue's
+#: ``coeff_1..coeff_N`` order, so one table drives building AND validating.
+_CURVE_FORMS = {
+    'BiQuadratic': {
+        'cls': 'CurveBiquadratic', 'find': 'getCurveBiquadraticByName',
+        'two_vars': True,
+        'coefficients': ('1Constant', '2x', '3xPOW2', '4y', '5yPOW2', '6xTIMESY'),
+    },
+    'BiCubic': {
+        'cls': 'CurveBicubic', 'find': 'getCurveBicubicByName',
+        'two_vars': True,
+        'coefficients': ('1Constant', '2x', '3xPOW2', '4y', '5yPOW2', '6xTIMESY',
+                         '7xPOW3', '8yPOW3', '9xPOW2TIMESY', '10xTIMESYPOW2'),
+    },
+    'Cubic': {
+        'cls': 'CurveCubic', 'find': 'getCurveCubicByName', 'two_vars': False,
+        'coefficients': ('1Constant', '2x', '3xPOW2', '4xPOW3'),
+    },
+    'Quadratic': {
+        'cls': 'CurveQuadratic', 'find': 'getCurveQuadraticByName', 'two_vars': False,
+        'coefficients': ('1Constant', '2x', '3xPOW2'),
+    },
+    'TableLookup': {
+        'cls': 'TableLookup', 'find': 'getTableLookupByName', 'two_vars': False,
+        'coefficients': (),
+    },
+}
+#: Spellings the vendored catalogue has used for the same form.
+_FORM_ALIASES = {'Biquadratic': 'BiQuadratic', 'Bicubic': 'BiCubic'}
+
+
+def curve_form(row):
+    """The catalogue row's form, in this module's one spelling, or None."""
+    form = row.get('form')
+    form = _FORM_ALIASES.get(form, form)
+    return form if form in _CURVE_FORMS else None
+
+
+def _close(a, b):
+    if a is None or b is None:
+        return a is None and b is None
+    return abs(float(a) - float(b)) <= CURVE_MATCH_TOL + CURVE_MATCH_TOL * abs(float(b))
+
+
+def _optional_value(getter):
+    """An SDK optional's value (or a plain value), None when uninitialized;
+    accepts the accessor itself or its result."""
+    value = getter() if callable(getter) else getter
+    if hasattr(value, 'is_initialized'):
+        return value.get() if value.is_initialized() else None
+    return value
+
+
+
+def _limits_match(obj, row, two_vars):
+    """Declared bounds agree. A bound the row leaves null is not compared — the
+    catalogue is silent there and the SDK's own default stands."""
+    pairs = [('minimum_independent_variable_1', obj.minimumValueofx),
+             ('maximum_independent_variable_1', obj.maximumValueofx)]
+    if two_vars:
+        pairs += [('minimum_independent_variable_2', obj.minimumValueofy),
+                  ('maximum_independent_variable_2', obj.maximumValueofy)]
+    if hasattr(obj, 'minimumCurveOutput'):
+        pairs += [('minimum_dependent_variable_output', obj.minimumCurveOutput),
+                  ('maximum_dependent_variable_output', obj.maximumCurveOutput)]
+    elif hasattr(obj, 'minimumOutput'):
+        pairs += [('minimum_dependent_variable_output', obj.minimumOutput),
+                  ('maximum_dependent_variable_output', obj.maximumOutput)]
+    for key, getter in pairs:
+        wanted = row.get(key)
+        value = getter()
+        if wanted is None:
+            # A bound the row leaves null must be ABSENT on the object too: a
+            # foreign clamp the catalogue never declared is a divergence
+            # (Sol's R-O review). A required SDK field (plain float, never
+            # optional) cannot be absent and is not compared.
+            if hasattr(value, 'is_initialized') and value.is_initialized():
+                return False
+            continue
+        if not _close(_optional_value(value), wanted):
+            return False
+    return True
+
+
+def _polynomial_matches(obj, row, spec):
+    for index, suffix in enumerate(spec['coefficients'], start=1):
+        wanted = row.get(f'coeff_{index}')
+        got = getattr(obj, f'coefficient{suffix}')()
+        if not _close(got, wanted):
+            return False
+    return _limits_match(obj, row, spec['two_vars'])
+
+
+def _lookup_matches(obj, row):
+    """One independent variable, the same grid, the same outputs, the same
+    interpolation/extrapolation and the same bounds."""
+    variables = obj.independentVariables()
+    if len(variables) != 1:
+        return False
+    points = row.get('points') or []
+    independent = variables[0]
+    values = [float(v) for v in independent.values()]
+    outputs = [float(v) for v in obj.outputValues()]
+    if len(values) != len(points) or len(outputs) != len(points):
+        return False
+    for (x, y), got_x, got_y in zip(points, values, outputs):
+        if not _close(got_x, x) or not _close(got_y, y):
+            return False
+    if independent.interpolationMethod() != row.get('interpolation'):
+        return False
+    if independent.extrapolationMethod() != row.get('extrapolation'):
+        return False
+    if obj.normalizationMethod() != 'None':
+        return False
+    if independent.unitType() != 'Dimensionless' or obj.outputUnitType() != 'Dimensionless':
+        return False  # what _build_lookup writes; a foreign unit type is a divergence
+    for key, getter in (('minimum_independent_variable_1', independent.minimumValue),
+                        ('maximum_independent_variable_1', independent.maximumValue),
+                        ('minimum_dependent_variable_output', obj.minimumOutput),
+                        ('maximum_dependent_variable_output', obj.maximumOutput)):
+        wanted = row.get(key)
+        value = getter()
+        if wanted is None:
+            if hasattr(value, 'is_initialized') and value.is_initialized():
+                return False  # a clamp the catalogue never declared
+            continue
+        if not _close(_optional_value(value), wanted):
+            return False
+    return True
+
+
+def curve_matches(obj, row):
+    """Does this model object state exactly what the catalogue row states?
+
+    The FORM is part of the answer: an object of another curve type sharing the
+    name never matches, however close its numbers (the SHW loader's rule — a
+    Quadratic spec must not be smuggled through as a cubic with a zero term)."""
+    form = curve_form(row)
+    if form is None:
+        return False
+    spec = _CURVE_FORMS[form]
+    caster = getattr(obj, f"to_{spec['cls']}", None)
+    if caster is None:
+        return False
+    cast = caster()
+    if not cast.is_initialized():
+        return False
+    obj = cast.get()
+    if form == 'TableLookup':
+        return _lookup_matches(obj, row)
+    return _polynomial_matches(obj, row, spec)
+
+
+def _build_polynomial(model, row, spec, name):
+    k = getattr(openstudio.model, spec['cls'])(model)
+    for index, suffix in enumerate(spec['coefficients'], start=1):
+        getattr(k, f'setCoefficient{suffix}')(row.get(f'coeff_{index}'))
+    set_limits(k, row, two_vars=spec['two_vars'])
+    k.setName(name)
+    return k
+
+
+def _build_lookup(model, row, name):
+    """A `Table:Lookup` over one independent variable — the representation the
+    part-load articles' printed points and rationals are carried in (D-89)."""
+    points = row.get('points') or []
+    independent = openstudio.model.TableIndependentVariable(model)
+    independent.setName(f'{name} PLR')
+    independent.setInterpolationMethod(row.get('interpolation') or 'Linear')
+    independent.setExtrapolationMethod(row.get('extrapolation') or 'Constant')
+    independent.setUnitType('Dimensionless')
+    independent.setValues([float(x) for x, _y in points])
+    if row.get('minimum_independent_variable_1') is not None:
+        independent.setMinimumValue(row['minimum_independent_variable_1'])
+    if row.get('maximum_independent_variable_1') is not None:
+        independent.setMaximumValue(row['maximum_independent_variable_1'])
+
+    table = openstudio.model.TableLookup(model)
+    table.addIndependentVariable(independent)
+    table.setNormalizationMethod('None')
+    table.setOutputUnitType('Dimensionless')
+    table.setOutputValues([float(y) for _x, y in points])
+    if row.get('minimum_dependent_variable_output') is not None:
+        table.setMinimumOutput(row['minimum_dependent_variable_output'])
+    if row.get('maximum_dependent_variable_output') is not None:
+        table.setMaximumOutput(row['maximum_dependent_variable_output'])
+    table.setName(name)
+    return table
+
+
+def curve(model, tables, name, audit=None, target=None):
+    """Build — or reuse, once validated — a performance curve from this
+    edition's own catalogue row.
+
+    Reuse is typed and checked (D-89/DF-4): the lookup is the one for the row's
+    OWN form, and the object it finds is adopted only when its form,
+    coefficients or points, and declared bounds all state what the row states.
+    A model object that merely shares the name is reported as foreign and the
+    ruleset builds its own object beside it.
+    """
     if name is None or str(name) == '':
         return None
-
-    existing = next((c for c in model.getCurves() if c.nameString() == name), None)
-    if existing is not None:
-        return existing
+    audit = audit if audit is not None else NullAudit()
 
     row = next((c for c in tables['curves'] if c['name'] == name), None)
     if row is None:
+        audit.warn('efficiency',
+                   f"curve '{name}' is not in this edition's curve catalogue — not set",
+                   target=target, inputs={'curve': name})
         return None
 
-    coeffs = [row.get(f'coeff_{i}') for i in range(1, 11)]
-    form = row.get('form')
-    if form in ('BiQuadratic', 'Biquadratic'):
-        k = openstudio.model.CurveBiquadratic(model)
-        k.setCoefficient1Constant(coeffs[0])
-        k.setCoefficient2x(coeffs[1])
-        k.setCoefficient3xPOW2(coeffs[2])
-        k.setCoefficient4y(coeffs[3])
-        k.setCoefficient5yPOW2(coeffs[4])
-        k.setCoefficient6xTIMESY(coeffs[5])
-        set_limits(k, row, two_vars=True)
-        c = k
-    elif form in ('BiCubic', 'Bicubic'):
-        k = openstudio.model.CurveBicubic(model)
-        k.setCoefficient1Constant(coeffs[0])
-        k.setCoefficient2x(coeffs[1])
-        k.setCoefficient3xPOW2(coeffs[2])
-        k.setCoefficient4y(coeffs[3])
-        k.setCoefficient5yPOW2(coeffs[4])
-        k.setCoefficient6xTIMESY(coeffs[5])
-        k.setCoefficient7xPOW3(coeffs[6])
-        k.setCoefficient8yPOW3(coeffs[7])
-        k.setCoefficient9xPOW2TIMESY(coeffs[8])
-        k.setCoefficient10xTIMESYPOW2(coeffs[9])
-        set_limits(k, row, two_vars=True)
-        c = k
-    elif form == 'Cubic':
-        k = openstudio.model.CurveCubic(model)
-        k.setCoefficient1Constant(coeffs[0])
-        k.setCoefficient2x(coeffs[1])
-        k.setCoefficient3xPOW2(coeffs[2])
-        k.setCoefficient4xPOW3(coeffs[3])
-        set_limits(k, row)
-        c = k
-    elif form == 'Quadratic':
-        k = openstudio.model.CurveQuadratic(model)
-        k.setCoefficient1Constant(coeffs[0])
-        k.setCoefficient2x(coeffs[1])
-        k.setCoefficient3xPOW2(coeffs[2])
-        set_limits(k, row)
-        c = k
-    else:
+    form = curve_form(row)
+    if form is None:
+        audit.warn('efficiency',
+                   f"curve '{name}' declares form {row.get('form')!r}, which this "
+                   "loader cannot build — not set",
+                   target=target, inputs={'curve': name, 'form': row.get('form')},
+                   ruling='D-89')
         return None
-    c.setName(name)
-    return c
+    spec = _CURVE_FORMS[form]
+
+    found = getattr(model, spec['find'])(name)
+    existing = found.get() if found.is_initialized() else None
+    if existing is None:
+        # An object of a DIFFERENT curve type may hold the name; one built under
+        # it would be silently renamed by the SDK ('NAME 1'), so it counts as
+        # occupying the name even though the typed lookup does not see it.
+        existing = next((c for c in model.getCurves() if c.nameString() == name), None)
+    if existing is not None and curve_matches(existing, row):
+        return existing
+
+    if existing is None:
+        return (_build_lookup(model, row, name) if form == 'TableLookup'
+                else _build_polynomial(model, row, spec, name))
+
+    own_name = f'{name} (D-89)'
+    # The ruleset's own object is found by CONTENT among the objects carrying
+    # the disambiguated name (the SDK suffixes ' 1', ' 2' when a foreign object
+    # squats on '(D-89)' too), never by the single fixed name: the foreign
+    # object was reported when the own curve was first built for this model,
+    # and every later component that needs the row reuses that one silently.
+    for candidate in model.getCurves():
+        if candidate.nameString().startswith(own_name) and curve_matches(candidate, row):
+            return candidate
+    built = (_build_lookup(model, row, own_name) if form == 'TableLookup'
+             else _build_polynomial(model, row, spec, own_name))
+    audit.warn('efficiency',
+               f"model object named '{name}' does not state this edition's "
+               f"{form} catalogue row — it is NOT adopted; the ruleset's own "
+               f"curve is applied as '{built.nameString()}'",
+               target=target, inputs={'curve': name, 'form': form,
+                                      'applied': built.nameString()},
+               ruling='D-89')
+    return built
 
 
 def set_limits(curve_object, row, two_vars=False):
-    if row.get('minimum_independent_variable_1'):
-        curve_object.setMinimumValueofx(row['minimum_independent_variable_1'])
-    if row.get('maximum_independent_variable_1'):
-        curve_object.setMaximumValueofx(row['maximum_independent_variable_1'])
+    """Write every bound the row DECLARES. A declared ``0.0`` is a legitimate
+    bound, not an absent one — the pre-D-89 truthiness test dropped it."""
+    def write(key, setter):
+        value = row.get(key)
+        if value is not None:
+            setter(value)
+
+    write('minimum_independent_variable_1', curve_object.setMinimumValueofx)
+    write('maximum_independent_variable_1', curve_object.setMaximumValueofx)
     if two_vars:
-        if row.get('minimum_independent_variable_2'):
-            curve_object.setMinimumValueofy(row['minimum_independent_variable_2'])
-        if row.get('maximum_independent_variable_2'):
-            curve_object.setMaximumValueofy(row['maximum_independent_variable_2'])
+        write('minimum_independent_variable_2', curve_object.setMinimumValueofy)
+        write('maximum_independent_variable_2', curve_object.setMaximumValueofy)
     if hasattr(curve_object, 'setMinimumCurveOutput'):
-        if row.get('minimum_dependent_variable_output'):
-            curve_object.setMinimumCurveOutput(row['minimum_dependent_variable_output'])
-        if row.get('maximum_dependent_variable_output'):
-            curve_object.setMaximumCurveOutput(row['maximum_dependent_variable_output'])
+        write('minimum_dependent_variable_output', curve_object.setMinimumCurveOutput)
+        write('maximum_dependent_variable_output', curve_object.setMaximumCurveOutput)
 
 
 # ---------------- capacities ----------------
@@ -1094,12 +2204,292 @@ def optional_f(value):
     return float(value.get()) if value.is_initialized() else None
 
 
+# ---------------- plant capacity ownership (D-90) ----------------
+
+#: D-90: the efficiency pass hard-sets boiler and chiller capacities (8.4.4.9.(6)
+#: / 8.4.4.10.(6) staging) and hardens cooling-tower hydraulics. These features
+#: record what it set and from what, so a repeat pass stages from the same
+#: design capacity instead of halving an already-halved value, and
+#: prepare_for_resizing releases exactly what the pass owns — never a capacity
+#: the model supplied as an input.
+CAPACITY_BASIS_FEATURE = 'btap_capacity_basis_w'
+CAPACITY_SOURCE_FEATURE = 'btap_capacity_source'
+CAPACITY_APPLIED_FEATURE = 'btap_capacity_applied_w'
+BASE_NAME_FEATURE = 'btap_base_name'
+TOWER_HARDENED_FEATURE = 'btap_tower_hardened_fields'
+#: Every ownership feature, for clone hygiene: a reference built from a model
+#: that already carries them must re-derive ownership from its own sizing.
+OWNERSHIP_FEATURES = (CAPACITY_BASIS_FEATURE, CAPACITY_SOURCE_FEATURE,
+                      CAPACITY_APPLIED_FEATURE, BASE_NAME_FEATURE,
+                      TOWER_HARDENED_FEATURE)
+
+
+def _same_capacity(a, b):
+    return abs(a - b) <= 1e-6 + 1e-9 * max(abs(a), abs(b))
+
+
+def _plant_capacity(component, hard_w, autosized_w):
+    """D-90: the design capacity to stage from, and where it came from.
+
+    A hard value equal to what this pass last applied is the pass's own output,
+    so the stored design basis is returned with its stored source — re-applying
+    then stages from the same basis. Any other hard value is an ``input`` (set by
+    a user or carried in with a copied proposed plant); an unset capacity is the
+    ``autosized`` result of the model's own sizing run.
+
+    :return: (design capacity W, 'autosized' | 'input'), or (None, None) unsized"""
+    props = component.additionalProperties()
+    basis = props.getFeatureAsDouble(CAPACITY_BASIS_FEATURE)
+    applied = props.getFeatureAsDouble(CAPACITY_APPLIED_FEATURE)
+    source = props.getFeatureAsString(CAPACITY_SOURCE_FEATURE)
+    if (hard_w is not None and basis.is_initialized() and applied.is_initialized()
+            and source.is_initialized() and _same_capacity(hard_w, applied.get())):
+        return basis.get(), source.get()
+    if hard_w is not None:
+        return hard_w, 'input'
+    if autosized_w is not None:
+        return autosized_w, 'autosized'
+    return None, None
+
+
+def _plant_role(boiler, name):
+    """Which boiler of a staged plant this is — ``'primary'``, ``'secondary'``
+    or ``None`` for a plant that is not a staged pair.
+
+    DF-13. The 8.4.x.9.(6) bands describe a PLANT, but the pass applies them per
+    boiler, and it used to decide by matching 'Primary Boiler' / 'Secondary
+    Boiler' in the name. That is fragile in both directions: a plant the
+    reference copied from the proposed (D-58) was staged and re-controlled
+    because it happened to carry those names, while a genuine two-boiler plant
+    named anything else was never staged — a miss of (6)(c), which Sol confirmed
+    (2026-09-16) applies to copied reference plants too.
+
+    Three sources, most reliable first. The builder's own feature survives any
+    renaming this pass does. The name is kept as the second source so every
+    model that staged correctly before still does. Topology is the last resort
+    and is what adds the missing coverage: exactly two boilers on one hot-water
+    loop ARE the (6)(c) pair whatever they are called, ordered by the loop's own
+    supply order so the choice is deterministic."""
+    stored = boiler.additionalProperties().getFeatureAsString(BOILER_PLANT_ROLE_FEATURE)
+    if stored.is_initialized() and stored.get() in ('primary', 'secondary'):
+        return stored.get()
+
+    if 'Primary Boiler' in name:
+        return 'primary'
+    if 'Secondary Boiler' in name:
+        return 'secondary'
+
+    loop_ = boiler.plantLoop()
+    if not loop_.is_initialized():
+        return None
+
+    boilers = [c.to_BoilerHotWater().get() for c in loop_.get().supplyComponents()
+               if c.to_BoilerHotWater().is_initialized()]
+    if len(boilers) != 2:
+        return None
+
+    return 'primary' if boiler.handle() == boilers[0].handle() else 'secondary'
+
+
+def _base_name(component):
+    """The name before this pass appended its capacity and efficiency suffix."""
+    stored = component.additionalProperties().getFeatureAsString(BASE_NAME_FEATURE)
+    return stored.get() if stored.is_initialized() and stored.get() else component.nameString()
+
+
+def _record_capacity(component, basis_w, source, applied_w, base_name):
+    props = component.additionalProperties()
+    props.setFeature(CAPACITY_BASIS_FEATURE, float(basis_w))
+    props.setFeature(CAPACITY_SOURCE_FEATURE, source)
+    props.setFeature(CAPACITY_APPLIED_FEATURE, float(applied_w))
+    props.setFeature(BASE_NAME_FEATURE, base_name)
+
+
+def _release_capacity(component, autosize_method):
+    """Return a capacity this pass derived from sizing to autosize. Inputs stay."""
+    props = component.additionalProperties()
+    source = props.getFeatureAsString(CAPACITY_SOURCE_FEATURE)
+    if not (source.is_initialized() and source.get() == 'autosized'):
+        return False
+    getattr(component, autosize_method)()
+    for feature in (CAPACITY_BASIS_FEATURE, CAPACITY_SOURCE_FEATURE, CAPACITY_APPLIED_FEATURE):
+        props.resetFeature(feature)
+    return True
+
+
+def _hardened_tower_fields(tower):
+    stored = tower.additionalProperties().getFeatureAsString(TOWER_HARDENED_FEATURE)
+    return set(filter(None, stored.get().split(';'))) if stored.is_initialized() else set()
+
+
 # ---------------- component appliers ----------------
+
+# ---------------- part-load classes (D-89) ----------------
+
+#: The feature a reference-building selection stamps on an object it creates, so
+#: the part-load class it elected survives the SECOND efficiency pass — the same
+#: `additionalProperties` mechanism the purchased-cooling chiller COP uses.
+PART_LOAD_CLASS_FEATURE = BOILER_PART_LOAD_CLASS_FEATURE
+#: Every class the enum admits, across both editions. A row or a feature naming
+#: anything else is a data error, reported rather than quietly defaulted.
+PART_LOAD_CLASSES = ('non_condensing', 'atmospheric', 'condensing',
+                     'modulating', 'not_applicable')
+
+
+def _edition_label(tables):
+    provenance = tables.get('provenance') or {}
+    return f"{provenance.get('code') or 'NECB'} {provenance.get('edition') or ''}".strip()
+
+
+def _part_load_class(component, row, audit, target):
+    """``(class, source)``. A class PROPAGATED onto the object wins over the
+    table row's default: the row bins by fluid, fuel and capacity and knows
+    nothing about the reference selection that created this object.
+
+    Two guards (independent review, 2026-09-13): a value outside
+    PART_LOAD_CLASSES is a DATA error, reported as such and ignored rather
+    than treated as a class the edition happens not to publish; and a row
+    whose class is ``not_applicable`` (no combustion part-load factor —
+    the electric boiler, contract item 4) keeps it whatever a tag says."""
+    row_class = row.get('part_load_curve_class')
+    if row_class not in PART_LOAD_CLASSES:
+        audit.warn('efficiency',
+                   f"row declares part_load_curve_class {row_class!r}, which is not "
+                   f"one of {PART_LOAD_CLASSES} — data error; treated as no class",
+                   target=target, inputs={'part_load_curve_class': row_class},
+                   ruling='D-89')
+        row_class = None
+    feature = component.additionalProperties().getFeatureAsString(PART_LOAD_CLASS_FEATURE)
+    tag = feature.get() if feature.is_initialized() and feature.get() else None
+    if tag is None:
+        return row_class, 'row'
+    if tag not in PART_LOAD_CLASSES:
+        audit.warn('efficiency',
+                   f"propagated part-load class tag {tag!r} is not one of "
+                   f"{PART_LOAD_CLASSES} — data error; the row's class "
+                   f"{row_class!r} is used",
+                   target=target, inputs={'tag': tag, 'part_load_curve_class': row_class},
+                   ruling='D-89')
+        return row_class, 'row'
+    if row_class == 'not_applicable':
+        audit.warn('efficiency',
+                   f"propagated part-load class tag {tag!r} ignored: this row has no "
+                   f"combustion part-load factor (not_applicable) and a tag cannot "
+                   f"give it one",
+                   target=target, inputs={'tag': tag, 'part_load_curve_class': row_class},
+                   ruling='D-89')
+        return row_class, 'row'
+    return tag, 'reference selection'
+
+
+def _fheatplc_entry(tables, equipment, klass):
+    return next((e for e in (tables.get('part_load_fheatplc') or [])
+                 if e.get('equipment') == equipment and e.get('class') == klass), None)
+
+
+def _curve_evidence(tables, row):
+    """What the part-load curve IS: the article, the table row it comes from,
+    the transform, the representation and its published error."""
+    implements = row.get('implements') or {}
+    entry = _fheatplc_entry(tables, implements.get('equipment'), implements.get('class'))
+    article = (entry or {}).get('article') or '(article not declared)'
+    error = implements.get('max_error_vs_exact')
+    error_text = ('exact at every value the Code publishes' if not error
+                  else f'max relative error {error * 100:.4f} % against the exact '
+                       'requirement (sampled at PLR step 0.00001)')
+    first_node = row.get('minimum_independent_variable_1')
+    if first_node == 0:
+        low_end = "; a node at PLR 0 carries the Code equation down to zero load"
+    elif (entry or {}).get('form') == 'points':
+        # A printed-point table (NECB 2020 Table 8.4.5.2.-B) is no equation:
+        # the Code states nothing below its lowest point, so there is no
+        # standby term to bound the hold against.
+        low_end = (f"; the Code publishes no value below PLR {first_node}, and "
+                   f"the table's Constant extrapolation holds the lowest printed "
+                   f"factor there — an implementation choice D-89 records")
+    else:
+        low_end = (f"; below the first node (PLR {first_node}) the table's "
+                   f"Constant extrapolation holds the factor, an under-count "
+                   f"bounded by the Code's standby term FHeatPLC(0) x rated fuel"
+                   + ("; the first node's value lies above the engine's 0.7 floor "
+                      "on the coil part-load fraction, so the engine never clamps"
+                      if implements.get('engine_floor') else ""))
+    return (f"Article {article} states FHeatPLC as a fuel-INPUT ratio "
+            f"(Table {implements.get('table')}, row "
+            f"{implements.get('row')!r}), so the EnergyPlus part-load field "
+            f"carries the transform {implements.get('transform')}; represented as "
+            f"a Table:Lookup on {implements.get('grid')} with "
+            f"{row.get('interpolation')} interpolation and "
+            f"{row.get('extrapolation')} extrapolation — {error_text}{low_end}")
+
+
+def _part_load_curve(component, tables, equipment, klass, audit, target):
+    """``(curve or None, label, form, evidence)`` for one equipment class.
+
+    The edition's own class -> curve map decides. A class the map does not carry
+    is UNREPRESENTABLE in this edition: a warning and a constant part-load
+    factor, never a quiet fall back to the non-condensing curve."""
+    spec = (tables.get('part_load_curves') or {}).get(equipment) or {}
+    article = spec.get('article')
+    classes = spec.get('classes') or {}
+    if klass is None:
+        # _part_load_class has already reported the row's class as a data
+        # error; a second "no representation" warning would misname the cause.
+        return None, 'none (no valid class)', None, (
+            f"the {equipment} row declares no valid part-load curve class, so no "
+            f"part-load curve applies and the part-load factor stays constant at 1.0")
+    if klass not in classes:
+        audit.warn('efficiency',
+                   f"part-load class {klass!r} has no representation in "
+                   f"{_edition_label(tables)} — part-load factor left constant",
+                   target=target,
+                   inputs={'part_load_curve_class': klass, 'equipment': equipment},
+                   article=article, ruling='D-89')
+        return None, 'none (class unrepresentable in this edition)', None, (
+            f"{_edition_label(tables)} publishes no part-load curve this ruleset can "
+            f"apply to the {klass!r} class, so the part-load factor stays constant "
+            f"at 1.0 rather than borrowing another class's curve")
+    name = classes[klass]
+    if name is None:
+        return None, 'none (constant part-load factor 1.0)', None, (
+            f"{article} derives the part-load fuel consumption of a FUEL-fired "
+            f"{equipment} from FHeatPLC; this {equipment} has no fuel input to "
+            f"adjust, so no part-load curve applies and the part-load factor is "
+            f"constant at 1.0")
+    built = curve(component.model(), tables, name, audit=audit, target=target)
+    row = next((c for c in tables['curves'] if c['name'] == name), None)
+    if built is None or row is None:
+        return None, f'none ({name} unavailable)', None, (
+            f"{article} requires a part-load curve for the {klass!r} class, and "
+            f"{name!r} could not be built from this edition's catalogue; the "
+            f"part-load factor is left constant at 1.0")
+    return built, built.nameString(), row.get('form'), _curve_evidence(tables, row)
+
+
+#: Marks a part-load class THIS pass stamped from the capacity band.
+#:
+#: A separate feature, because the class value cannot carry its own provenance:
+#: the reference BUILDER also propagates `modulating` — for purchased heating,
+#: where Article 6 names it regardless of capacity — and that stamp must
+#: survive a band change. My first version compared the class string alone and
+#: so cleared the builder's class on any sub-352 kW boiler, breaking the
+#: purchased-heating path. A pre-existing part-load test caught it; the
+#: docstring claiming the two were distinguished was simply false.
+BAND_FORCED_CLASS_FEATURE = 'btap_band_forced_part_load_class'
+
+
+def _forced_modulating(boiler) -> bool:
+    """True when THIS pass stamped the class from the capacity band."""
+    marker = boiler.additionalProperties().getFeatureAsBoolean(
+        BAND_FORCED_CLASS_FEATURE)
+    return bool(marker.is_initialized()) and bool(marker.get())
+
 
 def _apply_boiler(boiler, tables, plant, audit):
     """Legacy boiler_hot_water_apply_efficiency_and_curves (NECB2011 hvac_systems.rb:539):
-    primary/secondary staging (176/352 kW), EFFFPLR curve, AFUE/thermal/combustion ->
-    thermal efficiency, legacy rename."""
+    primary/secondary staging (176/352 kW), the part-load curve of the boiler's own
+    FHeatPLC class (D-89), AFUE/thermal/combustion -> thermal efficiency, legacy
+    rename."""
     fuel_type = boiler.fuelType()
     if fuel_type == 'Electricity':
         fuel = 'Electric'
@@ -1107,28 +2497,67 @@ def _apply_boiler(boiler, tables, plant, audit):
         fuel = 'Oil'
     else:
         fuel = 'Gas'
-    capacity_w = optional_f(boiler.nominalCapacity()) or optional_f(boiler.autosizedNominalCapacity())
+    capacity_w, capacity_source = _plant_capacity(
+        boiler, optional_f(boiler.nominalCapacity()), optional_f(boiler.autosizedNominalCapacity()))
     if capacity_w is None:
         return audit.warn('efficiency', 'boiler capacity unavailable (model not sized?) — not set',
                           target=boiler.nameString())
 
     boiler_capacity = capacity_w
-    name = boiler.nameString()
-    if 'Primary Boiler' in name or 'Secondary Boiler' in name:
+    # D-90: stage and rename from the base name, so a repeat pass neither
+    # re-halves the plant nor appends a second capacity suffix
+    name = _base_name(boiler)
+    role = _plant_role(boiler, name)
+    if role is not None:
         kw = capacity_w / 1000.0
+        modulating = kw > plant['two_boiler_max_kw'] and role == 'primary'
         if kw > plant['two_boiler_max_kw']:  # 8.4.4.9.(6)(d): 'exceeds 352 kW' (strict)
-            if 'Primary Boiler' in name:
-                boiler.setBoilerFlowMode('LeavingSetpointModulated')
-                boiler.setMinimumPartLoadRatio(plant['modulating_min_fraction'])
-            else:
+            if role == 'secondary':
                 boiler_capacity = 0.001
         elif kw > plant['single_boiler_max_kw']:  # (6)(c): 'greater than 176' (strict)
             boiler_capacity = capacity_w / 2
-        elif 'Secondary Boiler' in name:
+        elif role == 'secondary':
             boiler_capacity = 0.001
         elif capacity_w <= 1.0:
             boiler_capacity = 1.0
+        # D-90: every pass sets the COMPLETE control state of the band it lands in.
+        # The build-time pass reads the proposed's sizing and the next pass the
+        # reference's, so a plant can cross 352 kW in either direction between
+        # passes; a lower band must not keep the modulating controls of (d). The
+        # non-modulating state is the one the plant builder leaves: an explicit
+        # ConstantFlow flow mode and a defaulted minimum part-load ratio.
+        if modulating:
+            boiler.setBoilerFlowMode('LeavingSetpointModulated')
+            boiler.setMinimumPartLoadRatio(plant['modulating_min_fraction'])
+            # THE CLASS, not only the controls. (6)(d) names a MODULATING
+            # boiler above the two-boiler threshold, and class resolution ran
+            # later against the unchanged catalogue row — so a 400 kW primary
+            # took the row's `non_condensing` curve AND acquired AHJ-14, when
+            # the Code had already elected its class (Sol, `128`.2). Stamped
+            # as the propagated feature, the channel the reference builder
+            # already uses, so `_part_load_class` reports source
+            # `reference selection` and the ordinary-class referral correctly
+            # does not apply.
+            boiler.additionalProperties().setFeature(
+                PART_LOAD_CLASS_FEATURE, 'modulating')
+            boiler.additionalProperties().setFeature(
+                BAND_FORCED_CLASS_FEATURE, True)
+        else:
+            boiler.setBoilerFlowMode('ConstantFlow')
+            boiler.resetMinimumPartLoadRatio()
+            # CROSSING DOWNWARD must clear it. One pass reads the proposed's
+            # sizing and the next the reference's, so a plant can fall below
+            # the threshold between passes, and a stale forced class would
+            # outlive the band that justified it. Only the class THIS function
+            # stamps is cleared: one the reference builder elected for a
+            # selected variant is not ours to drop.
+            if _forced_modulating(boiler):
+                boiler.additionalProperties().resetFeature(
+                    PART_LOAD_CLASS_FEATURE)
+                boiler.additionalProperties().resetFeature(
+                    BAND_FORCED_CLASS_FEATURE)
     boiler.setNominalCapacity(boiler_capacity)
+    _record_capacity(boiler, capacity_w, capacity_source, boiler_capacity, name)
 
     cap_btuh = w_to_btu_per_hr(boiler_capacity)
     row = find_row(tables['boilers'], {'fluid_type': 'Hot Water', 'fuel_type': fuel}, cap_btuh)
@@ -1136,9 +2565,19 @@ def _apply_boiler(boiler, tables, plant, audit):
         return audit.warn('efficiency', 'no boiler efficiency row found — not set', target=name,
                           inputs={'fuel': fuel, 'capacity_btu_hr': ruby_round(cap_btuh)})
 
-    eff_fplr = curve(boiler.model(), tables, row.get('efffplr'))
-    if eff_fplr:
-        boiler.setNormalizedBoilerEfficiencyCurve(eff_fplr)
+    # 8.4.5.2./8.4.6.2. state FHeatPLC on the part-load ratio alone, so the
+    # evaluation variable is not load-bearing today; it is set explicitly
+    # because the field has no IDD default and any future temperature-dependent
+    # curve (2025's condensing row) needs an adjudicated basis.
+    boiler.setEfficiencyCurveTemperatureEvaluationVariable('EnteringBoiler')
+    klass, class_source = _part_load_class(boiler, row, audit, name)
+    plf, curve_label, curve_shape, evidence = _part_load_curve(
+        boiler, tables, 'boiler', klass, audit, name)
+    if plf is None:
+        # also clears a curve the proposed model contributed to this clone
+        boiler.resetNormalizedBoilerEfficiencyCurve()
+    else:
+        boiler.setNormalizedBoilerEfficiencyCurve(plf)
 
     thermal_eff, label = boiler_thermal_efficiency(row)
     if thermal_eff is None:
@@ -1146,11 +2585,65 @@ def _apply_boiler(boiler, tables, plant, audit):
 
     boiler.setNominalThermalEfficiency(thermal_eff)
     boiler.setName(f'{name} {ruby_round(w_to_kbtu_per_hr(boiler_capacity))}kBtu/hr {label}')
+    article = ((tables.get('part_load_curves') or {}).get('boiler') or {}).get('article')
     return audit.decision('efficiency', 'boiler efficiency applied', target=name,
-                          inputs={'fuel': fuel, 'capacity_kw': ruby_round(boiler_capacity / 1000.0, 1)},
+                          inputs={'fuel': fuel,
+                                  'capacity_kw': ruby_round(boiler_capacity / 1000.0, 1),
+                                  'design_capacity_kw': ruby_round(capacity_w / 1000.0, 1),
+                                  'capacity_source': capacity_source,
+                                  'part_load_curve_class': klass,
+                                  'class_source': class_source,
+                                  'curve': curve_label, 'form': curve_shape},
                           value=f"thermal efficiency {ruby_round(thermal_eff, 3)} ({label}), "
-                                f"curve {row.get('efffplr')}",
-                          article='NECB 2020 Table 5.2.12.1 (boilers)')
+                                f"part-load curve {curve_label}",
+                          evidence=f"{evidence}; the efficiency curve is evaluated on "
+                                   "the EnteringBoiler temperature",
+                          article=article, ruling='D-89 D-90',
+                          ahj=_boiler_class_ahj(klass, class_source,
+                                                boiler_capacity))
+
+
+#: Below this, in watts, a boiler object is SUPPRESSED rather than small.
+#:
+#: The staging rules set exactly 0.001 W to stand a Code-required object down,
+#: and the tiny-capacity floor sets exactly 1.0 W for a real but minimal
+#: boiler. One watt therefore separates "an implementation device" from "a
+#: genuine if trivial boiler", and the distinction is load-bearing: a stood-down
+#: object is not a second Code-required boiler and must not raise a second
+#: question (Sol, `128`.3).
+SUPPRESSED_CAPACITY_W = 1.0
+
+
+def _boiler_class_ahj(klass, class_source, final_capacity_w=None):
+    """AHJ-14's narrowing, applied where the class is resolved.
+
+    Sol's `126` narrowed this to equipment for which NO provision elects a
+    curve class. Three exclusions follow, and each matters:
+
+    * `class_source == 'reference selection'` means a provision DID elect it —
+      a purchased boiler is explicitly modulating under Article 6 — so it is
+      not a referral.
+    * `modulating` is what the Code names for a boiler above 352 kW, so a row
+      carrying it was decided by the Code and not by us. Applying a
+      NON-modulating class above 352 kW would be a tool DEFECT, not AHJ-14.
+    * `not_applicable` is equipment with no combustion part-load factor to
+      classify, electric boilers among it.
+
+    What remains is an ordinary fuel-fired boiler whose condensing versus
+    non-condensing class came from the catalogue row's own default — the local
+    default Sol's audit flagged as unresolved.
+    """
+    if class_source != 'row':
+        return None
+    if klass not in ('non_condensing', 'atmospheric', 'condensing'):
+        return None
+    if (final_capacity_w is not None
+            and final_capacity_w < SUPPRESSED_CAPACITY_W):
+        # Stood down by the staging rules. Article 9.(6)(b) requires ONE
+        # single-stage boiler; the zeroed SDK object beside it is how that is
+        # expressed in a model, not a second normative class question.
+        return None
+    return 'AHJ-14'
 
 
 def boiler_thermal_efficiency(row):
@@ -1169,9 +2662,10 @@ def boiler_thermal_efficiency(row):
 def _apply_chiller(chiller, tables, plant, audit):
     """Legacy chiller_electric_eir_apply_efficiency_and_curves (NECB2011:648): modulating
     to 25%, primary/secondary 2100 kW split, curves, kW/ton -> COP, tower sizing."""
-    name = chiller.nameString()
-    capacity_w = (optional_f(chiller.referenceCapacity())
-                  or optional_f(chiller.autosizedReferenceCapacity()))
+    name = _base_name(chiller)
+    capacity_w, capacity_source = _plant_capacity(
+        chiller, optional_f(chiller.referenceCapacity()),
+        optional_f(chiller.autosizedReferenceCapacity()))
     if capacity_w is None:
         return audit.warn('efficiency', 'chiller capacity unavailable (model not sized?) — not set', target=name)
 
@@ -1188,6 +2682,7 @@ def _apply_chiller(chiller, tables, plant, audit):
         else:
             chiller_capacity = capacity_w / 2.0
     chiller.setReferenceCapacity(chiller_capacity)
+    _record_capacity(chiller, capacity_w, capacity_source, chiller_capacity, name)
 
     cooling_type = 'AirCooled' if chiller.condenserType() == 'AirCooled' else 'WaterCooled'
     compressor = next((t for t in ('Reciprocating', 'Scroll', 'Centrifugal')
@@ -1210,7 +2705,7 @@ def _apply_chiller(chiller, tables, plant, audit):
                            ('setCoolingCapacityFunctionOfTemperature',
                             'setElectricInputToCoolingOutputRatioFunctionOfTemperature',
                             'setElectricInputToCoolingOutputRatioFunctionOfPLR')):
-        c = curve(chiller.model(), tables, row.get(key))
+        c = curve(chiller.model(), tables, row.get(key), audit=audit, target=name)
         if c:
             getattr(chiller, setter)(c)
 
@@ -1239,10 +2734,12 @@ def _apply_chiller(chiller, tables, plant, audit):
     chiller.setName(f'{name} {ruby_round(tons)}tons {name_suffix}')
     return audit.decision('efficiency', action, target=name,
                           inputs={'cooling_type': cooling_type, 'compressor': compressor,
-                                  'tons': ruby_round(tons, 1)},
+                                  'tons': ruby_round(tons, 1),
+                                  'design_capacity_kw': ruby_round(capacity_w / 1000.0, 1),
+                                  'capacity_source': capacity_source},
                           value=f'{applied}, curves '
                                 f"{row.get('capft')}/{row.get('eirft')}/{row.get('eirfplr')}",
-                          article=article)
+                          article=article, ruling='D-90')
 
 
 def _apply_tower_rules(model, audit):
@@ -1290,19 +2787,39 @@ def _apply_tower_rules(model, audit):
             # water/air/UA at their solved values leaves nothing to re-solve;
             # Table 5.2.12.2 governs fan POWER only, so the code fan rides on
             # E+'s self-consistent heat-transfer sizing.
-            for getter, setter in (
-                    ('autosizedDesignWaterFlowRate', 'setDesignWaterFlowRate'),
-                    ('autosizedDesignAirFlowRate', 'setDesignAirFlowRate'),
+            # D-90: record every field hardened FROM an autosized value (and the
+            # fan power, if it was autosized) so prepare_for_resizing can hand
+            # them back to EnergyPlus before the next sizing run; input values
+            # are never recorded and so never released.
+            hardened = _hardened_tower_fields(towers[0])
+            for getter, setter, is_autosized, release in (
+                    ('autosizedDesignWaterFlowRate', 'setDesignWaterFlowRate',
+                     'isDesignWaterFlowRateAutosized', 'autosizeDesignWaterFlowRate'),
+                    ('autosizedDesignAirFlowRate', 'setDesignAirFlowRate',
+                     'isDesignAirFlowRateAutosized', 'autosizeDesignAirFlowRate'),
                     ('autosizedUFactorTimesAreaValueatDesignAirFlowRate',
-                     'setUFactorTimesAreaValueatDesignAirFlowRate'),
+                     'setUFactorTimesAreaValueatDesignAirFlowRate',
+                     'isUFactorTimesAreaValueatDesignAirFlowRateAutosized',
+                     'autosizeUFactorTimesAreaValueatDesignAirFlowRate'),
                     ('autosizedAirFlowRateinFreeConvectionRegime',
-                     'setAirFlowRateinFreeConvectionRegime'),
+                     'setAirFlowRateinFreeConvectionRegime',
+                     'isAirFlowRateinFreeConvectionRegimeAutosized',
+                     'autosizeAirFlowRateinFreeConvectionRegime'),
                     ('autosizedUFactorTimesAreaValueatFreeConvectionAirFlowRate',
-                     'setUFactorTimesAreaValueatFreeConvectionAirFlowRate')):
+                     'setUFactorTimesAreaValueatFreeConvectionAirFlowRate',
+                     'isUFactorTimesAreaValueatFreeConvectionAirFlowRateAutosized',
+                     'autosizeUFactorTimesAreaValueatFreeConvectionAirFlowRate')):
                 v = getattr(towers[0], getter)()
                 if hasattr(v, 'is_initialized') and v.is_initialized():
+                    if getattr(towers[0], is_autosized)():
+                        hardened.add(release)
                     getattr(towers[0], setter)(v.get())
+            if towers[0].isFanPoweratDesignAirFlowRateAutosized():
+                hardened.add('autosizeFanPoweratDesignAirFlowRate')
             towers[0].setFanPoweratDesignAirFlowRate(fan_w)
+            if hardened:
+                towers[0].additionalProperties().setFeature(
+                    TOWER_HARDENED_FEATURE, ';'.join(sorted(hardened)))
         audit.decision('efficiency', 'cooling tower cells set from heat rejection',
                        target=towers[0].nameString(),
                        inputs={'tower_cap_kw': ruby_round(tower_cap / 1000.0, 1),
@@ -1352,7 +2869,7 @@ def _apply_dx_cooling(coil, tables, audit):
                         ('cool_eir_ft', 'setEnergyInputRatioFunctionOfTemperatureCurve'),
                         ('cool_eir_fflow', 'setEnergyInputRatioFunctionOfFlowFractionCurve'),
                         ('cool_plf_fplr', 'setPartLoadFractionCorrelationCurve')):
-        c = curve(coil.model(), tables, row.get(key))
+        c = curve(coil.model(), tables, row.get(key), audit=audit, target=name)
         if c:
             getattr(coil, setter)(c)
     coil.setName(f'{name} {ruby_round(w_to_kbtu_per_hr(capacity_w))}kBtu/hr {label}')
@@ -1404,7 +2921,7 @@ def _apply_dx_cooling_multi(coil, tables, audit, capacity_w=None):
     for stage in coil.stages():
         stage.setGrossRatedCoolingCOP(cop)
         for key, setter in curves:
-            c = curve(coil.model(), tables, row.get(key))
+            c = curve(coil.model(), tables, row.get(key), audit=audit, target=name)
             if c:
                 getattr(stage, setter)(c)
     coil.setName(f'{name} {ruby_round(w_to_kbtu_per_hr(capacity_w))}kBtu/hr {label}')
@@ -1471,7 +2988,7 @@ def _apply_dx_heating_multi(coil, tables, audit, capacity_w=None):
     for stage in coil.stages():
         stage.setGrossRatedHeatingCOP(cop)
         for key, setter in curves:
-            c = curve(coil.model(), tables, row.get(key))
+            c = curve(coil.model(), tables, row.get(key), audit=audit, target=name)
             if c and hasattr(stage, setter):
                 getattr(stage, setter)(c)
     coil.setName(f'{name} {ruby_round(w_to_kbtu_per_hr(capacity_w))}kBtu/hr {label}')
@@ -1516,8 +3033,12 @@ def _apply_gas_multi(coil, tables, audit, capacity_w=None):
         return audit.warn('efficiency', 'no furnace efficiency row found — not set', target=name,
                           inputs={'capacity_btu_hr': ruby_round(cap_btuh)})
 
-    plf = curve(coil.model(), tables, row.get('efffplr'))
-    if plf:
+    klass, class_source = _part_load_class(coil, row, audit, coil.nameString())
+    plf, curve_label, curve_shape, evidence = _part_load_curve(
+        coil, tables, 'furnace', klass, audit, name)
+    if plf is None:
+        coil.resetPartLoadFractionCorrelationCurve()
+    else:
         coil.setPartLoadFractionCorrelationCurve(plf)
 
     # same AFUE/thermal/combustion triad
@@ -1528,12 +3049,20 @@ def _apply_gas_multi(coil, tables, audit, capacity_w=None):
     for stage in coil.stages():
         stage.setGasBurnerEfficiency(thermal_eff)
     coil.setName(f'{name} {ruby_round(w_to_kbtu_per_hr(capacity_w))}kBtu/hr {label}')
+    article = ((tables.get('part_load_curves') or {}).get('furnace') or {}).get('article')
     return audit.decision('efficiency', 'staged gas heating efficiency applied to every stage', target=name,
                           inputs={'stages': len(coil.stages()),
-                                  'top_stage_kw': ruby_round(capacity_w / 1000.0, 1)},
+                                  'top_stage_kw': ruby_round(capacity_w / 1000.0, 1),
+                                  'part_load_curve_class': klass,
+                                  'class_source': class_source,
+                                  'curve': curve_label, 'form': curve_shape},
                           value=f'burner efficiency {ruby_round(thermal_eff, 3)} ({label}) on all '
-                                f"{len(coil.stages())} stages, curve {row.get('efffplr')}",
-                          article='NECB 2020 Table 5.2.12.1 (furnaces)', ruling='D-46')
+                                f"{len(coil.stages())} stages, part-load curve {curve_label}",
+                          evidence=f"{evidence}; the part-load curve sits on the PARENT "
+                                   "staged coil, which carries EnergyPlus' single "
+                                   "part-load-fraction field (D-46)",
+                          article=article, ruling='D-46 D-89',
+                          ahj=_boiler_class_ahj(klass, class_source))
 
 
 def _apply_dx_heating(coil, tables, audit):
@@ -1563,7 +3092,7 @@ def _apply_dx_heating(coil, tables, audit):
                         ('heat_eir_ft', 'setEnergyInputRatioFunctionofTemperatureCurve'),
                         ('heat_eir_fflow', 'setEnergyInputRatioFunctionofFlowFractionCurve'),
                         ('heat_plf_fplr', 'setPartLoadFractionCorrelationCurve')):
-        c = curve(coil.model(), tables, row.get(key))
+        c = curve(coil.model(), tables, row.get(key), audit=audit, target=name)
         if c and hasattr(coil, setter):
             getattr(coil, setter)(c)
     coil.setName(f'{name} {ruby_round(w_to_kbtu_per_hr(capacity_w))}kBtu/hr {label}')
@@ -1587,8 +3116,12 @@ def _apply_gas_coil(coil, tables, audit):
         return audit.warn('efficiency', 'no furnace efficiency row found — not set', target=name,
                           inputs={'capacity_btu_hr': ruby_round(cap_btuh)})
 
-    plf = curve(coil.model(), tables, row.get('efffplr'))
-    if plf:
+    klass, class_source = _part_load_class(coil, row, audit, coil.nameString())
+    plf, curve_label, curve_shape, evidence = _part_load_curve(
+        coil, tables, 'furnace', klass, audit, name)
+    if plf is None:
+        coil.resetPartLoadFractionCorrelationCurve()
+    else:
         coil.setPartLoadFractionCorrelationCurve(plf)
 
     # same AFUE/thermal/combustion triad
@@ -1598,11 +3131,17 @@ def _apply_gas_coil(coil, tables, audit):
 
     coil.setGasBurnerEfficiency(thermal_eff)
     coil.setName(f'{name} {ruby_round(w_to_kbtu_per_hr(capacity_w))}kBtu/hr {label}')
+    article = ((tables.get('part_load_curves') or {}).get('furnace') or {}).get('article')
     return audit.decision('efficiency', 'gas heating coil efficiency applied', target=name,
-                          inputs={'capacity_kw': ruby_round(capacity_w / 1000.0, 1)},
+                          inputs={'capacity_kw': ruby_round(capacity_w / 1000.0, 1),
+                                  'part_load_curve_class': klass,
+                                  'class_source': class_source,
+                                  'curve': curve_label, 'form': curve_shape},
                           value=f'burner efficiency {ruby_round(thermal_eff, 3)} ({label}), '
-                                f"curve {row.get('efffplr')}",
-                          article='NECB 2020 Table 5.2.12.1 (furnaces)')
+                                f'part-load curve {curve_label}',
+                          evidence=evidence,
+                          article=article, ruling='D-89',
+                          ahj=_boiler_class_ahj(klass, class_source))
 
 
 # ---------------- context helpers ----------------
@@ -1681,31 +3220,94 @@ def apply_efficiencies(model, code='necb2020', audit=None, proposed=None):
                   proposed=proposed)
 
 
-def prepare_for_resizing(model, audit=None):
+def prepare_for_resizing(model, audit=None, code='necb2020'):
     """Facade: make an ALREADY-EFFICIENCY-APPLIED model safe to re-size.
 
-    The efficiency pass hard-sets pump rated power (the 8.4.4.14 transfer and
-    the 5.2.6.3 clamp) while pump FLOW stays autosized, and reconciles the
-    head so the triple is physical at the flow sized so far. A later sizing
-    run re-derives the flow: if it grows, the frozen power/head no longer fit
-    it and EnergyPlus FATALS on "Calculated Pump Efficiency > 100%" during
-    input checking — before the efficiency pass gets its chance to
-    re-reconcile. Releasing the hard power back to autosize removes the
-    inconsistency by construction (EnergyPlus then derives power from the
-    flow and head it just sized), and the caller's next apply_efficiencies
-    re-transfers it against the NEW flow.
+    Since D-92 the pass does NOT hard-set pump power: it states head, shaft
+    coefficient and motor efficiency and leaves power autosized, so EnergyPlus
+    derives it from whatever flow it last sized. A pump the pass has touched
+    therefore needs no release at all — it is already consistent by
+    construction, and there is no reconciliation step any more.
+
+    What still needs releasing is a hard power the MODEL supplied: an input
+    pump power sits frozen while pump FLOW stays autosized, and when a later
+    sizing run grows the flow, the frozen power and head no longer fit it —
+    EnergyPlus FATALS on "Calculated Pump Efficiency > 100%" during input
+    checking, before the efficiency pass gets a chance to restate the pump.
+    Releasing that power to autosize removes the inconsistency, and the
+    caller's next apply_efficiencies restates the pump against the NEW flow.
 
     Call this before EVERY re-sizing run of a model that has already been
     through apply_efficiencies — the 8.4.1.2.(5) capacity iteration does.
 
+    EVERY hard-set pump power is released, including one the model supplied as an
+    input: a plant retained by the D-58 residential identity arrives with the
+    legacy's hard power and head, and the reference re-sizes that loop's flow, so
+    keeping the input value is what triggers the fatal above (found on the
+    SmallHotel gas variant). Pump power is deliberately NOT ownership-tracked the
+    way plant capacity is, and tracking it would change nothing: 8.4.4.14 (2025:
+    8.4.5.14) makes the reference's rated power a DERIVED quantity, and the next
+    pass re-derives it for every non-SWH pump whoever set the old value. WHICH
+    sentence supplies that value — (1)'s inherited head and efficiency, (2)'s
+    combined shaft power, or (3)'s W/(L/s) over the distribution flow — is
+    decided per correspondence by D-93. The caller's
+    next apply_efficiencies(proposed=) re-transfers it against the newly sized flow;
+    WITHOUT proposed= nothing is transferred and the released pump is left for
+    EnergyPlus to size.
+
+    A service-water circulator is NOT released (DF-12, closed by D-92). D-27 puts
+    it outside 8.4.4.14 and the pump pass leaves it 'as built', so releasing it
+    would strand it autosized with nothing to re-establish it — the release is
+    scoped to the pumps the Article governs.
+
+    D-90: the same holds for plant capacity. The pass hard-sets boiler and
+    chiller capacities (8.4.4.9.(6)(a): the sum of the served systems' capacities,
+    then staged) and hardens tower hydraulics; left in place, the reference
+    plant stays at whatever the FIRST pass read — on a reference clone, the
+    proposed's sizing — while its systems grow through every capacity increase.
+    Capacities the pass derived from sizing are released to autosize here;
+    capacities the model supplied as inputs are kept.
+
     :return: int — pumps released"""
     audit = audit if audit is not None else NullAudit()
-    pumps = ([p for p in model.getPumpVariableSpeeds() if not p.ratedPowerConsumption().empty()]
-             + [p for p in model.getPumpConstantSpeeds() if not p.ratedPowerConsumption().empty()])
+    # the edition's own article numbers: 2020 8.4.4.9/8.4.4.10/8.4.4.14,
+    # 2025 8.4.5.9/8.4.5.10/8.4.5.14
+    prefix = resolve(code).article('reference_subsection')
+    # DF-12: the release is sizing safety for the pumps 8.4.x.14 governs. A
+    # service-water circulator is outside that Article (D-27) and the pump pass
+    # leaves it 'as built', so releasing it would strand it autosized with
+    # nothing to re-establish it.
+    def _hvac_pump(pump):
+        loop_ = pump.plantLoop()
+        return not (loop_.is_initialized() and _swh_loop(loop_.get()))
+
+    pumps = ([p for p in model.getPumpVariableSpeeds()
+              if not p.ratedPowerConsumption().empty() and _hvac_pump(p)]
+             + [p for p in model.getPumpConstantSpeeds()
+                if not p.ratedPowerConsumption().empty() and _hvac_pump(p)])
     for p in pumps:
         p.autosizeRatedPowerConsumption()
     if pumps:
         audit.info('efficiency', 'hard-set pump power released to autosize for the re-sizing run — the '
                                  'efficiency pass re-transfers it against the newly sized flow',
-                   inputs={'pumps': len(pumps)}, article='8.4.4.14.(1)-(3)', ruling='D-11 D-27')
+                   inputs={'pumps': len(pumps)}, article=f'{prefix}.14.(1)-(3)', ruling='D-11 D-27')
+
+    released = {'boilers': 0, 'chillers': 0, 'towers': 0}
+    for boiler in model.getBoilerHotWaters():
+        released['boilers'] += _release_capacity(boiler, 'autosizeNominalCapacity')
+    for chiller in model.getChillerElectricEIRs():
+        released['chillers'] += _release_capacity(chiller, 'autosizeReferenceCapacity')
+    for tower in model.getCoolingTowerSingleSpeeds():
+        fields = _hardened_tower_fields(tower)
+        if fields:
+            for release in sorted(fields):
+                getattr(tower, release)()
+            tower.additionalProperties().resetFeature(TOWER_HARDENED_FEATURE)
+            released['towers'] += 1
+    if any(released.values()):
+        audit.info('efficiency', 'plant capacities the efficiency pass derived from sizing released to '
+                                 'autosize for the re-sizing run — the next pass re-stages them from the '
+                                 'newly sized design capacities; input capacities are kept',
+                   inputs=released, article=f'{prefix}.9.(6)(a); {prefix}.10.(6); 8.4.1.2.(5)',
+                   ruling='D-90')
     return len(pumps)

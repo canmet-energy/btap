@@ -1,0 +1,122 @@
+{
+  "fetched": "2026-09-28",
+  "decision": "D-97",
+  "why": "The N:1 ruling rests on the scope phrase \"in a given hydronic system\" in 8.4.5.14.(2) and on the non-normative status of Note A-8.4.5.14.(2). Archived so the ruling can be re-checked without a live HBIX call.",
+  "scope_phrase": "in a given hydronic system",
+  "note_is_normative": false,
+  "editions_identical_for_sentences_1_to_3": true,
+  "edition_difference": "Sentences (1)-(3) are word-for-word identical between the two editions save the Note's own number — 2020 embeds \"(See Note A-8.4.4.14.(2).)\" and 2025 \"(See Note A-8.4.5.14.(2).)\". Sentence (4)'s transcription of the equation differs between the two payloads; (4) is not relied on by this ruling (Fable, PR #63).",
+  "legacy_oracle": {
+    "ref": "f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
+    "finding": "zero occurrences of 8.4.4.14, 8.4.5.14, \"static head\" or \"corresponding pump\" in lib/**/*.rb; only the per-loop 5.2.6.3 cap (apply_maximum_loop_pump_power) is implemented, so the gem offers no precedent for cross-system correspondence"
+  },
+  "get_section:necb:2025:8.4.5.14": {
+    "edition": "2025",
+    "section_number": "8.4.5.14",
+    "article_number": "8.4.5.14",
+    "reference": "8.4.5.14",
+    "title": "Hydronic Pumps",
+    "division": "B",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.5"
+    ],
+    "part_number": "8",
+    "full_text": "1) Except as provided in Sentences (2) and (3), each hydronic pump of the reference building shall have a total static head and efficiency identical to that of the corresponding pump of the proposed building.\n2) Where the proposed building uses more than one pump in a given hydronic system, the peak shaft power demand of the reference building's pump shall be modeled as being identical to the combined peak shaft power demand of the proposed building's pumps. (See Note A-8.4.5.14.(2).)\n3) Where the total static head or efficiency of the proposed building's hydronic pump is not known, the characteristics of the reference building's hydronic pump shall be based on the peak power demand, in W/(L/s), of the proposed building's pump.\n4) Pump power, P, versus flow rate, V, shall be calculated using one of the following equations:\nIf Vpartload/Vrated <D, then Pₚₐrtload = Prated X E If Vpartload/Vrated ≥ D, then P partload = PratedX B (Vpartload/Vrated) +C (Vpartload/Vrated)2\nwhere\nVpartload = flow rate at part-load conditions, in L/s, Vᵣₐₜₑₜ = flow rate at rated conditions, in L/s, P partload = power draw at part-load conditions, in kW, Pᵣₐₜₑd = power draw at rated conditions, in kW, and A,B,C,D,E = coefficients defined in Table 8.4.5.14.\nTable 8.4.5.14. Coefficients Used in Calculating Pump Power versus Flow Rate Forming Part of Sentence 8.4.5.14.(4)\n5) Variable-flow pumps shall be modeled as a pump riding its curve.\n6) Where the secondary system defined in Tables 8.4.5.7.-A and 8.4.5.13. represents equipment meeting the requirements of Article 5.2.12.1. and whose minimum performance includes pump energy (in part or in whole), the performance of the heating and cooling equipment of the secondary system shall be adjusted so that the maximum power demand of the system, including pump power demand, meets the requirements of Article 5.2.12.1.\n\n[Verified formulas for this article]\n- If frac{V_partload}{V_rated} < D, then P_partload = P_rated × E\n\nIf frac{V_partload}{V_rated} ≥ D, then P_partload = P_rated × [A + B × frac{V_partload}{V_rated} + C × (frac{V_partload}{V_rated})^2]\n\nV_partload = flow rate at part-load conditions, in L/s\n\nV_rated = flow rate at rated conditions, in L/s\n\nP_partload = power draw at part-load conditions, in kW\n\nP_rated = power draw at rated conditions, in kW\n\nA, B, C, D, E = coefficients defined in Table 8.4.5.14\n- If frac{V_partload}{V_rated} < D, then P_partload = P_rated × E\n\nIf frac{V_partload}{V_rated} ≥ D, then P_partload = P_rated × [A + B × (frac{V_partload}{V_rated}) + C × (frac{V_partload}{V_rated})^2]\n\nV_partload = flow rate at part-load conditions, in L/s\n\nV_rated = flow rate at rated conditions, in L/s\n\nP_partload = power draw at part-load conditions, in kW\n\nP_rated = power draw at rated conditions, in kW\n\nA, B, C, D, E = coefficients defined in Table 8.4.5.14\n- V_partload = flow rate at part-load conditions, in L/s\n\nV_rated = flow rate at rated conditions, in L/s\n- V_partload = flow rate at part-load conditions, in L/s\n\nV_rated = flow rate at rated conditions, in L/s\n\nP_partload = power draw at part-load conditions, in kW\n\nP_rated = power draw at rated conditions, in kW\n- V_partload = flow rate at part load conditions, in L/s\n\nV_rated = flow rate at rated conditions, in L/s\n\nP_partload = power draw at part-load conditions, in kW\n\nP_rated = power draw at rated conditions, in kW\n- P_partload = power draw at part-load conditions, in kW,\n\nP_rated = power draw at rated conditions, in kW, and\n\nA, B, C, D, E = coefficients defined in Table 8.4.5.14.\n- A, B, C, D, E = coefficients defined in Table 8.4.5.14\n- F_partload = flow rate at part-load conditions, in L/s\n\nF_rated = flow rate at rated conditions, in L/s\n\nP_partload = power draw at part-load conditions, in kW",
+    "page_start": 226,
+    "page_end": 227,
+    "sentences": [],
+    "equations": [
+      {
+        "raw_text": "If Vpartload/Vrated <D, then Pₚₐrtload = Prated X E",
+        "latex": "\\text{If } \\frac{V_{\\text{partload}}}{V_{\\text{rated}}} < D, \\text{ then } P_{\\text{partload}} = P_{\\text{rated}} \\times E\n\n\\text{If } \\frac{V_{\\text{partload}}}{V_{\\text{rated}}} \\geq D, \\text{ then } P_{\\text{partload}} = P_{\\text{rated}} \\times \\left[A + B \\times \\frac{V_{\\text{partload}}}{V_{\\text{rated}}} + C \\times \\left(\\frac{V_{\\text{partload}}}{V_{\\text{rated}}}\\right)^2\\right]\n\nV_{\\text{partload}} = \\text{flow rate at part-load conditions, in L/s}\n\nV_{\\text{rated}} = \\text{flow rate at rated conditions, in L/s}\n\nP_{\\text{partload}} = \\text{power draw at part-load conditions, in kW}\n\nP_{\\text{rated}} = \\text{power draw at rated conditions, in kW}\n\nA, B, C, D, E = \\text{coefficients defined in Table 8.4.5.14}",
+        "text": "If frac{V_partload}{V_rated} < D, then P_partload = P_rated × E\n\nIf frac{V_partload}{V_rated} ≥ D, then P_partload = P_rated × [A + B × frac{V_partload}{V_rated} + C × (frac{V_partload}{V_rated})^2]\n\nV_partload = flow rate at part-load conditions, in L/s\n\nV_rated = flow rate at rated conditions, in L/s\n\nP_partload = power draw at part-load conditions, in kW\n\nP_rated = power draw at rated conditions, in kW\n\nA, B, C, D, E = coefficients defined in Table 8.4.5.14"
+      },
+      {
+        "raw_text": "If Vpartload/Vrated ≥ D, then P partload = PratedX",
+        "latex": "\\text{If } \\frac{V_{\\text{partload}}}{V_{\\text{rated}}} < D, \\text{ then } P_{\\text{partload}} = P_{\\text{rated}} \\times E\n\n\\text{If } \\frac{V_{\\text{partload}}}{V_{\\text{rated}}} \\geq D, \\text{ then } P_{\\text{partload}} = P_{\\text{rated}} \\times \\left[A + B \\times \\left(\\frac{V_{\\text{partload}}}{V_{\\text{rated}}}\\right) + C \\times \\left(\\frac{V_{\\text{partload}}}{V_{\\text{rated}}}\\right)^2\\right]\n\nV_{\\text{partload}} = \\text{flow rate at part-load conditions, in L/s}\n\nV_{\\text{rated}} = \\text{flow rate at rated conditions, in L/s}\n\nP_{\\text{partload}} = \\text{power draw at part-load conditions, in kW}\n\nP_{\\text{rated}} = \\text{power draw at rated conditions, in kW}\n\nA, B, C, D, E = \\text{coefficients defined in Table 8.4.5.14}",
+        "text": "If frac{V_partload}{V_rated} < D, then P_partload = P_rated × E\n\nIf frac{V_partload}{V_rated} ≥ D, then P_partload = P_rated × [A + B × (frac{V_partload}{V_rated}) + C × (frac{V_partload}{V_rated})^2]\n\nV_partload = flow rate at part-load conditions, in L/s\n\nV_rated = flow rate at rated conditions, in L/s\n\nP_partload = power draw at part-load conditions, in kW\n\nP_rated = power draw at rated conditions, in kW\n\nA, B, C, D, E = coefficients defined in Table 8.4.5.14"
+      },
+      {
+        "raw_text": "Vpartload = flow rate at part-load conditions, in L/s,",
+        "latex": "V_{\\text{partload}} = \\text{flow rate at part-load conditions, in L/s}\n\nV_{\\text{rated}} = \\text{flow rate at rated conditions, in L/s}",
+        "text": "V_partload = flow rate at part-load conditions, in L/s\n\nV_rated = flow rate at rated conditions, in L/s"
+      },
+      {
+        "raw_text": "Vᵣₐₜₑₜ = flow rate at rated conditions, in L/s,",
+        "latex": "V_{\\text{partload}} = \\text{flow rate at part-load conditions, in L/s}\n\nV_{\\text{rated}} = \\text{flow rate at rated conditions, in L/s}\n\nP_{\\text{partload}} = \\text{power draw at part-load conditions, in kW}\n\nP_{\\text{rated}} = \\text{power draw at rated conditions, in kW}",
+        "text": "V_partload = flow rate at part-load conditions, in L/s\n\nV_rated = flow rate at rated conditions, in L/s\n\nP_partload = power draw at part-load conditions, in kW\n\nP_rated = power draw at rated conditions, in kW"
+      },
+      {
+        "raw_text": "P partload = power draw at part-load conditions, in kW,",
+        "latex": "V_{\\text{partload}} = \\text{flow rate at part load conditions, in L/s}\n\nV_{\\text{rated}} = \\text{flow rate at rated conditions, in L/s}\n\nP_{\\text{partload}} = \\text{power draw at part-load conditions, in kW}\n\nP_{\\text{rated}} = \\text{power draw at rated conditions, in kW}",
+        "text": "V_partload = flow rate at part load conditions, in L/s\n\nV_rated = flow rate at rated conditions, in L/s\n\nP_partload = power draw at part-load conditions, in kW\n\nP_rated = power draw at rated conditions, in kW"
+      },
+      {
+        "raw_text": "Pᵣₐₜₑd = power draw at rated conditions, in kW, and",
+        "latex": "P_{\\text{partload}} = \\text{power draw at part-load conditions, in kW,}\n\nP_{\\text{rated}} = \\text{power draw at rated conditions, in kW, and}\n\nA, B, C, D, E = \\text{coefficients defined in Table 8.4.5.14.}",
+        "text": "P_partload = power draw at part-load conditions, in kW,\n\nP_rated = power draw at rated conditions, in kW, and\n\nA, B, C, D, E = coefficients defined in Table 8.4.5.14."
+      },
+      {
+        "raw_text": "A,B,C,D,E = coefficients defined in Table 8.4.5.14.",
+        "latex": "A, B, C, D, E = \\text{coefficients defined in Table 8.4.5.14}",
+        "text": "A, B, C, D, E = coefficients defined in Table 8.4.5.14"
+      },
+      {
+        "raw_text": "Ppartload = power draw at part-load conditions, in kW,",
+        "latex": "F_{\\text{partload}} = \\text{flow rate at part-load conditions, in L/s}\n\nF_{\\text{rated}} = \\text{flow rate at rated conditions, in L/s}\n\nP_{\\text{partload}} = \\text{power draw at part-load conditions, in kW}",
+        "text": "F_partload = flow rate at part-load conditions, in L/s\n\nF_rated = flow rate at rated conditions, in L/s\n\nP_partload = power draw at part-load conditions, in kW"
+      }
+    ],
+    "tables": [
+      {
+        "table_number": "8.4.5.13",
+        "title": "Heat Pump System Description",
+        "headers": [
+          "System Number",
+          "Type of System",
+          "Fan Control",
+          "Type of Terminal or Auxiliary Heating"
+        ],
+        "row_count": 2,
+        "note": "Use get_table('necb', '8.4.5.13') for full structured rows."
+      },
+      {
+        "table_number": "8.4.5.14",
+        "title": "Coefficients Used in Calculating Pump Power versus Flow Rate",
+        "headers": [
+          "Coefficients",
+          "Pump Riding its Curve (Type of Pump)",
+          "Pump with Variable Speed Drive (Type of Pump)"
+        ],
+        "row_count": 5,
+        "note": "Use get_table('necb', '8.4.5.14') for full structured rows."
+      }
+    ]
+  },
+  "get_section:necb:2025:A-8.4.5.14.(2)": {
+    "edition": "2025",
+    "section_number": "A-8.4.5.14.(2)",
+    "article_number": "A-8.4.5.14.(2)",
+    "reference": "A-8.4.5.14.(2)",
+    "title": "Hydronic Systems with Multiple Pumps",
+    "division": "B",
+    "hierarchy_level": "note",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.5"
+    ],
+    "part_number": "8",
+    "full_text": "Where the proposed building uses multiple pumps in its hydronic systems (for example, a primary-secondary hot water hydronic system), representing these pumps as a single pump in the reference building must ensure that the same peak power is demanded by adjusting the pump head accordingly, based on a flow-weighted average pump efficiency (in order to correctly account for the heat gain due to water passing through the system).\nExample 1\nIf the proposed building has the following characteristics:\na boiler plant with an output capacity of 200 kW that uses a primary-secondary pumping system having the following three pumps:\n- a primary pump (boiler plant) with 86 L/min with a head of 60 kPa and 60% efficiency,\n- secondary pump (north wing) with 78 L/min with a head of 100 kPa and 50% efficiency,\n- a secondary pump (south wing) with 103 L/min with a head of 120 kPa and 45% efficiency, and\na total shaft power demand of 861 W,\nthen, assuming the same output capacity of the reference building, the pump would be modeled with the following characteristics:\na flow rate of 179.4 L/min (at a 16°C temperature differential),\n54.2% efficiency,\na shaft power demand of 861 W (which is the same as for the proposed building), and\na pump head of 156.1 kPa.",
+    "page_start": 266,
+    "page_end": 266,
+    "normative": false,
+    "explains": "8.4.5.14.(2)",
+    "sentences": []
+  }
+}

@@ -41,7 +41,7 @@ renumbering table with worse signal.
 
 Regenerated in the ``lint`` job next to ``generate_necb_coverage.py`` and
 ``generate_necb_8_4_coverage.py``; ``--check`` fails on drift (the
-``generate_decisions_toc.py --check`` contract).
+``generate_decisions.py --check`` contract).
 """
 
 from __future__ import annotations

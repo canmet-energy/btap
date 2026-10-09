@@ -16,7 +16,7 @@ of Canada works for the NECB Section 8.4 coverage reference described by this
 project's D-01 decision.
 
 The NECB text is Crown copyright material. It is not licensed under the
-LGPL-3.0-or-later license that applies to canmet-btap source code. The cache
+GPL-3.0-or-later license that applies to canmet-btap source code. The cache
 provenance embedded in each edition records the retrieval source and date, and
 each edition's `manifest.json` records the same for every rule file, table and
 archived payload it ships.

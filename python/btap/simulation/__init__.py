@@ -45,6 +45,10 @@ def run(model, *, run_dir, weather=None, sizing_only=False, run_period=None, bac
     backend: execution backend (the process default — Local — if None).
     """
     if weather:
+        # No `audit=` here deliberately: this facade is the bare
+        # simulate-a-model entry point and takes no AuditLog, so there is
+        # nothing to cite D-25 into. The compliance pipeline, which does carry
+        # one, passes it (codes/pipeline.py, codes/necb/path.py).
         runner.attach_weather(model, epw=weather["epw"], ddy=weather["ddy"])
     out_dir = runner.run_energyplus(model, run_dir, sizing_only=sizing_only,
                                     run_period=run_period, backend=backend)

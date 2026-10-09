@@ -55,6 +55,76 @@ TRANSITION_FIELDS = (
 )
 
 
+#: The band a frozen scenario's energy intensity must fall in, kWh/m2.
+#:
+#: Deliberately WIDE. The corpus spans 3.2 (a `--quick` run simulating days
+#: rather than a year) to 185 (a real full year), so this leaves roughly 30x
+#: headroom below and 50x above. It is a sanity bound on a simulation result,
+#: NOT a materiality threshold on a Code question — the point is to catch a
+#: model that is physically absurd, never to express a view about how much
+#: energy a compliant building may use.
+#:
+#: WHAT THIS GUARD DOES NOT CATCH, stated so nobody trusts it further than it
+#: reaches. Sol's `130` measured a System 5 reference that completed with zero
+#: severe and zero fatal errors AND a site EUI of about 314 kWh/m2 — squarely
+#: inside this band — while refrigerating nothing: zone temperatures 9.32 to
+#: 41.75 C against a 4 C setpoint, and 8,760 cooling-unmet hours in every zone.
+#: A plausible total is not thermal control.
+#:
+#: The right check is ALL-HOURS zone control, and `report.json` does not carry
+#: it — only `unmet_occupied_hours` and `zone_unmet_occupied_hours`, which a
+#: real baseline legitimately pushes high (determination-01's proposed side
+#: records 1,709.75 unmet cooling hours). A threshold on the occupied figure
+#: would be a number I cannot justify rather than a check, so none is written
+#: here. Carrying an all-hours metric is part of AHJ-19's reporting gap; when it
+#: lands, this guard should grow a thermal-control arm beside the energy one.
+EUI_SANE_MIN_KWH_M2 = 0.1
+EUI_SANE_MAX_KWH_M2 = 10_000.0
+
+
+def _implausible_eui(run):
+    """Complaints about any side whose energy intensity is not a building's.
+
+    Reads the run's own `report.json`; silent when the report carries no energy
+    (a `--simulate none` scenario has none to check), because a missing number
+    is not an absurd one.
+    """
+    report = (run.observations or {}).get("report") if run.observations else None
+    if report is None:
+        path = Path(run.run_dir) / "report.json"
+        if not path.is_file():
+            return []
+        try:
+            report = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return []
+    out = []
+    for side in ("proposed", "reference"):
+        block = report.get(side) or {}
+        kwh = block.get("total_site_kwh")
+        area = block.get("floor_area_m2") or report.get("floor_area_m2")
+        # ABSENT is skipped; PRESENT AND ZERO is caught. `if not kwh` treated
+        # them alike, so a `total_site_kwh` of 0 passed a guard that complains
+        # about 50 (Fable's `131` F11). The docstring's reason — "a missing
+        # number is not an absurd one" — does not cover zero, which is present
+        # and absurd: a building that consumed nothing all year did not
+        # simulate. Nothing freezes that way today; the guard simply did not
+        # catch what it says it catches.
+        if kwh is None or not area:
+            continue
+        if not kwh:
+            out.append(f"  {side}: total_site_kwh is {kwh!r} — a building that "
+                       f"consumed NOTHING over a year did not simulate")
+            continue
+        eui = kwh / area
+        if not EUI_SANE_MIN_KWH_M2 <= eui <= EUI_SANE_MAX_KWH_M2:
+            out.append(
+                f"  {side}: {kwh:,.0f} kWh over {area:,.0f} m2 = "
+                f"{eui:,.1f} kWh/m2, outside "
+                f"[{EUI_SANE_MIN_KWH_M2}, {EUI_SANE_MAX_KWH_M2:,.0f}]")
+    return out
+
+
 def die(msg):
     sys.exit(f"FREEZE REFUSED: {msg}")
 
@@ -298,6 +368,129 @@ def promote(staged_baselines, staged_manifest, dest_baselines,
             (shutil.rmtree if backup.is_dir() else os.remove)(str(backup))
 
 
+def producer_identity():
+    """What actually produced this freeze, as far as it can be established.
+
+    WHY THIS EXISTS. The manifest already pins the SOURCE — a commit, three
+    harness hashes, the sample manifest — and because the scenarios' weather
+    is COMMITTED (`python/tests/fixtures/weather/*.epw`/`.ddy`), that commit
+    pins the weather bytes too. What it did not pin is the PRODUCER.
+    `openstudio_cli` is a version STRING a machine reports; two laptops can
+    report `3.11.0+241b8abb4d` while running different EnergyPlus builds, and
+    CI never freezes, so the producer has always been whichever developer
+    machine ran this script.
+
+    EVERYTHING IS PROBED IN THE WORKER INTERPRETER, not this one. Scenario
+    subprocesses run under `runner.python_exe()`, where `BTAP_PYTHON` takes
+    precedence, and the worker's `Local.execute` calls its OWN
+    `engine.ensure_energyplus()`. Probing `openstudio` and the engine here
+    recorded the DRIVER's stack: under a controlled override the record said
+    `python_worker=3.99.0` at `/other/python` while still reporting the
+    driver's OpenStudio and EnergyPlus — false provenance whenever the two
+    environments carry different builds (Sol, PR #80). The driver's own values
+    are kept beside them, labelled, so a divergence is visible rather than
+    hidden behind one ambiguous field.
+
+    A BARE VERSION IS REFUSED. The build suffix is the entire reason this
+    field exists — `25.2.0` is exactly what hides two engines — so a
+    successful probe returning `EnergyPlus, Version 25.2.0` records NULL
+    rather than a value that cannot distinguish anything.
+
+    These fields are a RECORD, NOT A GATE. Nothing compares them against the
+    running machine: a baseline frozen on one host must remain verifiable on
+    another, which is the point of the frozen corpus. What they buy is
+    attribution — when a baseline moves, the diff says whether the engine
+    underneath it moved too.
+
+    `container_digest` is the field this cannot fill. The CI image's tag is
+    `<openstudio version>-<sha256(Dockerfile)[:12]>`, which pins the RECIPE,
+    not the built bytes; a true `sha256:` digest is obtainable only where the
+    image runs, so it stays null until freezing happens there.
+
+    Every probe fails SOFT. A freeze must not break because an identity could
+    not be read; an absent field says "unknown", which is honest, where a
+    raised exception would just stop the work.
+    """
+    import platform
+    import re
+
+    #: A version WITH a build suffix. The suffix is mandatory: see the
+    #: docstring.
+    ENGINE_RE = re.compile(r"^\d+\.\d+\.\d+-[0-9A-Za-z]+$")
+
+    identity = {
+        "openstudio": None,
+        "energyplus": None,
+        "python_driver": platform.python_version(),
+        "python_worker": None,
+        "platform": platform.platform(),
+        "container_digest": None,
+    }
+
+    # One probe, in the interpreter that will actually run the scenarios.
+    probe = (
+        "import platform, sys\n"
+        "print('python', platform.python_version())\n"
+        "print('exe', sys.executable)\n"
+        "try:\n"
+        "    import openstudio\n"
+        "    print('openstudio', openstudio.openStudioLongVersion())\n"
+        "except Exception: pass\n"
+        "try:\n"
+        "    import subprocess\n"
+        "    from btap.simulation import engine\n"
+        "    out = subprocess.run([str(engine.ensure_energyplus()), "
+        "'--version'], capture_output=True, text=True, timeout=120)\n"
+        "    if out.returncode == 0:\n"
+        "        text = (out.stdout or out.stderr).strip()\n"
+        "        print('energyplus', text.split()[-1] if text else '')\n"
+        "except Exception: pass\n")
+    try:
+        runner._sys_path_python()
+        worker = runner.python_exe()
+        env = dict(os.environ)
+        env["PYTHONPATH"] = (str(runner.PYTHON_ROOT) + os.pathsep
+                             + env.get("PYTHONPATH", "")).rstrip(os.pathsep)
+        out = subprocess.run([str(worker), "-c", probe], capture_output=True,
+                             text=True, check=False, timeout=600, env=env)
+        if out.returncode == 0:
+            for line in out.stdout.strip().splitlines():
+                key, _, value = line.partition(" ")
+                value = value.strip()
+                if key == "python" and re.fullmatch(r"\d+\.\d+\.\d+", value):
+                    identity["python_worker"] = value
+                elif key == "exe" and value:
+                    identity["python_worker_executable"] = value
+                elif key == "openstudio" and value:
+                    identity["openstudio"] = value
+                elif key == "energyplus" and ENGINE_RE.match(value):
+                    identity["energyplus"] = value
+    except Exception:  # noqa: BLE001 — an unknown identity is not a failure
+        pass
+
+    # The DRIVER's own stack, beside the worker's, so a divergence is visible.
+    try:
+        import openstudio
+
+        identity["openstudio_driver"] = openstudio.openStudioLongVersion()
+    except Exception:  # noqa: BLE001
+        pass
+    try:
+        from btap.simulation import engine
+
+        out = subprocess.run([str(engine.ensure_energyplus()), "--version"],
+                             capture_output=True, text=True, check=False,
+                             timeout=120)
+        if out.returncode == 0:
+            text = (out.stdout or out.stderr).strip()
+            candidate = text.split()[-1] if text else ""
+            if ENGINE_RE.match(candidate):
+                identity["energyplus_driver"] = candidate
+    except Exception:  # noqa: BLE001
+        pass
+    return identity
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--allow-dirty", action="store_true",
@@ -370,6 +563,18 @@ def main():
             die(f"{sc['id']}: non-vacuity assertions failed — a vacuous "
                 "baseline must not freeze:\n" + "\n".join(vacuity))
 
+        # PHYSICAL SANITY, before anything is written. A run that completes
+        # is not a run that makes sense, and nothing here checked the
+        # difference until a fixture froze with a proposed EUI of 13.9 MILLION
+        # kWh/m2 — five orders of magnitude out, reported as a number rather
+        # than an error, and caught only by `parity-scenarios` noticing it was
+        # not reproducible across machines.
+        insane = _implausible_eui(run1)
+        if insane:
+            die(f"{sc['id']}: implausible energy intensity — a baseline must "
+                "be a building, not merely a completed simulation:\n"
+                + "\n".join(insane))
+
         # publish this scenario's baselines
         dest = baselines / sc["id"]
         dest.mkdir(parents=True)
@@ -431,6 +636,10 @@ def main():
             "openstudio_cli": subprocess.run(
                 ["openstudio", "openstudio_version"], capture_output=True,
                 text=True, check=False).stdout.strip(),
+                # WHO produced this freeze. A record, never a gate — no
+            # test compares these against the running machine, because a
+            # baseline frozen on one host must stay verifiable on another.
+            "producer": producer_identity(),
             "active_seals": active_seals,
             "retired_seals": retired_seals,
             "final_cross_language_attestation": final_attestation,

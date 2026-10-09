@@ -113,6 +113,36 @@ class TestClassify(unittest.TestCase):
         group = facts['zone_groups'][0]
         self.assertIn('Purchased', group['heating_energy_types'])
 
+    def test_district_steam_is_purchased_heating(self):
+        """Sol's fourth pass: NECB 8.4.4.6/8.4.5.6 apply to purchased energy in
+        any medium, and the classifier saw only the water objects."""
+        import openstudio
+
+        model, _ = self.build_and_characterize('Baseboard district hot water')
+        for water in list(model.getDistrictHeatingWaters()):
+            loop = water.plantLoop().get()
+            loop.addSupplyBranchForComponent(openstudio.model.DistrictHeatingSteam(model))
+            water.remove()
+        self.assertEqual(0, len(model.getDistrictHeatingWaters()))
+        self.assertEqual(1, len(model.getDistrictHeatingSteams()))
+
+        facts = modeling.characterize(model)
+
+        self.assertTrue(facts['purchased_energy']['heating'],
+                        'district steam = purchased heating energy')
+        self.assertIn('Purchased', facts['zone_groups'][0]['heating_energy_types'])
+
+    def test_district_steam_on_a_source_loop_is_an_external_source(self):
+        import openstudio
+
+        from btap.modeling.hvac import classify
+
+        model = openstudio.model.Model()
+        loop = openstudio.model.PlantLoop(model)
+        self.assertFalse(classify._external_source_loop(loop))
+        loop.addSupplyBranchForComponent(openstudio.model.DistrictHeatingSteam(model))
+        self.assertTrue(classify._external_source_loop(loop))
+
     def test_design_cooling_kw_and_audit(self):
         audit = AuditLog()
         model, facts = self.build_and_characterize(
