@@ -653,6 +653,37 @@ class TestTheOutcomesAreReachableInABuiltModel(unittest.TestCase):
             boiler.setName("{} {}".format(self.MARKER, index))
         return proposed
 
+    def _residential_mixed_proposed(self):
+        """Residential four-pipe fan coils on a dual-fuel plant — adoption by
+        the branch the Code actually provides.
+
+        Until D-101 the ADOPTED outcome was reached with `Baseboard gas boiler`,
+        a `build` group whose plant merely SURVIVED a per-assignment teardown
+        long enough to be found again by name. Sol's `141`: "an `action ==
+        'build'` plant must not be adopted merely because sequential teardown
+        has kept it non-empty", and phased destruction removed that route.
+
+        `copy_proposed` is the explicit retention branch. It needs a residential
+        space type AND compatible cooling, so heating-only baseboards fall
+        through to a System 1 build and only a cooled residential system
+        reaches it. Measured on this fixture: the audit records "proposed
+        system retained in reference (residential...)", both markers survive,
+        and the plant keeps Electricity and NaturalGas.
+        """
+        from .support import proposed_with_hvac
+
+        proposed = proposed_with_hvac("FPFC MAU DX Coils with Scroll Chiller")
+        for space_type in proposed.getSpaceTypes():
+            if space_type.spaces():
+                space_type.setStandardsSpaceType("Dwelling unit")
+        boilers = sorted(proposed.getBoilerHotWaters(),
+                         key=lambda b: b.nameString())
+        if len(boilers) > 1:
+            boilers[0].setFuelType("Electricity")
+        for index, boiler in enumerate(boilers):
+            boiler.setName("{} {}".format(self.MARKER, index))
+        return proposed
+
     def _reference_of(self, proposed):
         from btap.audit import AuditLog
         from btap.codes.necb import hvac
@@ -663,12 +694,19 @@ class TestTheOutcomesAreReachableInABuiltModel(unittest.TestCase):
         return result.model, audit
 
     def test_the_ADOPTED_outcome_is_reachable(self):
-        """Measured on the compliance fixture with `Baseboard gas boiler` and
-        one boiler switched to Electricity: both markers survive into the
-        reference, renamed with their efficiency suffix. So the proposed plant
-        IS adopted here, and an entry claiming the plant is always rebuilt or
-        always removed would be false."""
-        proposed = self._mixed_proposed()
+        """Measured on residential four-pipe fan coils with one boiler switched
+        to Electricity: both markers survive into the reference. So the proposed
+        plant IS adopted here, and an entry claiming the plant is always
+        rebuilt or always removed would be false.
+
+        The fixture CHANGED with D-101 and the outcome did not. It used to be
+        `Baseboard gas boiler`, where the plant survived only because teardown
+        ran per assignment; adoption now has to come through `copy_proposed`,
+        which is the branch the Code provides. AHJ-1's four-outcome prose
+        therefore stands unchanged — what was withdrawn is one illegitimate
+        route to one of them, not the outcome.
+        """
+        proposed = self._residential_mixed_proposed()
         reference, _audit = self._reference_of(proposed)
         survived = [b.nameString() for b in reference.getBoilerHotWaters()
                     if self.MARKER in b.nameString()]
@@ -685,8 +723,11 @@ class TestTheOutcomesAreReachableInABuiltModel(unittest.TestCase):
         so "the reference elects ONE energy type" was false as a statement
         about final equipment, which is why the disclosure now separates
         selection from outcome.
+
+        Re-pointed at the residential retention fixture with D-101, for the
+        reason in `test_the_ADOPTED_outcome_is_reachable`.
         """
-        proposed = self._mixed_proposed()
+        proposed = self._residential_mixed_proposed()
         reference, _audit = self._reference_of(proposed)
         fuels = {b.fuelType() for b in reference.getBoilerHotWaters()}
         self.assertEqual(
