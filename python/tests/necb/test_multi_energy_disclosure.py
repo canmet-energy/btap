@@ -39,14 +39,36 @@ from btap.codes.necb.hvac import reference
 from tests.support import needs_sdk
 
 
+def allocation_records(audit):
+    """The 8.4.x.9.(5) allocation disclosures — the AHJ-1 service-set scope."""
+    return [e for e in audit.entries
+            if e["level"] == "warning"
+            and "UNRESOLVED" in str(e.get("action"))
+            and "AHJ-1" in str(e.get("ahj") or "")]
+
+
+def plant_records(audit):
+    """The 8.4.x.9.(6) plant-cardinality disclosures — the AHJ-3 plant scope."""
+    return [e for e in audit.entries
+            if e["level"] == "warning"
+            and "UNRESOLVED" in str(e.get("action"))
+            and "AHJ-3" in str(e.get("ahj") or "")]
+
+
 class _Fixture(unittest.TestCase):
     def _audit(self):
         from btap.audit import AuditLog
 
         return AuditLog()
 
-    def _group(self, fuels, zones=("Zone 1",)):
-        return {"zones": list(zones), "heating_energy_types": list(fuels)}
+    def _group(self, fuels, zones=("Zone 1",), serving=None):
+        group = {"zones": list(zones), "heating_energy_types": list(fuels)}
+        if serving is not None:
+            # What `_blocks_of` stamps on each block view: the SERVICE SET the
+            # block belongs to. The AHJ-1 allocation disclosure dedupes on it,
+            # so a synthetic block split that omits it is not the real shape.
+            group["_serving_zones"] = tuple(serving)
+        return group
 
     def _facts(self, plants=()):
         # a FRESH dict each call: the per-plant dedupe state lives in `facts`,
@@ -69,10 +91,13 @@ class _Fixture(unittest.TestCase):
         # `_finalize` calls these two in sequence, and the disclosure now runs
         # on EVERY election path rather than only this one (Sol, `114`.2).
         reference._disclose_multi_energy(group, selection, facts, audit)
-        warnings = [e for e in audit.entries
-                    if e["level"] == "warning"
-                    and "UNRESOLVED" in str(e.get("action"))]
-        return result, warnings, audit
+        # THE ALLOCATION RECORD ONLY. AHJ-3's plant-cardinality question is a
+        # separate entry with its own scope since D-101 (Sol, `143`): AHJ-1
+        # follows each proposed heating service and allocation choice, AHJ-3
+        # follows the hydronic plant, and one plant can carry two service sets.
+        # Every test in this file is about the allocation half; `plant_records`
+        # below is the other one.
+        return result, allocation_records(audit), audit
 
 
 class TestTheCollapseIsDisclosed(_Fixture):
@@ -255,18 +280,68 @@ class TestTheWarningIsDeduplicated(_Fixture):
                                        "Electricity": None}}
         facts = self._facts([plant])
         audit = AuditLog()
-        for block in range(5):
+        blocks = tuple(f"Zone {n}" for n in range(5))
+        for block in blocks:
+            # Each call is one BLOCK VIEW of one service set, which is what
+            # `_blocks_of` produces — so `_serving_zones` is set. Without it
+            # these are five independent service sets, and under D-101 five
+            # separate allocation choices legitimately disclose five times.
             reference._disclose_multi_energy(
                 self._group(["NaturalGas", "Electricity"],
-                            zones=(f"Zone {block}",)),
+                            zones=(block,), serving=blocks),
                 self._selection(), facts, audit)
-        warnings = [e for e in audit.entries
-                    if e["level"] == "warning"
-                    and "UNRESOLVED" in str(e.get("action"))]
-        self.assertEqual(1, len(warnings),
-                         f"one plant, one warning — got {len(warnings)}")
-        self.assertEqual("Hot Water Loop", warnings[0]["target"],
-                         "the warning must name the plant, not a zone list")
+        allocations = allocation_records(audit)
+        self.assertEqual(
+            1, len(allocations),
+            f"one service choice, one allocation record — got {len(allocations)}")
+        self.assertEqual(
+            list(blocks), sorted(allocations[0]["target"].split(",")),
+            "and it must name every affected block, not the plant: a plant "
+            "name told a reader nothing about this question's reach")
+        self.assertEqual(
+            list(blocks), allocations[0]["inputs"]["affected_blocks"])
+
+        plants = plant_records(audit)
+        self.assertEqual(1, len(plants),
+                         "the (6) cardinality question is asked ONCE of the plant")
+        self.assertEqual("Hot Water Loop", plants[0]["target"],
+                         "and THAT record is the one that names the plant")
+
+    def test_TWO_service_sets_on_ONE_plant_give_two_allocations_and_one_plant_record(self):
+        """Sol's `143`, the shape the combined entry could not express.
+
+        Two independent proposed serving systems drawing on one dual-fuel
+        hot-water plant are TWO 8.4.x.9.(5) allocation choices and ONE
+        8.4.x.9.(6) plant-cardinality question. Keying both ids by plant
+        emitted a single warning for all of it.
+        """
+        from btap.audit import AuditLog
+        from btap.codes.necb.hvac import reference
+
+        plant = {"name": "Hot Water Loop", "type": "hot_water",
+                 "fuels": ["NaturalGas", "Electricity"],
+                 "fuel_capacities_w": {"NaturalGas": None,
+                                       "Electricity": None}}
+        facts = self._facts([plant])
+        audit = AuditLog()
+        first = ("Zone 1", "Zone 2", "Zone 3")
+        second = ("Zone 4", "Zone 5")
+        for service_set in (first, second):
+            for block in service_set:
+                reference._disclose_multi_energy(
+                    self._group(["NaturalGas", "Electricity"],
+                                zones=(block,), serving=service_set),
+                    self._selection(), facts, audit)
+        allocations = allocation_records(audit)
+        self.assertEqual(2, len(allocations),
+                         "two service choices are two allocation records")
+        self.assertEqual(
+            [list(first), list(second)],
+            sorted(sorted(e["inputs"]["affected_blocks"]) for e in allocations),
+            "each names its OWN blocks")
+        self.assertEqual(
+            1, len(plant_records(audit)),
+            "but the plant is asked once, however many systems draw on it")
 
     def test_TWO_plants_warn_twice(self):
         """The control: dedupe must not swallow a genuinely second finding."""
@@ -279,22 +354,30 @@ class TestTheWarningIsDeduplicated(_Fixture):
              "fuel_capacities_w": {"NaturalGas": None, "Electricity": None}},
         ])
         audit = AuditLog()
+        # DISTINCT ZONES, because the allocation record dedupes on the SERVICE
+        # SET since D-101. Both calls used the default `Zone 1`, which under a
+        # plant key were two findings and under a service key are one service
+        # set asked twice — so the control now says what it means: two serving
+        # systems, two plants, two of each record.
         reference._disclose_multi_energy(
-            self._group(["NaturalGas", "Electricity"]), self._selection(),
-            facts, audit)
+            self._group(["NaturalGas", "Electricity"], zones=("Zone 1",)),
+            self._selection(), facts, audit)
         facts["plants"] = [
             {"name": "Hot Water Loop B", "type": "hot_water",
              "fuels": ["FuelOilNo2", "Electricity"],
              "fuel_capacities_w": {"FuelOilNo2": None, "Electricity": None}}]
         reference._disclose_multi_energy(
-            self._group(["FuelOilNo2", "Electricity"]), self._selection(),
-            facts, audit)
-        warnings = [e for e in audit.entries
-                    if e["level"] == "warning"
-                    and "UNRESOLVED" in str(e.get("action"))]
-        self.assertEqual(2, len(warnings))
-        self.assertEqual({"Hot Water Loop A", "Hot Water Loop B"},
-                         {w["target"] for w in warnings})
+            self._group(["FuelOilNo2", "Electricity"], zones=("Zone 2",)),
+            self._selection(), facts, audit)
+        self.assertEqual(2, len(allocation_records(audit)))
+        self.assertEqual(
+            ["Hot Water Loop A", "Hot Water Loop B"],
+            sorted(e["target"] for e in plant_records(audit)),
+            "two plants are two cardinality questions")
+        # The old assertion here required the ALLOCATION warnings to name the
+        # plants, which is the conflation D-101 removed: those records now name
+        # their affected blocks, and the plant assertion above carries the
+        # per-plant intent.
 
 
 #: Sample 16's real shape, from `classify.characterize` on the generated
@@ -1370,8 +1453,7 @@ class TestTheAllocationIsRecordedByClassify(unittest.TestCase):
                 "article": "8.4.4.6.(1)", "part_load_curve_class": "modulating"},
                 "heat_pump": {"article": "8.4.4.13.(1)-(2)"}}},
             {"plants": facts["plants"], "purchased_energy": {}}, audit)
-        warned = [e for e in audit.entries
-                  if "UNRESOLVED" in str(e.get("action"))]
+        warned = allocation_records(audit)
         self.assertEqual(1, len(warned))
         self.assertEqual({"NaturalGas": 0.6, "Electricity": 0.4},
                          warned[0]["inputs"]["proposed_capacity_shares"])
@@ -1443,10 +1525,12 @@ class TestTheWarningDoesNotOVERCLAIM(_Fixture):
                                       "part_load_curve_class": "modulating"},
                 "heat_pump": {"article": "8.4.5.13.(1)-(2) + Table 8.4.5.13"}}},
             facts, audit)
-        warned = [e for e in audit.entries
-                  if "UNRESOLVED" in str(e.get("action"))]
+        warned = allocation_records(audit)
         self.assertEqual(1, len(warned))
         self.assertEqual("8.4.5.9.(5); 8.4.5.9.(6)", warned[0]["article"])
+        # The plant record cites the (6) sentence alone, in the same edition.
+        self.assertEqual(["8.4.5.9.(6)"],
+                         [e["article"] for e in plant_records(audit)])
         self.assertNotIn("8.4.4.", warned[0]["action"],
                          "a 2025 run must not cite a 2020 article to the AHJ")
 

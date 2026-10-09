@@ -2558,11 +2558,21 @@ def _disclosure_ahj(source_loop_fuels, covers):
       explanation of why this group entered scope. It adds no condition.
     """
     ids = ['AHJ-1']
-    if covers:
-        ids.append('AHJ-3')
     if source_loop_fuels:
         ids.append('AHJ-5')
     return ' '.join(ids)
+
+
+def _plant_cardinality_ahj():
+    """AHJ-3 alone, because its scope is the PLANT and not the service set.
+
+    It used to ride on the AHJ-1 entry, which forced one dedupe key for two
+    different questions: AHJ-1 follows each proposed heating service and
+    allocation choice, AHJ-3 follows the hydronic plant cardinality choice, and
+    one plant can carry two service sets. Keying the pair by plant collapsed
+    the two AHJ-1 records into one (Sol, `143`).
+    """
+    return 'AHJ-3'
 
 
 def multi_energy_serving_groups(facts):
@@ -2673,8 +2683,14 @@ def _disclose_multi_energy(group, selection, facts, audit, ruleset=None,
     # universal service identity: 8.4.x.9.(6)(a) distinguishes a plant from the
     # systems it serves, so both keys are kept.
     service_set = tuple(group.get('_serving_zones') or group['zones'])
-    key = (f'plant:{plant_name}' if covers
-           else 'service:' + ','.join(sorted(service_set)))
+    # THE AHJ-1 SCOPE IS THE SERVICE SET, ALWAYS. `plant:<name>` was used
+    # whenever a plant covered the group, which is not a service identity: two
+    # independent proposed serving systems drawing on ONE dual-fuel hot-water
+    # plant are two 8.4.x.9.(5) allocation choices, and the plant key emitted a
+    # single warning for both. 8.4.x.9.(6)(a) itself distinguishes a plant from
+    # the systems it serves, and AHJ-3's cardinality question — which IS
+    # per-plant — is emitted separately below.
+    key = 'service:' + ','.join(sorted(service_set))
     # `disclosed` is the caller's call-scoped set; the `facts` fallback keeps
     # a direct unit-test call working without leaking into a pipeline run.
     seen = facts.setdefault('_multi_energy_warned', set()) \
@@ -2685,9 +2701,15 @@ def _disclose_multi_energy(group, selection, facts, audit, ruleset=None,
 
     # Every affected block is listed, so a reader sees the one question's full
     # reach rather than one block of it.
-    target = plant_name if covers else ','.join(service_set)
+    # The TARGET is the affected blocks, not the plant: a plant name told a
+    # reader nothing about this question's reach, and the test that was meant
+    # to prove the entry "names every affected block" only required the target
+    # to be non-empty, which a plant name satisfies.
+    target = ','.join(service_set)
     inputs = {'proposed_energy_types': sorted(distinct),
               'serving_system': target,
+              'affected_blocks': sorted(service_set),
+              'affected_block_count': len(service_set),
               'reconciled': False}
     if plant is not None:
         # The fuels are recorded whenever a plant is IDENTIFIED. Gating this on
@@ -2784,6 +2806,37 @@ def _disclose_multi_energy(group, selection, facts, audit, ruleset=None,
         target=target, inputs=inputs,
         article=f'{ratio_article}; {sentence_six}',
         ahj=_disclosure_ahj(source_loop_fuels, covers=True))
+
+    # AHJ-3 IS A SEPARATE RECORD, SCOPED TO THE PLANT. The (6) cardinality
+    # question is asked once of the hydronic plant however many serving systems
+    # draw on it, so it dedupes on the plant while the allocation disclosure
+    # above dedupes on the service set. One plant with two multi-energy service
+    # sets therefore yields two AHJ-1 records and ONE AHJ-3 record, a shape the
+    # single combined entry could not express (Sol, `143`).
+    plant_key = f'plant:{plant_name}'
+    if plant_key not in seen:
+        seen.add(plant_key)
+        audit.warn(
+            'selection',
+            'UNRESOLVED: ONE hydronic heating plant carries every energy type '
+            f'the serving systems use, so {sentence_six} bands a requirement '
+            'on the REFERENCE plant by its heating capacity — which does not '
+            'exist at selection time, so no subclause is claimed. How many '
+            'reference boiler plants correspond to this proposed plant is an '
+            'N:1 correspondence question the acceptable-solution text does '
+            'not settle',
+            target=plant_name or 'unnamed hydronic plant',
+            inputs={'serving_plant': plant_name,
+                    'plant_energy_types': sorted(
+                        {str(f) for f in (plant.get('fuels') or ())}),
+                    'plant_boiler_count': plant.get('boiler_count'),
+                    'service_sets_drawing_on_it': 'NOT ESTABLISHED at '
+                    'selection time: each serving system is disclosed '
+                    'separately, and this record is the plant-scoped question',
+                    'boiler_count_subclause': inputs[
+                        'boiler_count_subclause']},
+            article=sentence_six,
+            ahj=_plant_cardinality_ahj())
 
 
 def _reference_energy_type(group, selection, facts, audit):

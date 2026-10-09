@@ -37,7 +37,10 @@ AUDIT_METHODS = {"decision", "info", "warn"}
 #: functions' bodies as well. The set is deliberately tiny and explicit: every
 #: id must still be a literal SOMEWHERE the walker reaches, or the grammar and
 #: resolution gates would have nothing to check.
-CITATION_HELPERS = {"_disclosure_ahj", "_boiler_class_ahj", "_dispatch_ahj"}
+CITATION_HELPERS = {"_disclosure_ahj", "_boiler_class_ahj", "_dispatch_ahj",
+                    # AHJ-3 left `_disclosure_ahj` with D-101: its scope is
+                    # the PLANT, not the service set (Sol, `143`).
+                    "_plant_cardinality_ahj"}
 
 
 def _registry() -> dict:

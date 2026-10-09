@@ -338,12 +338,18 @@ class TestTheREALHelperOnRealModels(unittest.TestCase):
         statuses = {c["id"]: c["status"] for c in reason["conditions"]}
         self.assertEqual("alternative-solution", statuses["AHJ-1"])
         self.assertEqual("referral", statuses["AHJ-3"])
-        targets = {c["target"] for c in reason["conditions"]}
-        self.assertEqual(
-            {"Hot Water Loop"}, targets,
-            "the condition names the PLANT, because that is what the firing "
-            "entry targets when one plant carries every fuel — more useful to "
-            "a reviewer than the zone list")
+        targets = {c["id"]: c["target"] for c in reason["conditions"]}
+        # EACH ID NAMES ITS OWN SCOPE since D-101 (Sol, `143`). Both conditions
+        # used to name the plant, because one combined entry carried both ids
+        # and targeted the plant. AHJ-1 follows the proposed heating service
+        # and allocation choice, so it names the affected thermal blocks;
+        # AHJ-3 follows the hydronic plant cardinality choice, so it names the
+        # plant. One plant can carry two service sets, which the single
+        # plant-targeted entry could not express.
+        self.assertEqual("Zone 1", targets["AHJ-1"],
+                         "the allocation condition names the affected blocks")
+        self.assertEqual("Hot Water Loop", targets["AHJ-3"],
+                         "the cardinality condition names the plant")
         joined = " ".join(reason["ahj_must_approve"])
         self.assertIn("ALTERNATIVE SOLUTION", joined)
         # The cardinality question now arrives as AHJ-3's own TITLE, not as
