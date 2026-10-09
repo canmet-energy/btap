@@ -134,9 +134,25 @@ def _select_reference_systems(*, facts, building, ruleset, audit=None,
         scope_loops, scope_zones, scope_sentence = _election_scope(group, facts)
         election_key = (tuple(sorted(scope_loops)), tuple(sorted(scope_zones)),
                         scope_sentence)
+        # TWO PASSES over the blocks, because the 8.4.x.9.(5) disclosure must
+        # name the blocks that actually RECEIVE the single-fuel substitution.
+        # A mixed service set — one residential block retained by
+        # `copy_proposed`, four replaced — kept both proposed fuels on the
+        # copied block, so listing it among the affected blocks over-claims the
+        # reach of a question it never faced (Sol, `143`). `_finalize` for one
+        # block cannot see the others' actions, so the actions are decided
+        # first and the substituted set is stamped on every view.
+        planned = []
         for block in _blocks_of(group, election_key):
             category = _category_for(block, building, selection, audit)
-            assignment = _assign(block, category, building, selection, audit)
+            planned.append((block, _assign(block, category, building,
+                                           selection, audit)))
+        substituted = sorted(
+            name for block, assignment in planned
+            if assignment is not None and assignment.action != 'copy_proposed'
+            for name in block['zones'])
+        for block, assignment in planned:
+            block['_substituted_blocks'] = substituted
             result = _finalize(assignment, block, definitions, selection, facts,
                                audit, hp_rules=hp_rules,
                                proposed_annual=proposed_annual,
@@ -921,6 +937,45 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
                                               if a.action != 'copy_proposed')},
                    ruling='D-101')
 
+    # PLANT OWNERSHIP ACROSS A MIXED CLOSURE. Phasing the teardown fixed the
+    # all-build ordering defect and not this one: `remove_hvac_from_zones`
+    # removes a plant only when its demand side empties, so a plant shared by a
+    # RETAINED `copy_proposed` block and replaced blocks correctly survives for
+    # the copied block — and the first reference builder then finds it by
+    # boiler presence and part-load class and connects the built blocks to it.
+    #
+    # Measured on one four-pipe fan-coil serving group over five blocks, block 1
+    # residential (`copy_proposed`) and blocks 2-5 office (System 3): the marked
+    # PROPOSED plant ended up with `Coil Heating Water 1` plus four
+    # `Coil Heating Water Baseboard` objects on its demand side — four
+    # `action == 'build'` blocks drawing on proposed equipment, now through
+    # retained demand rather than teardown order (Sol, `143`).
+    #
+    # The two ownership outcomes are therefore explicit: a copied block may
+    # retain its proposed plant, and a built block connects to a planned
+    # REFERENCE plant. `copy_proposed` is the only retention branch the Code
+    # gives us, and no conformance check exists that would let a built block
+    # adopt proposed plant equipment.
+    retained_plants = []
+    if any(a.action == 'copy_proposed' for a in assignments) and replaced_zone_names:
+        surviving = list(reference.getPlantLoops())
+        retained_plants = [str(plant.handle()) for plant in surviving]
+        if retained_plants:
+            audit.decision(
+                'build',
+                'proposed plant equipment RESERVED to the retained blocks: a '
+                'reference system built for a replaced block may not connect '
+                'to a plant that survived teardown because a copied block '
+                'still draws on it',
+                target=','.join(sorted(p.nameString() for p in surviving)),
+                inputs={'retained_plants': len(retained_plants),
+                        'copied_blocks': sum(len(a.zones) for a in assignments
+                                             if a.action == 'copy_proposed'),
+                        'replaced_blocks': len(replaced_zone_names)},
+                value='a built block connects to a planned reference plant; '
+                      'only a copy_proposed block retains proposed equipment',
+                ruling='D-101')
+
     for assignment in assignments:
         if assignment.action == 'copy_proposed':
             audit.info('build', 'proposed system retained in reference (residential rule)',
@@ -937,7 +992,8 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
         # closure. Removing again here would destroy a plant another block's
         # system has already been built onto.
         result = modeling.build_system(reference, assignment.catalog_name, zones,
-                                       config=assignment.config)
+                                       config=assignment.config,
+                                       exclude_plants=retained_plants)
         _audit_corner_block_grouping(result, assignment,
                                      _subsection(ruleset), audit)
         purchased_cooling_cop = (assignment.config or {}).get(
@@ -2705,11 +2761,17 @@ def _disclose_multi_energy(group, selection, facts, audit, ruleset=None,
     # reader nothing about this question's reach, and the test that was meant
     # to prove the entry "names every affected block" only required the target
     # to be non-empty, which a plant name satisfies.
-    target = ','.join(service_set)
+    # The blocks that RECEIVE the substitution, which is not always the whole
+    # service set: a `copy_proposed` block keeps the proposed system and both
+    # its fuels, so it faces no single-fuel substitution and must not be
+    # counted among the affected.
+    affected = list(group.get('_substituted_blocks') or service_set)
+    target = ','.join(affected)
     inputs = {'proposed_energy_types': sorted(distinct),
               'serving_system': target,
-              'affected_blocks': sorted(service_set),
-              'affected_block_count': len(service_set),
+              'affected_blocks': sorted(affected),
+              'affected_block_count': len(affected),
+              'service_set': sorted(service_set),
               'reconciled': False}
     if plant is not None:
         # The fuels are recorded whenever a plant is IDENTIFIED. Gating this on

@@ -40,18 +40,26 @@ def _named_hot_water_loop(loop):
     return bool(_HOT_WATER_LOOP_NAME.match(loop.nameString()))
 
 
-def find_hot_water(model, part_load_curve_class=None):
+def find_hot_water(model, part_load_curve_class=None, exclude=()):
     """Find an existing hot-water loop (one with a boiler on the supply side), or None.
 
     :param model: openstudio.model.Model
+    :param exclude: handles (as strings) of loops that must NOT be adopted,
+        however well they otherwise match. The NECB reference path uses it for
+        a PROPOSED plant that survived teardown because a `copy_proposed`
+        block still draws on it: a reference system being built must connect
+        to a planned reference plant, not to proposed equipment kept alive for
+        another block (D-101; Sol, `143`).
     :return: openstudio.model.PlantLoop or None
     """
     # Source matching is EXCLUSIVE: a hybrid loop (boilers AND a district
     # object on the supply side) is neither a boiler loop nor a district loop
     # for reuse, so the two callers can never be handed the same object.
+    blocked = {str(handle) for handle in exclude}
     return next(
         (pl for pl in model.getPlantLoops()
-         if _boiler_heated(pl) and not _district_heated(pl)
+         if str(pl.handle()) not in blocked
+         and _boiler_heated(pl) and not _district_heated(pl)
          and boiler_part_load_class(pl) == part_load_curve_class),
         None)
 
@@ -83,7 +91,7 @@ def _boiler_heated(loop):
 
 
 def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='boiler',
-              part_load_curve_class=None):
+              part_load_curve_class=None, exclude=()):
     """Build a hot-water loop: primary + secondary boiler, variable-speed pump,
     82C design exit / 16K dT, OA-reset 82C@-16C down to 60C@0C.
 
@@ -108,11 +116,14 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
             # Name-guarded: a ground-loop condenser loop is modelled with a
             # DistrictHeating object too (hp_plant_fancoils), and must never
             # serve as the hot-water loop (independent review, 2026-09-13).
+            blocked = {str(handle) for handle in exclude}
             existing = next((pl for pl in model.getPlantLoops()
-                             if _named_hot_water_loop(pl)
+                             if str(pl.handle()) not in blocked
+                             and _named_hot_water_loop(pl)
                              and _district_heated(pl) and not _boiler_heated(pl)), None)
         else:
-            existing = find_hot_water(model, part_load_curve_class)
+            existing = find_hot_water(model, part_load_curve_class,
+                                      exclude=exclude)
         # The name fallback catches a loop that has no boiler YET. It must not
         # adopt a loop heated by a DIFFERENT SOURCE than the one asked for:
         # every loop this builder makes is named 'Hot Water Loop', district
@@ -127,10 +138,18 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
         # reference kept purchased heating while its energy type said gas.
         # Refusing the adoption lets the district loop drain group by group and
         # be removed by the teardown's own fixpoint.
+        #
+        # The fallback honours `exclude` too. It did not, and an excluded loop
+        # came straight back through it by NAME: `find_hot_water` returned None
+        # and this matched `Hot Water Loop` anyway, so reserving a retained
+        # proposed plant had no effect at all (measured while fixing Sol's
+        # `143` blocker 3).
         if existing is None:
+            blocked_by_name = {str(handle) for handle in exclude}
             existing = next(
                 (pl for pl in model.getPlantLoops()
-                 if _named_hot_water_loop(pl)
+                 if str(pl.handle()) not in blocked_by_name
+                 and _named_hot_water_loop(pl)
                  and _district_heated(pl) == (source == 'district')
                  and not (source == 'district' and _boiler_heated(pl))
                  and boiler_part_load_class(pl) == part_load_curve_class),

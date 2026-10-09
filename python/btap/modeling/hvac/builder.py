@@ -65,9 +65,14 @@ def _system_class(family):
 
 
 def build_system(model, system_name, zones, control_zone=None, remove_existing=False,
-                 namer='default', config=None):
+                 namer='default', config=None, exclude_plants=None):
     """Build a complete HVAC system topology on a set of thermal zones by
     descriptive name.
+
+    ``exclude_plants`` names plant-loop handles this build must NOT adopt even
+    when they match, which the NECB reference path uses to keep a reference
+    system off a PROPOSED plant that survived teardown for a `copy_proposed`
+    block (D-101). The default adopts as before.
 
     Topology only: run your sizing and code-efficiency passes afterwards (e.g. with
     openstudio-standards, whose efficiency application is data-driven and applies to
@@ -120,7 +125,8 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
                                         fuel=resolved.get('boiler_fuel', 'NaturalGas'),
                                         source=resolved.get('hw_source', 'boiler'),
                                         part_load_curve_class=resolved.get(
-                                            'boiler_part_load_curve_class'))
+                                            'boiler_part_load_curve_class'),
+                                        exclude=exclude_plants or ())
     chw_loop = None
     if resolved.get('needs_chiller'):
         chw_loop = plant_loops.chilled_water(model,

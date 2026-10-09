@@ -456,3 +456,165 @@ class TestPurchasedEnergyStillGetsBlocks(unittest.TestCase):
             [], [e for e in audit.entries
                  if 'AHJ-1' in str(e.get('ahj') or '')],
             'purchased energy never reaches the multi-energy disclosure')
+
+
+class TestAMixedCopyAndBuildClosure(unittest.TestCase):
+    """Sol's `143` blocker 3: phased teardown is not enough on its own.
+
+    `remove_hvac_from_zones` drops a plant only once its demand side empties,
+    so a plant shared by a RETAINED `copy_proposed` block and replaced blocks
+    correctly survives for the copied block. The first reference builder then
+    found it — by boiler presence, part-load class, or failing those by NAME —
+    and connected the replaced blocks to it. An `action == 'build'` assignment
+    was still adopting proposed plant equipment, through retained demand rather
+    than teardown order.
+
+    These tests trace DEMAND-SIDE CONNECTIONS rather than boiler presence,
+    because every fixture here ends with proposed boilers still in the model:
+    that is the point, since the copied block is entitled to them.
+    """
+
+    MARKER = 'PROPOSED MARKER'
+    SYS = 'FPFC MAU DX Coils with Scroll Chiller'
+
+    def mixed_proposed(self):
+        """One four-pipe fan-coil serving group over five blocks: block 1
+        residential (reaching `copy_proposed`), blocks 2-5 office (built)."""
+        proposed = proposed_with_hvac(self.SYS)
+        zones = sorted(proposed.getThermalZones(), key=lambda z: z.nameString())
+        for index, zone in enumerate(zones):
+            wanted = 'Dwelling unit' if index == 0 else 'Office - enclosed'
+            for space in zone.spaces():
+                space_type = space.spaceType()
+                if space_type.is_initialized():
+                    clone = space_type.get().clone(proposed).to_SpaceType().get()
+                    clone.setName('Block type {}'.format(index))
+                    clone.setStandardsSpaceType(wanted)
+                    space.setSpaceType(clone)
+        boilers = sorted(proposed.getBoilerHotWaters(),
+                         key=lambda b: b.nameString())
+        self.assertGreater(len(boilers), 1, 'fixture: a multi-boiler plant')
+        boilers[0].setFuelType('Electricity')
+        for index, boiler in enumerate(boilers):
+            boiler.setName('{} {}'.format(self.MARKER, index))
+        return proposed, [zone.nameString() for zone in zones]
+
+    def marked_plants(self, model):
+        return [plant for plant in model.getPlantLoops()
+                if any(self.MARKER in component.nameString()
+                       for component in plant.supplyComponents())]
+
+    @staticmethod
+    def demand_names(plant):
+        return sorted(component.nameString()
+                      for component in plant.demandComponents()
+                      if 'Coil' in component.nameString()
+                      or 'Baseboard' in component.nameString())
+
+    def test_the_copied_block_KEEPS_its_plant_and_no_built_block_joins_it(self):
+        proposed, blocks = self.mixed_proposed()
+        reference, audit = reference_of(proposed, storeys=1)
+
+        # The precondition is the mixed closure itself.
+        retained = [e for e in audit.entries
+                    if 'retained in reference' in str(e.get('action'))]
+        self.assertEqual(1, len(retained),
+                         'fixture: exactly one copy_proposed block')
+        self.assertEqual(blocks[0], str(retained[0].get('target')))
+
+        marked = self.marked_plants(reference)
+        self.assertEqual(
+            1, len(marked),
+            'the proposed boilers must still exist — the copied block is '
+            'entitled to them')
+        # ONE demand connection, the copied block's own fan coil. Four
+        # `Coil Heating Water Baseboard` objects here was the defect.
+        self.assertEqual(
+            ['Coil Heating Water 1'], self.demand_names(marked[0]),
+            'no newly built block may be attached to the retained proposed '
+            'plant')
+
+        marked_handles = {str(plant.handle()) for plant in marked}
+        unmarked = [plant for plant in reference.getPlantLoops()
+                    if str(plant.handle()) not in marked_handles
+                    and any('Boiler' in component.nameString()
+                            for component in plant.supplyComponents())]
+        self.assertEqual(
+            1, len(unmarked),
+            'the built blocks need a separately planned reference plant')
+        self.assertEqual(
+            4, len(self.demand_names(unmarked[0])),
+            'and all four replaced blocks connect to THAT one')
+
+    def test_the_reservation_is_AUDITED(self):
+        proposed, _ = self.mixed_proposed()
+        _, audit = reference_of(proposed, storeys=1)
+        reserved = [e for e in audit.entries
+                    if 'RESERVED to the retained blocks' in str(e.get('action'))]
+        self.assertEqual(1, len(reserved),
+                         'the ownership decision must be visible, not implicit')
+        inputs = reserved[0].get('inputs') or {}
+        self.assertEqual(1, inputs.get('copied_blocks'))
+        self.assertEqual(4, inputs.get('replaced_blocks'))
+        self.assertEqual('D-101', reserved[0].get('ruling'))
+
+    def test_AHJ_1_names_only_the_blocks_that_RECEIVE_the_substitution(self):
+        """Sol's `143` blocker 2, test 4. The copied block keeps the proposed
+        system and BOTH its fuels, so it faces no single-fuel substitution and
+        must not be counted among the affected blocks — the disclosure listed
+        the whole service set, including it.
+        """
+        proposed, blocks = self.mixed_proposed()
+        _, audit = reference_of(proposed, storeys=1)
+        disclosures = [e for e in audit.entries
+                       if 'AHJ-1' in str(e.get('ahj') or '')]
+        self.assertEqual(1, len(disclosures), 'one service choice')
+        inputs = disclosures[0].get('inputs') or {}
+        self.assertEqual(
+            blocks[1:], inputs.get('affected_blocks'),
+            'the four REPLACED blocks, not the retained one')
+        self.assertEqual(
+            blocks, inputs.get('service_set'),
+            'the service set is still recorded in full, so a reader can see '
+            'the difference')
+
+
+class TestDistinctSourceLoopServiceSetsStayDISTINCT(unittest.TestCase):
+    """Sol's `143` blocker 2, test 5: one Article 13 source-loop scope must not
+    collapse two service sets into one disclosure.
+
+    The election's scope and the disclosure's scope are different questions —
+    `8.4.x.13.(2)(g)(ii)` unions the blocks of every heat pump on a shared
+    source water loop, while `8.4.x.9.(5)` follows each proposed heating
+    service and allocation choice.
+    """
+
+    SYS = 'DOAS with water source heat pumps fluid cooler with boiler'
+
+    def test_two_WSHP_service_sets_on_one_source_loop_disclose_SEPARATELY(self):
+        from btap import modeling
+
+        from .hvac_helpers import load_fixture, sorted_zones
+
+        model = load_fixture()
+        zones = sorted_zones(model)
+        modeling.build_system(model, self.SYS, zones[:3])
+        modeling.build_system(model, self.SYS, zones[3:])
+        facts = modeling.characterize(model, audit=None)
+        groups = sorted(facts['zone_groups'], key=lambda g: sorted(g['zones']))
+        self.assertEqual(2, len(groups), 'fixture: two serving systems')
+        self.assertEqual(
+            [['Heat Pump Loop'], ['Heat Pump Loop']],
+            [list(g.get('heat_pump_source_loops') or ()) for g in groups],
+            'fixture: and ONE shared source water loop')
+
+        audit = AuditLog()
+        hvac.reference_hvac(model, code='necb2020', building={'storeys': 2},
+                            audit=audit)
+        affected = sorted(
+            tuple((e.get('inputs') or {}).get('affected_blocks') or ())
+            for e in audit.entries if 'AHJ-1' in str(e.get('ahj') or ''))
+        self.assertEqual(
+            [tuple(sorted(groups[0]['zones'])), tuple(sorted(groups[1]['zones']))],
+            affected,
+            'two service sets, two disclosures, each naming its own blocks')
