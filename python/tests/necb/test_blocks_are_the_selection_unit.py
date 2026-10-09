@@ -1727,3 +1727,182 @@ class TestAMergedConstructionKeepsPERBLOCKActions(unittest.TestCase):
                         ['build', 'through_the_wall'],
                         inputs['selection_branches'],
                         'the record says both branches are present')
+
+                    # AND the RETURNED assignment, not only the audit. This
+                    # test inspected `inputs` alone while holding `result`,
+                    # so the public `ReferenceResult.assignments` kept an
+                    # order-dependent `build`/`through_the_wall` scalar — a
+                    # truthful map beside a contradictory scalar does not make
+                    # the scalar true for callers (Sol, `162`).
+                    from btap.codes.necb.hvac.reference import (
+                        MIXED_SOURCE_ACTIONS,
+                    )
+
+                    returned = result.assignments[0]
+                    self.assertEqual(
+                        MIXED_SOURCE_ACTIONS, returned.action,
+                        'the merged scalar must be neutral and the SAME in '
+                        'both block orders')
+                    self.assertEqual(actions, returned.source_actions,
+                                     'and the per-block map rides with it')
+
+
+class TestTheClassifierMatchesTheREUSEPathsExactly(unittest.TestCase):
+    """Sol's `162` blocker 2: `plant_is_hvac_candidate` claimed to mirror the
+    reuse paths and omitted one.
+
+    Its cooling branch recognised only chillers or district cooling, while
+    `chilled_water()` has another path — an EXACT builder-named
+    `Chilled Water Loop` with no cooling source yet is reusable for ANY
+    requested source. A source-less loop therefore classified False while the
+    builder would have adopted it, the false-NEGATIVE counterpart of the
+    service-water noise the filter was added to remove.
+
+    No test called the predicate directly before this, which is why the four
+    hot-water examples did not close the claimed equivalence. Each case here
+    asserts the classifier AND what the reuse path actually returns, so the two
+    cannot drift apart again.
+    """
+
+    def classify_and_reuse(self, build_loop, *, medium, source):
+        """(candidate, reused) for one loop shape and one requested lookup.
+
+        `medium` is explicit because `'district'` is a valid source for BOTH
+        hot and chilled water: dispatching on the source name alone sent a
+        district HOT-water case to `chilled_water` and reported a false
+        mismatch.
+        """
+        import openstudio
+
+        from btap.modeling.hvac.systems import plant_loops
+
+        model = openstudio.model.Model()
+        loop = build_loop(model, plant_loops)
+        candidate = plant_loops.plant_is_hvac_candidate(loop)
+        lookup = (plant_loops.chilled_water if medium == 'chilled'
+                  else plant_loops.hot_water)
+        got = lookup(model, source=source)
+        return candidate, str(got.handle()) == str(loop.handle())
+
+    @staticmethod
+    def _sourceless_chilled(model, plant_loops):
+        import openstudio
+
+        loop = openstudio.model.PlantLoop(model)
+        loop.setName('Chilled Water Loop')
+        return loop
+
+    def test_a_sourceless_CHILLED_WATER_LOOP_is_a_candidate_for_every_source(self):
+        for source in ('water_cooled', 'air_cooled', 'district'):
+            with self.subTest(source=source):
+                candidate, reused = self.classify_and_reuse(
+                    self._sourceless_chilled, medium='chilled', source=source)
+                self.assertTrue(reused,
+                                'chilled_water adopts an exact source-less '
+                                'Chilled Water Loop for any source')
+                self.assertTrue(candidate,
+                                'so the classifier must call it a candidate')
+
+    def test_a_DIFFERENTLY_NAMED_sourceless_loop_is_neither(self):
+        """The name test is EXACT, so it must not broaden past what
+        `chilled_water` can return.
+        """
+        def other(model, plant_loops):
+            import openstudio
+
+            loop = openstudio.model.PlantLoop(model)
+            loop.setName('PROCESS CHW LOOP')
+            return loop
+
+        candidate, reused = self.classify_and_reuse(other, medium='chilled',
+                                                    source='water_cooled')
+        self.assertFalse(reused, 'the builder cannot adopt it')
+        self.assertFalse(candidate, 'so it is not an audited candidate')
+
+    def test_the_hot_water_boundaries_agree_too(self):
+        """The four shapes from the previous round, now asserted against the
+        reuse paths rather than against my reading of them.
+        """
+        def district_oddly_named(model, plant_loops):
+            loop = plant_loops.hot_water(model, source='district', reuse=False)
+            loop.setName('DISTRICT PROCESS LOOP')
+            return loop
+
+        def hybrid(model, plant_loops):
+            import openstudio
+
+            loop = plant_loops.hot_water(model, source='boiler', reuse=False)
+            loop.addSupplyBranchForComponent(
+                openstudio.model.DistrictHeating(model))
+            return loop
+
+        def ordinary_boiler(model, plant_loops):
+            return plant_loops.hot_water(model, source='boiler', reuse=False)
+
+        def builder_named_district(model, plant_loops):
+            return plant_loops.hot_water(model, source='district', reuse=False)
+
+        for shape, source, expected in (
+                (district_oddly_named, 'district', False),
+                (district_oddly_named, 'boiler', False),
+                (hybrid, 'boiler', False),
+                (hybrid, 'district', False),
+                (ordinary_boiler, 'boiler', True),
+                (builder_named_district, 'district', True)):
+            with self.subTest(shape=shape.__name__, source=source):
+                candidate, reused = self.classify_and_reuse(shape, medium='hot',
+                                                            source=source)
+                self.assertEqual(
+                    expected, reused,
+                    'precondition: what the reuse path does with this shape')
+                if reused:
+                    self.assertTrue(candidate,
+                                    'an adoptable survivor must be audited')
+
+    def test_a_retained_sourceless_CHW_loop_is_NAMED_in_the_reservation(self):
+        """Sol's `162` second required control, through the full reference path.
+
+        A source-less `Chilled Water Loop` kept alive by process demand must
+        appear in the RESERVED audit — the builder would have adopted it
+        without the exclusion — while the built blocks' cooling coils go on a
+        new plant. Before the fix the exclusion protected them correctly and
+        the audit said nothing, which is the false negative.
+        """
+        import openstudio
+
+        from btap.modeling.hvac.systems import plant_loops
+
+        proposed = proposed_with_hvac(MULTIZONE_PROPOSED)
+        # Strip the proposed chillers so the loop has no cooling SOURCE, and
+        # give it process demand so teardown keeps it.
+        chilled = next(p for p in proposed.getPlantLoops()
+                       if p.nameString() == 'Chilled Water Loop')
+        for component in list(plant_loops._chillers(chilled)):
+            component.to_ChillerElectricEIR().get().remove()
+        self.assertIsNone(plant_loops._cooling_source(chilled),
+                          'fixture: the loop has no cooling source')
+        definition = openstudio.model.WaterUseEquipmentDefinition(proposed)
+        definition.setPeakFlowRate(0.001)
+        equipment = openstudio.model.WaterUseEquipment(definition)
+        equipment.setName('PROCESS COOLING LOAD')
+        connections = openstudio.model.WaterUseConnections(proposed)
+        connections.setName('PROCESS COOLING CONNECTIONS')
+        connections.addWaterUseEquipment(equipment)
+        chilled.addDemandBranchForComponent(connections)
+
+        reference, audit = reference_of(proposed, storeys=5)
+        reserved = [e for e in audit.entries
+                    if 'RESERVED to whatever retained it' in str(e.get('action'))]
+        self.assertEqual(1, len(reserved),
+                         'the survivor the builder could have adopted must be '
+                         'audited')
+        self.assertIn('Chilled Water Loop', str(reserved[0].get('target')),
+                      'and named in it')
+
+        # And the built blocks are still kept off it.
+        retained = next(p for p in reference.getPlantLoops()
+                        if p.nameString() == 'Chilled Water Loop')
+        coils = [c.nameString() for c in retained.demandComponents()
+                 if 'Coil Cooling' in c.nameString()]
+        self.assertEqual([], coils,
+                         'no reference cooling coil may join the retained loop')

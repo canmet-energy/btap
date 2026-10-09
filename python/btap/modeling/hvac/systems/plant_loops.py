@@ -399,16 +399,28 @@ def plant_is_hvac_candidate(loop):
     * the hot-water name fallback — the builder's name, with a source that
       matches or no boilers yet;
     * chilled water — chillers or district cooling, which `chilled_water`
-      reaches by source.
+      reaches by source;
+    * the CHILLED-WATER name fallback — an exact `Chilled Water Loop` with no
+      cooling source yet, which `chilled_water` returns for ANY requested
+      source. Omitting it hid a real survivor: a source-less
+      `Chilled Water Loop` retained by process demand classified False while
+      the builder would have adopted it without the broad exclusion — the
+      false-NEGATIVE counterpart of the service-water noise this filter
+      removed (Sol, `162`). Its name test is EXACT, unlike the hot-water
+      suffix regex, so it is not broadened beyond what `chilled_water` can
+      return.
 
     A service-water loop satisfies none of them.
     """
     boiler_hw = _boiler_heated(loop) and not _district_heated(loop)
     district_hw = (_district_heated(loop) and not _boiler_heated(loop)
                    and _named_hot_water_loop(loop))
-    name_fallback = _named_hot_water_loop(loop) and not boiler_fuels(loop)
+    hw_name_fallback = _named_hot_water_loop(loop) and not boiler_fuels(loop)
     cooling = bool(_chillers(loop) or _district_cooled(loop))
-    return bool(boiler_hw or district_hw or name_fallback or cooling)
+    chw_name_fallback = (loop.nameString() == 'Chilled Water Loop'
+                         and _cooling_source(loop) is None)
+    return bool(boiler_hw or district_hw or hw_name_fallback or cooling
+                or chw_name_fallback)
 
 
 def find_chilled_water(model, exclude=(), source=None):

@@ -37,6 +37,20 @@ def rules(edition):
     return rulesdata.load("hvac", code_id(edition))
 
 
+#: `Assignment.action` when a merge absorbed assignments whose SELECTION
+#: branches differed. The merge keys on `[catalog_name, config]` and not on
+#: action — adding action would split one Note (2) common ventilation system
+#: into two central MAUs — so one construction can cover blocks that reached
+#: it by different branches, and no single branch describes it.
+#:
+#: It is deliberately not `None` (which reads as "never set") and deliberately
+#: not one of the branch names. `source_actions` carries the per-block truth.
+#: Every post-merge consumer compares against `'copy_proposed'`, and a copied
+#: assignment is never merged, so this value behaves as "replaced" everywhere
+#: it is tested (Sol, `162`).
+MIXED_SOURCE_ACTIONS = 'mixed'
+
+
 @dataclass
 class Assignment:
     """One reference-system assignment for a group of zones."""
@@ -998,6 +1012,15 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
             existing[1].zones.extend([z for z in a.zones if z not in existing[1].zones])
             existing[1].articles.extend(a.articles)
             existing[1].source_actions.update(a.source_actions)
+            # THE RETURNED OBJECT TOO, not only the audit. `existing[1]` is
+            # published in `ReferenceResult.assignments`, so leaving the first
+            # absorbed assignment's scalar there kept an order-dependent false
+            # label on the public API: the same merged construction reported
+            # `build` or `through_the_wall` purely by which block sorted first.
+            # A truthful map beside a contradictory scalar does not make the
+            # scalar true for existing callers (Sol, `162`).
+            if len(set(existing[1].source_actions.values())) > 1:
+                existing[1].action = MIXED_SOURCE_ACTIONS
             # PER-KEY multiplicity. A global `len(merged) < len(assignments)`
             # only says SOMETHING merged; it cannot say which key did, and a
             # family that survived as one assignment was then reported as a
