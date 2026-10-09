@@ -444,7 +444,7 @@
     "modulating_min_fraction": 0.25
   },
   "dx_staging": {
-    "article": "8.4.4.10.(8)",
+    "article": "8.4.5.10.(8)",
     "two_stage_max_kw": 66,
     "stage_size_kw": 66
   },

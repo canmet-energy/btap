@@ -543,5 +543,94 @@ class TestDataGateCatchesRealRegressions(unittest.TestCase):
                         "the 2020 removal must fire even though 2025 gained the "
                         "same article — this is what the edition scope is for")
 
+class TestDataCitationsAreValidForTheirEdition(unittest.TestCase):
+    """A Section 8.4 citation in an edition's DATA must exist in THAT edition.
+
+    The count gates beside this one guard against LOSS: a citation vanishing,
+    or moving between editions while a repository total stays flat. None of
+    them asks whether the citation is VALID for the edition that ships it, so
+    a wrong article id was simply recorded in the baseline and defended
+    thereafter.
+
+    That is not hypothetical. `necb2025/reference_rules.json`'s `dx_staging`
+    kept `8.4.4.10.(8)` when NECB 2025 renumbered Cooling Systems to
+    8.4.5.10 — its immediate neighbour `cooling_plant` was shifted to
+    `8.4.5.10.(6)` and this one was missed. NECB 2025's 8.4.4 has exactly two
+    articles (General, Operating Schedules), so 8.4.4.10 does not exist in
+    that edition at all.
+
+    It survived because nothing could see it. `dx_staging['article']` is never
+    read — `_stage_multispeed_coil` takes its article as a PARAMETER built
+    from the edition prefix — so no audit, report or frozen baseline carried
+    the wrong value, and none of the four 2025 frozen scenarios exercises DX
+    staging. The one place that states the correct 2025 citation,
+    `test_codes_registry`'s `("2025", "hvac.efficiency.staging_dx_cooling")`
+    row, reads the registry rather than the rule file, so the two disagreed
+    silently.
+
+    Found while measuring what it would take to establish `editions` on the
+    97 unverified decisions: the authored per-edition rule data is the only
+    non-guessed source of citation correspondence, and checking it against
+    the snapshots turned up one stale entry out of 101 renumberings.
+    """
+
+    #: Only Section 8.4 is checkable. The snapshots cache that section alone,
+    #: so a citation into Part 5 or Division A has nothing to validate
+    #: against here and is left to the other gates.
+    SECTION_8_4 = "8.4."
+
+    def snapshot_articles(self, scope):
+        cache = (Path(__file__).resolve().parents[1] / "btap" / "codes" / "necb"
+                 / "data" / scope / "coverage" / "articles_8_4.json")
+        return set(json.loads(cache.read_text(encoding="utf-8"))["articles"])
+
+    def article_ids(self, value):
+        """The bare article ids inside one citation string.
+
+        A value may carry several (`"8.4.5.9.(3); 8.4.5.10.(7)"`) and may
+        carry a sentence or a range after the article, so the article id is
+        the first four numeric components and the rest is not checked here.
+        """
+        import re
+        return re.findall(r"\b(8\.4\.\d+\.\d+)", value)
+
+    def test_every_data_8_4_citation_exists_in_its_own_edition(self):
+        counts = compute_data_citation_counts()
+        problems = []
+        for scope, values in sorted(counts.items()):
+            known = self.snapshot_articles(scope)
+            for value in sorted(values):
+                if self.SECTION_8_4 not in value:
+                    continue
+                for article in self.article_ids(value):
+                    if article not in known:
+                        problems.append(
+                            f"{scope}: {value!r} cites {article}, which is not "
+                            f"an article in {scope}'s own snapshot")
+        self.assertEqual([], problems, "\n".join(problems))
+
+    def test_the_gate_fires_on_the_defect_it_was_written_for(self):
+        """Restore the real stale citation and prove this gate catches it.
+
+        Without this, the test above passes on a tree where the scanner
+        silently stopped reading rule files.
+        """
+        counts = compute_data_citation_counts()
+        self.assertIn("8.4.5.10.(8)", counts["necb2025"],
+                      "fixture precondition: 2025 carries the CORRECTED "
+                      "citation, so restoring the stale one is a real mutation")
+        known = self.snapshot_articles("necb2025")
+        self.assertNotIn("8.4.4.10", known,
+                         "fixture precondition: 8.4.4.10 genuinely does not "
+                         "exist in NECB 2025")
+        self.assertIn("8.4.5.10", known,
+                      "and Cooling Systems genuinely sits at 8.4.5.10 there")
+        # the mutation this gate exists to refuse
+        self.assertEqual(
+            ["8.4.4.10"], self.article_ids("8.4.4.10.(8)"),
+            "and the id extractor reads the article out of a sentence-level "
+            "citation, or the check above would never compare anything")
+
+
 if __name__ == "__main__":
     unittest.main()
