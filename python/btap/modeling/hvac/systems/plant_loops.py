@@ -47,31 +47,88 @@ def boiler_fuels(loop):
                 openstudio.model.BoilerHotWater.iddObjectType())]
 
 
+def _boiler_role(boiler):
+    """``'primary'``, ``'secondary'`` or None, by D-90's three sources.
+
+    The same contract `btap.codes.necb.hvac.efficiency._plant_role` applies on
+    the codes side — the builder's own feature, then the conventional name,
+    then a two-boiler plant's supply order. It is reimplemented here rather
+    than imported because `btap.modeling` may not depend on `btap.codes`
+    (the D-77 direction), and the FEATURE itself is modeling-owned.
+    """
+    stored = boiler.additionalProperties().getFeatureAsString(
+        BOILER_PLANT_ROLE_FEATURE)
+    if stored.is_initialized() and stored.get() in ('primary', 'secondary'):
+        return stored.get()
+    name = boiler.nameString()
+    if 'Primary Boiler' in name:
+        return 'primary'
+    if 'Secondary Boiler' in name:
+        return 'secondary'
+    return None
+
+
+def _ordered_boiler_fuels(loop):
+    """``(primary_fuel, secondary_fuel)`` for a staged pair, else None.
+
+    None means the ORDER could not be established — an imported loop whose
+    boilers carry no role marks, or a plant that is not a two-boiler pair.
+    A caller that supplied an explicit backup must then NOT reuse the loop:
+    unknown order may not silently count as a match (Sol, `153`).
+    """
+    boilers = [component.to_BoilerHotWater().get()
+               for component in loop.supplyComponents(
+                   openstudio.model.BoilerHotWater.iddObjectType())]
+    if len(boilers) != 2:
+        return None
+    roles = [_boiler_role(boiler) for boiler in boilers]
+    if set(roles) == {'primary', 'secondary'}:
+        by_role = dict(zip(roles, boilers))
+        return (by_role['primary'].fuelType(),
+                by_role['secondary'].fuelType())
+    if any(role is not None for role in roles):
+        # Half-marked: one boiler claims a role and the other does not. The
+        # order is not established, so refuse rather than guess.
+        return None
+    # D-90's last resort: exactly two unmarked boilers on one loop ARE the
+    # pair, ordered by the loop's own supply order so the choice is
+    # deterministic.
+    return (boilers[0].fuelType(), boilers[1].fuelType())
+
+
 def _fuels_compatible(loop, fuel, backup_fuel):
-    """Whether `loop` can serve a caller asking for these boiler fuels.
+    """Whether `loop` can serve a caller asking for this boiler realization.
 
-    SUBSET, not equality. The requested fuels must already be ON the loop; the
-    loop may carry more. Equality was wrong in a way the frozen corpus caught:
-    sample 11 is built by making a mixed gas-lead/electric-backup plant and
-    THEN building `Baseboard gas boiler`, which asks for NaturalGas and must
-    join that mixed plant — being a mixed-fuel plant the reference keeps is the
-    entire point of the sample. Under equality the gas request refused
-    `{NaturalGas, Electricity}` and built a second plant, so sample 11 stopped
-    being multi-energy and AHJ-1/AHJ-3 stopped firing on it.
+    TWO DIFFERENT REQUESTS, because `backup_fuel` carries meaning (Sol, `153`):
 
-    Subset still refuses what Sol's `151` requires it to refuse: an Electricity
-    caller cannot join a NaturalGas-only plant, and a NaturalGas caller cannot
-    join an Electricity-only one, so two single-energy services keep their own
-    reference plants in either assignment order.
+    * **backup omitted** — the caller is attaching demand to whatever plant
+      already realises its fuel and is NOT electing the other role. It needs
+      its fuel PRESENT, nothing more. This is the sample 11/12 shape: a mixed
+      gas-lead/electric-backup plant is built, then `Baseboard gas boiler`
+      asks for NaturalGas and must join it.
+    * **backup supplied** — this is an ordered primary/secondary plant
+      realization, and reuse must match BOTH roles IN ORDER. A reversed pair
+      is a different plant: the roles are durable runtime facts that D-90's
+      staging pass consumes, so adopting the reversal changes which fuel
+      occupies which role before that pass runs, and 8.4.x.9.(5)(b) makes
+      cross-energy operating priority substantive. An explicit gas/gas request
+      is likewise not satisfied by one gas and one electric boiler.
 
-    A loop with no boilers yet is compatible with anything — that is the
-    name-fallback case, where the caller is about to add its own.
+    A set subset satisfied all three of those wrongly — it loses order AND
+    multiplicity. Plain equality fails the omitted-backup case instead, which
+    the frozen corpus caught by way of sample 11 losing AHJ-1/AHJ-3.
+
+    A loop with no boilers is compatible with anything.
     """
     existing = boiler_fuels(loop)
     if not existing:
         return True
-    wanted = {fuel, backup_fuel if backup_fuel is not None else fuel}
-    return wanted <= set(existing)
+    if backup_fuel is None:
+        return fuel in existing
+    ordered = _ordered_boiler_fuels(loop)
+    if ordered is None:
+        return False
+    return ordered == (fuel, backup_fuel)
 
 
 _HOT_WATER_LOOP_NAME = re.compile(r'^Hot Water Loop( \d+)?$')
