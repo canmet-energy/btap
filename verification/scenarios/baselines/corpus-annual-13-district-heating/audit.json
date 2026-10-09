@@ -171,11 +171,12 @@
  },
  {
   "step": "selection",
-  "target": "DOAS ventilation only",
+  "target": "Thermal Zone 1",
   "action": "reference system selected",
   "inputs": {
    "category": "General Area",
    "energy_type": "gas",
+   "serving_system": "DOAS ventilation only",
    "heated": true,
    "cooled": true,
    "cooling_kw": null
@@ -199,11 +200,12 @@
  },
  {
   "step": "selection",
-  "target": "DOAS ventilation only",
+  "target": "Thermal Zone 2",
   "action": "reference system selected",
   "inputs": {
    "category": "General Area",
    "energy_type": "gas",
+   "serving_system": "DOAS ventilation only",
    "heated": true,
    "cooled": true,
    "cooling_kw": null
@@ -227,11 +229,12 @@
  },
  {
   "step": "selection",
-  "target": "DOAS ventilation only",
+  "target": "Thermal Zone 3",
   "action": "reference system selected",
   "inputs": {
    "category": "General Area",
    "energy_type": "gas",
+   "serving_system": "DOAS ventilation only",
    "heated": true,
    "cooled": true,
    "cooling_kw": null
@@ -255,11 +258,12 @@
  },
  {
   "step": "selection",
-  "target": "DOAS ventilation only",
+  "target": "Thermal Zone 4",
   "action": "reference system selected",
   "inputs": {
    "category": "General Area",
    "energy_type": "gas",
+   "serving_system": "DOAS ventilation only",
    "heated": true,
    "cooled": true,
    "cooling_kw": null
@@ -283,11 +287,12 @@
  },
  {
   "step": "selection",
-  "target": "DOAS ventilation only",
+  "target": "Thermal Zone 5",
   "action": "reference system selected",
   "inputs": {
    "category": "General Area",
    "energy_type": "gas",
+   "serving_system": "DOAS ventilation only",
    "heated": true,
    "cooled": true,
    "cooling_kw": null
@@ -308,20 +313,6 @@
   "ruling": "D-101",
   "building": "reference building",
   "level": "info"
- },
- {
-  "step": "build",
-  "target": "Main Service Water Loop",
-  "action": "proposed plant equipment RESERVED to whatever retained it: a reference system built for a replaced block may not connect to a plant that survived teardown, whether a copied block, process or service water, or another non-zone demand is keeping it alive",
-  "inputs": {
-   "retained_plants": 1,
-   "copied_blocks": 0,
-   "replaced_blocks": 5
-  },
-  "value": "a built block connects to a planned reference plant; proposed equipment stays with the demand that retained it",
-  "ruling": "D-101",
-  "building": "reference building",
-  "level": "decision"
  },
  {
   "step": "build",
@@ -1224,7 +1215,7 @@
  },
  {
   "step": "coverage",
-  "action": "Heating System \u2014 partial. Applied: reference heating energy type modeled identical to the proposed where the catalog PRESERVES that source, namely natural gas and electricity (see also 8.4.4.13.(2)(g)). Gaps: two distinct gaps. (i) The sentence opens \"Except as provided in Sentence (5)\", so it does NOT govern a group whose proposed heating system uses more than one energy type; for those the structural election is a SURROGATE for the unimplemented 8.4.4.9.(5), and no single-fuel basis, whether the fossil-first cascade, capacity-dominant, lead-fuel or annual-dominant, satisfies (5)(a)'s capacity ratio. The multi-energy case is disclosed as UNRESOLVED once per serving system. (ii) Even for a SINGLE-energy system the reference is not always identical: the election maps FuelOilNo2 and PropaneGas to the GAS catalog VARIANT. What the reference's final equipment burns is configuration-dependent and MEASURED, not inferred from the election: with an oil-fired hot-water plant the reference ADOPTS it and keeps FuelOilNo2, while a hot-water-baseboard variant tears it down and builds NaturalGas boilers from the same 'gas' election. So the gap is that the catalog offers no oil or propane variant, and a reference built from it burns gas; it is NOT that every oil building gets a gas reference. (4) requires the energy type to be identical and Division A's building-energy-target definition requires the same energy SOURCES for the same functions, so oil and propane remain unsupported. That is a catalog gap, not a Code reading.",
+  "action": "Heating System \u2014 partial. Applied: reference heating energy type modeled identical to the proposed where the catalog PRESERVES that source, namely natural gas and electricity (see also 8.4.4.13.(2)(g)). Gaps: two distinct gaps. (i) The sentence opens \"Except as provided in Sentence (5)\", so it does NOT govern a group whose proposed heating system uses more than one energy type; for those the structural election is a SURROGATE for the unimplemented 8.4.4.9.(5), and no single-fuel basis, whether the fossil-first cascade, capacity-dominant, lead-fuel or annual-dominant, satisfies (5)(a)'s capacity ratio. The multi-energy case is disclosed as UNRESOLVED once per serving system. (ii) Even for a SINGLE-energy system the reference is not always identical: the election maps FuelOilNo2 and PropaneGas to the GAS catalog VARIANT. What the reference's final equipment burns is configuration-dependent and MEASURED, not inferred from the election: MEASURED on this branch, both variants give the same answer: an oil-fired proposed plant is torn down and the reference builds NaturalGas boilers, whether the proposed system is zonal baseboards or a hot-water-baseboard PSZ. The earlier text said the zonal variant ADOPTS the oil plant and keeps FuelOilNo2, so the mismatch was 'real but not universal'. D-101 made that false for every BUILT block: destruction is phased ahead of construction and every plant surviving teardown is reserved to whatever retained it, so a built block cannot adopt a proposed plant. The gap is therefore that the catalog offers no oil or propane variant and a reference built from it burns gas, UNIVERSALLY for a built block. A `copy_proposed` block still retains its proposed plant with its own fuel, which is a different branch. (4) requires the energy type to be identical and Division A's building-energy-target definition requires the same energy SOURCES for the same functions, so oil and propane remain unsupported. That is a catalog gap, not a Code reading.",
   "inputs": {
    "status": "partial",
    "decisions_citing": 15,
