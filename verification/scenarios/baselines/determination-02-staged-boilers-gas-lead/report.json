@@ -162,7 +162,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
     "target": "Primary Boiler",
     "detail": "boiler efficiency applied",
-    "entry_index": 234
+    "entry_index": 235
    },
    {
     "id": "AHJ-14",
@@ -171,7 +171,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "CoilHeatingGasMultiStage_gas",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 256
+    "entry_index": 257
    },
    {
     "id": "AHJ-14",
@@ -180,7 +180,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "CoilHeatingGasMultiStage_gas 1",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 257
+    "entry_index": 258
    },
    {
     "id": "AHJ-14",
@@ -189,7 +189,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "CoilHeatingGasMultiStage_gas 2",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 258
+    "entry_index": 259
    },
    {
     "id": "AHJ-14",
@@ -198,7 +198,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "CoilHeatingGasMultiStage_gas 3",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 259
+    "entry_index": 260
    },
    {
     "id": "AHJ-14",
@@ -207,7 +207,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "CoilHeatingGasMultiStage_gas 4",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 260
+    "entry_index": 261
    }
   ]
  },

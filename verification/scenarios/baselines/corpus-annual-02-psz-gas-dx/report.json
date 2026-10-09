@@ -52,24 +52,24 @@
  },
  "reference": {
   "clean_run": true,
-  "total_site_kwh": 3969.4,
-  "electricity_kwh": 1452.8,
-  "natural_gas_kwh": 2516.7,
+  "total_site_kwh": 3138.9,
+  "electricity_kwh": 1188.9,
+  "natural_gas_kwh": 1950.0,
   "district_heating_kwh": 0.0,
   "district_cooling_kwh": 0.0,
   "end_uses_kwh": {
-   "heating": 2205.6,
-   "cooling": 0.0,
-   "fans": 636.1,
-   "pumps": 41.7,
+   "heating": 1638.9,
+   "cooling": 5.6,
+   "fans": 416.7,
+   "pumps": 5.6,
    "interior_lighting": 263.9,
    "interior_equipment": 472.2,
    "water_systems": 311.1
   },
   "floor_area_m2": 800.0,
-  "eui_kwh_per_m2": 5.0,
+  "eui_kwh_per_m2": 3.9,
   "unmet_occupied_hours": {
-   "heating": 29.75,
+   "heating": 0.0,
    "cooling": 0.0
   },
   "zone_unmet_occupied_hours": {
@@ -78,25 +78,25 @@
     "cooling": 0.0
    },
    "THERMAL ZONE 2": {
-    "heating": 25.5,
+    "heating": 0.0,
     "cooling": 0.0
    },
    "THERMAL ZONE 3": {
-    "heating": 25.5,
+    "heating": 0.0,
     "cooling": 0.0
    },
    "THERMAL ZONE 4": {
-    "heating": 25.5,
+    "heating": 0.0,
     "cooling": 0.0
    },
    "THERMAL ZONE 5": {
-    "heating": 3.75,
+    "heating": 0.0,
     "cooling": 0.0
    }
   }
  },
  "capacity_iterations": [],
- "percent_of_target": 100.1,
+ "percent_of_target": 126.6,
  "tier": null,
  "annual": false,
  "ahj_applied": [
@@ -104,7 +104,13 @@
    "id": "AHJ-14",
    "status": "referral",
    "title": "which part-load class a reference boiler or furnace takes",
-   "count": 2
+   "count": 6
+  },
+  {
+   "id": "AHJ-15",
+   "status": "referral",
+   "title": "whether (3) governs dispatch priority at all",
+   "count": 5
   }
  ],
  "ahj_register": "docs/NECB_AHJ_QUESTIONS.md",
@@ -112,7 +118,23 @@
  "warnings": [
   "CoilCoolingDXMultiSpeed_dx: staged capacity unavailable (model not sized?) \u2014 8.4.4.10.(8) stage count NOT set; run sizing first",
   "CoilHeatingGasMultiStage_gas: staged capacity unavailable (model not sized?) \u2014 8.4.4.9.(7) stage count NOT set; run sizing first",
+  "CoilCoolingDXMultiSpeed_dx 1: staged capacity unavailable (model not sized?) \u2014 8.4.4.10.(8) stage count NOT set; run sizing first",
+  "CoilHeatingGasMultiStage_gas 1: staged capacity unavailable (model not sized?) \u2014 8.4.4.9.(7) stage count NOT set; run sizing first",
+  "CoilCoolingDXMultiSpeed_dx 2: staged capacity unavailable (model not sized?) \u2014 8.4.4.10.(8) stage count NOT set; run sizing first",
+  "CoilHeatingGasMultiStage_gas 2: staged capacity unavailable (model not sized?) \u2014 8.4.4.9.(7) stage count NOT set; run sizing first",
+  "CoilCoolingDXMultiSpeed_dx 3: staged capacity unavailable (model not sized?) \u2014 8.4.4.10.(8) stage count NOT set; run sizing first",
+  "CoilHeatingGasMultiStage_gas 3: staged capacity unavailable (model not sized?) \u2014 8.4.4.9.(7) stage count NOT set; run sizing first",
+  "CoilCoolingDXMultiSpeed_dx 4: staged capacity unavailable (model not sized?) \u2014 8.4.4.10.(8) stage count NOT set; run sizing first",
+  "CoilHeatingGasMultiStage_gas 4: staged capacity unavailable (model not sized?) \u2014 8.4.4.9.(7) stage count NOT set; run sizing first",
   "staged DX cooling capacity unavailable (model not sized?) \u2014 not set",
+  "staged DX cooling capacity unavailable (model not sized?) \u2014 not set",
+  "staged DX cooling capacity unavailable (model not sized?) \u2014 not set",
+  "staged DX cooling capacity unavailable (model not sized?) \u2014 not set",
+  "staged DX cooling capacity unavailable (model not sized?) \u2014 not set",
+  "staged gas coil capacity unavailable (model not sized?) \u2014 not set",
+  "staged gas coil capacity unavailable (model not sized?) \u2014 not set",
+  "staged gas coil capacity unavailable (model not sized?) \u2014 not set",
+  "staged gas coil capacity unavailable (model not sized?) \u2014 not set",
   "staged gas coil capacity unavailable (model not sized?) \u2014 not set",
   "Purchased Energy \u2014 partial. Applied: purchased HEATING is represented by a gas-fired modulating boiler ((1)(a)) via the energy-type election. Gaps: the (1)(b) capacity-ratio adjustment is sizing-time and not enforced",
   "Purchased Energy \u2014 partial. Applied: purchased COOLING forces an air-cooled electric chiller ((2)(a)) via the chw_source config. Gaps: the (2)(b) capacity-ratio adjustment is sizing-time and not enforced",

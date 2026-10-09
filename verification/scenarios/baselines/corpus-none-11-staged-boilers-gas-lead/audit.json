@@ -266,6 +266,18 @@
  },
  {
   "step": "build",
+  "target": "Thermal Zone 1,Thermal Zone 2,Thermal Zone 3,Thermal Zone 4,Thermal Zone 5",
+  "action": "proposed HVAC torn down for every thermal block the reference replaces, in ONE pass before any reference system is built \u2014 a plant shared by several blocks must not survive one block's teardown and be re-adopted",
+  "inputs": {
+   "blocks": 5,
+   "assignments": 5
+  },
+  "ruling": "D-101",
+  "building": "reference building",
+  "level": "info"
+ },
+ {
+  "step": "build",
   "target": "Thermal Zone 1",
   "action": "reference system built",
   "inputs": {

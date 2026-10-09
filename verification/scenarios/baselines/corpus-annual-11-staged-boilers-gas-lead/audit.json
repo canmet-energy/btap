@@ -305,6 +305,18 @@
  },
  {
   "step": "build",
+  "target": "Thermal Zone 1,Thermal Zone 2,Thermal Zone 3,Thermal Zone 4,Thermal Zone 5",
+  "action": "proposed HVAC torn down for every thermal block the reference replaces, in ONE pass before any reference system is built \u2014 a plant shared by several blocks must not survive one block's teardown and be re-adopted",
+  "inputs": {
+   "blocks": 5,
+   "assignments": 5
+  },
+  "ruling": "D-101",
+  "building": "reference building",
+  "level": "info"
+ },
+ {
+  "step": "build",
   "target": "Thermal Zone 1",
   "action": "reference system built",
   "inputs": {
@@ -759,19 +771,19 @@
   "target": "Secondary Boiler",
   "action": "boiler efficiency applied",
   "inputs": {
-   "fuel": "Electric",
+   "fuel": "Gas",
    "capacity_kw": 0.0,
    "design_capacity_kw": 52.0,
    "capacity_source": "autosized",
-   "part_load_curve_class": "not_applicable",
+   "part_load_curve_class": "non_condensing",
    "class_source": "row",
-   "curve": "none (constant part-load factor 1.0)",
-   "form": null
+   "curve": "BOILER-PLF-NONCONDENSING",
+   "form": "TableLookup"
   },
-  "value": "thermal efficiency 1.0 (1.0 Thermal Eff), part-load curve none (constant part-load factor 1.0)",
+  "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
   "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
   "ruling": "D-89 D-90",
-  "evidence": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2. derives the part-load fuel consumption of a FUEL-fired boiler from FHeatPLC; this boiler has no fuel input to adjust, so no part-load curve applies and the part-load factor is constant at 1.0; the efficiency curve is evaluated on the EnteringBoiler temperature",
+  "evidence": "Article 8.4.5.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.2.-A, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0 (node value 0), 0.00001 to 0.0001 step 0.00001, 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (169 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.1994 % against the exact requirement (sampled at PLR step 0.00001); a node at PLR 0 carries the Code equation down to zero load; the efficiency curve is evaluated on the EnteringBoiler temperature",
   "building": "reference building",
   "level": "decision"
  },
@@ -3000,19 +3012,19 @@
   "target": "Secondary Boiler",
   "action": "boiler efficiency applied",
   "inputs": {
-   "fuel": "Electric",
+   "fuel": "Gas",
    "capacity_kw": 0.0,
    "design_capacity_kw": 64.4,
    "capacity_source": "autosized",
-   "part_load_curve_class": "not_applicable",
+   "part_load_curve_class": "non_condensing",
    "class_source": "row",
-   "curve": "none (constant part-load factor 1.0)",
-   "form": null
+   "curve": "BOILER-PLF-NONCONDENSING",
+   "form": "TableLookup"
   },
-  "value": "thermal efficiency 1.0 (1.0 Thermal Eff), part-load curve none (constant part-load factor 1.0)",
+  "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
   "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
   "ruling": "D-89 D-90",
-  "evidence": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2. derives the part-load fuel consumption of a FUEL-fired boiler from FHeatPLC; this boiler has no fuel input to adjust, so no part-load curve applies and the part-load factor is constant at 1.0; the efficiency curve is evaluated on the EnteringBoiler temperature",
+  "evidence": "Article 8.4.5.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.2.-A, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0 (node value 0), 0.00001 to 0.0001 step 0.00001, 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (169 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.1994 % against the exact requirement (sampled at PLR step 0.00001); a node at PLR 0 carries the Code equation down to zero load; the efficiency curve is evaluated on the EnteringBoiler temperature",
   "building": "reference building",
   "level": "decision"
  },
