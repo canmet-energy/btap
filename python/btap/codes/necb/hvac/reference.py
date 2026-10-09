@@ -49,6 +49,17 @@ class Assignment:
     energy_type: str | None = None
     action: str | None = None
     articles: list = field(default_factory=list)
+    #: ``{block: action}`` for every selection assignment this one absorbed.
+    #: The merge keys on ``[catalog_name, config]`` and NOT on ``action``,
+    #: deliberately — adding action would split one Note (2) common ventilation
+    #: system into two central MAUs — so one construction can legitimately
+    #: cover blocks whose SELECTION branches differed. `action` is then a
+    #: scalar that cannot describe all of them, and publishing it for the whole
+    #: construction claimed one branch applied to every block: a `build` Data
+    #: Processing block and a `through_the_wall` residential block on one
+    #: proposed VAV loop resolve to the same gas System 1 catalogue and config,
+    #: and whichever sorted first supplied the label for both (Sol, `160`).
+    source_actions: dict = field(default_factory=dict)
 
 
 def select_reference_systems(*, facts, building, code='necb2020', audit=None,
@@ -978,12 +989,15 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
                if a.action in ('build', 'through_the_wall')
                and a.reference_system in (1, 2, 5, 6)
                else None)
+        if not a.source_actions:
+            a.source_actions = {zone: a.action for zone in a.zones}
         existing = None
         if key is not None:
             existing = next((m for m in merged if m[0] == key), None)
         if existing is not None:
             existing[1].zones.extend([z for z in a.zones if z not in existing[1].zones])
             existing[1].articles.extend(a.articles)
+            existing[1].source_actions.update(a.source_actions)
             # PER-KEY multiplicity. A global `len(merged) < len(assignments)`
             # only says SOMETHING merged; it cannot say which key did, and a
             # family that survived as one assignment was then reported as a
@@ -1224,7 +1238,18 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
                 if str(boiler.handle()) not in existing_boilers:
                     boiler.additionalProperties().setFeature(
                         BOILER_PART_LOAD_CLASS_FEATURE, boiler_class)
-        built_inputs = {'system': assignment.reference_system, 'action': assignment.action}
+        # PER-BLOCK ACTIONS, not a scalar. `assignment.action` is the first
+        # absorbed assignment's branch and cannot speak for the others; this
+        # record targets every block it built, so a scalar label claimed one
+        # selection branch applied to all of them. Where every block agrees the
+        # map says so once.
+        source_actions = assignment.source_actions or {
+            zone: assignment.action for zone in assignment.zones}
+        distinct_actions = sorted({str(action) for action in source_actions.values()})
+        built_inputs = {'system': assignment.reference_system,
+                        'source_actions': {zone: source_actions[zone]
+                                           for zone in sorted(source_actions)},
+                        'selection_branches': distinct_actions}
         if boiler_class is not None:
             built_inputs['boiler_part_load_curve_class'] = boiler_class
         audit.decision('build', 'reference system built', target=','.join(assignment.zones),
@@ -3039,8 +3064,8 @@ def _disclose_multi_energy(group, selection, facts, audit, ruleset=None,
         'UNRESOLVED: the PROPOSED heating system puts MORE THAN ONE ENERGY '
         'TYPE on ONE BOILER PLANT that carries every energy type the group '
         'uses. What the REFERENCE plant ends up with is not established '
-        'here: it depends on the selected system variant, on whether the '
-        'plant is adopted or torn down, and on a post-sizing staging pass '
+        'here: it depends on the selected system variant and on a '
+        'post-sizing staging pass '
         'that acts on primary/secondary ROLE blind to energy type and whose '
         'effect differs by capacity band and by whether any role is '
         'recognised at all. '

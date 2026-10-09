@@ -6626,7 +6626,19 @@ while the claim stays honest.
 
 ### What is NOT claimed
 
-Nothing about the reference's final equipment. Four outcomes are reachable and
+Nothing about the reference's final equipment.
+
+**SUPERSEDED IN PART BY [D-101](#d-101), 2026-10-09: there are now THREE
+reachable outcomes, not four.** Adoption of the proposed plant is no longer
+among them. D-101 phases destruction ahead of construction and reserves every
+plant surviving that pass to whatever retained it, so a BUILT block cannot
+join a surviving proposed plant; and a `copy_proposed` block never reaches
+this disclosure, because `_finalize` returns before the election. `adopted`
+was removed from AHJ-1's outcome list accordingly. The four below were
+reachable in the 2026-10-07 implementation this decision records and are kept
+as that period's measured evidence, not as today's contract.
+
+Four outcomes were reachable and
 the entry lists them without electing one: the proposed plant adopted; a
 different plant built by the selected variant after this one is torn down; no
 plant at all where the variant needs no boiler; or a hydronic plant staged

@@ -482,9 +482,12 @@ class TestTheDisclosureSurvivesTheHeatPumpPath(unittest.TestCase):
 
 class TestTheEntryAssertsNothingAboutTheReferencePlant(_Fixture):
     """The entry must describe the PROPOSED plant and claim nothing about the
-    reference one, because four outcomes are reachable (Sol, `120`/`121`):
+    reference one. Sol's `120`/`121` found FOUR reachable outcomes; since D-101
+    there are THREE, because adoption is no longer among them — phased
+    teardown plus the ungated plant reservation mean a built block cannot join
+    a surviving proposed plant, and a `copy_proposed` block never reaches this
+    disclosure at all (Sol, `160`):
 
-    * the proposed plant is adopted;
     * it is torn down and REPLACED by a newly built plant of the selected
       variant, holding none of its devices;
     * it is torn down and not rebuilt, where the variant needs no boiler;
@@ -830,7 +833,7 @@ class TestTheOutcomesAreReachableInABuiltModel(unittest.TestCase):
         fuels = {b.fuelType() for b in reference.getBoilerHotWaters()}
         self.assertEqual(
             {"Electricity", "NaturalGas"}, fuels,
-            "the adopted reference plant carries both proposed fuels")
+            "the RETAINED reference plant carries both proposed fuels")
 
     def test_the_REPLACED_outcome_is_reachable(self):
         """Sol's `121` found this outcome by hand and "adopted or absent"

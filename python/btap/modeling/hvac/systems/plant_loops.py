@@ -381,14 +381,34 @@ def plant_is_hvac_candidate(loop):
     where a reservation MATTERS indistinguishable from the rest
     (Fable, `158` F2).
 
-    A loop is a candidate when one of the two reuse lookups could return it:
-    boiler- or district-heated, or carrying chillers or district cooling, or
-    bearing the builder's own hot-water name (the no-boiler-yet fallback). A
-    service-water loop is none of those.
+    The classification MIRRORS the lookups rather than approximating them,
+    which the first version did not: it counted `_district_heated` alone as
+    enough, while district hot-water reuse is NAME-guarded and boiler reuse
+    explicitly EXCLUDES a district-heated loop. A district-heated
+    `DISTRICT PROCESS LOOP` was therefore audited as an adoptable survivor
+    though neither source-specific lookup can return it and the reference
+    builds its own plant — the same false reservation signal this filter
+    exists to remove, on a less common source boundary (Sol, `160`).
+
+    Mirroring the four reuse paths exactly:
+
+    * boiler hot water — boiler-heated and NOT district-heated, which also
+      rejects a boiler/district HYBRID, as `find_hot_water` does;
+    * district hot water — district-heated, NOT boiler-heated, AND carrying
+      the builder's own hot-water name;
+    * the hot-water name fallback — the builder's name, with a source that
+      matches or no boilers yet;
+    * chilled water — chillers or district cooling, which `chilled_water`
+      reaches by source.
+
+    A service-water loop satisfies none of them.
     """
-    return bool(_boiler_heated(loop) or _district_heated(loop)
-                or _chillers(loop) or _district_cooled(loop)
-                or _named_hot_water_loop(loop))
+    boiler_hw = _boiler_heated(loop) and not _district_heated(loop)
+    district_hw = (_district_heated(loop) and not _boiler_heated(loop)
+                   and _named_hot_water_loop(loop))
+    name_fallback = _named_hot_water_loop(loop) and not boiler_fuels(loop)
+    cooling = bool(_chillers(loop) or _district_cooled(loop))
+    return bool(boiler_hw or district_hw or name_fallback or cooling)
 
 
 def find_chilled_water(model, exclude=(), source=None):

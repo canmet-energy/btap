@@ -1582,3 +1582,148 @@ class TestTheCOOLINGSourceGuardFalsifies(unittest.TestCase):
                                           reuse=False)
         again = plant_loops.chilled_water(model, source='water_cooled')
         self.assertEqual(str(first.handle()), str(again.handle()))
+
+
+class TestTheAHJ1ACTIONTextDoesNotOfferAdoption(unittest.TestCase):
+    """Sol's `160` blocker 1: the withdrawn outcome was still in the live
+    warning's ACTION, which is what reaches an authority.
+
+    `inputs['live_capacity_outcome']` was corrected, the code comment beside
+    it said adoption is no longer an outcome, AHJ-1's register entry said
+    `adopted` was removed, and D-101 said a retained block never reaches this
+    disclosure — while the action string one line away still said the
+    reference plant depends "on whether the plant is adopted or torn down".
+    It appeared in four frozen audits, and `determination-02` copied it into
+    every AHJ-1 condition's `detail` and into the report warnings, so the
+    AHJ-facing artifact stated the withdrawn outcome five times.
+
+    Pinning the ACTION, not just the inputs, because the action is the text a
+    reader sees first and the one surface the earlier sweep missed.
+    """
+
+    def disclosure(self):
+        from btap.audit import AuditLog
+        from btap.codes.necb.hvac import reference as ref
+
+        plant = {'name': 'Hot Water Loop', 'type': 'hot_water',
+                 'fuels': ['NaturalGas', 'Electricity'], 'boiler_count': 2,
+                 'fuel_capacities_w': {'NaturalGas': None, 'Electricity': None}}
+        facts = {'plants': [plant], 'purchased_energy': {}}
+        group = {'zones': ['Zone 1'],
+                 'heating_energy_types': ['NaturalGas', 'Electricity']}
+        selection = {'special_rules': {
+            'purchased_heating': {'article': '8.4.4.6.(1)',
+                                  'part_load_curve_class': 'modulating'},
+            'heat_pump': {'article': '8.4.4.13.(1)-(2)'}}}
+        audit = AuditLog()
+        ref._disclose_multi_energy(group, selection, facts, audit)
+        found = [e for e in audit.entries
+                 if 'AHJ-1' in str(e.get('ahj') or '')]
+        self.assertEqual(1, len(found), 'precondition: the disclosure fired')
+        return found[0]
+
+    def test_the_action_does_not_say_the_plant_may_be_adopted(self):
+        entry = self.disclosure()
+        action = str(entry['action'])
+        self.assertIn('MORE THAN ONE ENERGY', action,
+                      'precondition: this is the allocation disclosure')
+        self.assertNotIn(
+            'adopted', action.lower(),
+            'the action a reader sees first must not offer an outcome the '
+            'branch made unreachable')
+
+    def test_the_inputs_do_not_offer_it_either(self):
+        """The half that was already right, kept as a control so a future
+        edit cannot reintroduce it on the other surface.
+        """
+        inputs = self.disclosure()['inputs']
+        self.assertNotIn('adopted',
+                         str(inputs.get('live_capacity_outcome')).lower())
+        self.assertIn('DIFFERENT plant',
+                      str(inputs.get('live_capacity_outcome')),
+                      'replacement is still listed')
+
+
+class TestAMergedConstructionKeepsPERBLOCKActions(unittest.TestCase):
+    """Sol's `160` blocker 2, which is Fable's F8 reproduced.
+
+    The merge keys on `[catalogue, config]` and NOT on `action`, deliberately:
+    adding action would split one Note (2) common ventilation system into two
+    central MAUs. So one construction can legitimately cover blocks whose
+    SELECTION branches differed — an unsized Data Processing block falls back
+    to System 1 with `action='build'`, and a cooled Multi-unit residential
+    block reaches System 1 with `action='through_the_wall'` — and both resolve
+    to the same gas System 1 catalogue and config.
+
+    The construction then published `assignment.action`, a scalar that is the
+    FIRST absorbed assignment's branch, for a record targeting both blocks.
+    Swapping which block sorted first changed the published provenance while
+    the model stayed one MAU over the same two blocks.
+    """
+
+    VAV = MULTIZONE_PROPOSED
+
+    def build(self, *, data_first, code):
+        proposed = proposed_with_hvac(self.VAV)
+        zones = sorted(proposed.getThermalZones(), key=lambda z: z.nameString())
+        for extra in zones[2:]:
+            extra.remove()
+        kept = zones[:2]
+        for index, zone in enumerate(kept):
+            is_data = (index == 0) if data_first else (index == 1)
+            wanted = ('Computer/Server room' if is_data
+                      else 'Multi-unit residential')
+            for space in zone.spaces():
+                space_type = space.spaceType()
+                if space_type.is_initialized():
+                    clone = space_type.get().clone(proposed).to_SpaceType().get()
+                    clone.setName('Block type {}'.format(index))
+                    clone.setStandardsSpaceType(wanted)
+                    space.setSpaceType(clone)
+        names = [zone.nameString() for zone in kept]
+        audit = AuditLog()
+        result = hvac.reference_hvac(proposed, code=code,
+                                     building={'storeys': 1}, audit=audit)
+        built = [e for e in audit.entries
+                 if e.get('action') == 'reference system built']
+        data_block = names[0] if data_first else names[1]
+        residential = names[1] if data_first else names[0]
+        return result, built, data_block, residential
+
+    def test_one_construction_and_truthful_per_block_actions(self):
+        for code in EDITIONS:
+            for data_first in (True, False):
+                with self.subTest(code=code, data_first=data_first):
+                    result, built, data_block, residential = self.build(
+                        data_first=data_first, code=code)
+
+                    # 1. one System 1 construction in BOTH orders
+                    self.assertEqual(1, len(built),
+                                     'one merged Note (2) construction')
+                    self.assertEqual(
+                        1, len(result.model.getAirLoopHVACs()),
+                        'and one central make-up air unit, not two — adding '
+                        'action to the merge key would split it')
+
+                    inputs = built[0]['inputs']
+                    actions = inputs['source_actions']
+
+                    # 2 and 3. each block keeps its OWN selection branch
+                    self.assertEqual(
+                        'build', actions[data_block],
+                        'the Data Processing block fell back to System 1 by '
+                        'the build branch, whichever order it sorted in')
+                    self.assertEqual(
+                        'through_the_wall', actions[residential],
+                        'and the residential block reached System 1 through '
+                        'the through-the-wall branch')
+
+                    # 4. no scalar first-action is attributed to both
+                    self.assertNotIn(
+                        'action', inputs,
+                        'a scalar label on a record targeting both blocks '
+                        'claims one branch applied to both')
+                    self.assertEqual(
+                        ['build', 'through_the_wall'],
+                        inputs['selection_branches'],
+                        'the record says both branches are present')
