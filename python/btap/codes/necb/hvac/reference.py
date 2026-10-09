@@ -1003,8 +1003,21 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
         if key is None or absorbed < 2:
             continue
         blocks = sorted(assignment.zones)
+        # THE COMPLETE MERGE KEY, not half of it. The runtime identity is
+        # `[catalog_name, config]`, and serializing only the catalogue left two
+        # records that differ solely by config — Systems 2 and 5 use one
+        # catalogue name for their gas and electric variants — exposing the
+        # same system and catalogue with nothing saying why they are separate
+        # (Sol, `151`). `energy_type` rides along because it is what a reader
+        # is usually after, and `config` covers the differences that do not
+        # reduce to it, such as purchased-energy overrides and System 5's
+        # cooling-only realisation.
         scope = {'reference_system': assignment.reference_system,
                  'catalogue': assignment.catalog_name,
+                 'config': (dict(sorted(assignment.config.items()))
+                            if isinstance(assignment.config, dict)
+                            else assignment.config),
+                 'energy_type': assignment.energy_type,
                  'selection_assignments_absorbed': absorbed,
                  'thermal_blocks_spanned': len(blocks),
                  'thermal_blocks': blocks}

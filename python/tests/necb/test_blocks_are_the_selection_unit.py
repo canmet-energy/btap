@@ -1143,3 +1143,115 @@ class TestTWOMergedSystem6ConstructionsStaySEPARATE(unittest.TestCase):
                 inputs['selection_assignments_absorbed'],
                 len(inputs['thermal_blocks']),
                 'and each absorbed assignment was one thermal block')
+
+
+class TestSAMECatalOGUEDifferentCONFIGKeepsItsFuel(unittest.TestCase):
+    """Sol's `151`: the merge key stopped before plant reuse.
+
+    Systems 2 and 5 use ONE catalogue name for their gas and electric
+    variants; the variants differ in `config`. The merge pass kept the keys
+    separate, and the builder then joined both assignments to whichever boiler
+    plant was built first, because `find_hot_water` matched source, exclusion
+    and part-load class but NOT the requested fuel — and its name fallback was
+    likewise fuel-blind. The second assignment's config never reached plant
+    construction.
+
+    Renaming only the PROPOSED air loops, which `characterize()` sorts, then
+    flipped the whole reference plant:
+
+        A Gas / Z Electric   ->  one plant, NaturalGas only
+        A Electric / Z Gas   ->  one plant, Electricity only
+
+    One single-energy proposed service therefore got the wrong reference energy
+    source, chosen by a display name, with ZERO AHJ records — each service set
+    is individually single-energy, so AHJ-1 correctly does not fire and cannot
+    make the substitution conditional. That is the assignment-order dependence
+    D-101 removed on the teardown side, surviving on the construction side.
+    """
+
+    GAS = 'MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard'
+    ELECTRIC = ('MZ BU RTU Electric Heating Coil Scroll Chiller and '
+                'Electric Baseboard')
+
+    def build(self, *, gas_loop_name, electric_loop_name, code):
+        from btap import modeling
+
+        from .hvac_helpers import load_fixture, sorted_zones
+
+        model = load_fixture()
+        zones = sorted_zones(model)
+        # Museum archive sends every block to System 2, whose gas and electric
+        # variants share a catalogue name.
+        for space_type in model.getSpaceTypes():
+            if space_type.spaces():
+                space_type.setStandardsSpaceType('Museum archive')
+        gas = modeling.build_system(model, self.GAS, zones[:3])
+        electric = modeling.build_system(model, self.ELECTRIC, zones[3:])
+        for loop in gas.air_loops:
+            loop.setName(gas_loop_name)
+        for loop in electric.air_loops:
+            loop.setName(electric_loop_name)
+        audit = AuditLog()
+        result = hvac.reference_hvac(model, code=code,
+                                     building={'storeys': 5}, audit=audit)
+        return result.model, audit, [z.nameString() for z in zones]
+
+    @staticmethod
+    def boiler_plants(model):
+        """(fuel, served heating coils) per reference boiler plant."""
+        out = []
+        for plant in model.getPlantLoops():
+            fuels = sorted(
+                component.to_BoilerHotWater().get().fuelType()
+                for component in plant.supplyComponents()
+                if component.to_BoilerHotWater().is_initialized())
+            if not fuels:
+                continue
+            coils = len([c for c in plant.demandComponents()
+                         if 'Coil Heating Water' in c.nameString()])
+            out.append((fuels[0], coils))
+        return sorted(out)
+
+    def test_each_config_gets_its_own_plant_whatever_sorts_first(self):
+        for code in EDITIONS:
+            for label, gas_name, electric_name in (
+                    ('gas sorts first', 'A Gas', 'Z Electric'),
+                    ('electric sorts first', 'Z Gas', 'A Electric')):
+                with self.subTest(code=code, order=label):
+                    model, _, _ = self.build(gas_loop_name=gas_name,
+                                             electric_loop_name=electric_name,
+                                             code=code)
+                    self.assertEqual(
+                        [('Electricity', 2), ('NaturalGas', 3)],
+                        self.boiler_plants(model),
+                        'one NaturalGas plant for blocks 1-3 and one '
+                        'Electricity plant for blocks 4-5, under EITHER '
+                        'proposed loop name — a display name must not choose '
+                        "a service's reference energy source")
+
+    def test_the_record_carries_the_CONFIG_that_separates_the_keys(self):
+        """Sol's second point: the records exposed the same system and
+        catalogue with nothing saying why they were separate. The System 6
+        fixture cannot catch this — its variants have different catalogue
+        names.
+        """
+        _, audit, blocks = self.build(gas_loop_name='A Gas',
+                                      electric_loop_name='Z Electric',
+                                      code='necb2020')
+        merges = [e for e in audit.entries
+                  if 'Note (' in str(e.get('article') or '')]
+        self.assertEqual(2, len(merges))
+        by_blocks = {tuple(e['inputs']['thermal_blocks']): e['inputs']
+                     for e in merges}
+        gas = by_blocks[tuple(blocks[:3])]
+        electric = by_blocks[tuple(blocks[3:])]
+
+        self.assertEqual(gas['catalogue'], electric['catalogue'],
+                         'precondition: the catalogue name does NOT separate '
+                         'these two records')
+        self.assertEqual('gas', gas['energy_type'])
+        self.assertEqual('electric', electric['energy_type'])
+        self.assertEqual({'boiler_fuel': 'Electricity'}, electric['config'],
+                         'the config is what separates them, so the record '
+                         'must carry it')
+        self.assertIsNone(gas['config'])

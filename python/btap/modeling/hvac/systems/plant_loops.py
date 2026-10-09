@@ -31,6 +31,35 @@ def boiler_part_load_class(loop):
     return None
 
 
+def boiler_fuels(loop):
+    """The boiler fuels on a loop's supply side, in supply order.
+
+    Part of a hot-water loop's REUSE IDENTITY. Without it, two reference
+    assignments that differ only in `config` — Systems 2 and 5 use one
+    catalogue name for their gas and electric variants — both adopted whichever
+    plant was built first, so the second assignment's fuel never reached plant
+    construction. Renaming only the PROPOSED air loops, which `characterize()`
+    sorts, then flipped the whole reference plant between NaturalGas and
+    Electricity (Sol, `151`).
+    """
+    return [component.to_BoilerHotWater().get().fuelType()
+            for component in loop.supplyComponents(
+                openstudio.model.BoilerHotWater.iddObjectType())]
+
+
+def _fuels_compatible(loop, fuel, backup_fuel):
+    """Whether `loop` already realises the requested boiler fuels.
+
+    A loop with no boilers yet is compatible with anything — that is the
+    name-fallback case, where the caller is about to add its own.
+    """
+    existing = boiler_fuels(loop)
+    if not existing:
+        return True
+    wanted = {fuel, backup_fuel if backup_fuel is not None else fuel}
+    return set(existing) == wanted
+
+
 _HOT_WATER_LOOP_NAME = re.compile(r'^Hot Water Loop( \d+)?$')
 
 
@@ -40,7 +69,8 @@ def _named_hot_water_loop(loop):
     return bool(_HOT_WATER_LOOP_NAME.match(loop.nameString()))
 
 
-def find_hot_water(model, part_load_curve_class=None, exclude=()):
+def find_hot_water(model, part_load_curve_class=None, exclude=(), fuel=None,
+                   backup_fuel=None):
     """Find an existing hot-water loop (one with a boiler on the supply side), or None.
 
     :param model: openstudio.model.Model
@@ -61,7 +91,8 @@ def find_hot_water(model, part_load_curve_class=None, exclude=()):
         (pl for pl in model.getPlantLoops()
          if str(pl.handle()) not in blocked
          and _boiler_heated(pl) and not _district_heated(pl)
-         and boiler_part_load_class(pl) == part_load_curve_class),
+         and boiler_part_load_class(pl) == part_load_curve_class
+         and (fuel is None or _fuels_compatible(pl, fuel, backup_fuel))),
         None)
 
 
@@ -124,7 +155,8 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
                              and _district_heated(pl) and not _boiler_heated(pl)), None)
         else:
             existing = find_hot_water(model, part_load_curve_class,
-                                      exclude=exclude)
+                                      exclude=exclude, fuel=fuel,
+                                      backup_fuel=backup_fuel)
         # The name fallback catches a loop that has no boiler YET. It must not
         # adopt a loop heated by a DIFFERENT SOURCE than the one asked for:
         # every loop this builder makes is named 'Hot Water Loop', district
@@ -153,7 +185,12 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
                  and _named_hot_water_loop(pl)
                  and _district_heated(pl) == (source == 'district')
                  and not (source == 'district' and _boiler_heated(pl))
-                 and boiler_part_load_class(pl) == part_load_curve_class),
+                 and boiler_part_load_class(pl) == part_load_curve_class
+                 # FUEL-AWARE here too. The typed lookup above and this
+                 # fallback are two paths to the same adoption, and fixing one
+                 # of a pair has already been the shape of two defects in this
+                 # function.
+                 and _fuels_compatible(pl, fuel, backup_fuel)),
                 None)
         if existing is not None:
             return existing
