@@ -2,7 +2,7 @@
  "version": 2,
  "spec_sha256": "ca661a5cfb1a69f6b16b7f0b4d2f2e4afb4a593e3fcb1af37f4107fcf050e107",
  "provenance": {
-  "commit": "0edb0639f64637f3b58601b187d276c1dd789b63",
+  "commit": "f7e8ae8e14d530c17beb91d78d4b0e6d10bc520c",
   "dirty": false,
   "freezer_sha256": "fb8b5e7ae9dacc434ec5c1182ec30c44f600868c782f679df97b23a66d046c68",
   "defs_sha256": "f9ab23510d46ec427796342f0459340d727f370ab3ef6d9a5e6aa619969b2787",
@@ -87,9 +87,9 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "e1e676b5b232497b2a3a695cb27aad69d91d0ed52e82058c2fc3e35c843e8368",
-    "audit.txt": "ad02a513083949fd684230441dd75b70f2ff515031fc2512eb67a06f8e943f21",
-    "report.json": "729a11749dec93fc41f01a39606edc0605ae7aa38e18a4ec2a8804f26741d93c",
+    "audit.json": "d7d1c2a81053dfe9b3d480d063400d07e0604d990dacb7c0e8baf1f578b2926c",
+    "audit.txt": "ccd5fcaa854bdb7766730fa37294c97a96c4d849186904c8e64dd1267be6b03f",
+    "report.json": "b6be1bf265a6ce408a3dadad51e0d8add52896ab56a2616b9c13d3a07f720696",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "70456f63c4cd17296f999111ac6a8a085e1011d69087f38327a9cb76b6c041de"
    }
@@ -133,9 +133,9 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "ad9701da57e7e689a1e0f0072a7ba78bcb350b27c44cadb4c2bffe02a9b4e393",
-    "audit.txt": "e0d43cb88005cb7b23c3890568dc167f9586793688d7571666c6e1b16a975aeb",
-    "report.json": "90ee93b3b4322af2567b3e5eaa5856477ee909356a49664150c61a25c44df4bf",
+    "audit.json": "63658023f92c002a89cb5a90640911b5a19dee47a48a7522b36ea8d182945884",
+    "audit.txt": "e761dc091a5a0d1e4b030162e6389d58b4450fc8e919d6fec4caea6bffe02c5a",
+    "report.json": "d75ae754030c00f924949c7a11964066078e5403795468617fb50475666bfa1e",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "a6ffb1c03a084ede2c896970baeb4f5776b9ddea60dd21baa2fb0d4b3cbd1564"
    }
@@ -179,9 +179,9 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "6b7acf0db9798f57511cceab0db0feb5f0217e42bf5a1bfd786024b0faf3ebe0",
-    "audit.txt": "6ddb39f39a6d63413fcf00242b4f4acc8257bd1ebc5e74af14dce6639411f5c4",
-    "report.json": "b06aa0b8e99fb80a56dd43917a12017049508253a4ce25be060d83f8f7abf5af",
+    "audit.json": "fabaf6b0c4c0ec174099d6a50919c469439db63bfab29dd8456d9a02f105e429",
+    "audit.txt": "285cdc59cef8c9033b8fdb249417a03446a0840d977042da4ca64b2eeb9fc23f",
+    "report.json": "8df997da913d93967633770f3021722e8ae96feae614bec35f51f7354cf2c135",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "710805a663bfecaf63bcb887d6ca08b35d98e7ab1ad84f57b8e3b3323013c144"
    }
@@ -225,9 +225,9 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "723d14c9852e3c475aa0ba0547ffe024c35b5bcc1bd54d7c31d82478ec844f3a",
-    "audit.txt": "4403a0c0015a506b7725305417b08b3eb53076e6d39bc0490af2697cd9bda2e9",
-    "report.json": "90ee93b3b4322af2567b3e5eaa5856477ee909356a49664150c61a25c44df4bf",
+    "audit.json": "e2f65c8844e81288503d9d440be48b16b33eea735584fbd4ed1b738d6ac707eb",
+    "audit.txt": "f335dc2112c62b4477b221767668e1681d87d816cd13a98b576c7ee7d8e918c0",
+    "report.json": "d75ae754030c00f924949c7a11964066078e5403795468617fb50475666bfa1e",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "f548b7f59c4e1ac29692bba901cb96ad91988ce61dc9ab27c3e5bff8652f12e8"
    }
@@ -271,9 +271,9 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "eb8872f6a622e21383d52d299ba59bde2f514cb81b523b454afe50ab28a203e1",
-    "audit.txt": "487036908c7c4216b277c1eb688e50b9ce8770cbdaa067a47ef3bef7e941c14a",
-    "report.json": "aad39278c925be258a03bc63786ccc2bde892d0ffedc36240f23a9c3ca3b2781",
+    "audit.json": "13d3e468a82719ac64fe6f88f4e5c2c11fefff01d4134c434dad6a71f2a46492",
+    "audit.txt": "83cc9d76d37dadd530c1c702386812b747002e4c853df878c8ca1410079f2461",
+    "report.json": "4f073ca3fff2fcd451dd80d39e2c5f154b2147fba41768a2eaa81a7a11c556fe",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "7dbf8f2fc3d13b1fa1fb27c07257c79c5700d8bd44a61a8f75517a9f6094bed2"
    }
@@ -317,9 +317,9 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "630baa14bf16d4e6912c6c2748c4384cdd11209b693e43dd8c94e5cf902e71df",
-    "audit.txt": "b34bd170ebc6d15908cbc0fd255ff37bd8df5c374148a8562f8aeac3c4682301",
-    "report.json": "729a11749dec93fc41f01a39606edc0605ae7aa38e18a4ec2a8804f26741d93c",
+    "audit.json": "92681a35622d7cf3e6d9ea7efd92bd1a06fdd24810c2615100a5ce569b52b589",
+    "audit.txt": "b6fc52d1852a15a26d46105e1f2f58f753f54562fdb07b626c41f0756ee5b3ce",
+    "report.json": "b6be1bf265a6ce408a3dadad51e0d8add52896ab56a2616b9c13d3a07f720696",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "70456f63c4cd17296f999111ac6a8a085e1011d69087f38327a9cb76b6c041de"
    }
@@ -363,9 +363,9 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "6fcf1378b78aecc6a390c8ab49dc7109f3178025db8572cc24be320f598d3fe2",
-    "audit.txt": "a00fec262d2d758d50adc2e5d53a3145f76041f0bb5ba16d27147bf19f1608a5",
-    "report.json": "729a11749dec93fc41f01a39606edc0605ae7aa38e18a4ec2a8804f26741d93c",
+    "audit.json": "48cad15ab61655d7b4feb90588a2652bcfd5ea9cc9cd2d26af32cd463f4cb4b7",
+    "audit.txt": "65453e1720efb315053bcdcb463545e13f917528e199543f2965b89784d7caad",
+    "report.json": "b6be1bf265a6ce408a3dadad51e0d8add52896ab56a2616b9c13d3a07f720696",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "70456f63c4cd17296f999111ac6a8a085e1011d69087f38327a9cb76b6c041de"
    }
@@ -409,9 +409,9 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "4704612b92c3c84d95c44db5330fcc1075b12627cce370bcf0a00a09d6e49fb6",
-    "audit.txt": "92295319fbf4e413fb5bc11844a00dd05bde83986f39273d60b05d333f3ced4c",
-    "report.json": "f16ef1808937a4468907d5482d3c15c32dac3a534c20b607ed5de8419449aecd",
+    "audit.json": "3f0806a41c3181c647c87023a06d5c2e3f7501822cc52de5eb23fbca11602273",
+    "audit.txt": "cc96825f6943f081a3cb70decc00254189ec0bd2a4bc8fc6f8d8388660d1e7b2",
+    "report.json": "050db9e6eb0e2cf33f9811d3896f98fcd12732c0630e0d9bfb103e7840c072d0",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "ae5493f9630ad5d3e9dcf13bdadce4994e8cda2b14e7b8503f71d0380a58228e"
    }
@@ -455,9 +455,9 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "61b80411a8ddc340dd138fc14f2c670a147aa26e99fa8c0711d05dbb722a7fba",
-    "audit.txt": "1bb1b69a3075c808fb2ef553a7747c17c2abaae1e7190caff76c835574ffcc3f",
-    "report.json": "75ec0016fc45a0c39702ac1c0de267a6f1a7fcf9f04f05769bc37538cff66460",
+    "audit.json": "0b0f0ca6f7d62fef7aed5a4eb6927fa9ac15dd5cafae1ad618caecad71902a1c",
+    "audit.txt": "476820fc0b4f3de98acf54d299c3c108caa04681667663148693eb6c9f09cd91",
+    "report.json": "82e4972ed09306c06c8f6170ecc19b17256366f5132c14a016ac6b81d0648d30",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "20cb3ce7d35de330d462aaf1f2512352d134a9906dedabe5fae7f425d7f0606e"
    }
@@ -501,9 +501,9 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "8c73a3a5ab3876c22181242ca62315c36de4ec39b569361f4ccef4a1a1da6147",
-    "audit.txt": "ac2fbfdbaf04b0f80d99c7028df7000a78f00476256a4be4512907c6af099346",
-    "report.json": "a70a76b605267b969851f22a15972fc69c515d8e17a0e95ebf66ac58d2c8bf09",
+    "audit.json": "4c3bf0fcd75d30b96cdc5b9fd0e31f4b3a4385a8c02bf792bd04ed3d5701fea0",
+    "audit.txt": "72e78e007197e7a743214d84812ec6731113d6cf5033c55e740eb9af430f9fdf",
+    "report.json": "fd982a2a2900ebfff402002757e74db93582570caee6e314786a1ce2cd48a63b",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "5bf5d5f0806880646a3833bf58b18dd637f0287a4d6116ede342e9723ce51d82"
    }
@@ -547,9 +547,9 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "5b9db163803392b762f0319a9bda1ba8d7b06475459b0ee48d2236a9d580ca9b",
-    "audit.txt": "b17634eee787e3be5f28a4818336d88e26b9909f6b0f000006b20ff07669c56e",
-    "report.json": "b25e341edabf309c39ddfd0632f1a7dba0991806a41e4ce85f83036437cf856c",
+    "audit.json": "1240afe7fa285ec53ece153a8ea6f465f4865b129ed66b2a5afe65ff28d9254c",
+    "audit.txt": "9507a06388db46bd0d4f0e888eac43729d7cd74dfe04464bf4d02a3dedcbbbf2",
+    "report.json": "9ba2a81c7e154a24dec5364b98464ae8a681e944e45db4878217a289ee5f8d80",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "12c50aec4b8b378757482f0ddf48dccc8479a5b78ff0e3e9a9ec396bfacf03ab"
    }
@@ -593,9 +593,9 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "fcbde784abe15113f746d694dc09d22e34f5114b2ef7d5906d103cd2c0717e5a",
-    "audit.txt": "3cc4336a321b2d76e480d53bad64bfcbbced63cde21ca477f8b98f49c139e333",
-    "report.json": "b25e341edabf309c39ddfd0632f1a7dba0991806a41e4ce85f83036437cf856c",
+    "audit.json": "99740be642fd1ff48cc3e446ac0600e192ccbde33d3e44fa4cf6d9cd5ea7cb6a",
+    "audit.txt": "b2c4efd0cc37bba1ee51f387f56969f8a3011d26cf44461aa8fcf566c59fd5e2",
+    "report.json": "9ba2a81c7e154a24dec5364b98464ae8a681e944e45db4878217a289ee5f8d80",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "12c50aec4b8b378757482f0ddf48dccc8479a5b78ff0e3e9a9ec396bfacf03ab"
    }
@@ -639,9 +639,9 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "388af46b25195772e1c1c05817beaa9d0dbdb0e28e263fe39b4e29a7426836fe",
-    "audit.txt": "b024cdde000094b778e49d3e9c745ec549f5b2f2c601dd5c36e0fc6644df246e",
-    "report.json": "90ee93b3b4322af2567b3e5eaa5856477ee909356a49664150c61a25c44df4bf",
+    "audit.json": "164f9f1dda762615bc707c4570b15bf870e3db1a875c00048f8f54f5d2715238",
+    "audit.txt": "7e58a261e6af3f3f4bd5239e83a5081f66a8baa4f1ae54a256f091c7b395493f",
+    "report.json": "d75ae754030c00f924949c7a11964066078e5403795468617fb50475666bfa1e",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "f548b7f59c4e1ac29692bba901cb96ad91988ce61dc9ab27c3e5bff8652f12e8"
    }
@@ -685,9 +685,9 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "cf890c086bdeb977bbd6bf8d92a99a7c1b2910687c070cbe8dac9820a7c917ed",
-    "audit.txt": "154176a38bd9cc184527a00c4a55e7f765cb8191cf7952e2802a7a9f4e020147",
-    "report.json": "729a11749dec93fc41f01a39606edc0605ae7aa38e18a4ec2a8804f26741d93c",
+    "audit.json": "b2b9dc53ea2517a0747a8bb00c6214fb01e5ac63652a3c23dcad34e145b3c5d3",
+    "audit.txt": "e49943532d8ab5a92c83f6c630821b9447b5b0f2bfa83a6864b843558b2f5446",
+    "report.json": "b6be1bf265a6ce408a3dadad51e0d8add52896ab56a2616b9c13d3a07f720696",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "70456f63c4cd17296f999111ac6a8a085e1011d69087f38327a9cb76b6c041de"
    }
@@ -731,9 +731,9 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "e46293ba347b70c8b13d0dd227c0df2e0a0cf24434c54bd6e6127e263c28b608",
-    "audit.txt": "f8242b1eb68df1c5c9f850c141c037e1866a37540662d8326ffe68fdd77f25b5",
-    "report.json": "ee1b233613dfb290497b8b091c45cb2d7f78c9790188c1f18c0468dbd9b7537b",
+    "audit.json": "73bc43a7490f46ff4dfeece3f96546c3498cd8861f5daf988c104f6cc17e5dee",
+    "audit.txt": "d21cf5c504d646a3826e14e92a5190efbae7cdc7c4cb0dc9ddf9fee619599acc",
+    "report.json": "9e9d85075ee7e938b982a6a96f059299d1c6b498844603dcb0bc39044f5de744",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "62ee258ff3610818f7fee4e157bb8e8e56ca17950bf02e1fb4d88ef69cbf9439"
    }
@@ -777,9 +777,9 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "303ed8e3a927aac5a344c329120c7124fb1fa035880c993f7f5491d008cf3d74",
-    "audit.txt": "cb0b4e4b04cf5ac08c4d4b4d49c8ac6b099719ab4611820138afb55e7407c3f0",
-    "report.json": "ea08c4604d171f46f83c30c09ba1b14f71f7ab1868a0bfa9c45a8c6209f5e2a1",
+    "audit.json": "93ce2a1ef9e206275de0d2a2e2077a01f005329b9ce7db14405b9743fdb4d2e6",
+    "audit.txt": "505ffdd33249f89032c425b949de313b09e72d9dcbd85a1a2f4188728d0882b9",
+    "report.json": "a07fb7dbedb8881b735569af5bb9da1ddebbd4e10c2d7e1ce8481c3baa81c4e4",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "67affdbc4844ecf4a3184b9d647e050ec47b68c6b568f8aa6593c6eedd7227c4"
    }
@@ -818,9 +818,9 @@
    },
    "seal": "python-only:first frozen at DF-17 \u2014 authored after the Ruby product retired; no cross-language attestation exists for this scenario",
    "baseline_sha256": {
-    "audit.json": "37dd36bd149c30bbf2f8ebd76060a60ae4042f34e45653bfe28df688d66b90bf",
-    "audit.txt": "4d0a91c4e255867d5d34a767ab9b638463e4a322c12bfe8a33481c7476f735c4",
-    "report.json": "b4b2fb6f3500c86d4fa44a6f9f144cbbf8c97bd1d1775f826515c84579282f42",
+    "audit.json": "5d78e1a5325f3025b4cfbd9d86d123bf193b573fd15a2b75814654858f5a58a9",
+    "audit.txt": "486eef3402d2ce7a55168105bb533ab4f3def7550201fac787d0b0a5ddcc1f72",
+    "report.json": "c73c5c3eab5e5463905ca63314f247992ac833afb3529ede4b0201c05e042818",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "d0b879a029167c54a2577aaf97ccd842b3db12f966d1b521019b76016feb08d8"
    }
@@ -859,9 +859,9 @@
    },
    "seal": "python-only:first frozen at DF-17 \u2014 authored after the Ruby product retired; no cross-language attestation exists for this scenario",
    "baseline_sha256": {
-    "audit.json": "4d1c970e019f94e22a8de2fbc57f2bf906047822f6b5fffc8cc43c8c25612dab",
-    "audit.txt": "7dd95f9fd318c71f36bf9e981a602dc7ea54118bd123456ac0e97b88e4f4040c",
-    "report.json": "b4b2fb6f3500c86d4fa44a6f9f144cbbf8c97bd1d1775f826515c84579282f42",
+    "audit.json": "3fde75ba5a1ab8b70419864c47c0d665fe1002edaa581651662d7f2dd22161b2",
+    "audit.txt": "d588b63b090129de69f5045db43f404d4c5cbde791a9bad214a0fb2d09e335e4",
+    "report.json": "c73c5c3eab5e5463905ca63314f247992ac833afb3529ede4b0201c05e042818",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "d0b879a029167c54a2577aaf97ccd842b3db12f966d1b521019b76016feb08d8"
    }
@@ -907,9 +907,9 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "d53f2cf853f7e54b333a18252a9b4979f9fa1dd612ead502d36b8b01315b0054",
-    "audit.txt": "4b33cad83ec2dfd0bf44e7984b8b2b172e1f978193b10aa4d3a5a717eaeea6ff",
-    "report.json": "a7aab99db19000bba8e83c74002697641596f7f9a988f7166c0d231315f6caf3",
+    "audit.json": "d0ac827d804a96d2eda0689377cb6a90c3395078774633aeaeea268b911a601c",
+    "audit.txt": "4da1b2ebee81ee4b9877518700f953a8a46704a146ff4b70d04ce11128252cbc",
+    "report.json": "3854a72f04552120aee267150bec5452e2a97db6fe43c3b4bce927a20dc343fe",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "ed873f730f1c04f4414ecb078fb96630750986489687ea25864ef4154523686b"
    }
@@ -955,9 +955,9 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "775bf9ad5478fd2bc0f9f8d202fdd283778be9c9610318449c449164839de7de",
-    "audit.txt": "5b83c7049f25cc7cf94b1be6b049368e0077b67d175597437194019eb4ed88c4",
-    "report.json": "527384988a039dc10de8c28168f5ca35e30d38d9c9002f3c3827cbd8d036f734",
+    "audit.json": "6fb2f156d8c310b1eb44271b5c3e44a7c97831e0197869fb64f4ecd78073e40e",
+    "audit.txt": "936926e761f526fb6020967fc2540155ad258e011661ded28c84fa39fc487a94",
+    "report.json": "f141486f18115889be17eda7aff70f7d623e6f847f3b1ef67bca6bd7f76e4395",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "51c325df8f92bb10bc4aa032ab3f7b382530a6d98266464b2f841b8a625e2d67"
    }
@@ -1003,9 +1003,9 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "b77b876c8763cebe2516acc3107c3ad46c3aa1c50709a3694fceceef21040cd0",
-    "audit.txt": "a43789609bd23d2393bb88ccd8f2a9ff66919a48d1e4e5cbdc80280040863e4b",
-    "report.json": "527384988a039dc10de8c28168f5ca35e30d38d9c9002f3c3827cbd8d036f734",
+    "audit.json": "73e313955bb84de2eaf584d96a8aba22fe7081a09244ba9de1a84fa65fdcf7d4",
+    "audit.txt": "01787025300fa5eabc4ffd7a0c9cb2d7be2b31f7b3c4c73f4d503ea6177ff10e",
+    "report.json": "f141486f18115889be17eda7aff70f7d623e6f847f3b1ef67bca6bd7f76e4395",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "51c325df8f92bb10bc4aa032ab3f7b382530a6d98266464b2f841b8a625e2d67"
    }
@@ -1051,9 +1051,9 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "5b327028b31e8b1da66c95f07c992b2df880cd5c4d49180a2453b4b94596a58b",
-    "audit.txt": "cc4b50fec1b4819de9fb177e4f3a4a8379f481c2c3e8bb7e6ffaec3c25f4a712",
-    "report.json": "2b7789d01c5646504e4340e3e9564cdd24dee1cf9549a8cb1cbfd5d67df2b640",
+    "audit.json": "0d48d28656c7866e25a0947905401d86b8521aa039a07c39385ce6b0ff9b65f5",
+    "audit.txt": "8ef115bea48dc1ec65ff8e757e871401dbf08c6b0b54c7ce93371d0f8837b339",
+    "report.json": "4bf98d0dbd167c594078762684869ca6544fee2953a956a2ee7b5c26d103b028",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "b987ecd9a19bbcd1af8623bb46a1c820b0500e050a3afbad24c14cf0e461fa07"
    }
@@ -1114,9 +1114,9 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "66bd259c142180211e89ddb0819ef5a84efc0b5a923cfd301e3d29e85645d04c",
-    "audit.txt": "40803f279328d8a07b70d42e09469f03987a1b5c5baf49597788daf2286899e8",
-    "report.json": "65b69aedbc279e83dca21840316bbbef38c07c6ea6448a26b0fb5d422617bd14",
+    "audit.json": "251ce1d4a6b23a00659c24695cf579a560f8c87fbbf1c5f3ba44f9bf25602a08",
+    "audit.txt": "39bfb4c8ded6b3e53be8e4117fab402808076ae12c0eb70cfacce04a0f47095e",
+    "report.json": "0643270890e35a4d7dd873aff4042418866bf06595393425afb64b66a079ff54",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "915065a040275ab48a1c43c4dc29f762616a8835f47eb3d76a6801279f79a9d8"
    }
@@ -1177,9 +1177,9 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "54b622580970ff3da163fe6b56a8387aa1fbaf8e58feda52eff5824725a0add0",
-    "audit.txt": "dc023ebaaff1bc9978a29122cc10d7be92f84f74bc5af35c51bbb0e24417fcd2",
-    "report.json": "ddf46b486017d8b885b2a1a76fc3afa32acbd2aa506bc572fa0d346ecbfcc902",
+    "audit.json": "c78939c5b2c8cc5ae147825539736cadd9c1f81a586228a1b2be567425d94a5a",
+    "audit.txt": "d9fe1627a77cc32520397779190580e26604634b96fa0e6c68171c86e0b35408",
+    "report.json": "40225ba34f4da070697d97cdc319621dc0111d58758bfca396d4dc151117d374",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "516904240c0e715e1533786e05345afc82a782a515db6c20f2d89df3955ac828"
    }
@@ -1220,9 +1220,9 @@
    },
    "seal": "python-only:first frozen at D-89 step 3 (R-O-a) \u2014 authored after the Ruby product retired; no cross-language attestation exists for this scenario",
    "baseline_sha256": {
-    "audit.json": "ccd00fa25ca6faf476cd74c741c7537c6e4f5fa8ab70c999c67b723c97334c15",
-    "audit.txt": "85c29d3d119633447c3a326061f22559b04e1519bfeed682256843f2c260b7a3",
-    "report.json": "e03f88e57e3045d26aad71c6cc8c4a2d0bfc8e29b7e46a33874e047876e75833",
+    "audit.json": "b827eb331f4833f4ea3929bd88e7c194b97b592064695d56e8a1e8981dbb9e4c",
+    "audit.txt": "bf27357f5bd915e5dfd2e9178bbab133a8e4c87b28acb6203135cbe2cc5f6c8c",
+    "report.json": "3d5c32f66b42a5452d22370fadef49e137cfd90fce89a528c40657fcf3582d04",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "3089b848c7f36e51e033bfecf1d4dd21a031e43b862ab484f5b91d41f6b80bc0"
    }
@@ -1278,9 +1278,9 @@
     }
    ],
    "baseline_sha256": {
-    "audit.json": "70d162f0778f30185883d191c1833f690dfbf91666eb3f8dce0d6e32309d4998",
-    "audit.txt": "90c0fd800d50c45818f5c0444a7d780b0fecd37bb7fbf67745ed9f3ee6ae0524",
-    "report.json": "35a1db3937507edb982d9786068be42476b50669f0c393e3af9fe0d124fe1752",
+    "audit.json": "92862c019e4b3ffc30312f9f47e28092a8baf410bc58fc4599ab8f14d5debb48",
+    "audit.txt": "d047f4880268a48b92fbfba6410418e36350f4cfc6694cbfb1e27328af40d74b",
+    "report.json": "48abb21492a0e11892732d003260d475daca1dc3f939d9416ddbc85f60b22558",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "cd69006a6ede7669241d5d5e7596ce9480c3989de6c06e0a806132669a49555c"
    }
@@ -1321,9 +1321,9 @@
    },
    "seal": "python-only:first frozen at DF-17 \u2014 authored after the Ruby product retired; no cross-language attestation exists for this scenario",
    "baseline_sha256": {
-    "audit.json": "ac7d2d17a93e48eb5494a6818a110b7bb122ddc688faa7f5f27afb0a370c0d15",
-    "audit.txt": "59ccad77a346198972e9d688432482b095fdb1e2e85b8c49da65cfb576387bc5",
-    "report.json": "20e4b2279c8b4a39e2ff68a14f5cfe6f10f312e37162c931ead24040af6578fc",
+    "audit.json": "ad412a756fc6a19bcb9b19c3cc035796fa20f1304f61c1cd08400d92e616bc79",
+    "audit.txt": "f4be06bd66f8f922c27db3e18d20536e99404a6d2cf8362b34ff2ffd01a3a83d",
+    "report.json": "b1a82f37d9b09a06814537c19866a353e66c694c1052246290c328ecd644c4f3",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "7f89a939bd1a5a6292d73aebaeb6705ac847bfb6e2a4c4e07611ccf592dddf9d"
    }
@@ -1364,9 +1364,9 @@
    },
    "seal": "python-only:first frozen at DF-17 \u2014 authored after the Ruby product retired; no cross-language attestation exists for this scenario",
    "baseline_sha256": {
-    "audit.json": "3e1fbf7b1e8c24ebfb91f40cb01243c7b693226607dc3bf457fff2fa9de35903",
-    "audit.txt": "0c60f2da9f928a370e358d4ca72457e098685f657bb0bb25c6aeafc45e868bb0",
-    "report.json": "9c96fdf76cbef791d3f996a881c925bb9917403313ad896951f592acccf738a1",
+    "audit.json": "acc574de224f075f2d52a07539db45d38e97f2c1debe5cd195363b8a4ca679cc",
+    "audit.txt": "87639c62d1fd09dc7ce0f3b96346f61d7ccf00f69d22d4630a7794926c133176",
+    "report.json": "03e89dce811cbe5a4089b31053d0e89aa6bb2a4cfdc638ff35090d7bf67e0f64",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "f5b25833ed2b1b392691217618d09bc346fcd88dbc6fa469165e201e45f65ce6"
    }
@@ -1422,9 +1422,9 @@
     }
    ],
    "baseline_sha256": {
-    "audit.json": "2ebbf351e57295114a5d71da604012fabb4dc1418fe6c04306a9bfa7f5601816",
-    "audit.txt": "fcbb10c7ba617d653df63becae51994b029bac7ae5126409de9a406043f24044",
-    "report.json": "862370b815416a3774022270abeb3afcb5c5f2cd46465b8065b1ee5585757da0",
+    "audit.json": "2496bdb131f1d62b097ffccb298832dd5ca6cfe7186217045eb25ba4647219dc",
+    "audit.txt": "274a4ea2b489204e0b3a2ef480f365011f127c611121199576c64f535a4cb3e1",
+    "report.json": "254f3b89a4d041fe7b9ca1d9a7fe1e329446ca06836ca238366391df798fb826",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "16eacc0e0775f0f72fdfa55be4a07ebfbe3a5c67adfc40f93e12f61a8612d92d"
    }
@@ -1480,9 +1480,9 @@
     }
    ],
    "baseline_sha256": {
-    "audit.json": "68646f9f8c5d13fc40cc0f9d353f9f13acc0e6a5d279c5dcd5f4b71844988a4d",
-    "audit.txt": "63113990aea8aa909f9b4e5a505cf403950302c85456c4589f3b4fbe407f5939",
-    "report.json": "a6265c671a26b113605cc68b85e0027c785bce86d7aafc061c11a9efefb7a48b",
+    "audit.json": "24faae27f7eaf34d7bf7621f8dc27c24e51a10c496e7bb7a965f1635eb691cdc",
+    "audit.txt": "83b610d59d6de7ee0c143f6867cd8a0980d2b5a7244964afbf2e0329a3524c9d",
+    "report.json": "71056741d6ffd5b694c8787565786750b2049fab6ecfdcff1226617e4ed6eabc",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "aec7423e327fdb8bc66d1f6650c1d3ccfdc3de9dd5c95d31fe16aee991ba3f18"
    }
@@ -1520,9 +1520,9 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "3f43ee30fcf3b580496a7fc9f89c864a963ee10568d2f6c10870126cabf4063c",
-    "audit.txt": "08a8ae0bd620f611a42402a69b97c9a14b0503dcfc4dc6bc30dbb6ead5d58eb6",
-    "report.json": "f87f98a1fc1fee1cd095a24e55c9740b17b489d777ab003752323709c8fb3a12"
+    "audit.json": "5f90f71b77b44be19877bd5376f251fc24601a4f520de6110ed39200c869c587",
+    "audit.txt": "c3a9e30105d58a97d4b6e62c77a613eec7c664fc1fe20936e7141d580465edd7",
+    "report.json": "477110601fe3fa546cd4d0c3442f7cef00ed7a27740202eb87404dc48bd3ca64"
    }
   },
   {
@@ -2050,9 +2050,9 @@
     }
    ],
    "baseline_sha256": {
-    "audit.json": "021c75c85c76b1cc8c9ce58ba5c019bb08abae5e5ec56bad7355a46de2ef8fe2",
-    "audit.txt": "f94222f9e8bde5236f7632af6212ce4af71505b086319b579b824f1326aa5946",
-    "report.json": "d8b1cb41aab4f57cd4b11408818ec2109de46841f4ca6fe4578000002ec1dacf",
+    "audit.json": "500b9d546be680d93b0d8ac93583ca5e191a5a55d43d3225c853f06539d746b1",
+    "audit.txt": "6fc628a59e8c219d8ebe40733cf2125eaade0f7da521cc3a378eaf8f49e8a975",
+    "report.json": "15cb08565f70c0559fef6fea62df3526c507021100630992d6052ffd1e5db32f",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "8a7886678d74b7758a00e87c2ba3f528d4fec01fad5d50d49610e10cfe1011d4"
    }
@@ -2155,9 +2155,9 @@
     }
    ],
    "baseline_sha256": {
-    "audit.json": "a9d7ca6c89b75c619314dc9e12c325bd452d3f8632f8c475d5cc476673126616",
-    "audit.txt": "eb80b4f9d2f398b29593687c2b82a7f77195e4dbdf1f14810ffe0e13f5d32cf6",
-    "report.json": "48fe769c971449c457b92ef39b42461a4e52e8ffd61a2df65ff323594af24202"
+    "audit.json": "a22e48de6d6a9b8a246bbe02bdea7d4a7f028aeff7bd338236327aaf3d7974f3",
+    "audit.txt": "fe9a3da7eeabe40fb484f912fb1068d55d3d89b4e5352c17720c630e16bcc6a3",
+    "report.json": "7d754e50cb6a3e1d34ae991c026addb60ca53418812ec53efacb55f20a3385a3"
    }
   },
   {
@@ -2213,9 +2213,9 @@
     }
    ],
    "baseline_sha256": {
-    "audit.json": "562fda3aa1d61c130e1fe736a9e68ad30a51eb7f70c3ab8dd4a5f95fedd8d25d",
-    "audit.txt": "209f3ac0a0b2154ea5f85a7f0250c9512a208f2dd9cf4b505f010977cde1008e",
-    "report.json": "d75db80ce508a385b47fdec2993ee8cdaf1a5a9bc22920aceb37a53e8180ab79",
+    "audit.json": "b0261d83292e07acfa027f0c0236ee9662eb7c614161e7face8e415d8447c948",
+    "audit.txt": "e22bf068e2cc0e39c10fcd60d8cde1ec919ad0d821d7cf9ef92c93b0d41ed4b6",
+    "report.json": "a0e822f97da4a20fbdb724d82c32c1cfb85089fca943418fb17d93c3d4d8ae89",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "fff32bb35373ad25535137def1a90bab8b945ccea14e008bcd387de8fb3b5fb9"
    }
@@ -2272,9 +2272,9 @@
     }
    ],
    "baseline_sha256": {
-    "audit.json": "e9c6a82f2f53810f9dc4c0047b9d85b2c1b1823888b8788cf3408330139c9c2f",
-    "audit.txt": "45ece69279fa0de4c32a86eda7286918ed276217d96a71afc17a3b71702cc0d0",
-    "report.json": "e10de9a8e4110e11a6cc25aecbe21b5723940ebfe64d052105c5b44624f58a62",
+    "audit.json": "4d0bf1b08911a2925ea3da3e66c7de2735bc1040f83357147afde41b59c91ae9",
+    "audit.txt": "aa8acfc2fc4b18bc9489eeca2952df1891262f7adf94450b73e98d07ed58d8eb",
+    "report.json": "58c56dd20fb1320cf27f6e2bdaa344a66f4a5391ab981d240307d29cd2759feb",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "133fcd013cb5c71992f7289ddab2f9e0f61997fa8c65cda2a0dc1e2aa25a4b07"
    }
@@ -2409,9 +2409,9 @@
     }
    ],
    "baseline_sha256": {
-    "audit.json": "d318b7c14f8c1a697e6799c7abe7061a9e3c818f9f547ffdd94d808688078d4d",
-    "audit.txt": "e3f73e6140ba5e0aa0dd750a82e26ab8cd44a57c2b77b186c7582cf1f9001b78",
-    "report.json": "c711f1bc2f8b48f5108b07328ef446601fe3509e3a0802c80e85f8fbfc143d02"
+    "audit.json": "c8d5924434fcb85857af60ab1285b01bed8b7f29768a6162146ff04b317218c8",
+    "audit.txt": "ed9f8323f2b8a87a3227bd07628e099e02c47e98ea3cffe3df118c21706c3b0c",
+    "report.json": "63565cc93a65d7b0f2f61753501c2c2395e7de1360f2daccb5bc9fe8ea1cc2d3"
    }
   },
   {
