@@ -144,11 +144,28 @@ class TestReferenceRules(unittest.TestCase):
                             f"{slug} must declare its storey count")
             self.assertEqual(expected, declared.get())
 
-    def test_mixed_fuel_plant_passes_through_unchanged_the_declared_gap(self):
-        # 8.4.4.9.(5)/8.4.4.10.(4) multi-energy capacity ratios are a
-        # DECLARED gap: the reference keeps a mixed-fuel plant unchanged
-        # rather than apportioning it. Pinned so that implementing the clause
-        # has to come here and say so.
+    def test_a_mixed_fuel_plant_is_REPLACED_by_the_elected_single_fuel(self):
+        # 8.4.4.9.(5)/8.4.4.10.(4) multi-energy capacity ratios are still a
+        # DECLARED gap, but the gap is NOT what this test used to assert.
+        #
+        # It was `..._passes_through_unchanged_...` and required the
+        # reference's boilers to EQUAL the proposed's, on the reasoning that
+        # an unimplemented (5) leaves the mixed plant alone. D-101 made that
+        # false: destruction is phased ahead of construction and every plant
+        # surviving teardown is reserved to whatever retained it, so a BUILT
+        # block cannot join a proposed plant. Sample 11's blocks are all
+        # built, nothing retains its mixed plant, and the reference gets a
+        # planned single-fuel one.
+        #
+        # This test lives in the `verify` lane, which SKIPS on pull requests
+        # and runs on push to main — so it was the ninth surface of the
+        # `adopted` sweep and the one the PR could not see. Main went red on
+        # it (run 37990581458).
+        #
+        # The gap that remains is the real one: the reference elects ONE
+        # energy type and apportions no capacity by fuel, which AHJ-1
+        # discloses per serving system. Implementing (5)(a) has to come here
+        # and say so.
         with tempfile.TemporaryDirectory() as dir:
             r = compliance(self, "11-staged-boilers-gas-lead", dir)
 
@@ -156,12 +173,21 @@ class TestReferenceRules(unittest.TestCase):
                 return sorted((b.nameString(), b.fuelType())
                               for b in m.getBoilerHotWaters())
 
-            self.assertEqual(fuels(r.proposed_model), fuels(r.reference_model),
-                             "while 8.4.4.9.(5) is unimplemented the "
-                             "mixed-fuel plant should pass through as-is")
-            reference_fuels = [f for _, f in fuels(r.reference_model)]
-            self.assertIn("Electricity", reference_fuels)
-            self.assertIn("NaturalGas", reference_fuels)
+            proposed = [f for _, f in fuels(r.proposed_model)]
+            self.assertEqual(sorted(["Electricity", "NaturalGas"]),
+                             sorted(proposed),
+                             "fixture precondition: the PROPOSED plant is "
+                             "mixed-fuel")
+
+            reference = [f for _, f in fuels(r.reference_model)]
+            self.assertEqual(
+                ["NaturalGas", "NaturalGas"], sorted(reference),
+                "the reference builds its own plant in the ELECTED energy "
+                "type; it does not inherit the proposed mix")
+            self.assertNotEqual(
+                fuels(r.proposed_model), fuels(r.reference_model),
+                "and it is not a pass-through — that claim was withdrawn "
+                "with D-101")
 
     def test_purchased_heating_is_replaced_whatever_the_group_layout(self):
         # The layout that hid the bug: `Baseboard district hot water` makes
