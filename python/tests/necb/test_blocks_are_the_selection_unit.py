@@ -550,7 +550,7 @@ class TestAMixedCopyAndBuildClosure(unittest.TestCase):
         proposed, _ = self.mixed_proposed()
         _, audit = reference_of(proposed, storeys=1)
         reserved = [e for e in audit.entries
-                    if 'RESERVED to the retained blocks' in str(e.get('action'))]
+                    if 'RESERVED to whatever retained it' in str(e.get('action'))]
         self.assertEqual(1, len(reserved),
                          'the ownership decision must be visible, not implicit')
         inputs = reserved[0].get('inputs') or {}
@@ -924,3 +924,138 @@ class TestTheUnsizedWarningDoesNotDependOnORDER(unittest.TestCase):
         """
         _, hits = self.run_with(set())
         self.assertEqual([], hits)
+
+
+class TestAPlantKeptAliveByNONZONEDemand(unittest.TestCase):
+    """Sol's `147` blocker 1: the reservation was gated on `copy_proposed`.
+
+    `remove_hvac_from_zones` drops a plant only when its DEMAND SIDE empties,
+    and zone coils are not the only demand. A `WaterUseConnections` carrying
+    process or service water keeps the proposed loop alive with no copied
+    block anywhere in the model — and the reservation, which only ran when an
+    assignment was `copy_proposed`, never fired. Every newly built reference
+    baseboard then joined the proposed plant, with both marked fuels on it.
+
+    The process demand IS entitled to keep that loop. The built blocks are not
+    entitled to join it, and what retained the plant does not change that.
+    """
+
+    MARKER = 'PROPOSED MARKER'
+
+    def proposed_with_process_water(self):
+        import openstudio
+
+        proposed = proposed_with_hvac('Baseboard gas boiler')
+        boilers = sorted(proposed.getBoilerHotWaters(),
+                         key=lambda b: b.nameString())
+        self.assertGreater(len(boilers), 1, 'fixture: a multi-boiler plant')
+        loop = boilers[0].plantLoop()
+        self.assertTrue(loop.is_initialized(), 'fixture: the boilers have a loop')
+        loop = loop.get()
+        boilers[0].setFuelType('Electricity')
+        for index, boiler in enumerate(boilers):
+            boiler.setName('{} boiler {}'.format(self.MARKER, index))
+
+        definition = openstudio.model.WaterUseEquipmentDefinition(proposed)
+        definition.setName('PROCESS WATER DEF')
+        definition.setPeakFlowRate(0.001)
+        equipment = openstudio.model.WaterUseEquipment(definition)
+        equipment.setName('PROCESS WATER LOAD')
+        connections = openstudio.model.WaterUseConnections(proposed)
+        connections.setName('PROCESS WATER CONNECTIONS')
+        connections.addWaterUseEquipment(equipment)
+        loop.addDemandBranchForComponent(connections)
+        return proposed
+
+    def test_no_built_block_joins_a_plant_kept_alive_by_process_water(self):
+        proposed = self.proposed_with_process_water()
+        reference, audit = reference_of(proposed, storeys=2)
+
+        self.assertEqual(
+            [], [e for e in audit.entries
+                 if 'retained in reference' in str(e.get('action'))],
+            'fixture precondition: NO copy_proposed assignment — every block '
+            'is rebuilt, which is what made the old gate miss this')
+
+        marked, unmarked = [], []
+        for plant in reference.getPlantLoops():
+            bucket = marked if any(self.MARKER in c.nameString()
+                                   for c in plant.supplyComponents()) else unmarked
+            bucket.append(plant)
+        self.assertEqual(1, len(marked),
+                         'the proposed plant survives, as the process demand '
+                         'entitles it to')
+
+        demand = sorted(c.nameString() for c in marked[0].demandComponents()
+                        if 'Baseboard' in c.nameString()
+                        or 'PROCESS WATER CONNECTIONS' in c.nameString())
+        self.assertEqual(
+            ['PROCESS WATER CONNECTIONS'], demand,
+            'and ONLY the demand that retained it — five reference baseboards '
+            'here was the defect')
+
+        built = [p for p in unmarked
+                 if any('Boiler' in c.nameString() for c in p.supplyComponents())]
+        self.assertEqual(1, len(built),
+                         'the five built blocks need a reference plant')
+        self.assertEqual(
+            5, len([c for c in built[0].demandComponents()
+                    if 'Baseboard' in c.nameString()]),
+            'all five of them on it')
+
+    def test_the_reservation_is_audited_without_any_copied_block(self):
+        proposed = self.proposed_with_process_water()
+        _, audit = reference_of(proposed, storeys=2)
+        reserved = [e for e in audit.entries
+                    if 'RESERVED to whatever retained it' in str(e.get('action'))]
+        self.assertEqual(1, len(reserved),
+                         'the ownership decision must be visible here too')
+        inputs = reserved[0].get('inputs') or {}
+        self.assertEqual(0, inputs.get('copied_blocks'),
+                         'no copied block, and the reservation still applies')
+        self.assertEqual(5, inputs.get('replaced_blocks'))
+
+
+class TestAHETEROGENEOUSMergeAuditsOnlyWhatMerged(unittest.TestCase):
+    """Sol's `147` blocker 2: one global `len(merged) < len(assignments)` gate.
+
+    It says only that SOMETHING merged. `collapsed` was then filled from every
+    keyed survivor, so a family that survived as ONE assignment was reported as
+    a merge — a Note (2) record claiming a common ventilation system for a
+    single thermal block. The homogeneous Note (2) and Note (3) tests pass
+    because every family in those fixtures really does merge; they cannot see
+    this composition boundary.
+    """
+
+    MZ = MULTIZONE_PROPOSED
+
+    def test_a_singleton_System_2_beside_merging_System_6_is_not_audited(self):
+        proposed = proposed_with_hvac(self.MZ)
+        zones = sorted(proposed.getThermalZones(), key=lambda z: z.nameString())
+        for index, zone in enumerate(zones):
+            wanted = 'Museum archive' if index == 0 else 'Office - enclosed'
+            for space in zone.spaces():
+                space_type = space.spaceType()
+                if space_type.is_initialized():
+                    clone = space_type.get().clone(proposed).to_SpaceType().get()
+                    clone.setName('Block type {}'.format(index))
+                    clone.setStandardsSpaceType(wanted)
+                    space.setSpaceType(clone)
+        _, audit = reference_of(proposed, storeys=5)
+
+        systems = selected_systems(audit)
+        self.assertEqual(
+            {'System 2': 1, 'System 6': 4},
+            {name: systems.count(name) for name in sorted(set(systems))},
+            'fixture precondition: ONE System 2 block beside four that merge')
+
+        merges = [e for e in audit.entries
+                  if 'Note (' in str(e.get('article') or '')]
+        self.assertEqual(
+            1, len(merges),
+            'only System 6 merged, so only System 6 is audited; got {}'.format(
+                [(e['inputs'].get('reference_system'), e['article'])
+                 for e in merges]))
+        self.assertEqual(6, merges[0]['inputs']['reference_system'])
+        self.assertIn('Note (3)', merges[0]['article'])
+        self.assertEqual(4, merges[0]['inputs']['thermal_blocks_spanned'])

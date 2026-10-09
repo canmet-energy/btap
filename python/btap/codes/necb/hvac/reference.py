@@ -965,8 +965,15 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
         if existing is not None:
             existing[1].zones.extend([z for z in a.zones if z not in existing[1].zones])
             existing[1].articles.extend(a.articles)
+            # PER-KEY multiplicity. A global `len(merged) < len(assignments)`
+            # only says SOMETHING merged; it cannot say which key did, and a
+            # family that survived as one assignment was then reported as a
+            # merge. One Museum-archive System 2 beside four merging Office
+            # System 6 blocks produced a Note (2) record claiming a common
+            # ventilation system for ONE block (Sol, `147`).
+            existing[2] += 1
         else:
-            merged.append([key, a])
+            merged.append([key, a, 1])
     # TWO NOTES, NOT ONE. Note (3) is marked on System 6 ALONE and is what
     # authorizes one multizone system to span groups of thermal blocks. Systems
     # 1, 2 and 5 reach a COMMON VENTILATION SYSTEM through Note (2); they do not
@@ -976,8 +983,11 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
     # whether the selected units remain separate at CONSTRUCTION.
     if len(merged) < len(assignments):
         collapsed = {}
-        for key, assignment in merged:
-            if key is None:
+        for key, assignment, absorbed in merged:
+            # Only a key that ABSORBED another assignment merged. A singleton
+            # survivor is not a merge, whatever happened elsewhere in the
+            # building.
+            if key is None or absorbed < 2:
                 continue
             collapsed.setdefault(assignment.reference_system, []).append(assignment)
         subsection = _subsection(ruleset)
@@ -1071,23 +1081,43 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
     # gives us, and no conformance check exists that would let a built block
     # adopt proposed plant equipment.
     retained_plants = []
-    if any(a.action == 'copy_proposed' for a in assignments) and replaced_zone_names:
+    if replaced_zone_names:
+        # EVERY SURVIVOR, whatever kept it alive. Nothing of the reference has
+        # been built yet, so any plant still present after the teardown pass is
+        # a PROPOSED plant that something retained — and what retained it does
+        # not change whether a replaced block may join it.
+        #
+        # Gating this on `copy_proposed` missed the other retainers.
+        # `remove_hvac_from_zones` drops a plant only when its DEMAND SIDE
+        # empties, and zone coils are not the only demand: a
+        # `WaterUseConnections` carrying process or service water keeps the loop
+        # alive with no copied block anywhere. Measured on five office blocks
+        # all selected as build System 3, with 0.001 m3/s of process water on
+        # the proposed loop: the marked plant kept the process demand AND all
+        # five newly built reference baseboards, with no reservation audit at
+        # all (Sol, `147`).
+        #
+        # Reference systems built later still share one another's plants,
+        # because this list is captured BEFORE construction and holds only
+        # pre-existing loops.
         surviving = list(reference.getPlantLoops())
         retained_plants = [str(plant.handle()) for plant in surviving]
         if retained_plants:
             audit.decision(
                 'build',
-                'proposed plant equipment RESERVED to the retained blocks: a '
+                'proposed plant equipment RESERVED to whatever retained it: a '
                 'reference system built for a replaced block may not connect '
-                'to a plant that survived teardown because a copied block '
-                'still draws on it',
+                'to a plant that survived teardown, whether a copied block, '
+                'process or service water, or another non-zone demand is '
+                'keeping it alive',
                 target=','.join(sorted(p.nameString() for p in surviving)),
                 inputs={'retained_plants': len(retained_plants),
                         'copied_blocks': sum(len(a.zones) for a in assignments
                                              if a.action == 'copy_proposed'),
                         'replaced_blocks': len(replaced_zone_names)},
                 value='a built block connects to a planned reference plant; '
-                      'only a copy_proposed block retains proposed equipment',
+                      'proposed equipment stays with the demand that retained '
+                      'it',
                 ruling='D-101')
 
     for assignment in assignments:
