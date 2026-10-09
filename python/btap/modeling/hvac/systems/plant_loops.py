@@ -48,7 +48,21 @@ def boiler_fuels(loop):
 
 
 def _fuels_compatible(loop, fuel, backup_fuel):
-    """Whether `loop` already realises the requested boiler fuels.
+    """Whether `loop` can serve a caller asking for these boiler fuels.
+
+    SUBSET, not equality. The requested fuels must already be ON the loop; the
+    loop may carry more. Equality was wrong in a way the frozen corpus caught:
+    sample 11 is built by making a mixed gas-lead/electric-backup plant and
+    THEN building `Baseboard gas boiler`, which asks for NaturalGas and must
+    join that mixed plant — being a mixed-fuel plant the reference keeps is the
+    entire point of the sample. Under equality the gas request refused
+    `{NaturalGas, Electricity}` and built a second plant, so sample 11 stopped
+    being multi-energy and AHJ-1/AHJ-3 stopped firing on it.
+
+    Subset still refuses what Sol's `151` requires it to refuse: an Electricity
+    caller cannot join a NaturalGas-only plant, and a NaturalGas caller cannot
+    join an Electricity-only one, so two single-energy services keep their own
+    reference plants in either assignment order.
 
     A loop with no boilers yet is compatible with anything — that is the
     name-fallback case, where the caller is about to add its own.
@@ -57,7 +71,7 @@ def _fuels_compatible(loop, fuel, backup_fuel):
     if not existing:
         return True
     wanted = {fuel, backup_fuel if backup_fuel is not None else fuel}
-    return set(existing) == wanted
+    return wanted <= set(existing)
 
 
 _HOT_WATER_LOOP_NAME = re.compile(r'^Hot Water Loop( \d+)?$')
