@@ -854,13 +854,28 @@ class TestTheSINGLEEnergyELECTIONIsNotAlwaysIdentical(_Fixture):
 
 @needs_sdk
 class TestAnOILProposedBuildingsFinalREFERENCEFuel(unittest.TestCase):
-    """The selection elects `gas` for oil. The FINAL reference fuel is
-    configuration-dependent, and Sol's `125`.1 established both outcomes.
+    """The selection elects `gas` for oil, and so does the FINAL reference
+    plant — now that replacement is phase-ordered.
+
+    Sol's `125`.1 established BOTH outcomes, adopted and replaced, and this
+    class pinned both. His `141` withdraws the adopted one for an
+    `action == "build"` assignment: it existed only because teardown ran
+    per assignment, so a plant shared by several blocks stayed non-empty long
+    enough for the next block's builder to find and reuse it. "Do not preserve
+    the newly observed adoption. It is caused by mutation order, not by a Code
+    requirement" — and "`copy_proposed` is an explicit retention branch; a
+    surviving plant discovered during mutation is not."
+
+    Measured both ways after the fix: the zonal-baseboard fixture and the PSZ
+    fixture now each give two NaturalGas boilers and zero proposed markers.
+    Explicit retention still exists — that is `copy_proposed`, which the
+    teardown closure excludes by construction.
 
     Reproduced here so the claim is a measurement rather than an inference
     from the selector. This is the twelfth overclaim on this branch: my fix
     for the eleventh wrote "a proposed oil system becomes a GAS reference",
-    which is the selector's answer presented as the reference's.
+    which is the selector's answer presented as the reference's — and it has
+    become true of the final plant for a different reason than I wrote it.
     """
 
     MARKER = "PROPOSED MARKER"
@@ -884,12 +899,53 @@ class TestAnOILProposedBuildingsFinalREFERENCEFuel(unittest.TestCase):
         return ({b.fuelType() for b in built},
                 sum(1 for b in built if self.MARKER in b.nameString()))
 
-    def test_an_ADOPTED_oil_plant_keeps_FuelOilNo2(self):
-        """So the reference does NOT burn gas here, and a blanket claim that
-        oil becomes a gas reference is false."""
+    def test_a_ZONAL_proposed_plant_is_REPLACED_not_adopted(self):
+        """The outcome `125`.1 recorded as adoption, re-measured under
+        phase-ordered replacement (`141`).
+
+        A zonal baseboard proposed plant used to survive into the reference
+        because its five single-zone assignments tore down one at a time and
+        the loop never emptied. It is replaced now, like every other
+        `action == "build"` plant, and the result no longer depends on which
+        block is processed first."""
         fuels, kept = self._oil_reference("Baseboard gas boiler")
-        self.assertEqual(2, kept, "the plant is adopted, so markers survive")
-        self.assertEqual({"FuelOilNo2"}, fuels)
+        self.assertEqual(0, kept,
+                         "a build-action plant is replaced; adoption via "
+                         "sequential teardown is the artifact `141` removed")
+        self.assertEqual({"NaturalGas"}, fuels)
+
+    def test_the_outcome_does_not_depend_on_BLOCK_ORDER(self):
+        """Sol's gate 2: "Reversing a list of block assignments cannot be
+        allowed to change the reference plant's fuel, equipment, or
+        provenance." Block assignments follow the group's zone order, so
+        reversing the proposed zones reverses them."""
+        from btap.audit import AuditLog
+        from btap.codes.necb import hvac
+
+        from .support import proposed_with_hvac
+
+        seen = []
+        for reverse in (False, True):
+            proposed = proposed_with_hvac("Baseboard gas boiler")
+            for index, boiler in enumerate(proposed.getBoilerHotWaters()):
+                boiler.setFuelType("FuelOilNo2")
+                boiler.setName("{} {}".format(self.MARKER, index))
+            if reverse:
+                # Rename the zones so sorted order inverts, which inverts the
+                # order blocks are selected and built in.
+                zones = list(proposed.getThermalZones())
+                for index, zone in enumerate(zones):
+                    zone.setName("ZZ Reordered {}".format(len(zones) - index))
+            reference = hvac.reference_hvac(
+                proposed, code="necb2020", building={"storeys": 1},
+                audit=AuditLog()).model
+            built = list(reference.getBoilerHotWaters())
+            seen.append((sorted({b.fuelType() for b in built}),
+                         sum(1 for b in built if self.MARKER in b.nameString()),
+                         len(built)))
+        self.assertEqual(seen[0], seen[1],
+                         "the reference plant's fuel, provenance and count "
+                         "must not depend on block order: {}".format(seen))
 
     def test_a_REPLACED_plant_carries_NaturalGas_from_the_same_election(self):
         """The opposite outcome from the same `gas` election, which is why the

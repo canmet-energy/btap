@@ -85,18 +85,91 @@ def _select_reference_systems(*, facts, building, ruleset, audit=None,
     # caller's dict and documented as pure input — two calls on one dict used
     # to yield one disclosure (Fable, `117`).
     disclosed: set = set()
+    #: Article 13.(2)(g) elections already made in THIS selector call,
+    #: keyed by `_election_scope`. Call-scoped for the same reason
+    #: `disclosed` is: `facts` is the caller's dict and documented as
+    #: pure input, so two calls on one dict must not share state.
+    elected: dict = {}
     for group in facts['zone_groups']:
         if not (group['heated'] or group['cooled']):
             continue  # unconditioned: no reference system
 
-        category = _category_for(group, building, selection, audit)
-        assignment = _assign(group, category, building, selection, audit)
-        result = _finalize(assignment, group, definitions, selection, facts, audit,
-                           hp_rules=hp_rules, proposed_annual=proposed_annual,
-                           ruleset=ruleset, disclosed=disclosed)
-        if result is not None:
-            assignments.append(result)
+        # ONE ASSIGNMENT PER THERMAL BLOCK, not per serving system.
+        #
+        # This iterated the GROUP — zones sharing one PROPOSED air loop — and
+        # treated it as the unit Sentence 8.4.x.7.(1) assigns a system to. It
+        # is not: it is a serving set. The consequence was a reference
+        # "single-zone" System 3 built as ONE air loop over five thermal
+        # blocks, its supply temperature following one elected control zone
+        # while the other four drifted — 932 unmet heating hours in sample
+        # 18's reference, which fails 8.4.1.2.(3) and made the run report NOT
+        # COMPLIANT for the reference's failure rather than the proposed
+        # building's performance.
+        #
+        # Sol's `139` ruled it, against the Code and the NRC User's Guide
+        # rather than the legacy gem: Division A defines a single-zone
+        # secondary system as one serving only ONE thermal block; 8.4.x.1.(4)(c)
+        # keeps the proposed building's thermal blocks in the reference; and the
+        # Guide's Figures 8-3, 8-4 and 8-7 each say "each thermal block is
+        # considered separate from all other thermal blocks". Its Example 8-4
+        # is decisive: to serve two proposed zones with one System 4 unit the
+        # modeller must MERGE the zones, not attach two retained zones to one
+        # "single-zone" unit.
+        #
+        # The architecture already separated these concerns and only this
+        # iteration conflated them — the merge step below re-groups the
+        # MULTIZONE families (2/5/6) by catalogue identity and deliberately
+        # leaves "single-zone families (1/3/4/hp) ... their selection
+        # grouping". So selecting per block gives 3/4/1/hp one unit each while
+        # 2/5/6 recombine exactly as before, Note (3)'s facade split included.
+        #
+        # The serving GROUP stays the source of truth for service-set facts —
+        # fuels, plant correspondence, DCV, dispatch, Article 9/10 allocation —
+        # which is Sol's first disposition item: keep `zone_groups`, stop using
+        # it as the block partition.
+        # The Article 13 election's scope, computed from the ORIGINAL group
+        # BEFORE it is split: `_election_scope` reads `group['zones']`, and a
+        # block view has one. (g)(ii) also reaches sibling groups sharing a
+        # source water loop, which only the unsplit group can see.
+        scope_loops, scope_zones, scope_sentence = _election_scope(group, facts)
+        election_key = (tuple(sorted(scope_loops)), tuple(sorted(scope_zones)),
+                        scope_sentence)
+        for block in _blocks_of(group, election_key):
+            category = _category_for(block, building, selection, audit)
+            assignment = _assign(block, category, building, selection, audit)
+            result = _finalize(assignment, block, definitions, selection, facts,
+                               audit, hp_rules=hp_rules,
+                               proposed_annual=proposed_annual,
+                               ruleset=ruleset, disclosed=disclosed,
+                               elected=elected)
+            if result is not None:
+                assignments.append(result)
     return assignments
+
+
+def _blocks_of(group, election_key=None):
+    """One view per retained thermal block in ``group``.
+
+    Each view narrows ``zones`` to a single block and inherits every other
+    key, so the block carries its serving system's facts without the group
+    pretending to be one block.
+
+    ``design_cooling_kw`` is inherited UNCHANGED, deliberately. It is a
+    group-level quantity and the one rule that reads it — Table 8.4.x.7.-A's
+    "Where the proposed building or space has a cooling capacity exceeding
+    20 kW" for a Data Processing Area — turns on whether "building or space"
+    means the serving system or the block. That is a separate Code reading,
+    not something to decide by inheritance: this change alters WHICH blocks get
+    their own unit, not WHAT a capacity threshold measures. Splitting it would
+    silently move a Code threshold's basis.
+    """
+    serving = tuple(group['zones'])
+    extra = {'_serving_zones': serving, '_election_key': election_key}
+    if len(serving) == 1:
+        return [dict(group, **extra)]
+    return [dict(group, zones=[zone], **extra) for zone in serving]
+
+
 
 
 # ---- category election: majority space-type keyword match over the group's zones ----
@@ -394,7 +467,7 @@ def _audit_corner_block_grouping(result, assignment, prefix, audit):
 
 def _finalize(assignment, group, definitions, selection, facts, audit,
               hp_rules=None, proposed_annual=None, ruleset=None,
-              disclosed=None):
+              disclosed=None, elected=None):
     if assignment.action == 'copy_proposed':
         return assignment
 
@@ -420,8 +493,21 @@ def _finalize(assignment, group, definitions, selection, facts, audit,
     assignment.energy_type = None
     boiler_part_load_curve_class = None
     if assignment.reference_system == 'hp':
-        assignment.energy_type = heat_pump_aux_energy_type(
-            group, facts, hp_rules, proposed_annual, audit, article_base=hp_article)
+        # ONE ELECTION PER HEAT PUMP OR SOURCE-LOOP SET, reused on every block
+        # it serves. (2)(g) states its own comparison scope and it is not the
+        # thermal block: see `_election_scope`. Without this, five blocks served
+        # by one ASHP ran five identical annual comparisons and audited five
+        # times, which is not five questions — it is one question, obscured
+        # (Sol, `141`; D-52's existing contract).
+        scope = group.get('_election_key')
+        if elected is not None and scope is not None and scope in elected:
+            assignment.energy_type = elected[scope]
+        else:
+            assignment.energy_type = heat_pump_aux_energy_type(
+                group, facts, hp_rules, proposed_annual, audit,
+                article_base=hp_article)
+            if elected is not None and scope is not None:
+                elected[scope] = assignment.energy_type
     if assignment.energy_type is None:
         assignment.energy_type, boiler_part_load_curve_class = \
             _reference_energy_type(group, selection, facts, audit)
@@ -749,8 +835,20 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
     # (1/3/4/hp) keep their selection grouping.
     merged = []
     for a in assignments:
+        # SYSTEM 1 MERGES TOO. Only Systems 3 and 4 are labelled
+        # "Single-zone" in Table 8.4.x.7.-B, which is the wording Sol's `139`
+        # turns on; System 1 is a "Unitary air conditioner with baseboard
+        # heating" whose Note (2) central make-up air unit serves the blocks
+        # together. Selecting per block and merging 1 alongside 2/5/6 keeps
+        # that one central unit while 3, 4 and the heat-pump redirects get one
+        # unit per block.
+        #
+        # Splitting System 1 was the one thing my per-block change got wrong:
+        # `test_hvac_necb_through_the_wall_build` asserts "System 1 = one
+        # central MAU for ventilation air" and saw five.
         key = ([a.catalog_name, a.config]
-               if a.action == 'build' and a.reference_system in (2, 5, 6) else None)
+               if a.action == 'build' and a.reference_system in (1, 2, 5, 6)
+               else None)
         existing = None
         if key is not None:
             existing = next((m for m in merged if m[0] == key), None)
@@ -769,6 +867,41 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
     assignments = [m[1] for m in merged]
 
     purchased_cooling_chillers = []
+    # DESTRUCTION IS PHASED AHEAD OF CONSTRUCTION, for the whole affected
+    # closure at once.
+    #
+    # `replace_system` is `build_system(..., remove_existing=True)`, so a
+    # per-assignment call tore down and built in one step. That was harmless
+    # while one assignment covered a whole serving system, and wrong once
+    # selection became per thermal block: five block assignments tore down five
+    # times, and a plant SHARED by those blocks survived whichever teardown ran
+    # first and was then re-adopted by name. Sample 13's own fixture
+    # description had warned of exactly that — "with several single-zone groups
+    # the district loop survives the per-group teardown and is adopted by name,
+    # so the article is only half-applied" — and the multi-energy witnesses
+    # caught it: a plant the Code REPLACES kept its proposed markers.
+    #
+    # Sol's `141`: "Destructive replacement must be planned for the whole
+    # affected HVAC closure and completed before replacement construction
+    # begins." Phasing it also makes the outcome assignment-order invariant,
+    # which a per-assignment teardown can never be.
+    replaced_zone_names = [name for assignment in assignments
+                           if assignment.action != 'copy_proposed'
+                           for name in assignment.zones]
+    if replaced_zone_names:
+        modeling.remove_hvac_from_zones(
+            reference, [zones_by_name[name] for name in replaced_zone_names])
+        audit.info('build',
+                   'proposed HVAC torn down for every thermal block the '
+                   'reference replaces, in ONE pass before any reference '
+                   'system is built — a plant shared by several blocks must '
+                   'not survive one block\'s teardown and be re-adopted',
+                   target=','.join(replaced_zone_names),
+                   inputs={'blocks': len(replaced_zone_names),
+                           'assignments': sum(1 for a in assignments
+                                              if a.action != 'copy_proposed')},
+                   ruling='D-101')
+
     for assignment in assignments:
         if assignment.action == 'copy_proposed':
             audit.info('build', 'proposed system retained in reference (residential rule)',
@@ -781,8 +914,11 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
                              for chiller in reference.getChillerElectricEIRs()}
         existing_boilers = {str(boiler.handle())
                             for boiler in reference.getBoilerHotWaters()}
-        result = modeling.replace_system(reference, assignment.catalog_name, zones,
-                                         config=assignment.config)
+        # NOT `replace_system`: the teardown already ran above for the whole
+        # closure. Removing again here would destroy a plant another block's
+        # system has already been built onto.
+        result = modeling.build_system(reference, assignment.catalog_name, zones,
+                                       config=assignment.config)
         _audit_corner_block_grouping(result, assignment,
                                      _subsection(ruleset), audit)
         purchased_cooling_cop = (assignment.config or {}).get(
@@ -2500,8 +2636,26 @@ def _disclose_multi_energy(group, selection, facts, audit, ruleset=None,
     plant = _heating_plant(group, facts)
     covers = _plant_covers_group(plant, group, facts)
     plant_name = (plant or {}).get('name')
+    # ONE DISCLOSURE PER CODE DECISION SCOPE, listing every affected block.
+    #
+    # The scope is the proposed HEATING SERVICE/ALLOCATION choice, not the
+    # thermal block: 8.4.x.9.(5) transfers one capacity allocation and one
+    # operating priority from one proposed heating system. One multi-energy
+    # plant and one control sequence serving five blocks is ONE unresolved
+    # choice affecting five block-level reference systems — "repeating the
+    # same warning five times does not disclose five questions; it obscures
+    # one question" (Sol, `141`).
+    #
+    # Where a plant COVERS the service set, the plant is that scope and the key
+    # was already right — which is why a shared plant stayed at one disclosure
+    # through the block refactor. Where no plant covers it, the scope is the
+    # SERVICE SET, so the key must name the original serving zones rather than
+    # the narrowed block. Sol is explicit that `plant:<name>` is not a
+    # universal service identity: 8.4.x.9.(6)(a) distinguishes a plant from the
+    # systems it serves, so both keys are kept.
+    service_set = tuple(group.get('_serving_zones') or group['zones'])
     key = (f'plant:{plant_name}' if covers
-           else 'group:' + ','.join(sorted(group['zones'])))
+           else 'service:' + ','.join(sorted(service_set)))
     # `disclosed` is the caller's call-scoped set; the `facts` fallback keeps
     # a direct unit-test call working without leaking into a pipeline run.
     seen = facts.setdefault('_multi_energy_warned', set()) \
@@ -2510,7 +2664,9 @@ def _disclose_multi_energy(group, selection, facts, audit, ruleset=None,
         return
     seen.add(key)
 
-    target = plant_name if covers else ','.join(group['zones'])
+    # Every affected block is listed, so a reader sees the one question's full
+    # reach rather than one block of it.
+    target = plant_name if covers else ','.join(service_set)
     inputs = {'proposed_energy_types': sorted(distinct),
               'serving_system': target,
               'reconciled': False}
