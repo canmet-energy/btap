@@ -208,13 +208,8 @@ def _blocks_of(group, election_key=None):
     extra = {'_serving_zones': serving, '_election_key': election_key,
              '_origin_group': group}
     if len(serving) == 1:
-        return [dict(group, _first_block=True, **extra)]
-    # `_first_block` marks the ONE view that may speak for the serving system.
-    # A fact about the group — "this model is not sized", say — is not five
-    # findings because the group has five blocks, and the unsized-threshold
-    # warning was emitted once per block with the same air-loop target.
-    return [dict(group, zones=[zone], _first_block=(index == 0), **extra)
-            for index, zone in enumerate(serving)]
+        return [dict(group, **extra)]
+    return [dict(group, zones=[zone], **extra) for zone in serving]
 
 
 
@@ -290,6 +285,20 @@ def _audit_museum_row(group, building, category, audit):
 # ---- rule application per category ----
 
 def _assign(group, category, building, selection, audit, unsized=None):
+    # Every `Assignment` COPIES `group['zones']`. It used to share the list
+    # object, and `_blocks_of` copies the group dict shallowly — so for a
+    # single-zone group an assignment's `zones` WAS
+    # `facts['zone_groups'][i]['zones']`, and the merge's
+    # `existing[1].zones.extend(...)` mutated the characterised facts:
+    #
+    #   before merge  [['Zone 1'], ['Zone 2'], ...]
+    #   after  merge  [['Zone 1','Zone 2','Zone 3','Zone 4','Zone 5'], ['Zone 2'], ...]
+    #
+    # Nothing visible changed today — the one post-merge reader of group zones
+    # is a superset either way — but D-101 made single-zone views the normal
+    # shape and added System 1 to the merged set, so this was one reader away
+    # from a real defect (Fable, `158` F4).
+
     cat = next(c for c in selection['categories'] if c['category'] == category)
     articles = [selection['article']]
     storeys = int(building.get('storeys') or 0)
@@ -364,13 +373,13 @@ def _assign(group, category, building, selection, audit, unsized=None):
 
         if rule.get('article'):
             articles.append(rule['article'])
-        return Assignment(zones=group['zones'], category=category,
+        return Assignment(zones=list(group['zones']), category=category,
                           reference_system=rule['reference_system'],
                           action='build', articles=[a for a in articles if a is not None])
 
     # no rule matched (e.g. storey band gap) — fall back to the last, most general rule
     fallback = [r for r in cat['rules'] if not r.get('special')][-1]
-    return Assignment(zones=group['zones'], category=category,
+    return Assignment(zones=list(group['zones']), category=category,
                       reference_system=fallback['reference_system'],
                       action='build', articles=[a for a in articles if a is not None])
 
@@ -422,12 +431,12 @@ def _residential_assignment(group, category, selection, articles, audit):
         audit.decision('selection',
                        'residential with heat pump -> ASHP reference redirect (A1/D-34: follow legacy)',
                        target=','.join(group['zones']), article='8.4.4.7.(4)', ruling='D-34')
-        return Assignment(zones=group['zones'], category=category, reference_system=1,
+        return Assignment(zones=list(group['zones']), category=category, reference_system=1,
                           action='build', articles=articles + ['8.4.4.7.(4)'])
     if group['heated'] and not group['cooled']:
         audit.decision('selection', 'residential heated-only -> System 1',
                        target=','.join(group['zones']), article=res['article'])
-        return Assignment(zones=group['zones'], category=category, reference_system=1,
+        return Assignment(zones=list(group['zones']), category=category, reference_system=1,
                           action='build', articles=articles)
     if group['cooled'] and _residential_compatible_cooling(group):
         audit.decision('selection', 'residential with compatible cooling -> reference identical to proposed',
@@ -436,7 +445,7 @@ def _residential_assignment(group, category, selection, articles, audit):
                                'loop_dx_cooling': group.get('loop_dx_cooling'),
                                'family': group.get('family') or group.get('family_guess')},
                        article=res['article'], ruling='D-58')
-        return Assignment(zones=group['zones'], category=category, reference_system=None,
+        return Assignment(zones=list(group['zones']), category=category, reference_system=None,
                           action='copy_proposed', articles=articles)
     audit.decision('selection', 'residential otherwise -> through-the-wall systems',
                    target=','.join(group['zones']),
@@ -444,7 +453,7 @@ def _residential_assignment(group, category, selection, articles, audit):
                            'loop_dx_cooling': group.get('loop_dx_cooling'),
                            'family': group.get('family') or group.get('family_guess')},
                    article=res['article'], ruling='D-58')
-    return Assignment(zones=group['zones'], category=category, reference_system=1,
+    return Assignment(zones=list(group['zones']), category=category, reference_system=1,
                       action='through_the_wall', articles=articles)
 
 
@@ -715,9 +724,19 @@ def _finalize(assignment, group, definitions, selection, facts, audit,
         audit.decision('selection', 'purchased cooling energy -> represented by air-cooled electric chiller',
                        target=','.join(group['zones']), article=pc['article'])
 
+    # THE TARGET IS THE THERMAL BLOCK. This is the record OF the 8.4.x.7.(1)
+    # decision, which D-101 makes per block, and it inherited `air_loop` from
+    # the group — so five blocks on one proposed loop wrote five byte-identical
+    # records with no block identity anywhere in them. In a heterogeneous
+    # serving set the audit then held one System 2 and four System 6 records
+    # all targeted at the same loop, and nothing said which block was the
+    # museum: a reader could not reconstruct the per-block assignment from the
+    # per-block audit (Fable, `158` F1). The serving system moves into `inputs`,
+    # where it is still available and no longer impersonates the subject.
     audit.decision('selection', 'reference system selected',
-                   target=group['air_loop'] or ','.join(group['zones']),
+                   target=','.join(group['zones']),
                    inputs={'category': assignment.category, 'energy_type': assignment.energy_type,
+                           'serving_system': group['air_loop'],
                            'heated': group['heated'], 'cooled': group['cooled'],
                            'cooling_kw': group['design_cooling_kw']},
                    value=f"System {assignment.reference_system} -> '{assignment.catalog_name}'",
@@ -1126,7 +1145,22 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
         # pre-existing loops.
         surviving = list(reference.getPlantLoops())
         retained_plants = [str(plant.handle()) for plant in surviving]
-        if retained_plants:
+        # THE EXCLUSION STAYS BROAD; THE AUDIT DOES NOT. Every corpus model
+        # carries a `Main Service Water Loop`, which teardown skips by design,
+        # so an unclassified record fired on all 35 corpus scenarios with
+        # `copied_blocks: 0` and told an AHJ that proposed plant equipment had
+        # been reserved — making the one run where it MATTERS indistinguishable
+        # from the ones where nothing could have been adopted anyway
+        # (Fable, `158` F2). An SWH loop was never a candidate for
+        # `find_hot_water` or `find_chilled_water`.
+        #
+        # So the audit reports only the survivors a reference build could
+        # actually have adopted, and counts the rest separately. Reserving them
+        # all is still right: the exclusion costs nothing and a loop this
+        # classifier misjudges would otherwise be adoptable.
+        adoptable = [plant for plant in surviving
+                     if modeling.plant_is_hvac_candidate(plant)]
+        if adoptable:
             audit.decision(
                 'build',
                 'proposed plant equipment RESERVED to whatever retained it: a '
@@ -1134,8 +1168,10 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
                 'to a plant that survived teardown, whether a copied block, '
                 'process or service water, or another non-zone demand is '
                 'keeping it alive',
-                target=','.join(sorted(p.nameString() for p in surviving)),
-                inputs={'retained_plants': len(retained_plants),
+                target=','.join(sorted(p.nameString() for p in adoptable)),
+                inputs={'retained_plants': len(adoptable),
+                        'retained_non_hvac_plants': len(surviving) - len(adoptable),
+                        'reserved_plants': len(retained_plants),
                         'copied_blocks': sum(len(a.zones) for a in assignments
                                              if a.action == 'copy_proposed'),
                         'replaced_blocks': len(replaced_zone_names)},

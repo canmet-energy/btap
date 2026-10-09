@@ -282,6 +282,17 @@ forbidden above 352 kW is not established by the text.
 **What the tool does meanwhile.** The (6) coverage gap states that the
 applicable subclause is not established at selection time and claims none.
 
+**Where a reader meets it.** Since D-101, AHJ-3 has its OWN audit record,
+targeted at the hydronic PLANT and emitted once per plant however many serving
+systems draw on it — `UNRESOLVED: ONE hydronic heating plant carries every
+energy type the serving systems use`, citing the (6) sentence alone. It used
+to ride on AHJ-1's allocation entry under one plant-keyed dedupe, which could
+not express one plant carrying two service sets: AHJ-1 follows each proposed
+heating service and allocation choice, AHJ-3 follows the plant. In the
+conditional determination the two therefore appear as separate conditions, the
+AHJ-1 ones naming their affected thermal blocks and the AHJ-3 one naming the
+plant (Fable, `158` F7).
+
 ## AHJ-4 — the 8.4.2.2.(5) backup-equipment exclusion
 
 **Status: `ruled`. Does not set a run conditional.**
@@ -362,13 +373,26 @@ functions. `_reference_energy_type` elects by a cascade returning `'gas'` for
 any recognised fossil fuel, so oil and propane both get the GAS catalog
 variant — there is no oil or propane variant to get.
 
-**That is a SELECTION fact, and the final equipment is configuration-dependent**
-(Sol, `125`.1). Measured on an oil-fired proposed building: where the hot-water
-plant is ADOPTED the reference keeps `FuelOilNo2`, and where a
-hot-water-baseboard variant tears it down the reference carries `NaturalGas`.
-So a final-fuel mismatch is real but not universal, and the earlier wording —
-"an oil- or propane-heated building is compared against a natural-gas
-reference" — stated the selector's answer as the reference's.
+**That is a SELECTION fact** (Sol, `125`.1), and the final equipment used to be
+configuration-dependent. It is not any more, for a BUILT block. Re-measured on
+an oil-fired proposed building on 2026-10-09, both variants give the same
+answer: the proposed plant is torn down and the reference carries
+`NaturalGas`, whether the proposed system is zonal baseboards or a
+hot-water-baseboard PSZ.
+
+The earlier account said the zonal variant ADOPTED the oil plant and kept
+`FuelOilNo2`, so a final-fuel mismatch was "real but not universal". D-101
+made it universal for a built block: destruction is phased ahead of
+construction and every plant surviving teardown is reserved to whatever
+retained it, so a built block cannot adopt a proposed plant. A `copy_proposed`
+block does still retain its proposed plant and its fuel — a different branch,
+and not this entry's subject.
+
+The wording before that — "an oil- or propane-heated building is compared
+against a natural-gas reference" — stated the selector's answer as the
+reference's, which was a separate error; it happens to describe the current
+built-block outcome correctly, but for the reference's reason rather than the
+selector's.
 
 Sol ruled the sources stay distinct and that this is a catalog gap, not a Code
 reading. Unlike AHJ-1 it IS fixable tool-side by adding the variants, and

@@ -369,6 +369,28 @@ def _cooling_source(loop):
     return 'air_cooled' if condensers == {'AirCooled'} else 'water_cooled'
 
 
+def plant_is_hvac_candidate(loop):
+    """Whether a reference HVAC build could ever ADOPT this loop.
+
+    The NECB reference path reserves every plant surviving its teardown pass,
+    which is right — the exclusion costs nothing and a loop misjudged here
+    would otherwise be adoptable. But the AUDIT of that reservation should name
+    only the loops a build could have taken: every corpus model carries a
+    `Main Service Water Loop` that teardown skips by design, so an
+    unclassified record fired on all 35 corpus scenarios and made the one run
+    where a reservation MATTERS indistinguishable from the rest
+    (Fable, `158` F2).
+
+    A loop is a candidate when one of the two reuse lookups could return it:
+    boiler- or district-heated, or carrying chillers or district cooling, or
+    bearing the builder's own hot-water name (the no-boiler-yet fallback). A
+    service-water loop is none of those.
+    """
+    return bool(_boiler_heated(loop) or _district_heated(loop)
+                or _chillers(loop) or _district_cooled(loop)
+                or _named_hot_water_loop(loop))
+
+
 def find_chilled_water(model, exclude=(), source=None):
     """Find an existing chilled-water loop (one with a chiller on the supply side),
     or None.

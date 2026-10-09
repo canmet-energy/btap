@@ -810,7 +810,7 @@ class TestTheOutcomesAreReachableInABuiltModel(unittest.TestCase):
             "the election or the disclosure, so the entry must not list "
             "`adopted` among its possibilities")
 
-    def test_the_adopted_reference_RETAINS_BOTH_FUELS(self):
+    def test_the_RETAINED_reference_plant_keeps_BOTH_FUELS(self):
         """The direct refutation of the claim withdrawn over eight rounds.
 
         The SELECTION elects one energy type. On this configuration the
@@ -819,8 +819,11 @@ class TestTheOutcomesAreReachableInABuiltModel(unittest.TestCase):
         about final equipment, which is why the disclosure now separates
         selection from outcome.
 
-        Re-pointed at the residential retention fixture with D-101, for the
-        reason in `test_the_ADOPTED_outcome_is_reachable`.
+        Re-pointed at the residential retention fixture with D-101, and
+        RENAMED from `test_the_adopted_reference_RETAINS_BOTH_FUELS`: what it
+        exercises is `copy_proposed` retention, which is not "adoption" in the
+        sense AHJ-1's withdrawn outcome used — a retained block never reaches
+        the election or the disclosure at all (Fable, `158` F3).
         """
         proposed = self._residential_mixed_proposed()
         reference, _audit = self._reference_of(proposed)
@@ -835,10 +838,13 @@ class TestTheOutcomesAreReachableInABuiltModel(unittest.TestCase):
         carries the marker, so the proposed plant was torn down and a
         different one built.
 
-        What decides adoption versus replacement is the terminal type, not the
-        fuels: `Baseboard gas boiler` is adopted, while
-        `... and Hot Water Baseboard` is replaced. Measured on three variants;
-        this uses one.
+        The sentence here used to say that the terminal type decides adoption
+        versus replacement — `Baseboard gas boiler` adopted, `... and Hot Water
+        Baseboard` replaced. That stopped being true on this branch: D-101
+        phases destruction ahead of construction and reserves every surviving
+        proposed plant, so a BUILT block is replaced either way, and
+        re-measuring both variants on an oil-fired plant gives NaturalGas
+        boilers for both (Fable, `158` F3).
         """
         proposed = self._mixed_proposed(
             "PSZ RTU Electric and DX Coils and Hot Water Baseboard")

@@ -1510,3 +1510,75 @@ class TestAnEXPLICITBackupIsAnORDEREDRealization(unittest.TestCase):
                                           backup_fuel=self.GAS)
         self.assertNotEqual(str(loop.handle()), str(reversed_.handle()),
                             'and the reversed request still does not')
+
+
+class TestTheCOOLINGSourceGuardFalsifies(unittest.TestCase):
+    """Fable's `158` F6: `find_chilled_water(source=...)` had no falsifying
+    test.
+
+    `chilled_water` documents that "a caller asking for district cooling must
+    never be handed a chiller loop, and vice versa" — the cooling analogue of
+    the hot-water source guard, which exists because 8.4.4.6.(1)(a) was once
+    half-applied by exactly that adoption. Mutation M3 replaced the source
+    comparison with a bare chiller-presence test and the whole targeted set of
+    186 tests stayed green.
+    """
+
+    def loops(self, model):
+        from btap.modeling.hvac.systems import plant_loops
+
+        return [(p.nameString(), plant_loops._cooling_source(p))
+                for p in model.getPlantLoops()
+                if plant_loops._cooling_source(p) is not None]
+
+    def test_a_district_caller_is_not_handed_a_CHILLER_loop(self):
+        import openstudio
+
+        from btap.modeling.hvac.systems import plant_loops
+
+        model = openstudio.model.Model()
+        chilled = plant_loops.chilled_water(model, source='water_cooled',
+                                            reuse=False)
+        self.assertEqual('water_cooled',
+                         plant_loops._cooling_source(chilled),
+                         'precondition: a chiller loop exists')
+        district = plant_loops.chilled_water(model, source='district')
+        self.assertNotEqual(
+            str(chilled.handle()), str(district.handle()),
+            'a district-cooling caller must build its own loop, not adopt '
+            'chillers')
+        self.assertEqual(
+            'district', plant_loops._cooling_source(district),
+            'and what it built is district-cooled')
+
+    def test_a_CHILLER_caller_is_not_handed_a_district_loop(self):
+        """And the other direction, which is the half the hot-water side
+        learned the hard way.
+        """
+        import openstudio
+
+        from btap.modeling.hvac.systems import plant_loops
+
+        model = openstudio.model.Model()
+        district = plant_loops.chilled_water(model, source='district',
+                                             reuse=False)
+        self.assertEqual('district', plant_loops._cooling_source(district),
+                         'precondition: a district-cooling loop exists')
+        chilled = plant_loops.chilled_water(model, source='water_cooled')
+        self.assertNotEqual(
+            str(district.handle()), str(chilled.handle()),
+            'a chiller caller must not adopt a district loop')
+        self.assertEqual('water_cooled',
+                         plant_loops._cooling_source(chilled))
+
+    def test_a_MATCHING_source_still_shares_one_loop(self):
+        """The control: source matching must not stop legitimate reuse."""
+        import openstudio
+
+        from btap.modeling.hvac.systems import plant_loops
+
+        model = openstudio.model.Model()
+        first = plant_loops.chilled_water(model, source='water_cooled',
+                                          reuse=False)
+        again = plant_loops.chilled_water(model, source='water_cooled')
+        self.assertEqual(str(first.handle()), str(again.handle()))
