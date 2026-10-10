@@ -86,6 +86,96 @@ def _three_storeys(model):
     model.getBuilding().setStandardsNumberOfAboveGroundStories(3)
 
 
+def _corner_block_above_four_storeys(model):
+    """Five storeys AND a zone with exposure on two orientations.
+
+    BOTH are needed, and only the pair reaches Table 8.4.x.7.-B Note (3)'s
+    ambiguity (AHJ-10). `VAVReheat._zone_groups` records its grouping evidence
+    only above four storeys — at or below, every above-grade zone goes into one
+    group and there is no facade election to question. And the shared
+    `5ZoneNoHVAC` fixture has four perimeter zones each facing exactly ONE
+    way, so raising the storey count alone yields evidence with no corner in
+    it: measured S 152, W 76, N 152, E 76, core none.
+
+    Merging the W zone into the S zone makes ONE block exposed on two
+    facades, which is exactly the case Note (3) does not decide: it says
+    blocks are "grouped together based on facade orientation" and supplies
+    neither the metric nor the tie-break. D-18 elects the largest exterior
+    wall area, so this block takes S (152 > 76) and the choice is audited.
+    """
+    model.getBuilding().setStandardsNumberOfAboveGroundStories(5)
+    zones = {zone.nameString(): zone for zone in model.getThermalZones()}
+    keep, merge = zones.get("Thermal Zone 1"), zones.get("Thermal Zone 2")
+    if keep is None or merge is None:
+        raise SystemExit("corner sample: the fixture's zone names have moved")
+    for space in list(merge.spaces()):
+        space.setThermalZone(keep)
+    merge.remove()
+
+
+def _humidified(model):
+    """Proposed humidification WITH a determinable control.
+
+    Table 8.4.x.7.-B Note (1) governs the energy SOURCE once humidification is
+    present in the reference; it does not say whether reference humidification
+    is added at all (AHJ-12). No other sample carries a humidifier, and
+    `btap.modeling` builds none, so this is the only shape that reaches the
+    question.
+
+    The humidistat matters as much as the humidifier. Without one the capture
+    finds no determinable control and refuses to rebuild, which exercises only
+    the REFUSAL branch — a witness to the wrong half. With a humidistat on one
+    served zone, this model reaches BOTH: the rebuild decision for that zone's
+    loop and the refusal for the zonally-served remainder.
+    """
+    import openstudio  # local, as everywhere else in this script
+
+    loops = sorted(model.getAirLoopHVACs(), key=lambda loop: loop.nameString())
+    if not loops:
+        raise SystemExit("humidified sample: the catalog system built no air loop")
+    loop = loops[0]
+    humidifier = openstudio.model.HumidifierSteamElectric(model)
+    humidifier.setName("Proposed Steam Humidifier")
+    if not humidifier.addToNode(loop.supplyOutletNode()):
+        raise SystemExit("humidified sample: the humidifier would not attach")
+    schedule = openstudio.model.ScheduleRuleset(model)
+    schedule.setName("Min Relative Humidity 30")
+    schedule.defaultDaySchedule().addValue(openstudio.Time(0, 24, 0, 0), 30.0)
+    humidistat = openstudio.model.ZoneControlHumidistat(model)
+    humidistat.setHumidifyingRelativeHumiditySetpointSchedule(schedule)
+    served = sorted(loop.thermalZones(), key=lambda zone: zone.nameString())
+    if not served:
+        raise SystemExit("humidified sample: the air loop serves no thermal block")
+    served[0].setZoneControlHumidistat(humidistat)
+
+    # AND the outlet setpoint manager, without which this sample CANNOT BE
+    # SIMULATED. A humidistat alone satisfies the reference-side capture — the
+    # SDK-only path builds and audits fine — but EnergyPlus fatals in the
+    # PROPOSED sizing run:
+    #
+    #   Severe  Humidifiers: Missing humidity setpoint for
+    #           Humidifier:Steam:Electric = PROPOSED STEAM HUMIDIFIER
+    #           use a Setpoint Manager with Control Variable =
+    #           "MinimumHumidityRatio"
+    #   Fatal   Previous severe set point errors cause program termination
+    #
+    # So the first version of this sample was unsimulable and nothing caught
+    # it, because the reference path never runs the engine (Sol, `181`).
+    # `test_hvac_necb_humidification.py` already held the valid construction.
+    outlet = humidifier.outletModelObject()
+    if not outlet.is_initialized():
+        raise SystemExit("humidified sample: the humidifier has no outlet node")
+    manager = openstudio.model.SetpointManagerSingleZoneHumidityMinimum(model)
+    manager.setControlZone(served[0])
+    if not manager.addToNode(outlet.get().to_Node().get()):
+        raise SystemExit("humidified sample: the setpoint manager would not attach")
+
+
+#: Runs AFTER the catalog system is built: there is no air loop to humidify
+#: before that.
+_humidified.after_build = True
+
+
 # Cases chosen to make the REFERENCE-BUILDING logic visibly do something, rather
 # than to cover another system. Each names the article it exercises, and the
 # optional callable is model-level setup the plain SAMPLES tuple cannot express.
@@ -139,6 +229,26 @@ STRESS_CASES = (
      "not. It witnesses the accessor's contribution; it cannot DETECT its "
      "absence. 18-vav-hw-subset-reheat is the sample that does.",
      None),
+    ("19-corner-block-5storey",
+     "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
+     "Table 8.4.4.7.-B Note (3) / D-18 / AHJ-10 — the ONLY sample with a block "
+     "exposed on two facades, and the only one above four storeys. Both are "
+     "required: grouping evidence is recorded only above four storeys, and the "
+     "shared fixture's four perimeter zones each face exactly ONE way, so "
+     "raising the storey count alone produces evidence with no corner in it. "
+     "The merged block takes S over W by largest exterior wall area (152 vs "
+     "76 m2) — a tie-break Note (3) does not supply, which is the question.",
+     _corner_block_above_four_storeys),
+    ("20-humidified-psz",
+     "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+     "Table 8.4.4.7.-B Note (1) / D-55 / AHJ-12 — the ONLY sample carrying "
+     "humidification; `btap.modeling` builds none, so no other shape reaches "
+     "the question of whether reference humidification is added at all. The "
+     "humidistat is as load-bearing as the humidifier: without one the capture "
+     "finds no determinable control and only the REFUSAL branch runs. With one "
+     "on a single served zone this model reaches BOTH branches — the rebuild "
+     "for that loop and the refusal for the zonally-served remainder.",
+     _humidified),
 )
 
 #: DF-17's discriminating sample, and the reason it is hand-built rather than
@@ -339,9 +449,17 @@ def generate(out: Path) -> list[tuple[str, str, int]]:
         gate(slug, system)
         try:
             model = seed("necb2020")
-            if setup is not None:
+            # Most setup shapes the model the system is then built ONTO —
+            # storey counts, zone merges. One needs the opposite: a humidifier
+            # attaches to an air loop, which does not exist until the catalog
+            # system is built. `after_build` says which, explicitly, rather
+            # than reordering the common case or guessing from the slug.
+            after = bool(getattr(setup, "after_build", False))
+            if setup is not None and not after:
                 setup(model)
             modeling.build_system(model, system, sorted_by_name(model.getThermalZones()))
+            if setup is not None and after:
+                setup(model)
             size = save(model, out, slug)
         except Exception as e:  # noqa: BLE001 - re-raised as a fatal, named
             abort(slug, e)

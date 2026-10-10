@@ -1,0 +1,80 @@
+[openstudio.model.YearDescription] <1> 'UseWeatherFile' is selected in YearDescription, but there are no weather file set for the model.
+[openstudio.model.YearDescription] <1> 'UseWeatherFile' is selected in YearDescription, but there are no weather file set for the model.
+[openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
+[openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
+[openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
+[openstudio.model.HeatExchangerAirToAirSensibleAndLatent] <0> As of 3.8.0, bool openstudio::model::HeatExchangerAirToAirSensibleAndLatent::setSensibleEffectivenessat75HeatingAirFlow(double) is deprecated. Use sensibleEffectivenessofHeatingAirFlowCurve instead.
+[openstudio.model.HeatExchangerAirToAirSensibleAndLatent] <0> As of 3.8.0, bool openstudio::model::HeatExchangerAirToAirSensibleAndLatent::setLatentEffectivenessat75HeatingAirFlow(double) is deprecated. Use latentEffectivenessofHeatingAirFlowCurve instead.
+[openstudio.model.HeatExchangerAirToAirSensibleAndLatent] <0> As of 3.8.0, bool openstudio::model::HeatExchangerAirToAirSensibleAndLatent::setSensibleEffectivenessat75CoolingAirFlow(double) is deprecated. Use sensibleEffectivenessofCoolingAirFlowCurve instead.
+[openstudio.model.HeatExchangerAirToAirSensibleAndLatent] <0> As of 3.8.0, bool openstudio::model::HeatExchangerAirToAirSensibleAndLatent::setLatentEffectivenessat75CoolingAirFlow(double) is deprecated. Use latentEffectivenessofCoolingAirFlowCurve instead.
+[openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
+[openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
+[openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
+[openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
+
+------------------------------------------------------------------
+                   site kWh      kWh/m2/yr      area m2
+Proposed            121,614          152.0        800.0
+Reference           184,153          230.2        800.0
+Margin               62,539   34.0% under target   Tier 2
+Unmet hours  heating 488.5 / 0.0 h    cooling 262.0 / 231.3 h
+------------------------------------------------------------------
+
+  *** NOT A CODE-COMPLIANT DETERMINATION ***
+  3 question(s) in the AHJ register (AHJ-1, AHJ-2, AHJ-14) were raised by this
+  run's modelling choices and require approval before the comparison above
+  can support compliance. It is INFORMATIONAL only and is not evidence of
+  compliance.
+  Governing: 8.4.4.13.(2)(g)(i); 8.4.4.9.(5); 8.4.5.2.; 8.4.5.3.; NECB 2020 Table 5.2.12.1.-N; NECB 2020 Table 5.2.12.1.-O
+    - Thermal Zone 1,Thermal Zone 2,Thermal Zone 3,Thermal Zone 4,Thermal Zone 5
+    - Primary Boiler
+    - Coil Heating Gas 1
+    - Coil Heating Gas 2
+    - Coil Heating Gas 3
+    - Coil Heating Gas 4
+    - Coil Heating Gas 5
+
+  CONDITIONAL: the authority having jurisdiction must accept the conditions
+  below. Each says whether it is an ALTERNATIVE SOLUTION — the text decides
+  the requirement and this tool does not meet it — or an INTERPRETATION the
+  text does not settle.
+    - AHJ-1 (alternative-solution): a single-fuel reference is a
+      NON-CONFORMING substitution — an ALTERNATIVE SOLUTION, which
+      the text DECIDES and this tool does not meet — accepting it
+      means accepting an explicitly identified non-conforming
+      substitution. Applies to: Thermal Zone 1,Thermal Zone
+      2,Thermal Zone 3,Thermal Zone 4,Thermal Zone 5 — UNRESOLVED:
+      the heating equipment serving this group uses MORE THAN ONE
+      ENERGY TYPE. 8.4.4.9.(5) requires the reference heating
+      capacities to follow the proposed energy-type allocation, and
+      this tool does NOT compute or enforce that allocation — it
+      elects ONE energy type for the group. Whether the reference
+      happens to match the proposed allocation is therefore NOT
+      VERIFIED here, in either direction, and a passing annual
+      result is not evidence that it does
+    - AHJ-2 (referral): the annual-energy basis (2)(g) compares, and
+      an irreconcilable Article 13 case — an INTERPRETATION the
+      acceptable-solution text does not settle. Applies to: Thermal
+      Zone 1,Thermal Zone 2,Thermal Zone 3,Thermal Zone 4,Thermal
+      Zone 5 — auxiliary heating energy type ELECTED from the
+      proposed run's simulated period: the terminal/aux energy type
+      with the largest energy use over that period is NaturalGas
+      (110.08 GJ delivered), and the heat pump's 55.2% share exceeds
+      the 33% proviso ((h) inapplicable: the source is classified
+      air/water/ground)
+    - AHJ-14 (referral): which part-load class a reference boiler or
+      furnace takes — an INTERPRETATION the acceptable-solution text
+      does not settle. Applies to: Primary Boiler, Coil Heating Gas
+      1, Coil Heating Gas 2, Coil Heating Gas 3, Coil Heating Gas 4,
+      Coil Heating Gas 5 — each of the 6 choices above makes this
+      same unresolved election; the conditions list carries what was
+      established at each one
+
+  VERDICT: NOT COMPLIANT - INFORMATIONAL, AND CONDITIONAL ON APPROVAL BY THE
+           AUTHORITY HAVING JURISDICTION
+  (NECB 2020, Division B, Article 8.4.1.2; see docs/NECB_AHJ_QUESTIONS.md)
+------------------------------------------------------------------
+
+  Audit    <RUN_DIR>/audit.txt
+  Data     <RUN_DIR>/report.json
+  81 warning(s) recorded - see audit.txt

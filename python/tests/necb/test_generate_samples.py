@@ -64,6 +64,60 @@ class TestGenerateSamples(unittest.TestCase):
 
         return load_model(self.out / f"{slug}.osm")
 
+    def test_the_humidified_sample_can_actually_be_SIMULATED(self):
+        """`20-humidified-psz` must carry an OUTLET SETPOINT MANAGER, not just
+        a humidistat.
+
+        The first version carried only the zone humidistat. That satisfies the
+        reference-side capture completely — the SDK-only path builds, audits
+        and reaches AHJ-12's rebuild branch — but EnergyPlus fatals in the
+        PROPOSED sizing run:
+
+            Severe  Humidifiers: Missing humidity setpoint for
+                    Humidifier:Steam:Electric = PROPOSED STEAM HUMIDIFIER
+                    use a Setpoint Manager with Control Variable =
+                    "MinimumHumidityRatio"
+            Fatal   Previous severe set point errors cause program termination
+
+        So the sample was UNSIMULABLE and nothing caught it, because every
+        check it had ran the reference path and never the engine (Sol, `181`).
+        This is the structural guard: the manager exists, sits on the
+        humidifier's OWN outlet node, and controls the zone carrying the
+        humidistat.
+        """
+        model = self.load("20-humidified-psz")
+        humidifiers = list(model.getHumidifierSteamElectrics())
+        self.assertEqual(1, len(humidifiers),
+                         "the sample's point is one proposed humidifier")
+        outlet = humidifiers[0].outletModelObject()
+        self.assertTrue(outlet.is_initialized(),
+                        "the humidifier must be on a node at all")
+        node = outlet.get().to_Node().get()
+
+        managers = [
+            m for m in model.getSetpointManagerSingleZoneHumidityMinimums()
+            if m.setpointNode().is_initialized()
+            and m.setpointNode().get().handle() == node.handle()]
+        self.assertEqual(
+            1, len(managers),
+            "a humidifier with no MinimumHumidityRatio setpoint manager on its "
+            "OWN outlet node is a fatal EnergyPlus error, not a modelling "
+            "choice — and the reference path cannot see it, because it never "
+            "runs the engine")
+
+        humidistat_zones = [z.nameString() for z in model.getThermalZones()
+                            if z.zoneControlHumidistat().is_initialized()]
+        self.assertEqual(1, len(humidistat_zones),
+                         "one humidistat, so the control zone is unambiguous")
+        control = managers[0].controlZone()
+        self.assertTrue(control.is_initialized(),
+                        "the manager must name its control zone")
+        self.assertEqual(
+            humidistat_zones[0], control.get().nameString(),
+            "the manager must control the zone that carries the humidistat, or "
+            "the setpoint it writes is unrelated to the control asking for "
+            "humidification")
+
     def test_slug_set_equals_the_manifest_in_both_directions(self):
         expected = set(self.generator.expected_slugs())
         produced = {slug for slug, _, _ in self.built}
@@ -74,7 +128,7 @@ class TestGenerateSamples(unittest.TestCase):
                          "exactly — a missing sample and an extra one are both defects")
         self.assertEqual(expected, on_disk,
                          "every manifest slug must exist on disk as a .osm, and nothing else")
-        self.assertEqual(18, len(expected), "the corpus is 18 samples")
+        self.assertEqual(20, len(expected), "the corpus is 20 samples")
 
     def test_every_sample_reloads_through_the_sdk_with_zones(self):
         # model.save() reports nothing about whether the bytes it wrote can be
@@ -193,9 +247,10 @@ class TestGenerateSamples(unittest.TestCase):
 
     def test_the_shipped_readme_is_written(self):
         readme = (self.out / "README.txt").read_text(encoding="utf-8")
-        self.assertIn("Sample models — 18 files, one building", readme)
+        self.assertIn("Sample models — 20 files, one building", readme)
         for slug, _, _ in self.built:
             self.assertIn(slug, readme, f"{slug} is missing from the shipped README")
+
 
 
 if __name__ == "__main__":

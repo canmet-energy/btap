@@ -1,0 +1,57 @@
+[openstudio.model.YearDescription] <1> 'UseWeatherFile' is selected in YearDescription, but there are no weather file set for the model.
+[openstudio.model.YearDescription] <1> 'UseWeatherFile' is selected in YearDescription, but there are no weather file set for the model.
+[openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
+[openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
+[openstudio.model.ChillerElectricEIR] <0> Cannot set condenserType to 'WaterCooled', chiller 'Chiller Electric EIR 1' is not connected to a secondaryPlantLoop
+[openstudio.model.ChillerElectricEIR] <0> Cannot set condenserType to 'WaterCooled', chiller 'Chiller Electric EIR 2' is not connected to a secondaryPlantLoop
+[openstudio.energyplus.ForwardTranslator] <0> Object of type 'OS:ThermalZone' and named 'Thermal Zone 1' has DaylightingControl Objects assigned. The interior walls between Spaces will be merged. Make sure these are correctly Matched!
+[openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
+[openstudio.model.HeatExchangerAirToAirSensibleAndLatent] <0> As of 3.8.0, bool openstudio::model::HeatExchangerAirToAirSensibleAndLatent::setSensibleEffectivenessat75HeatingAirFlow(double) is deprecated. Use sensibleEffectivenessofHeatingAirFlowCurve instead.
+[openstudio.model.HeatExchangerAirToAirSensibleAndLatent] <0> As of 3.8.0, bool openstudio::model::HeatExchangerAirToAirSensibleAndLatent::setLatentEffectivenessat75HeatingAirFlow(double) is deprecated. Use latentEffectivenessofHeatingAirFlowCurve instead.
+[openstudio.model.HeatExchangerAirToAirSensibleAndLatent] <0> As of 3.8.0, bool openstudio::model::HeatExchangerAirToAirSensibleAndLatent::setSensibleEffectivenessat75CoolingAirFlow(double) is deprecated. Use sensibleEffectivenessofCoolingAirFlowCurve instead.
+[openstudio.model.HeatExchangerAirToAirSensibleAndLatent] <0> As of 3.8.0, bool openstudio::model::HeatExchangerAirToAirSensibleAndLatent::setLatentEffectivenessat75CoolingAirFlow(double) is deprecated. Use latentEffectivenessofCoolingAirFlowCurve instead.
+[openstudio.energyplus.ForwardTranslator] <0> Object of type 'OS:ThermalZone' and named 'Thermal Zone 1' has DaylightingControl Objects assigned. The interior walls between Spaces will be merged. Make sure these are correctly Matched!
+[openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
+[openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
+
+------------------------------------------------------------------
+                   site kWh      kWh/m2/yr      area m2
+Proposed            191,656          239.6        800.0
+Reference           295,542          369.4        800.0
+Margin              103,886   35.2% under target   Tier 2
+Unmet hours  heating 0.0 / 23.5 h    cooling 0.0 / 0.0 h
+------------------------------------------------------------------
+
+  *** NOT A CODE-COMPLIANT DETERMINATION ***
+  2 question(s) in the AHJ register (AHJ-10, AHJ-14) were raised by this
+  run's modelling choices and require approval before the comparison above
+  can support compliance. It is INFORMATIONAL only and is not evidence of
+  compliance.
+  Governing: 8.4.5.2.; NECB 2020 Table 5.2.12.1.-N; Table 8.4.4.7.-B Note (3)
+    - Thermal Zone 1
+    - Primary Boiler
+
+  CONDITIONAL: the authority having jurisdiction must accept the conditions
+  below. Each says whether it is an ALTERNATIVE SOLUTION — the text decides
+  the requirement and this tool does not meet it — or an INTERPRETATION the
+  text does not settle.
+    - AHJ-10 (referral): how corner thermal blocks are grouped — an
+      INTERPRETATION the acceptable-solution text does not settle.
+      Applies to: Thermal Zone 1 — corner thermal blocks assigned to
+      ONE facade group by largest exterior wall area, with an
+      N/E/S/W tie-break — Note (3) says only that blocks are grouped
+      by facade orientation and supplies neither the metric nor the
+      tie-break, so this assignment is ours
+    - AHJ-14 (referral): which part-load class a reference boiler or
+      furnace takes — an INTERPRETATION the acceptable-solution text
+      does not settle. Applies to: Primary Boiler — boiler
+      efficiency applied
+
+  VERDICT: COMPLIANT - INFORMATIONAL, AND CONDITIONAL ON APPROVAL BY THE
+           AUTHORITY HAVING JURISDICTION
+  (NECB 2020, Division B, Article 8.4.1.2; see docs/NECB_AHJ_QUESTIONS.md)
+------------------------------------------------------------------
+
+  Audit    <RUN_DIR>/audit.txt
+  Data     <RUN_DIR>/report.json
+  40 warning(s) recorded - see audit.txt

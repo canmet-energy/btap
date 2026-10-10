@@ -1,0 +1,82 @@
+[openstudio.model.YearDescription] <1> 'UseWeatherFile' is selected in YearDescription, but there are no weather file set for the model.
+[openstudio.model.YearDescription] <1> 'UseWeatherFile' is selected in YearDescription, but there are no weather file set for the model.
+[openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
+[openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
+[openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
+[openstudio.model.HeatExchangerAirToAirSensibleAndLatent] <0> As of 3.8.0, bool openstudio::model::HeatExchangerAirToAirSensibleAndLatent::setSensibleEffectivenessat75HeatingAirFlow(double) is deprecated. Use sensibleEffectivenessofHeatingAirFlowCurve instead.
+[openstudio.model.HeatExchangerAirToAirSensibleAndLatent] <0> As of 3.8.0, bool openstudio::model::HeatExchangerAirToAirSensibleAndLatent::setLatentEffectivenessat75HeatingAirFlow(double) is deprecated. Use latentEffectivenessofHeatingAirFlowCurve instead.
+[openstudio.model.HeatExchangerAirToAirSensibleAndLatent] <0> As of 3.8.0, bool openstudio::model::HeatExchangerAirToAirSensibleAndLatent::setSensibleEffectivenessat75CoolingAirFlow(double) is deprecated. Use sensibleEffectivenessofCoolingAirFlowCurve instead.
+[openstudio.model.HeatExchangerAirToAirSensibleAndLatent] <0> As of 3.8.0, bool openstudio::model::HeatExchangerAirToAirSensibleAndLatent::setLatentEffectivenessat75CoolingAirFlow(double) is deprecated. Use latentEffectivenessofCoolingAirFlowCurve instead.
+[openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
+[openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
+[openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
+[openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
+
+------------------------------------------------------------------
+                   site kWh      kWh/m2/yr      area m2
+Proposed            201,414          251.8        800.0
+Reference           151,206          189.0        800.0
+Margin              -50,208   33.2% OVER target
+Unmet hours  heating 322.0 / 0.0 h    cooling 170.8 / 4.8 h
+------------------------------------------------------------------
+
+  *** NOT A CODE-COMPLIANT DETERMINATION ***
+  3 question(s) in the AHJ register (AHJ-12, AHJ-14, AHJ-15) were raised by this
+  run's modelling choices and require approval before the comparison above
+  can support compliance. It is INFORMATIONAL only and is not evidence of
+  compliance.
+  Governing: 8.4.2.10.(2); 8.4.4.9.(3); 8.4.5.2.; 8.4.5.3.; NECB 2020 Table 5.2.12.1.-N; NECB 2020 Table 5.2.12.1.-O; Table 8.4.4.7.-B Note (1)
+    - Thermal Zone 1
+    - Thermal Zone 2
+    - Thermal Zone 3
+    - Thermal Zone 4
+    - Thermal Zone 5
+    - PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1
+    - PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 2
+    - PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 3
+    - PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 4
+    - PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 5
+    - Primary Boiler
+    - CoilHeatingGasMultiStage_gas
+    - CoilHeatingGasMultiStage_gas 1
+    - CoilHeatingGasMultiStage_gas 2
+    - CoilHeatingGasMultiStage_gas 3
+    - CoilHeatingGasMultiStage_gas 4
+
+  CONDITIONAL: the authority having jurisdiction must accept the conditions
+  below. Each says whether it is an ALTERNATIVE SOLUTION — the text decides
+  the requirement and this tool does not meet it — or an INTERPRETATION the
+  text does not settle.
+    - AHJ-12 (referral): "where present" humidification — an
+      INTERPRETATION the acceptable-solution text does not settle.
+      Applies to: PSZ RTU Gas and DX Coils and Hot Water Baseboard |
+      Thermal Zone 1, PSZ RTU Gas and DX Coils and Hot Water
+      Baseboard | Thermal Zone 2, PSZ RTU Gas and DX Coils and Hot
+      Water Baseboard | Thermal Zone 3, PSZ RTU Gas and DX Coils and
+      Hot Water Baseboard | Thermal Zone 4, PSZ RTU Gas and DX Coils
+      and Hot Water Baseboard | Thermal Zone 5 — each of the 5
+      choices above makes this same unresolved election; the
+      conditions list carries what was established at each one
+    - AHJ-14 (referral): which part-load class a reference boiler or
+      furnace takes — an INTERPRETATION the acceptable-solution text
+      does not settle. Applies to: Primary Boiler,
+      CoilHeatingGasMultiStage_gas, CoilHeatingGasMultiStage_gas 1,
+      CoilHeatingGasMultiStage_gas 2, CoilHeatingGasMultiStage_gas
+      3, CoilHeatingGasMultiStage_gas 4 — each of the 6 choices
+      above makes this same unresolved election; the conditions list
+      carries what was established at each one
+    - AHJ-15 (referral): whether (3) governs dispatch priority at
+      all — an INTERPRETATION the acceptable-solution text does not
+      settle. Applies to: Thermal Zone 1, Thermal Zone 2, Thermal
+      Zone 3, Thermal Zone 4, Thermal Zone 5 — each of the 5 choices
+      above makes this same unresolved election; the conditions list
+      carries what was established at each one
+
+  VERDICT: NOT COMPLIANT - INFORMATIONAL, AND CONDITIONAL ON APPROVAL BY THE
+           AUTHORITY HAVING JURISDICTION
+  (NECB 2020, Division B, Article 8.4.1.2; see docs/NECB_AHJ_QUESTIONS.md)
+------------------------------------------------------------------
+
+  Audit    <RUN_DIR>/audit.txt
+  Data     <RUN_DIR>/report.json
+  69 warning(s) recorded - see audit.txt

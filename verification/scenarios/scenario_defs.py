@@ -217,9 +217,22 @@ R6_CORPUS_SLUGS = (
 #: never had. A seal is a provenance claim, so the default must not be
 #: inherited by a scenario that post-dates the evidence.
 #: ``test_every_post_handoff_slug_predates_the_attestation`` is the gate.
+#: The two guard-7 corpus additions. A seal is a PROVENANCE CLAIM, and the
+#: default "ruby" seal is converted by ``all_scenarios()`` into
+#: ``python-only:post-handoff``, which carries the final cross-language
+#: attestation (85ab143). These samples did not exist then, so inheriting that
+#: would assert evidence they never had —
+#: ``test_every_post_handoff_slug_predates_the_attestation`` is the gate that
+#: caught exactly this.
+GUARD7_CORPUS_SEAL = ("python-only:first frozen as a guard-7 corpus addition — "
+                      "authored after the Ruby product retired; no "
+                      "cross-language attestation exists for this sample")
+
 POST_R6_PYTHON_LANE_SEALS = {
     "17-vav-hw-reheat": DF17_SEAL,
     "18-vav-hw-subset-reheat": DF17_SEAL,
+    "19-corner-block-5storey": GUARD7_CORPUS_SEAL,
+    "20-humidified-psz": GUARD7_CORPUS_SEAL,
 }
 
 
@@ -409,6 +422,110 @@ DETERMINATION_SCENARIOS = [
          # And the verdict is about the PROPOSED building.
          {"op": "json_equals", "file": "report.json",
           "path": "percent_of_target", "value": 112.3},
+         {"op": "json_equals", "file": "report.json", "path": "compliant",
+          "value": False},
+     ]},
+
+    # GUARD 7 for AHJ-2 (Sol's `127`: one ANNUAL frozen artifact per
+    # approval-required id). AHJ-2 fired in NO frozen audit at all — not even a
+    # corpus-tier one — because its branch reads the ANNUAL per-zone heating
+    # energy to weigh the (2)(g) comparison, and under `--simulate none` the
+    # structural 8.4.x.9.(4) proxy answers instead. Sample 16's own generator
+    # note says exactly that: "Needs --simulate annual: under :none it cannot
+    # run and the structural 8.4.4.9.(4) proxy answers instead."
+    #
+    # The shape is an air-source heat pump with BOTH an electric supplementary
+    # coil and a hot-water baseboard, so there IS auxiliary heating energy for
+    # (2)(g) to weigh — `aux_by_fuel` non-empty is the precondition the branch
+    # returns early on.
+    {"id": "determination-04-16-ashp-supp-aux-election-annual",
+     "lane": "parity", "kind": "cli", "replaces": [],
+     "argv": ["<CORPUS>/16-ashp-electric-supp-hw-baseboard.osm",
+              "--simulate", "annual", "--epw", "<EPW>",
+              *BASE_ARGS, "-o", "<RUN_DIR>"],
+     "env": {}, "expect_exit": 1, "timeout_s": 5400,
+     "files": CORPUS_FILES, "text_files": CORPUS_TEXT,
+     "streams": {"stdout": "exact", "stderr": "exact"},
+     "seal": GUARD7_SEAL,
+     "asserts": [
+         {"op": "json_equals", "file": "report.json", "path": "annual",
+          "value": True},
+         # The guard's substance, in two halves. First that AHJ-2 was CITED
+         # at the deciding rule site, which D-100 makes the thing that
+         # declares applicability — `json_in` is the wrong op here, it checks
+         # that a value is one of a list rather than that a list contains one.
+         {"op": "audit_entry", "ahj": "AHJ-2", "count": 1},
+         # Second that this run reaches a DETERMINATION, which is the one
+         # thing no frozen artifact proved for AHJ-2. Measured on a full-year
+         # probe before this was authored, so the id list is pinned rather
+         # than left to whatever the freeze happened to produce.
+         {"op": "json_equals", "file": "report.json",
+          "path": "compliance_determination", "value": "conditional"},
+         {"op": "json_equals", "file": "report.json",
+          "path": "compliance_determination_reason.ahj_ids",
+          "value": ["AHJ-1", "AHJ-2", "AHJ-14"]},
+     ]},
+
+    # GUARD 7 for AHJ-10. The corpus-none scenario for sample 19 is useful
+    # evidence but NOT a guard-7 witness: `127` is explicit that
+    # `none`/`sizing` artifacts do not prove verdict wiring, and that scenario
+    # exits 6 with no `annual` and no `compliance_determination`. Adding the
+    # sample was not the same as witnessing the id — the distinction I kept
+    # for AHJ-2 and lost here (Sol, `181`).
+    {"id": "determination-05-19-corner-block-annual",
+     "lane": "parity", "kind": "cli", "replaces": [],
+     "argv": ["<CORPUS>/19-corner-block-5storey.osm",
+              "--simulate", "annual", "--epw", "<EPW>",
+              *BASE_ARGS, "-o", "<RUN_DIR>"],
+     "env": {}, "expect_exit": 0, "timeout_s": 5400,
+     "files": CORPUS_FILES, "text_files": CORPUS_TEXT,
+     "streams": {"stdout": "exact", "stderr": "exact"},
+     "seal": GUARD7_SEAL,
+     "asserts": [
+         {"op": "json_equals", "file": "report.json", "path": "annual",
+          "value": True},
+         {"op": "json_equals", "file": "report.json",
+          "path": "compliance_determination", "value": "conditional"},
+         {"op": "json_equals", "file": "report.json",
+          "path": "compliance_determination_reason.ahj_ids",
+          "value": ["AHJ-10", "AHJ-14"]},
+         # The corner election itself, at its DECIDING site — not merely the
+         # id appearing somewhere in the audit.
+         {"op": "audit_entry", "step": "selection", "level": "decision",
+          "ahj": "AHJ-10", "count": 1},
+     ]},
+
+    # GUARD 7 for AHJ-12. Same tier correction, plus the sample itself could
+    # not be simulated at all until `181`: a humidistat with no outlet
+    # setpoint manager fatals in the PROPOSED sizing run.
+    {"id": "determination-06-20-humidified-annual",
+     "lane": "parity", "kind": "cli", "replaces": [],
+     "argv": ["<CORPUS>/20-humidified-psz.osm",
+              "--simulate", "annual", "--epw", "<EPW>",
+              *BASE_ARGS, "-o", "<RUN_DIR>"],
+     "env": {}, "expect_exit": 1, "timeout_s": 5400,
+     "files": CORPUS_FILES, "text_files": CORPUS_TEXT,
+     "streams": {"stdout": "exact", "stderr": "exact"},
+     "seal": GUARD7_SEAL,
+     "asserts": [
+         {"op": "json_equals", "file": "report.json", "path": "annual",
+          "value": True},
+         {"op": "json_equals", "file": "report.json",
+          "path": "compliance_determination", "value": "conditional"},
+         {"op": "json_equals", "file": "report.json",
+          "path": "compliance_determination_reason.ahj_ids",
+          "value": ["AHJ-12", "AHJ-14", "AHJ-15"]},
+         # EXACTLY ONE positive rebuild, not five uses of the id: the
+         # degenerate version of this sample fired AHJ-12 five times with
+         # every one a refusal.
+         {"op": "audit_entry", "level": "decision", "ahj": "AHJ-12",
+          "count": 1},
+         {"op": "audit_entry", "level": "warning", "ahj": "AHJ-12",
+          "count": 4},
+         # The truth about this comparison, pinned rather than dressed up:
+         # the PROPOSED building misses on unmet hours while the reference
+         # holds. A non-compliant annual determination still proves the
+         # conditional wiring; a fatal sizing run cannot.
          {"op": "json_equals", "file": "report.json", "path": "compliant",
           "value": False},
      ]},
