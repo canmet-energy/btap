@@ -386,8 +386,16 @@ DETERMINATION_SCENARIOS = [
     # CWEC2020). The reference's unmet hours are the substance of the guard:
     # 0.0 h heating and 4.75 h cooling, where the proposed building logs 4.0 h
     # cooling, so the comparison basis now holds setpoint. The remaining NOT
-    # COMPLIANT is the proposed building at 112.3% of target — a statement
+    # COMPLIANT is the proposed building at 112.2% of target — a statement
     # about the proposed building, which is what a performance path is for.
+      #
+      # 112.3 -> 112.2 on 2026-10-10, and the freeze gate REFUSED the baseline
+      # until this number was authored rather than absorbed. D-102 put the PLF
+      # floor on the OUTPUT axis, so the cycling penalty now applies below PLR
+      # 0.7. This reference runs five multi-speed DX cooling coils carrying
+      # DXCOOL-REF-COOLPLFFPLR, so the reference burns MORE at low load, the
+      # target grows, and proposed/target falls. The direction was predicted
+      # before the number was read.
     {"id": "determination-03-18-vav-hw-subset-reheat-annual",
      "lane": "parity", "kind": "cli", "replaces": [],
      "argv": ["<CORPUS>/18-vav-hw-subset-reheat.osm",
@@ -421,7 +429,7 @@ DETERMINATION_SCENARIOS = [
           "value": 0.0},
          # And the verdict is about the PROPOSED building.
          {"op": "json_equals", "file": "report.json",
-          "path": "percent_of_target", "value": 112.3},
+          "path": "percent_of_target", "value": 112.2},
          {"op": "json_equals", "file": "report.json", "path": "compliant",
           "value": False},
      ]},

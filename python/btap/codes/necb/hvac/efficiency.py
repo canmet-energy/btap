@@ -2934,7 +2934,13 @@ def _apply_dx_cooling_multi(coil, tables, audit, capacity_w=None):
                                   'top_stage_kw': ruby_round(capacity_w / 1000.0, 1)},
                           value=f'COP {ruby_round(cop, 2)} ({label}) on all {len(coil.stages())} stages, '
                                 'binned by total capacity',
-                          article='NECB 2020 Table 5.2.12.1 (unitary equipment)', ruling='D-46')
+                          article='NECB 2020 Table 5.2.12.1 (unitary equipment)',
+                              # D-102 decides the PLF curve these stages carry;
+                              # D-46 decides the staging. Sample 18's reference
+                              # runs five of THESE coils and its determination
+                              # moved 112.3% -> 112.2% on D-102's bounds, so this
+                              # is the site where that change is observable.
+                              ruling='D-46 D-102')
 
 
 def dx_cooling_cop(row):
@@ -3000,7 +3006,13 @@ def _apply_dx_heating_multi(coil, tables, audit, capacity_w=None):
                                   'top_stage_kw': ruby_round(capacity_w / 1000.0, 1)},
                           value=f'heating COP {ruby_round(cop, 2)} ({label}) on all '
                                 f'{len(coil.stages())} stages',
-                          article='NECB 2020 Table 5.2.12.1 (heat pumps, heating)', ruling='D-46')
+                          article='NECB 2020 Table 5.2.12.1 (heat pumps, heating)',
+                              # D-102 decides the PLF curve these stages carry;
+                              # D-46 decides the staging. Sample 18's reference
+                              # runs five of THESE coils and its determination
+                              # moved 112.3% -> 112.2% on D-102's bounds, so this
+                              # is the site where that change is observable.
+                              ruling='D-46 D-102')
 
 
 def dx_heating_cop(row, capacity_w):
