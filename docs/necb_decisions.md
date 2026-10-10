@@ -911,6 +911,21 @@ tower fleet member):
 
 ## D-27 — SWH circulators are outside 8.4.4.14; transfer head reconciled
 
+**Superseded in part by [D-92](#d-92) (2026-09-16).** The head-reconciliation
+half below is history: D-92 deleted the mechanism rather than suppressing it.
+The reference pump is STATED — rated head, design shaft power per unit flow
+per unit head, motor efficiency — with rated power left autosized, so no
+computed power exists to repair, and `_reconcile_pump_head` and
+`DESIGN_PUMP_EFFICIENCY` are gone from the source. The account below is the
+2026-07-25/29 record and is kept as period evidence rather than rewritten
+(the D-99 pattern).
+
+What SURVIVES, and what D-92's resizing boundary still rests on, is the SCOPE
+ruling: a loop carrying a water heater or water-use connections is outside
+Article 8.4.x.14 entirely, and is excluded from the proposed-side intensity
+statistics. That is the premise established for both editions when D-27
+entered the pump component (Sol, `171`/`173`).
+
 First finding from the reference-system VARIANT matrix (gas fuel column —
 run at phylroy's direction after the coverage analysis showed the electric
 archetype fleet exercises only 4 of 14 catalog variants): all four gas
