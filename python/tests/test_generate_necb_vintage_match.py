@@ -891,5 +891,79 @@ class TestRendering(unittest.TestCase):
         self.assertFalse(document.endswith("\n\n"))
 
 
+class TestCurveClassificationIsNotOneVerdict(unittest.TestCase):
+    """The fifteen inherited curves are FOUR states, not one.
+
+    This file used to emit a single verdict for every curve matching
+    ("DXCOOL-", "DXHEAT-", "VarVolFan-", "SWH-"): `no edition table`, with the
+    detail "the NECB 2011 origin is legitimately retained". Both halves were
+    FALSE for the four fan rows — current Tables 8.4.4.17 / 8.4.5.17 DO
+    publish fan power versus flow, and the shipped cubics are not equivalent
+    to them (Sol, `169`/`171`).
+
+    The mutation this pins is the one that would restore that claim: give the
+    fans `no edition table` again, or drop them from the classification so
+    they fall back to it.
+    """
+
+    FANS = ("VarVolFan-AFBIFanCurve-FPLR", "VarVolFan-AFBIInletVanes-FPLR",
+            "VarVolFan-FCInletVanes-FPLR", "VarVolFan-VSD-FPLR")
+
+    def test_no_curve_is_classified_no_edition_table(self):
+        """The verdict that was false for a third of the rows is gone."""
+        verdicts = {name: klass for name, (klass, _a, _d)
+                    in gen.CURVE_CLASSIFICATION.items()}
+        self.assertNotIn(
+            "no edition table", set(verdicts.values()),
+            "one verdict covering four different states is how the fan "
+            "falsehood survived; classify per curve")
+
+    def test_the_fans_are_differs_with_a_measured_deviation(self):
+        for name in self.FANS:
+            klass, article, deviation = gen.CURVE_CLASSIFICATION[name]
+            self.assertEqual(
+                "differs (L-9)", klass,
+                f"{name}: a current table publishes this quantity and the "
+                "shipped cubic is not equivalent to it")
+            self.assertEqual("8.4.x.17.", article,
+                             f"{name}: must name the table it differs FROM")
+            self.assertIsNotNone(
+                deviation,
+                f"{name}: 'differs' without a magnitude is an assertion, not "
+                "evidence")
+            self.assertGreater(
+                deviation, 0.1,
+                f"{name}: the measured discrepancy is what makes this a "
+                "finding rather than a rounding note")
+
+    def test_the_fan_detail_states_the_MECHANISM_not_just_the_size(self):
+        """Column E as curve input where the Code uses column D as the flow
+        threshold — the thing a reader needs in order to act on this."""
+        detail = gen.CURVE_CLASS_DETAIL["differs (L-9)"].lower()
+        for phrase in ("column e", "column d", "dead data", "efficiency.py"):
+            self.assertIn(phrase, detail,
+                          f"the fan detail must say {phrase!r}: a magnitude "
+                          "alone does not tell a reader why, or that nothing "
+                          "reads these rows")
+
+    def test_every_class_has_a_detail_and_every_detail_a_class(self):
+        """No class may print an empty explanation, and none may be dead."""
+        classes = {klass for klass, _a, _d in gen.CURVE_CLASSIFICATION.values()}
+        self.assertEqual(
+            classes, set(gen.CURVE_CLASS_DETAIL),
+            "a class with no detail prints nothing; a detail with no class is "
+            "unreachable text")
+
+    def test_every_class_is_ordered_for_the_summary(self):
+        for klass in set(gen.CURVE_CLASS_DETAIL):
+            self.assertIn(
+                klass, gen.VERDICT_ORDER,
+                f"{klass!r} must have a sort ordinal or the summary table "
+                "raises on it")
+        ordinals = [gen.VERDICT_ORDER[k] for k in gen.VERDICT_ORDER]
+        self.assertEqual(len(ordinals), len(set(ordinals)),
+                         "two verdicts sharing an ordinal sort unstably")
+
+
 if __name__ == "__main__":  # pragma: no cover
     unittest.main()

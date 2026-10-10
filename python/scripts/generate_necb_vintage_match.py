@@ -1112,8 +1112,19 @@ class FileResult:
             self.verdict = "identical"
 
 
-VERDICT_ORDER = {"identical": 0, "differs": 1, "no edition table": 2,
-                 "not comparable without a mapping": 3}
+VERDICT_ORDER = {
+    "identical": 0,
+    "identical to rounding": 1,
+    "differs": 2,
+    "differs (L-9)": 3,
+    "from the article": 4,
+    "derived": 5,
+    "not prescribed": 6,
+    "no edition table": 7,
+    "no inherited curve": 8,
+    "not implemented (D-89)": 9,
+    "not comparable without a mapping": 10,
+}
 
 
 # --------------------------------------------------------------------------
@@ -2119,8 +2130,10 @@ def compare_efficiencies(res: FileResult, numbers: list[str],
                 (f"curves[{rec['name']}]" if rec["name"] else f"curves[{rec['label']}]",
                  _fmt(rec["shipped"]), rec["detail"]))
     res.counts["shipped curves"] = len(shipped.get("curves", []))
-    for verdict in ("identical to rounding", "differs", "no edition table",
-                    "no inherited curve", "not implemented (D-89)"):
+    for verdict in ("identical to rounding", "differs", "differs (L-9)",
+                    "from the article", "derived", "not prescribed",
+                    "no edition table", "no inherited curve",
+                    "not implemented (D-89)"):
         n = sum(1 for r in records if r["verdict"] == verdict)
         if n:
             res.counts[f"curves — {verdict}"] = n
@@ -2163,9 +2176,80 @@ CURVE_TABLES = {
     "absorption_firft": {"necb2020": "8.4.5.8.-C", "necb2025": "8.4.6.8.-C"},
 }
 
-#: Curves neither edition publishes a table for. The NECB 2011 origin is
-#: legitimately retained; Phase B must record it as such, never silently.
-NO_EDITION_TABLE_PREFIXES = ("DXCOOL-", "DXHEAT-", "VarVolFan-", "SWH-")
+#: The inherited curves outside the equipment tables, CLASSIFIED PER CURVE.
+#:
+#: This was one prefix tuple — ("DXCOOL-", "DXHEAT-", "VarVolFan-", "SWH-") —
+#: emitting a single verdict, "no edition table", with the detail "the NECB
+#: 2011 origin is legitimately retained". Both halves were FALSE for the four
+#: fan rows: current Tables 8.4.4.17 / 8.4.5.17 DO publish fan power versus
+#: flow, and the shipped cubics are not equivalent to them (Sol, `169`/`171`).
+#:
+#: One verdict was hiding four different states, so the classification is now
+#: authored per curve with its reason:
+#:
+#:   not prescribed     the Code prescribes no such curve; an OpenStudio
+#:                      default is used and the note says so
+#:   from the article   the current Article publishes the coefficients and the
+#:                      shipped values are them, after the degF->degC
+#:                      substitution where applicable
+#:   derived            the current Article publishes a DIFFERENT quantity and
+#:                      the shipped curve is a stated transform of it (PLF =
+#:                      PLR / EIR_FPLR), so coefficients cannot be compared
+#:                      directly
+#:   differs (L-9)      a current table EXISTS and the shipped values are not
+#:                      equivalent to it. SUPERSEDED DEAD DATA: runtime uses
+#:                      the table's own A/B/C and the D flow threshold
+#:                      directly in `efficiency.py`, and no runtime consumer
+#:                      of these four curve names exists.
+CURVE_CLASSIFICATION = {
+    # -- the Code prescribes no flow-fraction curve at all ------------------
+    "DXCOOL-REF-CAPFFLOW": ("not prescribed", "8.4.x.4.", None),
+    "DXCOOL-REF-COOLEIRFFLOW": ("not prescribed", "8.4.x.4.", None),
+    "DXHEAT-REF-CAPFFLOW": ("not prescribed", "8.4.x.7.", None),
+    "DXHEAT-REF-EIRFFLOW": ("not prescribed", "8.4.x.7.", None),
+    # -- the Article's own published coefficients ---------------------------
+    "DXCOOL-REF-CAPFT": ("from the article", "8.4.x.4.(3)", None),
+    "DXCOOL-REF-COOLEIRFT": ("from the article", "8.4.x.4.(7)", None),
+    "DXHEAT-REF-CAPFT": ("from the article", "8.4.x.7.(3)", None),
+    "DXHEAT-REF-EIRFT": ("from the article", "8.4.x.7.(7)", None),
+    # -- a stated transform of the Article's own quantity -------------------
+    "DXCOOL-REF-COOLPLFFPLR": ("derived", "8.4.x.4.(5)", None),
+    "DXHEAT-REF-PLFFPLR": ("derived", "8.4.x.7.(5)", None),
+    "SWH-EFFFPLR": ("derived", "8.4.x.9.(2)", None),
+    # -- a current table exists and the values are NOT equivalent ----------
+    # The third element is the measured maximum |P/Pr| discrepancy over the
+    # Code's own flow range [D, 1.0], with the shipped curve's input bounds
+    # applied as EnergyPlus applies them.
+    "VarVolFan-AFBIFanCurve-FPLR": ("differs (L-9)", "8.4.x.17.", 0.382),
+    "VarVolFan-AFBIInletVanes-FPLR": ("differs (L-9)", "8.4.x.17.", 0.168),
+    "VarVolFan-FCInletVanes-FPLR": ("differs (L-9)", "8.4.x.17.", 0.446),
+    "VarVolFan-VSD-FPLR": ("differs (L-9)", "8.4.x.17.", 0.468),
+}
+
+#: The detail printed for each class. The fan text states the mechanism, not
+#: just the magnitude: the shipped records use the table's column E as the
+#: CURVE-INPUT minimum (0.68/0.50/0.22/0.04) where the Code uses column D as
+#: the FLOW THRESHOLD (0.47/0.35/0.25/0.20).
+CURVE_CLASS_DETAIL = {
+    "not prescribed": (
+        "neither edition prescribes this curve — the Article names no "
+        "flow-fraction dependence — so an OpenStudio default is used and "
+        "STATED in the note, not silently inherited"),
+    "from the article": (
+        "no TABLE, but the current Article publishes these coefficients in "
+        "its own sentences and the shipped values are them"),
+    "derived": (
+        "no TABLE, and the current Article publishes a DIFFERENT quantity: "
+        "the shipped curve is a stated transform of it (PLF = PLR / "
+        "EIR_FPLR), so its coefficients are not comparable directly"),
+    "differs (L-9)": (
+        "a current table DOES publish fan power versus flow, and the shipped "
+        "cubic is not equivalent to its quadratic. SUPERSEDED DEAD DATA: the "
+        "records use the table's column E as the curve-input minimum where "
+        "the Code uses column D as the flow threshold, runtime applies the "
+        "table's own A/B/C and the D threshold directly in `efficiency.py`, "
+        "and no runtime consumer of these four curve names exists (L-9)"),
+}
 
 #: How close two coefficient sets must be to count as the same numbers at the
 #: precision the snapshot publishes (6 significant figures).
@@ -2621,19 +2705,25 @@ def curve_records(edition_id: str) -> list[dict]:
             label = row.get("Type of Absorption Chiller") or "absorption"
             records.append(_no_shipped(f"{label} {quantity}", number))
 
-    # -- curves neither edition publishes ----------------------------------
+    # -- the inherited curves outside the equipment tables ------------------
+    # Classified PER CURVE: one verdict used to cover four different states,
+    # and for the fans both the verdict and its detail were false.
     for name, curve in sorted(curves.items()):
-        if not name.startswith(NO_EDITION_TABLE_PREFIXES):
+        classified = CURVE_CLASSIFICATION.get(name)
+        if classified is None:
             continue
+        klass, article, deviation = classified
+        detail = CURVE_CLASS_DETAIL[klass]
+        if deviation is not None:
+            detail += (f" — measured maximum |ΔP/Pr| {deviation:.3f} over the "
+                       "Code's own flow range")
         records.append({
-            "klass": "no edition table", "name": name, "label": name,
-            "table": "—", "relation": "—", "verdict": "no edition table",
-            "detail": ("neither edition publishes a table for this quantity; the "
-                       "NECB 2011 origin is legitimately retained and must be "
-                       "STATED in provenance, not silently inherited"),
+            "klass": klass, "name": name, "label": name,
+            "table": article, "relation": "—", "verdict": klass,
+            "detail": detail,
             "shipped": [c for c in _coeffs(curve, 10) if c is not None],
             "edition": None, "converted": None, "errata": [],
-            "deviation": None, "points": [],
+            "deviation": deviation, "points": [],
         })
     records.sort(key=lambda r: (r["klass"], r["label"]))
     return records
