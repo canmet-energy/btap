@@ -442,11 +442,15 @@ DETERMINATION_SCENARIOS = [
          # declares applicability — `json_in` is the wrong op here, it checks
          # that a value is one of a list rather than that a list contains one.
          {"op": "audit_entry", "ahj": "AHJ-2", "count": 1},
-         # Second that this run reaches a DETERMINATION at all, which is the
-         # one thing no frozen artifact proved for AHJ-2. The exact id list
-         # and verdict are pinned by the frozen report.json itself.
-         {"op": "json_exists", "file": "report.json",
-          "path": "compliance_determination"},
+         # Second that this run reaches a DETERMINATION, which is the one
+         # thing no frozen artifact proved for AHJ-2. Measured on a full-year
+         # probe before this was authored, so the id list is pinned rather
+         # than left to whatever the freeze happened to produce.
+         {"op": "json_equals", "file": "report.json",
+          "path": "compliance_determination", "value": "conditional"},
+         {"op": "json_equals", "file": "report.json",
+          "path": "compliance_determination_reason.ahj_ids",
+          "value": ["AHJ-1", "AHJ-2", "AHJ-14"]},
      ]},
 
     # GUARD 7 for AHJ-1 and AHJ-3 (Sol's `127`: one ANNUAL frozen artifact per
