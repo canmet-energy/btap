@@ -33,10 +33,10 @@
       "title": "NECB text reproduction (Crown copyright)",
       "kind": "process",
       "articles": {
-        "unverified": []
+        "not_applicable": []
       },
       "editions": [
-        "unverified"
+        "not_applicable"
       ],
       "summary": "Generated coverage documents committed to the public repository may quote NECB article text in full, because NRCan is the Crown and the code's copyright belongs to the Government of Canada. This decision scopes where verbatim code text is allowed: the generated coverage HTML and its article cache, not arbitrary source or data files."
     },
@@ -163,10 +163,10 @@
       "title": "Remaining adjudications delegated, with mandatory logging",
       "kind": "process",
       "articles": {
-        "unverified": []
+        "not_applicable": []
       },
       "editions": [
-        "unverified"
+        "not_applicable"
       ],
       "summary": "The project owner delegated the remaining queued interpretation decisions, on the condition that every judgement call is logged as a numbered decision entry, self-contained enough to be reversed on later review. Entries marked as made under this delegation were decided on the best evidence-backed recommendation rather than by direct instruction."
     },
@@ -450,10 +450,10 @@
       "title": "Upstream issues carry explicit Claude authorship",
       "kind": "process",
       "articles": {
-        "unverified": []
+        "not_applicable": []
       },
       "editions": [
-        "unverified"
+        "not_applicable"
       ],
       "summary": "At the project owner's direction, upstream issues drafted by the AI assistant state that authorship in the issue body, even when submitted from a human account for access reasons. The note was also applied retroactively to previously filed issues. This is a standing rule for future filings and supersedes an earlier no-attribution convention."
     },
@@ -462,10 +462,10 @@
       "title": "Legacy findings ledger cleared upstream",
       "kind": "process",
       "articles": {
-        "unverified": []
+        "not_applicable": []
       },
       "editions": [
-        "unverified"
+        "not_applicable"
       ],
       "summary": "Eight legacy-library findings were filed upstream as three grouped issues covering reference-system selection, reference modelling rules, and a construction film-convention disagreement. After this the ledger had no unfiled rows, leaving only entries that were still under investigation."
     },
@@ -503,10 +503,10 @@
       "title": "Variant mockups exercise the never-fleet-tested reference routes",
       "kind": "process",
       "articles": {
-        "unverified": []
+        "not_applicable": []
       },
       "editions": [
-        "unverified"
+        "not_applicable"
       ],
       "summary": "A coverage audit showed the archetype fleet only ever selects a handful of reference system types, leaving several build routes never exercised end to end. Seven synthetic mockup models were generated so that every reference route runs through the full pipeline including sizing. This also surfaced a space-type keyword-ordering collision affecting museum exhibition areas, queued for adjudication."
     },
@@ -695,10 +695,10 @@
       "title": "Decision rulings surfaced at runtime in the audit log and AHJ report",
       "kind": "process",
       "articles": {
-        "unverified": []
+        "not_applicable": []
       },
       "editions": [
-        "unverified"
+        "not_applicable"
       ],
       "summary": "Adjudicated decisions previously lived only in project documentation, so a user running the pipeline never learned why a ruled code path behaved as it did. Audit entries now carry an optional ruling tag citing decision identifiers alongside the existing code-article citation, this registry mirrors every decision in machine-readable form with a self-contained summary, and the compliance report renders an appendix listing the decisions that actually fired in the run. Purely additive: no determination behaviour changes."
     },
@@ -1133,10 +1133,10 @@
       "title": "Clarity restructure: aliased public renames + the openstudio-audit gem",
       "kind": "process",
       "articles": {
-        "unverified": []
+        "not_applicable": []
       },
       "editions": [
-        "unverified"
+        "not_applicable"
       ],
       "summary": "The restructure pass renamed four public surfaces with back-compat aliases - the reference-ASHP catalog marker (heat_source ashp, replacing a DX heating-coil misnomer), the geometry facade's storeys vocabulary, the single daylighting placement selector with option as a deprecated alias, and the extraction of the shared audit log and coverage emitter into the openstudio-audit gem, retiring six synchronized copies. Every rename was proof-gated: canonical names and built model objects byte-identical, the selection golden green including the full matrix, and the coverage-emitter unification shown behavior-neutral by an empty before-and-after citation-count diff."
     },
@@ -1145,10 +1145,10 @@
       "title": "The nrcan merge absorbed: SHW flip, daylighting-port tracking, SHA-keyed caches",
       "kind": "process",
       "articles": {
-        "unverified": []
+        "not_applicable": []
       },
       "editions": [
-        "unverified"
+        "not_applicable"
       ],
       "summary": "Merging the upstream branch brought our own defect-fix pull request into the legacy tree, so the gem family's deliberate legacy-parity concessions flipped: the water-heater tank sizing now uses the true hour after the peak (the preserved sorted-array defect is retired and the live parity gate passes on the corrected side), the quarantined 2011 daylighting port mirrors legacy as fixed (the any-single-criterion, skylight-accumulation and office-name defects are gone from both sides), and the archetype generation caches are now keyed by the legacy-subtree revision so library changes invalidate them automatically instead of silently reusing stale models. The full-annual fleet baseline is stale pending a refresh because regenerated archetypes now carry corrected tanks and daylighting controls."
     },
@@ -1157,10 +1157,10 @@
       "title": "The legacy-parity oracle is pinned to a revision (legacy_pin)",
       "kind": "process",
       "articles": {
-        "unverified": []
+        "not_applicable": []
       },
       "editions": [
-        "unverified"
+        "not_applicable"
       ],
       "summary": "The parity gates now compare against a bundler-pinned checkout of the fork at an explicit revision, with a committed lockfile, instead of the in-tree working copy. The published RubyGems release is never the pin because it is the upstream release line rather than the fork's NECB and BTAP state; the default remote is the local repository to avoid multi-gigabyte clones; the tbd, osut and topolys triplet is pinned to the oracle-era resolution because a floating osut changes generated insulation materials; legacy's undeclared runtime dependencies are declared in the pin Gemfile; and a required-mode environment flag turns missing-oracle skips into failures so a parity gate can never pass vacuously. Bumping the revision is a deliberate, attributed event."
     },
@@ -1169,10 +1169,10 @@
       "title": "Hospital and Outpatient removed from routine sweeps",
       "kind": "process",
       "articles": {
-        "unverified": []
+        "not_applicable": []
       },
       "editions": [
-        "unverified"
+        "not_applicable"
       ],
       "summary": "The two largest archetypes are excluded from the routine sweep fleet by the owner's ruling because their capacity-iterated full-annual chains dominated the sweep's wall-clock while moving least; they remain runnable by name. The routine full-annual baseline becomes fifteen buildings by two vintages. The acknowledged coverage loss - hospital-scale outdoor-air and energy-recovery determinations, humidification, the health-care selection rows - is to be recovered later by a small synthetic stress-fixture suite; until then, changes touching those paths should run the pair explicitly."
     },
@@ -1181,10 +1181,10 @@
       "title": "Measured-footprint massing lands in openstudio-geometry",
       "kind": "process",
       "articles": {
-        "unverified": []
+        "not_applicable": []
       },
       "editions": [
-        "unverified"
+        "not_applicable"
       ],
       "summary": "Turning a real building outline into a model belongs in the geometry gem, as a peer of the shape-wizard entry point rather than an eighth member of its shape enum, because a coordinate ring is not the set of positional scalars that enum dispatches. The gem stays offline and SDK-only: projection, winding and spike normalisation, decimation, mitred core-perimeter offsetting and storey stacking landed, while fetching records, choosing a storey height and mapping a building class to space types remain the caller's job. Storey height is a facade parameter with an audit entry, never a constant - the same measured tower yields twenty-seven, twenty-four or twenty-two storeys depending on the height assumed, a twelve percent floor-area spread. Perimeter depth and decimation tolerance both default to automatic, and core-perimeter viability is decided by wall-run length against the offset depth rather than by vertex count or concavity."
     },
@@ -1193,10 +1193,10 @@
       "title": "The building-stock adapter is a script, not a gem file",
       "kind": "process",
       "articles": {
-        "unverified": []
+        "not_applicable": []
       },
       "editions": [
-        "unverified"
+        "not_applicable"
       ],
       "summary": "The networked fetch adapter lives in the geometry gem's scripts directory, which no gem packages because every file manifest covers only the library directory, so the adapter sits beside its only consumer while the gem itself stays offline and the massing code never learns where a ring came from. Credentials are never hardcoded: the endpoint and key resolve at runtime from environment variables, falling back to the ignored local server configuration, and the key is never printed, cached, or stamped onto a model. Provenance is written to the building's additional properties rather than to the standards building type, so a measured massing never masquerades as a tagged archetype."
     },
@@ -1258,10 +1258,10 @@
       "title": "The family is sliced by nature: five btap-* gems replace the nine openstudio-* gems",
       "kind": "process",
       "articles": {
-        "unverified": []
+        "not_applicable": []
       },
       "editions": [
-        "unverified"
+        "not_applicable"
       ],
       "summary": "audit/simulation/modeling/costing/necb, one-way dependencies (necb -> costing -> modeling -> audit), flat Btap* modules because the oracle's module BTAP is live in-process in ten parity gates, coverage attribution by domain label, and the costing->necb daylighting call inverted into a provider. Accepted costs: rule and mechanism for one domain span two gems; NECB-vocabulary data keys stay in the generic gems as catalog identifiers."
     },
@@ -1270,10 +1270,10 @@
       "title": "Three-way verification for the Python migration: gates, run diffs, and direct oracle goldens",
       "kind": "process",
       "articles": {
-        "unverified": []
+        "not_applicable": []
       },
       "editions": [
-        "unverified"
+        "not_applicable"
       ],
       "summary": "Leg A: the eleven parity gates (Ruby vs pinned oracle, via shared probe code). Leg B: a Python, spec-driven differ over both CLIs' audit/report JSON, self-tested Ruby-vs-Ruby. Leg C: goldens frozen FROM the oracle under the pin, consumed directly by the Python port so a faithfully-ported bug still fails; a currency meta-test pins the goldens to legacy_pin/REF."
     },
@@ -1282,10 +1282,10 @@
       "title": "The Ruby to Python port: milestone order, the _compat parity contracts, and two forced divergences",
       "kind": "process",
       "articles": {
-        "unverified": []
+        "not_applicable": []
       },
       "editions": [
-        "unverified"
+        "not_applicable"
       ],
       "summary": "Bottom-up milestones (audit, simulation, modeling, costing, necb domains, umbrella), each landing only when its ported Ruby suites AND its slice of the D-78 verification pass. One pip distribution with five subpackages; the D-77 arrows enforced by import-linter, plus a contract keeping btap.audit SDK-free. Cross-cutting Ruby semantics live in _compat (ruby_round half-away incl. non-finite, ruby_div never raising, opt/opt_or, sorted_by_name, NullAudit, esc/ruby_str) and _sdk (ensure_sdk_hashable), each pinned against real Ruby output. Forced divergences: the wheel has no CLI so the Local backend translates in-process and spawns a provisioned EnergyPlus (WarmupFlag differs, test-only); Ruby module reopening becomes a re-exported module, preserving the legacy-2011 daylighting quarantine. Ruby stays frozen except bugfixes as the Leg-B baseline. Never call .get() on an unchecked SDK Optional: OptionalModel.get() on an empty optional returns an EMPTY model instead of raising, and other empty Optionals raise SystemError that can later segfault — use _compat.opt(). The catalog seed model is runtime-owned in both languages (gem lib/, Python package resources) with two separately tested contracts: the default resolves from an install, and an unreadable seed raises rather than degrading; an installed-wheel smoke gate runs outside the checkout. Leg C covers 2020 only and structurally cannot cover 2025, because the pinned oracle predates that edition."
     },
@@ -1294,10 +1294,10 @@
       "title": "Retiring the Ruby gems: the python-prep / ruby-probe live Leg C, the request manifest, and the freeze-first retirement path",
       "kind": "process",
       "articles": {
-        "unverified": []
+        "not_applicable": []
       },
       "editions": [
-        "unverified"
+        "not_applicable"
       ],
       "summary": "The btap Ruby gems will be retired in favour of the Python implementation — freeze first (R3 primacy flip), delete later (R6) — and the verification chain is decoupled from the gems now. openstudio-standards is Ruby forever, so the oracle side always runs Ruby as pinned infrastructure (legacy_pin/ + verification/oracle/), never as product. Live Leg C is python-prep / ruby-probe: an implementation-independent committed request manifest (schedule names, costing candidates, a recursive typed golden inventory with per-list comparison modes, the goldens pytest file list + collected count) so Python never defines both question and expected answer; a gem-free Ruby exporter whose gem-tainted prep chains moved wholly to Python (oracle_prep.py, composition contracts, full provenance incl. dirty state and the OpenStudio identity as sdk_version+build_sha, hard version-skew failure, atomic completeness-gated exact-set publication); and one live run proving BOTH Python == live oracle (zero skips, pass count == manifest collected count) AND committed goldens == live oracle (tbd_rsi absorbed at 1e-6; the WWR wall stays the historical SDK-iteration-order Surface 8 — sorted selection is its own adjudicated change). The manifest bootstrap was the last gem-derived act, recorded with source hashes. Registry authority: Ruby's decisions.json is authoritative through the support window and synced to the Python copy by generation (this repaired the Python copy's silent drift to 78 entries, missing D-79); Python becomes authoritative at R3. Leg A stays green until R6; gate 2's assembly premise stays the accepted loss; order-independent of the parked REF bump / TBD 3.6.x rebaseline. Review of record: docs/d80_retirement_plan_review.md."
     },
@@ -1306,10 +1306,10 @@
       "title": "The R3 primacy flip: the Python implementation is canonical and primary; the Ruby registry copy is generated; same-PR backports continue only until R4's verification handoff",
       "kind": "process",
       "articles": {
-        "unverified": []
+        "not_applicable": []
       },
       "editions": [
-        "unverified"
+        "not_applicable"
       ],
       "summary": "The Python implementation is now primary and canonical (adjudicated 2026-08-29, with the decisive fact that the Ruby gems have ZERO users — there is no support window and nothing to deprecate; Ruby's remaining role is verification only). The decisions registry's authority reversed as MACHINERY, not policy text: python/btap/necb/data/decisions.json is the one hand-maintained registry, the Ruby gem's copy is generated from it by python/scripts/sync_decisions_registry.py, the doc and TOC stay synchronized with the canonical source, and CI checks generation in the new direction on every PR (a named lint gate plus the pytest sync test), with the two-sided runtime-citation invariant now enforced on the Python side by an AST-based scanner as well as by the Ruby test. A behaviour change lands Python-first WITH its Ruby backport in the SAME PR so Leg B stays green at every commit; backports stop only when R4's verification handoff completes — scenario suite frozen and validated, the Ruby-vs-Python Leg-B gates removed from required CI, their drivers dormant for R6 deletion — never merely when R4 'lands'. Leg A keeps its dispatch cadence until R6. NOT flipped here: the decision doc's location and the TOC generator (both move at R6; the generator deliberately reads the generated Ruby copy — identity makes those the canonical bytes), the fixture-drift direction (Ruby-authoritative until R6), packaging/windows, and the Ruby CLI's output streams (frozen verbatim by R4). The README now presents the Python implementation as the product with an honest SOURCE install (the package is unpublished; 'pip install btap' is reserved for a future publication decision), and the Ruby Windows installer stays buildable but unrecommended until the R5 Python installer. Rejected: recording this as a D-80 amendment (amendment sub-headings are not mirrored into the registry, so it would exercise none of the flipped machinery — this very entry landing through the new direction is the proof of the flip); porting the TOC generator now (forks tooling ahead of the doc's R6 move); a policy-text-only flip (fails the machinery-reversal acceptance criterion). Registry grammar note: ids are D-NN (two digits); before allocating a hundredth decision, adjudicate the successor id format and update the regexes, TOC sorting, registry tests, and report parsing TOGETHER, in both implementations. AMENDED 2026-09-29 (Sol): the machinery statements above are the R3 period record and are superseded. One decision is now one file, docs/decisions/D-NN.md, carrying TOML front matter (id, title, kind, articles, summary) plus the authored Markdown body, and THAT file is canonical; both docs/necb_decisions.md and python/btap/codes/data/decisions.json are generated from the sources by python/scripts/generate_decisions.py, whose --check is the single drift gate in CI, so there is one writer where R3 had a hand-maintained JSON beside hand-authored prose and R6 had a second generator for the index alone. Both artifacts are emitted in NUMERIC id order: document order, registry order and numeric order were three different sequences diverging over D-53 to D-65, the document's 'chronological' claim was false there (2026-08-02 entries preceded 2026-07-29 ones), and chronology is not a durable generator invariant because decisions acquire later amendments and ids are occasionally reserved, so the claim is withdrawn rather than repaired. The front-matter title is the compact index/runtime title and the body's heading is authored prose; they differ for 69 of 97 decisions by design, and the generator emits every d-NN anchor, outside every authored body, so commenting a body out cannot orphan a fragment. Unchanged: the Python runtime-citation invariant, whose two-sided form ended at D-84, and the paraphrase rule. The migration rewrote no decision's text, but the partition is not uniform: of the 97 bodies 83 carried byte-for-byte, 13 of the remaining 14 changed in their first line alone (each taking the registry title it already carried in the index), and D-81 changed in its first line and by gaining this amendment. In the registry 96 entries are unchanged and only D-81's summary moved, so the registry's content moved exactly once."
     },
@@ -1318,10 +1318,10 @@
       "title": "The R4 verification handoff is complete: the frozen scenario suite replaces the live Ruby-vs-Python Leg-B gates, the drivers are dormant, and Ruby backports stop",
       "kind": "process",
       "articles": {
-        "unverified": []
+        "not_applicable": []
       },
       "editions": [
-        "unverified"
+        "not_applicable"
       ],
       "summary": "Leg B's successor is live and Leg B is switched off (2026-08-29). The frozen scenario suite — 35 scenarios (python 30 / verify 3 / parity 2), sealed against the Ruby implementation at freeze time (29 mirrored-argv CLI seals comparing exit codes plus audit.json/report.json under the spec rules, exactly what live Leg B proved; 2 Ruby API seals — thermal bridging via the ruby_tbd_compliance driver with structured non-vacuity on both sides, and the audit-unit scenario which alone carries the B6 audit-text BYTE contract; 4 recorded python-only seals with reasons) — replaced gates B1-B7 and B9; B8 (TBD.process engine parity, TBD_REQUIRED) stays ACTIVE until R6 because it guards the pinned py-tbd/Ruby-tbd equivalence, not the pipeline. The suite pins its own interpreter machinery (freezer, definitions, runner, and gate sha256s are in the manifest and verified at runtime), proves provenance ancestry in CI (fetching history; unknown fails in required mode), stores baselines in canonical stripped form, and re-freezes atomically with proven restore-on-failure. The DORMANT SKIP is hereby an adjudicated third skip category beside dependency skips and failures: a dormant gate names its replacement scenario, its reactivation flag (BTAP_LEGB=1), and its deletion milestone (R6); CI deliberately does not set the flag; behavioural rot until R6 is ACCEPTED and bounded only by an import/collection canary; the dormant surface is PINNED (three test classes, three drivers) so the exemption cannot quietly broaden. generate_samples.py is now the sole corpus generator — its witness is the slug manifest contract plus the frozen outputs themselves. Declared-uncovered, honestly: the 8.4.1.2.(5) capacity-iteration failure branch (nothing of it frozen; unit tests only) and the full-year end-to-end determination (verdict-unit scenarios freeze exits 0/1 at unit level; live Leg B never covered them end-to-end either). Re-freeze protocol: an intentional behaviour change re-runs freeze.py on a clean tree and commits baselines WITH the change; post-handoff re-freezes are python-only:post-handoff — originally-sealed baselines carry the Ruby seal as a freeze-moment statement, never a standing property. Attestation: the PR-1 coexistence dispatch (run 33270979482 era culminating in 33271516644 at b7ffe4a) showed all three frozen lanes green BESIDE every live Leg-B gate; the sealed baseline provenance lives in the scenario manifest; the PR-2 handoff run stays external evidence in its PR record, never written back here. WITH THIS DECISION RUBY BACKPORTS STOP: behaviour changes are Python-only; the Ruby gems are frozen verification infrastructure (Leg A until R6) and their unit suites keep running in CI only to prove the frozen code still passes under environment changes."
     },
@@ -1330,10 +1330,10 @@
       "title": "R5 distribution: full PyPI publication, the canmet-energyplus engine wheel published from its own repository, and the Python Windows installer succeeding the Ruby one",
       "kind": "process",
       "articles": {
-        "unverified": []
+        "not_applicable": []
       },
       "editions": [
-        "unverified"
+        "not_applicable"
       ],
       "summary": "The zero-thought distribution goal is adjudicated (2026-08-30): pip install btap[tbd] on Windows x86-64 or supported glibc-based Linux x86-64 installs everything — EnergyPlus included — and simulations run locally with no user setup. Mechanism: a per-platform canmet-energyplus engine wheel, published from canmet-energy/canmet-energyplus rather than this repository (py3-none-win_amd64 plus a manylinux wheel whose tag is EARNED by an auditwheel PEP 600 compliance audit with recursive ELF closure, validated inside the oldest-claimed manylinux container — never derived from a symbol scan) carrying the pinned E+ 25.2.0 as package data: NREL asset sha256-verified BEFORE pruning, prune-list of python_lib/pyenergyplus plus Documentation/ExampleFiles/PreProcess (49 MB of PDFs, 28 MB of sample models and 23 MB of auxiliary tools, none reachable from a simulation run — the pruned wheel is 63 MB against PyPI's 100 MB per-file cap, which the unpruned 164 MB build exceeded; ExpandObjects, the one preprocessor btap invokes, sits at the payload root and is keep-listed; libpython is a verified NEEDED dependency of the energyplus binary and ships), exec bits recorded in wheel external_attrs with a runtime chmod backstop, and a PROVENANCE.json naming source hashes, prune/keep manifests, licenses, and modifications. btap depends on the companion as a HARD platform-marked EXACT pin (canmet-energyplus==25.2.0.2 — a repackaging requires a corresponding btap release, as the 25.2.0.1 to 25.2.0.2 prune change did; the runtime version cross-check is defense in depth, never identity), and the engine resolution order becomes: version gate, BTAP_ENERGYPLUS override (raises on bad — the frozen exit-4 scenario's premise, now unit-pinned), the companion (FAIL-CLOSED once imported: absence on optional platforms is the only fall-through; any defect after import raises), the unverified cache, the archive rung, the NREL download. The mandatory clean-tree re-freeze accompanied the resolution change per D-82's unconditional contract, with the expected identical-output result recorded as the proof of non-regression; the original Ruby seals remain the freeze-time origin seal until R6. Publication ownership is singular: py-topolys 0.1.0 (exactly the D-79 pinned SHA) and py-tbd 3.5.2 (the pinned implementation tree plus one mechanically constrained metadata-only commit, diff-proven) are built, rehearsed on TestPyPI, and published each from its own repository; this repository publishes only canmet-btap, in ONE workflow run per release (the engine wheel moved OUT: two projects cannot publish from one repository and workflow, because a trusted-publishing exchange mints a token for ONE project and resolves the run's claims against every registered publisher — co-location forced distinct environments, four publish jobs, and a registration collision, all of which vanish with one project per repository. canmet-energyplus is therefore a third singly-owned upstream beside py-topolys and canmet-tbd, and it owns the packaged-platform asset identity while btap keeps its own compatible-version and fallback-download data — the duplication is checked in the wheel gate, never assumed) — build once as immutable artifacts, digest-manifested, validated per platform (Linux: ELF closure and a real sizing run in the floor container; Windows: PE closure and a real sizing run on the exact digest), uploaded to TestPyPI, installed from TestPyPI alone, then promoted to PyPI from the same run artifacts behind a protected-environment approval — production never re-invokes a builder. The Windows installer becomes embedded CPython 3.12 (both the openstudio cp312 Windows wheel and rpds-py pin that minor) plus a PRE-INSTALLED site-packages tree staged by cross-platform pip on Linux, replacing the Ruby installer as the v-tag artifact; versions unify at tag = btap.__version__ = iss AppVersion; the Ruby windows:* rake tasks go dormant behind BTAP_RUBY_INSTALLER=1 (extending D-82's dormancy category to packaging, deleted at R6); the installer newly ships the placeholder costing CSVs deliberately (the PRICED_CSVS exclusion protects licensed RS-Means values, which are runtime-injected and never committed — one artifact behavior beats two); a generated third-party license inventory gates every release, with the LGPL source obligation met by the shipped .py sources plus a written source offer under human legal review. On musl or older-glibc Linux, pip install btap fails resolution BY DESIGN, documented with a tested metadata-generated escape procedure. Rejected: an [engine] extra (pip has no default extras — fails the goal on exactly its target population); .postN companion versioning (a prune change is functional); a wildcard companion pin; setup-time pip on the user machine; download-only distribution (the first-run surprise and the TLS-intercept failure the archive rung exists for); a frozen-scenario installer lane (edits the pinned gate for zero seal value)."
     },
@@ -1342,10 +1342,10 @@
       "title": "R6 retirement: Python is the sole product implementation while the pinned Ruby oracle survives",
       "kind": "process",
       "articles": {
-        "unverified": []
+        "not_applicable": []
       },
       "editions": [
-        "unverified"
+        "not_applicable"
       ],
       "summary": "The five btap Ruby gems retire after the exact-SHA final attestation at 85ab14352677093e24038d933cf1071e5b03431a (GitHub Actions run 33544573991): 45 Ruby parity runs / 629 assertions plus the Ruby SmallOffice gate (3 runs / 62 assertions), Python successor (4 passed), live Leg C (23/23), frozen parity scenarios, verify, Python, lint, and all gem matrix jobs passed with zero parity skips. Product Ruby is distinct from the permanent oracle: legacy_pin/ and verification/oracle Ruby probes remain pinned infrastructure. Thirty-one cross-language scenario seals become active python-only:post-handoff seals while retaining their original 29 Ruby and 2 Ruby-API attestations, commit, run id and URL; four historical Python-only seals remain unchanged. Python manifests now cite Python implementation owners, durable project documents live under docs/, and the NECB 2020/2025 Section 8.4 article caches ship as attributed, offline package reference data whose Crown text is explicitly outside the LGPL code license."
     },
@@ -1368,10 +1368,10 @@
       "title": "R-B: btap.necb becomes btap.codes, and the 2025-only halves of tiers.py move beside their edition",
       "kind": "process",
       "articles": {
-        "unverified": []
+        "not_applicable": []
       },
       "editions": [
-        "unverified"
+        "not_applicable"
       ],
       "summary": "Stage 1 of the multi-edition refactor (R-B, docs/NECB_MULTI_EDITION_PLAN.md), adjudicated 2026-09-08, is a PATH-ONLY change: the Python package btap.necb becomes btap.codes, with btap.codes.necb holding the NECB code family (the five rule domains, the NECB rule tables, and tiers.py), and the code-family-neutral data — the decisions registry and the Section 8.4 article caches — moving up to btap.codes/data/. The 2025-only two thirds of tiers.py move beside their edition in btap/codes/necb/editions/necb2025/: eui_data and eui_building_energy_target join the EUI implementation that already read them (eui_archetypes.py), and ghg_data, operational_ghg_kg and ghg_level become part11_ghg.py. tiers.py keeps only energy_tier, whose Table 10.1.2.1 is verified identical in 2020 and 2025. The five eui/tiers coverage pointers move with their definitions rather than later, because they are frozen at R-A and a subsequent move would break an output-identical stage. Nothing is bound by an edition registry here — callers import the edition module by name; the manifest binding is Stage 5. ZERO logic change: beyond the moves the only edits are import lines (including the import-order reflow the new package name forces), path strings, dotted names, and documentation text. The distribution version becomes 0.3.0, an intentional breaking release with no consumers; the console script names (btap-compliance, btap-necb-coverage) are deliberately unchanged, being user surface rather than paths. The import-linter D-77 layer contract reads btap.codes -> btap.costing -> btap.modeling -> btap.audit, with btap.simulation beside. Accepted diff categories, and nothing else: /inputs/code[] leaves in every evidence-bearing audit.json, the same path strings in normalized audit.txt, each affected baseline_sha256, the regenerated coverage documents' links, and the manifest's provenance/freezer/runner hashes. The re-freeze that absorbs them is R-B's, run on a clean tree by the orchestrator. Evidence and records: a SECOND ledger, python/tests/data/coverage_code_ref_mapping_r7.json, maps all 87 unique coverage code pointers old -> new with their use counts; the R6 ledger is never rewritten, and test_coverage_code_refs.py now walks the whole chain — every R7 old is an R6 new, every R7 new resolves in a live manifest, and the R7 use counts still sum to 313. tiers.py drops out of the pointer set (32 owning files become 31) because its one pointer followed eui_building_energy_target into eui_archetypes.py. tests/test_no_legacy_namespace.py is the standing gate: no active btap.necb or btap/necb reference survives in tracked sources, with an explicit allowlist naming the historical records that are deliberately never rewritten (PORT_STATUS, the R6 and D-80 reviews, the M6/M7 port review, the multi-edition plan itself, both ledgers' old columns, and dated wording inside the decision record)."
     },
@@ -1571,10 +1571,10 @@
       "title": "Development and sign-off: implement, Sol, Fable, then stop",
       "kind": "process",
       "articles": {
-        "unverified": []
+        "not_applicable": []
       },
       "editions": [
-        "unverified"
+        "not_applicable"
       ],
       "summary": "Decided: phylroy, 2026-09-20. The working loop: research and develop a solution, implement it, pass it to Sol for review, THEN review with Fable. When Sol, Fable and Claude all agree the implementation is good, stop and move to the next problem; otherwise iterate. Why the order: Sol is the NECB adjudicator, ruling on what the Code requires against live HBIX text, the packaged payloads and the pinned gem. Fable is the adversarial implementation reviewer and comes LAST deliberately - it reproduces findings, checks arithmetic, and reviews both the implementation and Sol's ruling. That ordering has earned itself: Fable found that a flow-weighted motor efficiency leaks 123 W, which Sol then corrected, and that a headline measurement was wrong in its own author's favour. Three agreements, not two: Claude's own agreement is part of the gate, so deferring does not satisfy it. Where Claude believes a finding is wrong it says so with the reproduction and iterates rather than complying - a loop that simply obeys would have shipped both of the above. What 'good' means: the finding is reproduced before it is fixed; the fix is pinned by a test covering the shape that let it through; suites and gates pass; frozen outputs are re-frozen when they move; and the adjudication is recorded as a D-XX rather than left in correspondence. Stopping is the point - the loop terminates on agreement rather than on exhaustion, and a further round needs a finding rather than an impulse to polish. Transport: .reviews/ (gitignored); Sol and Claude exchange files directly, so neither GitHub nor phylroy carries messages. Claude watches to-claude/; wait-for.sh blocks until the other side replies. - Who/when: phylroy, 2026-09-20. Extends D-10, which delegated the adjudications themselves; this governs how the resulting work is signed off. AMENDED 2026-09-23 (Sol raised it; phylroy adopted): agreement is not the whole stop condition. 'Stop' also requires the merged-main workflow to be green, because green PR-head CI is a different claim and a squash merge is exactly where the two diverge - it rewrites the branch commit the frozen manifest's provenance names, so test_manifest_integrity fails on main while every branch check was green. Not hypothetical: main was red for three days across 9f48d45 and 235145a because each PR was verified on its own head and declared closed without anyone looking at main afterwards. A work item is closed when the three agree AND the post-merge run passes - or, for a change the workflow path-ignores entirely such as documentation only, when no run was triggered at all. If a run failed, the repair comes before the next item. See D-95 for the merge rule that removes the cause. AMENDED 2026-10-05 (phylroy asked whether nine review rounds across two PRs were worth it; the answer was that the early rounds paid and the later ones found variants of one class, and that the effort was going into the tool that checks our checks rather than into anything a building engineer sees). Review depth is now TIERED by what a change can break. COMPLIANCE tier - product code that can change an audit entry, a verdict, a sized capacity, a citation or a frozen baseline's content - gets the full loop, every round, until all three agree. VERIFICATION tier - harness, provenance, freeze machinery, CI wiring, whose defects are visible and recoverable without a wrong answer reaching a reader - gets ONE adversarial round then merges on clearance, and further variants of a found class are filed rather than chased. TOOLING tier - developer scripts nothing imports - gets self-review and no adversarial round. The tiering is about DEPTH and never about rigour: a tooling change still needs its mutation evidence, a verification change still needs its re-freeze. Added with it: A NEGATIVE TEST MUST BE SHOWN TO GO RED. Six times in one session Claude wrote a check that modelled a property instead of exercising it - an anchor grep that passed while the anchor was dropped from one entry, a mutation row reporting a failure a later fix had made impossible, two greps standing in for 'the producer is not a gate', a grep that failed because the forbidden string sat in its own docstring, and a negative test that injected after the load it guarded. Each passed; none could fail for the reason it claimed. Before a negative test is offered as evidence, install the defect it exists to catch and watch it go red - run it, do not reason about it. Offering a check without that step is the same error as reporting a frozen lane that holds none of the changed baselines. AND ON ITS OWN CASE (Fable's clause): a suite where breaking rung N turns case M red is still modelling one level up - the coverage is real but no case is pinned to the rung it names, so a later edit can delete the rung a case claims to guard while something else keeps it green. Each case must red on the defect it is named for; Fable demonstrated the standard on mutate.py with 15 mutations, one per rung, term and refusal, each red on its own case. The cheap habit that produces this: install the defect FIRST, confirm red, then write the fix - test-first for negative tests specifically, where the usual argument for it is weakest and the payoff highest. Five of the six occurrences were written while fixing a finding about checks that model themselves, which is the hardest moment to notice it, because the attention is on the defect rather than the instrument."
     },
@@ -1583,10 +1583,10 @@
       "title": "Freeze-carrying PRs merge with a merge commit, not a squash or rebase",
       "kind": "process",
       "articles": {
-        "unverified": []
+        "not_applicable": []
       },
       "editions": [
-        "unverified"
+        "not_applicable"
       ],
       "summary": "Decided: Sol ruled, phylroy adopted, 2026-09-23. A PR that changes frozen baselines or the manifest provenance freeze.py produces is merged with a MERGE COMMIT - not a squash and not a rebase, both of which give the merged commit a new SHA, and this repository allowed all three when the rule was written (rebase is now disabled; see the enforcement note). Ordinary PRs keep the squash convention. Mechanism: freeze.py records the commit it RAN at, always a branch commit, and test_manifest_integrity requires it to be an ancestor of HEAD - a claim that the baselines were made on this line of history, separate from the content and machinery hashes the manifest already pins. A squash merge gives the merged commit a single parent, main's previous tip, so the recorded branch commit is unreachable from HEAD; branch deletion is irrelevant and this repository does not delete on merge. Measured - two independent breakages with different stale pointers: main failed on 9f48d45 (#53) with 'manifest provenance commit 446482dca42e is NOT an ancestor of HEAD' and on 235145a (#54) with 'c415a5188f8b', while both PR heads were green on all five jobs (via dispatch runs; verify and parity are skipped on pull_request events). Recovery when someone squashes or rebases one anyway: re-freeze from the resulting main commit and re-pin immediately; a pure repair moves only provenance metadata (f5533ff moved one line, c415a51 -> 235145a, no baseline touched in any of the 45 scenarios), and baseline movement in a repair needs its own explanation. Rejected: proving provenance by content instead - cheapest and removes the recurrence, but ancestry contributes the separate 'made on this line of history' claim that content equality cannot substitute for, and the gate's own comment says the common CI path must not routinely skip it. The residual risk is human and named: the rule depends on remembering the exception and fails silently after the fact when someone does not, which is why D-94's stop condition now requires the post-merge main run to be checked. The relationship is asymmetric, in Sol's words: D-95 prevents the known cause when the exception is remembered, D-94 detects it when it is forgotten, and neither makes the other redundant. ENFORCEMENT 2026-09-24: rebase merging is disabled repository-wide (allow_rebase_merge=false), closing the rebase half mechanically. The GitHub ruleset that would scope allowed_merge_methods to main was deliberately not used, because that parameter belongs to the ruleset's pull_request rule which also REQUIRES a pull request before merging - a constraint nobody adjudicated that would have blocked 15 of the last 60 first-parent commits; the repository toggle applies to every branch, which is stricter, not looser. A third reason once recorded here - that a ruleset would not bind a repository admin - was WITHDRAWN as untrue: ruleset bypass is configured per ruleset in an explicit bypass_actors list, and admins are eligible to be granted bypass rather than exempt by default, so a ruleset with no admin entry binds them. The squash button remains present and still wrong for these PRs, so the human residual stands. Separately, test.yml gained a main-red job that runs an incident lifecycle on every push run on main: a failure opens or updates an issue assigned to vars.MAIN_RED_ASSIGNEE or the pusher, naming the run, the commit, the per-job results and the D-95 provenance diagnosis, and a green run comments the recovery and closes it. Assignment is not best-effort - a failed assignment fails the job, because an unassigned incident is the failure mode it exists to end (the repository has zero subscribers). The only prior signal was a failed-run email to the merging actor, which went unacted on for three days. SQUASH RULING 2026-09-24 (Sol): allow_squash_merge=false would close the residual completely and was declined, because D-95 keeps squash as the ordinary-PR convention and makes freeze-carrying PRs the exception - a repository-wide toggle would reverse the policy for every PR to automate one exception. Do not read the 38/7/15 aggregate as squash being barely used: it is weighted by older migration history, and on a recency check all six most recently merged PRs (#53-#58) were squashes, so the open route is the one in daily use and this residual is larger than the aggregate suggests."
     },
@@ -1595,10 +1595,10 @@
       "title": "The package relicenses from LGPL-3.0-or-later to GPL-3.0-or-later",
       "kind": "process",
       "articles": {
-        "unverified": []
+        "not_applicable": []
       },
       "editions": [
-        "unverified"
+        "not_applicable"
       ],
       "summary": "Decided: phylroy, 2026-09-28. canmet-btap is licensed GPL-3.0-or-later. LICENSE and python/LICENSE now carry the full GNU General Public License v3.0 text (674 lines from gnu.org); the previous file was the LGPL-3.0 text, which is short because it INCORPORATES the GPL by reference rather than restating it, so this is a document replacement rather than an edit. pyproject.toml's SPDX license field and the licence statements in README.md, CLAUDE.md, the two btap.codes guides, ATTRIBUTION.md and the Windows packaging notes all say GPL-3.0-or-later. The instruction said 'GPL 3', which is ambiguous between GPL-3.0-only and GPL-3.0-or-later; the previous licence was LGPL-3.0-or-later, so the -or-later posture is preserved rather than silently narrowed, and moving to -only is a one-line follow-up. The mechanism is sound: LGPL-3.0 section 2(b) expressly permits conveying a covered work under the plain GPL-3.0. What this does NOT settle: relicensing binds only what the copyright holder may bind, and LICENSE carries no project copyright line - the only notice in it is the FSF's on the licence text - so the holder is stated nowhere in this repository. A maintainer should confirm the holder (NRCan / His Majesty the King in Right of Canada) has authorised this and that no third-party contribution forbids it; that is a legal question this entry does not answer. It is one-way for what is already released: anyone who received an earlier version under LGPL keeps LGPL rights to that version permanently, and downstream code linking the library must now be GPL-compatible where LGPL previously allowed proprietary linking. The Crown NECB text is unaffected - it was never under the package licence and still is not. D-83, D-84 and the docs/ review records still say LGPL as period wording, which the repository's rule preserves."
     },
@@ -1663,10 +1663,10 @@
       "title": "A baseline records its producer; freezing stays local until an image digest is obtainable",
       "kind": "process",
       "articles": {
-        "unverified": []
+        "not_applicable": []
       },
       "editions": [
-        "unverified"
+        "not_applicable"
       ],
       "summary": "Decided: phylroy, 2026-10-05, on Sol's ruling. The frozen manifest pinned the SOURCE of a baseline but not its PRODUCER. Because the scenarios' weather is committed (python/tests/fixtures/weather/*.epw and *.ddy are tracked), the provenance commit already pins the weather bytes, and the harness hashes plus the sample manifest pin the rest of the source; what was missing is the engine stack that ran. 'openstudio_cli' is a version STRING a machine reports, so two hosts can both report 3.11.0+241b8abb4d while running different EnergyPlus builds, and CI never freezes, so the producer has always been whichever developer machine ran freeze.py. A 'producer' block now records openstudio, energyplus (with its BUILD HASH, 25.2.0-cf7368216c, which a bare version hides), python and platform, with container_digest null. These fields are a RECORD, NOT A GATE: no test compares them against the running machine, because a baseline frozen on one host must remain verifiable on another, which is the point of the frozen corpus. What they buy is attribution - when a baseline moves, the diff says whether the engine underneath it moved too. Service-only freezing was proposed and REJECTED: the simulation request carries a station id and format, not a requestable weather revision or a hash of the bytes a job used, so mirroring today's service file and diffing it does not bind tomorrow's job to those bytes. The drift is real and material - station 716240 under the same CWEC2020 label moved from ASHRAE 2021 design conditions (heating 99.6% -18.5 C, 81 design days) to ASHRAE 2025 (-17.8 C, 117 days), with byte-identical hourly rows, which moves 40 of 286 audit entries and sized capacity from 52.0 to 51.1 kW; NECB efficiency tiers are capacity-banded, so a ~2% shift near a band edge can change which requirement applies. That weather is NOT adopted and a rebaseline onto it would be its own adjudication, in the class of the canmet-tbd pin rather than dependency maintenance. hbix#105 asks upstream for a content hash and a requestable revision and is the prerequisite for reconsidering. freeze.py keeps REFUSING any non-local backend; remote VERIFICATION against committed baselines is a separate, permitted capability, and one sizing scenario verified byte-identical local versus remote (audit.json, audit.txt and report.json) through the product CLI, which holds for a structural reason: D-25 attaches the design days INTO the model, so they travel in the uploaded IDF and the service's weather library cannot affect a sizing result. An annual run uses the service's hourly data, so that equality is not established there. The stronger end state is freezing in the pinned CI image, but it is not available yet, and it is NOT known to be faster: the 6-minute figure often quoted is a full verification DISPATCH, which never runs freeze.py and splits lanes across parallel jobs, whereas the freezer runs 45 scenarios sequentially. A CI freeze has not been measured. the image tag is <openstudio version>-<sha256(Dockerfile)[:12]>, which pins the RECIPE rather than the built bytes, no digest is recorded anywhere in the workflows, and a true sha256 digest is obtainable only where the image runs. The follow-on is therefore ci-image.yml emitting the pushed digest, a freeze workflow running in that image and returning its output, and freeze.py filling container_digest; the fields recorded here are exactly what that end state records plus the digest, so nothing is wasted. Every probe fails SOFT - an unknown identity records as absent rather than stopping a freeze, because an exception would only prevent the work while 'unknown' is honest."
     },

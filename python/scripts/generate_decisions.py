@@ -67,6 +67,15 @@ FIELDS = ("id", "title", "kind", "articles", "editions", "summary")
 #: checked them against the other, so asserting a list would be a guess. It is
 #: a declared gap rather than a silent one.
 EDITIONS_UNVERIFIED = "unverified"
+#: A decision whose conclusion adopts NO operative Code proposition whose
+#: numbering, content or result can vary by edition — licensing, delegation,
+#: repository governance, the review loop. It is a CATEGORY statement, not a
+#: verification state: `unverified` would say "not yet checked" where the
+#: truth is "the edition axis does not apply" (Sol, `169`). A decision does
+#: NOT qualify merely because its holding list is empty or its subject is
+#: tooling, so the classification is authored per decision and never derived
+#: from `kind`.
+EDITIONS_NOT_APPLICABLE = "not_applicable"
 KINDS = ("runtime", "runtime_unwired", "data", "process")
 #: The only keys _meta.json may carry.
 META_FIELDS = ("registry_comment",)
@@ -144,6 +153,9 @@ def toml_value(value) -> str:
 #: articles are carried unvalidated, because validating them requires knowing
 #: which edition's numbering they are written in.
 ARTICLES_UNVERIFIED = "unverified"
+#: The articles counterpart of ``EDITIONS_NOT_APPLICABLE``. Its list must be
+#: EMPTY: a decision that cites an article has a Code proposition to check.
+ARTICLES_NOT_APPLICABLE = "not_applicable"
 
 
 def _bare_article(value: str):
@@ -305,6 +317,31 @@ def check_articles(name: str, meta: dict) -> None:
 
     codes = registered_codes()
     claimed = set(meta["editions"])
+
+    # RULE 0. `not_applicable` pairs with an EMPTY articles list, in both
+    # directions. A decision that cites an article has a Code proposition
+    # whose numbering or content can move between editions, which is exactly
+    # what this sentinel denies (Sol, `169`).
+    not_applicable_articles = ARTICLES_NOT_APPLICABLE in articles
+    not_applicable_editions = claimed == {EDITIONS_NOT_APPLICABLE}
+    if not_applicable_articles and len(articles) > 1:
+        raise ValueError(
+            "{}: articles may not mix the {!r} key with anything else".format(
+                name, ARTICLES_NOT_APPLICABLE))
+    if not_applicable_articles != not_applicable_editions:
+        raise ValueError(
+            "{}: articles[{!r}] and editions == [{!r}] go together or not at "
+            "all — articles={}, editions={}".format(
+                name, ARTICLES_NOT_APPLICABLE, EDITIONS_NOT_APPLICABLE,
+                not_applicable_articles, sorted(claimed)))
+    if not_applicable_articles:
+        block = articles[ARTICLES_NOT_APPLICABLE]
+        if block != []:
+            raise ValueError(
+                "{}: articles[{!r}] must be EMPTY — a cited article is a Code "
+                "proposition to establish, not an inapplicable axis; got "
+                "{!r}".format(name, ARTICLES_NOT_APPLICABLE, block))
+        return
 
     # RULE 1. The holding pen and established editions are mutually exclusive
     # in BOTH directions. Checking only one let a decision claim necb2020 and
@@ -525,7 +562,7 @@ def front_matter(meta: dict) -> str:
             "table, got {}".format(type(meta["articles"]).__name__))
     for key, block in sorted(meta["articles"].items()):
         lines.append("")
-        if key == ARTICLES_UNVERIFIED:
+        if key in (ARTICLES_UNVERIFIED, ARTICLES_NOT_APPLICABLE):
             lines.append("[articles]")
             lines.append("{} = {}".format(key, toml_value(block)))
             continue
@@ -588,13 +625,26 @@ def validate(name: str, meta: dict, body: str) -> None:
     if duplicates:
         raise ValueError(
             "{}: editions lists {} more than once".format(name, duplicates))
-    allowed = registered_codes() | {EDITIONS_UNVERIFIED}
+    allowed = (registered_codes() | {EDITIONS_UNVERIFIED,
+                                       EDITIONS_NOT_APPLICABLE})
     unknown = sorted(set(meta["editions"]) - allowed)
     if unknown:
         raise ValueError(
             "{}: editions lists {} which are neither a registered code id nor "
-            "{!r}; registered are {}".format(
-                name, unknown, EDITIONS_UNVERIFIED, sorted(registered_codes())))
+            "{!r} nor {!r}; registered are {}".format(
+                name, unknown, EDITIONS_UNVERIFIED, EDITIONS_NOT_APPLICABLE,
+                sorted(registered_codes())))
+    if EDITIONS_NOT_APPLICABLE in meta["editions"] and len(meta["editions"]) > 1:
+        raise ValueError(
+            "{}: editions may not mix {!r} with anything else — the edition "
+            "axis either applies to this decision or it does not".format(
+                name, EDITIONS_NOT_APPLICABLE))
+    if (EDITIONS_NOT_APPLICABLE in meta["editions"]
+            and meta["kind"] != "process"):
+        raise ValueError(
+            "{}: only a kind='process' decision may be {!r}; this one is "
+            "kind={!r}, so it has a Code proposition to establish".format(
+                name, EDITIONS_NOT_APPLICABLE, meta["kind"]))
     if EDITIONS_UNVERIFIED in meta["editions"] and len(meta["editions"]) > 1:
         raise ValueError(
             "{}: editions may not mix {!r} with a code id — either it has been "

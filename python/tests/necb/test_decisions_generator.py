@@ -144,6 +144,93 @@ class TestSourceValidation(unittest.TestCase):
         refused, not by what it let through."""
         self.parse(**kwargs)
 
+    # ---------------------------------------------------------------- the
+    # `not_applicable` sentinel (Sol, `169`). It is a CATEGORY statement —
+    # this decision adopts no operative Code proposition whose numbering,
+    # content or result can vary by edition — and NOT a verification state.
+    # Each rule is paired with a control, because the rule this file replaced
+    # was caught by what it wrongly REFUSED, not by what it let through.
+
+    @staticmethod
+    def na(**over):
+        base = dict(GOOD_META, editions=["not_applicable"],
+                    articles={"not_applicable": []})
+        base.update(over)
+        return base
+
+    def test_not_applicable_is_accepted_on_a_process_decision(self):
+        meta, _ = self.parse(meta=self.na())
+        self.assertEqual(["not_applicable"], meta["editions"])
+        self.assertEqual({"not_applicable": []}, meta["articles"])
+
+    def test_not_applicable_may_not_be_mixed_with_a_code_id(self):
+        self.rejects("may not mix",
+                     meta=self.na(editions=["not_applicable", "necb2020"]))
+
+    def test_not_applicable_may_not_be_mixed_with_unverified(self):
+        self.rejects("may not mix",
+                     meta=self.na(editions=["not_applicable", "unverified"]))
+
+    def test_a_not_applicable_decision_may_not_cite_an_article(self):
+        """An empty list, in both directions.
+
+        A cited article IS a Code proposition whose numbering can move
+        between editions, which is exactly what this sentinel denies. The
+        control proves the empty list is still accepted, so this does not
+        pass by refusing the key outright.
+        """
+        self.rejects("must be EMPTY",
+                     meta=self.na(articles={"not_applicable": ["8.4.4.9.(7)"]}))
+        self.accepts(meta=self.na())
+
+    def test_not_applicable_may_not_sit_beside_an_authored_requirement(self):
+        """The articles-side exclusivity rule, which nothing else pins.
+
+        Found by mutation rather than by review: neutering
+        `if not_applicable_articles and len(articles) > 1:` left all six
+        other sentinel tests green, so the rule was shipping unpinned. A
+        decision carrying BOTH the sentinel and a real requirement is
+        asserting the edition axis does not apply and then citing something
+        that varies by edition.
+        """
+        self.rejects("may not mix", meta=self.na(articles={
+            "not_applicable": [],
+            "hydronic_pumps": {"label": "Hydronic pump power",
+                               "necb2020": ["8.4.4.14.(1)"],
+                               "necb2025": ["8.4.5.14.(1)"]}}))
+        self.accepts(meta=self.na())
+
+    def test_the_two_halves_must_agree(self):
+        """`editions` and the articles key go together or not at all."""
+        self.rejects("go together or not at all",
+                     meta=self.na(articles={"unverified": []}))
+        self.rejects("go together or not at all",
+                     meta=self.na(editions=["unverified"]))
+
+    def test_only_a_process_decision_may_be_not_applicable(self):
+        """Sol's restriction: a runtime or data decision HAS a Code
+        proposition to establish, so the sentinel is initially process-only.
+        The control keeps `kind` from being the thing that decides — process
+        is necessary, never sufficient, and the classification is authored
+        per decision.
+        """
+        for kind in ("runtime", "runtime_unwired", "data"):
+            self.rejects("only a kind='process' decision",
+                         meta=self.na(kind=kind))
+        self.accepts(meta=self.na(kind="process"))
+
+    def test_a_process_decision_may_still_be_unverified(self):
+        """The sentinel must not swallow its own category.
+
+        13 of the 38 real process decisions stay `unverified` because they
+        cite an article or their classification is uncertain. If `process`
+        implied `not_applicable`, this control would fail.
+        """
+        meta, _ = self.parse(meta=dict(
+            GOOD_META, kind="process", editions=["unverified"],
+            articles={"unverified": ["8.4.4.9.(7)"]}))
+        self.assertEqual(["unverified"], meta["editions"])
+
     def test_a_missing_or_unexpected_field_is_refused(self):
         # A missing field cannot be written through source_text, which needs
         # all five, so this one is assembled by hand.
