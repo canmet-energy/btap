@@ -1,0 +1,42 @@
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Design Coil Load'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Design Coil Load'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Design Coil Load'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Design Coil Load'.
+[openstudio.model.ChillerElectricEIR] <0> Cannot set condenserType to 'WaterCooled', chiller 'Chiller Electric EIR 1' is not connected to a secondaryPlantLoop
+[openstudio.model.ChillerElectricEIR] <0> Cannot set condenserType to 'WaterCooled', chiller 'Chiller Electric EIR 2' is not connected to a secondaryPlantLoop
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Nominal Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Nominal Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Reference Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Reference Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Reference Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Reference Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Maximum Flow Rate'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Maximum Flow Rate'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Maximum Flow Rate'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Maximum Flow Rate'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Maximum Flow Rate'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Maximum Flow Rate'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Maximum Flow Rate'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Maximum Flow Rate'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Flow Rate'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Reference Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Reference Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Flow Rate'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Reference Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Reference Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Flow Rate'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Nominal Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Nominal Capacity'.
+
+------------------------------------------------------------------
+                   site kWh      kWh/m2/yr      area m2
+Proposed                  -              -            -
+------------------------------------------------------------------
+
+  VERDICT: NO DETERMINATION (simulate: none)
+  Run with --simulate annual for an 8.4.1.2 determination.
+------------------------------------------------------------------
+
+  Audit    <RUN_DIR>/audit.txt
+  Data     <RUN_DIR>/report.json
+  57 warning(s) recorded - see audit.txt
