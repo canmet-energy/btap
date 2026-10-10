@@ -223,7 +223,6 @@
     "8.4.5.9.(6)": 2,
     "8.4.5.9.(7)": 2,
     "8.4.5.10.(6)": 2,
-    "8.4.4.10.(8)": 1,
     "5.2.2.8.(4)-(5)": 1,
     "8.4.5.18.(3)-(4)": 1,
     "8.4.5.13.(2)": 2,
@@ -251,7 +250,7 @@
     "8.4.5.10.(4)": 1,
     "8.4.5.10.(5)": 1,
     "8.4.5.10.(7)": 1,
-    "8.4.5.10.(8)": 1,
+    "8.4.5.10.(8)": 2,
     "8.4.5.10.(9)": 1,
     "8.4.5.11.(1)": 1,
     "8.4.5.11.(2)": 1,
@@ -321,6 +320,7 @@
       ],
       "source": "values of ['article', 'trigger_article'] keys, plus each manifest \"articles\" registry mapping, under btap/**/data/**/*.json"
     },
-    "Re-baselined 2026-10-08 on Sol's `137`, which is a NORMATIVE ruling and not a tidy-up. NECB 2020 does not contain Articles 8.4.1.5, 8.4.2.11 or 8.4.2.12, nor even Sentence 8.4.2.2.(6) — he verified it against the official NRC NECB 2020 second printing including the 2025-02-27 errata, citing Division B page 8-2 (Subsection 8.4.1 ends at Article 8.4.1.4), page 8-3 (8.4.2 starts at 8.4.2.1, and 8.4.2.2 has Sentences (1)-(5) only) and page 8-5 (8.4.2.10 is the last article of the subsection). The HBIX 2020-to-2025 Part 8 comparison labels all three NEW in 2025. So the packaged 2020 snapshot was right and our 2020 COVERAGE DATA was citing another edition's articles. There is no snapshot omission and no MCP defect to report. Three edits, exactly as ruled: the `8.4.1.5.` row is DELETED rather than renumbered, because 2020 has no one-for-one counterpart; the `8.4.2.2.(4)` row STAYS and only its \"(see 8.4.2.11.)\" pointer goes, because 2020's software-conformance requirement is in that sentence itself, which names ANSI/ASHRAE 140; and the `8.4.2.2.(6)` row is DELETED whole, with the exceptional-calculation route NOT mapped onto the Code's general alternative-solution framework, because Sol ruled they are not the same requirement. The 2025 claims and `necb_8_4_disposition.json` are untouched: all three provisions exist there. This is a LOSS of two citation sites and it is the correct loss — they cited articles that do not exist."
+    "Re-baselined 2026-10-08 on Sol's `137`, which is a NORMATIVE ruling and not a tidy-up. NECB 2020 does not contain Articles 8.4.1.5, 8.4.2.11 or 8.4.2.12, nor even Sentence 8.4.2.2.(6) — he verified it against the official NRC NECB 2020 second printing including the 2025-02-27 errata, citing Division B page 8-2 (Subsection 8.4.1 ends at Article 8.4.1.4), page 8-3 (8.4.2 starts at 8.4.2.1, and 8.4.2.2 has Sentences (1)-(5) only) and page 8-5 (8.4.2.10 is the last article of the subsection). The HBIX 2020-to-2025 Part 8 comparison labels all three NEW in 2025. So the packaged 2020 snapshot was right and our 2020 COVERAGE DATA was citing another edition's articles. There is no snapshot omission and no MCP defect to report. Three edits, exactly as ruled: the `8.4.1.5.` row is DELETED rather than renumbered, because 2020 has no one-for-one counterpart; the `8.4.2.2.(4)` row STAYS and only its \"(see 8.4.2.11.)\" pointer goes, because 2020's software-conformance requirement is in that sentence itself, which names ANSI/ASHRAE 140; and the `8.4.2.2.(6)` row is DELETED whole, with the exceptional-calculation route NOT mapped onto the Code's general alternative-solution framework, because Sol ruled they are not the same requirement. The 2025 claims and `necb_8_4_disposition.json` are untouched: all three provisions exist there. This is a LOSS of two citation sites and it is the correct loss — they cited articles that do not exist.",
+    "Re-baselined 2026-10-09: necb2025's `dx_staging.article` was `8.4.4.10.(8)`, an article NECB 2025 does not have — it renumbered Cooling Systems to 8.4.5.10 and the neighbouring `cooling_plant` was shifted while this one was missed. 2025 therefore loses `8.4.4.10.(8)` (1) and `8.4.5.10.(8)` rises 1 -> 2. necb2020 is UNCHANGED: 8.4.4.10.(8) is correct there. Nothing read the stale value — `_stage_multispeed_coil` takes its article as a parameter built from the edition prefix — so no audit, report or frozen baseline moved, and no re-freeze follows. Found while measuring the work to establish `editions` on the 97 unverified decisions; `TestDataCitationsAreValidForTheirEdition` is the gate that now refuses it. Its relationship to the count gates is narrower than first recorded (Sol, `169`): BEFORE this correction a count baseline could preserve an already-invalid key indefinitely, and AFTER the rebaseline below, restoring this exact value is also a count loss, so the no-loss gate fires on it too. What only validity can refuse is an ADDITIVE invalid citation, which preserves every baseline count. That is the case the gate's non-redundancy test now uses."
   ]
 }
