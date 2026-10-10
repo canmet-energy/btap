@@ -623,10 +623,21 @@ unsettled, how many times the run applied it, a link to the first audit entry,
 and its bearing on the verdict — stated per row, because a status alone does
 not tell a reader whether the verdict moved.
 
-What remains open is EVIDENCE, not wiring: AHJ-2, AHJ-10, AHJ-11 and AHJ-12
-have no frozen artifact that reaches a determination, because the annual tier
-runs `--quick` and the shapes that would exercise them sit in tiers that stop
-earlier. The status column says so per entry.
+What remains open is EVIDENCE, not wiring — but NOT all for the same reason.
+The single explanation this paragraph used to give, that "the annual tier runs
+`--quick` and the shapes sit in tiers that stop earlier", was true of ONE of
+the four. Measured per id, 2026-10-10:
+
+| id | why it had no determination-reaching artifact |
+| --- | --- |
+| AHJ-2 | the TIER, as described. Its branch reads the ANNUAL per-zone heating energy to weigh the (2)(g) comparison, and under `--simulate none` the structural `8.4.x.9.(4)` proxy answers instead. Sample 16 run full-year is the witness. |
+| AHJ-10 | the SHAPE did not exist. Grouping evidence is recorded only ABOVE four storeys, and the shared `5ZoneNoHVAC` fixture's four perimeter zones each face exactly ONE way (S 152, W 76, N 152, E 76 m², core none), so no corner block existed at ANY storey count. `19-corner-block-5storey` is the witness. |
+| AHJ-12 | the SHAPE did not exist. No sample carried humidification and `btap.modeling` builds none, so nothing reached Note (1)'s question at all. `20-humidified-psz` is the witness, and it reaches BOTH branches — the rebuild and the no-control refusal. |
+| AHJ-11 | NEITHER. It is **blocked**, not merely unwitnessed. Its own entry below records that a coherent refrigerated model does not complete the path, and three tool gaps stand in front of it: AHJ-18 (no plant-side changeover), AHJ-19 (refrigeration invisible to classification, teardown and end-use reporting) and AHJ-20 (a 7 °C comfort chilled-water loop that cannot condition a 2/4 °C cooler). No scenario or corpus addition can witness AHJ-11 until those close. |
+
+The distinction matters because "needs a frozen artifact" and "cannot have one
+yet" are different states, and the earlier wording made AHJ-11 look like the
+first when it is the second.
 
 AHJ-1, AHJ-3 and AHJ-16 DO have one. AHJ-1 and AHJ-3 ride on
 `determination-02` (sample 11, full year, Sol's `127`), and AHJ-16 on
