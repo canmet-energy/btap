@@ -217,9 +217,22 @@ R6_CORPUS_SLUGS = (
 #: never had. A seal is a provenance claim, so the default must not be
 #: inherited by a scenario that post-dates the evidence.
 #: ``test_every_post_handoff_slug_predates_the_attestation`` is the gate.
+#: The two guard-7 corpus additions. A seal is a PROVENANCE CLAIM, and the
+#: default "ruby" seal is converted by ``all_scenarios()`` into
+#: ``python-only:post-handoff``, which carries the final cross-language
+#: attestation (85ab143). These samples did not exist then, so inheriting that
+#: would assert evidence they never had —
+#: ``test_every_post_handoff_slug_predates_the_attestation`` is the gate that
+#: caught exactly this.
+GUARD7_CORPUS_SEAL = ("python-only:first frozen as a guard-7 corpus addition — "
+                      "authored after the Ruby product retired; no "
+                      "cross-language attestation exists for this sample")
+
 POST_R6_PYTHON_LANE_SEALS = {
     "17-vav-hw-reheat": DF17_SEAL,
     "18-vav-hw-subset-reheat": DF17_SEAL,
+    "19-corner-block-5storey": GUARD7_CORPUS_SEAL,
+    "20-humidified-psz": GUARD7_CORPUS_SEAL,
 }
 
 

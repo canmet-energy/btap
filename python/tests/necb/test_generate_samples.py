@@ -74,7 +74,7 @@ class TestGenerateSamples(unittest.TestCase):
                          "exactly — a missing sample and an extra one are both defects")
         self.assertEqual(expected, on_disk,
                          "every manifest slug must exist on disk as a .osm, and nothing else")
-        self.assertEqual(18, len(expected), "the corpus is 18 samples")
+        self.assertEqual(20, len(expected), "the corpus is 20 samples")
 
     def test_every_sample_reloads_through_the_sdk_with_zones(self):
         # model.save() reports nothing about whether the bytes it wrote can be
@@ -193,7 +193,7 @@ class TestGenerateSamples(unittest.TestCase):
 
     def test_the_shipped_readme_is_written(self):
         readme = (self.out / "README.txt").read_text(encoding="utf-8")
-        self.assertIn("Sample models — 18 files, one building", readme)
+        self.assertIn("Sample models — 20 files, one building", readme)
         for slug, _, _ in self.built:
             self.assertIn(slug, readme, f"{slug} is missing from the shipped README")
 

@@ -18,6 +18,8 @@
     "15-general-3storey",
     "16-ashp-electric-supp-hw-baseboard",
     "17-vav-hw-reheat",
-    "18-vav-hw-subset-reheat"
+    "18-vav-hw-subset-reheat",
+    "19-corner-block-5storey",
+    "20-humidified-psz"
   ]
 }
