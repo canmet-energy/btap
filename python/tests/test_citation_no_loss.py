@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import ast
 import json
+import re
 import shutil
 import tempfile
 import unittest
@@ -578,10 +579,28 @@ class TestDataCitationsAreValidForTheirEdition(unittest.TestCase):
     #: so a citation into Part 5 or Division A has nothing to validate
     #: against here and is left to the other gates.
     SECTION_8_4 = "8.4."
+    SNAPSHOT_2025 = "btap/codes/necb/data/necb2025/reference_rules.json"
+    MANIFEST_2025 = "btap/codes/necb/data/necb2025/manifest.json"
+    #: the exact value this gate was added for, and its correction
+    STALE = '"article": "8.4.4.10.(8)"'
+    FIXED = '"article": "8.4.5.10.(8)"'
 
-    def snapshot_articles(self, scope):
-        cache = (Path(__file__).resolve().parents[1] / "btap" / "codes" / "necb"
-                 / "data" / scope / "coverage" / "articles_8_4.json")
+    def copy(self):
+        tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, tmp, ignore_errors=True)
+        shutil.copytree(Path(__file__).resolve().parents[1] / "btap", tmp / "btap")
+        return tmp
+
+    def edit(self, tmp, relative, old, new, *, count=1):
+        target = tmp / relative
+        text = target.read_text(encoding="utf-8")
+        self.assertIn(old, text, f"anchor missing in {relative} — the fixture has moved")
+        target.write_text(text.replace(old, new, count), encoding="utf-8")
+
+    def snapshot_articles(self, scope, root=None):
+        base = Path(root) / "btap" if root else (Path(__file__).resolve().parents[1] / "btap")
+        cache = (base / "codes" / "necb" / "data" / scope / "coverage"
+                 / "articles_8_4.json")
         return set(json.loads(cache.read_text(encoding="utf-8"))["articles"])
 
     def article_ids(self, value):
@@ -591,14 +610,24 @@ class TestDataCitationsAreValidForTheirEdition(unittest.TestCase):
         carry a sentence or a range after the article, so the article id is
         the first four numeric components and the rest is not checked here.
         """
-        import re
         return re.findall(r"\b(8\.4\.\d+\.\d+)", value)
 
-    def test_every_data_8_4_citation_exists_in_its_own_edition(self):
-        counts = compute_data_citation_counts()
+    def invalid_citations(self, root=None):
+        """Every Section 8.4 citation in packaged DATA absent from its own edition.
+
+        THE WALK ITSELF, parameterised by data root, so a regression test can
+        run it against a mutated throwaway tree and exercise the rejection
+        branch. The first version of this gate asserted the corrected value,
+        the snapshot membership and the id regex as three INDEPENDENT facts
+        and never called this comparison — so `if False and article not in
+        known:` left both tests green (Sol, `169`). Asserting a precondition
+        is not exercising a branch.
+        """
+        counts = compute_data_citation_counts(source_root=root) if root \
+            else compute_data_citation_counts()
         problems = []
         for scope, values in sorted(counts.items()):
-            known = self.snapshot_articles(scope)
+            known = self.snapshot_articles(scope, root)
             for value in sorted(values):
                 if self.SECTION_8_4 not in value:
                     continue
@@ -607,29 +636,69 @@ class TestDataCitationsAreValidForTheirEdition(unittest.TestCase):
                         problems.append(
                             f"{scope}: {value!r} cites {article}, which is not "
                             f"an article in {scope}'s own snapshot")
-        self.assertEqual([], problems, "\n".join(problems))
+        return problems
 
-    def test_the_gate_fires_on_the_defect_it_was_written_for(self):
-        """Restore the real stale citation and prove this gate catches it.
+    def test_every_data_8_4_citation_exists_in_its_own_edition(self):
+        self.assertEqual([], self.invalid_citations(),
+                         "\n".join(self.invalid_citations()))
 
-        Without this, the test above passes on a tree where the scanner
-        silently stopped reading rule files.
+    def test_restoring_the_stale_citation_is_REJECTED(self):
+        """The defect this gate was added for, reinstated in data and caught.
+
+        This is the mutation that must die: restore `8.4.4.10.(8)` in the 2025
+        snapshot and require the walk to name it. A branch-kill
+        (`if False and article not in known:`) fails this test, which is the
+        property the first version lacked.
         """
-        counts = compute_data_citation_counts()
-        self.assertIn("8.4.5.10.(8)", counts["necb2025"],
-                      "fixture precondition: 2025 carries the CORRECTED "
-                      "citation, so restoring the stale one is a real mutation")
-        known = self.snapshot_articles("necb2025")
-        self.assertNotIn("8.4.4.10", known,
-                         "fixture precondition: 8.4.4.10 genuinely does not "
-                         "exist in NECB 2025")
-        self.assertIn("8.4.5.10", known,
-                      "and Cooling Systems genuinely sits at 8.4.5.10 there")
-        # the mutation this gate exists to refuse
+        tmp = self.copy()
+        self.edit(tmp, self.SNAPSHOT_2025, self.FIXED, self.STALE)
+        problems = self.invalid_citations(tmp)
+        self.assertTrue(
+            any("8.4.4.10" in p and "necb2025" in p for p in problems),
+            "restoring the stale 2025 citation must be rejected by article "
+            f"existence; got {problems}")
+        self.assertEqual([], self.invalid_citations(),
+                         "and the real tree must still be clean")
+
+    def test_an_ADDITIVE_invalid_citation_evades_the_count_gates(self):
+        """Non-redundancy, on the case the count gates provably cannot see.
+
+        A REPLACEMENT is not it. The baseline was re-recorded with the
+        corrected value, so restoring the stale one is itself a count loss —
+        and appending to an existing citation STRING is also a replacement at
+        the count gate's key granularity, because a citation is keyed by its
+        whole value: `"8.4.5.10.(8)"` becoming
+        `"8.4.5.10.(8); 8.4.4.10.(8)"` drops the first key from 2 to 1. The
+        first version of this test did exactly that and then EXCLUDED that
+        key from its own assertion, which proved the count gate fires and
+        then hid the regression it reported (Sol, `171`).
+
+        A genuinely additive fixture adds a NEW emitted site: one more
+        `manifest.json` article-registry entry, whose value the scanner
+        counts as its own key. Every pre-existing baseline count is then
+        untouched, so no no-loss gate can fire, while the citation is still
+        invalid for the edition shipping it.
+        """
+        tmp = self.copy()
+        self.edit(tmp, self.MANIFEST_2025, '  "articles": {',
+                  '  "articles": {\n    "_additive_invalid_probe": "8.4.4.10.(8)",')
+        after = compute_data_citation_counts(source_root=tmp)
+        baseline = load_data_baseline()
+        regressions = {scope: {k: (n, after[scope].get(k, 0))
+                               for k, n in values.items()
+                               if after.get(scope, {}).get(k, 0) < n}
+                       for scope, values in baseline.items()
+                       if isinstance(values, dict)}
+        regressions = {s: v for s, v in regressions.items() if v}
         self.assertEqual(
-            ["8.4.4.10"], self.article_ids("8.4.4.10.(8)"),
-            "and the id extractor reads the article out of a sentence-level "
-            "citation, or the check above would never compare anything")
+            {}, regressions,
+            "a genuinely ADDITIVE citation must leave every baseline count "
+            "intact — no key may be excluded to make that true")
+        problems = self.invalid_citations(tmp)
+        self.assertTrue(
+            any("8.4.4.10" in p and "necb2025" in p for p in problems),
+            "validity must reject the added site that the count gates cannot "
+            f"see; got {problems}")
 
 
 if __name__ == "__main__":
