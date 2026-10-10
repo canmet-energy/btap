@@ -580,6 +580,7 @@ class TestDataCitationsAreValidForTheirEdition(unittest.TestCase):
     #: against here and is left to the other gates.
     SECTION_8_4 = "8.4."
     SNAPSHOT_2025 = "btap/codes/necb/data/necb2025/reference_rules.json"
+    MANIFEST_2025 = "btap/codes/necb/data/necb2025/manifest.json"
     #: the exact value this gate was added for, and its correction
     STALE = '"article": "8.4.4.10.(8)"'
     FIXED = '"article": "8.4.5.10.(8)"'
@@ -662,29 +663,42 @@ class TestDataCitationsAreValidForTheirEdition(unittest.TestCase):
     def test_an_ADDITIVE_invalid_citation_evades_the_count_gates(self):
         """Non-redundancy, on the case the count gates provably cannot see.
 
-        A REPLACEMENT is now also a count loss, because the baseline was
-        re-recorded with the corrected value — so a replacement alone does not
-        separate this gate from its neighbours (Sol, `169`). An ADDITION does:
-        every baseline count is preserved or increased, so no no-loss gate
-        fires, while the citation is still invalid for the edition shipping
-        it.
+        A REPLACEMENT is not it. The baseline was re-recorded with the
+        corrected value, so restoring the stale one is itself a count loss —
+        and appending to an existing citation STRING is also a replacement at
+        the count gate's key granularity, because a citation is keyed by its
+        whole value: `"8.4.5.10.(8)"` becoming
+        `"8.4.5.10.(8); 8.4.4.10.(8)"` drops the first key from 2 to 1. The
+        first version of this test did exactly that and then EXCLUDED that
+        key from its own assertion, which proved the count gate fires and
+        then hid the regression it reported (Sol, `171`).
+
+        A genuinely additive fixture adds a NEW emitted site: one more
+        `manifest.json` article-registry entry, whose value the scanner
+        counts as its own key. Every pre-existing baseline count is then
+        untouched, so no no-loss gate can fire, while the citation is still
+        invalid for the edition shipping it.
         """
         tmp = self.copy()
-        # add a second, invalid 2025 citation beside a valid one
-        self.edit(tmp, self.SNAPSHOT_2025, self.FIXED,
-                  '"article": "8.4.5.10.(8); 8.4.4.10.(8)"')
-        baseline = load_data_baseline()
+        self.edit(tmp, self.MANIFEST_2025, '  "articles": {',
+                  '  "articles": {\n    "_additive_invalid_probe": "8.4.4.10.(8)",')
         after = compute_data_citation_counts(source_root=tmp)
-        dropped = [k for k, n in baseline["necb2025"].items()
-                   if after["necb2025"].get(k, 0) < n
-                   and k != "8.4.5.10.(8)"]
-        self.assertEqual([], dropped,
-                         "the addition must not reduce any other baseline "
-                         "count, or this would not be the additive case")
+        baseline = load_data_baseline()
+        regressions = {scope: {k: (n, after[scope].get(k, 0))
+                               for k, n in values.items()
+                               if after.get(scope, {}).get(k, 0) < n}
+                       for scope, values in baseline.items()
+                       if isinstance(values, dict)}
+        regressions = {s: v for s, v in regressions.items() if v}
+        self.assertEqual(
+            {}, regressions,
+            "a genuinely ADDITIVE citation must leave every baseline count "
+            "intact — no key may be excluded to make that true")
         problems = self.invalid_citations(tmp)
         self.assertTrue(
             any("8.4.4.10" in p and "necb2025" in p for p in problems),
-            f"validity must reject the added invalid citation; got {problems}")
+            "validity must reject the added site that the count gates cannot "
+            f"see; got {problems}")
 
 
 if __name__ == "__main__":
