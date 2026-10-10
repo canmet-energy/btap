@@ -2334,13 +2334,13 @@
       "coeff_8": null,
       "coeff_9": null,
       "coeff_10": null,
-      "minimum_independent_variable_1": 0.7,
+      "minimum_independent_variable_1": 0.25,
       "maximum_independent_variable_1": 1.0,
       "minimum_independent_variable_2": null,
       "maximum_independent_variable_2": null,
-      "minimum_dependent_variable_output": null,
-      "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.21.-E (4).  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.6.7."
+      "minimum_dependent_variable_output": 0.7,
+      "maximum_dependent_variable_output": 1.0,
+      "notes": "From NECB 2011 Table 8.4.4.21.-E (4).  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.6.7.  BOUNDS CORRECTED 2026-10-10: `minimum_independent_variable_1` was 0.7, which put EnergyPlus's PLF FLOOR on the INPUT axis — so every part-load ratio below 0.7 evaluated at the 0.7 value and the cycling penalty vanished. Measured against the Article's own EIR_FPLR over its PLR range 0.25-1.0, the AS-APPLIED deviation was 23.0% at PLR 0.25 (target 0.8029, delivered 0.9877) while the raw polynomial fits to 1.8%. The 0.7 belongs on the OUTPUT, as the cooling twin DXCOOL-REF-COOLPLFFPLR already had it: min_x 0.25 with output clamped [0.7, 1.0] brings the as-applied deviation to 1.80%, the polynomial's own fit quality. Found by Sol's `185` while correcting the vintage-match document; the existing probe reported 1.8% because it evaluated raw coefficients and never the curve the builder installs."
     },
     {
       "name": "FURNACE-PLF-ATMOSPHERIC",
