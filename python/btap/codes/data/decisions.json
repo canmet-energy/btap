@@ -560,13 +560,32 @@
       "title": "Prescriptive pump-power caps applied min-wins over the intensity transfer",
       "kind": "runtime",
       "articles": {
-        "unverified": [
-          "5.2.6.3.(1)",
-          "8.4.4.14."
-        ]
+        "prescriptive_pump_power_ceiling": {
+          "label": "Prescriptive ceiling on combined pump-motor power per kW of loop peak thermal demand",
+          "necb2020": [
+            "5.2.6.3.(1)"
+          ],
+          "necb2025": [
+            "5.2.6.3.(1)"
+          ]
+        },
+        "reference_hydronic_pump_power": {
+          "label": "Reference hydronic pump power: the sentences that state it",
+          "necb2020": [
+            "8.4.4.14.(1)",
+            "8.4.4.14.(2)",
+            "8.4.4.14.(3)"
+          ],
+          "necb2025": [
+            "8.4.5.14.(1)",
+            "8.4.5.14.(2)",
+            "8.4.5.14.(3)"
+          ]
+        }
       },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
       "summary": "Reference hydronic pump power is set by the proposed-intensity transfer and then clamped at the prescriptive maximum watts per kilowatt of the loop's peak thermal demand, because the prescriptive requirement is a ceiling the reference building may never pierce. Taking the smaller of the two is the only reading that satisfies both articles at once, and it removes the perverse incentive whereby wasteful proposed pumping inflates its own target. Unsized inputs produce an audited not-evaluable note rather than a silent skip."
     },
@@ -808,15 +827,32 @@
       "title": "The reference heat pump's auxiliary-heating energy type is elected from the proposed building's annual run",
       "kind": "runtime",
       "articles": {
-        "unverified": [
-          "8.4.4.13.(2)(b)",
-          "8.4.4.13.(2)(g)",
-          "8.4.4.13.(2)(h)",
-          "8.4.5.13.(2)(g)"
-        ]
+        "heat_pump_reference_correspondence": {
+          "label": "Reference system correspondence and capacity for a proposed heat pump",
+          "necb2020": [
+            "8.4.4.13.(2)(b)",
+            "8.4.4.13.(2)(g)",
+            "8.4.4.13.(2)(h)"
+          ],
+          "necb2025": [
+            "8.4.5.13.(2)(b)",
+            "8.4.5.13.(2)(g)",
+            "8.4.5.13.(2)(h)"
+          ]
+        },
+        "heating_energy_type_inheritance": {
+          "label": "Reference heating-system energy type follows the proposed building",
+          "necb2020": [
+            "8.4.4.9.(4)"
+          ],
+          "necb2025": [
+            "8.4.5.9.(4)"
+          ]
+        }
       },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
       "summary": "The heat-pump reference system's terminal or auxiliary heating must take the energy type used for terminal or auxiliary heating of the thermal blocks the heat pump serves that has the largest annual energy use, provided the heat pump itself carries more than a third of those blocks' total annual space-heating energy. That is an annual-energy question, so the proposed building's annual simulation is now run BEFORE the reference is built - it depends on nothing downstream, so the reordering costs no additional simulation - and its per-equipment delivered heating energy is aggregated by energy type over the blocks each heat pump serves: the pump's own blocks for an air-source machine, the blocks of every pump sharing the same source water loop for a water- or ground-source machine. All quantities compared are delivered heat, one consistent basis across energy types. Where the election cannot run - no annual data because only sizing was requested, blocks with no terminal or auxiliary heating at all, or a heat-pump share at or below the threshold so the sentence's proviso is unmet - the structural energy-type proxy that follows the proposed system's fuels elects instead, and the audit states plainly which path elected the fuel. The election is made once, from the first annual run, and is not re-litigated by later capacity iterations, which adjust sizes but never rebuild the reference topology. The clause forcing electricity for a pump that is neither air-, water- nor ground-source is only applied when such a source is affirmatively established, which the current source taxonomy never produces, so an evidence-less detection keeps the proxy rather than guessing. The cooling-capacity clause - peak cooling load without oversizing - was verified by measurement rather than assumption: the per-zone unit cooling sizing factor the heat-pump builders stamp overrides the model-wide capped factor, giving identical sized capacity with the global factor at its cap versus at unity."
     },
@@ -840,13 +876,28 @@
       "title": "The proposed's demand-control ventilation strategy is carried across the reference teardown, but its peak-rate outdoor-air method is not",
       "kind": "runtime",
       "articles": {
-        "unverified": [
-          "8.4.4.15.(2)",
-          "8.4.5.15.(2)"
-        ]
+        "demand_control_ventilation_requirement": {
+          "label": "The prescriptive requirement that determines which DCV strategies are required",
+          "necb2020": [
+            "5.2.3.4."
+          ],
+          "necb2025": [
+            "5.2.3.4."
+          ]
+        },
+        "reference_demand_control_ventilation": {
+          "label": "Reference building inherits the proposed demand-control ventilation strategies",
+          "necb2020": [
+            "8.4.4.15.(2)"
+          ],
+          "necb2025": [
+            "8.4.5.15.(2)"
+          ]
+        }
       },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
       "summary": "The reference building is required to be modelled with the same demand-control ventilation strategies the proposed building implements, but the reference air systems are rebuilt from scratch and their fresh outdoor-air controllers start with demand control switched off, so a proposed building with demand control was being compared against a reference that ventilated at full design rate whenever its fans ran. The characterization step now records each proposed air loop's demand-control setting before the old systems are torn out, and the rebuilt reference controllers receive the same setting. The simulation engine states demand control as a flag plus an outdoor-air method, and only the methods that are themselves demand-control schemes — carbon-dioxide sensing and occupancy-proportional control — are copied, because the remaining methods determine the PEAK ventilation rate, which a different sentence governs and which the reference already inherits from the cloned space ventilation specifications."
     },
@@ -1379,16 +1430,32 @@
       "title": "The reference pump is stated as head, efficiency and motor efficiency; EnergyPlus derives its power",
       "kind": "runtime",
       "articles": {
-        "unverified": [
-          "8.4.4.14",
-          "8.4.5.14",
-          "8.4.4.14.(3)",
-          "8.4.5.14.(3)",
-          "5.2.6.3.(1)"
-        ]
+        "prescriptive_pump_power_ceiling": {
+          "label": "Prescriptive ceiling on combined pump-motor power per kW of loop peak thermal demand",
+          "necb2020": [
+            "5.2.6.3.(1)"
+          ],
+          "necb2025": [
+            "5.2.6.3.(1)"
+          ]
+        },
+        "reference_hydronic_pump_power": {
+          "label": "Reference hydronic pump power: the sentences that state it",
+          "necb2020": [
+            "8.4.4.14.(1)",
+            "8.4.4.14.(2)",
+            "8.4.4.14.(3)"
+          ],
+          "necb2025": [
+            "8.4.5.14.(1)",
+            "8.4.5.14.(2)",
+            "8.4.5.14.(3)"
+          ]
+        }
       },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
       "summary": "Decided: 2026-09-16 under D-10 delegation, after Sol's D-58 scope ruling and two Fable reviews (DF-11 increment A). The reference pump is STATED, not computed-then-repaired: the efficiency pass writes its rated head, its design shaft power per unit flow per unit head and its motor efficiency, and leaves rated power AUTOSIZED so EnergyPlus derives the power. D-11's value source is unchanged here (the proposed loop-type's combined W/(L/s)); what is replaced is the mechanism. The requirement. NECB 2020 8.4.4.14 (2025: 8.4.5.14, identical text): (1) each reference hydronic pump has a total static head and efficiency identical to that of the CORRESPONDING proposed pump; (2) where the proposed uses more than one pump in a given hydronic system, the reference pump's peak SHAFT power demand is identical to the combined peak shaft power demand of the proposed's pumps; (3) where the proposed pump's head or efficiency is NOT KNOWN, the reference pump is based on the proposed's peak power demand in W/(L/s). Note A-8.4.4.14.(2) (explanatory) gives the method for (2): preserve the peak power by ADJUSTING THE PUMP HEAD, at a flow-weighted average pump efficiency. 8.4.4.9.(6)(f) separately fixes the reference plant's peak pumping flow (installed capacity, pure water, 16 C drop), so under (2) both flow and shaft power are article-owned and head is the only free variable. Verified against the codes MCP; the note's own example computes its 179.4 L/min from (6)(f) at 200 kW. What was wrong. The pass hard-set rated power to intensity x reference flow and then bent the inherited head whenever the resulting triple implied a pump efficiency above the motor efficiency (the D-27 reconciliation), because EnergyPlus FATALS on \"Calculated Pump Efficiency > 100%\". That inverted the Article: (1) makes head and efficiency the inherited quantities and lets power follow, and (3)'s W/(L/s) is a fallback for when they are not known. Sol ruled the reconciliation \"not generally justified\" (2026-09-16). The mechanism. P = V x H x k / motor_eff under PowerPerFlowPerPressure, with k = 1 / pump efficiency, so stating H = I x 1000 x motor_eff x pump_eff reproduces an intensity I exactly at any flow. The derived power does not depend on how the total efficiency splits between motor and impeller - the split cancels - so a physical split can always be chosen without moving a watt. A proposed pump whose triple implies an efficiency above 100% (a model that hard-sets power against an unrelated head) states nothing inheritable: that is (3)'s \"not known\", and the pass falls back to E+'s own 0.78 pump / 0.9 motor split, audited citing (3), never silently. Validation is PER CONSTITUENT PUMP, not on the aggregate (Sol, PR #50): a 55.6% pump averaged with a 111.1% one reads as a plausible 60.6%, and the reference would inherit an efficiency no proposed pump has. Each proposed pump's implied efficiency is therefore checked before it joins the flow-weighted mean; one that states the impossible contributes its power and flow to the (2) combination but NOT its efficiency, and the exclusion is audited. Because the stated efficiency is the one E+ computes, the fatal is unreachable by construction and the reconciliation is deleted rather than suppressed. The 5.2.6.3 cap (D-38) clamps through whichever field E+ actually reads - a hard-set rated power, a PowerPerFlow intensity, or the head of a PowerPerFlowPerPressure pump - scaling the head alongside so the implied efficiency is unchanged. That pairing is what keeps a clamped pump as physical as an unclamped one: cutting power while leaving head raises V x H / P toward the same fatal the deleted reconciliation existed to repair. Head-scaling is the pinned gem's mechanism (apply_maximum_loop_pump_power, NECB2015/hvac_systems.rb:228) and the Appendix note's. Branching on the power source is required rather than cosmetic (Sol, PR #50): the cap applies with or without a proposed model, D-92 normalizes only the pumps it transfers, and head is absent from E+'s sizing equation for the other two sources - so a head-only clamp reported a reduction it never applied (10,000 W audited as 450 W while the model still sized 10,000 W). Each pump's power is computed from its own fields rather than re-read from a sizing SQL the pass has just invalidated. Input hardening (Sol, PR #50, accepted with residual risk): the SDK refuses a motor efficiency outside (0, 1], a non-positive shaft coefficient and a non-finite head, but it ACCEPTS a negative or zero rated head and a negative rated power. Those reach the cap as negative watts, and because the clamp fires only when the combined power EXCEEDS the cap, one malformed pump can drag the sum under it - a genuine 5,110 W pump beside a -5,110 W one sums to zero, the loop is certified \"within the Table 5.2.6.3 maximum\", and the real pump escapes the clamp. A compliance check that can be made to pass a violating loop is worse than one that refuses to answer, so a non-positive or non-finite power now reads as unreadable: the cap REFUSES to evaluate the loop and warns, naming the pump, and such a pump is excluded from the (2) combination entirely rather than netted off it. Unreachable through the authored builders and absent from every frozen model; it needs a hostile or hand-edited input. DF-12 is closed with it: prepare_for_resizing no longer releases a service-water circulator, which D-27 puts outside 8.4.4.14 and the pump pass leaves as built. The legacy realisation. openstudio-standards has NO proposed-to-reference pump transfer at all - it generates archetypes, so there is no proposed to transfer from. Its only pump-power mechanism is the Part 5 cap 5.2.6.3.(1), which NECB2020 inherits from NECB2015 and which scales ratedPumpHead under PowerPerFlowPerPressure. Findings recorded rather than adopted: the gem's cap is an unconditional ratio, so it RAISES an under-cap loop's power to the cap (D-38 is min-wins), and because every gem pump starts at OpenStudio defaults its reference pump power equals the cap on every loop. Numerically inert. Head = I x 1000 x motor_eff x pump_eff reproduces the corpus's 255.49 W/(L/s) as 179 354 Pa against OpenStudio's 179 352 Pa default (2 Pa, the truncation in the stored intensity), and the derived power matches the previously hard-set power to 0.00e+00 at every flow tested. All seven frozen baselines carrying a transfer entry re-freeze on audit TEXT only. What this does NOT decide. The value source: whose intensity, and which of (1)/(2)/(3) supplies it. DF-11 carries the explicit sentence branch, the corresponding-pump rule where topologies differ, the proposed-with-no-hydronic-pumps case, and the shaft-versus-electrical question in (2)/(3). Two readings are recorded for Sol to object to rather than ratify in advance: (2) preserves absolute combined shaft watts even where the reference flow differs, superseding D-11's \"intensity, not absolute watts\" choice; and the note's stated 54.2% does not reproduce as a flow-weighted mean (51.3%), though it does reproduce the note's published 156.1 kPa head, so the stated METHOD rather than the arithmetic appears to be the erratum. Also disclosed: 8.4.4.9.(6)(e) requires a constant-speed primary pumping system and our reference builders create PumpVariableSpeed given the riding-curve row under (5). - Files: btap/codes/necb/hvac/efficiency.py (_state_pump_characteristics, _pump_power_from_triple, _transfer_pump_power, _proposed_pump_stats, _apply_pump_power_cap, prepare_for_resizing; _reconcile_pump_head and DESIGN_PUMP_EFFICIENCY deleted), tests/necb/test_hvac_necb_pump_rules.py, tests/necb/test_plant_capacity_ownership.py. - Who/when: Claude under D-10, with the user; Fable reviews; Sol's scope ruling 2026-09-16."
     },
@@ -1397,19 +1464,41 @@
       "title": "The reference pump's value source: correspondence, then the sentence that governs it",
       "kind": "runtime",
       "articles": {
-        "unverified": [
-          "8.4.4.14",
-          "8.4.5.14",
-          "8.4.4.14.(1)",
-          "8.4.4.14.(2)",
-          "8.4.4.14.(3)",
-          "8.4.5.14.(1)",
-          "8.4.5.14.(2)",
-          "8.4.5.14.(3)"
-        ]
+        "heating_plant_peak_pumping_flow": {
+          "label": "Heating-plant peak pumping flow rate",
+          "necb2020": [
+            "8.4.4.9.(6)(f)"
+          ],
+          "necb2025": [
+            "8.4.5.9.(6)(f)"
+          ]
+        },
+        "prescriptive_pump_power_ceiling": {
+          "label": "Prescriptive ceiling on combined pump-motor power per kW of loop peak thermal demand",
+          "necb2020": [
+            "5.2.6.3.(1)"
+          ],
+          "necb2025": [
+            "5.2.6.3.(1)"
+          ]
+        },
+        "reference_hydronic_pump_power": {
+          "label": "Reference hydronic pump power: the sentences that state it",
+          "necb2020": [
+            "8.4.4.14.(1)",
+            "8.4.4.14.(2)",
+            "8.4.4.14.(3)"
+          ],
+          "necb2025": [
+            "8.4.5.14.(1)",
+            "8.4.5.14.(2)",
+            "8.4.5.14.(3)"
+          ]
+        }
       },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
       "summary": "Decided: 2026-09-18/19 by Sol (DF-11 increment B), over three rounds in which he corrected two of his own rulings; two Fable reviews. 8.4.4.14 (2025: 8.4.5.14) is applied per CORRESPONDENCE, not per loop type: for each reference hydronic loop the pass finds the proposed system it corresponds to, decides which of sentences (1), (2) and (3) that system's pumps put it under, and applies that sentence's own formula; where no unambiguous correspondence exists it declines and says so. D-92 settled the mechanism (state the pump, let E+ derive the power); D-93 settles the value. The requirement. (1) each reference pump has a total static head and efficiency identical to that of the CORRESPONDING proposed pump; (2) where the proposed uses more than one pump in a given hydronic system, the reference pump's peak SHAFT power demand is identical to their combined peak shaft power demand; (3) where head or efficiency is NOT KNOWN, the reference pump is based on the proposed's peak power demand in W/(L/s). 8.4.4.9.(6)(f) fixes the reference pumping flow and 5.2.6.3.(1) caps the power required by the MOTORS. Verified against the codes MCP. What was wrong. D-11 collapsed all three sentences into one mechanism - the proposed's combined W/(L/s) blended by plant-loop type across the whole building, applied as intensity x reference flow. It is not (2): on the Code's own Appendix example that yields 578.6 W where the Article requires 861 W, a third short, because the reference flow (179.4 L/min, fixed by (6)(f)) is smaller than the proposed's combined 267 L/min. Its denominator summed the PUMPS' flows, so two pumps in series - circulating the same water - halve the intensity. And a whole-building blend is weakest exactly where a real pump-to-pump correspondence exists. Correspondence. Role (hot_water / chilled_water / condenser / heat_pump_source) plus the set of served thermal blocks, matched by zone NAME because the reference is cloned and clone does not preserve handles; a condenser loop reaches zones through the chillers it serves and a loop behind a heat exchanger through the loop it serves, so both recurse. Scope is an unambiguous one-to-one match; several proposed systems consolidated onto one reference loop is real but the Code does not define correspondence across independently consolidated systems, so it declines; D-97 adjudicated that on 2026-09-28 and upheld the decline, sentence (2) combining pumps only within one hydronic system. Precedence, at the correspondence-group level, which the Code does not state and which is therefore itself adjudicated: if ANY applicable pump's head or hydraulic efficiency is unknown - defaulted, missing or physically impossible - the whole group takes (3); otherwise more than one pump takes (2); otherwise (1). (2) cannot preserve a combined shaft power it cannot compute, and (3) is the explicit missing-data rule. This replaces D-92's partial treatment, where an unreadable pump still contributed to a (2)-style total while being dropped only from the efficiency average. Known is operational. Blank-ness cannot be read: the PumpConstantSpeed constructor writes head and motor efficiency as explicit fields, so isRatedPumpHeadDefaulted() is False on a pump nobody touched, and the shaft coefficient has no isDefaulted accessor. Head is known when positive and not OpenStudio's 179352 Pa; efficiency when the model pins the triple (a hard power against a known head) or moves the shaft coefficient off 1.282051282 - AND the efficiency that implies is one a pump can have. The equivalent motor efficiency is adjudicated, not prescribed: NECB does not define it. A flow-weighted mean preserves shaft power while LEAKING electrical power; eta_m,ref = sum(S)/sum(Pe) (an electrical-weighted arithmetic mean, equivalently a shaft-power-weighted harmonic mean) conserves both at once, and it is the electrical figure D-38's Part 5 cap binds. The denominator is the DISTRIBUTION flow, counted once per fluid stream - the loop's own design maximum flow, hard then autosized - never the sum of the pumps' rated flows. If it cannot be determined the transfer declines and warns; it does not fall back. Flow dependence differs by sentence: (1) and (3) are flow-invariant, (2) is not - head carries the absolute target, so it must be restated after every re-size, which the pipeline already does. The Appendix example is an erratum, and an inert one. Its stated method is a flow-weighted average efficiency, which is 51.292%; the published 54.2% follows no weighting anyone can reproduce (flow 51.3, shaft-power 49.0, series 49.4, parallel 50.5, head 50.0) though it does reproduce the published 156.1 kPa. We implement the stated method, giving 147.72 kPa, and report the discrepancy. It changes no simulated number: the hydraulic/motor split cancels out of the derived power. Declines rather than guesses: N:1 consolidation, partial overlap, several equally valid matches, a reference loop serving no thermal block, a missing counterpart, an undeterminable distribution flow, and more than one pump on the reference loop. Each warns, naming the reason, and says the retained value is a modelling default rather than a Code value; 5.2.6.3 still caps it. Evidence. The Appendix example reproduces end to end: shaft powers 143.33/260.00/457.78 -> 861.11 W, head 147.72 kPa at 51.292%, derived power 861.11 W preserved absolutely at the smaller reference flow. On the frozen corpus every correspondence is single-pump and all-default, so every scenario cites (3) and no watts move - the loop's maximum flow rate equals the pump's design flow to all 16 digits there. Supersedes D-11's '(1)-(3) through one mechanism', its 'intensity x reference flow, not absolute watts', and its loop-TYPE correspondence; and D-92's partial-efficiency treatment of an unreadable pump. - Files: btap/codes/necb/hvac/efficiency.py (_loop_role, _served_zone_names, _distribution_flow, _pump_characteristics_known, _corresponding_loop, _governing_sentence, _transfer_by_correspondence, _apply_sentence_1/2/3; the D-11 transfer path removed), tests/necb/test_hvac_necb_pump_rules.py, tests/necb/test_plant_capacity_ownership.py. - Who/when: decided by Sol, 2026-09-18/19; Fable reviews; scoped to 1:1 so it need not wait on the consolidation adjudication."
     },
@@ -1454,13 +1543,41 @@
       "title": "8.4.x.14.(2) combines pumps within one hydronic system, not across consolidated ones",
       "kind": "runtime",
       "articles": {
-        "unverified": [
-          "8.4.4.14.",
-          "8.4.5.14."
-        ]
+        "heating_plant_capacity_basis": {
+          "label": "Heating-plant capacity as the sum of the systems it serves",
+          "necb2020": [
+            "8.4.4.9.(6)(a)"
+          ],
+          "necb2025": [
+            "8.4.5.9.(6)(a)"
+          ]
+        },
+        "prescriptive_pump_power_ceiling": {
+          "label": "Prescriptive ceiling on combined pump-motor power per kW of loop peak thermal demand",
+          "necb2020": [
+            "5.2.6.3.(1)"
+          ],
+          "necb2025": [
+            "5.2.6.3.(1)"
+          ]
+        },
+        "reference_hydronic_pump_power": {
+          "label": "Reference hydronic pump power: the sentences that state it",
+          "necb2020": [
+            "8.4.4.14.(1)",
+            "8.4.4.14.(2)",
+            "8.4.4.14.(3)"
+          ],
+          "necb2025": [
+            "8.4.5.14.(1)",
+            "8.4.5.14.(2)",
+            "8.4.5.14.(3)"
+          ]
+        }
       },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
       "summary": "Decided: Sol, 2026-09-28. Where several INDEPENDENT proposed hydronic systems are consolidated onto one reference loop, sentence (2) does NOT aggregate their pumps; the 8.4.x.14.(1)-(3) transfer declines. This closes the N:1 item D-93 left open. The scope word is 'in a given hydronic system': (2) combines pumps WITHIN one system, and several systems consolidated onto one reference loop is a different shape. Note A-8.4.x.14.(2) does not enlarge it - the note is non-normative and its plural 'its hydronic systems' is generic, since the example names ONE 200 kW boiler plant using one primary-secondary system whose primary and two wing secondaries serve zone-disjoint branches while remaining hydraulically one system; zone disjointness is not system independence. Two neighbouring provisions confirm the boundary: 5.2.6.3.(1) uses the same 'in a given hydronic system' phrase with the thermal denominator being the peak demand of THE LOOP, and 8.4.x.9.(6)(a) distinguishes the consolidated reference plant from the systems served by it, prescribing that their CAPACITIES be summed and never that pumps be summed across independent proposed systems. No sentence supplies a value for N:1: (1) has no single corresponding pump, (2) is same-system only, (3) is a missing-characteristics fallback for a corresponding pump rather than a fallback for missing correspondence. The declined default is NOT conservative - 5.2.6.3 is a ceiling only, so the retained modelling default may sit above or below a counterfactual transfer and can bias the reference in either direction; the audit entry says the direction is indeterminate, names the consolidated proposed loops, and cites D-93 D-97 as a loud warning rather than a hard error. The pinned gem f01da13a6b89 offers no precedent: zero occurrences of 8.4.4.14, 8.4.5.14, 'static head' or 'corresponding pump' in lib, and only the per-loop 5.2.6.3 cap implemented. Nothing in D-93's same-system formulas changes, and the two efficiencies stay distinct - hydraulic follows the note's flow-weighted form while the equivalent motor efficiency remains the separately adjudicated sum(S)/sum(Pe), the 123 W leak having come from flow-weighting the MOTOR efficiency. Reachability stated narrowly: a sweep built all 97 catalog systems and none yields two loops of one role, and no frozen scenario contains the shape, but plant_loops.hot_water(reuse=False) authors two same-role loops through the public API and sample generation already uses it, so it is not foreign-only. D-93 D-97 is cited on the consolidation branch ALONE: D-93 declines on several other shapes and this ruling examined one, so every other decline keeps D-93's existing wording (counts are deliberately not stated - two comments said four and this summary said six, while the measured number is seven). The first implementation put the citation and the 'not a conservative bound' text in the shared decline branch, which made a partial overlap attest to D-97 and moved the frozen corpus-sizing-18-vav-hw-subset-reheat baseline; whether the same caution should be generalised to the other declines is a D-93 question, not a side effect of this one. The implemented predicate is an EXACT consolidation: the overlapping proposed loops' block sets must be pairwise disjoint and must cover the reference loop's set exactly. 'More than one overlapping loop' is not this decision's shape and was the first implementation's error - against a reference serving {A,B} it also caught {A},{A} (reference block B left without a counterpart), {A,C},{A,D} and {A,C},{B,D} (reaching blocks the reference does not serve); those are multiple partial overlaps and keep D-93's decline. The boundary is HYDRAULIC CONTINUITY, not energy coupling: two distinct same-role proposed PlantLoops are two hydronic systems even when their equipment shares another loop, because a shared source/condenser/oil-cooler/auxiliary/heat-rejection loop, a heat exchanger, a refrigerant circuit or an air-to-water heat pump's refrigerant parent couples equipment and transfers energy rather than letting one fluid circulate through both loops. 5.2.6.3.(1)'s table note fixes the thermal denominator at the peak demand of THE LOOP, Note A-8.4.x.14.(2)'s example is one primary-secondary system circulating common fluid, and 8.4.x.9.(6)(a) distinguishes a plant from the systems it serves. An earlier round classified a 'hydraulically connected network' through heat exchangers, chillers and plant heat pumps and required the overlapping loops to lie in separate networks; Sol withdrew that as an over-expansion from common-fluid primary-secondary pumping into arbitrary thermal and refrigerant coupling, so there is NO connectivity test in the predicate and the ChillerElectricASHRAE205 oil-cooler/auxiliary and HeatPumpAirToWater completeness questions no longer govern this decision. An exact match counts as one-to-one only when it is the SOLE overlapping loop: with reference {A,B}, proposed {A,B} and proposed {B} the earlier order transferred under (3) from the exact loop's pump alone and dropped the other silently, which is neither unambiguous nor a disjoint partition, so it declines under D-93 alone naming every candidate. Both editions are word-for-word identical for (1)-(3) save the Note's own number, and all four article/Note payloads are archived verbatim under each edition's provenance/ so the scope phrase can be re-read offline. Numbered D-97 rather than the D-96 the ruling named, because D-96 was taken by the relicence while the question was in flight."
     },
