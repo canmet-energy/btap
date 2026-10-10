@@ -2,10 +2,10 @@
  "version": 2,
  "spec_sha256": "ca661a5cfb1a69f6b16b7f0b4d2f2e4afb4a593e3fcb1af37f4107fcf050e107",
  "provenance": {
-  "commit": "c27da1906a47c31388996f5ad07105da6ee419a0",
+  "commit": "4f0d96e38b523dc26f4d837803e53970adf1e114",
   "dirty": false,
   "freezer_sha256": "a05b10c3bfccbd9869593e030d8e65757ecf311b39907f2030e7729935a4145e",
-  "defs_sha256": "6e59f22d5ed1251b8278f96a67fbacaa7868d5b90ba13bbb5abf2f6cc7f223d8",
+  "defs_sha256": "a8b51bc913ad00fee9dca9ab94fae041b902372abb130c481c9f79da1a690241",
   "runner_sha256": "f5fa6467f22f3a2aee19ef3d5637a9194ff1a76e66f6dad73d7c5b4db6302de1",
   "api_worker_sha256": "3264ee133bd08fdfebcda263349280cf8bda19555fbb1166f0c55e6cc5931f0f",
   "compare_runs_sha256": "b8f1f60f5e285047ede41cdcb933296564ec0130a8c3946ab03b5a6a014e08ec",
@@ -25,7 +25,7 @@
   },
   "active_seals": {
    "python-only:post-handoff": 31,
-   "python-only": 21
+   "python-only": 23
   },
   "retired_seals": {
    "ruby": 29,
@@ -45,7 +45,7 @@
  "counts": {
   "python": 36,
   "verify": 6,
-  "parity": 10
+  "parity": 12
  },
  "scenarios": [
   {
@@ -2207,6 +2207,160 @@
     "report.json": "44249f59f94ed8cb85bdc6ff186e49e6c4fd746c63e8846d2788909182e8efd1",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "7ca3e78dffb3abe04cea13d581dcbe08ff2308332a5d84ac007e8121766dc05d"
+   }
+  },
+  {
+   "id": "determination-05-19-corner-block-annual",
+   "lane": "parity",
+   "kind": "cli",
+   "replaces": [],
+   "argv": [
+    "<CORPUS>/19-corner-block-5storey.osm",
+    "--simulate",
+    "annual",
+    "--epw",
+    "<EPW>",
+    "--hdd",
+    "3890",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 0,
+   "timeout_s": 5400,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "python-only:first frozen as a guard-7 witness \u2014 authored after the Ruby product retired; no cross-language attestation exists for this scenario",
+   "asserts": [
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "annual",
+     "value": true
+    },
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "compliance_determination",
+     "value": "conditional"
+    },
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "compliance_determination_reason.ahj_ids",
+     "value": [
+      "AHJ-10",
+      "AHJ-14"
+     ]
+    },
+    {
+     "op": "audit_entry",
+     "step": "selection",
+     "level": "decision",
+     "ahj": "AHJ-10",
+     "count": 1
+    }
+   ],
+   "baseline_sha256": {
+    "audit.json": "714e614fb92cfc2788866cba024ddea2cbd0943fa413fe5086fc0e845884f907",
+    "audit.txt": "02029fd5eca96cfdd6dac510ab226cd00590ea4a239e13c8be16ae8081f6a5d0",
+    "report.json": "0ad28839765d185c39532e867c6d0de57bbab0b89bf1777fbc8570b6c6e3a867",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "7fe821934475aa4f3e8d09f1981d80792f98d588b9aa2260124cdb157d9b284f"
+   }
+  },
+  {
+   "id": "determination-06-20-humidified-annual",
+   "lane": "parity",
+   "kind": "cli",
+   "replaces": [],
+   "argv": [
+    "<CORPUS>/20-humidified-psz.osm",
+    "--simulate",
+    "annual",
+    "--epw",
+    "<EPW>",
+    "--hdd",
+    "3890",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 1,
+   "timeout_s": 5400,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "python-only:first frozen as a guard-7 witness \u2014 authored after the Ruby product retired; no cross-language attestation exists for this scenario",
+   "asserts": [
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "annual",
+     "value": true
+    },
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "compliance_determination",
+     "value": "conditional"
+    },
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "compliance_determination_reason.ahj_ids",
+     "value": [
+      "AHJ-12",
+      "AHJ-14",
+      "AHJ-15"
+     ]
+    },
+    {
+     "op": "audit_entry",
+     "level": "decision",
+     "ahj": "AHJ-12",
+     "count": 1
+    },
+    {
+     "op": "audit_entry",
+     "level": "warning",
+     "ahj": "AHJ-12",
+     "count": 4
+    },
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "compliant",
+     "value": false
+    }
+   ],
+   "baseline_sha256": {
+    "audit.json": "971e8c77da8e565386323a639e5093dc345a4137be450c9282c806c0d0653c23",
+    "audit.txt": "e3ffeaf8516e767a51594ee125810b6cfaecab693a94d07e5b2bd1a68e560b6f",
+    "report.json": "e275cc8a5d7261f9265123159fb32154f8ee5fc8125fa092b622e0e5fa30e748",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "e6069015ddf9ed22d52ffb5529e9422acb2c102257cd0a012d89f9bbe6720255"
    }
   },
   {
