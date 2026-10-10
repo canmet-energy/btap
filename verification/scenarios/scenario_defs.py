@@ -413,6 +413,42 @@ DETERMINATION_SCENARIOS = [
           "value": False},
      ]},
 
+    # GUARD 7 for AHJ-2 (Sol's `127`: one ANNUAL frozen artifact per
+    # approval-required id). AHJ-2 fired in NO frozen audit at all — not even a
+    # corpus-tier one — because its branch reads the ANNUAL per-zone heating
+    # energy to weigh the (2)(g) comparison, and under `--simulate none` the
+    # structural 8.4.x.9.(4) proxy answers instead. Sample 16's own generator
+    # note says exactly that: "Needs --simulate annual: under :none it cannot
+    # run and the structural 8.4.4.9.(4) proxy answers instead."
+    #
+    # The shape is an air-source heat pump with BOTH an electric supplementary
+    # coil and a hot-water baseboard, so there IS auxiliary heating energy for
+    # (2)(g) to weigh — `aux_by_fuel` non-empty is the precondition the branch
+    # returns early on.
+    {"id": "determination-04-16-ashp-supp-aux-election-annual",
+     "lane": "parity", "kind": "cli", "replaces": [],
+     "argv": ["<CORPUS>/16-ashp-electric-supp-hw-baseboard.osm",
+              "--simulate", "annual", "--epw", "<EPW>",
+              *BASE_ARGS, "-o", "<RUN_DIR>"],
+     "env": {}, "expect_exit": 1, "timeout_s": 5400,
+     "files": CORPUS_FILES, "text_files": CORPUS_TEXT,
+     "streams": {"stdout": "exact", "stderr": "exact"},
+     "seal": GUARD7_SEAL,
+     "asserts": [
+         {"op": "json_equals", "file": "report.json", "path": "annual",
+          "value": True},
+         # The guard's substance, in two halves. First that AHJ-2 was CITED
+         # at the deciding rule site, which D-100 makes the thing that
+         # declares applicability — `json_in` is the wrong op here, it checks
+         # that a value is one of a list rather than that a list contains one.
+         {"op": "audit_entry", "ahj": "AHJ-2", "count": 1},
+         # Second that this run reaches a DETERMINATION at all, which is the
+         # one thing no frozen artifact proved for AHJ-2. The exact id list
+         # and verdict are pinned by the frozen report.json itself.
+         {"op": "json_exists", "file": "report.json",
+          "path": "compliance_determination"},
+     ]},
+
     # GUARD 7 for AHJ-1 and AHJ-3 (Sol's `127`: one ANNUAL frozen artifact per
     # approval-required id). Both fired only in tiers that structurally cannot
     # reach a determination — the annual tier runs `--quick`, which Article
