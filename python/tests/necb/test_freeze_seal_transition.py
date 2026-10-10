@@ -60,6 +60,12 @@ class TestFreezeSealTransition(unittest.TestCase):
         #      AHJ-2 fired in NO frozen audit at all, because its branch reads
         #      the ANNUAL per-zone heating energy and under `--simulate none`
         #      the structural 8.4.x.9.(4) proxy answers instead
+        #   2  guard 7 for AHJ-10 and AHJ-12: determination-05 and -06, the
+        #      two new samples run FULL-YEAR. Adding the samples was NOT the
+        #      same as witnessing the ids — their corpus-none scenarios exit 6
+        #      with no `annual` and no determination, and `127` is explicit
+        #      that none/sizing artifacts do not prove verdict wiring
+        #      (Sol, `181`)
         #   2  the guard-7 CORPUS additions, which are samples rather than
         #      scenarios: 19-corner-block-5storey for AHJ-10 (the only block
         #      exposed on two facades, and the only sample above four storeys
@@ -67,12 +73,12 @@ class TestFreezeSealTransition(unittest.TestCase):
         #      fixture's perimeter zones each face exactly one way) and
         #      20-humidified-psz for AHJ-12 (the only sample carrying
         #      humidification at all; `btap.modeling` builds none)
-        #   = 21
+        #   = 23
         #
         # This enumeration was ALREADY one behind before sample 09: it listed
         # 4+4+2+4 = 14 beside an assertion of 15, having never recorded sample
         # 11. A provenance narrative that does not add up is not provenance.
-        self.assertEqual({"python-only:post-handoff": 31, "python-only": 21}, active)
+        self.assertEqual({"python-only:post-handoff": 31, "python-only": 23}, active)
         self.assertEqual({"ruby": 29, "ruby-api": 2}, retired)
         self.assertEqual({
             "commit": "85ab14352677093e24038d933cf1071e5b03431a",

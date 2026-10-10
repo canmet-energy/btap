@@ -148,6 +148,28 @@ def _humidified(model):
         raise SystemExit("humidified sample: the air loop serves no thermal block")
     served[0].setZoneControlHumidistat(humidistat)
 
+    # AND the outlet setpoint manager, without which this sample CANNOT BE
+    # SIMULATED. A humidistat alone satisfies the reference-side capture — the
+    # SDK-only path builds and audits fine — but EnergyPlus fatals in the
+    # PROPOSED sizing run:
+    #
+    #   Severe  Humidifiers: Missing humidity setpoint for
+    #           Humidifier:Steam:Electric = PROPOSED STEAM HUMIDIFIER
+    #           use a Setpoint Manager with Control Variable =
+    #           "MinimumHumidityRatio"
+    #   Fatal   Previous severe set point errors cause program termination
+    #
+    # So the first version of this sample was unsimulable and nothing caught
+    # it, because the reference path never runs the engine (Sol, `181`).
+    # `test_hvac_necb_humidification.py` already held the valid construction.
+    outlet = humidifier.outletModelObject()
+    if not outlet.is_initialized():
+        raise SystemExit("humidified sample: the humidifier has no outlet node")
+    manager = openstudio.model.SetpointManagerSingleZoneHumidityMinimum(model)
+    manager.setControlZone(served[0])
+    if not manager.addToNode(outlet.get().to_Node().get()):
+        raise SystemExit("humidified sample: the setpoint manager would not attach")
+
 
 #: Runs AFTER the catalog system is built: there is no air loop to humidify
 #: before that.
