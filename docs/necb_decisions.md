@@ -2101,6 +2101,20 @@ implemented by `align_heat_pump_heating_capacity` since D-22.
   `openstudio-hvac/lib/openstudio_hvac/data/necb/reference_rules_{2020,2025}.json`.
 - **Who/when:** phylroy ruled 2026-07-29, implemented by Claude under D-10.
 
+### Which editions this was established against
+
+- **Established:** `necb2020` and `necb2025`, Claude under D-10, 2026-10-10.
+
+`8.4.4.5` (2020) and `8.4.5.5` (2025) are both titled *Lighting*, both carry
+twelve sentences, and their normalised text agrees to a similarity of
+**0.997013**. Every difference is the article's OWN cross-reference
+renumbering as Subsection 8.4.4 became 8.4.5, with one exception verified
+rather than assumed: 2025 drops the symbol `Focc,i` from sentence (3) while
+keeping the requirement word for word. The citation ranges the holding key
+carried are split, because `8.4.4.5.(9)-(12)` is not a FULLMATCH of the
+citation grammar. [[D-57]] rests on the same pair and was established in the
+same reading.
+
 <a id="d-52"></a>
 
 ## D-52 — 8.4.4.13.(2)(b)/(g)/(h): HP cooling sized without oversizing (measured), and the auxiliary-heating fuel is ELECTED from the proposed annual run
@@ -2598,6 +2612,18 @@ cooled fluid to economize with and are warned rather than silently skipped.
   `openstudio-hvac/test/test_helper.rb` (`run_energyplus!` gained an optional
   `run_period:` — shoulder weather is where this control acts).
 - **Who/when:** Claude under D-10 delegation, 2026-07-29.
+
+### Which editions this was established against
+
+- **Established:** `necb2020` and `necb2025`, Claude under D-10, 2026-10-10.
+
+`8.4.4.12` (2020) and `8.4.5.12` (2025) are both titled *Cooling with Outside
+Air*, both are single-sentence articles of 435 characters, and every
+difference between them is their own renumbering — including the
+`Table 8.4.4` → `Table 8.4.5` reference the sentence makes to itself.
+`5.2.2.9`, *Cooling by Indirect Use of Outdoor Air (Water Economizer
+System)*, keeps its number in both editions and differs only by the
+capitalisation of one token in the retained payload.
 
 <a id="d-57"></a>
 
@@ -3207,6 +3233,51 @@ fleet trend table should quote 101.8 / 101.6 / 102.8 / 97.2 / 95.4 for these
 five from here on.
 
 - Who/when: Fable under D-10 delegation, 2026-08-02.
+
+### Which editions this was established against, and how
+
+- **Established:** `necb2020` and `necb2025`, Claude under D-10, 2026-10-10.
+  Before this the entry said `unverified`, and its citations sat in the
+  holding key as a flat list with the two editions' numbers beside each other
+  but no correspondence authored.
+
+The transfer was COMPUTED from both editions' text, not inferred from the
+numbering and not read by eye:
+
+| requirement | 2020 | 2025 | result |
+|---|---|---|---|
+| Interior Lighting Controls | `4.2.2.1` | `4.2.2.1` | **identical**, 8250 characters each |
+| Sidelighted areas | `4.2.2.3` | `4.2.2.3` | identical once the payload's absorbed `4.2.2.4` title is removed |
+| Daylighted area under roof monitors | `4.2.2.4` | `4.2.2.4` | **identical**, 1079 each |
+| Daylighted area under skylights | `4.2.2.5` | `4.2.2.5` | **identical**, 860 each |
+| Reference photocontrol evaluation | `8.4.4.5.(9)-(12)` | `8.4.5.5.(9)-(12)` | transfers, similarity 0.997013 |
+| Space-type control gates | `Table 4.2.1.6` | `Table 4.2.1.6` | 101 rows each; **0 differing cells of 882** in the nine control columns |
+
+Three things in that table are worth stating rather than leaving implicit.
+
+**The 8.4 pair's differences are its own cross-references, with one exception
+I checked rather than assumed.** Five single-character `4`→`5` replacements are
+the article's own renumbering as Subsection 8.4.4 became 8.4.5. The exception:
+2025 drops the SYMBOL `Focc,i` from sentence (3) while keeping the requirement
+word for word — "multiplied by the factor for occupancy control, and the factor
+for personal control, Fpers,i as determined in accordance with Article
+4.3.2.10. for the appropriate occupancy-sensing mechanism". A dropped symbol is
+a drafting difference. I verified it instead of filing it under OCR noise,
+because a dropped occupancy factor WOULD have been normative.
+
+**Table 4.2.1.6 is identical where this decision reads it.** Both editions
+carry 101 rows; eight rows differ and every difference is in the SYNTHESISED
+`Space Category` column or a space-type label (`< 25 m²` against `≤ 25 m²`,
+`Storage room < 5 m²` against `Storage room <5m2`) — never in a control
+column. Both daylighting columns mark 97 of 101 rows in each edition. The
+codes service states the same independently in its own `known_issue`: the nine
+lighting-control columns "are verified against the printed pages and agree
+exactly between the 2020 and 2025 editions (0 differing cells of 882)". An
+earlier account in this repository said 105 rows; 101 is correct.
+
+**The ranges are gone.** `8.4.4.5.(9)-(12)` is not a FULLMATCH of the citation
+grammar, so each sentence is now cited on its own. The holding key's flat list
+could carry a range because nothing validated it.
 
 <a id="d-58"></a>
 
@@ -5685,6 +5756,32 @@ data miss rather than a DF-4 validation. (6) The live scenario counts read 41, t
 them Python-only from their first freeze. R-O re-frozen on the clean tree;
 attribution in the plan log.
 
+### Which editions this was established against
+
+- **Established:** `necb2020` and `necb2025`, Claude under D-10, 2026-10-10.
+
+This decision's subject IS a per-edition difference, and the reading confirms
+the difference is real and structural rather than a renumbering:
+
+```text
+8.4.5.2 Boiler  (2020)   3 sentences   condensing or non-condensing;
+                                       modulating is its own sentence (3),
+                                       by TABLE 8.4.5.2.-B
+8.4.6.2 Boiler  (2025)   2 sentences   condensing, non-condensing OR
+                                       modulating in one sentence, by a
+                                       CURVE that adds return-water
+                                       temperature
+```
+
+So the modulating requirement is `8.4.5.2.(3)` in 2020 and `8.4.6.2.(2)` in
+2025 — an authored correspondence that an equal-suffix rule would refuse, and
+the reason correspondence is authored rather than computed. The furnace pair
+has the same shape. `8.4.4.6`/`8.4.5.6` *Purchased Energy* is a clean transfer
+at similarity 0.998596.
+
+2025's return-water-temperature surface remains deferred as stated above; the
+reading did not change that disposition, it confirmed the Code text it rests on.
+
 <a id="d-90"></a>
 
 ## D-90 — The reference plant's capacity follows the reference's own sizing
@@ -5828,6 +5925,22 @@ with attribution in the plan log.
   `tests/necb/test_plant_capacity_ownership.py`.
 - **Who/when:** Claude with the user, reviewed by Fable and Sol, 2026-09-15.
 
+### Which editions this was established against
+
+- **Established:** `necb2020` and `necb2025`, Claude under D-10, 2026-10-10.
+
+`8.4.4.9`/`8.4.5.9` *Heating System* (similarity 0.998606) and
+`8.4.4.10`/`8.4.5.10` *Cooling Systems* transfer cleanly. The cooling pair
+needed a per-SENTENCE comparison to show it: a positional diff reported
+0.744 because a block had moved, while all nine sentences are identical or
+identical after their own `8.4.4`→`8.4.5` renumbering — sentence (5)'s sole
+difference is its cross-reference to *Subsection 8.4.5* becoming *8.4.6*.
+
+`8.4.1.2.(5)` keeps its number in both editions and differs in wording: 2025
+says the capacities "of the proposed building or the reference building, where
+applicable" rather than "of the proposed or reference building". The
+conditionality is already carried per edition in the runtime rule data.
+
 <a id="d-91"></a>
 
 ## D-91 — Reference zone dispatch for one-unit-per-block Systems 3 and 4: the rooftop air terminal runs first
@@ -5944,6 +6057,33 @@ in the plan log.
   compliance tests.
 - **Who/when:** Claude with the user; Fable reviews; decided by Sol,
   2026-09-15.
+
+### Which editions this was established against
+
+- **Established:** `necb2020` and `necb2025`, Claude under D-10, 2026-10-10.
+
+`8.4.4.9.(3)`/`8.4.5.9.(3)` transfers cleanly, and `8.4.2.10.(2)` is
+CHARACTER-IDENTICAL in both editions even though the article's title changed
+from *HVAC Systems Calculations* to *HVAC Systems* — a title change is not a
+requirement change.
+
+`8.4.1.2.(3)` and `(4)` keep their numbers and DO differ substantively, which
+is why this entry could not be established by resolving its citations:
+
+```text
+(4) 2020   proposed unmet cooling hours shall not differ by more than +10%
+           from the reference's
+(4) 2025   ... for thermal blocks for which mechanical cooling is provided,
+           shall not exceed 100 h when complying with Subsection 8.4.4., or
+           not differ by more than +10% OR 20 HOURS, WHICHEVER IS GREATER
+```
+
+The 20-hour floor matters most where the absolute count is small: against a
+reference logging 4.75 unmet cooling hours, 2020 allows 5.225 h and 2025
+allows 24.75 h. That per-edition difference is already implemented as data —
+`necb_rules.json` `unmet_cooling.minimum_allowance_h` is `0.0` for 2020 and
+`20.0` for 2025 — and the reading confirms both of those notes against the
+Code's own text.
 
 <a id="d-92"></a>
 

@@ -3314,7 +3314,7 @@
   },
   "value": "COP 3.98 (15.0SEER) on all 2 stages, binned by total capacity",
   "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3330,7 +3330,7 @@
   },
   "value": "COP 3.98 (15.0SEER) on all 2 stages, binned by total capacity",
   "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3346,7 +3346,7 @@
   },
   "value": "COP 3.8 (11.0EER) on all 2 stages, binned by total capacity",
   "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3362,7 +3362,7 @@
   },
   "value": "COP 3.98 (15.0SEER) on all 2 stages, binned by total capacity",
   "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3378,7 +3378,7 @@
   },
   "value": "COP 3.98 (15.0SEER) on all 2 stages, binned by total capacity",
   "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3728,7 +3728,7 @@
   "inputs": {
    "run_period": "full year",
    "clean_run": true,
-   "total_site_kwh": 148858,
+   "total_site_kwh": 148919,
    "unmet_heating_h": 0.0,
    "unmet_cooling_h": 4.75
   },
@@ -3740,9 +3740,9 @@
   "action": "proposed EXCEEDS the building energy target",
   "inputs": {
    "proposed_kwh": 167150.0,
-   "reference_building_energy_target_kwh": 148858.3
+   "reference_building_energy_target_kwh": 148919.4
   },
-  "value": "margin -18291.7 kWh (-12.3%)",
+  "value": "margin -18230.6 kWh (-12.2%)",
   "article": "8.4.1.2.(2)",
   "level": "decision"
  },
@@ -3750,8 +3750,8 @@
   "step": "compliance",
   "action": "no energy performance tier achieved (over the target)",
   "inputs": {
-   "percent_of_target": 112.3,
-   "improvement_percent": -12.3
+   "percent_of_target": 112.2,
+   "improvement_percent": -12.2
   },
   "article": "10.1.2.1. (Table verified identical 2020/2025)",
   "level": "decision"

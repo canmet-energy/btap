@@ -3295,7 +3295,7 @@
   },
   "value": "COP 3.8 (11.0EER) on all 2 stages, binned by total capacity",
   "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3311,7 +3311,7 @@
   },
   "value": "COP 3.98 (15.0SEER) on all 2 stages, binned by total capacity",
   "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3327,7 +3327,7 @@
   },
   "value": "COP 3.8 (11.0EER) on all 2 stages, binned by total capacity",
   "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3343,7 +3343,7 @@
   },
   "value": "COP 3.98 (15.0SEER) on all 2 stages, binned by total capacity",
   "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3359,7 +3359,7 @@
   },
   "value": "COP 3.98 (15.0SEER) on all 2 stages, binned by total capacity",
   "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },

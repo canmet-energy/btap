@@ -52,14 +52,14 @@
  },
  "reference": {
   "clean_run": true,
-  "total_site_kwh": 184152.8,
-  "electricity_kwh": 70413.9,
+  "total_site_kwh": 184244.4,
+  "electricity_kwh": 70505.6,
   "natural_gas_kwh": 113738.9,
   "district_heating_kwh": 0.0,
   "district_cooling_kwh": 0.0,
   "end_uses_kwh": {
-   "heating": 99983.3,
-   "cooling": 2769.4,
+   "heating": 100000.0,
+   "cooling": 2844.4,
    "fans": 32969.4,
    "pumps": 1241.7,
    "interior_lighting": 9402.8,
@@ -67,7 +67,7 @@
    "water_systems": 14127.8
   },
   "floor_area_m2": 800.0,
-  "eui_kwh_per_m2": 230.2,
+  "eui_kwh_per_m2": 230.3,
   "unmet_occupied_hours": {
    "heating": 0.0,
    "cooling": 231.25
@@ -283,7 +283,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "Coil Heating Gas 1",
     "detail": "gas heating coil efficiency applied",
-    "entry_index": 275
+    "entry_index": 276
    },
    {
     "id": "AHJ-14",
@@ -292,7 +292,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "Coil Heating Gas 2",
     "detail": "gas heating coil efficiency applied",
-    "entry_index": 276
+    "entry_index": 277
    },
    {
     "id": "AHJ-14",
@@ -301,7 +301,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "Coil Heating Gas 3",
     "detail": "gas heating coil efficiency applied",
-    "entry_index": 277
+    "entry_index": 278
    },
    {
     "id": "AHJ-14",
@@ -310,7 +310,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "Coil Heating Gas 4",
     "detail": "gas heating coil efficiency applied",
-    "entry_index": 278
+    "entry_index": 279
    },
    {
     "id": "AHJ-14",
@@ -319,7 +319,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "Coil Heating Gas 5",
     "detail": "gas heating coil efficiency applied",
-    "entry_index": 279
+    "entry_index": 280
    }
   ]
  },
@@ -398,6 +398,7 @@
   "model object named 'DXCOOL-REF-CAPFFLOW' does not state this edition's Quadratic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-CAPFFLOW (D-89)'",
   "model object named 'DXCOOL-REF-COOLEIRFT' does not state this edition's BiQuadratic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-COOLEIRFT (D-89)'",
   "model object named 'DXCOOL-REF-COOLPLFFPLR' does not state this edition's Cubic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-COOLPLFFPLR (D-89)'",
+  "model object named 'DXHEAT-REF-PLFFPLR' does not state this edition's Cubic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXHEAT-REF-PLFFPLR (D-89)'",
   "CoilHeatingDXMultiSpeed_ashp 68kBtu/hr 3.3COPH: staged cooling capacity unavailable \u2014 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
   "CoilHeatingDXMultiSpeed_ashp 1 34kBtu/hr 7.4HSPF: staged cooling capacity unavailable \u2014 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
   "CoilHeatingDXMultiSpeed_ashp 2 68kBtu/hr 3.3COPH: staged cooling capacity unavailable \u2014 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
