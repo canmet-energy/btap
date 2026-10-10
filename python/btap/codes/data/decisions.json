@@ -411,12 +411,23 @@
       "title": "Service-water circulators are outside the hydronic pump article; transfer head reconciled",
       "kind": "runtime",
       "articles": {
-        "unverified": [
-          "8.4.4.14."
-        ]
+        "reference_hydronic_pump_power": {
+          "label": "Reference hydronic pump power: the sentences that state it and its scope",
+          "necb2020": [
+            "8.4.4.14.(1)",
+            "8.4.4.14.(2)",
+            "8.4.4.14.(3)"
+          ],
+          "necb2025": [
+            "8.4.5.14.(1)",
+            "8.4.5.14.(2)",
+            "8.4.5.14.(3)"
+          ]
+        }
       },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
       "summary": "The pump-power transfer had been applying a space-heating power intensity to service-water circulators, which combined with an inherited high head implies an impossible pump efficiency and is fatal to the simulation engine. Loops carrying a water heater or water-use connections are now outside the hydronic pump scope entirely, and are also excluded from the proposed-side intensity statistics. Every remaining transfer carries a physicality guard that reconciles head, with a loud warning, when the implied efficiency is impossible."
     },
@@ -561,16 +572,18 @@
       "kind": "runtime",
       "articles": {
         "prescriptive_pump_power_ceiling": {
-          "label": "Prescriptive ceiling on combined pump-motor power per kW of loop peak thermal demand",
+          "label": "Prescriptive ceiling on combined pump-motor power, and the table that supplies it",
           "necb2020": [
-            "5.2.6.3.(1)"
+            "5.2.6.3.(1)",
+            "Table 5.2.6.3."
           ],
           "necb2025": [
-            "5.2.6.3.(1)"
+            "5.2.6.3.(1)",
+            "Table 5.2.6.3."
           ]
         },
         "reference_hydronic_pump_power": {
-          "label": "Reference hydronic pump power: the sentences that state it",
+          "label": "Reference hydronic pump power: the sentences that state it and its scope",
           "necb2020": [
             "8.4.4.14.(1)",
             "8.4.4.14.(2)",
@@ -580,6 +593,15 @@
             "8.4.5.14.(1)",
             "8.4.5.14.(2)",
             "8.4.5.14.(3)"
+          ]
+        },
+        "reference_meets_prescriptive_requirements": {
+          "label": "The reference building's systems meet the Part 5 prescriptive requirements",
+          "necb2020": [
+            "8.4.4.1.(2)"
+          ],
+          "necb2025": [
+            "8.4.5.1.(2)"
           ]
         }
       },
@@ -827,17 +849,24 @@
       "title": "The reference heat pump's auxiliary-heating energy type is elected from the proposed building's annual run",
       "kind": "runtime",
       "articles": {
-        "heat_pump_reference_correspondence": {
-          "label": "Reference system correspondence and capacity for a proposed heat pump",
+        "heat_pump_auxiliary_heating_energy_type": {
+          "label": "Auxiliary-heating energy type elected for a reference heat pump",
           "necb2020": [
-            "8.4.4.13.(2)(b)",
             "8.4.4.13.(2)(g)",
             "8.4.4.13.(2)(h)"
           ],
           "necb2025": [
-            "8.4.5.13.(2)(b)",
             "8.4.5.13.(2)(g)",
             "8.4.5.13.(2)(h)"
+          ]
+        },
+        "heat_pump_cooling_capacity": {
+          "label": "Reference heat-pump cooling capacity set from peak load without oversizing",
+          "necb2020": [
+            "8.4.4.13.(2)(b)"
+          ],
+          "necb2025": [
+            "8.4.5.13.(2)(b)"
           ]
         },
         "heating_energy_type_inheritance": {
@@ -1430,17 +1459,39 @@
       "title": "The reference pump is stated as head, efficiency and motor efficiency; EnergyPlus derives its power",
       "kind": "runtime",
       "articles": {
-        "prescriptive_pump_power_ceiling": {
-          "label": "Prescriptive ceiling on combined pump-motor power per kW of loop peak thermal demand",
+        "hydronic_pump_appendix_method": {
+          "label": "The Appendix A note's pump-power method and its one primary-secondary example",
           "necb2020": [
-            "5.2.6.3.(1)"
+            "A-8.4.4.14.(2)"
           ],
           "necb2025": [
-            "5.2.6.3.(1)"
+            "A-8.4.5.14.(2)"
+          ]
+        },
+        "plant_peak_pumping_flow": {
+          "label": "Plant peak pumping flow rate, heating and cooling",
+          "necb2020": [
+            "8.4.4.9.(6)(f)",
+            "8.4.4.10.(6)(e)"
+          ],
+          "necb2025": [
+            "8.4.5.9.(6)(f)",
+            "8.4.5.10.(6)(e)"
+          ]
+        },
+        "prescriptive_pump_power_ceiling": {
+          "label": "Prescriptive ceiling on combined pump-motor power, and the table that supplies it",
+          "necb2020": [
+            "5.2.6.3.(1)",
+            "Table 5.2.6.3."
+          ],
+          "necb2025": [
+            "5.2.6.3.(1)",
+            "Table 5.2.6.3."
           ]
         },
         "reference_hydronic_pump_power": {
-          "label": "Reference hydronic pump power: the sentences that state it",
+          "label": "Reference hydronic pump power: the sentences that state it and its scope",
           "necb2020": [
             "8.4.4.14.(1)",
             "8.4.4.14.(2)",
@@ -1464,26 +1515,39 @@
       "title": "The reference pump's value source: correspondence, then the sentence that governs it",
       "kind": "runtime",
       "articles": {
-        "heating_plant_peak_pumping_flow": {
-          "label": "Heating-plant peak pumping flow rate",
+        "hydronic_pump_appendix_method": {
+          "label": "The Appendix A note's pump-power method and its one primary-secondary example",
           "necb2020": [
-            "8.4.4.9.(6)(f)"
+            "A-8.4.4.14.(2)"
           ],
           "necb2025": [
-            "8.4.5.9.(6)(f)"
+            "A-8.4.5.14.(2)"
+          ]
+        },
+        "plant_peak_pumping_flow": {
+          "label": "Plant peak pumping flow rate, heating and cooling",
+          "necb2020": [
+            "8.4.4.9.(6)(f)",
+            "8.4.4.10.(6)(e)"
+          ],
+          "necb2025": [
+            "8.4.5.9.(6)(f)",
+            "8.4.5.10.(6)(e)"
           ]
         },
         "prescriptive_pump_power_ceiling": {
-          "label": "Prescriptive ceiling on combined pump-motor power per kW of loop peak thermal demand",
+          "label": "Prescriptive ceiling on combined pump-motor power, and the table that supplies it",
           "necb2020": [
-            "5.2.6.3.(1)"
+            "5.2.6.3.(1)",
+            "Table 5.2.6.3."
           ],
           "necb2025": [
-            "5.2.6.3.(1)"
+            "5.2.6.3.(1)",
+            "Table 5.2.6.3."
           ]
         },
         "reference_hydronic_pump_power": {
-          "label": "Reference hydronic pump power: the sentences that state it",
+          "label": "Reference hydronic pump power: the sentences that state it and its scope",
           "necb2020": [
             "8.4.4.14.(1)",
             "8.4.4.14.(2)",
@@ -1543,26 +1607,39 @@
       "title": "8.4.x.14.(2) combines pumps within one hydronic system, not across consolidated ones",
       "kind": "runtime",
       "articles": {
-        "heating_plant_capacity_basis": {
-          "label": "Heating-plant capacity as the sum of the systems it serves",
+        "hydronic_pump_appendix_method": {
+          "label": "The Appendix A note's pump-power method and its one primary-secondary example",
           "necb2020": [
-            "8.4.4.9.(6)(a)"
+            "A-8.4.4.14.(2)"
           ],
           "necb2025": [
-            "8.4.5.9.(6)(a)"
+            "A-8.4.5.14.(2)"
+          ]
+        },
+        "plant_capacity_basis": {
+          "label": "Plant capacity as the sum of the systems it serves, heating and cooling",
+          "necb2020": [
+            "8.4.4.9.(6)(a)",
+            "8.4.4.10.(6)(a)"
+          ],
+          "necb2025": [
+            "8.4.5.9.(6)(a)",
+            "8.4.5.10.(6)(a)"
           ]
         },
         "prescriptive_pump_power_ceiling": {
-          "label": "Prescriptive ceiling on combined pump-motor power per kW of loop peak thermal demand",
+          "label": "Prescriptive ceiling on combined pump-motor power, and the table that supplies it",
           "necb2020": [
-            "5.2.6.3.(1)"
+            "5.2.6.3.(1)",
+            "Table 5.2.6.3."
           ],
           "necb2025": [
-            "5.2.6.3.(1)"
+            "5.2.6.3.(1)",
+            "Table 5.2.6.3."
           ]
         },
         "reference_hydronic_pump_power": {
-          "label": "Reference hydronic pump power: the sentences that state it",
+          "label": "Reference hydronic pump power: the sentences that state it and its scope",
           "necb2020": [
             "8.4.4.14.(1)",
             "8.4.4.14.(2)",
