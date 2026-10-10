@@ -1,139 +1,199 @@
-"""The DX part-load-fraction curves must be equivalent to the Article AS THE
-ENGINE EVALUATES THEM, not as their coefficients read.
+"""The DX part-load-fraction curves, evaluated THROUGH THE PRODUCT, must match
+the Article where EnergyPlus can carry it — and the gap must be named where it
+cannot.
 
-`DXHEAT-REF-PLFFPLR` shipped with `minimum_independent_variable_1 = 0.7`,
-which placed EnergyPlus's PLF FLOOR on the INPUT axis. Every part-load ratio
-below 0.7 therefore evaluated at the 0.7 value and the cycling penalty
-disappeared:
+Two verification failures produced this file, one inside the fix for the other.
 
-    PLR 0.25   Article target 0.8029   delivered 0.9877   (+23.0%)
+**The first.** `DXHEAT-REF-PLFFPLR` shipped with
+`minimum_independent_variable_1 = 0.7`, putting EnergyPlus's PLF floor on the
+INPUT axis, so every part-load ratio below 0.7 evaluated at the 0.7 value and
+the cycling penalty disappeared — 23.0% from the Article as applied, while
+`test_hvac_part_load_curves.py` reported 1.8% because it evaluates raw
+COEFFICIENTS and the defect lived in a BOUND.
 
-The raw polynomial fits the Article to 1.8%, and the existing part-load probe
-reported exactly that, because it evaluated coefficients and never the curve
-`coils.py` installs. A verification that takes a cheaper path than runtime
-cannot see a bound (Sol, `185`).
+**The second was mine.** The replacement test read the JSON row and built its
+own `CurveCubic`. It was a SECOND IMPLEMENTATION of the path it claimed to
+test: Sol killed `set_limits()`'s output-bound writer and every assertion
+still passed, and two data mutations survived with it (Sol, `187`).
 
-So every assertion here goes THROUGH `openstudio.model.CurveCubic`, built the
-way the product builds it, and `evaluate()` applies the bounds.
+So nothing here constructs a curve. Every assertion builds a real coil through
+`btap.modeling.hvac.components.coils`, reads the curve the COIL carries, and
+evaluates it — which is the only arrangement that can see a bound the product
+fails to write.
 """
 
 from __future__ import annotations
 
-import json
 import unittest
 
-from btap.codes.necb import _data_root
 from tests.support import needs_sdk
 
-#: The Article's own EIR_FPLR cubics, per edition, and the PLR range they are
-#: stated over. PLF = PLR / EIR_FPLR is the transform both curves realise.
-ARTICLE = {
-    "necb2020": {
-        "DXHEAT-REF-PLFFPLR": ("8.4.5.7.(5)",
-                               (0.0856522, 0.9388137, -0.1834361, 0.1589702)),
-        "DXCOOL-REF-COOLPLFFPLR": ("8.4.5.4.(5)",
-                                   (0.2012301, -0.0312175, 1.9504979, -1.1205105)),
-    },
-    "necb2025": {
-        "DXHEAT-REF-PLFFPLR": ("8.4.6.7.(5)",
-                               (0.0856522, 0.9388137, -0.1834361, 0.1589702)),
-        "DXCOOL-REF-COOLPLFFPLR": ("8.4.6.4.(5)",
-                                   (0.2012301, -0.0312175, 1.9504979, -1.1205105)),
-    },
+#: The Article's own EIR_FPLR cubic. `PLF = PLR / EIR_FPLR` is the mapping
+#: D-102 adopts; the Code states EIR_FPLR and says nothing about EnergyPlus's
+#: PLF field or its bounds.
+ARTICLE_EIR_FPLR = {
+    "heating": (0.0856522, 0.9388137, -0.1834361, 0.1589702),
+    "cooling": (0.2012301, -0.0312175, 1.9504979, -1.1205105),
 }
-PLR_LO, PLR_HI = 0.25, 1.0
-#: The polynomials are fits, so some residual is expected. 3% is well above
-#: the 1.8% both curves achieve and far below the 23% a misplaced bound gave,
-#: so it separates "a fit" from "a bound on the wrong axis".
-TOLERANCE_PERCENT = 3.0
+#: EnergyPlus constrains its cycling PLF carrier to [0.7, 1.0] and samples the
+#: field over 0.0-1.0 (`DXCoils.cc`, 25.2.0). Neither bound is in the Code.
+CARRIER_LO, CARRIER_HI = 0.7, 1.0
+#: Below this PLR the Article's target falls under the carrier floor and is NOT
+#: representable. D-102 records that as a declared gap; it is not a tolerance.
+REPRESENTABLE_FROM = {"heating": 0.1661, "cooling": 0.1745}
+#: The fit error D-102 accepts where the mapping IS representable, per curve.
+TOLERANCE_PERCENT = {"heating": 3.0, "cooling": 13.0}
 
 
-def article_plf(coefficients, plr):
-    eir = sum(c * plr ** i for i, c in enumerate(coefficients))
+def exact_plf(kind, plr):
+    eir = sum(c * plr ** i for i, c in enumerate(ARTICLE_EIR_FPLR[kind]))
     return plr / eir
 
 
 @needs_sdk
 class TestDxPartLoadFractionAsApplied(unittest.TestCase):
-    def curve(self, edition, name):
-        """The curve as the PRODUCT builds it, bounds included."""
+    def coil_plf_curve(self, kind):
+        """The PLF curve the PRODUCT leaves on a real coil after its own pass.
+
+        Three stages matter and only the last is the answer:
+
+        1. `coils.py` builds the coil with `btap.modeling`'s own
+           `data/curves.json`, which still carries `min_x = 0.7` and NO output
+           bounds — modeling cannot read NECB data under D-77;
+        2. `efficiency.apply` replaces that curve with the edition's, but
+           RETURNS EARLY on an unsized coil ("DX heating capacity unavailable
+           (model not sized?)"), so a bare coil silently keeps stage 1;
+        3. only a coil with a capacity reaches the NECB curve.
+
+        A probe that stops at stage 1 or 2 reads modeling's default and
+        concludes the NECB data never arrives. I made that mistake before
+        checking the early return.
+        """
         import openstudio
 
-        data = json.loads(
-            (_data_root() / edition / "efficiencies.json").read_text(encoding="utf-8"))
-        spec = next(c for c in data["curves"]
-                    if isinstance(c, dict) and c.get("name") == name)
-        self.assertEqual("Cubic", spec["form"], f"{name} is no longer a cubic")
+        from btap.codes.necb.hvac import efficiency
+        from btap.modeling.hvac.components import coils
+
         model = openstudio.model.Model()
-        curve = openstudio.model.CurveCubic(model)
-        curve.setCoefficient1Constant(spec["coeff_1"])
-        curve.setCoefficient2x(spec["coeff_2"])
-        curve.setCoefficient3xPOW2(spec["coeff_3"])
-        curve.setCoefficient4xPOW3(spec["coeff_4"])
-        if spec.get("minimum_independent_variable_1") is not None:
-            curve.setMinimumValueofx(spec["minimum_independent_variable_1"])
-        if spec.get("maximum_independent_variable_1") is not None:
-            curve.setMaximumValueofx(spec["maximum_independent_variable_1"])
-        if spec.get("minimum_dependent_variable_output") is not None:
-            curve.setMinimumCurveOutput(spec["minimum_dependent_variable_output"])
-        if spec.get("maximum_dependent_variable_output") is not None:
-            curve.setMaximumCurveOutput(spec["maximum_dependent_variable_output"])
-        return spec, curve
+        schedule = openstudio.model.ScheduleConstant(model)
+        schedule.setValue(1.0)
+        if kind == "heating":
+            coil = coils.dx_heating_single_speed(model, schedule)
+            coil.setRatedTotalHeatingCapacity(20000.0)
+            coil.setRatedAirFlowRate(1.0)
+            coil.setRatedCOP(3.0)
+        else:
+            coil = coils.dx_cooling_single_speed(model, schedule)
+            coil.setRatedTotalCoolingCapacity(20000.0)
+            coil.setRatedSensibleHeatRatio(0.75)
+            coil.setRatedAirFlowRate(1.0)
+            coil.setRatedCOP(3.0)
+        efficiency.apply(model, code="necb2020")
+        return coil.partLoadFractionCorrelationCurve().to_CurveCubic().get()
 
-    def test_as_applied_plf_tracks_the_article_over_its_whole_PLR_range(self):
-        for edition, curves in sorted(ARTICLE.items()):
-            for name, (article, coefficients) in sorted(curves.items()):
-                with self.subTest(edition=edition, curve=name):
-                    _spec, curve = self.curve(edition, name)
-                    worst, at = 0.0, None
-                    for step in range(0, 151):
-                        plr = PLR_LO + (PLR_HI - PLR_LO) * step / 150
-                        want = article_plf(coefficients, plr)
-                        rel = abs(curve.evaluate(plr) - want) / want * 100.0
-                        if rel > worst:
-                            worst, at = rel, plr
-                    self.assertLess(
-                        worst, TOLERANCE_PERCENT,
-                        f"{edition}/{name}: {worst:.2f}% from {article} at PLR "
-                        f"{at:.3f} AS APPLIED. A bound on the wrong axis reads "
-                        "as a good fit in the coefficients and a 23% error in "
-                        "the engine")
+    def test_the_product_writes_all_four_bounds(self):
+        """The mutation that survived last time: killing the output writer.
 
-    def test_the_PLF_floor_is_on_the_OUTPUT_axis_not_the_INPUT(self):
-        """The specific defect, named so it cannot come back quietly.
-
-        EnergyPlus floors PLF at 0.7. On the OUTPUT that is the floor. On the
-        INPUT it silently freezes every part-load ratio below 0.7 at the 0.7
-        value, which is where the cycling penalty went.
+        A curve with no declared output bounds evaluates to 1.0077 at full
+        load and has no floor at all, and no numeric comparison starting
+        above the floor can notice.
         """
-        for edition, curves in sorted(ARTICLE.items()):
-            for name in sorted(curves):
-                with self.subTest(edition=edition, curve=name):
-                    spec, _curve = self.curve(edition, name)
-                    self.assertLessEqual(
-                        spec["minimum_independent_variable_1"], PLR_LO,
-                        f"{edition}/{name}: the curve must be evaluable over "
-                        "the Article's own PLR range; a 0.7 input minimum is "
-                        "the PLF floor on the wrong axis")
-                    self.assertEqual(
-                        0.7, spec["minimum_dependent_variable_output"],
-                        f"{edition}/{name}: the 0.7 floor belongs HERE")
-
-    def test_the_two_editions_ship_the_same_curve(self):
-        for name in sorted(ARTICLE["necb2020"]):
-            with self.subTest(curve=name):
-                a, _ = self.curve("necb2020", name)
-                b, _ = self.curve("necb2025", name)
-                fields = ("coeff_1", "coeff_2", "coeff_3", "coeff_4",
-                          "minimum_independent_variable_1",
-                          "maximum_independent_variable_1",
-                          "minimum_dependent_variable_output",
-                          "maximum_dependent_variable_output")
+        for kind in sorted(ARTICLE_EIR_FPLR):
+            with self.subTest(kind=kind):
+                curve = self.coil_plf_curve(kind)
+                self.assertEqual(0.0, curve.minimumValueofx(),
+                                 f"{kind}: the engine samples from 0.0; a higher "
+                                 "input floor is an unsourced clamp (Sol, `187`)")
+                self.assertEqual(1.0, curve.maximumValueofx(), kind)
+                # The SDK is asymmetric here: the INPUT bounds come back as
+                # plain floats and the OUTPUT bounds as Optionals, so an
+                # `assertEqual` against the raw accessor compares a float to
+                # an Optional and fails even when the value is right.
+                lo_out, hi_out = curve.minimumCurveOutput(), curve.maximumCurveOutput()
+                self.assertTrue(
+                    lo_out.is_initialized() and hi_out.is_initialized(),
+                    f"{kind}: the product must write BOTH output bounds; "
+                    "killing that writer is the mutation that survived before")
                 self.assertEqual(
-                    {f: a.get(f) for f in fields}, {f: b.get(f) for f in fields},
-                    f"{name} differs between editions; if that is intended it "
-                    "needs an edition-qualified name, as D-89 does for the "
-                    "modulating boiler")
+                    CARRIER_LO, lo_out.get(),
+                    f"{kind}: the engine's PLF floor belongs HERE, on the "
+                    "OUTPUT axis")
+                self.assertEqual(
+                    CARRIER_HI, hi_out.get(),
+                    f"{kind}: the upper bound removes a real 1.0077 full-load "
+                    "overshoot, so its absence is not cosmetic")
+
+    def test_as_applied_matches_the_article_where_the_carrier_can_hold_it(self):
+        for kind, floor in sorted(REPRESENTABLE_FROM.items()):
+            with self.subTest(kind=kind):
+                curve = self.coil_plf_curve(kind)
+                worst, at = 0.0, None
+                for step in range(0, 201):
+                    plr = floor + (1.0 - floor) * step / 200
+                    want = min(exact_plf(kind, plr), CARRIER_HI)
+                    rel = abs(curve.evaluate(plr) - want) / want * 100.0
+                    if rel > worst:
+                        worst, at = rel, plr
+                self.assertLess(
+                    worst, TOLERANCE_PERCENT[kind],
+                    f"{kind}: {worst:.2f}% from the Article at PLR {at:.3f}, "
+                    f"as the coil's own curve evaluates it")
+
+    def test_below_the_carrier_floor_the_gap_is_DECLARED_not_hidden(self):
+        """The region D-102 may not call verified.
+
+        As PLR approaches zero the Article's EIR cubic keeps its non-zero
+        intercept, so the exact PLF tends to zero while EnergyPlus will not
+        accept a value under 0.7. Starting a tolerance at 0.25 renamed that
+        out of scope; this asserts it exists and is bounded by the floor.
+        """
+        for kind, floor in sorted(REPRESENTABLE_FROM.items()):
+            with self.subTest(kind=kind):
+                curve = self.coil_plf_curve(kind)
+                self.assertAlmostEqual(
+                    CARRIER_LO, curve.evaluate(floor / 2.0), places=6,
+                    msg=f"{kind}: under the floor the carrier can only deliver "
+                        "0.7, which is the declared gap")
+                self.assertLess(
+                    exact_plf(kind, floor / 2.0), CARRIER_LO,
+                    f"{kind}: and the Article's own target there IS below the "
+                    "floor — if this fails the floor is no longer the reason")
+
+    def test_both_editions_ship_the_same_curve(self):
+        """One curve per quantity, or it needs an edition-qualified name as
+        D-89's modulating boiler has."""
+        import json
+
+        from btap.codes.necb import _data_root
+
+        for name in ("DXHEAT-REF-PLFFPLR", "DXCOOL-REF-COOLPLFFPLR"):
+            with self.subTest(curve=name):
+                rows = []
+                for edition in ("necb2020", "necb2025"):
+                    data = json.loads((_data_root() / edition / "efficiencies.json")
+                                      .read_text(encoding="utf-8"))
+                    row = next(c for c in data["curves"]
+                               if isinstance(c, dict) and c.get("name") == name)
+                    rows.append({k: v for k, v in row.items() if k != "notes"})
+                self.assertEqual(rows[0], rows[1],
+                                 f"{name} differs between editions")
+
+    def test_every_curve_note_cites_D_102(self):
+        """The runtime ruling lives in the decision, and the data points at it."""
+        import json
+
+        from btap.codes.necb import _data_root
+
+        for edition in ("necb2020", "necb2025"):
+            data = json.loads((_data_root() / edition / "efficiencies.json")
+                              .read_text(encoding="utf-8"))
+            for name in ("DXHEAT-REF-PLFFPLR", "DXCOOL-REF-COOLPLFFPLR"):
+                with self.subTest(edition=edition, curve=name):
+                    row = next(c for c in data["curves"]
+                               if isinstance(c, dict) and c.get("name") == name)
+                    self.assertIn("D-102", row.get("notes") or "",
+                                  f"{edition}/{name}: a bound choice the Code "
+                                  "does not make must cite its decision")
 
 
 if __name__ == "__main__":  # pragma: no cover

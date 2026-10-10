@@ -149,6 +149,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-99** — A reference that cannot satisfy a requirement yields a CONDITIONAL result, not a certification _(runtime)_
 - **D-100** — AHJ dispositions are cited by the deciding rule site; the determination owns only policy _(runtime)_
 - **D-101** — The thermal block is the selection unit; plant, election and disclosure scopes stay larger _(runtime)_
+- **D-102** — The Code states EIR_FPLR; EnergyPlus carries PLF in [0.7, 1.0], and the gap below the floor is declared _(runtime)_
 
 <!-- TOC END -->
 
@@ -7062,3 +7063,114 @@ describes. `adopted` was removed from that entry's outcome list. What remains
 true, and is tested separately, is that `copy_proposed` CAN retain a proposed
 plant with both its fuels; it is simply not an outcome of the question AHJ-1
 asks.
+
+<a id="d-102"></a>
+
+## D-102 — the Code states EIR_FPLR; EnergyPlus carries PLF, and the floor goes on the output
+
+- **Decision:** Claude under D-10 delegation, 2026-10-10, after Sol's `185`
+  and `187`. Two domains meet here and the Code governs only one of them.
+
+**What the Code says.** Sentence (5) of each Article gives a cubic for
+`EIR_FPLR`, the part-load energy input ratio. Sentence (6) defines
+`PLR = Qoperating / Qavailable`. Sentence (4) composes them into operating
+power. Nothing in either Article mentions a part-load FRACTION, a lower limit
+on PLR, or any bound at all.
+
+**What the engine needs.** `Coil:Heating:DX:SingleSpeed` and its cooling and
+multi-speed siblings carry a `PartLoadFractionCorrelationCurve`. EnergyPlus
+25.2.0 samples that field over CurveInput 0.0 to 1.0 and requires its values
+in `[0.7, 1.0]`, resetting them otherwise. PLF is a cycling-loss
+representation, not an EIR.
+
+**The adopted mapping** is therefore `PLF = PLR / EIR_FPLR`, realised as a
+cubic in PLR with:
+
+```text
+input  [0.0, 1.0]     what the engine samples; the Code states no PLR floor
+output [0.7, 1.0]     the engine's own constraint on this field
+```
+
+### The defect this corrects
+
+The heat-pump curve shipped with `minimum_independent_variable_1 = 0.7` — the
+engine's PLF floor placed on the INPUT axis. `coils.py` installs the curve and
+OpenStudio clamps below an input minimum, so every part-load ratio under 0.7
+evaluated at the 0.7 value and the cycling penalty disappeared:
+
+```text
+PLR 0.25   Article target 0.8029   delivered 0.9877
+```
+
+As applied that is 23.0% from the Article; the raw polynomial is 1.8% from it.
+The existing part-load probe reported 1.8% because it evaluated COEFFICIENTS,
+and the defect was in a BOUND. A PLF that is too high understates the cycling
+penalty, so the reference burns less than the Code prescribes and the
+compliance target is tighter than it should be — the error runs against
+proposed buildings.
+
+### Why not 0.25
+
+A 0.25 input minimum was proposed first, taken from the cooling curve, whose
+note says only that its polynomial was FIT over PLR 0.25-1.0. Sol refused it
+(`187`): a fit range is not a Code domain, the cooling curve carries the same
+unsourced choice, and **one unadjudicated clamp cannot validate another**. At
+PLR 0.10 the 0.25 clamp delivers 0.7885 against an exact target of 0.5622 —
+40.2% high, worse than the 0.7 the engine floor alone would give.
+
+### The declared gap, which this decision does not call verified
+
+The exact target falls below the engine's floor under PLR **0.1661**
+(heating) and **0.1745** (cooling), because the Article's EIR cubic keeps a
+non-zero intercept as PLR approaches zero while a cycling PLF cannot reach
+zero. There the reference delivers 0.7 where the Code implies less:
+
+```text
+PLR 0.10   heating exact 0.5622   carrier floor 0.7
+PLR 0.15   heating exact 0.6730   carrier floor 0.7
+```
+
+This is an ENGINE-CARRIER limitation, not a modelling choice and not a
+tolerance. It is recorded with its measured consequence rather than excluded
+by starting a tolerance above it — which is precisely what a 0.25 floor did.
+
+### Accepted error where the mapping IS representable
+
+```text
+heating   2.699%   over PLR [0.1661, 1.0]
+cooling  12.645%   over PLR [0.1745, 1.0]
+```
+
+The cooling number is a finding in its own right: that polynomial was fit over
+0.25-1.0, so the lowest part of its representable region was never in the fit.
+A refit over the representable region measures **1.877%** and **4.853%**. That
+refit is OPEN WORK and deliberately not applied here — it changes reference
+energy results, so it belongs with its own re-freeze and its own adjudication
+of what error is acceptable.
+
+### A second copy, in a layer that cannot see this one
+
+`btap/modeling/hvac/data/curves.json` holds both curves again, with the same
+`min_x: 0.7` and no output bounds. Under D-77 the modeling layer cannot read
+NECB data, and the NECB efficiency pass replaces the curve on any coil that
+carries a capacity — an unsized coil silently keeps modeling's version, which
+is how a probe can conclude the NECB data never arrives. Whether the catalogue
+default should also be corrected is open; the proposed building is not bound by
+the reference Articles.
+
+### How it is verified
+
+`python/tests/necb/test_dx_plf_as_applied.py` builds a real coil through
+`btap.modeling.hvac.components.coils`, gives it a capacity so the NECB pass
+proceeds, runs `efficiency.apply`, and reads the curve the COIL carries. Three
+mutations that survived the previous, hand-built version of that test now fail
+it: killing `set_limits`'s output-bound writer, nulling the upper output bound,
+and moving the input minimum to 0.1.
+
+- **Who/when:** Claude under D-10, 2026-10-10; Sol's `185` found the axis
+  defect and `187` refused the 0.25 domain and the hand-built test.
+- **Evidence:** the retained Article caches at
+  `btap/codes/necb/data/necb<edition>/coverage/articles_8_4.json` for sentences
+  (4)-(6), and EnergyPlus 25.2.0 `src/EnergyPlus/DXCoils.cc` for the field's
+  sampling range and `[0.7, 1.0]` requirement. Two domains, cited separately,
+  because neither alone settles this.

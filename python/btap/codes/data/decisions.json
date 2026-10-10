@@ -1782,6 +1782,44 @@
         "necb2025"
       ],
       "summary": "Decided: Sol's 139 and 141, 2026-10-09, against the Code and the NRC User's Guide rather than the pinned gem. Sentence 8.4.x.7.(1) assigns an HVAC system to EACH THERMAL BLOCK, and Table 8.4.x.7.-B labels Systems 3 and 4 `Single-zone`; Division A defines a single-zone secondary system as one serving only ONE thermal block, and 8.4.x.1.(4)(c) keeps the proposed building's thermal blocks in the reference. The selector instead iterated `facts['zone_groups']` — the zones sharing one PROPOSED air loop, which is a SERVING SET — so a `single-zone` System 3 was built as ONE air loop over five thermal blocks, its supply temperature following one elected control zone while the other four drifted: 932.25 unmet heating hours in sample 18's reference against 8.4.1.2.(3)'s 100 h, reported as NOT COMPLIANT for the reference's failure rather than the proposed building's performance. The pinned gem builds the same shared unit by default (`new_auto_zoner: true`, passed by `autozone.rb`), its stale comments claim the opposite, and the SAME library's ASHRAE 90.1 Appendix G path builds one packaged unit per zone unconditionally — so the shared default was an implementation choice, not evidence that `single-zone` has a special NECB meaning. Per-block selection does NOT make every rule per-block, because the Code uses three nouns for three scopes: the THERMAL BLOCK selects the system (8.4.x.7.(1), .9.(1), .10.(1)); the SYSTEMS SERVED BY A PLANT size the plant (8.4.x.9.(6)(a), .10.(6)(a)), so a plant is built once for the reference systems it serves and is not multiplied because those systems were selected per block; and the PROPOSED HEAT PUMP or source-loop SET scopes the Article 13.(2)(g) election, which is D-52's existing contract. SELECTION IS PER BLOCK FOR EVERY ROW; what differs is whether the selected units REMAIN SEPARATE AT CONSTRUCTION. Systems 3 and 4 and the heat-pump redirects do, and Systems 1, 2, 5 and 6 are merged by the post-selection pass — on DIFFERENT authority, which the table marks itself: Note (3) is marked on the System 6 name and authorizes one multizone system to span groups of thermal blocks, while Note (2) is marked on Systems 1, 2 and 5 and authorizes a common VENTILATION system distinguished from the block-level systems, so a merged System 1 audited under Note (3) was citing System 6's permission. Destruction is PHASED ahead of construction for the whole replacement closure, because a per-assignment teardown left a plant shared by several blocks non-empty long enough for the next block's builder to adopt it, making the reference plant's fuel depend on assignment order; `copy_proposed` is the only explicit retention branch, and a plant surviving mutation is not one. The 8.4.x.9.(5) disclosure is emitted once per SERVICE SET, always, listing the blocks that RECEIVE the single-fuel substitution — a `copy_proposed` block keeps the proposed system and both its fuels, so it is not among them. AHJ-3's plant-cardinality question is a SEPARATE record keyed per plant, because AHJ-1 follows each proposed heating service and allocation choice while AHJ-3 follows the hydronic plant, and one plant can carry two service sets; keying the pair by plant collapsed two allocation choices into one warning. Adoption of the proposed plant is NOT among the outcomes this disclosure lists: it fires only for an `action == 'build'` block, and a retained block never reaches it. One multi-energy plant and one control sequence serving five blocks is one unresolved choice and repeating the warning five times obscures it rather than disclosing five questions."
+    },
+    {
+      "id": "D-102",
+      "title": "The Code states EIR_FPLR; EnergyPlus carries PLF in [0.7, 1.0], and the gap below the floor is declared",
+      "kind": "runtime",
+      "articles": {
+        "dx_cooling_part_load": {
+          "label": "Reference direct-expansion cooling part-load power and its part-load ratio",
+          "necb2020": [
+            "8.4.5.4.(4)",
+            "8.4.5.4.(5)",
+            "8.4.5.4.(6)"
+          ],
+          "necb2025": [
+            "8.4.6.4.(4)",
+            "8.4.6.4.(5)",
+            "8.4.6.4.(6)"
+          ]
+        },
+        "heat_pump_part_load": {
+          "label": "Reference air-source heat-pump part-load power and its part-load ratio",
+          "necb2020": [
+            "8.4.5.7.(4)",
+            "8.4.5.7.(5)",
+            "8.4.5.7.(6)"
+          ],
+          "necb2025": [
+            "8.4.6.7.(4)",
+            "8.4.6.7.(5)",
+            "8.4.6.7.(6)"
+          ]
+        }
+      },
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ],
+      "summary": "Decided 2026-10-10 under D-10 delegation, after Sol's `185` and `187`. The Code states a part-load ENERGY INPUT RATIO, EIR_FPLR; EnergyPlus's direct-expansion coils carry a part-load FRACTION, PLF, and constrain it to [0.7, 1.0]. The adopted mapping is PLF = PLR / EIR_FPLR. THE INPUT DOMAIN IS 0.0 to 1.0, because that is what the engine samples and because neither Article states a lower limit on PLR: sentence (6) defines PLR = Qoperating / Qavailable and stops there. A 0.7 INPUT minimum shipped on the air-source heat-pump curve until this decision, which put the engine's PLF floor on the wrong axis and froze every part-load ratio below 0.7 at the 0.7 value — 23.0% from the Article as applied, against 1.8% for the raw polynomial, which is why a coefficient-only probe reported the curve as equivalent. A 0.25 input minimum was then proposed from the cooling curve's fit range and REFUSED: a fit range is not a Code domain, and one unadjudicated clamp cannot validate another. BOTH output bounds are written, and both do work: the floor is the engine's own requirement, and the ceiling removes the inherited heating fit's 1.0077 full-load overshoot while the Article's own cooling target peaks at 1.002358 near PLR 0.9055. WHERE THE MAPPING IS NOT REPRESENTABLE THIS DECISION DECLARES A GAP RATHER THAN CLAIMING EQUIVALENCE: the exact target falls under the engine's floor below PLR 0.1661 for heating and 0.1745 for cooling, because the Article's EIR cubic keeps a non-zero intercept as PLR approaches zero while a cycling PLF cannot. In that region the reference delivers 0.7 where the Code implies less, understating the cycling penalty; the consequence is measured and recorded, not verified. Accepted fit error over the representable region is 2.699% for heating and 12.645% for cooling. The cooling figure is a FINDING: its polynomial was fit over 0.25-1.0 and the representable region starts at 0.1745, so part of the domain was never in the fit. A refit over the representable region measures 1.877% and 4.853% respectively and is OPEN WORK, deliberately not applied here, because it changes reference energy results and belongs with its own re-freeze and its own adjudication. The modeling layer keeps a SECOND copy of both curves in btap/modeling/hvac/data/curves.json with the same 0.7 input minimum and no output bounds; it cannot read NECB data under D-77, the NECB efficiency pass replaces it on any sized coil, and whether the catalogue default should also be corrected is open."
     }
   ]
 }

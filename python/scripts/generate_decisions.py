@@ -168,6 +168,12 @@ def _bare_article(value: str):
     return match.group(1) if match else None
 
 
+#: Articles cited correctly whose retained payload carries no title. Not an
+#: error: the codes service itself returns an empty title for NECB 2025's
+#: 8.4.6.7 while serving its full text (D-102).
+_untitled_articles: set = set()
+
+
 def _article_titles(code: str) -> dict:
     """Section 8.4 article number -> title, for one code id, read from that
     edition's own coverage cache with STDLIB ONLY.
@@ -457,11 +463,23 @@ def check_articles(name: str, meta: dict) -> None:
                     energy_section.add(False)
                     continue
                 energy_section.add(True)
-                if bare not in _article_titles(code):
+                # EXISTENCE is record presence, not TITLE presence. Using
+                # `_article_titles` here conflated two different conditions and
+                # refused a correct citation: NECB 2025's 8.4.6.7 is the
+                # air-source heat-pump article, with seven cached sentences and
+                # `parse_ok`, but the codes service returns an EMPTY TITLE for
+                # it — so a title-keyed check reported "does not exist" for an
+                # article that plainly does (D-102).
+                if not _article_record(code, bare):
                     raise ValueError(
                         "{}: articles[{!r}][{!r}] cites {!r}, and Section 8.4 "
                         "article {} does not exist in that edition".format(
                             name, key, code, value, bare))
+                if not _article_titles(code).get(bare):
+                    # Not a failure. A missing title is an upstream gap in the
+                    # retained payload, and saying so is more useful than
+                    # either refusing the citation or staying silent.
+                    _untitled_articles.add((code, bare))
 
                 if table is not None:
                     suffixes = _article_tables(code, bare)

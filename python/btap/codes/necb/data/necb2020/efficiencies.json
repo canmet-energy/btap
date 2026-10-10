@@ -2877,13 +2877,13 @@
       "coeff_8": null,
       "coeff_9": null,
       "coeff_10": null,
-      "minimum_independent_variable_1": 0.25,
+      "minimum_independent_variable_1": 0.0,
       "maximum_independent_variable_1": 1.0,
       "minimum_independent_variable_2": null,
       "maximum_independent_variable_2": null,
       "minimum_dependent_variable_output": 0.7,
       "maximum_dependent_variable_output": 1.0,
-      "notes": "Refit 2026-07-22: least-squares cubic of PLF(PLR) = PLR / EIR_FPLR(PLR) over PLR 0.25-1.0, from the 8.4.5.4.(5) EIR_FPLR cubic. Output clamped to [0.7, 1.0] (PLF > 1 is nonphysical; E+ guidance floor 0.7). A cubic cannot represent the rational target exactly: max implied-EIR deviation ~2.0% (the structural floor; was 3.70% with the legacy 0.7-floored refit). See scripts/necb_8_4_6_curve_probe.rb.  Governing requirement in this edition: Article 8.4.5.4."
+      "notes": "PLF = PLR / EIR_FPLR from Article 8.4.5.4.(5), realised in EnergyPlus's cycling PLF field. Polynomial refit 2026-07-22 over PLR 0.25-1.0. Bounds and domain per D-102: input [0.0, 1.0] as the engine samples it, output [0.7, 1.0] as the engine requires. Worst error 12.645% over the representable region PLR [0.1745, 1.0] — the old fit range excluded part of it. See D-102."
     },
     {
       "name": "DXHEAT-REF-CAPFFLOW",
@@ -3002,13 +3002,13 @@
       "coeff_8": null,
       "coeff_9": null,
       "coeff_10": null,
-      "minimum_independent_variable_1": 0.25,
+      "minimum_independent_variable_1": 0.0,
       "maximum_independent_variable_1": 1.0,
       "minimum_independent_variable_2": null,
       "maximum_independent_variable_2": null,
       "minimum_dependent_variable_output": 0.7,
       "maximum_dependent_variable_output": 1.0,
-      "notes": "From NECB 2011 Table 8.4.4.21.-E (4).  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.5.7.  BOUNDS CORRECTED 2026-10-10: `minimum_independent_variable_1` was 0.7, which put EnergyPlus's PLF FLOOR on the INPUT axis — so every part-load ratio below 0.7 evaluated at the 0.7 value and the cycling penalty vanished. Measured against the Article's own EIR_FPLR over its PLR range 0.25-1.0, the AS-APPLIED deviation was 23.0% at PLR 0.25 (target 0.8029, delivered 0.9877) while the raw polynomial fits to 1.8%. The 0.7 belongs on the OUTPUT, as the cooling twin DXCOOL-REF-COOLPLFFPLR already had it: min_x 0.25 with output clamped [0.7, 1.0] brings the as-applied deviation to 1.80%, the polynomial's own fit quality. Found by Sol's `185` while correcting the vintage-match document; the existing probe reported 1.8% because it evaluated raw coefficients and never the curve the builder installs."
+      "notes": "PLF = PLR / EIR_FPLR from Article 8.4.5.7.(5), realised in EnergyPlus's cycling PLF field. Polynomial inherited from NECB 2011 Table 8.4.4.21.-E (4). Bounds and domain per D-102: input [0.0, 1.0] as the engine samples it, output [0.7, 1.0] as the engine requires. Worst error 2.699% over the representable region PLR [0.1661, 1.0]; below that the Code's target falls under the engine's 0.7 floor and is not representable. See D-102."
     },
     {
       "name": "FURNACE-PLF-ATMOSPHERIC",

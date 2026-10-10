@@ -2878,7 +2878,10 @@ def _apply_dx_cooling(coil, tables, audit):
                                   'heating_type': heating_type,
                                   'capacity_kw': ruby_round(capacity_w / 1000.0, 1)},
                           value=f'COP {ruby_round(cop, 2)} ({label})',
-                          article='NECB 2020 Table 5.2.12.1 (unitary equipment)')
+                          article='NECB 2020 Table 5.2.12.1 (unitary equipment)',
+                          # D-102 decides this coil's PLF mapping and its [0.7, 1.0]
+                          # carrier bounds. The Code states EIR_FPLR and no bound.
+                          ruling='D-102')
 
 
 def _apply_dx_cooling_multi(coil, tables, audit, capacity_w=None):
@@ -3099,7 +3102,10 @@ def _apply_dx_heating(coil, tables, audit):
     return audit.decision('efficiency', 'DX heating efficiency applied', target=name,
                           inputs={'capacity_kw': ruby_round(capacity_w / 1000.0, 1)},
                           value=f'heating COP {ruby_round(cop, 2)} ({label})',
-                          article='NECB 2020 Table 5.2.12.1 (heat pumps, heating)')
+                          article='NECB 2020 Table 5.2.12.1 (heat pumps, heating)',
+                          # D-102, as above. This is the curve whose 0.7 floor sat
+                          # on the INPUT axis until 2026-10-10.
+                          ruling='D-102')
 
 
 def _apply_gas_coil(coil, tables, audit):
