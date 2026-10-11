@@ -39,6 +39,10 @@ ARTICLE_EIR_FPLR = {
 #: EnergyPlus constrains its cycling PLF carrier to [0.7, 1.0] and samples the
 #: field over 0.0-1.0 (`DXCoils.cc`, 25.2.0). Neither bound is in the Code.
 CARRIER_LO, CARRIER_HI = 0.7, 1.0
+#: Slack for comparisons AGAINST a carrier edge. The seam root equals the
+#: ceiling by construction, so its evaluation differs between platforms by
+#: an ULP; CI saw 1.0000000000000002 where this host saw 1.0.
+CARRIER_EPS = 1e-9
 #: Below this PLR the Article's target falls under the carrier floor and is NOT
 #: representable. D-102 records that as a declared gap; it is not a tolerance.
 #: The region where the engine's PLF field can actually HOLD the transformed
@@ -163,7 +167,7 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                     # validated cannot show that the bound trims the target.
                     want = exact_plf(kind, plr)
                     self.assertLessEqual(
-                        want, CARRIER_HI + 1e-9,
+                        want, CARRIER_HI + CARRIER_EPS,
                         f"{kind}: PLR {plr:.4f} is inside the declared "
                         "representable region but its exact target exceeds the "
                         "carrier — the region bounds are wrong, not the curve")
@@ -196,7 +200,7 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                     worst = max(exact_plf(kind, i / 1000.0)
                                 for i in range(1, 1001))
                     self.assertLessEqual(
-                        worst, CARRIER_HI + 1e-9,
+                        worst, CARRIER_HI + CARRIER_EPS,
                         f"{kind}: this curve is declared to have no upper "
                         f"seam, but its target reaches {worst:.6f}")
                     continue
@@ -214,8 +218,16 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                 # The root ITSELF is representable — equality, not exclusion
                 # — so the gap is OPEN at this end. Asserting the endpoint was
                 # open is the error Sol found in `191`.
+                #
+                # The tolerance is NOT decoration. This value is the root, so
+                # it equals the ceiling BY CONSTRUCTION, and a quantity equal
+                # by construction lands on either side of it in floating
+                # point: it evaluated to exactly 1.0 on the development host
+                # and to 1.0000000000000002 — one ULP high — on CI, where a
+                # bare `assertLessEqual` failed. A strict inequality against a
+                # value defined by equality is the bug, not the platform.
                 self.assertLessEqual(
-                    exact_plf(kind, seam), CARRIER_HI,
+                    exact_plf(kind, seam), CARRIER_HI + CARRIER_EPS,
                     f"{kind}: the root is IN the representable set")
                 self.assertLess(
                     exact_plf(kind, seam - 1e-6), CARRIER_HI,
@@ -246,7 +258,7 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                 # version of this test asserted the coil delivers exactly 1.0
                 # and failed, which is how the distinction surfaced.
                 worst, worst_at = UPPER_SEAM_WORST_SHORTFALL[kind]
-                self.assertLessEqual(curve.evaluate(at), CARRIER_HI + 1e-9, kind)
+                self.assertLessEqual(curve.evaluate(at), CARRIER_HI + CARRIER_EPS, kind)
                 measured, m_at = 0.0, None
                 for step in range(0, 201):
                     plr = seam + (1.0 - seam) * step / 200
