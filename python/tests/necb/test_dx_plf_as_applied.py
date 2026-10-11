@@ -48,7 +48,12 @@ CARRIER_LO, CARRIER_HI = 0.7, 1.0
 #: Sol found this because the comparison below clipped the target to the
 #: carrier before differencing, which cannot reveal that the carrier
 #: truncates the target — the same shape as the 0.25 floor he refused.
-REPRESENTABLE = {"heating": (0.1661, 0.8149), "cooling": (0.1745, 1.0)}
+#: CLOSED at the root: the target EQUALS the ceiling there, which is what
+#: makes it the root, so the point is representable. The first version wrote
+#: this half-open and asserted the endpoint was open — encoding the error
+#: instead of detecting it (Sol, `191`).
+REPRESENTABLE = {"heating": (0.1661, 0.8149996906315529),
+                 "cooling": (0.1745, 1.0)}
 REPRESENTABLE_FROM = {k: v[0] for k, v in REPRESENTABLE.items()}
 
 #: Where the heating target crosses ABOVE what the field accepts. Pinned to
@@ -206,12 +211,31 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                     CARRIER_HI, exact_plf(kind, seam), places=9,
                     msg=f"{kind}: the seam is the ROOT of "
                         "exact_plf(PLR) = 1.0; this is the published value")
+                # The root ITSELF is representable — equality, not exclusion
+                # — so the gap is OPEN at this end. Asserting the endpoint was
+                # open is the error Sol found in `191`.
+                self.assertLessEqual(
+                    exact_plf(kind, seam), CARRIER_HI,
+                    f"{kind}: the root is IN the representable set")
                 self.assertLess(
                     exact_plf(kind, seam - 1e-6), CARRIER_HI,
                     f"{kind}: one micro-step below, the target still fits")
                 self.assertGreater(
                     exact_plf(kind, seam + 1e-6), CARRIER_HI,
-                    f"{kind}: one micro-step above, it does not")
+                    f"{kind}: one micro-step above, it does not — so the gap "
+                    "is open at the root")
+                # The full-load point is NOT in the gap. The Article's
+                # coefficients sum to exactly 1, so EIR_FPLR(1.0) = 1 and the
+                # target is exactly the ceiling there — the representable set
+                # is DISCONNECTED, and describing it as a half-open region up
+                # to the seam discards a point the Code and the carrier agree
+                # on. Sol raised the isolated endpoint; this pins it.
+                self.assertAlmostEqual(
+                    1.0, sum(ARTICLE_EIR_FPLR[kind]), places=12,
+                    msg=f"{kind}: the Article cubic is normalised at full load")
+                self.assertAlmostEqual(
+                    CARRIER_HI, exact_plf(kind, 1.0), places=12,
+                    msg=f"{kind}: so the target is representable AT 1.0")
                 peak, at = UPPER_SEAM_PEAK[kind]
                 self.assertAlmostEqual(
                     peak, exact_plf(kind, at), places=5,
@@ -284,15 +308,14 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                                  f"{name} differs between editions")
 
     def test_the_PUBLISHED_region_matches_the_one_the_seams_define(self):
-        """The shipped note must state the region the arithmetic actually has.
+        """The shipped note must state the set the arithmetic actually has.
 
-        This is the defect's SECOND form. The first revision declared the
-        upper seam in D-102's prose while the curve notes and the
-        accepted-error table still said heating was representable over
-        `[0.1661, 1.0]` — the decision contradicting itself inside the same
-        change, which Sol caught. Fixing an instance is not fixing the class,
-        so the published interval is checked against the same constants the
-        seam tests use.
+        Two earlier versions of this guard were too weak to be worth having.
+        The first compared to `places=2`, so Sol moved both notes' endpoint
+        from `0.815` to `0.819` and all 8 tests stayed green. Rounding is
+        exactly what must not be tolerated here, because the endpoint IS the
+        published digit string. So the expected text is BUILT from the same
+        constants the seam tests use and matched verbatim.
         """
         import json
 
@@ -307,25 +330,59 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                 with self.subTest(edition=edition, kind=kind):
                     row = next(c for c in data["curves"]
                                if isinstance(c, dict) and c.get("name") == name)
-                    shown = re.search(
-                        r"representable region PLR \[([\d.]+), ([\d.]+)([)\]])",
-                        row.get("notes") or "")
-                    self.assertIsNotNone(
-                        shown, f"{edition}/{kind}: the note must STATE its "
-                               "representable region, or nothing keeps it honest")
-                    self.assertAlmostEqual(
-                        REPRESENTABLE[kind][0], float(shown.group(1)), places=4,
-                        msg=f"{kind}: the note's lower bound")
-                    seam = UPPER_SEAM[kind]
-                    self.assertAlmostEqual(
-                        seam if seam else 1.0, float(shown.group(2)), places=2,
-                        msg=f"{kind}: the note says the region runs to "
-                            f"{shown.group(2)}, but the seam puts it at "
-                            f"{seam if seam else 1.0}")
-                    self.assertEqual(
-                        ")" if seam else "]", shown.group(3),
-                        f"{kind}: a region ENDED by a seam is open at the top; "
-                        "one that reaches full load is closed")
+                    notes, seam = row.get("notes") or "", UPPER_SEAM[kind]
+                    lo, hi = REPRESENTABLE[kind]
+                    if seam is None:
+                        wanted = f"representable region PLR [{lo}, {hi}]"
+                    else:
+                        # a disconnected set: the closed interval, the isolated
+                        # full-load point, and the OPEN gap between them
+                        wanted = (f"representable set is PLR [{lo}, {seam!r}] "
+                                  "union {1.0}")
+                        self.assertIn(
+                            f"OPEN interval ({seam!r}, 1.0)", notes,
+                            f"{edition}/{kind}: the note must state the gap as "
+                            "OPEN at both ends; a half-open region discards a "
+                            "point the Code and the carrier agree on")
+                    self.assertIn(
+                        wanted, notes,
+                        f"{edition}/{kind}: the note must state this EXACT "
+                        f"set, digit for digit:\n  wanted: {wanted}\n"
+                        f"  note:   {' '.join(notes.split())[:200]}")
+
+    def test_no_RETIRED_figure_is_presented_as_current(self):
+        """D-102 carried a superseded number on three surfaces in turn.
+
+        The upper seam shortened the representable region, which moved the
+        refit figures. I corrected the body table, then the shipped data
+        notes, then — after Sol found it again — the front-matter summary,
+        each time leaving a parallel surface stating the old pair as a current
+        measurement. Fixing instances was not fixing the class.
+
+        So a retired figure may appear ONLY inside a sentence that marks it
+        retired. That is checkable, and it fails the moment one is quoted as
+        a live result.
+        """
+        import pathlib
+
+        RETIRED = ("1.877", "4.853")
+        MARKERS = ("earlier version", "superseded", "no longer", "stale")
+        source = (pathlib.Path(__file__).resolve().parents[3]
+                  / "docs" / "decisions" / "D-102.md")
+        if not source.is_file():   # installed-wheel smoke run, no repo docs
+            self.skipTest(f"{source} is not present in this layout")
+        text = source.read_text(encoding="utf-8")
+        for figure in RETIRED:
+            for sentence in re.split(r"(?<=\.)\s+", text):
+                if figure not in sentence:
+                    continue
+                with self.subTest(figure=figure):
+                    self.assertTrue(
+                        any(m in sentence.lower() for m in MARKERS),
+                        f"{figure}% is a RETIRED refit figure, measured over "
+                        "the old domain with the target clipped. It appears "
+                        "here without any marker that it is superseded:\n"
+                        f"  {' '.join(sentence.split())[:220]}")
 
     def test_every_curve_note_cites_D_102(self):
         """The runtime ruling lives in the decision, and the data points at it."""

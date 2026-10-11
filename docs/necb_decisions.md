@@ -5951,7 +5951,8 @@ the same as branching on it. Sol caught the substitution of one sentence's
 evidence for another's.
 
 **On the path this decision governs, the qualification is SATISFIED rather
-than ignored.** D-90 is about the 8.4.5 reference path, where a reference
+than ignored.** D-90 is about the reference-building path — Subsection 8.4.4 in NECB
+2020 and Subsection 8.4.5 in NECB 2025 — where a reference
 building exists and is therefore "applicable". Iterating both buildings'
 capacities there is the case 2025's wording retains, not a deviation from it.
 An earlier version of this note mistook the absence of an edition branch for a
@@ -6083,7 +6084,7 @@ in the plan log.
 ### Which editions this was established against
 
 - **Established:** `necb2020` and `necb2025`, Claude under D-10, 2026-10-10,
-  **for the 8.4.5 reference path this decision governs.** The archetype-EUI
+  **for the reference-building path — Subsection 8.4.4 in NECB 2020 and Subsection 8.4.5 in NECB 2025 this decision governs.** The archetype-EUI
   path's own unmet-load omission is [[AHJ-21]] and is deliberately not
   claimed here.
 
@@ -7375,18 +7376,47 @@ ASSESSED ENGINE DOMAIN, PLR [0.0, 1.0] — the shipped curve's worst error
 heating   2.699%   at PLR 0.1816     below both seams, so the seams do not move it
 cooling  12.645%   at PLR 0.1745     at its floor
 
-REPRESENTABLE REGION — where the field can actually hold the Article target
-heating            PLR [0.1661, 0.8149996906315529)   ENDED by the upper seam
-cooling            PLR [0.1745, 1.0]                  no upper seam
+REPRESENTABLE SET — where the field can actually hold the Article target
+heating   PLR [0.1661, 0.8149996906315529] union {1.0}
+cooling   PLR [0.1745, 1.0]
+
+UNREPRESENTABLE GAP, heating   the OPEN interval (0.8149996906315529, 1.0)
+
+Both endpoints BELONG to the representable set and an earlier version of this
+decision excluded one of them. At the root the target equals the ceiling by
+definition — that is what makes it the root — and at full load the Article's
+own coefficients sum to exactly one,
+a + b + c + d = 0.0856522 + 0.9388137 - 0.1834361 + 0.1589702 = 1.0, so
+EIR_FPLR(1.0) = 1 and the target is exactly 1.0. Both values lie inside the
+carrier's CLOSED [0.7, 1.0] range, so the primary interval is closed at the
+root and the full-load point is isolated rather than absent. The gap between
+them is open at both ends. The first version wrote `[0.1661, root)` and its
+test ASSERTED that endpoint must be open, which encoded the error instead of
+detecting it (Sol, `191`).
 ```
 
 The cooling number is a finding in its own right: that polynomial was fit over
 0.25-1.0, so the lowest part of its representable region was never in the fit.
-A refit over the REPRESENTABLE REGION measures, for heating, **1.235%** on a
-20 000-point least-squares sample — and the sample density matters enough to
-state: 1.193% on 200 points, 1.214% on 400, 1.235% converged. Sol's
-independent 200-point reproduction gives 1.1926%, which agrees. Cooling
-refits to **4.938%** over its own region. An earlier version of this decision
+A refit over the REPRESENTABLE SET measures **1.236% heating / 5.025%
+cooling**, both on the SAME 100 000-point least-squares grid (equally spaced,
+endpoints included, maximum relative error measured on that grid). The density
+has to be named because the figures move with it, and because naming it is
+what makes them reproducible:
+
+```text
+points     heating     cooling
+   200    1.192849%   4.852719%
+   400    1.214230%   4.938354%
+ 20 000   1.235388%   5.023286%
+100 000   1.235735%   5.024681%
+```
+
+Sol's independent reproduction agrees to six decimals at 20 000 and 100 000
+points. An earlier version of this decision published **1.235% / 4.938%** as a
+pair and called it converged: the heating figure was the 20 000-point result
+(which does not round to three decimals as 1.235%) and the cooling figure was
+the 400-POINT result. Two densities under one label, which is the same fault
+as two domains under one label further up. An earlier version of this decision
 published 1.877% and 4.853%, measured over PLR [0.1661, 1.0] with the target
 CLIPPED at 1.0 — the old domain and the old clip, carried forward under a
 label that no longer described them. That refit is OPEN WORK and deliberately

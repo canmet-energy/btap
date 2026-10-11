@@ -1066,8 +1066,21 @@ none.
 
 **What the tool does meanwhile.** It reaches an EUI determination with no
 unmet-load check and no warning that none was made. Closing this means
-applying (3) and (4)(a) to the proposed building on the EUI path, and deciding
-whether (5)'s capacity iteration runs there — the proposed building is the
-user's design, so raising its capacities is a different act from raising a
-reference's. That choice is why this is not a one-line fix, and it does not
-make the gap an ambiguity.
+applying (3), (4)(a) and (5) to the proposed building on the EUI path.
+
+**Sentence (5)'s APPLICABILITY is not open, and an earlier version of this
+entry said it was.** It said closing the gap meant "deciding whether (5)'s
+capacity iteration runs there". (5) already decides that: where (3) and (4)
+are not met, the capacities of the proposed building or the applicable
+reference building SHALL be increased. On the EUI path the proposed building
+exists and the reference does not, so the proposed is the subject and the
+sentence applies. Reintroducing an applicability choice in the interim text of
+a `tool-gap` entry is internally inconsistent — it is the laundering this
+register's statuses exist to prevent, committed by the entry that names it
+(Sol, `191`).
+
+What does need adjudication is the MECHANICS: raising the capacities of the
+user's own design is a different act from raising a reference's, and the
+iteration changes the model the EUI verdict is then computed on. That is an
+implementation question inside a settled requirement, which is why this is not
+a one-line fix and still not an ambiguity.
