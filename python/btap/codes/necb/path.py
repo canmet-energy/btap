@@ -50,6 +50,12 @@ from btap.codes.pipeline import Verdict
 from btap.simulation import runner
 
 HEATING_UNMET_LIMIT_H = 100.0    # 8.4.1.2.(3)
+#: 8.4.1.2.(4)(a). On the Subsection 8.4.4 path the cooling criterion
+#: is an ABSOLUTE limit on the proposed building, not a comparison
+#: with a reference that this path never builds. (4)(b)'s +10%/20 h
+#: allowance is the 8.4.5 branch and does not apply here, which is
+#: why this is a separate constant rather than a reuse.
+COOLING_UNMET_LIMIT_H_8_4_4 = 100.0
 SECANT_TARGET_FRACTION = 0.9     # aim below the limit so noise can't strand the last hour
 SECANT_MAX_STEP = 2.0            # per-round growth cap (never below the configured `step`)
 SECANT_MIN_IMPROVEMENT_H = 1.0   # observations closer than this can't support a slope
@@ -787,16 +793,35 @@ def _eui_compliance(model, *, ruleset, weather, hdd, run_dir, simulate,
             compliance._run_annual(
                 proposed, os.path.join(run_dir, "proposed_annual"),
                 run_period, report["proposed"], audit=audit)
+            # (4)'s vacuity rule needs this, and this path never gets it from
+            # `prepare_annual`: that runs inside `pipeline._proposed_annual`,
+            # the REFERENCE flow, while this path calls `_run_annual` directly
+            # and only rejoins the pipeline at `_finalize`. Without it the
+            # lookup returns None rather than False, the clause stops being
+            # vacuous, and an uncooled building is judged on its
+            # passive-overheating hours — the exact false positive the
+            # reference path's vacuity rule exists to prevent.
+            report["proposed"]["mechanical_cooling"] = _mechanical_cooling(
+                proposed)
             proposed_kwh = report["proposed"]["total_site_kwh"]
-            compliant = proposed_kwh <= target["bet_kwh"]
+            energy_ok = proposed_kwh <= target["bet_kwh"]
             audit.decision(
                 "compliance",
                 "proposed does not exceed the archetype-EUI building energy "
-                "target" if compliant
+                "target" if energy_ok
                 else "proposed EXCEEDS the archetype-EUI building energy target",
                 inputs={"proposed_kwh": proposed_kwh,
                         "bet_kwh": target["bet_kwh"]},
                 article="8.4.4.1.(2)")
+            # 8.4.1.2.(3) and (4)(a). The energy comparison is NOT the whole
+            # determination, and until 2026-10-11 it was the whole of it on
+            # this path: a model could be declared compliant with any number
+            # of unmet thermal-block hours, and (4)(a) is the branch of (4)
+            # written FOR a building complying under Subsection 8.4.4 (AHJ-21,
+            # Sol's `189`). Composed the same way the reference path composes
+            # `energy_ok and unmet_ok`.
+            unmet_ok = evaluate_unmet_8_4_4(report, audit)
+            compliant = energy_ok and unmet_ok
             report.update(tiers.energy_tier(proposed_kwh, target["bet_kwh"],
                                             audit=audit))
             if province_state and part11_ghg is not None:
@@ -1013,6 +1038,90 @@ def evaluate_unmet(report, ruleset, audit):
             f"{iterations} capacity increase(s) — the building remains "
             "non-compliant; raise max_capacity_iterations, increase "
             f"capacity_step, or fix the design ({cause}).", article="8.4.1.2.(5)")
+    return status["all_ok"]
+
+
+def _unmet_status_8_4_4(report):
+    """(3) and (4)(a) for a building complying under Subsection 8.4.4.
+
+    The archetype-EUI path builds NO reference model, so (3)'s "and, where
+    applicable, for the reference building" has nothing to apply to and (4)'s
+    reference comparison is unavailable by construction. 2025 writes the
+    branch for exactly this case: (4)(a) is an absolute 100 h on the proposed
+    building "when complying with Subsection 8.4.4.", against (4)(b)'s
+    reference comparison "when complying with Subsection 8.4.5."
+
+    Until 2026-10-11 this path applied NEITHER sentence — see AHJ-21. A model
+    could reach an annual EUI verdict with any number of unmet thermal-block
+    hours, and (4)(a) is the one branch of (4) written for the path that
+    omitted it.
+    """
+    unmet = report["proposed"].get("unmet_occupied_hours") or {}
+    heating_h, cooling_h = unmet.get("heating"), unmet.get("cooling")
+    # Same vacuity rule as the reference path: a building with no mechanical
+    # cooling accrues passive-overheating hours that are not a capacity
+    # shortfall, and (4) is scoped to blocks "for which mechanical cooling is
+    # provided".
+    cooling_vacuous = report["proposed"].get("mechanical_cooling") is False
+    heating_ok = heating_h is not None and heating_h <= HEATING_UNMET_LIMIT_H
+    cooling_ok = cooling_vacuous or (
+        cooling_h is not None and cooling_h <= COOLING_UNMET_LIMIT_H_8_4_4)
+    return {"proposed_heating_h": heating_h, "proposed_cooling_h": cooling_h,
+            "cooling_vacuous": cooling_vacuous,
+            "indeterminate": heating_h is None or (
+                not cooling_vacuous and cooling_h is None),
+            "heating_ok": heating_ok, "cooling_ok": cooling_ok,
+            "all_ok": heating_ok and cooling_ok}
+
+
+def evaluate_unmet_8_4_4(report, audit):
+    """Audit (3) and (4)(a) on the archetype-EUI path and return the verdict."""
+    status = _unmet_status_8_4_4(report)
+    if status["indeterminate"]:
+        audit.warn("compliance",
+                   "unmet occupied hours are UNAVAILABLE for the proposed "
+                   "building, so 8.4.1.2.(3) and (4)(a) cannot be determined "
+                   "on this path", article="8.4.1.2.(3)")
+        return False
+    audit.decision(
+        "compliance",
+        "unmet heating hours within 100 h for the proposed building"
+        if status["heating_ok"] else "unmet heating hours EXCEED 100 h",
+        inputs={"proposed_h": status["proposed_heating_h"],
+                "limit_h": HEATING_UNMET_LIMIT_H},
+        value=("the reference building is not applicable on this path — "
+               "8.4.4 derives the target from Table 8.4.4.1 and builds no "
+               "reference, which is what (3)'s \"where applicable\" admits"),
+        article="8.4.1.2.(3)", ruling="AHJ-21")
+    if status["cooling_vacuous"]:
+        audit.decision(
+            "compliance",
+            "sentence (4) is vacuous — the proposed building has no "
+            "mechanical cooling",
+            inputs={"proposed_h": status["proposed_cooling_h"]},
+            article="8.4.1.2.(4)", ruling="AHJ-21")
+    else:
+        audit.decision(
+            "compliance",
+            "unmet cooling hours within 100 h for the proposed building"
+            if status["cooling_ok"]
+            else "unmet cooling hours EXCEED 100 h",
+            inputs={"proposed_h": status["proposed_cooling_h"],
+                    "limit_h": COOLING_UNMET_LIMIT_H_8_4_4},
+            value=("8.4.1.2.(4)(a), the branch for a building complying under "
+                   "Subsection 8.4.4 — an absolute limit, not (4)(b)'s "
+                   "allowance over a reference"),
+            article="8.4.1.2.(4)", ruling="AHJ-21")
+    if not status["all_ok"]:
+        audit.warn(
+            "compliance",
+            "8.4.1.2.(5) requires the proposed building's capacities to be "
+            "incrementally increased until these loads are met. That is NOT "
+            "done on this path: raising the capacities of the user's own "
+            "design is a different act from raising a reference's, and its "
+            "mechanics are unadjudicated (AHJ-21). The verdict below is "
+            "therefore NOT COMPLIANT rather than remediated.",
+            article="8.4.1.2.(5)", ruling="AHJ-21")
     return status["all_ok"]
 
 
