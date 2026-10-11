@@ -50,7 +50,7 @@ def sample(test, slug):
 
 
 def report(heating_h, cooling_h, *, mechanical_cooling=True, blocks=None,
-           cooled=None, facility=None):
+           cooled=None, facility=None, unplaceable=None):
     """The shape `_eui_compliance` has after its annual run.
 
     One block by default, because (3) and (4)(a) are written per thermal
@@ -65,6 +65,7 @@ def report(heating_h, cooling_h, *, mechanical_cooling=True, blocks=None,
     return {"proposed": {"zone_unmet_occupied_hours": blocks,
                          "zone_mechanical_cooling": cooled,
                          "mechanical_cooling": mechanical_cooling,
+                         "unplaceable_cooling": unplaceable or [],
                          "unmet_occupied_hours": facility},
             "reference": {"method": "archetype EUI (Table 8.4.4.1)"}}
 
@@ -263,13 +264,19 @@ class TestTheCriteriaArePerThermalBlock(unittest.TestCase):
         status = path._unmet_status_8_4_4(report(
             None, None,
             blocks={"Z1": {"heating": 1.0, "cooling": 900.0}},
-            cooled={"Z1": False}, mechanical_cooling=True))
-        self.assertTrue(status["unresolved_cooling"])
-        self.assertTrue(status["indeterminate"])
+            cooled={"Z1": False}, mechanical_cooling=True,
+            unplaceable=["Unplaceable Cooling Coil"]))
+        self.assertFalse(status["cooling_known"])
+        self.assertFalse(status["cooling_vacuous"])
         self.assertFalse(
             status["all_ok"],
-            "a building with cooling whose cooled blocks cannot be "
-            "identified must not PASS (4)(a) over zero blocks")
+            "a building with cooling whose applicability cannot be "
+            "established must not PASS (4)(a) over zero blocks")
+        # And (3) is STILL decided: 1.0 h is known and passes. A combined
+        # flag reported both unknown and cited the wrong sentence (Sol,
+        # `220`).
+        self.assertTrue(status["heating_known"])
+        self.assertTrue(status["heating_ok"])
 
     def test_a_block_missing_from_the_cooling_map_is_indeterminate(self):
         """Not an uncooled block — a block whose applicability is unknown.
@@ -283,8 +290,10 @@ class TestTheCriteriaArePerThermalBlock(unittest.TestCase):
                     "Z2": {"heating": 1.0, "cooling": 1.0}},
             cooled={"Z2": True}, mechanical_cooling=True))
         self.assertEqual(["Z1"], status["unattributed_blocks"])
-        self.assertTrue(status["indeterminate"])
+        self.assertFalse(status["cooling_known"])
         self.assertFalse(status["all_ok"])
+        self.assertTrue(status["heating_known"],
+                        "heating is readable here and must stay decided")
 
     def test_the_wholly_uncooled_fast_path_still_PASSES(self):
         """The control for both guards above: they must not turn an uncooled
@@ -295,14 +304,15 @@ class TestTheCriteriaArePerThermalBlock(unittest.TestCase):
             blocks={"Z1": {"heating": 10.0, "cooling": 1422.0}},
             cooled={}, mechanical_cooling=False))
         self.assertTrue(status["cooling_vacuous"])
-        self.assertFalse(status["indeterminate"])
+        self.assertTrue(status["cooling_known"])
+        self.assertTrue(status["heating_known"])
         self.assertTrue(status["all_ok"])
 
     def test_absent_block_rows_are_INDETERMINATE_and_the_union_is_not_used(self):
         status = path._unmet_status_8_4_4(report(
             None, None, blocks={},
             facility={"heating": 1.0, "cooling": 1.0}))
-        self.assertTrue(status["indeterminate"])
+        self.assertFalse(status["heating_known"])
         self.assertFalse(
             status["all_ok"],
             "a conforming FACILITY union must not be substituted for block "
@@ -337,7 +347,11 @@ class TestTheCriteriaArePerThermalBlock(unittest.TestCase):
                     openstudio.toPath(sample(self, name)))
                 self.assertTrue(loaded.is_initialized(), f"{name} must load")
                 model = loaded.get()
-                per_zone = path._zone_mechanical_cooling(model)
+                per_zone, unplaceable = path._zone_mechanical_cooling(model)
+                self.assertEqual(
+                    [], unplaceable,
+                    f"{name}: every cooling object must be placeable; an "
+                    "unplaceable one leaves (4)(a)'s applicability unknown")
                 self.assertTrue(per_zone, "every thermal block gets an answer")
                 self.assertEqual(
                     len(model.getThermalZones()), len(per_zone),

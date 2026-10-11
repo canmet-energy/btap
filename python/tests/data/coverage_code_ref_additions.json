@@ -1,0 +1,27 @@
+{
+ "schema_version": 1,
+ "why": [
+  "Coverage code-references ADDED after R-B, because a coverage claim",
+  "acquired a surface that did not exist when the R6 -> R7 ledgers were",
+  "written. Those ledgers record RENAMES and assert that R-B 'moved",
+  "paths, it did not add, drop or merge an owner', so an addition must",
+  "not be recorded by rewriting them — the same reasoning that put",
+  "deletions in `coverage_code_ref_retirements.json` rather than in a",
+  "ledger edit.",
+  "",
+  "With this file the invariant is still exact and still provable from",
+  "R6's total of 313: every reference a manifest names today is either",
+  "in the R7 ledger, or retired there, or added here with the authority",
+  "that added it and the reason.",
+  "",
+  "    live + retired == ledger + added"
+ ],
+ "additions": [
+  {
+   "ref": "python/btap/codes/necb/path.py#evaluate_unmet_8_4_4",
+   "uses": 1,
+   "authority": "Sol, review `220` (PR #100)",
+   "reason": "NECB 2025's 8.4.1.2 row claims that on the 8.4.4 archetype-EUI path the (3) and (4)(a) verdicts are applied per thermal block and composed into the determination. Its two existing pointers, `compliance.py#_evaluate` and `#_evaluate_unmet`, are preserved forwarding surfaces for the REFERENCE path and are not on the EUI path's executed call path — `_eui_compliance` calls `path.evaluate_unmet_8_4_4` directly. Stage 9's evidence rule makes a forwarding pointer not executed for the claim substantively false, so the claim needed this pointer. I first removed it instead, reasoning that the R7 ledger forbade additions; Sol ruled that the ledger is a historical migration record, not a rule that this product may never acquire a coverage pointer."
+  }
+ ]
+}

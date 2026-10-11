@@ -12,6 +12,7 @@ turns every missing prerequisite (manifest, baselines, engine) into a
 FAILURE naming the remedy.
 """
 
+import contextlib
 import importlib.util
 import os
 import tempfile
@@ -131,12 +132,50 @@ class TestFrozenScenarios(unittest.TestCase):
         if rc != 0 and shallow():
             # FETCH, so ancestry is PROVEN rather than shrugged at (review
             # Medium: the common CI path must not routinely skip this).
-            subprocess.run(["git", "-C", str(REPO_ROOT), "fetch", "--quiet",
-                            "--unshallow"], capture_output=True, check=False)
-            subprocess.run(["git", "-C", str(REPO_ROOT), "fetch", "--quiet",
-                            "origin", commit], capture_output=True,
-                           check=False)
-            rc = is_ancestor()
+            #
+            # UNDER A LOCK, and re-checked inside it (issue #99). This module
+            # and `test_freeze_producer.py` both reach this function, `pytest
+            # -n auto` puts them in separate PROCESSES, and they share one
+            # `.git`. Two workers deepening at once let one read ancestry
+            # while the other's fetch was in flight: objects present, graft
+            # not yet removed, `rc == 1` — the same code as a genuine "no",
+            # which is the ambiguity described above. It produced the false
+            # "came from another line of history" accusation on a PR whose
+            # commit WAS an ancestor, non-deterministically.
+            #
+            # CI no longer reaches this path at all: the jobs that run these
+            # modules check out with `fetch-depth: 0`. The lock is for a
+            # LOCAL shallow clone, which nothing else protects. It landed
+            # here rather than with that workflow change because editing this
+            # file moves `gate_sha256` and forces a full re-freeze, so it
+            # waited for a change that was re-freezing anyway (Sol, `220`).
+            #
+            # The second `is_ancestor()` inside the lock is what makes this
+            # correct rather than merely serialised: the worker that waits
+            # finds the repository already deep and answers from it instead
+            # of fetching again.
+            import fcntl
+
+            lock_path = REPO_ROOT / ".git" / "btap-unshallow.lock"
+            with open(lock_path, "a+") as handle:
+                try:
+                    fcntl.flock(handle, fcntl.LOCK_EX)
+                except OSError:
+                    pass          # no advisory locking: the pre-#99 behaviour
+                try:
+                    rc = is_ancestor()
+                    if rc != 0 and shallow():
+                        subprocess.run(
+                            ["git", "-C", str(REPO_ROOT), "fetch", "--quiet",
+                             "--unshallow"], capture_output=True, check=False)
+                        subprocess.run(
+                            ["git", "-C", str(REPO_ROOT), "fetch", "--quiet",
+                             "origin", commit], capture_output=True,
+                            check=False)
+                        rc = is_ancestor()
+                finally:
+                    with contextlib.suppress(OSError):
+                        fcntl.flock(handle, fcntl.LOCK_UN)
         if rc == 1:
             self.fail(f"manifest provenance commit {commit[:12]} is NOT an "
                       "ancestor of HEAD — these baselines came from another "

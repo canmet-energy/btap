@@ -814,8 +814,9 @@ def _eui_compliance(model, *, ruleset, weather, hdd, run_dir, simulate,
             # And PER BLOCK, because (4) is scoped to each block "for which
             # mechanical cooling is provided" — one building-wide flag marks a
             # mixed building's uncooled blocks as cooled.
-            report["proposed"]["zone_mechanical_cooling"] = (
-                _zone_mechanical_cooling(proposed))
+            cooling_map, unplaceable = _zone_mechanical_cooling(proposed)
+            report["proposed"]["zone_mechanical_cooling"] = cooling_map
+            report["proposed"]["unplaceable_cooling"] = unplaceable
             proposed_kwh = report["proposed"]["total_site_kwh"]
             energy_ok = proposed_kwh <= target["bet_kwh"]
             audit.decision(
@@ -1055,8 +1056,7 @@ def evaluate_unmet(report, ruleset, audit):
 
 
 def _unmet_status_8_4_4(report):
-    """(3) and (4)(a) PER THERMAL BLOCK, for a building complying under
-    Subsection 8.4.4.
+    """(3) and (4)(a) PER THERMAL BLOCK, each decided on its OWN evidence.
 
     The archetype-EUI path builds NO reference model, so (3)'s "and, where
     applicable, for the reference building" has nothing to apply to and (4)'s
@@ -1066,154 +1066,152 @@ def _unmet_status_8_4_4(report):
     reference comparison "when complying with Subsection 8.4.5."
 
     Both sentences are written per thermal block, and the FACILITY row cannot
-    stand in for them. Facility time is a union over blocks, so disjoint unmet
-    periods sum past 100 h with no single block anywhere near it: Sol's `212`
-    gave the facility-reading version 150 h with two blocks at 75 h each and
-    it returned not-compliant on a building where every block conformed. The
-    determination therefore reads `zone_unmet_occupied_hours` and requires
-    every applicable block to be within the limit.
+    stand in for them. Facility time is a union over blocks, so disjoint
+    unmet periods sum past 100 h with no single block anywhere near it: Sol's
+    `212` gave the facility-reading version 150 h with two blocks at 75 h each
+    and it returned not-compliant on a building where every block conformed.
 
-    (4) reaches only blocks "for which mechanical cooling is provided", so
-    cooling applicability is per block too — an uncooled block's
-    passive-overheating hours are not a capacity shortfall and never enter the
-    determination, however the rest of the building is served.
+    **The two criteria are tracked separately**, which is Sol's `220`. A
+    single combined flag reported BOTH unknown when only (4)(a)'s
+    applicability was unresolved: given a block with heating 1.0 h, cooling
+    900.0 h and no resolvable cooled block, it warned that "(3) and (4)(a)
+    cannot be determined" — but (3) CAN be determined from 1.0 h and passes.
+    The final verdict was right and its AHJ-facing evidence was false, citing
+    the wrong operative sentence.
 
-    Absent per-block rows are INDETERMINATE. The facility union is not
-    substituted for them, because a union that exceeds the limit does not
-    establish that any block does.
-
-    Until 2026-10-11 this path applied NEITHER sentence — see AHJ-21. A model
-    could reach an annual EUI verdict with any number of unmet thermal-block
-    hours, and (4)(a) is the one branch of (4) written for the path that
-    omitted it.
+    **And an unresolved object is not the same as no cooled block.** A
+    building whose cooling serves only process or service-water demand
+    genuinely has no thermal block "for which mechanical cooling is
+    provided", so (4) is VACUOUS there. Only a cooling object the model walk
+    cannot place leaves applicability unknown (Fable, `219`).
     """
     section = report["proposed"]
     blocks = section.get("zone_unmet_occupied_hours") or {}
     cooled_map = {str(k).upper(): bool(v) for k, v in
                   (section.get("zone_mechanical_cooling") or {}).items()}
+    unplaceable = list(section.get("unplaceable_cooling") or [])
 
-    # The WHOLE-BUILDING fast path survives for one case only: a building with
-    # no mechanical cooling anywhere has no block to which (4) applies, so the
-    # sentence is vacuous without needing per-block attribution. A MIXED
-    # building cannot use it — that is what made passive hours from an
-    # uncooled block fail (4)(a).
-    cooling_vacuous = section.get("mechanical_cooling") is False
-
-    heating_failures, cooling_failures = {}, {}
-    # A block whose hours are ABSENT is not a conforming block. Skipping it
-    # would make silence count as a pass, one block at a time, which is the
-    # same substitution as reading the facility union — it just fails quietly
-    # instead of loudly.
-    unreadable = set()
-    cooling_blocks = 0
+    # ---- sentence (3): heating, every block -------------------------------
+    heating_failures, heating_unreadable = {}, set()
     for name, hours in blocks.items():
-        heating_h = (hours or {}).get("heating")
-        if heating_h is None:
-            unreadable.add(name)
+        value = (hours or {}).get("heating")
+        if value is None:
+            # A block with absent hours is not a conforming block. Skipping
+            # it would make silence a pass, one block at a time.
+            heating_unreadable.add(name)
             continue
-        if float(heating_h) > HEATING_UNMET_LIMIT_H:
-            heating_failures[name] = float(heating_h)
+        if float(value) > HEATING_UNMET_LIMIT_H:
+            heating_failures[name] = float(value)
+    heating_known = bool(blocks) and not heating_unreadable
+    heating_ok = heating_known and not heating_failures
 
-    unattributed = set()
-    if not cooling_vacuous:
-        for name, hours in blocks.items():
-            if str(name).upper() not in cooled_map:
-                # A block with unmet hours and no entry in the cooling map is
-                # not an UNCOOLED block; it is a block whose applicability was
-                # never established. Defaulting it to uncooled let 900 h pass
-                # (Fable, `214`).
-                unattributed.add(name)
-                continue
-            if not cooled_map[str(name).upper()]:
-                continue
-            cooling_blocks += 1
-            cooling_h = (hours or {}).get("cooling")
-            if cooling_h is None:
-                unreadable.add(name)
-                continue
-            if float(cooling_h) > COOLING_UNMET_LIMIT_H_8_4_4:
-                cooling_failures[name] = float(cooling_h)
+    # ---- sentence (4)(a): cooling, every MECHANICALLY COOLED block --------
+    building_has_cooling = section.get("mechanical_cooling") is not False
+    cooling_failures, cooling_unreadable, unattributed = {}, set(), set()
+    cooled_blocks = 0
+    for name, hours in blocks.items():
+        if str(name).upper() not in cooled_map:
+            unattributed.add(name)
+            continue
+        if not cooled_map[str(name).upper()]:
+            continue
+        cooled_blocks += 1
+        value = (hours or {}).get("cooling")
+        if value is None:
+            cooling_unreadable.add(name)
+            continue
+        if float(value) > COOLING_UNMET_LIMIT_H_8_4_4:
+            cooling_failures[name] = float(value)
 
-    # Nothing to read means nothing was determined, in four shapes: no
-    # blocks at all; a block present with no hours; a non-vacuous building
-    # with no cooling map; and a block with hours whose applicability the map
-    # does not cover.
-    #
-    # The fourth includes the case that matters most. A building the
-    # building-wide flag calls cooled, in which NO block could be identified
-    # as cooled, is a resolution failure and not a building to which (4)(a)
-    # happens not to apply: `08-vrf` evaluated the sentence over ZERO blocks
-    # and PASSED, because the SDK does not resolve a VRF coil to its terminal
-    # unit (Fable, `214`). That is fixed in `_zone_mechanical_cooling`, and
-    # this is the guard that stops the next unresolvable equipment type
-    # reaching a verdict the same way — silence about applicability is not
-    # applicability.
-    unresolved_cooling = bool(
-        not cooling_vacuous and blocks and cooling_blocks == 0)
-    indeterminate = bool(not blocks or unreadable or unattributed
-                         or (not cooling_vacuous and not cooled_map)
-                         or unresolved_cooling)
+    # Vacuous where the sentence reaches no block, and that is a DECIDED
+    # outcome: either the building has no mechanical cooling at all, or every
+    # cooling object was placed and none of them reaches a thermal block.
+    cooling_vacuous = (not building_has_cooling
+                       or (not unplaceable and cooled_blocks == 0
+                           and not unattributed))
+    cooling_known = cooling_vacuous or (
+        bool(blocks) and bool(cooled_map) and not unplaceable
+        and not unattributed and not cooling_unreadable)
+    cooling_ok = cooling_vacuous or (cooling_known and not cooling_failures)
 
-    heating_ok = not heating_failures
-    cooling_ok = cooling_vacuous or not cooling_failures
     return {"blocks": len(blocks),
-            "cooled_blocks": cooling_blocks,
-            "unreadable_blocks": sorted(unreadable),
-            "unattributed_blocks": sorted(unattributed),
-            "unresolved_cooling": unresolved_cooling,
+            "cooled_blocks": cooled_blocks,
             "heating_failures": heating_failures,
             "cooling_failures": cooling_failures,
+            "heating_unreadable": sorted(heating_unreadable),
+            "cooling_unreadable": sorted(cooling_unreadable),
+            "unattributed_blocks": sorted(unattributed),
+            "unplaceable_cooling": sorted(unplaceable),
             "worst_heating_h": max(
                 (float((h or {}).get("heating") or 0.0)
                  for h in blocks.values()), default=None),
             "cooling_vacuous": cooling_vacuous,
-            "indeterminate": indeterminate,
-            "heating_ok": heating_ok and not indeterminate,
+            "heating_known": heating_known,
+            "cooling_known": cooling_known,
+            "heating_ok": heating_ok,
             "cooling_ok": cooling_ok,
-            "all_ok": (heating_ok and cooling_ok and not indeterminate)}
+            "all_ok": heating_ok and cooling_ok}
 
 
 def evaluate_unmet_8_4_4(report, audit):
     """Audit (3) and (4)(a) per thermal block on the archetype-EUI path and
-    return the verdict."""
+    return the verdict. Each sentence is reported on its OWN evidence: one
+    being undeterminable does not make the other unknown (Sol, `220`)."""
     status = _unmet_status_8_4_4(report)
-    if status["indeterminate"]:
-        audit.warn("compliance",
-                   "per-thermal-block unmet occupied hours are UNAVAILABLE "
-                   "for the proposed building, so 8.4.1.2.(3) and (4)(a) "
-                   "cannot be determined on this path — the Facility row is "
-                   "a union over blocks and is NOT substituted for them",
-                   inputs={"blocks": status["blocks"],
-                           "unreadable_blocks":
-                               status["unreadable_blocks"] or None,
-                           "unattributed_blocks":
-                               status["unattributed_blocks"] or None,
-                           "no_cooled_block_identified":
-                               status["unresolved_cooling"] or None},
-                   article="8.4.1.2.(3)", ahj="AHJ-21")
-        return False
-    audit.decision(
-        "compliance",
-        f"unmet heating hours within 100 h for every one of "
-        f"{status['blocks']} thermal block(s)" if status["heating_ok"]
-        else "unmet heating hours EXCEED 100 h for "
-             f"{len(status['heating_failures'])} of {status['blocks']} "
-             "thermal block(s)",
-        inputs={"blocks": status["blocks"],
-                "worst_block_h": status["worst_heating_h"],
-                "failing_blocks": status["heating_failures"] or None,
-                "limit_h": HEATING_UNMET_LIMIT_H},
-        value=("the reference building is not applicable on this path — "
-               "8.4.4 derives the target from Table 8.4.4.1 and builds no "
-               "reference, which is what (3)'s \"where applicable\" admits"),
-        article="8.4.1.2.(3)", ahj="AHJ-21")
+
+    # ---- sentence (3) -----------------------------------------------------
+    if not status["heating_known"]:
+        audit.warn(
+            "compliance",
+            "per-thermal-block unmet HEATING hours are UNAVAILABLE for the "
+            "proposed building, so 8.4.1.2.(3) cannot be determined — the "
+            "Facility row is a union over blocks and is NOT substituted for "
+            "them",
+            inputs={"blocks": status["blocks"],
+                    "unreadable_blocks": status["heating_unreadable"] or None},
+            article="8.4.1.2.(3)", ahj="AHJ-21")
+    else:
+        audit.decision(
+            "compliance",
+            f"unmet heating hours within 100 h for every one of "
+            f"{status['blocks']} thermal block(s)" if status["heating_ok"]
+            else "unmet heating hours EXCEED 100 h for "
+                 f"{len(status['heating_failures'])} of {status['blocks']} "
+                 "thermal block(s)",
+            inputs={"blocks": status["blocks"],
+                    "worst_block_h": status["worst_heating_h"],
+                    "failing_blocks": status["heating_failures"] or None,
+                    "limit_h": HEATING_UNMET_LIMIT_H},
+            value=("the reference building is not applicable on this path — "
+                   "8.4.4 derives the target from Table 8.4.4.1 and builds no "
+                   "reference, which is what (3)'s \"where applicable\" admits"),
+            article="8.4.1.2.(3)", ahj="AHJ-21")
+
+    # ---- sentence (4)(a) --------------------------------------------------
     if status["cooling_vacuous"]:
         audit.decision(
             "compliance",
             "sentence (4)(a) is vacuous — the proposed building has no "
-            "mechanical cooling, so it has no thermal block \"for which "
-            "mechanical cooling is provided\"",
-            inputs={"blocks": status["blocks"], "cooled_blocks": 0},
+            "thermal block \"for which mechanical cooling is provided\"",
+            inputs={"blocks": status["blocks"], "cooled_blocks": 0,
+                    "building_has_cooling":
+                        report["proposed"].get("mechanical_cooling")},
+            article="8.4.1.2.(4)(a)", ahj="AHJ-21")
+    elif not status["cooling_known"]:
+        audit.warn(
+            "compliance",
+            "which thermal blocks (4)(a) APPLIES to cannot be established "
+            "for the proposed building, so the sentence cannot be determined "
+            "— cooling equipment is present and at least one object or block "
+            "could not be placed",
+            inputs={"blocks": status["blocks"],
+                    "cooled_blocks": status["cooled_blocks"],
+                    "unplaceable_cooling":
+                        status["unplaceable_cooling"] or None,
+                    "unattributed_blocks":
+                        status["unattributed_blocks"] or None,
+                    "unreadable_blocks":
+                        status["cooling_unreadable"] or None},
             article="8.4.1.2.(4)(a)", ahj="AHJ-21")
     else:
         audit.decision(
@@ -1236,6 +1234,7 @@ def evaluate_unmet_8_4_4(report, audit):
                    "their passive-overheating hours are not a capacity "
                    "shortfall"),
             article="8.4.1.2.(4)(a)", ahj="AHJ-21")
+
     if not status["all_ok"]:
         audit.warn(
             "compliance",
@@ -1360,9 +1359,8 @@ def _hard_sized_phrase(names):
     return shown
 
 
-def _zone_mechanical_cooling(model) -> dict:
-    """Which thermal blocks have mechanical cooling PROVIDED, keyed by
-    UPPER-CASED zone name to match `zone_unmet_occupied_hours`.
+def _zone_mechanical_cooling(model) -> tuple:
+    """`({BLOCK: cooled}, [unresolved cooling object, ...])`.
 
     8.4.1.2.(4) is scoped to "each thermal block ... for which mechanical
     cooling is provided", and `_mechanical_cooling` answers only whether the
@@ -1377,22 +1375,27 @@ def _zone_mechanical_cooling(model) -> dict:
     having no cooled block at all — the direction that makes (4)(a) wrongly
     vacuous.
 
-    Resolution has two rungs, and the second is why this is not just the
-    containment accessors. A VRF cooling coil answers `airLoopHVAC`,
-    `containingZoneHVACComponent` AND `containingHVACComponent` all empty in
-    the 3.11 SDK, so `08-vrf` came out 0 of 5 cooled with the building-wide
-    flag True, and (4)(a) was then evaluated over ZERO blocks and passed
-    (Fable, `214`). So when containment cannot answer, the object's REFERENCE
-    GRAPH does: `sources()` gives the objects that point at this coil, and a
-    terminal unit among them resolves through `to_ZoneHVACComponent()` to the
-    block it serves. That is a general relationship rather than a list of
-    equipment types, which is what keeps the next unlisted terminal unit from
-    reintroducing this.
+    Resolution is ordered NARROWEST FIRST, which is the correction that
+    matters most here. A coil held inside a zone terminal serves THAT block,
+    even when the terminal sits on an air loop — so a cooled beam or
+    four-pipe induction unit in one zone of an otherwise heating-only loop
+    marked every block on the loop as cooled while `airLoopHVAC()` was tried
+    first (Fable, `219`). Zone containment is therefore asked before the loop.
+
+    The second return value is the cooling objects the walk could NOT place.
+    That distinction is what keeps a resolution failure from looking like an
+    answer: a building whose cooling serves only process or service-water
+    demand genuinely has NO cooled thermal block, and (4) is vacuous there,
+    while a coil nobody can place means applicability is unknown and the
+    determination must say so rather than pass over an empty set. Treating
+    both as indeterminate failed buildings the Code does not reach (Fable,
+    `219`).
     """
     cooled = set()
+    unresolved = []
 
     def zone_of(obj, depth=0):
-        """The blocks one object serves, by containment then by reference."""
+        """Did this object's blocks get attributed? Zone before loop."""
         if depth > 6:                # these chains are shallow; this bounds a cycle
             return False
         zone_component = obj.to_ZoneHVACComponent()
@@ -1400,24 +1403,31 @@ def _zone_mechanical_cooling(model) -> dict:
             zone = zone_component.get().thermalZone()
             if zone.is_initialized():
                 cooled.add(zone.get().nameString().upper())
-                return True
+            return True              # placed, even if the zone is detached
         component = obj.to_HVACComponent()
         if component.is_initialized():
             component = component.get()
-            loop = component.airLoopHVAC()
-            if loop.is_initialized():
-                for zone in loop.get().thermalZones():
-                    cooled.add(zone.nameString().upper())
-                return True
+            # NARROWEST FIRST: a coil inside a zone terminal serves that one
+            # block, not every block on the terminal's air loop.
             held_by = component.containingZoneHVACComponent()
             if held_by.is_initialized():
                 zone = held_by.get().thermalZone()
                 if zone.is_initialized():
                     cooled.add(zone.get().nameString().upper())
-                    return True
+                return True
             containing = component.containingHVACComponent()
             if containing.is_initialized():
                 return zone_of(containing.get(), depth + 1)
+            loop = component.airLoopHVAC()
+            if loop.is_initialized():
+                for zone in loop.get().thermalZones():
+                    cooled.add(zone.nameString().upper())
+                return True          # a loop serving no zone is still placed
+            if component.plantLoop().is_initialized():
+                # A plant-side coil: the demand it serves is on that loop, and
+                # a loop carrying only process or service-water demand reaches
+                # no thermal block. Placed, with nothing to attribute.
+                return True
         # Containment is silent: ask what POINTS AT this object.
         for source in obj.sources():
             as_model_object = source.to_ModelObject()
@@ -1438,7 +1448,8 @@ def _zone_mechanical_cooling(model) -> dict:
         # blocks served only for process or service-water demand.
         if _UPSTREAM_COOLING_PATTERN.search(type_name):
             continue
-        zone_of(obj)
+        if not zone_of(obj):
+            unresolved.append(obj.nameString())
 
     # An ideal-loads block is cooled by definition, and the flag lives on the
     # zone rather than on any object the walk above would reach.
@@ -1446,9 +1457,10 @@ def _zone_mechanical_cooling(model) -> dict:
         if zone.useIdealAirLoads():
             cooled.add(zone.nameString().upper())
 
-    return {zone.nameString().upper():
-            zone.nameString().upper() in cooled
-            for zone in model.getThermalZones()}
+    return ({zone.nameString().upper():
+             zone.nameString().upper() in cooled
+             for zone in model.getThermalZones()},
+            sorted(unresolved))
 
 
 def _mechanical_cooling(model):
