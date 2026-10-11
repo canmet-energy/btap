@@ -1055,7 +1055,17 @@ Table 8.4.4.1.
                  loads are met                               NOT applied
 ```
 
-(5) is what is left, and it is not a calculation gap: `_iterate_capacities`
+**A narrower gap remains beside (5), and it is not sentence (5).** 2025
+scopes (4) to "each thermal block ... for which mechanical cooling is
+provided", and the vacuity gate here is WHOLE-BUILDING: `cooling_vacuous` is
+true only when the proposed building has no mechanical cooling anywhere. A
+building with some cooled and some uncooled blocks is therefore judged on
+facility-level unmet cooling hours, which are any-zone hours, so (4)(a) can
+false-FAIL a partially cooled building on hours accrued in blocks the clause
+does not reach. `zone_unmet_occupied_hours` is already in the report, so
+per-block scoping is implementable without new data (Fable, `212`).
+
+(5) is the other part, and it is not a calculation gap: `_iterate_capacities`
 exists and works, but it is written over a proposed/reference PAIR — it loops
 both models, re-applies the reference's capacity-binned efficiencies, and
 reads `report["reference"]["unmet_occupied_hours"]`. On this path there is no
@@ -1064,10 +1074,11 @@ DESIGN: raising its capacities changes the building being assessed, which is
 a different act from raising a reference's, and the mechanics of doing that
 inside a determination are unadjudicated.
 
-Sentence (4)(a) is the sharp one. It is written FOR this path — "when
-complying with Subsection 8.4.4." — and it is the branch the reference path
-never uses. So the tool implements (4)(b), the reference comparison, and
-leaves the only branch that governs its own EUI path unimplemented.
+Sentence (4)(a) was the sharp one, and it is why this entry existed: it is
+written FOR this path — "when complying with Subsection 8.4.4." — and is the
+branch the reference path never uses, so the tool implemented (4)(b)'s
+reference comparison and left the only branch governing its own EUI path
+unimplemented. That is closed; (4)(a)'s absolute limit is applied here now.
 
 **Why it mattered.** A model could be declared compliant on the EUI path while
 leaving thermal-block heating or cooling loads unmet for any number of hours;

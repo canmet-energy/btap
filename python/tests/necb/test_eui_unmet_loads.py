@@ -89,9 +89,22 @@ class TestTheEuiPathAppliesTheUnmetLoadCriteria(unittest.TestCase):
         self.assertFalse(
             path.evaluate_unmet_8_4_4(report(None, None), audit),
             "absent unmet hours cannot satisfy a criterion")
-        self.assertTrue(
-            any(e["level"] == "warning" for e in audit.entries),
-            "and the run must SAY it could not determine them")
+        # The warning must say it could not DETERMINE them. Accepting any
+        # warning let `indeterminate` be forced False and still pass, and the
+        # mutated audit then said "unmet heating hours EXCEED 100 h" with
+        # `proposed_h=None` — a confident verdict on a number it did not have
+        # (Fable, `212`, M5).
+        said = [e for e in audit.entries
+                if e["level"] == "warning" and "UNAVAILABLE" in e["action"]]
+        self.assertEqual(
+            1, len(said),
+            "exactly one warning must say the hours are UNAVAILABLE, not that "
+            "a limit was exceeded — audit was:\n  "
+            + "\n  ".join(f"[{e['level']}] {e['action'][:88]}"
+                           for e in audit.entries))
+        self.assertFalse(
+            [e for e in audit.entries if "EXCEED" in e["action"]],
+            "and nothing may claim a limit was exceeded on absent data")
 
     def test_the_criteria_are_AUDITED_against_their_own_sentences(self):
         audit = AuditLog()
