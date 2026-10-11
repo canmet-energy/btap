@@ -22,12 +22,25 @@ The 8.4.1.2 determination:
 
 - **(2)** annual energy consumption of the proposed ≤ the building energy
   target of the reference
-- **(3)** unmet heating hours ≤ 100 h/year for both buildings
-- **(4)** unmet cooling hours: proposed within +10% of reference (2025: +10%
-  or 20 h, whichever is greater, on the 8.4.5 path). The clause applies to
-  thermal blocks *"for which mechanical cooling is provided"* — a proposed
-  building with no mechanical cooling passes (4) vacuously, with the
-  determination audited.
+- **(3)** unmet heating hours ≤ 100 h/year per THERMAL BLOCK, for both
+  buildings where applicable — on the 8.4.4 path there is no reference
+  building, which is what "where applicable" admits. The Facility row is a
+  union over blocks and is not read for either sentence.
+- **(4)** unmet cooling hours, and 2025 writes TWO branches with different
+  subjects:
+  - **(4)(b)**, "when complying with Subsection 8.4.5" — the proposed within
+    +10% of the reference, or +10% or 20 h whichever is greater. This is the
+    reference path's branch.
+  - **(4)(a)**, "when complying with Subsection 8.4.4" — an ABSOLUTE 100 h,
+    because that path derives its target from Table 8.4.4.1 and builds no
+    reference to compare against. `path="eui"` applies this branch, not
+    (4)(b)'s allowance.
+
+  Either branch applies to thermal blocks *"for which mechanical cooling is
+  provided"*, so the limit is evaluated per block and an uncooled block's
+  passive-overheating hours never enter it. A proposed building with no
+  mechanical cooling at all passes (4) vacuously, with the determination
+  audited.
 - **(5)** where (3)/(4) fail: capacities are **incrementally increased until
   the loads are met** — sizing factors bumped by `capacity_step` (default
   1.25, per failing thermal block where the data supports it), the building

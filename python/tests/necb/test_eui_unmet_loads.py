@@ -1,4 +1,8 @@
-"""8.4.1.2.(3) and (4)(a) on the archetype-EUI path — AHJ-21's closure.
+"""8.4.1.2.(3) and (4)(a) on the archetype-EUI path — AHJ-21 NARROWED.
+
+Not closed: sentence (5) remains a settled, implementable `tool-gap`, so the
+register entry stays open and this is the narrowing Sol approved in `212`, not
+its closure.
 
 Until 2026-10-11 `path="eui"` reached an annual verdict with NO unmet-load
 determination at all. `_eui_compliance` builds no reference model and never
@@ -15,20 +19,53 @@ defect was never in the arithmetic — it was that nothing called it — so
 `TestTheVerdictActuallyComposesIt` below drives the real path and is the test
 that would have caught the original gap.
 """
+import os
 import tempfile
 import unittest
+from pathlib import Path
 from unittest import mock
 
 from btap.audit import AuditLog
 from btap.codes.necb import path
 from tests.necb.support import DDY, EPW, needs_engine, proposed_with_hvac
 
+SAMPLES = Path(os.environ.get(
+    "BTAP_SAMPLES_DIR",
+    Path(__file__).resolve().parents[1] / "generated" / "samples"))
 
-def report(heating_h, cooling_h, *, mechanical_cooling=True):
-    """The shape `_eui_compliance` has after its annual run."""
-    return {"proposed": {"unmet_occupied_hours": {"heating": heating_h,
-                                                  "cooling": cooling_h},
-                         "mechanical_cooling": mechanical_cooling},
+
+def sample(test, slug):
+    """A corpus model, following `test_reference_rules.py`'s idiom — including
+    its flag discipline, so a missing corpus fails rather than passing
+    vacuously where the lane requires one."""
+    path_ = SAMPLES / f"{slug}.osm"
+    if not path_.exists():
+        msg = (f"sample {slug} not generated: run python3 "
+               "scripts/generate_samples.py tests/generated/samples "
+               "(or set BTAP_SAMPLES_DIR)")
+        if os.environ.get("BTAP_SAMPLES_REQUIRED") == "1":
+            test.fail(msg)
+        test.skipTest(msg)
+    return str(path_)
+
+
+def report(heating_h, cooling_h, *, mechanical_cooling=True, blocks=None,
+           cooled=None, facility=None):
+    """The shape `_eui_compliance` has after its annual run.
+
+    One block by default, because (3) and (4)(a) are written per thermal
+    block. `facility` sets the Facility union independently, so a test can
+    prove the determination does NOT read it.
+    """
+    if blocks is None:
+        blocks = {"THERMAL ZONE 1": {"heating": heating_h,
+                                     "cooling": cooling_h}}
+    if cooled is None:
+        cooled = {name: mechanical_cooling for name in blocks}
+    return {"proposed": {"zone_unmet_occupied_hours": blocks,
+                         "zone_mechanical_cooling": cooled,
+                         "mechanical_cooling": mechanical_cooling,
+                         "unmet_occupied_hours": facility},
             "reference": {"method": "archetype EUI (Table 8.4.4.1)"}}
 
 
@@ -111,7 +148,7 @@ class TestTheEuiPathAppliesTheUnmetLoadCriteria(unittest.TestCase):
         path.evaluate_unmet_8_4_4(report(10.0, 10.0), audit)
         articles = [e.get("article") for e in audit.entries]
         self.assertIn("8.4.1.2.(3)", articles)
-        self.assertIn("8.4.1.2.(4)", articles)
+        self.assertIn("8.4.1.2.(4)(a)", articles)
         # The `ahj` axis, not `ruling`: D-100 keeps three separate axes and
         # `ruling` is for an adjudicated D-XX decision, while a register
         # disposition belongs in `ahj`. I used `ruling` and
@@ -151,6 +188,119 @@ class TestTheEuiPathAppliesTheUnmetLoadCriteria(unittest.TestCase):
 
 
 @needs_engine
+class TestTheCriteriaArePerThermalBlock(unittest.TestCase):
+    """The scope of (3) and (4)(a), which the Facility row cannot stand in for.
+
+    The first version of this change read `unmet_occupied_hours` — EnergyPlus's
+    `Facility` row — for both sentences. Facility time is a UNION over blocks,
+    so disjoint unmet periods sum past 100 h with no single block near it. Sol
+    (`212`) gave that version a facility result of 150 h with two blocks at
+    75 h each and it returned not-compliant on a building where every block
+    conformed.
+    """
+
+    def test_a_facility_union_over_the_limit_with_every_block_under_it_PASSES(self):
+        """Sol's probe, as a test. 150 h of facility time, no block over 75."""
+        status = path._unmet_status_8_4_4(report(
+            None, None,
+            blocks={"ZONE 1": {"heating": 75.0, "cooling": 75.0},
+                    "ZONE 2": {"heating": 75.0, "cooling": 75.0}},
+            facility={"heating": 150.0, "cooling": 150.0}))
+        self.assertTrue(
+            status["all_ok"],
+            "every block is within 100 h, so (3) and (4)(a) are met — a "
+            "facility union of 150 h is not a block over the limit")
+
+    def test_one_failing_block_FAILS_whatever_the_others_do(self):
+        status = path._unmet_status_8_4_4(report(
+            None, None,
+            blocks={"GOOD": {"heating": 1.0, "cooling": 1.0},
+                    "BAD": {"heating": 101.0, "cooling": 1.0}}))
+        self.assertFalse(status["heating_ok"])
+        self.assertEqual({"BAD": 101.0}, status["heating_failures"],
+                         "and the audit must be able to NAME the block")
+
+    def test_4a_does_not_reach_an_UNCOOLED_block(self):
+        """Sol's second hostile control.
+
+        (4) is scoped to "each thermal block ... for which mechanical cooling
+        is provided". An uncooled block's passive-overheating hours are not a
+        capacity shortfall, and a single building-wide flag made them one as
+        soon as any other block was cooled.
+        """
+        status = path._unmet_status_8_4_4(report(
+            None, None,
+            blocks={"COOLED": {"heating": 10.0, "cooling": 50.0},
+                    "PASSIVE": {"heating": 10.0, "cooling": 900.0}},
+            cooled={"COOLED": True, "PASSIVE": False}))
+        self.assertEqual(1, status["cooled_blocks"])
+        self.assertTrue(
+            status["all_ok"],
+            "900 h of passive overheating in an UNCOOLED block is outside "
+            "(4)(a) — the cooled block is within its limit")
+
+    def test_but_a_genuinely_failing_COOLED_block_still_fails(self):
+        """The control for the control: the exclusion above must not be a
+        blanket pass once any block is uncooled."""
+        status = path._unmet_status_8_4_4(report(
+            None, None,
+            blocks={"COOLED": {"heating": 10.0, "cooling": 150.0},
+                    "PASSIVE": {"heating": 10.0, "cooling": 900.0}},
+            cooled={"COOLED": True, "PASSIVE": False}))
+        self.assertFalse(status["cooling_ok"])
+        self.assertEqual({"COOLED": 150.0}, status["cooling_failures"])
+
+    def test_absent_block_rows_are_INDETERMINATE_and_the_union_is_not_used(self):
+        status = path._unmet_status_8_4_4(report(
+            None, None, blocks={},
+            facility={"heating": 1.0, "cooling": 1.0}))
+        self.assertTrue(status["indeterminate"])
+        self.assertFalse(
+            status["all_ok"],
+            "a conforming FACILITY union must not be substituted for block "
+            "rows that are absent")
+
+    def test_per_block_cooling_applicability_comes_from_the_MODEL(self):
+        """`_zone_mechanical_cooling` must agree with the building-wide flag on
+        real models, and must not miss a coil held INSIDE zone equipment.
+
+        Matching a zone's own equipment types reported a fully cooled PTAC
+        building as having no cooled block at all — the direction that makes
+        (4)(a) wrongly vacuous — because the zone carries the PTAC and the DX
+        coil is its child.
+        """
+        import openstudio
+
+        expected_any = {"01-baseboard-gas": False, "06-unit-heaters-gas": False,
+                        "05-ptac-electric": True, "02-psz-gas-dx": True,
+                        "03-vav-reheat-chiller": True,
+                        "04-fancoil-chiller": True}
+        for name, cooled_expected in expected_any.items():
+            with self.subTest(model=name):
+                loaded = openstudio.osversion.VersionTranslator().loadModel(
+                    openstudio.toPath(sample(self, name)))
+                self.assertTrue(loaded.is_initialized(), f"{name} must load")
+                model = loaded.get()
+                per_zone = path._zone_mechanical_cooling(model)
+                self.assertTrue(per_zone, "every thermal block gets an answer")
+                self.assertEqual(
+                    len(model.getThermalZones()), len(per_zone),
+                    "one answer per thermal block, not per cooled block")
+                self.assertEqual(
+                    cooled_expected, any(per_zone.values()),
+                    f"{name}: expected any-block-cooled {cooled_expected}")
+                self.assertEqual(
+                    path._mechanical_cooling(model), any(per_zone.values()),
+                    f"{name}: per-block cooling must agree with the "
+                    "building-wide flag about whether ANY block is cooled")
+                if cooled_expected:
+                    self.assertTrue(
+                        all(per_zone.values()),
+                        f"{name}: every block is served, so a coil held "
+                        "INSIDE zone equipment must still be found — "
+                        f"got {per_zone}")
+
+
 class TestTheVerdictActuallyComposesIt(unittest.TestCase):
     """The call site, not the helper.
 
@@ -190,6 +340,53 @@ class TestTheVerdictActuallyComposesIt(unittest.TestCase):
                         "failing unmet hours must make the EUI determination "
                         "NOT COMPLIANT, whatever the energy comparison says")
 
+    def test_a_failing_ENERGY_comparison_still_dominates(self):
+        """The converse operand, which the test above did not pin.
+
+        `compliant = energy_ok and unmet_ok` has two operands and the test
+        above only ever asserted the verdict when the unmet result was False.
+        So `compliant = unmet_ok` — deleting the energy comparison outright —
+        satisfied every assertion in it: Sol made exactly that one-line change
+        and the engine-backed test stayed green (`212`, blocker 3).
+
+        Here the unmet criteria PASS and the energy target is driven below the
+        proposed consumption, so only `energy_ok` can carry the verdict.
+        """
+        from btap.codes.necb.editions.necb2025 import eui_archetypes
+
+        real_target = eui_archetypes.eui_building_energy_target
+
+        def impossible_target(*args, **kwargs):
+            target = dict(real_target(*args, **kwargs))
+            target["bet_kwh"] = 1.0        # no real building meets 1 kWh/year
+            return target
+
+        with mock.patch.object(path, "evaluate_unmet_8_4_4",
+                               return_value=True) as spy:
+            with mock.patch.object(eui_archetypes,
+                                   "eui_building_energy_target",
+                                   side_effect=impossible_target):
+                result = self.run_eui()
+        self.assertTrue(spy.called, "the unmet criteria are still consulted")
+        self.assertFalse(
+            result.compliant,
+            "the unmet criteria PASSED and the energy target is 1 kWh, so an "
+            "EUI verdict that is still COMPLIANT means the energy comparison "
+            "no longer reaches it")
+
+    def test_BOTH_operands_passing_is_what_makes_it_compliant(self):
+        """The positive control for the two tests above: with both operands
+        satisfied the verdict is COMPLIANT, so neither of them is proving its
+        point by way of a run that could never pass."""
+        with mock.patch.object(path, "evaluate_unmet_8_4_4",
+                               return_value=True):
+            result = self.run_eui()
+        self.assertTrue(
+            result.compliant,
+            "unmet criteria passing and the real archetype target met must "
+            "give a COMPLIANT determination — if this fails, the two "
+            "dominance tests above are vacuous")
+
     def test_the_path_SETS_the_mechanical_cooling_flag(self):
         """(4)'s vacuity rule needs a flag this path does not inherit.
 
@@ -215,10 +412,42 @@ class TestTheVerdictActuallyComposesIt(unittest.TestCase):
             "it must be a real boolean; None makes (4) non-vacuous for an "
             "uncooled building instead of vacuous")
 
+    def test_the_path_SETS_the_PER_BLOCK_cooling_map(self):
+        """The sibling of the flag above, and it needs its own assertion.
+
+        Deleting the `zone_mechanical_cooling` line left all nineteen tests
+        green: the engine fixture is an UNCOOLED building, so `(4)(a)` is
+        vacuous through the building-wide fast path and the per-block map is
+        never consulted on that model. A mutation that survives because the
+        fixture cannot reach the code is not a passing test, so this asserts
+        the map on the REPORT, where its absence shows regardless of what the
+        fixture is cooled by.
+        """
+        result = self.run_eui()
+        section = result.report["proposed"]
+        self.assertIn(
+            "zone_mechanical_cooling", section,
+            "the EUI path must set the per-block cooling map; without it a "
+            "MIXED cooled/uncooled building is INDETERMINATE at best and "
+            "judged on an uncooled block's passive hours at worst")
+        per_block = section["zone_mechanical_cooling"]
+        self.assertIsInstance(per_block, dict)
+        self.assertTrue(per_block, "one entry per thermal block, not empty")
+        self.assertEqual(
+            sorted(k.upper() for k in
+                   (section.get("zone_unmet_occupied_hours") or {})),
+            sorted(k.upper() for k in per_block),
+            "the cooling map and the unmet-hours rows must cover the SAME "
+            "blocks — (4)(a) joins them by name, so a key that appears in "
+            "one and not the other silently drops a block from the sentence")
+        for name, cooled in per_block.items():
+            self.assertIsInstance(
+                cooled, bool, f"{name}: a real boolean, not None")
+
     def test_the_criteria_reach_the_audit_on_a_real_run(self):
         result = self.run_eui()
         articles = [e.get("article") for e in result.audit.entries]
-        for sentence in ("8.4.1.2.(3)", "8.4.1.2.(4)"):
+        for sentence in ("8.4.1.2.(3)", "8.4.1.2.(4)(a)"):
             self.assertIn(
                 sentence, articles,
                 f"{sentence} must be determined on the EUI path, not skipped")

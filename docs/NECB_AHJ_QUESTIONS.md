@@ -1048,24 +1048,29 @@ generates and simulates **no reference building** — the target comes from
 Table 8.4.4.1.
 
 ```text
-8.4.1.2.(3)      the 100 h per-thermal-block heating limit   APPLIED
-8.4.1.2.(4)(a)   the 100 h cooling limit for a building
-                 complying under Subsection 8.4.4            APPLIED
+8.4.1.2.(3)      100 h per THERMAL BLOCK, heating             APPLIED
+8.4.1.2.(4)(a)   100 h per MECHANICALLY COOLED thermal
+                 block, for a building complying under
+                 Subsection 8.4.4                             APPLIED
 8.4.1.2.(5)      incremental capacity increase until the
-                 loads are met                               NOT applied
+                 loads are met                                NOT applied
 ```
 
-**A narrower gap remains beside (5), and it is not sentence (5).** 2025
-scopes (4) to "each thermal block ... for which mechanical cooling is
-provided", and the vacuity gate here is WHOLE-BUILDING: `cooling_vacuous` is
-true only when the proposed building has no mechanical cooling anywhere. A
-building with some cooled and some uncooled blocks is therefore judged on
-facility-level unmet cooling hours, which are any-zone hours, so (4)(a) can
-false-FAIL a partially cooled building on hours accrued in blocks the clause
-does not reach. `zone_unmet_occupied_hours` is already in the report, so
-per-block scoping is implementable without new data (Fable, `212`).
+Both limits are evaluated per block and every applicable block must be within
+them. The Facility row is NOT read: facility time is a union over blocks, so
+it exceeds 100 h with no block near it — 150 h of facility time over two
+blocks at 75 h each is a conforming building, and reading the union called it
+non-compliant (Sol, `212`).
 
-(5) is the other part, and it is not a calculation gap: `_iterate_capacities`
+**Cooling applicability is per block too**, because 2025 scopes (4) to "each
+thermal block ... for which mechanical cooling is provided". An uncooled
+block's passive-overheating hours are not a capacity shortfall and never enter
+the determination, however the rest of the building is served. A building with
+no mechanical cooling ANYWHERE still takes the building-wide fast path — it
+has no block the sentence reaches — but a mixed cooled/uncooled building does
+not, and the first version of this change used that flag for both cases.
+
+(5) is what remains, and it is not a calculation gap: `_iterate_capacities`
 exists and works, but it is written over a proposed/reference PAIR — it loops
 both models, re-applies the reference's capacity-binned efficiencies, and
 reads `report["reference"]["unmet_occupied_hours"]`. On this path there is no
