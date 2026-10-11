@@ -34,10 +34,14 @@ SCENARIO_MODULES = ("test_frozen_scenarios", "test_freeze_producer")
 #: to END at `tests` is what distinguishes "the tree" from "a file in it";
 #: narrowing the rule is right, and excluding `lint` by name would have been a
 #: confession that the rule was wrong.
+#: The freeze script's own path is NOT a token here. It would be a cross-tree
+#: reference from `python/tests/`, which `test_self_containment.py` forbids,
+#: and it changes the detected set for no job — so the dependency is removed
+#: rather than allowlisted, which is the first of the two fixes that gate's
+#: own failure message offers.
 REACHES_RE = re.compile(
     r"|".join([*(re.escape(m) for m in SCENARIO_MODULES),
-               r"(?<![\w/-])tests/?(?=\s|$)",
-               r"verification/scenarios"]))
+               r"(?<![\w/-])tests/?(?=\s|$)"]))
 
 
 def _yaml():
