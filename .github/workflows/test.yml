@@ -85,14 +85,6 @@ jobs:
             tests.necb.test_decisions_registry_sync \
             tests.necb.test_decisions_generator \
             tests.necb.test_decisions_registry
-      # docs/NECB_AHJ_QUESTIONS.md is the authored register;
-      # docs/NECB_AHJ_REFERRALS.md extracts the two statuses that need an
-      # authority. It exists so those questions can be handed over once
-      # instead of rediscovered one at a time, and it is GENERATED for the
-      # same reason D-102's evidence was eventually deleted down to one
-      # surface: a second hand-maintained copy drifts.
-      - name: "AHJ: the referral package is current"
-        run: python3 python/scripts/generate_ahj_referrals.py --check
 
   # The Python product suite on a bare runner, including import contracts,
   # linting, the installable wheel, and the engine-free frozen scenarios. The

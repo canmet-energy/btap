@@ -2,8 +2,9 @@
 
 **GENERATED** by `python/scripts/generate_ahj_referrals.py` from
 `docs/NECB_AHJ_QUESTIONS.md`. Do not edit: edit the register and
-regenerate. It carries no figures or wording of its own, so it cannot
-drift from the register it summarises.
+regenerate. Every question, article, attribution and interim
+behaviour below is the register's own text, so none of it can drift;
+the framing sentences are this generator's.
 
 The register holds every question in four statuses. Two of them need
 no authority — `ruled` is settled, and `tool-gap` is a defect for us
@@ -129,6 +130,8 @@ being asked.
 - **Article:** 8.4.4.9.(5) with 8.4.4.9.(6); 8.4.5.9.(5) with 8.4.5.9.(6).
 - **Makes a run conditional:** yes — `compliance_determination: conditional`
 
+**The question.** Sentence (5)(a) requires the reference heating capacities to match the ratio of the proposed building's capacity allocation per energy type, and (5)(b) requires the proposed operating schedule and priority of use. Sentence (6) independently bands the reference hydronic plant's boiler count: (6)(b) "one single-stage boiler" at or below 176 kW, (6)(c) "two boilers of equal capacity" or one two-staged boiler to 352 kW, (6)(d) "a boiler that is fully modulating" above. Every simulation boiler object carries ONE fixed fuel. The acceptable-solution text does not say how a two-fuel ratio is to be represented inside those cardinality constraints, and Sol confirmed on fetched normative text that (6) nowhere says it replaces (5), nor (5) that it overrides (6).
+
 **Established by.** Sol `110`, `112`, `119`, `120`; Fable `117`, `118`. Sol fetched both editions through the codes MCP; Fable reproduced the implementation's behaviour with code.
 
 **What the tool does meanwhile.** It elects ONE energy type for the reference SELECTION and computes no capacity ratio, so it satisfies neither clause of (5). What the reference's FINAL equipment carries is a separate question this tool does not establish — the selected variant may REPLACE the proposed plant with a newly built one of the elected variant, tear it down and not rebuild it where the variant needs no boiler, or stage it by role blind to fuel. It says so: an UNRESOLVED audit warning per serving system, `8.4.x.9.(5)` held at `not_implemented`, and the run's determination set to `conditional` naming this question.
@@ -138,6 +141,8 @@ being asked.
 - **Editions:** necb2020, necb2025
 - **Article:** Table 8.4.5.5.-C (NECB 2020); Table 8.4.6.5.-C (NECB 2025).
 - **Makes a run conditional:** not yet — see the entry
+
+**The question.** THE DEFECT IS IN THE PUBLISHED CODE, not in our extraction. Three electric-chiller EIR_FT rows fail the AHRI 550/590 rating-point normalization, which requires EIR_FT = 1.0 at 44 °F chilled water with 85 °F condenser water or 95 °F condenser air:
 
 **Established by.** The codes service's own errata (`services/codes/docs/errata-necb-chiller-eir-ft.md`), surfaced in the `known_issue` of the archived payload at `necb2020/provenance/vintage_match/8.4.5.5.-C.result.json`. Recovered into this register on 2026-10-07 after phylroy recalled that table errors had been found in an earlier session; they were recorded in provenance and in the vintage-match verification, but not as an AHJ-weighable question.
 

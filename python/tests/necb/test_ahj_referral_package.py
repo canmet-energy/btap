@@ -65,6 +65,46 @@ class TestTheReferralPackage(unittest.TestCase):
                         "listing it here would present our own defect as "
                         "someone else's question")
 
+    def test_every_listed_entry_states_the_QUESTION_itself(self):
+        """The thing the authority is being asked, present for every entry.
+
+        Both `alternative-solution` entries shipped without it and nothing
+        noticed: AHJ-1 and AHJ-7 head their requirement "The requirement, and
+        why we do not meet it.", the extractor matched "The requirement."
+        exactly, and a truthiness check dropped the field — so the two entries
+        where the Code DOES decide and this tool does not meet it went to a
+        reader whose whole job is to judge that, with no statement of the
+        requirement (Fable, `212`).
+
+        Emptying the extractor's heading tuple altogether left all three of
+        the other tests green, which is why this one counts BLOCKS rather than
+        trusting the renderer.
+        """
+        if not OUTPUT.is_file():
+            self.skipTest(f"{OUTPUT} is not present in this layout")
+        text = OUTPUT.read_text(encoding="utf-8")
+        wanted = [r["id"] for r in entries()
+                  if r.get("status") in ("referral", "alternative-solution")]
+        self.assertEqual(
+            len(wanted), text.count("**The question.** "),
+            f"{len(wanted)} entries need an authority, so the package must "
+            f"carry {len(wanted)} question blocks and carries "
+            f"{text.count('**The question.** ')}")
+        for ident in wanted:
+            with self.subTest(entry=ident):
+                start = text.index(f"### {ident} — ")
+                nxt = text.find("### ", start + 4)
+                section = text[start:nxt if nxt != -1 else len(text)]
+                m = [ln for ln in section.split("\n")
+                     if ln.startswith("**The question.** ")]
+                self.assertEqual(
+                    1, len(m),
+                    f"{ident}: exactly one question block")
+                self.assertGreater(
+                    len(m[0]), 80,
+                    f"{ident}: the question is a sentence, not a stub — "
+                    f"got {len(m[0])} characters")
+
     def test_every_listed_entry_states_what_the_tool_does_meanwhile(self):
         """A question with no stated interim behaviour tells a reader what is
         being asked and not what hangs on the answer."""

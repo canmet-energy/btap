@@ -35,15 +35,27 @@ OUTPUT = ROOT / "docs" / "NECB_AHJ_REFERRALS.md"
 #: prevent — a defect presented as a question for someone else.
 NEEDS_AUTHORITY = ("referral", "alternative-solution")
 
-#: Headings the register uses for each part of an entry. "now" and
-#: "meanwhile" are both accepted for interim behaviour: once a question is
-#: ruled, "meanwhile" is the wrong tense, and the register test accepts either.
+#: Headings the register uses for each part of an entry, matched as PREFIXES.
+#:
+#: Exact matching silently lost both `alternative-solution` entries: AHJ-1 and
+#: AHJ-7 head their requirement "The requirement, and why we do not meet it.",
+#: which "The requirement." does not equal, so the package shipped the two
+#: entries where the Code DOES decide and we do not meet it with no statement
+#: of the requirement at all — to a reader whose whole job is to judge that
+#: (Fable, `212`). "now" and "meanwhile" are both accepted for interim
+#: behaviour because once a question is ruled, "meanwhile" is the wrong tense.
 FIELDS = {
-    "article": ("Article.",),
-    "question": ("The ambiguity.", "The question.", "The requirement."),
-    "established": ("Established by.",),
-    "meanwhile": ("What the tool does meanwhile.", "What the tool does now."),
+    "article": ("Article",),
+    "question": ("The ambiguity", "The question", "The requirement"),
+    "established": ("Established by",),
+    "meanwhile": ("What the tool does meanwhile", "What the tool does now"),
 }
+
+#: Fields an entry MUST have for the package to be worth handing over. A
+#: missing one is a register defect, and rendering the document without it
+#: would hand an authority a question with no requirement, no interim
+#: behaviour, or no article — so generation FAILS instead.
+REQUIRED = ("article", "question", "meanwhile")
 
 
 def _statuses() -> dict:
@@ -56,13 +68,32 @@ def _statuses() -> dict:
 def _conditional_column() -> dict:
     """The register's own status table says whether an entry makes a run
     conditional. That column is the contract, so it is read rather than
-    inferred from the status."""
+    inferred from the status.
+
+    Read by POSITION, which means a mis-count renders a neighbouring column
+    instead — reading the status column produced "Makes a run conditional:
+    referral" on every entry with every test still green (Fable, `212`). So
+    the value's SHAPE is checked: it must begin with a yes/no judgement,
+    because that is what the column means. "not yet" is one of them, from
+    AHJ-7, whose defect is in published data this tool corrects rather than in
+    a run.
+    """
+    starts = ("yes", "no", "not yet")
     out = {}
     for line in REGISTER.read_text(encoding="utf-8").split("\n"):
         m = re.match(r"\|\s*(AHJ-\d+)\s*\|([^|]*)\|([^|]*)\|([^|]*)\|([^|]*)\|",
                      line)
         if m:
-            out[m.group(1)] = m.group(5).strip()
+            value = m.group(5).strip()
+            if not value.lower().startswith(starts):
+                raise SystemExit(
+                    f"generate_ahj_referrals: {m.group(1)}'s conditional "
+                    f"column reads {value!r}, which does not begin with a "
+                    f"yes/no judgement ({', '.join(starts)}). Either the "
+                    "register's status table changed shape or this generator "
+                    "is reading the wrong column — and a wrong column would "
+                    "tell an authority the opposite of the truth.")
+            out[m.group(1)] = value
     return out
 
 
@@ -76,8 +107,15 @@ def _sections() -> dict:
 
 
 def _field(body: str, headings: tuple) -> str | None:
+    """The first matching heading's text, matched as a PREFIX.
+
+    The register's headings carry trailing clauses — "The requirement, and why
+    we do not meet it." — so an exact match drops the field and, with a
+    truthiness check downstream, drops it silently.
+    """
     for h in headings:
-        m = re.search(rf"\*\*{re.escape(h)}\*\*\s*(.*?)(?=\n\n|\Z)", body, re.S)
+        m = re.search(rf"\*\*{re.escape(h)}[^*]*\*\*\s*(.*?)(?=\n\n|\Z)",
+                      body, re.S)
         if m:
             return " ".join(m.group(1).split())
     return None
@@ -93,6 +131,14 @@ def render() -> str:
     if missing:
         raise SystemExit(f"generate_ahj_referrals: {missing} have a status "
                          "needing an authority but no register section")
+    holes = [f"{i}:{key}" for i in wanted for key in REQUIRED
+             if not _field(sections[i]["body"], FIELDS[key])]
+    if holes:
+        raise SystemExit(
+            "generate_ahj_referrals: these entries are missing a REQUIRED "
+            f"field and the package will not be written: {', '.join(holes)}. "
+            "An authority cannot act on a question with no requirement, no "
+            "article or no stated interim behaviour.")
 
     by_status = {s: [i for i in wanted if statuses[i]["status"] == s]
                  for s in NEEDS_AUTHORITY}
@@ -101,8 +147,9 @@ def render() -> str:
         "",
         "**GENERATED** by `python/scripts/generate_ahj_referrals.py` from",
         "`docs/NECB_AHJ_QUESTIONS.md`. Do not edit: edit the register and",
-        "regenerate. It carries no figures or wording of its own, so it cannot",
-        "drift from the register it summarises.",
+        "regenerate. Every question, article, attribution and interim",
+        "behaviour below is the register's own text, so none of it can drift;",
+        "the framing sentences are this generator's.",
         "",
         "The register holds every question in four statuses. Two of them need",
         "no authority — `ruled` is settled, and `tool-gap` is a defect for us",
