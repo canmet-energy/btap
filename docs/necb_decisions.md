@@ -149,7 +149,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-99** — A reference that cannot satisfy a requirement yields a CONDITIONAL result, not a certification _(runtime)_
 - **D-100** — AHJ dispositions are cited by the deciding rule site; the determination owns only policy _(runtime)_
 - **D-101** — The thermal block is the selection unit; plant, election and disclosure scopes stay larger _(runtime)_
-- **D-102** — The Code states EIR_FPLR; EnergyPlus carries PLF in [0.7, 1.0], and the gap below the floor is declared _(runtime)_
+- **D-102** — The Code states EIR_FPLR; EnergyPlus carries PLF in [0.7, 1.0], and the gaps at BOTH carrier edges are declared _(runtime)_
 
 <!-- TOC END -->
 
@@ -5950,10 +5950,18 @@ for both editions; it quotes the 2025 wording in its docstring, which is not
 the same as branching on it. Sol caught the substitution of one sentence's
 evidence for another's.
 
-Whether (5) needs an edition branch at all is open: the phrase softens WHICH
-buildings must be iterated, and the tool iterates whichever building fails,
-which is defensible under both wordings. That is an argument, not an
-implementation, and it is recorded here as the former.
+**On the path this decision governs, the qualification is SATISFIED rather
+than ignored.** D-90 is about the 8.4.5 reference path, where a reference
+building exists and is therefore "applicable". Iterating both buildings'
+capacities there is the case 2025's wording retains, not a deviation from it.
+An earlier version of this note mistook the absence of an edition branch for a
+gap; there is nothing to branch on while the reference exists.
+
+The real omission is on the OTHER path and is recorded as
+[[AHJ-21]]: `path="eui"` reaches `_eui_compliance`, which generates no
+reference building and never calls `_iterate_capacities`, so (5) is not
+applied there at all. That is a tool gap outside this decision's scope, not an
+edition difference inside it.
 
 <a id="d-91"></a>
 
@@ -6074,7 +6082,10 @@ in the plan log.
 
 ### Which editions this was established against
 
-- **Established:** `necb2020` and `necb2025`, Claude under D-10, 2026-10-10.
+- **Established:** `necb2020` and `necb2025`, Claude under D-10, 2026-10-10,
+  **for the 8.4.5 reference path this decision governs.** The archetype-EUI
+  path's own unmet-load omission is [[AHJ-21]] and is deliberately not
+  claimed here.
 
 `8.4.4.9.(3)`/`8.4.5.9.(3)` transfers cleanly, and `8.4.2.10.(2)` is
 CHARACTER-IDENTICAL in both editions even though the article's title changed
@@ -6118,16 +6129,25 @@ tool does with each:
   and it is a gap.
 - **(4)'s (a)/(b) branch.** 2025 offers "not exceed 100 hours ... when
   complying with Subsection 8.4.4." OR the reference comparison "when
-  complying with Subsection 8.4.5." Only (b) is implemented, which is correct
-  for this tool: it builds a reference building, so it complies under 8.4.5
-  and (a) never applies. Stated rather than left silent.
+  complying with Subsection 8.4.5." On the path THIS decision governs, (b) is
+  the applicable branch and is implemented.
+
+  An earlier version of this note said (a) "never applies" because the tool
+  builds a reference building. That was wrong, and Sol's `189` caught it: the
+  tool also has an 8.4.4 path — `path="eui"` reaches `_eui_compliance`, which
+  generates no reference building — and (a) is written FOR that path. So the
+  only branch governing the EUI path is the one left unimplemented. That is
+  [[AHJ-21]], a tool gap, and it is outside this decision's scope rather than
+  absent from the Code.
 - **(3)'s "where applicable".** 2020 requires the 100-hour heating limit "for
   both the proposed and reference buildings"; 2025 says "for the proposed
   building and, where applicable, for the reference building".
-  `_unmet_status` requires BOTH in both editions
-  (`proposed_heating_ok and reference_heating_ok`), so the tool is STRICTER
-  than 2025 permits. A conservative deviation is still a deviation and is
-  recorded as one.
+  `_unmet_status` requires both. On the reference path a reference building
+  EXISTS and is therefore applicable, so requiring both is exactly what the
+  qualification retains — NOT the over-strict deviation an earlier version of
+  this note called it. The phrase does work on the EUI path, where no
+  reference exists, and there sentence (3) is not applied at all. Again
+  [[AHJ-21]].
 
 <a id="d-92"></a>
 
@@ -7351,14 +7371,26 @@ Code implies 1.002358; the clamp is not even active there.
 ### Accepted error where the mapping IS representable
 
 ```text
-heating   2.699%   over PLR [0.1661, 1.0]
-cooling  12.645%   over PLR [0.1745, 1.0]
+ASSESSED ENGINE DOMAIN, PLR [0.0, 1.0] — the shipped curve's worst error
+heating   2.699%   at PLR 0.1816     below both seams, so the seams do not move it
+cooling  12.645%   at PLR 0.1745     at its floor
+
+REPRESENTABLE REGION — where the field can actually hold the Article target
+heating            PLR [0.1661, 0.8149996906315529)   ENDED by the upper seam
+cooling            PLR [0.1745, 1.0]                  no upper seam
 ```
 
 The cooling number is a finding in its own right: that polynomial was fit over
 0.25-1.0, so the lowest part of its representable region was never in the fit.
-A refit over the representable region measures **1.877%** and **4.853%**. That
-refit is OPEN WORK and deliberately not applied here — it changes reference
+A refit over the REPRESENTABLE REGION measures, for heating, **1.235%** on a
+20 000-point least-squares sample — and the sample density matters enough to
+state: 1.193% on 200 points, 1.214% on 400, 1.235% converged. Sol's
+independent 200-point reproduction gives 1.1926%, which agrees. Cooling
+refits to **4.938%** over its own region. An earlier version of this decision
+published 1.877% and 4.853%, measured over PLR [0.1661, 1.0] with the target
+CLIPPED at 1.0 — the old domain and the old clip, carried forward under a
+label that no longer described them. That refit is OPEN WORK and deliberately
+not applied here — it changes reference
 energy results, so it belongs with its own re-freeze and its own adjudication
 of what error is acceptable.
 
@@ -7379,10 +7411,25 @@ the reference Articles.
 proceeds, runs `efficiency.apply`, and reads the curve the COIL carries. Three
 mutations that survived the previous, hand-built version of that test now fail
 it: killing `set_limits`'s output-bound writer, nulling the upper output bound,
-and moving the input minimum to 0.1. The comparison is UNCLIPPED, and four
+and moving the input minimum to 0.1. The comparison is UNCLIPPED, and three
 further mutations fail it: calling the whole domain representable (the original
-defect), moving the seam, claiming cooling has an upper seam, and restoring the
-clipped comparison that hid the seam in the first place.
+defect), moving the seam off its root, and claiming cooling has an upper seam.
+
+A FOURTH claim is withdrawn. This decision said that restoring the clipped
+comparison fails the test; Sol applied it literally and all six tests stayed
+green. He is right, and the reason is instructive: the main comparison now runs
+only over the REPRESENTABLE region, where by construction the target never
+reaches the ceiling, so clipping there is a mathematical no-op. My mutation had
+replaced BOTH occurrences of that expression — including the one inside the
+upper-seam test, which is what actually failed — and I attributed the failure
+to the wrong site. The seam is detected by the seam test, not by the fit
+comparison.
+
+The seam's own pin was also weaker than claimed. It bracketed the crossing at
++/-0.01, so moving the constant to 0.82 passed; it now asserts the ROOT, that
+the exact target EQUALS the ceiling at 0.8149996906315529 to nine places, and
+brackets at 1e-6. Sol's mutation now fails, and so does 0.8150 — three parts
+in ten million from the root, and comfortably inside the old bracket.
 
 - **Who/when:** Claude under D-10, 2026-10-10; Sol's `185` found the axis
   defect and `187` refused the 0.25 domain and the hand-built test.

@@ -3008,7 +3008,7 @@
       "maximum_independent_variable_2": null,
       "minimum_dependent_variable_output": 0.7,
       "maximum_dependent_variable_output": 1.0,
-      "notes": "PLF = PLR / EIR_FPLR from Article 8.4.5.7.(5), realised in EnergyPlus's cycling PLF field. Polynomial inherited from NECB 2011 Table 8.4.4.21.-E (4). Bounds and domain per D-102: input [0.0, 1.0] as the engine samples it, output [0.7, 1.0] as the engine requires. Worst error 2.699% over the representable region PLR [0.1661, 1.0]; below that the Code's target falls under the engine's 0.7 floor and is not representable. See D-102."
+      "notes": "PLF = PLR / EIR_FPLR from Article 8.4.5.7.(5), realised in EnergyPlus's cycling PLF field. Polynomial inherited from NECB 2011 Table 8.4.4.21.-E (4). Bounds and domain per D-102: input [0.0, 1.0] as the engine samples it, output [0.7, 1.0] as the engine requires. Worst error 2.699% over the representable region PLR [0.1661, 0.815) — TWO seams, not one: below 0.1661 the Code's target falls under the engine's 0.7 floor, and from 0.81499969 it rises above the 1.0 ceiling, peaking at 1.002358 near PLR 0.9055. See D-102."
     },
     {
       "name": "FURNACE-PLF-ATMOSPHERIC",

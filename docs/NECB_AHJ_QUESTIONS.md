@@ -101,6 +101,7 @@ nonconformity with 8.4.x.9.(6)(e).
 | AHJ-18 | the two-pipe fan-coil surrogate has no plant-side changeover | tool-gap | necb2020, necb2025 | no |
 | AHJ-19 | real refrigeration is invisible to classification, teardown and end-use reporting | tool-gap | necb2020, necb2025 | no |
 | AHJ-20 | System 5's chilled-water loop is a 7 °C comfort loop | tool-gap | necb2020, necb2025 | no |
+| AHJ-21 | the archetype-EUI path applies no unmet-load criteria at all | tool-gap | necb2025 | no |
 
 ---
 
@@ -1020,3 +1021,53 @@ added after my own absurd fixture would not have caught this one.
 water-chiller reference that can actually serve a refrigerated block — an
 appropriate low-temperature fluid and equipment representation — is an
 implementable modelling problem, not an interpretation an authority must bless.
+
+## AHJ-21 — the archetype-EUI path applies no unmet-load criteria at all
+
+**Article.** 8.4.1.2.(3), 8.4.1.2.(4)(a) and 8.4.1.2.(5), NECB 2025, as they
+apply to a building complying under Subsection 8.4.4.
+
+**Status: `tool-gap`, NOT a referral.** The Code decides this plainly and we
+do not do it. Nothing needs an authority, and the run is NOT conditional:
+calling an unimplemented criterion an ambiguity would launder a defect as an
+interpretation, which is what the register's four statuses exist to prevent.
+
+**What is missing.** `performance_compliance(..., path="eui")` reaches
+`_eui_compliance`, the NECB 2025 Subsection 8.4.4 archetype-EUI path, which
+generates and simulates **no reference building** — the target comes from
+Table 8.4.4.1. That function never calls `_unmet_status`,
+`_iterate_capacities` or `evaluate_unmet`, so on that path:
+
+```text
+8.4.1.2.(3)      the 100 h per-thermal-block heating limit   NOT applied
+8.4.1.2.(4)(a)   the 100 h cooling limit for a building
+                 complying under Subsection 8.4.4            NOT applied
+8.4.1.2.(5)      incremental capacity increase until the
+                 loads are met                               NOT applied
+```
+
+Sentence (4)(a) is the sharp one. It is written FOR this path — "when
+complying with Subsection 8.4.4." — and it is the branch the reference path
+never uses. So the tool implements (4)(b), the reference comparison, and
+leaves the only branch that governs its own EUI path unimplemented.
+
+**Why it matters.** A model may be declared compliant on the EUI path while
+leaving thermal-block heating or cooling loads unmet for any number of hours.
+On the reference path the same model would fail 8.4.1.2.(3) at 101 hours. The
+determination does not say which criteria were applied, so the omission is
+invisible in the report.
+
+**Established by.** Sol's `189` on PR #98, 2026-10-11, reviewing a claim of
+mine that branch (a) "never applies to this tool because it builds a reference
+building". The tool has an 8.4.4 path, that path is exactly where (a) applies,
+and D-91's first establishment account was wrong on both counts. Confirmed by
+reading `_eui_compliance` for calls to the unmet-hour machinery: there are
+none.
+
+**What the tool does meanwhile.** It reaches an EUI determination with no
+unmet-load check and no warning that none was made. Closing this means
+applying (3) and (4)(a) to the proposed building on the EUI path, and deciding
+whether (5)'s capacity iteration runs there — the proposed building is the
+user's design, so raising its capacities is a different act from raising a
+reference's. That choice is why this is not a one-line fix, and it does not
+make the gap an ambiguity.

@@ -24,6 +24,7 @@ fails to write.
 
 from __future__ import annotations
 
+import re
 import unittest
 
 from tests.support import needs_sdk
@@ -52,7 +53,7 @@ REPRESENTABLE_FROM = {k: v[0] for k, v in REPRESENTABLE.items()}
 
 #: Where the heating target crosses ABOVE what the field accepts. Pinned to
 #: the digits so the seam cannot silently widen.
-UPPER_SEAM = {"heating": 0.81499969, "cooling": None}
+UPPER_SEAM = {"heating": 0.8149996906315529, "cooling": None}
 #: Its peak excess over the ceiling, and where.
 UPPER_SEAM_PEAK = {"heating": (1.002358, 0.9055)}
 #: Three DIFFERENT things live in the top of this domain and D-102's first
@@ -194,13 +195,23 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                         f"{kind}: this curve is declared to have no upper "
                         f"seam, but its target reaches {worst:.6f}")
                     continue
+                # The ROOT, not a bracket. Sol moved this constant from
+                # 0.81499969 to 0.82 and every test stayed green, because a
+                # +/-0.01 bracket proves only that the crossing is somewhere
+                # in a 0.02-wide window — which is not what "pinned to the
+                # digits" claims. The seam is where the exact target EQUALS
+                # the ceiling, so assert that, then bracket it tightly enough
+                # that the published digits are what passes.
+                self.assertAlmostEqual(
+                    CARRIER_HI, exact_plf(kind, seam), places=9,
+                    msg=f"{kind}: the seam is the ROOT of "
+                        "exact_plf(PLR) = 1.0; this is the published value")
                 self.assertLess(
-                    exact_plf(kind, seam - 0.01), CARRIER_HI,
-                    f"{kind}: just BELOW the seam the target still fits")
+                    exact_plf(kind, seam - 1e-6), CARRIER_HI,
+                    f"{kind}: one micro-step below, the target still fits")
                 self.assertGreater(
-                    exact_plf(kind, seam + 0.01), CARRIER_HI,
-                    f"{kind}: just ABOVE it the target does NOT fit — if this "
-                    "fails the seam has moved and D-102's figure is stale")
+                    exact_plf(kind, seam + 1e-6), CARRIER_HI,
+                    f"{kind}: one micro-step above, it does not")
                 peak, at = UPPER_SEAM_PEAK[kind]
                 self.assertAlmostEqual(
                     peak, exact_plf(kind, at), places=5,
@@ -271,6 +282,50 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                     rows.append({k: v for k, v in row.items() if k != "notes"})
                 self.assertEqual(rows[0], rows[1],
                                  f"{name} differs between editions")
+
+    def test_the_PUBLISHED_region_matches_the_one_the_seams_define(self):
+        """The shipped note must state the region the arithmetic actually has.
+
+        This is the defect's SECOND form. The first revision declared the
+        upper seam in D-102's prose while the curve notes and the
+        accepted-error table still said heating was representable over
+        `[0.1661, 1.0]` — the decision contradicting itself inside the same
+        change, which Sol caught. Fixing an instance is not fixing the class,
+        so the published interval is checked against the same constants the
+        seam tests use.
+        """
+        import json
+
+        from btap.codes.necb import _data_root
+
+        NAMES = {"heating": "DXHEAT-REF-PLFFPLR",
+                 "cooling": "DXCOOL-REF-COOLPLFFPLR"}
+        for edition in ("necb2020", "necb2025"):
+            data = json.loads((_data_root() / edition / "efficiencies.json")
+                              .read_text(encoding="utf-8"))
+            for kind, name in sorted(NAMES.items()):
+                with self.subTest(edition=edition, kind=kind):
+                    row = next(c for c in data["curves"]
+                               if isinstance(c, dict) and c.get("name") == name)
+                    shown = re.search(
+                        r"representable region PLR \[([\d.]+), ([\d.]+)([)\]])",
+                        row.get("notes") or "")
+                    self.assertIsNotNone(
+                        shown, f"{edition}/{kind}: the note must STATE its "
+                               "representable region, or nothing keeps it honest")
+                    self.assertAlmostEqual(
+                        REPRESENTABLE[kind][0], float(shown.group(1)), places=4,
+                        msg=f"{kind}: the note's lower bound")
+                    seam = UPPER_SEAM[kind]
+                    self.assertAlmostEqual(
+                        seam if seam else 1.0, float(shown.group(2)), places=2,
+                        msg=f"{kind}: the note says the region runs to "
+                            f"{shown.group(2)}, but the seam puts it at "
+                            f"{seam if seam else 1.0}")
+                    self.assertEqual(
+                        ")" if seam else "]", shown.group(3),
+                        f"{kind}: a region ENDED by a seam is open at the top; "
+                        "one that reaches full load is closed")
 
     def test_every_curve_note_cites_D_102(self):
         """The runtime ruling lives in the decision, and the data points at it."""
