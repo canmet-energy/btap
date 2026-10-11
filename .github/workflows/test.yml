@@ -180,6 +180,16 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v5
+        # fetch-depth 0, like the `python` job: this job runs the
+        # frozen-scenario modules, whose manifest-ancestry check cannot be
+        # answered from a shallow clone and recovers by deepening it. Two
+        # modules doing that concurrently is issue #99, and setting it on
+        # `python` alone left THIS job failing with the same message —
+        # "these baselines came from another line of history" — on run
+        # 38150608891. A full clone means the deepening path is never
+        # entered at all.
+        with:
+          fetch-depth: 0
       # The container runs as root while the workspace belongs to the runner
       # user, so git refuses the tree ("dubious ownership", exit 128) — which
       # surfaces far from the cause: oracle_prep's `git rev-parse HEAD` and the
@@ -370,6 +380,16 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v5
+        # fetch-depth 0, like the `python` job: this job runs the
+        # frozen-scenario modules, whose manifest-ancestry check cannot be
+        # answered from a shallow clone and recovers by deepening it. Two
+        # modules doing that concurrently is issue #99, and setting it on
+        # `python` alone left THIS job failing with the same message —
+        # "these baselines came from another line of history" — on run
+        # 38150608891. A full clone means the deepening path is never
+        # entered at all.
+        with:
+          fetch-depth: 0
       # See the same step in verify: git refuses a workspace owned by another
       # UID, and the manifest-ancestry check needs git.
       - name: Trust the workspace (container UID != workspace owner)
