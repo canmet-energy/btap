@@ -187,11 +187,20 @@ FIELD_HEADINGS = (
     "Where a reader meets it",
 )
 
-#: A heading ends at a period or at its closing `**`. Without that,
-#: `FIELD_HEADINGS`'s entries were bare PREFIXES: `**Articles of this
-#: Section…**` would have ended a field as if it were `**Article.**`, and
-#: `**Status quo…**` as if it were the status line (Fable, `219`).
-_HEADING_TAIL = r"(?:\.|\*\*)"
+#: A heading ends at a period, colon or comma, or at its closing `**`.
+#:
+#: Without any delimiter, `FIELD_HEADINGS`'s entries were bare PREFIXES:
+#: `**Articles of this Section…**` would have ended a field as if it were
+#: `**Article.**` (Fable, `219`).
+#:
+#: With only a period or `**`, the register's own `**Status: \`referral\`**`
+#: lines and its comma-clause question headings stopped being boundaries, so
+#: SEVEN of the ten Article bullets swallowed the status line and everything
+#: after it — AHJ-7's went from 59 characters to 2050 with the coefficient
+#: table flattened onto one line (Fable, `223`). The character after a
+#: heading's name is punctuation, and the set has to be the punctuation the
+#: register actually uses.
+_HEADING_TAIL = r"(?:[.:,]|\*\*)"
 
 _FIELD_END_RE = re.compile(
     r"(?m)^(?:" + "|".join(

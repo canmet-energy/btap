@@ -91,9 +91,9 @@ def _read_field(body, heads, boundaries):
             continue
         collected = [line.split("**", 2)[-1].lstrip()]
         for later in lines[index + 1:]:
-            if any(later.startswith(f"**{name}.")
-                   or later.startswith(f"**{name}**")
-                   for name in boundaries):
+            if any(later.startswith(f"**{name}{tail}")
+                   for name in boundaries
+                   for tail in (".", ":", ",", "**")):
                 break
             if later.startswith("#"):
                 break
@@ -211,6 +211,69 @@ class TestTheReferralPackage(unittest.TestCase):
                     f"{ident} is an alternative solution: the requirement it "
                     "does not meet IS what an authority is being asked to "
                     "accept, and it must be in the package")
+
+    def test_no_field_SWALLOWS_another(self):
+        """PLACEMENT, and independent of the grammar on either side.
+
+        Every content assertion in this file asks whether some text is
+        SOMEWHERE in a section, and all of them passed while seven of the ten
+        Article bullets had swallowed the status line and everything after
+        it — AHJ-7's went from 59 characters to 2050, with the coefficient
+        table flattened onto one line (Fable, `223`). The text was all
+        present; it was in the wrong field.
+
+        `test_fields_are_IDENTICAL_to_the_register` does catch that, but only
+        while the generator's grammar and this file's reader disagree. Edit
+        both and it goes quiet again, which is the shared-grammar problem
+        that has now bitten twice. These assertions use neither: a bullet is
+        one short line, and no field may contain a DIFFERENT field's heading.
+        """
+        if not OUTPUT.is_file():
+            self.skipTest(f"{OUTPUT} is not present in this layout")
+        text = OUTPUT.read_text(encoding="utf-8")
+        wanted = [r["id"] for r in entries()
+                  if r.get("status") in ("referral", "alternative-solution")]
+        labels = ("The question", "Established by",
+                  "What the tool does meanwhile")
+        # Spelled out here rather than imported, so a change to the
+        # generator's tuple cannot move this expectation with it.
+        headings = ("Article", "Status", "The ambiguity", "The question",
+                    "The requirement", "The gap", "What is missing",
+                    "Why it matters", "Established by",
+                    "What the tool does meanwhile", "What the tool does now",
+                    "Where a reader meets it")
+        for ident in wanted:
+            start = text.index(f"### {ident} — ")
+            nxt = text.find("\n### ", start + 4)
+            section = text[start:nxt if nxt != -1 else len(text)]
+
+            for bullet in ("Editions", "Article", "Makes a run conditional"):
+                with self.subTest(entry=ident, bullet=bullet):
+                    line = [ln for ln in section.split("\n")
+                            if ln.startswith(f"- **{bullet}:**")][0]
+                    self.assertLess(
+                        len(line), 300,
+                        f"{ident}: the {bullet} bullet is {len(line)} "
+                        "characters. A bullet carries one short value, so "
+                        "this one has absorbed what follows it")
+                    value = line[len(f"- **{bullet}:**"):]
+                    for name in headings:
+                        self.assertNotIn(
+                            f"**{name}", value,
+                            f"{ident}: the {bullet} bullet's VALUE contains "
+                            f"the heading '{name}', so it ran past its end")
+
+            for label in labels:
+                with self.subTest(entry=ident, field=label):
+                    body = _published_field(section, label, list(labels))
+                    for name in headings:
+                        if label.startswith(name) or name.startswith(label):
+                            continue
+                        for tail in (".", ":", ","):
+                            self.assertNotIn(
+                                f"\n**{name}{tail}", body,
+                                f"{ident}: the {label} field swallowed the "
+                                f"'{name}' heading")
 
     def test_fields_are_IDENTICAL_to_the_register(self):
         """Equality, not containment — so OVER-reading fails too.
