@@ -386,6 +386,19 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
         text = re.sub(r"```.*?```", " ", source.read_text(encoding="utf-8"),
                       flags=re.S)
         self.assertNotIn("```", text, "every fenced block must be stripped")
+        # The refit's DOMAIN drifted between summary and body four times, so
+        # pin the label too: the fit is over the primary INTERVAL, and calling
+        # it the representable region or set is the specific wording that kept
+        # coming back after the body had been corrected.
+        for wrong in ("refit over the REPRESENTABLE REGION",
+                      "refit over the REPRESENTABLE SET",
+                      "refit over the representable region",
+                      "refit over the representable set"):
+            self.assertNotIn(
+                wrong, text,
+                "the refit is measured over heating's PRIMARY INTERVAL; the "
+                "representable set also contains the isolated point 1.0, "
+                "which the fit does not serve")
         for heating, cooling in RETIRED_PAIRS:
             for sentence in re.split(r"(?<=\.)\s+", text):
                 if heating not in sentence or cooling not in sentence:
