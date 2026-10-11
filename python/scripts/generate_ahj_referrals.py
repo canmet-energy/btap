@@ -55,14 +55,66 @@ FIELDS = {
 #: missing one is a register defect, and rendering the document without it
 #: would hand an authority a question with no requirement, no interim
 #: behaviour, or no article — so generation FAILS instead.
-REQUIRED = ("article", "question", "meanwhile")
+REQUIRED = ("article", "question", "established", "meanwhile")
 
 
 def _statuses() -> dict:
+    """Status, title and editions from the AUTHORED register, with the
+    generated projection required to agree.
+
+    This read `ahj.json` — itself generated from the register — and that made
+    one generated projection the oracle for another. Sol (`213`) changed
+    AHJ-21's status in both canonical authored locations, left the JSON and
+    the package untouched, and `--check` reported success: the gate certified
+    a current package while the canonical status had moved underneath it.
+
+    So the register is parsed directly, with `generate_ahj_registry`'s own
+    parser rather than a second copy of it — that parser already cross-checks
+    each entry's table row against the status in its own body. The projection
+    is then checked AGAINST that parse, so a stale `ahj.json` fails here too
+    instead of silently steering the selection.
+    """
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+    import generate_ahj_registry
+
+    try:
+        authored = {r["id"]: r for r in generate_ahj_registry.parse_register(
+            REGISTER.read_text(encoding="utf-8"))}
+    except ValueError as error:
+        # A register edit is the EXPECTED trigger for this path, so it reports
+        # rather than tracebacks. The parser's own message names the entry and
+        # the contradiction.
+        raise SystemExit(
+            f"generate_ahj_referrals: the authored register does not parse, "
+            f"so the questions needing an authority cannot be "
+            f"identified:\n  {error}") from None
+
     data = json.loads(PROJECTION.read_text(encoding="utf-8"))
     rows = data if isinstance(data, list) else (data.get("entries") or [])
     rows = list(rows.values()) if isinstance(rows, dict) else rows
-    return {r["id"]: r for r in rows}
+    projected = {r["id"]: r for r in rows}
+
+    drift = []
+    for ident, record in sorted(authored.items(),
+                                key=lambda kv: int(kv[0].split("-")[1])):
+        mirror = projected.get(ident)
+        if mirror is None:
+            drift.append(f"{ident}: in the register, absent from ahj.json")
+            continue
+        for field in ("status", "title", "editions"):
+            if mirror.get(field) != record[field]:
+                drift.append(
+                    f"{ident}.{field}: register {record[field]!r} vs "
+                    f"ahj.json {mirror.get(field)!r}")
+    for ident in sorted(set(projected) - set(authored)):
+        drift.append(f"{ident}: in ahj.json, absent from the register")
+    if drift:
+        raise SystemExit(
+            "generate_ahj_referrals: the generated registry has drifted from "
+            "the authored register, so neither can be trusted to say which "
+            "questions need an authority. Run generate_ahj_registry.py.\n  "
+            + "\n  ".join(drift))
+    return authored
 
 
 def _conditional_column() -> dict:
@@ -133,12 +185,20 @@ def render() -> str:
                          "needing an authority but no register section")
     holes = [f"{i}:{key}" for i in wanted for key in REQUIRED
              if not _field(sections[i]["body"], FIELDS[key])]
+    # The conditional judgement is not a register heading, so it is checked
+    # here against the same requirement: a blank cell renders a question with
+    # nothing said about what hangs on it. Sol (`213`) blanked AHJ-2's cell,
+    # regenerated, and all three tests passed on the empty value.
+    holes += [f"{i}:conditional" for i in wanted
+              if not (conditional.get(i) or "").strip()]
     if holes:
         raise SystemExit(
             "generate_ahj_referrals: these entries are missing a REQUIRED "
             f"field and the package will not be written: {', '.join(holes)}. "
-            "An authority cannot act on a question with no requirement, no "
-            "article or no stated interim behaviour.")
+            "A placeholder is not an authority package: an authority cannot "
+            "act on a question with no requirement, no article, no "
+            "attribution, no stated interim behaviour, or nothing said about "
+            "whether a run is conditional on it.")
 
     by_status = {s: [i for i in wanted if statuses[i]["status"] == s]
                  for s in NEEDS_AUTHORITY}
@@ -176,16 +236,19 @@ def render() -> str:
             sec, row = sections[i], statuses[i]
             out += [f"### {i} — {sec['title']}", ""]
             eds = ", ".join(row.get("editions") or []) or "(none stated)"
+            # No placeholder fallbacks. Every field below is validated
+            # non-empty before anything is rendered, so `(absent)` here could
+            # only ever hide a hole from the reader it matters to — and it
+            # already did, for AHJ-1 and AHJ-7 (Sol, `213`).
             out += [f"- **Editions:** {eds}",
-                    f"- **Article:** {_field(sec['body'], FIELDS['article']) or '(absent)'}",
-                    f"- **Makes a run conditional:** {conditional.get(i, '(not in the status table)')}",
+                    f"- **Article:** {_field(sec['body'], FIELDS['article'])}",
+                    f"- **Makes a run conditional:** {conditional[i]}",
                     ""]
             for label, key in (("The question", "question"),
                                ("Established by", "established"),
                                ("What the tool does meanwhile", "meanwhile")):
                 value = _field(sec["body"], FIELDS[key])
-                if value:
-                    out += [f"**{label}.** {value}", ""]
+                out += [f"**{label}.** {value}", ""]
         out += ["---", ""]
     out += [
         "## How a run says this out loud",

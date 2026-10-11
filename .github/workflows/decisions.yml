@@ -74,6 +74,12 @@ jobs:
       # register edit touches nothing it watches and neither `lint` nor
       # `python` runs. The gate was in `test.yml` and was therefore INERT for
       # the only edit that can make the package stale (Fable, `212`).
+      # BOTH AHJ generators, because the package's selection is only as
+      # current as the registry it is cross-checked against, and a register
+      # edit is a docs-only change either way.
+      - name: generate_ahj_registry.py --check
+        run: python3 python/scripts/generate_ahj_registry.py --check
+
       - name: generate_ahj_referrals.py --check
         run: python3 python/scripts/generate_ahj_referrals.py --check
 
@@ -86,4 +92,5 @@ jobs:
             tests.necb.test_decisions_registry \
             tests.necb.test_decisions_registry_sync \
             tests.necb.test_decisions_generator \
-            tests.necb.test_ahj_referral_package
+            tests.necb.test_ahj_referral_package \
+            tests.necb.test_ahj_register
