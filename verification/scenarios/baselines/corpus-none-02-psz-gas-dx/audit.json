@@ -2891,7 +2891,7 @@
  },
  {
   "step": "coverage",
-  "action": "Determination of Compliance \u2014 implemented: The pipeline computes the (2) annual-energy verdict (proposed vs reference building energy target), the (3)/(4) unmet-hours verdicts (with the vacuous-cooling determination when the proposed has no mechanical cooling), and the sentence-(5) capacity auto-iteration \u2014 per-thermal-block: each failing zone\u2019s Sizing:Zone factors are raised, secant-targeted from that zone\u2019s own (factor, unmet-hours) history across rounds, with a global SizingParameters fallback when per-zone data cannot attribute the failure, and hard-sized-equipment stall detection \u2014 compliance.rb; asserted by test_compliance.rb.",
+  "action": "Determination of Compliance \u2014 implemented: The pipeline computes the (2) annual-energy verdict (proposed vs reference building), the (3)/(4) unmet-hours verdicts per THERMAL BLOCK \u2014 the Facility row is a union over blocks and is not read \u2014 with (4) scoped to blocks for which mechanical cooling is provided and vacuous where the proposed has none, and the sentence-(5) capacity auto-iteration: each failing zone\u2019s Sizing:Zone factors are raised, secant-targeted from that zone\u2019s own (factor, unmet-hours) history across rounds, with a global SizingParameters fallback when per-zone data cannot attribute the failure, and hard-sized-equipment stall detection.",
   "inputs": {
    "status": "implemented",
    "decisions_citing": 1,
