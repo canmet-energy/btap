@@ -49,6 +49,14 @@
     "cooling": 829.0
    }
   },
+  "mechanical_cooling": false,
+  "zone_mechanical_cooling": {
+   "THERMAL ZONE 1": false,
+   "THERMAL ZONE 2": false,
+   "THERMAL ZONE 3": false,
+   "THERMAL ZONE 4": false,
+   "THERMAL ZONE 5": false
+  },
   "ghg_kg_co2e": 18966.8
  },
  "reference": {
