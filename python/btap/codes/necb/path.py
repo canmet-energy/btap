@@ -1092,14 +1092,14 @@ def evaluate_unmet_8_4_4(report, audit):
         value=("the reference building is not applicable on this path — "
                "8.4.4 derives the target from Table 8.4.4.1 and builds no "
                "reference, which is what (3)'s \"where applicable\" admits"),
-        article="8.4.1.2.(3)", ruling="AHJ-21")
+        article="8.4.1.2.(3)", ahj="AHJ-21")
     if status["cooling_vacuous"]:
         audit.decision(
             "compliance",
             "sentence (4) is vacuous — the proposed building has no "
             "mechanical cooling",
             inputs={"proposed_h": status["proposed_cooling_h"]},
-            article="8.4.1.2.(4)", ruling="AHJ-21")
+            article="8.4.1.2.(4)", ahj="AHJ-21")
     else:
         audit.decision(
             "compliance",
@@ -1111,7 +1111,7 @@ def evaluate_unmet_8_4_4(report, audit):
             value=("8.4.1.2.(4)(a), the branch for a building complying under "
                    "Subsection 8.4.4 — an absolute limit, not (4)(b)'s "
                    "allowance over a reference"),
-            article="8.4.1.2.(4)", ruling="AHJ-21")
+            article="8.4.1.2.(4)", ahj="AHJ-21")
     if not status["all_ok"]:
         audit.warn(
             "compliance",
@@ -1121,7 +1121,7 @@ def evaluate_unmet_8_4_4(report, audit):
             "design is a different act from raising a reference's, and its "
             "mechanics are unadjudicated (AHJ-21). The verdict below is "
             "therefore NOT COMPLIANT rather than remediated.",
-            article="8.4.1.2.(5)", ruling="AHJ-21")
+            article="8.4.1.2.(5)", ahj="AHJ-21")
     return status["all_ok"]
 
 

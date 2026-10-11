@@ -99,10 +99,14 @@ class TestTheEuiPathAppliesTheUnmetLoadCriteria(unittest.TestCase):
         articles = [e.get("article") for e in audit.entries]
         self.assertIn("8.4.1.2.(3)", articles)
         self.assertIn("8.4.1.2.(4)", articles)
+        # The `ahj` axis, not `ruling`: D-100 keeps three separate axes and
+        # `ruling` is for an adjudicated D-XX decision, while a register
+        # disposition belongs in `ahj`. I used `ruling` and
+        # test_every_ruling_value_is_a_literal_on_the_audit_surface caught it.
         self.assertTrue(
-            all(e.get("ruling") == "AHJ-21" for e in audit.entries
+            all(e.get("ahj") == "AHJ-21" for e in audit.entries
                 if e.get("article", "").startswith("8.4.1.2")),
-            "each entry cites the register id that recorded the gap")
+            "each entry cites the register id on the AHJ axis")
 
     def test_sentence_5_is_DECLARED_unimplemented_when_the_limits_fail(self):
         """(5) applies here — Sol's `191` — and is not implemented.
