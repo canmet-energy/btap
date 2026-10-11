@@ -256,8 +256,13 @@ def _provision_lock(version: str, timeout: float = PROVISION_LOCK_TIMEOUT_S):
 
     * contention WAITS, bounded by `timeout` and sized for a 230 MB download
       and extraction rather than for a briefly held lock; and
-    * a lock that cannot be taken at all raises `EngineError`, naming the two
-      overrides that skip provisioning entirely.
+    * a lock that cannot be taken at all raises `EngineError`, naming the ONE
+      override that skips provisioning entirely — `BTAP_ENERGYPLUS`, which
+      resolves at the first rung. `BTAP_ENERGYPLUS_ARCHIVE` is NOT a second
+      one: it is read just before this lock and installed inside it, so
+      offering it as a way out of a locking failure sends the reader back
+      into the operation that just failed (Sol, `222`; the error text and its
+      test already said this, and this docstring did not).
 
     Raising is the right failure here because the alternative is a silent
     return to a known defect. A reader is protected regardless by

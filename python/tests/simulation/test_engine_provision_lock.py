@@ -220,6 +220,44 @@ class TestThePublishIsAtomic(unittest.TestCase):
             (engine._binary_in(self.target).parent / "Energy+.idd").is_file(),
             "with the whole release, not just the binary")
 
+    def test_a_staging_directory_from_a_DEAD_process_is_swept(self):
+        """The pre-build sweep, which nothing exercised.
+
+        My crash test raises inside `build`, and that call's own `finally`
+        already removes its staging directory — so it never leaves a
+        leftover from a process that is no longer executing, and deleting
+        the sweep loop entirely left the whole module green (Sol, `222`).
+
+        A hard-killed process leaves no `finally`, so the leftover is
+        constructed here the way a `SIGKILL` leaves one: a populated staging
+        sibling with nobody to clean it.
+        """
+        engine = self.engine
+        self.target.parent.mkdir(parents=True, exist_ok=True)
+        orphan = (self.target.parent
+                  / f".{self.target.name}.staging-deadbeef")
+        (orphan / "release").mkdir(parents=True)
+        (orphan / "release" / "energyplus").write_text("stale",
+                                                       encoding="utf-8")
+        self.assertTrue(orphan.is_dir(), "the leftover exists to begin with")
+
+        def build(into):
+            (into / "release").mkdir(parents=True, exist_ok=True)
+            (into / "release" / "energyplus").write_text("new",
+                                                         encoding="utf-8")
+
+        engine._stage(build, self.target)
+
+        self.assertFalse(
+            orphan.exists(),
+            f"{orphan.name} survived a later install. A hard-killed build "
+            "leaves ~230 MB behind, and every caller holds the provisioning "
+            "lock, so a staging sibling here belongs to a process that is "
+            "gone and must be swept")
+        self.assertEqual(
+            [], list(self.target.parent.glob(".*staging-*")),
+            "and nothing else may be left either")
+
     def test_a_crashed_install_leaves_nothing_resolvable(self):
         """`_stage` must not publish a tree its builder failed to finish."""
         engine = self.engine
