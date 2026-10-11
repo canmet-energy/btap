@@ -9,6 +9,7 @@ worth it: it is current, and it includes neither `ruled` nor `tool-gap`.
 """
 import json
 import pathlib
+import re
 import subprocess
 import sys
 import unittest
@@ -16,6 +17,7 @@ import unittest
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 SCRIPT = ROOT / "python" / "scripts" / "generate_ahj_referrals.py"
 OUTPUT = ROOT / "docs" / "NECB_AHJ_REFERRALS.md"
+REGISTER = ROOT / "docs" / "NECB_AHJ_QUESTIONS.md"
 PROJECTION = ROOT / "python" / "btap" / "codes" / "data" / "ahj.json"
 
 
@@ -23,6 +25,53 @@ def entries():
     data = json.loads(PROJECTION.read_text(encoding="utf-8"))
     rows = data if isinstance(data, list) else (data.get("entries") or [])
     return list(rows.values()) if isinstance(rows, dict) else rows
+
+
+def _generator():
+    """The generator module, imported from `python/scripts/`.
+
+    The package's correctness is a relationship between the authored register
+    and the published document, and the generator owns the one parser that
+    defines it. Re-implementing `_field` here would test a copy.
+    """
+    import importlib.util
+
+    path_ = (pathlib.Path(__file__).resolve().parents[2]
+             / "scripts" / "generate_ahj_referrals.py")
+    spec = importlib.util.spec_from_file_location("_ahj_referrals", path_)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _register_body(register, ident):
+    """One entry's body out of the authored register."""
+    start = register.index(f"## {ident} — ")
+    nxt = register.find("\n## ", start + 4)
+    return register[start:nxt if nxt != -1 else len(register)]
+
+
+def _read_field(body, heads):
+    """A field's whole text, LINE BY LINE — a second implementation.
+
+    Deliberately not the generator's regex: a field runs from the line
+    opening `**Label...**` to the next line that opens a bold label or a
+    sub-heading. Written differently on purpose, so a change to the
+    generator's reader cannot carry this test's expectation along with it.
+    """
+    lines = body.split("\n")
+    for index, line in enumerate(lines):
+        if not any(line.startswith(f"**{head}") for head in heads):
+            continue
+        collected = [line.split("**", 2)[-1].lstrip()]
+        for later in lines[index + 1:]:
+            if later.startswith("**") and later.find("**", 2) != -1:
+                break
+            if later.startswith("#"):
+                break
+            collected.append(later)
+        return "\n".join(collected).strip()
+    return ""
 
 
 class TestTheReferralPackage(unittest.TestCase):
@@ -65,20 +114,16 @@ class TestTheReferralPackage(unittest.TestCase):
                         "listing it here would present our own defect as "
                         "someone else's question")
 
-    def test_every_listed_entry_states_the_QUESTION_itself(self):
-        """The thing the authority is being asked, present for every entry.
+    def test_every_entry_carries_each_field_exactly_ONCE(self):
+        """The structure: one labelled block per field, per entry.
 
-        Both `alternative-solution` entries shipped without it and nothing
-        noticed: AHJ-1 and AHJ-7 head their requirement "The requirement, and
-        why we do not meet it.", the extractor matched "The requirement."
-        exactly, and a truthiness check dropped the field — so the two entries
-        where the Code DOES decide and this tool does not meet it went to a
-        reader whose whole job is to judge that, with no statement of the
-        requirement (Fable, `212`).
-
-        Emptying the extractor's heading tuple altogether left all three of
-        the other tests green, which is why this one counts BLOCKS rather than
-        trusting the renderer.
+        Content is checked by comparing it with the register
+        (`test_no_field_is_TRUNCATED_against_the_register`), which subsumes
+        the length floors this used to carry. Those floors were the wrong
+        instrument twice over: one value of 40 characters failed AHJ-12, whose
+        attribution "Sol `122`." is complete and correct, and no floor could
+        see AHJ-7 publishing a plausible 246-character sentence in place of
+        1150 characters with a table in them.
         """
         if not OUTPUT.is_file():
             self.skipTest(f"{OUTPUT} is not present in this layout")
@@ -86,76 +131,28 @@ class TestTheReferralPackage(unittest.TestCase):
         wanted = [r["id"] for r in entries()
                   if r.get("status") in ("referral", "alternative-solution")]
         self.assertEqual(
-            len(wanted), text.count("**The question.** "),
-            f"{len(wanted)} entries need an authority, so the package must "
-            f"carry {len(wanted)} question blocks and carries "
-            f"{text.count('**The question.** ')}")
-        for ident in wanted:
-            with self.subTest(entry=ident):
-                start = text.index(f"### {ident} — ")
-                nxt = text.find("### ", start + 4)
-                section = text[start:nxt if nxt != -1 else len(text)]
-                m = [ln for ln in section.split("\n")
-                     if ln.startswith("**The question.** ")]
-                self.assertEqual(
-                    1, len(m),
-                    f"{ident}: exactly one question block")
-                self.assertGreater(
-                    len(m[0]), 80,
-                    f"{ident}: the question is a sentence, not a stub — "
-                    f"got {len(m[0])} characters")
-
-    def test_every_section_carries_all_five_fields_NON_EMPTY(self):
-        """Parsed out of the rendered document, field by field.
-
-        The earlier tests checked that a LABEL occurred somewhere in a
-        section, which an empty value satisfies: Sol (`213`) blanked AHJ-2's
-        conditional cell, regenerated, and all three tests passed on the empty
-        value. A placeholder is not an authority package, so each field is
-        read and required to carry content.
-        """
-        if not OUTPUT.is_file():
-            self.skipTest(f"{OUTPUT} is not present in this layout")
-        text = OUTPUT.read_text(encoding="utf-8")
-        wanted = [r["id"] for r in entries()
-                  if r.get("status") in ("referral", "alternative-solution")]
-        bullets = ("Editions", "Article", "Makes a run conditional")
-        # The minimum length is per FIELD, because the fields do different
-        # jobs. A question and an interim behaviour have to EXPLAIN something,
-        # so a 20-character value is a stub. An attribution does not: AHJ-12's
-        # is "Sol `122`." and that is the complete, correct answer. Holding
-        # every field to one threshold would have meant either accepting
-        # stubs everywhere or excluding AHJ-12 from the check, and an
-        # exclusion in a test filter is a confession.
-        paragraphs = (("The question", 40), ("Established by", 8),
-                      ("What the tool does meanwhile", 40))
+            len(wanted), len(re.findall(r"(?m)^### AHJ-\d+ — ", text)),
+            "one section per entry needing an authority")
         for ident in wanted:
             start = text.index(f"### {ident} — ")
-            nxt = text.find("### ", start + 4)
+            nxt = text.find("\n### ", start + 4)
             section = text[start:nxt if nxt != -1 else len(text)]
-            for label in bullets:
+            for label in ("Editions", "Article", "Makes a run conditional"):
+                with self.subTest(entry=ident, bullet=label):
+                    lines = [ln for ln in section.split("\n")
+                             if ln.startswith(f"- **{label}:**")]
+                    self.assertEqual(1, len(lines),
+                                     f"{ident}: one {label} bullet")
+                    value = lines[0].split("**", 2)[-1].lstrip(": ").strip()
+                    self.assertTrue(value, f"{ident}: {label} is EMPTY")
+                    self.assertNotIn("absent", value.lower(),
+                                     f"{ident}: {label} is a placeholder")
+            for label in ("The question", "Established by",
+                          "What the tool does meanwhile"):
                 with self.subTest(entry=ident, field=label):
-                    line = [ln for ln in section.split("\n")
-                            if ln.startswith(f"- **{label}:**")]
-                    self.assertEqual(1, len(line), f"{ident}: one {label}")
-                    value = line[0].split("**", 2)[-1].lstrip(": ").strip()
-                    self.assertTrue(
-                        value, f"{ident}: {label} is EMPTY — a blank cell "
-                        "tells an authority nothing and reads as if it had "
-                        "been considered")
-                    self.assertNotIn(
-                        "absent", value.lower(),
-                        f"{ident}: {label} rendered a placeholder")
-            for label, floor in paragraphs:
-                with self.subTest(entry=ident, field=label):
-                    line = [ln for ln in section.split("\n")
-                            if ln.startswith(f"**{label}.** ")]
-                    self.assertEqual(1, len(line), f"{ident}: one {label}")
-                    value = line[0][len(label) + 7:].strip()
-                    self.assertGreater(
-                        len(value), floor,
-                        f"{ident}: {label} is a stub ({len(value)} chars, "
-                        f"floor {floor}): {value!r}")
+                    self.assertEqual(
+                        1, section.count(f"**{label}.** "),
+                        f"{ident}: exactly one {label} block")
 
     def test_the_two_ALTERNATIVE_SOLUTIONS_are_named_explicitly(self):
         """AHJ-1 and AHJ-7 by id, not by count.
@@ -163,8 +160,7 @@ class TestTheReferralPackage(unittest.TestCase):
         Both shipped with no requirement text at all and the counts still
         matched, because eight referrals satisfied every aggregate assertion.
         The two entries where the Code DOES decide and this tool does not meet
-        it are the ones an authority most needs, so they are pinned by name
-        (Sol, `213`).
+        it are the ones an authority most needs (Sol, `213`).
         """
         if not OUTPUT.is_file():
             self.skipTest(f"{OUTPUT} is not present in this layout")
@@ -180,40 +176,79 @@ class TestTheReferralPackage(unittest.TestCase):
         for ident in alternatives:
             with self.subTest(entry=ident):
                 start = text.index(f"### {ident} — ")
-                nxt = text.find("### ", start + 4)
+                nxt = text.find("\n### ", start + 4)
                 section = text[start:nxt if nxt != -1 else len(text)]
-                question = [ln for ln in section.split("\n")
-                            if ln.startswith("**The question.** ")]
                 self.assertEqual(
-                    1, len(question),
+                    1, section.count("**The question.** "),
                     f"{ident} is an alternative solution: the requirement it "
-                    "does not meet IS the thing an authority is being asked "
-                    "to accept, and it must be in the package")
-                self.assertGreater(len(question[0]), 120,
-                                   f"{ident}: not a stub")
+                    "does not meet IS what an authority is being asked to "
+                    "accept, and it must be in the package")
 
-    def test_every_listed_entry_states_what_the_tool_does_meanwhile(self):
-        """A question with no stated interim behaviour tells a reader what is
-        being asked and not what hangs on the answer."""
+    def test_no_field_is_TRUNCATED_against_the_register(self):
+        """Every field, whole — read INDEPENDENTLY of the generator.
+
+        `_field` stopped at the first blank line, so AHJ-7's requirement
+        published 246 of its 1150 characters and ended on the colon
+        introducing the coefficient table it dropped: the authority was asked
+        to accept a non-conforming substitution and shown neither the three
+        wrong published rows nor the paragraph headed "Why an authority must
+        weigh in". AHJ-1 lost 842 characters and AHJ-10 357 (Sol, `216`;
+        Fable, `214`).
+
+        The first version of this test called the generator's own `_field` to
+        say what the package SHOULD contain, so restoring the blank-line stop
+        truncated both sides equally and all five tests stayed green. A check
+        that defines its expectation with the code under test cannot fail.
+
+        So the field is read here by a second, deliberately different
+        implementation — line-based rather than regex-based, same rule. Two
+        implementations of one simple rule is the point; if they disagree, one
+        of them is wrong.
+        """
         if not OUTPUT.is_file():
             self.skipTest(f"{OUTPUT} is not present in this layout")
-        text = OUTPUT.read_text(encoding="utf-8")
+        register = REGISTER.read_text(encoding="utf-8")
+        published = " ".join(OUTPUT.read_text(encoding="utf-8").split())
         wanted = [r["id"] for r in entries()
                   if r.get("status") in ("referral", "alternative-solution")]
+        labels = {"article": ("Article",),
+                  "question": ("The ambiguity", "The question",
+                               "The requirement"),
+                  "established": ("Established by",),
+                  "meanwhile": ("What the tool does meanwhile",
+                                "What the tool does now")}
         for ident in wanted:
-            with self.subTest(entry=ident):
-                start = text.index(f"### {ident} — ")
-                nxt = text.find("### ", start + 4)
-                section = text[start:nxt if nxt != -1 else len(text)]
-                self.assertIn(
-                    "What the tool does meanwhile.", section,
-                    f"{ident}: the package must say what happens until the "
-                    "question is answered")
-                self.assertIn(
-                    "Makes a run conditional:", section,
-                    f"{ident}: and whether it makes a run conditional, which "
-                    "is the register's own status-table column")
+            body = _register_body(register, ident)
+            for key, heads in labels.items():
+                with self.subTest(entry=ident, field=key):
+                    text = _read_field(body, heads)
+                    self.assertTrue(
+                        text, f"{ident}: the register states no {key}")
+                    normalised = " ".join(text.split())
+                    self.assertIn(
+                        normalised, published,
+                        f"{ident}.{key}: {len(normalised)} characters in the "
+                        "register are not all in the package. A field "
+                        "truncated in the middle still reads as prose, which "
+                        "is why this compares the TEXT and not its length")
 
+    def test_the_READER_itself_sees_more_than_one_paragraph(self):
+        """The control for the test above.
 
-if __name__ == "__main__":  # pragma: no cover
-    unittest.main()
+        If this file's own reader stopped at a blank line too, the comparison
+        would pass against a truncated package and prove nothing. AHJ-7's
+        requirement is the case: four material parts under one heading,
+        including the table of wrong coefficients.
+        """
+        register = REGISTER.read_text(encoding="utf-8")
+        text = _read_field(_register_body(register, "AHJ-7"),
+                           ("The requirement", "The question"))
+        self.assertGreater(
+            len(text), 900,
+            "AHJ-7's requirement is a multi-paragraph field with a table; a "
+            f"reader returning {len(text)} characters has stopped early, and "
+            "this file's other assertions are then vacuous")
+        self.assertIn(
+            "|", text,
+            "the coefficient table is part of the requirement — it names the "
+            "three wrong published rows an authority is asked about")

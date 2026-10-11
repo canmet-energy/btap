@@ -158,18 +158,39 @@ def _sections() -> dict:
     return out
 
 
-def _field(body: str, headings: tuple) -> str | None:
-    """The first matching heading's text, matched as a PREFIX.
+#: Where a field ENDS: the next field heading, a sub-heading, or the entry.
+#: Not the first blank line — see `_field`.
+_FIELD_END_RE = re.compile(r"(?m)^(?:\*\*[A-Z][^*\n]*\*\*|#{2,6} )")
 
-    The register's headings carry trailing clauses — "The requirement, and why
-    we do not meet it." — so an exact match drops the field and, with a
-    truthiness check downstream, drops it silently.
+
+def _field(body: str, headings: tuple, *, collapse: bool = False) -> str | None:
+    """One field's WHOLE text, from its heading to the next one.
+
+    Matched as a PREFIX, because the register's headings carry trailing
+    clauses — "The requirement, and why we do not meet it." — and an exact
+    match drops the field, which a truthiness check downstream then drops
+    silently.
+
+    Read to the next HEADING rather than to the first blank line. Stopping at
+    the blank line published 246 of AHJ-7's 1150 characters and ended on the
+    colon introducing the coefficient table it dropped — so the authority was
+    asked to accept a non-conforming substitution and shown neither the three
+    wrong published rows nor the paragraph headed "Why an authority must weigh
+    in" (Sol, `216`; Fable, `214` measured AHJ-1 losing 842 and AHJ-10 357).
+    A length floor cannot see that, because what survived was a plausible
+    sentence.
+
+    `collapse` folds the result onto one line, for the fields rendered as
+    bullets. The paragraph fields keep their blank lines, lists and tables.
     """
     for h in headings:
-        m = re.search(rf"\*\*{re.escape(h)}[^*]*\*\*\s*(.*?)(?=\n\n|\Z)",
-                      body, re.S)
-        if m:
-            return " ".join(m.group(1).split())
+        m = re.search(rf"\*\*{re.escape(h)}[^*]*\*\*[ \t]*", body)
+        if not m:
+            continue
+        rest = body[m.end():]
+        stop = _FIELD_END_RE.search(rest)
+        text = (rest[:stop.start()] if stop else rest).strip()
+        return " ".join(text.split()) if collapse else text
     return None
 
 
@@ -241,7 +262,8 @@ def render() -> str:
             # only ever hide a hole from the reader it matters to — and it
             # already did, for AHJ-1 and AHJ-7 (Sol, `213`).
             out += [f"- **Editions:** {eds}",
-                    f"- **Article:** {_field(sec['body'], FIELDS['article'])}",
+                    f"- **Article:** "
+                    f"{_field(sec['body'], FIELDS['article'], collapse=True)}",
                     f"- **Makes a run conditional:** {conditional[i]}",
                     ""]
             for label, key in (("The question", "question"),

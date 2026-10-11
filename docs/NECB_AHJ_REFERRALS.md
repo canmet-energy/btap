@@ -30,11 +30,28 @@ being asked.
 - **Article:** 8.4.4.13 and Table 8.4.4.13; 8.4.5.13 and its table; with 8.4.x.9.(5).
 - **Makes a run conditional:** yes, where the (2)(g) comparison is actually made
 
-**The question.** 8.4.x.7.(4) sends heat-pump thermal blocks to Article 13 for the reference system type. Article 13 controls the ASHP topology, its capacity and operating limits, the terminal/auxiliary capacity, and the terminal/auxiliary energy-type election in (2)(g). Clause 13.(2)(f) expressly incorporates Subsections 8.4.1, 8.4.2 and 8.4.4/8.4.5. Sol ruled on fetched text that there is NO wholesale supersession and the two operate concurrently — but whether an irreconcilable capacity-allocation case is governed by Article 13's specific prescriptions or by (5) still needs an authority where the two cannot both be satisfied.
+**The question.** 8.4.x.7.(4) sends heat-pump thermal blocks to Article 13
+for the reference system type. Article 13 controls the ASHP topology, its
+capacity and operating limits, the terminal/auxiliary capacity, and the
+terminal/auxiliary energy-type election in (2)(g). Clause 13.(2)(f) expressly
+incorporates Subsections 8.4.1, 8.4.2 and 8.4.4/8.4.5. Sol ruled on fetched
+text that there is NO wholesale supersession and the two operate
+concurrently — but whether an irreconcilable capacity-allocation case is
+governed by Article 13's specific prescriptions or by (5) still needs an
+authority where the two cannot both be satisfied.
 
-**Established by.** Sol `119`, `120`, narrowing his own earlier "expressly unresolved".
+**Established by.** Sol `119`, `120`, narrowing his own earlier "expressly
+unresolved".
 
-**What the tool does meanwhile.** The (5) disclosure runs on the heat-pump path as well as the structural one, and says the allocation is NOT VERIFIED. It does not claim the auxiliary election eliminates electric reference heating, which was a false statement it used to make. The (2)(g) election itself proceeds on delivered heat, audited, and falls back to the structural proxy with its own audit entry — so the choice is visible per run, and it SETS THE RUN CONDITIONAL wherever the (2)(g) comparison is actually made. It does not where there is no annual data to compare, which is a mode limitation rather than a question an authority can settle.
+**What the tool does meanwhile.** The (5) disclosure runs on the heat-pump
+path as well as the structural one, and says the allocation is NOT VERIFIED.
+It does not claim the auxiliary election eliminates electric reference
+heating, which was a false statement it used to make. The (2)(g) election
+itself proceeds on delivered heat, audited, and falls back to the structural
+proxy with its own audit entry — so the choice is visible per run, and it
+SETS THE RUN CONDITIONAL wherever the (2)(g) comparison is actually made. It
+does not where there is no annual data to compare, which is a mode limitation
+rather than a question an authority can settle.
 
 ### AHJ-3 — whether 8.4.4.9.(6)(d) permits more than one boiler
 
@@ -42,11 +59,17 @@ being asked.
 - **Article:** 8.4.4.9.(6)(d); 8.4.5.9.(6)(d).
 - **Makes a run conditional:** yes, where a hydronic plant carries both fuels
 
-**The question.** (6)(b) says "one single-stage boiler" and (6)(c) says "two boilers of equal capacity"; (6)(d) says only "a boiler that is fully modulating". Sol searched for a singular/plural interpretation rule and an Appendix A note and found neither, so whether additional boilers are forbidden above 352 kW is not established by the text.
+**The question.** (6)(b) says "one single-stage boiler" and (6)(c) says "two
+boilers of equal capacity"; (6)(d) says only "a boiler that is fully
+modulating". Sol searched for a singular/plural interpretation rule and an
+Appendix A note and found neither, so whether additional boilers are
+forbidden above 352 kW is not established by the text.
 
-**Established by.** Sol `119` section C, correcting his own earlier "conflict across every band" as too categorical.
+**Established by.** Sol `119` section C, correcting his own earlier
+"conflict across every band" as too categorical.
 
-**What the tool does meanwhile.** The (6) coverage gap states that the applicable subclause is not established at selection time and claims none.
+**What the tool does meanwhile.** The (6) coverage gap states that the
+applicable subclause is not established at selection time and claims none.
 
 ### AHJ-10 — how corner thermal blocks are grouped
 
@@ -54,11 +77,25 @@ being asked.
 - **Article:** Table 8.4.x.7.-B, Note (3).
 - **Makes a run conditional:** yes, on a corner block above four storeys
 
-**The question.** The note says only that blocks are "grouped together based on facade orientation". D-18 assigns a corner block by largest exterior-wall area, with a north/east/south/west tie-break. Neither the metric nor the tie-break is in the text.
+**The question.** The note says only that blocks are "grouped together based
+on facade orientation". D-18 assigns a corner block by largest exterior-wall
+area, with a north/east/south/west tie-break. Neither the metric nor the
+tie-break is in the text.
 
 **Established by.** Sol `122`, decision-log audit.
 
-**What the tool does meanwhile.** It applies D-18's rule — largest exterior-wall area with an N/E/S/W tie-break — and **the choice IS audited**, since the metadata handoff landed. `VAVReheat` records structured grouping evidence (per external zone: the exterior wall area in each compass bin, the elected facade, the tie-break rule) and `btap.codes` emits the entry citing Table 8.4.x.7.-B Note (3) with `ahj='AHJ-10'`.
+**What the tool does meanwhile.** It applies D-18's rule — largest exterior-wall
+area with an N/E/S/W tie-break — and **the choice IS audited**, since the
+metadata handoff landed. `VAVReheat` records structured grouping evidence
+(per external zone: the exterior wall area in each compass bin, the elected
+facade, the tie-break rule) and `btap.codes` emits the entry citing
+Table 8.4.x.7.-B Note (3) with `ahj='AHJ-10'`.
+
+This entry said for one round that the choice was NOT audited, which was true
+when Sol wrote `127` and false once the handoff shipped. Fable's `131` F4 caught
+the stale sentence. Before the handoff a reviewer could not see which facade a
+corner block was given; now the corner block's identity, its facade areas and
+the elected facade are all in the audit.
 
 ### AHJ-11 — heating in a two-pipe System 5 reference
 
@@ -66,11 +103,15 @@ being asked.
 - **Article:** 8.4.x.1.(5) with Table 8.4.x.7.-B, System 5.
 - **Makes a run conditional:** yes, where a heated block is assigned System 5
 
-**The question.** A genuine internal tension in the Code, not just in our reading: sentence (5) requires identical heating presence between proposed and reference, while the table's System 5 row says heating "None". D-39 retains heating when the proposed block is heated.
+**The question.** A genuine internal tension in the Code, not just in our
+reading: sentence (5) requires identical heating presence between proposed and
+reference, while the table's System 5 row says heating "None". D-39 retains
+heating when the proposed block is heated.
 
 **Established by.** Sol `122`, who called it a genuine internal tension.
 
-**What the tool does meanwhile.** It follows (5) and retains the heating, audited against both the sentence and the table row.
+**What the tool does meanwhile.** It follows (5) and retains the heating,
+audited against both the sentence and the table row.
 
 ### AHJ-12 — "where present" humidification
 
@@ -78,11 +119,15 @@ being asked.
 - **Article:** Table 8.4.x.7.-B, Note (1).
 - **Makes a run conditional:** yes, on a presence CHOICE — not where the topology settles it
 
-**The question.** D-55 reads "where present" as requiring reference humidification wherever the PROPOSED has it. Sol reads the note as fixing the energy source only for humidification already present in the REFERENCE — a materially different scope.
+**The question.** D-55 reads "where present" as requiring reference
+humidification wherever the PROPOSED has it. Sol reads the note as fixing the
+energy source only for humidification already present in the REFERENCE — a
+materially different scope.
 
 **Established by.** Sol `122`.
 
-**What the tool does meanwhile.** It applies D-55's reading, which adds reference humidification the other reading would not.
+**What the tool does meanwhile.** It applies D-55's reading, which adds
+reference humidification the other reading would not.
 
 ### AHJ-14 — which part-load class a reference boiler or furnace takes
 
@@ -90,11 +135,19 @@ being asked.
 - **Article:** 8.4.x.2/.3 and Tables 5.2.12.1.-N/-O.
 - **Makes a run conditional:** yes, where the row's own default elected the class
 
-**The question.** The Code supplies multiple part-load classes and the efficiency tables do not select one for the reference. D-89 assumes ordinary boilers non-condensing and furnaces atmospheric, from LEGACY PRECEDENT rather than from the text — and the pinned gem has already been caught shipping the non-condensing curve on every boiler row, so the precedent is weak evidence.
+**The question.** The Code supplies multiple part-load classes and the
+efficiency tables do not select one for the reference. D-89 assumes ordinary
+boilers non-condensing and furnaces atmospheric, from LEGACY PRECEDENT rather
+than from the text — and the pinned gem has already been caught shipping the
+non-condensing curve on every boiler row, so the precedent is weak evidence.
 
-**Established by.** Sol `122`, who added one caution: keep the purchased-energy case separate, because 8.4.x.6 explicitly specifies a MODULATING boiler, so there the Code does elect.
+**Established by.** Sol `122`, who added one caution: keep the
+purchased-energy case separate, because 8.4.x.6 explicitly specifies a
+MODULATING boiler, so there the Code does elect.
 
-**What the tool does meanwhile.** It applies D-89's classes, and the purchased route separately applies the modulating class the article names (D-89's own scope note).
+**What the tool does meanwhile.** It applies D-89's classes, and the purchased
+route separately applies the modulating class the article names (D-89's own
+scope note).
 
 ### AHJ-15 — whether (3) governs dispatch priority at all
 
@@ -102,11 +155,16 @@ being asked.
 - **Article:** 8.4.x.9.(3) with 8.4.2.10.(2).
 - **Makes a run conditional:** yes, on the System 3/4 branch where (5)(b) does not prescribe it
 
-**The question.** Sentence (3) specifies terminal and plant CAPACITY, not an annual dispatch sequence. D-91 selects air-terminal-first dispatch. Other viable sequences move reference energy by about **48 MWh per year**, which makes this the largest single unreferred assumption the audit found.
+**The question.** Sentence (3) specifies terminal and plant CAPACITY, not an
+annual dispatch sequence. D-91 selects air-terminal-first dispatch. Other
+viable sequences move reference energy by about **48 MWh per year**, which
+makes this the largest single unreferred assumption the audit found.
 
 **Established by.** Sol `122`. D-91 remains the interim project ruling.
 
-**What the tool does meanwhile.** It dispatches air-terminal-first per D-91 and audits it. The magnitude is why this entry exists rather than sitting in the decision log alone.
+**What the tool does meanwhile.** It dispatches air-terminal-first per D-91
+and audits it. The magnitude is why this entry exists rather than sitting in
+the decision log alone.
 
 ### AHJ-16 — N:1 system correspondence for hydronic pumps
 
@@ -114,11 +172,63 @@ being asked.
 - **Article:** 8.4.x.14 and its Appendix A note.
 - **Makes a run conditional:** yes, on an in-scope transfer decline
 
-**The question.** The note explains multiple pumps WITHIN one proposed system. It does not address several proposed hydronic systems corresponding to one grouped reference system, nor the case where no unique correspondence exists. D-93 and D-97 decline in those cases and retain a simulator default.
+**The question.** The note explains multiple pumps WITHIN one proposed
+system. It does not address several proposed hydronic systems corresponding to
+one grouped reference system, nor the case where no unique correspondence
+exists. D-93 and D-97 decline in those cases and retain a simulator default.
 
 **Established by.** Sol `122`, as one combined referral for both decisions.
 
-**What the tool does meanwhile.** It DECLINES rather than guessing, emitting an unresolved warning per affected loop and leaving the simulator default in place. That is NOT a conservative bound, which this entry previously claimed: D-97's runtime warning and Sol's `126` both say the retained default may bias the reference in EITHER direction. Declining to guess is defensible; calling the result conservative was not.
+**What the tool does meanwhile.** It DECLINES rather than guessing, emitting an
+unresolved warning per affected loop and leaving the simulator default in
+place. That is NOT a conservative bound, which this entry previously
+claimed: D-97's runtime warning and Sol's `126` both say the retained
+default may bias the reference in EITHER direction. Declining to guess is
+defensible; calling the result conservative was not.
+
+
+**Guard 7 is MET since 2026-10-09, and how it was unmet is a finding worth
+keeping.** Sol's `127` requires one full-year frozen artifact per
+approval-required id. AHJ-16 fires on exactly one corpus model, sample 18
+(`18-vav-hw-subset-reheat`), and only in the SIZING tier, which reaches no
+determination. Driven through a real annual run on 2026-10-08 it reached one —
+`conditional`, with AHJ-16 on the Hot Water Loop — so the wiring was sound.
+
+That run was still refused as a baseline, because its REFERENCE building did
+not hold setpoint: 932.25 unmet heating hours and 542.25 unmet cooling against
+the proposed building's 0.0 and 4.0, where Article 8.4.1.2.(3) allows 100 h. The
+non-compliant verdict was the reference failing, not the proposed building. Sol
+refused exactly this standard of evidence for AHJ-11 in `130` — a reference
+that completes without conditioning is not a comparison, and "EnergyPlus
+exited zero is not the Code's test". Freezing it would have recorded a broken
+reference as the expected baseline.
+
+The cause was not sample 18. It was the selector: one "single-zone" System 3
+air loop served all five retained thermal blocks, following one elected control
+zone while the other four drifted. **D-101** made the thermal block the
+selection unit, and the corrected full-year run was measured twice with every
+reported figure agreeing:
+
+| | before D-101 | after |
+|---|---:|---:|
+| reference unmet heating | 932.25 h | **0.0 h** |
+| reference unmet cooling | 542.25 h | **4.75 h** |
+| proposed unmet cooling | 4.0 h | 4.0 h |
+
+Every block is now 0.0 h heating and 0.5–1.75 h cooling, so the comparison
+basis holds setpoint. The run still reports NOT COMPLIANT and that is now a
+statement about the PROPOSED building — 167 150 kWh against the reference's
+148 919 kWh, 112.2% of target — which is what a performance path is for.
+(D-101 recorded 148 858 kWh and 112.3% when this entry was written; D-102
+corrected the reference DX part-load curve's axis, which moved the reference
+up. The verdict is unchanged.)
+
+The witness is the frozen scenario
+`determination-03-18-vav-hw-subset-reheat-annual` (parity lane, full year, not
+`--quick`, since Article 8.4.1.2 makes a quick run a non-determination). Its
+assertions pin the determination, `ahj_ids` of AHJ-1/AHJ-14/AHJ-16, the
+reference's unmet hours per block, and that the verdict is the proposed
+building's.
 
 ---
 
@@ -130,11 +240,43 @@ being asked.
 - **Article:** 8.4.4.9.(5) with 8.4.4.9.(6); 8.4.5.9.(5) with 8.4.5.9.(6).
 - **Makes a run conditional:** yes — `compliance_determination: conditional`
 
-**The question.** Sentence (5)(a) requires the reference heating capacities to match the ratio of the proposed building's capacity allocation per energy type, and (5)(b) requires the proposed operating schedule and priority of use. Sentence (6) independently bands the reference hydronic plant's boiler count: (6)(b) "one single-stage boiler" at or below 176 kW, (6)(c) "two boilers of equal capacity" or one two-staged boiler to 352 kW, (6)(d) "a boiler that is fully modulating" above. Every simulation boiler object carries ONE fixed fuel. The acceptable-solution text does not say how a two-fuel ratio is to be represented inside those cardinality constraints, and Sol confirmed on fetched normative text that (6) nowhere says it replaces (5), nor (5) that it overrides (6).
+**The question.** Sentence (5)(a) requires the reference heating capacities
+to match the ratio of the proposed building's capacity allocation per energy
+type, and (5)(b) requires the proposed operating schedule and priority of
+use. Sentence (6) independently bands the reference hydronic plant's boiler
+count: (6)(b) "one single-stage boiler" at or below 176 kW, (6)(c) "two
+boilers of equal capacity" or one two-staged boiler to 352 kW, (6)(d) "a
+boiler that is fully modulating" above. Every simulation boiler object
+carries ONE fixed fuel. The acceptable-solution text does not say how a
+two-fuel ratio is to be represented inside those cardinality constraints, and
+Sol confirmed on fetched normative text that (6) nowhere says it replaces (5),
+nor (5) that it overrides (6).
 
-**Established by.** Sol `110`, `112`, `119`, `120`; Fable `117`, `118`. Sol fetched both editions through the codes MCP; Fable reproduced the implementation's behaviour with code.
+**Established by.** Sol `110`, `112`, `119`, `120`; Fable `117`, `118`. Sol
+fetched both editions through the codes MCP; Fable reproduced the
+implementation's behaviour with code.
 
-**What the tool does meanwhile.** It elects ONE energy type for the reference SELECTION and computes no capacity ratio, so it satisfies neither clause of (5). What the reference's FINAL equipment carries is a separate question this tool does not establish — the selected variant may REPLACE the proposed plant with a newly built one of the elected variant, tear it down and not rebuild it where the variant needs no boiler, or stage it by role blind to fuel. It says so: an UNRESOLVED audit warning per serving system, `8.4.x.9.(5)` held at `not_implemented`, and the run's determination set to `conditional` naming this question.
+**What the tool does meanwhile.** It elects ONE energy type for the reference
+SELECTION and computes no capacity ratio, so it satisfies neither clause of
+(5). What the reference's FINAL equipment carries is a separate question this
+tool does not establish — the selected variant may REPLACE the proposed plant
+with a newly built one of the elected variant, tear it down and not rebuild it
+where the variant needs no boiler, or stage it by role blind to fuel. It says
+so: an UNRESOLVED audit warning per serving system, `8.4.x.9.(5)` held at
+`not_implemented`, and the run's determination set to `conditional` naming
+this question.
+
+**`adopted` was removed from this list on 2026-10-09**, and the removal is a
+finding rather than an edit. An AHJ-1-cited choice is a block whose heating was
+collapsed to ONE energy type, and such a block is always an `action == "build"`
+assignment: `_finalize` returns before the election and this disclosure for a
+`copy_proposed` block, so a retained block raises no AHJ-1 question at all. The
+only measured adoption was an all-`copy_proposed` residential service with
+ZERO AHJ-1 records, which Sol's `143` refused as evidence for this entry, and
+after D-101's plant-ownership split a built block cannot reach the proposed
+plant either. No conformance check exists that would let one. So `copy_proposed`
+CAN retain a proposed plant — that statement stands on its own and is tested —
+but it is not an outcome of the question this entry asks.
 
 ### AHJ-7 — three published chiller EIR_FT rows are arithmetically wrong
 
@@ -142,11 +284,63 @@ being asked.
 - **Article:** Table 8.4.5.5.-C (NECB 2020); Table 8.4.6.5.-C (NECB 2025).
 - **Makes a run conditional:** not yet — see the entry
 
-**The question.** THE DEFECT IS IN THE PUBLISHED CODE, not in our extraction. Three electric-chiller EIR_FT rows fail the AHRI 550/590 rating-point normalization, which requires EIR_FT = 1.0 at 44 °F chilled water with 85 °F condenser water or 95 °F condenser air:
+**The question.** THE DEFECT IS IN THE PUBLISHED
+CODE, not in our extraction.
+Three electric-chiller EIR_FT rows fail the AHRI 550/590 rating-point
+normalization, which requires EIR_FT = 1.0 at 44 °F chilled water with 85 °F
+condenser water or 95 °F condenser air:
 
-**Established by.** The codes service's own errata (`services/codes/docs/errata-necb-chiller-eir-ft.md`), surfaced in the `known_issue` of the archived payload at `necb2020/provenance/vintage_match/8.4.5.5.-C.result.json`. Recovered into this register on 2026-10-07 after phylroy recalled that table errors had been found in an earlier session; they were recorded in provenance and in the vintage-match verification, but not as an AHJ-weighable question.
+| row | coefficient | printed | evaluates to | suspected correct |
+| --- | --- | --- | --- | --- |
+| Water-cooled Scroll | d | -0.0128136 | 0.018 | -0.00128136 |
+| Water-cooled Reciprocating | b | -0.0882156 | -2.49 | -0.00882156 |
+| Air-cooled Screw | a | 0.013545636 | 0.88 | 0.13545636 (approx; fit 1.005) |
 
-**What the tool does meanwhile.** It ships the CORRECTED values for two of the three rows, and the manifest provenance records that it does so and why: "the water-cooled Scroll and Reciprocating rows agree only after the codes service's own published errata for those two rows ... so the misprint is the printed source's and the shipped curve already carries the corrected value". That is a documented deviation from the printed Code, which is the defensible choice and still a deviation.
+All three look like a single misplaced decimal place. A rating point of 0.018
+means a chiller drawing under two per cent of its rated power, and -2.49 is
+not physically interpretable at all. The codes MCP flags this itself as a
+`known_issue`, says the rows are "transcribed faithfully from the printed
+NECB", states that "the defect is in the source publication, not this
+database", that it is identical in both editions, and advises: "Do not use the
+Water-cooled Scroll/Reciprocating or Air-cooled Screw EIR_FT rows without
+correction; verify each polynomial at its rating point before use."
+
+**Established by.** The codes service's own errata
+(`services/codes/docs/errata-necb-chiller-eir-ft.md`), surfaced in the
+`known_issue` of the archived payload at
+`necb2020/provenance/vintage_match/8.4.5.5.-C.result.json`. Recovered into
+this register on 2026-10-07 after phylroy recalled that table errors had been
+found in an earlier session; they were recorded in provenance and in the
+vintage-match verification, but not as an AHJ-weighable question.
+
+**What the tool does meanwhile.** It ships the CORRECTED values for two of the
+three rows, and the manifest provenance records that it does so and why: "the
+water-cooled Scroll and Reciprocating rows agree only after the codes
+service's own published errata for those two rows ... so the misprint is the
+printed source's and the shipped curve already carries the corrected value".
+That is a documented deviation from the printed Code, which is the defensible
+choice and still a deviation.
+
+**VERIFIED 2026-10-07 by evaluating the shipped surfaces, not by reading the
+provenance.** Every water-cooled EIR_FT curve hits the AHRI rating point
+(44 °F leaving chilled water, 85 °F entering condenser water), in both
+editions:
+
+```
+  WaterCooled_Reciprocating_EIRFT   0.9999    printed coefficient gives -2.49
+  WaterCooled_Scroll_EIRFT          0.9983    printed coefficient gives  0.018
+  WaterCooled_Screw_EIRFT           0.9964
+  WaterCooled_Centrifugal_EIRFT     0.9953
+```
+
+So the corrections are genuinely in the product data, and the two rows the
+erratum names would be unusable without them.
+
+**The Air-cooled Screw row does not reach us, because no air-cooled chiller
+curve is shipped at all.** That answers the erratum for this entry; the
+absence itself is a separate `tool-gap` and is now **AHJ-17**, because one
+entry cannot carry a referral and a tool gap under one status without making
+the taxonomy untruthful (Sol, clearance review of be2118d).
 
 ---
 
