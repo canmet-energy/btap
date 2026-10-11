@@ -209,6 +209,14 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                     worst, TOLERANCE_PERCENT[kind],
                     f"{kind}: {worst:.2f}% from the Article at PLR {at:.3f}, "
                     f"as the coil's own curve evaluates it")
+                # And the figure this measures is PUBLISHED, so require every
+                # surface to publish THIS one. Fable `202`: `worst` and `at`
+                # were computed here and thrown away, so 12.663% -> 12.645%
+                # and 0.181558 -> 0.1816 passed on D-102 and on both shipped
+                # notes. A tolerance check proves the curve is close enough;
+                # it says nothing about whether the documents quote the number
+                # that was measured.
+                self.assert_published(kind, worst, at)
 
     def test_the_LOWER_seam_is_the_root_too(self):
         """The floor end of the declared gap, pinned like the ceiling end.
@@ -446,6 +454,69 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                         f"set, digit for digit:\n  wanted: {wanted}\n"
                         f"  note:   {' '.join(notes.split())[:200]}")
 
+    def as_applied_maximum(self, kind, intervals):
+        """The worst as-applied error over the representable set, and where."""
+        lo, hi = REPRESENTABLE[kind]
+        curve = self.coil_plf_curve(kind)
+        worst, at = 0.0, None
+        for i in range(intervals + 1):
+            plr = lo + (hi - lo) * i / intervals
+            want = exact_plf(kind, plr)
+            rel = abs(curve.evaluate(plr) - want) / want * 100.0
+            if rel > worst:
+                worst, at = rel, plr
+        return worst, at
+
+    def assert_published(self, kind, worst, at):
+        """The as-applied maximum and its location, on all FOUR surfaces.
+
+        D-102's front matter, D-102's body, and BOTH editions' shipped curve
+        notes each state this figure. None of them was tied to the
+        measurement, so each could go stale alone — which is this decision's
+        whole history. Checked per surface, never over their union.
+        """
+        import json
+        import pathlib as _p
+
+        from btap.codes.necb import _data_root
+
+        # Recomputed at a density that RESOLVES both, not the caller's
+        # 200-interval scan: the maximum VALUE is insensitive (2.698847% at
+        # 200 against 2.699012% converged) but its LOCATION is not —
+        # 0.182270 at 200, 0.181621 at 2 000, 0.181556 at 20 000. So the value
+        # is published to three decimals and the location to four, each being
+        # the precision it is stable to. Publishing the location to six was
+        # over-precise: that digit still moves at 200 000 intervals.
+        worst, at = self.as_applied_maximum(kind, 20_000)
+        shown, where = f"{worst:.3f}%", f"{at:.4f}"
+        source = (_p.Path(__file__).resolve().parents[3]
+                  / "docs" / "decisions" / "D-102.md")
+        if not source.is_file():
+            self.skipTest(f"{source} is not present in this layout")
+        text = source.read_text(encoding="utf-8")
+        front, _, body = text.partition("+++\n\n")
+        surfaces = [("D-102 front matter", front), ("D-102 body", body)]
+        name = {"heating": "DXHEAT-REF-PLFFPLR",
+                "cooling": "DXCOOL-REF-COOLPLFFPLR"}[kind]
+        for edition in ("necb2020", "necb2025"):
+            data = json.loads((_data_root() / edition / "efficiencies.json")
+                              .read_text(encoding="utf-8"))
+            row = next(c for c in data["curves"]
+                       if isinstance(c, dict) and c.get("name") == name)
+            surfaces.append((f"{edition} curve note", row.get("notes") or ""))
+        for label, chunk in surfaces:
+            self.assertIn(
+                shown, chunk,
+                f"{kind}: the worst as-applied error over the representable "
+                f"set is {worst:.6f}%, so {label} must publish {shown}")
+        # The LOCATION is published for heating only; cooling's is its root,
+        # which the seam tests already pin.
+        if kind == "heating":
+            self.assertIn(
+                f"at PLR {where}", body,
+                f"heating: the maximum is at PLR {where} and the body must "
+                "say so")
+
     def test_the_PUBLISHED_refit_is_COMPUTED_from_the_root_constants(self):
         """D-102's refit figures, recomputed and matched — not enumerated.
 
@@ -538,7 +609,13 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
         """
         import pathlib
 
-        RETIRED_PAIRS = (("1.877", "4.853"), ("1.235", "4.938"))
+        # Every pair this decision has retired. Fable has now caught this
+        # list un-extended TWICE — the pair retired in the commit that added
+        # the guard, and then the pair retired in the commit that extended it
+        # — so the computed guard above is the real defence and this is the
+        # backstop for a figure stated as a pair in prose.
+        RETIRED_PAIRS = (("1.877", "4.853"), ("1.235", "4.938"),
+                         ("1.236", "5.025"))
         MARKERS = ("earlier version", "superseded", "no longer", "stale",
                    "was wrong", "retired")
         source = (pathlib.Path(__file__).resolve().parents[3]

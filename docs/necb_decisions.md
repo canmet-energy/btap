@@ -7382,7 +7382,11 @@ heating   PLR [0.16604619095565545, 0.8149996906315529] union {1.0}
 cooling   PLR [0.17442759262761687, 1.0]
 
 WORST AS-APPLIED ERROR over that set, against the EXACT Article target
-heating   2.699%    at PLR 0.181558   between the seams, not below them
+heating   2.699%    at PLR 0.1816     between the seams, not below them
+                                     four decimals, which is where the location is
+                                     stable: 0.182270 at 200 intervals, 0.181621 at
+                                     2 000, 0.181556 at 20 000, and the sixth decimal
+                                     still moving at 200 000
 cooling  12.663%    at its lower root
 
 UNREPRESENTABLE GAP, heating   the OPEN interval (0.8149996906315529, 1.0)
@@ -7423,17 +7427,21 @@ evidence still contained the slivers the same commit had just rejected
 (Sol, `199`). The refit figures move with the endpoint, which is the point:
 
 **Naming the interval rather than the set matters, because the fit does not
-serve the isolated point.** Evaluated at PLR 1.0 the refit polynomial returns
-1.053994 — it is extrapolating past the domain it was fitted on. Which error
-that represents depends on which of this decision's two measurements is
-meant, and both are legitimate:
+serve the isolated point.** At PLR 1.0 the refit polynomial is extrapolating
+past the domain it was fitted on. Which error that represents depends on which
+of this decision's two measurements is meant, and both are legitimate: the raw
+one is large, and the as-applied one is zero because the clamp lands exactly
+on a target that is itself exactly 1.0.
 
-```text
-raw polynomial vs the Article at PLR 1.0     5.399%   the fit is poor there
-as applied, after the engine's 1.0 clamp     0.000%   the clamp lands exactly
-                                                      on the target, which is
-                                                      itself exactly 1.0
-```
+**Those numbers are in the account table below and NOWHERE ELSE here.** They
+used to be quoted in this paragraph too, from the rounded-floor fit, so it
+published 1.053994 and 5.399% as CURRENT while the table thirty lines down
+published 5.402193% and retired 5.399395% — the same value current and retired
+at once (Sol `201`, Fable `202`, independently). A duplicated figure is one
+that can go stale on a copy, which is what five rounds of correcting this
+decision have been. Quoting it once removes the possibility instead of
+guarding it; a second body-wide check would have been satisfied by the correct
+table and repeated the union mistake.
 
 So a single cubic fitted over the primary interval cannot be said to serve the
 representable SET; it serves the interval, and the isolated point is carried by
@@ -7461,7 +7469,7 @@ rounded 0.1661 and is retired.
 
 Both are exact at full load once the ceiling applies, so the full-load point
 does not distinguish them; their maxima, both at the LOWER endpoint, do. Sol
-reproduced every figure in that table independently (`195`).
+reproduced the ROUNDED-FLOOR account in `195` and these exact-root figures in `199`. They are two different calculations and are credited separately, because the table was wholly recomputed after `195` (Fable, `202`).
 
 Sol's independent reproduction agrees to six decimals at 20 000 and 100 000
 INTERVALS. An earlier version of this decision published **1.235% / 4.938%** as a
