@@ -39,14 +39,15 @@ ARTICLE_EIR_FPLR = {
 #: EnergyPlus constrains its cycling PLF carrier to [0.7, 1.0] and samples the
 #: field over 0.0-1.0 (`DXCoils.cc`, 25.2.0). Neither bound is in the Code.
 CARRIER_LO, CARRIER_HI = 0.7, 1.0
-#: The part-load ratio the defect witness is quoted at. The floor that
-#: shipped is NOT a free constant: the defect was putting the CARRIER's
-#: own floor on the input axis, so it IS `CARRIER_LO` and is bound to it.
-#: Sol (`205`, `207`) moved a free version to 0.75, updated the block to
-#: what it then computed, and every test passed while the witness no
-#: longer described the shipped defect.
+#: The part-load ratio the defect witness is quoted at. There is deliberately
+#: no constant for the floor that shipped: the defect was putting the
+#: CARRIER's own floor on the input axis, so the witness reads `CARRIER_LO`
+#: directly. An alias for it stood here and expressed that invariant without
+#: TESTING it — Sol (`209`) changed the alias to 0.75 and the rendered witness
+#: to what it then computed, and every test passed while D-102's prose still
+#: said the shipped floor was the carrier's. A constant that can be edited
+#: apart from the thing it mirrors will be.
 DEFECT_PLR = 0.25
-OLD_INPUT_FLOOR = CARRIER_LO
 #: Slack for comparisons AGAINST a carrier edge. The seam root equals the
 #: ceiling by construction, so its evaluation differs between platforms by
 #: an ULP; CI saw 1.0000000000000002 where this host saw 1.0.
@@ -217,13 +218,6 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                     worst, TOLERANCE_PERCENT[kind],
                     f"{kind}: {worst:.2f}% from the Article at PLR {at:.3f}, "
                     f"as the coil's own curve evaluates it")
-                # And the figure this measures is PUBLISHED, so require every
-                # surface to publish THIS one. Fable `202`: `worst` and `at`
-                # were computed here and thrown away, so 12.663% -> 12.645%
-                # and 0.181558 -> 0.1816 passed on D-102 and on both shipped
-                # notes. A tolerance check proves the curve is close enough;
-                # it says nothing about whether the documents quote the number
-                # that was measured.
 
     def test_the_LOWER_seam_is_the_root_too(self):
         """The floor end of the declared gap, pinned like the ceiling end.
@@ -452,7 +446,19 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
         # passed: a count that keys on `representable set` being the first
         # characters cannot see a stale block that starts differently, which
         # is the one a careless edit would leave.
-        fenced = re.findall(r"```text\n(.*?)```", text, re.S)
+        # Count OPENING FENCES as a renderer sees them, not by one
+        # exact spelling. Sol (`209`) added a second block opening
+        # "```text " with a trailing space — CommonMark trims
+        # info-string whitespace, so a reader saw two evidence blocks
+        # while a literal-match counter saw one.
+        opens = re.findall(
+            r"(?m)^ {0,3}(?:`{3,}|~{3,})[ \t]*text[ \t]*$", text)
+        self.assertEqual(
+            1, len(opens),
+            f"D-102 must carry EXACTLY ONE fenced `text` block and "
+            f"carries {len(opens)}; a second is a copy that can go "
+            "stale, whatever whitespace its fence uses")
+        fenced = re.findall(r"```text[ \t]*\n(.*?)```", text, re.S)
         self.assertEqual(
             1, len(fenced),
             f"D-102 must carry EXACTLY ONE fenced `text` block and carries "
@@ -488,7 +494,7 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
         cool_worst, _ = self.measured_maximum("cooling")
         target = exact_plf("heating", DEFECT_PLR)
         delivered = max(CARRIER_LO,
-                        min(CARRIER_HI, _raw_poly("heating", OLD_INPUT_FLOOR)))
+                        min(CARRIER_HI, _raw_poly("heating", CARRIER_LO)))
         as_applied = abs(delivered - target) / target * 100
         raw = abs(_raw_poly("heating", DEFECT_PLR) - target) / target * 100
         self.assertAlmostEqual(CARRIER_LO, exact_plf("heating", heat_lo), places=9)
@@ -500,10 +506,19 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
             f"                    cooling  [{cool_lo}, {cool_hi}]\n"
             f"worst as applied    heating  {heat_worst:.3f}%    "
             f"cooling  {cool_worst:.3f}%\n"
-            f"defect corrected    at PLR {DEFECT_PLR} the curve delivered "
-            f"{delivered:.4f} against an Article\n"
-            f"                    target of {target:.4f} \u2014 "
-            f"{as_applied:.1f}% as applied, {raw:.1f}% raw"
+            # The floor is RENDERED from CARRIER_LO, so re-basing the
+            # witness on some other floor produces a block that states one
+            # floor and the delivery of another. Sol (`209`) moved the
+            # witness to 0.75 in the test AND the document together and it
+            # passed, because nothing tied the two. The only self-consistent
+            # mutation now is to change CARRIER_LO itself — which
+            # `test_the_product_writes_all_four_bounds` kills against the
+            # shipped output bound.
+            f"defect corrected    at PLR {DEFECT_PLR}, an input floor at "
+            f"{CARRIER_LO} delivered {delivered:.4f}\n"
+            f"                    against an Article target of "
+            f"{target:.4f} \u2014 {as_applied:.1f}% as applied,\n"
+            f"                    {raw:.1f}% raw"
         )
         def flat(s):
             return "\n".join(" ".join(x.split())
@@ -569,8 +584,12 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                     # digit changes undetected — but a stale SECOND statement
                     # appended beside the pinned one would pass, which is the
                     # duplication shape this decision was corrected for twice.
+                    # Semantic count. Sol (`209`) wrote the WRONG primary
+                    # declaration as "PLR  [" with two spaces and appended the
+                    # correct one: a reader saw two contradictory statements,
+                    # an exact-space counter saw one.
                     self.assertEqual(
-                        1, notes.count("PLR ["),
+                        1, len(re.findall(r"\bPLR\s*\[", notes)),
                         f"{edition}/{kind}: one region statement, not two — a "
                         "copy is a place to drift")
 

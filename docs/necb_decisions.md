@@ -7166,16 +7166,18 @@ the thing Sol required to be measured rather than assumed:
     per block, heating             -         0.0 h   x5
     per block, cooling             -         0.5 - 1.75 h
 
-The run still reports NOT COMPLIANT, and that is now a statement about the
-PROPOSED BUILDING: both models are clean runs within the unmet-hour limits, and
-the proposed building uses 167 150 kWh against the reference's 148 858 kWh —
-112.3% of target. **Those are D-101's own measurements, taken before D-102.**
-D-102 corrected the reference DX part-load curve's axis, which moved the
-reference up: the frozen witness now reads 167 150 against 148 919 kWh, 112.2%
-of target. The verdict and the reasoning are unchanged — a present-tense
-account of a frozen scenario may not stay false while the scenario moves
-(Sol, `207`). Before, the same verdict was produced by a reference that
-could not hold setpoint in four of five blocks. Two consecutive runs agree
+The run reports NOT COMPLIANT, and that is a statement about the PROPOSED
+BUILDING: both models are clean runs within the unmet-hour limits.
+
+**At D-101's freeze the run reported** 167 150 kWh against the reference's
+148 858 kWh — 112.3% of target. D-102 later corrected the reference DX
+part-load curve's axis, which moved the reference up, and **the frozen witness
+now reads** 167 150 against 148 919 kWh, 112.2% of target. The verdict and the
+reasoning are unchanged. The old account is in the past tense because a
+present-tense statement about a frozen scenario may not stay false while the
+scenario moves, and following a false present tense with its correction is not
+the same as replacing it (Sol, `207` and `209`). Before, the same verdict was produced by a reference that
+could not hold setpoint in four of five blocks. D-101's two consecutive runs agreed
 exactly on every reported figure, so the artifact is coherent and repeatable
 and guard 7 for AHJ-16 can be met from it.
 
@@ -7309,8 +7311,9 @@ than waiting to be noticed.
 representable set   heating  [0.16604619095565545, 0.8149996906315529] union {1.0}
                     cooling  [0.17442759262761687, 1.0]
 worst as applied    heating  2.699%    cooling  12.663%
-defect corrected    at PLR 0.25 the curve delivered 0.9877 against an Article
-                    target of 0.8029 — 23.0% as applied, 1.8% raw
+defect corrected    at PLR 0.25, an input floor at 0.7 delivered 0.9877
+                    against an Article target of 0.8029 — 23.0% as applied,
+                    1.8% raw
 ```
 
 The set's endpoints are the ROOTS of `exact_plf(PLR) = 0.7` and
@@ -7345,8 +7348,9 @@ limit.
 **At the floor.** As PLR approaches zero the Article's EIR cubic keeps its
 non-zero intercept, so the exact target tends to zero while a cycling PLF
 cannot go below the carrier's floor. Under the lower root the reference
-therefore delivers the floor where the Code implies less — at a tenth of
-rated load, roughly 0.56 against the carrier's 0.70. That one load is worth
+therefore delivers the floor where the Code implies less — FOR HEATING, at a
+tenth of rated load, roughly 0.56 against the carrier's 0.70; cooling's exact
+target there is lower still, about 0.46. That one load is worth
 stating because it is the comparison that refused the 0.25 floor: a clamp
 there delivers further from the Article than the carrier's own limit does.
 
