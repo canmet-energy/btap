@@ -39,6 +39,10 @@ ARTICLE_EIR_FPLR = {
 #: EnergyPlus constrains its cycling PLF carrier to [0.7, 1.0] and samples the
 #: field over 0.0-1.0 (`DXCoils.cc`, 25.2.0). Neither bound is in the Code.
 CARRIER_LO, CARRIER_HI = 0.7, 1.0
+#: The part-load ratio the defect witness is quoted at, and the input-axis
+#: floor that shipped before this decision. Together they reproduce the
+#: headline: at PLR 0.25 an input floor at 0.7 clamps the evaluation to 0.7.
+DEFECT_PLR, OLD_INPUT_FLOOR = 0.25, 0.7
 #: Slack for comparisons AGAINST a carrier edge. The seam root equals the
 #: ceiling by construction, so its evaluation differs between platforms by
 #: an ULP; CI saw 1.0000000000000002 where this host saw 1.0.
@@ -216,7 +220,6 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                 # notes. A tolerance check proves the curve is close enough;
                 # it says nothing about whether the documents quote the number
                 # that was measured.
-                self.assert_published(kind, worst, at)
 
     def test_the_LOWER_seam_is_the_root_too(self):
         """The floor end of the declared gap, pinned like the ceiling end.
@@ -411,267 +414,90 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                 self.assertEqual(rows[0], rows[1],
                                  f"{name} differs between editions")
 
-    def test_the_PUBLISHED_region_matches_the_one_the_seams_define(self):
-        """The shipped note must state the set the arithmetic actually has.
+    def test_the_EVIDENCE_BLOCK_is_computed(self):
+        """D-102's one evidence block, every field recomputed and matched.
 
-        Two earlier versions of this guard were too weak to be worth having.
-        The first compared to `places=2`, so Sol moved both notes' endpoint
-        from `0.815` to `0.819` and all 8 tests stayed green. Rounding is
-        exactly what must not be tolerated here, because the endpoint IS the
-        published digit string. So the expected text is BUILT from the same
-        constants the seam tests use and matched verbatim.
+        This replaces four guards that each chased the figures the previous
+        review round had moved. Fable's `204` census ended that approach: 70
+        distinct figures in the body, 5 tied to a computation, ~55 tied to
+        nothing — including the headline the decision exists for. Guard nine
+        would have pinned six more and left 59.
+
+        So the document now states its measured figures ONCE, in one fenced
+        block on one surface, and this derives every field of it from the
+        shipped curve and the Article cubic. A broad `assertIn` over the body
+        cannot do this: the same figure appearing elsewhere satisfies it,
+        which is how `12.663%` reverting in the governing table stayed green
+        (Sol, `203`).
         """
-        import json
+        import pathlib as _p
 
-        from btap.codes.necb import _data_root
+        source = (_p.Path(__file__).resolve().parents[3]
+                  / "docs" / "decisions" / "D-102.md")
+        if not source.is_file():
+            self.skipTest(f"{source} is not present in this layout")
+        block = re.search(r"```text\n(representable set.*?)```",
+                          source.read_text(encoding="utf-8"), re.S)
+        self.assertIsNotNone(
+            block, "D-102 must carry its evidence block, starting "
+                   "'representable set'")
+        lines = [" ".join(line.split())
+                 for line in block.group(1).strip().split("\n")]
 
-        NAMES = {"heating": "DXHEAT-REF-PLFFPLR",
-                 "cooling": "DXCOOL-REF-COOLPLFFPLR"}
-        for edition in ("necb2020", "necb2025"):
-            data = json.loads((_data_root() / edition / "efficiencies.json")
-                              .read_text(encoding="utf-8"))
-            for kind, name in sorted(NAMES.items()):
-                with self.subTest(edition=edition, kind=kind):
-                    row = next(c for c in data["curves"]
-                               if isinstance(c, dict) and c.get("name") == name)
-                    notes, seam = row.get("notes") or "", UPPER_SEAM[kind]
-                    lo, hi = REPRESENTABLE[kind]
-                    if seam is None:
-                        wanted = f"representable region PLR [{lo}, {hi}]"
-                    else:
-                        # a disconnected set: the closed interval, the isolated
-                        # full-load point, and the OPEN gap between them
-                        wanted = (f"representable set PLR [{lo}, {seam!r}] "
-                                  "union {1.0}")
-                        self.assertIn(
-                            f"OPEN interval ({seam!r}, 1.0)", notes,
-                            f"{edition}/{kind}: the note must state the gap as "
-                            "OPEN at both ends; a half-open region discards a "
-                            "point the Code and the carrier agree on")
-                    self.assertIn(
-                        wanted, notes,
-                        f"{edition}/{kind}: the note must state this EXACT "
-                        f"set, digit for digit:\n  wanted: {wanted}\n"
-                        f"  note:   {' '.join(notes.split())[:200]}")
+        expected = []
+        for kind in ("heating", "cooling"):
+            lo, hi = REPRESENTABLE[kind]
+            seam = UPPER_SEAM[kind]
+            self.assertAlmostEqual(CARRIER_LO, exact_plf(kind, lo), places=9)
+            shape = (f"[{lo}, {seam!r}] union {{1.0}}" if seam
+                     else f"[{lo}, {hi}]")
+            expected.append(f"{kind} {shape}")
+        for kind in ("heating", "cooling"):
+            worst, _ = self.measured_maximum(kind)
+            expected.append(f"{kind} {worst:.3f}%")
 
-    def as_applied_maximum(self, kind, intervals):
-        """The worst as-applied error over the representable set, and where."""
+        # The DEFECT WITNESS, which is the reason this decision exists and was
+        # the one figure in the block still tied to nothing: Fable moved
+        # 23.0% to 32.0% and every test stayed green (`204`, R4-f). All four
+        # of its numbers are derivable — the Article target at PLR 0.25, what
+        # an INPUT floor at 0.7 delivered there, and the two errors.
+        target = exact_plf("heating", DEFECT_PLR)
+        delivered = max(CARRIER_LO,
+                        min(CARRIER_HI, _raw_poly("heating", OLD_INPUT_FLOOR)))
+        raw = _raw_poly("heating", DEFECT_PLR)
+        witness = [
+            f"{target:.4f}", f"{delivered:.4f}",
+            f"{abs(delivered - target) / target * 100:.1f}% as applied",
+            f"{abs(raw - target) / target * 100:.1f}% raw",
+        ]
+        for want in witness:
+            self.assertIn(
+                want, " ".join(lines),
+                f"the evidence block's defect witness must state {want!r}: at "
+                f"PLR {DEFECT_PLR} an input floor at {OLD_INPUT_FLOOR} "
+                "delivered that against the Article's target, which is why "
+                "this decision exists")
+
+        flat = " ".join(lines)
+        for want in expected:
+            field, _, value = want.partition(" ")
+            self.assertRegex(
+                flat, re.escape(field) + r"\s+" + re.escape(value),
+                f"the evidence block must state {field} {value}; computed "
+                f"from the shipped curve and the Article cubic. Block as "
+                f"published:\n  " + "\n  ".join(lines))
+
+    def measured_maximum(self, kind):
+        """Worst as-applied relative error over the representable set."""
         lo, hi = REPRESENTABLE[kind]
-        curve = self.coil_plf_curve(kind)
-        worst, at = 0.0, None
-        for i in range(intervals + 1):
-            plr = lo + (hi - lo) * i / intervals
+        curve, worst, at = self.coil_plf_curve(kind), 0.0, None
+        for i in range(20_001):
+            plr = lo + (hi - lo) * i / 20_000
             want = exact_plf(kind, plr)
             rel = abs(curve.evaluate(plr) - want) / want * 100.0
             if rel > worst:
                 worst, at = rel, plr
         return worst, at
-
-    def assert_published(self, kind, worst, at):
-        """The as-applied maximum and its location, on all FOUR surfaces.
-
-        D-102's front matter, D-102's body, and BOTH editions' shipped curve
-        notes each state this figure. None of them was tied to the
-        measurement, so each could go stale alone — which is this decision's
-        whole history. Checked per surface, never over their union.
-        """
-        import json
-        import pathlib as _p
-
-        from btap.codes.necb import _data_root
-
-        # Recomputed at a density that RESOLVES both, not the caller's
-        # 200-interval scan: the maximum VALUE is insensitive (2.698847% at
-        # 200 against 2.699012% converged) but its LOCATION is not —
-        # 0.182270 at 200, 0.181621 at 2 000, 0.181556 at 20 000. So the value
-        # is published to three decimals and the location to four, each being
-        # the precision it is stable to. Publishing the location to six was
-        # over-precise: that digit still moves at 200 000 intervals.
-        worst, at = self.as_applied_maximum(kind, 20_000)
-        shown, where = f"{worst:.3f}%", f"{at:.4f}"
-        source = (_p.Path(__file__).resolve().parents[3]
-                  / "docs" / "decisions" / "D-102.md")
-        if not source.is_file():
-            self.skipTest(f"{source} is not present in this layout")
-        text = source.read_text(encoding="utf-8")
-        front, _, body = text.partition("+++\n\n")
-        surfaces = [("D-102 front matter", front), ("D-102 body", body)]
-        name = {"heating": "DXHEAT-REF-PLFFPLR",
-                "cooling": "DXCOOL-REF-COOLPLFFPLR"}[kind]
-        for edition in ("necb2020", "necb2025"):
-            data = json.loads((_data_root() / edition / "efficiencies.json")
-                              .read_text(encoding="utf-8"))
-            row = next(c for c in data["curves"]
-                       if isinstance(c, dict) and c.get("name") == name)
-            surfaces.append((f"{edition} curve note", row.get("notes") or ""))
-        for label, chunk in surfaces:
-            self.assertIn(
-                shown, chunk,
-                f"{kind}: the worst as-applied error over the representable "
-                f"set is {worst:.6f}%, so {label} must publish {shown}")
-        # The LOCATION is published for heating only; cooling's is its root,
-        # which the seam tests already pin.
-        if kind == "heating":
-            self.assertIn(
-                f"at PLR {where}", body,
-                f"heating: the maximum is at PLR {where} and the body must "
-                "say so")
-
-    def test_the_PUBLISHED_refit_is_COMPUTED_from_the_root_constants(self):
-        """D-102's refit figures, recomputed and matched — not enumerated.
-
-        Three times now a refit pair has gone stale because the domain moved
-        under it, and twice the answer was to add the newly retired pair to a
-        list. That does not scale and it did not work: each retirement needed
-        the list extended, and Sol's `199` found the fits still starting at
-        the inward-rounded floors the same commit had rejected.
-
-        So this derives the figure instead. It fits the cubic over
-        `REPRESENTABLE[kind]` — the ROOT constants the seam tests pin — and
-        requires D-102 to publish that number. If a root moves, the expected
-        figure moves with it, and a document carrying the old one fails
-        without anybody remembering to enumerate it.
-        """
-        import pathlib as _p
-
-        source = (_p.Path(__file__).resolve().parents[3]
-                  / "docs" / "decisions" / "D-102.md")
-        if not source.is_file():
-            self.skipTest(f"{source} is not present in this layout")
-        text = source.read_text(encoding="utf-8")
-        for kind in sorted(REPRESENTABLE):
-            with self.subTest(kind=kind):
-                lo, hi = REPRESENTABLE[kind]
-                coef = self.least_squares_cubic(kind, lo, hi, 100_000)
-                worst = max(
-                    abs(max(CARRIER_LO, min(CARRIER_HI, _poly(coef, x)))
-                        - exact_plf(kind, x)) / exact_plf(kind, x) * 100.0
-                    for x in (lo + (hi - lo) * i / 100_000
-                              for i in range(100_001)))
-                shown = f"{worst:.3f}%"
-                # PER SURFACE, not over the union. The first version of this
-                # guard searched the whole document, so reverting the BODY to
-                # the stale pair still passed — the front-matter summary
-                # carried the right figure and `assertIn` found it there. A
-                # union check cannot see one surface going stale, which is the
-                # exact failure mode this decision has had five times.
-                front, _, body = text.partition("+++\n\n")
-                for where, chunk in (("front-matter summary", front),
-                                     ("body", body)):
-                    self.assertIn(
-                        shown, chunk,
-                        f"{kind}: a refit over [{lo}, {hi}] at 100 000 "
-                        f"intervals measures {worst:.6f}%, so the {where} "
-                        f"must publish {shown} and does not. If this fails "
-                        "after a root moved, the figure is stale — recompute "
-                        "it, do not retire it by hand.")
-
-    @staticmethod
-    def least_squares_cubic(kind, lo, hi, intervals):
-        """A plain normal-equations cubic fit, so the expectation is derived."""
-        n = 4
-        m = [[0.0] * (n + 1) for _ in range(n)]
-        for i in range(intervals + 1):
-            x = lo + (hi - lo) * i / intervals
-            basis, y = [1.0, x, x * x, x ** 3], exact_plf(kind, x)
-            for r in range(n):
-                for c in range(n):
-                    m[r][c] += basis[r] * basis[c]
-                m[r][n] += basis[r] * y
-        for col in range(n):
-            piv = max(range(col, n), key=lambda r: abs(m[r][col]))
-            m[col], m[piv] = m[piv], m[col]
-            for r in range(n):
-                if r != col and m[col][col]:
-                    f = m[r][col] / m[col][col]
-                    for c in range(col, n + 1):
-                        m[r][c] -= f * m[col][c]
-        return [m[r][n] / m[r][r] for r in range(n)]
-
-    def test_no_RETIRED_pair_is_presented_as_current(self):
-        """D-102 carried a superseded result on three surfaces in turn.
-
-        The upper seam shortened the representable region, which moved the
-        refit figures; then naming the interval rather than the set moved them
-        again. Each time I corrected one surface and left a parallel one
-        stating the old PAIR as a current measurement — body table, then
-        shipped notes, then the front-matter summary, which is where Sol found
-        it.
-
-        The unit guarded is the PAIR, not the digit. An individual figure
-        legitimately appears in the density progression — `1.235388%` IS the
-        20 000-interval heating result and belongs in that table. What may not
-        appear is a retired heating/cooling pair offered together as THE
-        result, which is the mistake actually made. A first version of this
-        guard enumerated bare digits and failed on the table it had just
-        published, and a second enumerated only the ORIGINAL pair, leaving the
-        pair retired in the same commit unguarded.
-        """
-        import pathlib
-
-        # Every pair this decision has retired. Fable has now caught this
-        # list un-extended TWICE — the pair retired in the commit that added
-        # the guard, and then the pair retired in the commit that extended it
-        # — so the computed guard above is the real defence and this is the
-        # backstop for a figure stated as a pair in prose.
-        RETIRED_PAIRS = (("1.877", "4.853"), ("1.235", "4.938"),
-                         ("1.236", "5.025"))
-        MARKERS = ("earlier version", "superseded", "no longer", "stale",
-                   "was wrong", "retired")
-        source = (pathlib.Path(__file__).resolve().parents[3]
-                  / "docs" / "decisions" / "D-102.md")
-        if not source.is_file():   # installed-wheel smoke run, no repo docs
-            self.skipTest(f"{source} is not present in this layout")
-        # PROSE only. A fenced block is DATA — the density progression
-        # legitimately lists 1.235388% beside 4.938354% because those are the
-        # 20 000- and 400-interval results, and it carries no sentence
-        # punctuation, so an unfiltered scan reads the whole table as one
-        # sentence making a claim. What is guarded is a claim, not a column.
-        text = re.sub(r"```.*?```", " ", source.read_text(encoding="utf-8"),
-                      flags=re.S)
-        self.assertNotIn("```", text, "every fenced block must be stripped")
-        # The refit's DOMAIN drifted between summary and body four times, so
-        # pin the label too: the fit is over the primary INTERVAL, and calling
-        # it the representable region or set is the specific wording that kept
-        # coming back after the body had been corrected.
-        for wrong in ("refit over the REPRESENTABLE REGION",
-                      "refit over the REPRESENTABLE SET",
-                      "refit over the representable region",
-                      "refit over the representable set"):
-            self.assertNotIn(
-                wrong, text,
-                "the refit is measured over heating's PRIMARY INTERVAL; the "
-                "representable set also contains the isolated point 1.0, "
-                "which the fit does not serve")
-        # The sample UNIT drifted twice: first the table labelled intervals
-        # as points, then the prose around it did after the table was fixed.
-        # `range(n + 1)` over n intervals is n + 1 points, and the difference
-        # is measurable at low density (200 points 1.192635% against 200
-        # intervals 1.192849%), so the label is not cosmetic.
-        # Whitespace-NORMALISED, because the document wraps. My first version
-        # of this check looked for "100 000 points" with a space and the live
-        # text had a newline between the number and the unit — the very form
-        # the mutation restored, so the guard passed on the instance it
-        # existed to catch.
-        flat = " ".join(text.split())
-        for density in ("200", "400", "20 000", "100 000"):
-            for unit in (f"{density}-point", f"{density} points",
-                         f"{density}-POINT", f"{density} POINT"):
-                self.assertNotIn(
-                    unit.lower(), flat.lower(),
-                    f"this decision measures {density} INTERVALS, not points; "
-                    f"n intervals is n+1 points and the figures differ")
-        for heating, cooling in RETIRED_PAIRS:
-            for sentence in re.split(r"(?<=\.)\s+", text):
-                if heating not in sentence or cooling not in sentence:
-                    continue
-                with self.subTest(pair=f"{heating}/{cooling}"):
-                    self.assertTrue(
-                        any(m in sentence.lower() for m in MARKERS),
-                        f"{heating}% / {cooling}% is a RETIRED refit pair. It "
-                        "appears here offered as a current result, with no "
-                        "marker that it is superseded:\n"
-                        f"  {' '.join(sentence.split())[:240]}")
 
     def test_every_curve_note_cites_D_102(self):
         """The runtime ruling lives in the decision, and the data points at it."""

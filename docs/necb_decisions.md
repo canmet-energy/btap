@@ -7273,8 +7273,8 @@ asks.
 
 ## D-102 — the Code states EIR_FPLR; EnergyPlus carries PLF, and the floor goes on the output
 
-- **Decision:** Claude under D-10 delegation, 2026-10-10, after Sol's `185`
-  and `187`. Two domains meet here and the Code governs only one of them.
+- **Decision:** Claude under D-10 delegation, 2026-10-10. Two domains meet
+  here and the Code governs only one of them.
 
 **What the Code says.** Sentence (5) of each Article gives a cubic for
 `EIR_FPLR`, the part-load energy input ratio. Sentence (6) defines
@@ -7289,254 +7289,132 @@ in `[0.7, 1.0]`, resetting them otherwise. PLF is a cycling-loss
 representation, not an EIR.
 
 **The adopted mapping** is therefore `PLF = PLR / EIR_FPLR`, realised as a
-cubic in PLR with:
+cubic in PLR with input `[0.0, 1.0]` — what the engine samples, and the Code
+states no PLR floor — and output `[0.7, 1.0]`, the engine's own constraint.
+
+## The evidence
+
+Every measured figure this decision rests on is here, once. It is checked
+field by field against the shipped curve and the Article cubic by
+`test_the_EVIDENCE_BLOCK_is_computed` in
+`python/tests/necb/test_dx_plf_as_applied.py`, so a stale number fails rather
+than waiting to be noticed.
 
 ```text
-input  [0.0, 1.0]     what the engine samples; the Code states no PLR floor
-output [0.7, 1.0]     the engine's own constraint on this field
+representable set   heating  [0.16604619095565545, 0.8149996906315529] union {1.0}
+                    cooling  [0.17442759262761687, 1.0]
+worst as applied    heating  2.699%    cooling  12.663%
+defect corrected    at PLR 0.25 the curve delivered 0.9877 against an Article
+                    target of 0.8029 — 23.0% as applied, 1.8% raw
 ```
+
+The set's endpoints are the ROOTS of `exact_plf(PLR) = 0.7` and
+`exact_plf(PLR) = 1.0`. The worst-as-applied figures are maxima of the
+relative error against the exact Article target, over that set, after the
+engine's output clamps. Nothing else numeric in this decision is load-bearing.
 
 ### The defect this corrects
 
-The heat-pump curve shipped with `minimum_independent_variable_1 = 0.7` — the
-engine's PLF floor placed on the INPUT axis. `coils.py` installs the curve and
-OpenStudio clamps below an input minimum, so every part-load ratio under 0.7
-evaluated at the 0.7 value and the cycling penalty disappeared:
+The heat-pump curve shipped with its minimum on the INPUT axis. `coils.py`
+installs the curve and OpenStudio clamps below an input minimum, so every
+part-load ratio under the floor evaluated at the floor's value and the cycling
+penalty disappeared. The existing part-load probe reported the curve as nearly
+equivalent because it evaluated COEFFICIENTS, and the defect was in a BOUND.
 
-```text
-PLR 0.25   Article target 0.8029   delivered 0.9877
-```
-
-As applied that is 23.0% from the Article; the raw polynomial is 1.8% from it.
-The existing part-load probe reported 1.8% because it evaluated COEFFICIENTS,
-and the defect was in a BOUND. A PLF that is too high understates the cycling
-penalty, so the reference burns less than the Code prescribes and the
-compliance target is tighter than it should be — the error runs against
-proposed buildings.
+A PLF that is too high understates the cycling penalty, so the reference burns
+less than the Code prescribes and the compliance target is tighter than it
+should be — the error runs against proposed buildings.
 
 ### Why not 0.25
 
 A 0.25 input minimum was proposed first, taken from the cooling curve, whose
 note says only that its polynomial was FIT over PLR 0.25-1.0. Sol refused it
 (`187`): a fit range is not a Code domain, the cooling curve carries the same
-unsourced choice, and **one unadjudicated clamp cannot validate another**. At
-PLR 0.10 the 0.25 clamp delivers 0.7885 against an exact target of 0.5622 —
-40.2% high, worse than the 0.7 the engine floor alone would give.
+unsourced choice, and **one unadjudicated clamp cannot validate another**. Low
+in the domain that clamp is worse than the engine floor alone, because it
+holds a value well above the Article's target rather than at the carrier's
+limit.
 
-### The declared gap, which this decision does not call verified
+### The declared gaps, which this decision does not call verified
 
-The exact target falls below the engine's floor under PLR
-**0.16604619095565545** (heating) and **0.17442759262761687** (cooling) — the ROOTS of
-`exact_plf(PLR) = 0.7`, published to their digits as the upper seam is, because
-an earlier version rounded them INWARD to 0.1661 and 0.1745 and then measured
-from there. Rounding a gap boundary inward excludes the worst sliver of the
-region: cooling's maximum is 12.645% from 0.1745 and **12.663%** from its
-actual root. The Article's EIR cubic keeps a
-non-zero intercept as PLR approaches zero while a cycling PLF cannot reach
-zero. There the reference delivers 0.7 where the Code implies less:
+**At the floor.** As PLR approaches zero the Article's EIR cubic keeps its
+non-zero intercept, so the exact target tends to zero while a cycling PLF
+cannot go below the carrier's floor. Under the lower root the reference
+therefore delivers the floor where the Code implies less. This is an
+ENGINE-CARRIER limitation, not a modelling choice and not a tolerance, and it
+is recorded with its measured consequence rather than excluded by starting a
+tolerance above it — which is precisely what a 0.25 floor did.
 
-```text
-PLR 0.10   heating exact 0.5622   carrier floor 0.7
-PLR 0.15   heating exact 0.6730   carrier floor 0.7
-```
+**At the ceiling.** A part-load FRACTION above 1.0 would mean better-than-rated
+efficiency at part load, and EnergyPlus will not accept it. Over the top fifth
+of the heating domain the Code states a target the field cannot carry, by a
+fraction of a percent, and the clamp is what makes full load exact. **Cooling
+has no upper seam**, and the asymmetry is asserted in the tests rather than
+left incidental.
 
-This is an ENGINE-CARRIER limitation, not a modelling choice and not a
-tolerance. It is recorded with its measured consequence rather than excluded
-by starting a tolerance above it — which is precisely what a 0.25 floor did.
+Both roots BELONG to the representable set: at each one the target equals the
+bound by definition, which is what makes it the root. At full load the
+Article's own coefficients sum to exactly one, so the target is exactly the
+ceiling there and that isolated point is representable too — the gap is the
+OPEN interval between the upper root and full load, and the set is
+disconnected rather than merely short.
 
-### The second declared gap, at the ceiling
+### A refit is open work, and lives elsewhere
 
-The floor is not the only seam, and saying so only at the floor was wrong.
-
-```text
-PLR 0.81499969   the heating exact target crosses ABOVE 1.0
-PLR 0.9055       its peak, 1.002358  (0.236% over the ceiling)
-PLR 1.0          it returns to exactly 1.000000
-```
-
-A part-load FRACTION above 1.0 would mean better-than-rated efficiency at
-part load; EnergyPlus will not accept it. So over the top 18.5% of the domain
-the Code states a target the field cannot carry, exactly as it does below
-0.16604619095565545 — and for the same kind of reason. **Cooling has no upper seam**, and
-the asymmetry is asserted rather than left incidental.
-
-Three different things live in that region and the first version of this
-decision named only the last:
-
-```text
-(a) the Code's target exceeds the ceiling      from PLR 0.815, max 0.236%
-(b) the shipped polynomial UNDER-delivers      worst 0.951% at PLR 0.8437
-(c) the engine's 1.0 clamp becomes active      only from PLR 0.953
-```
-
-So the ceiling does remove a real 1.0077 full-load overshoot — that is (c) —
-but it is NOT the whole story of the top of this curve, and (a) is a declared
-gap rather than a tidied fit. At the peak the coil delivers 0.995107 where the
-Code implies 1.002358; the clamp is not even active there.
-
-### Accepted error where the mapping IS representable
-
-```text
-REPRESENTABLE SET — where the field can actually hold the Article target
-heating   PLR [0.16604619095565545, 0.8149996906315529] union {1.0}
-cooling   PLR [0.17442759262761687, 1.0]
-
-WORST AS-APPLIED ERROR over that set, against the EXACT Article target
-heating   2.699%    at PLR 0.1816     between the seams, not below them
-                                     four decimals, which is where the location is
-                                     stable: 0.182270 at 200 intervals, 0.181621 at
-                                     2 000, 0.181556 at 20 000, and the sixth decimal
-                                     still moving at 200 000
-cooling  12.663%    at its lower root
-
-UNREPRESENTABLE GAP, heating   the OPEN interval (0.8149996906315529, 1.0)
-
-Both endpoints BELONG to the representable set and an earlier version of this
-decision excluded one of them. At the root the target equals the ceiling by
-definition — that is what makes it the root — and at full load the Article's
-own coefficients sum to exactly one,
-a + b + c + d = 0.0856522 + 0.9388137 - 0.1834361 + 0.1589702 = 1.0, so
-EIR_FPLR(1.0) = 1 and the target is exactly 1.0. Both values lie inside the
-carrier's CLOSED [0.7, 1.0] range, so the primary interval is closed at the
-root and the full-load point is isolated rather than absent. The gap between
-them is open at both ends. The first version wrote `[0.1661, root)` and its
-test ASSERTED that endpoint must be open, which encoded the error instead of
-detecting it (Sol, `191`).
-```
-
-The cooling number is a finding in its own right: that polynomial was fit over
-0.25-1.0, so the lowest part of its representable region was never in the fit.
-A refit over the heating curve's PRIMARY INTERVAL — [0.16604619095565545,
-the upper root], not the whole set — measures **1.237%**, and cooling's over its own region measures
-**5.029%**, both on the same 100 000-INTERVAL least-squares grid (equally
-spaced, endpoints included, maximum relative error measured on that grid, and
-AS APPLIED, i.e. after the engine's output clamps):
-
-```text
-intervals   heating     cooling        (n intervals is n+1 points)
-      200  1.193942%   4.856725%
-      400  1.215343%   4.942430%
-   20 000  1.236520%   5.027431%
-  100 000  1.236868%   5.028827%
-```
-
-Every row of that progression was recomputed from the exact lower ROOTS. The
-submitted version fitted from the inward-rounded 0.1661 and 0.1745 while
-calling the domain the primary interval and cooling's own region — so the
-evidence still contained the slivers the same commit had just rejected
-(Sol, `199`). The refit figures move with the endpoint, which is the point:
-
-**Naming the interval rather than the set matters, because the fit does not
-serve the isolated point.** At PLR 1.0 the refit polynomial is extrapolating
-past the domain it was fitted on. Which error that represents depends on which
-of this decision's two measurements is meant, and both are legitimate: the raw
-one is large, and the as-applied one is zero because the clamp lands exactly
-on a target that is itself exactly 1.0.
-
-**Those numbers are in the account table below and NOWHERE ELSE here.** They
-used to be quoted in this paragraph too, from the rounded-floor fit, so it
-published 1.053994 and 5.399% as CURRENT while the table thirty lines down
-published 5.402193% and retired 5.399395% — the same value current and retired
-at once (Sol `201`, Fable `202`, independently). A duplicated figure is one
-that can go stale on a copy, which is what five rounds of correcting this
-decision have been. Quoting it once removes the possibility instead of
-guarding it; a second body-wide check would have been satisfied by the correct
-table and repeated the union mistake.
-
-So a single cubic fitted over the primary interval cannot be said to serve the
-representable SET; it serves the interval, and the isolated point is carried by
-the clamp rather than by the fit. Sol raised this as a topology defect in the
-evidence (`191` follow-up) and he is right that calling it a set refit was
-wrong.
-
-It also matters WHICH fit a figure comes from, and an earlier version of this
-paragraph switched between them mid-sentence. It contrasted "the 5.376% he
-measured" with the 0.000% as-applied value — but 5.376015% is ACCOUNT 2's raw
-full-load error, where 1.0 is one of the fitting observations, while the
-0.000% belongs to Account 1. Two different cubics, presented as one
-comparison. Stated properly, with both accounts' governing maxima rather than
-only their full-load behaviour:
-
-```text
-                        raw at PLR 1.0   clamped at 1.0   MAX as applied
-Account 1 (chosen)        5.402193%          0.000%       1.236868% @ the root
-Account 2 (alternative)   5.378805%          0.000%       1.239862% @ the root
-```
-
-Both rows are fitted from PLR 0.16604619095565545, the exact root. The
-earlier pair — 5.399395%/1.235735% and 5.376015%/1.238728% — came from the
-rounded 0.1661 and is retired.
-
-Both are exact at full load once the ceiling applies, so the full-load point
-does not distinguish them; their maxima, both at the LOWER endpoint, do. Sol
-reproduced the ROUNDED-FLOOR account in `195` and these exact-root figures in `199`. They are two different calculations and are credited separately, because the table was wholly recomputed after `195` (Fable, `202`).
-
-Sol's independent reproduction agrees to six decimals at 20 000 and 100 000
-INTERVALS. An earlier version of this decision published **1.235% / 4.938%** as a
-pair and called it converged: the heating figure was the 20 000-INTERVAL result
-(which does not round to three decimals as 1.235%) and the cooling figure was
-the 400-INTERVAL result. Two densities under one label, which is the same fault
-as two domains under one label further up. An earlier version of this decision
-published 1.877% and 4.853%, measured over PLR [0.1661, 1.0] with the target
-CLIPPED at 1.0 — the old domain and the old clip, carried forward under a
-label that no longer described them. That refit is OPEN WORK and deliberately
-not applied here — it changes reference
-energy results, so it belongs with its own re-freeze and its own adjudication
-of what error is acceptable.
+Refitting either polynomial over its representable set reduces the error
+materially, and it is NOT applied here: it moves reference energy results, so
+it belongs with its own re-freeze and its own adjudication of what error is
+acceptable. The study — the method, both candidate accounts, the sampling
+progression and the script that regenerates them — is
+`docs/necb_dx_plf_refit.md`. It is kept there rather than transcribed into
+this decision because it describes work the product does not ship, and a
+figure nobody will act on still has to be kept right.
 
 ### A second copy, in a layer that cannot see this one
 
 `btap/modeling/hvac/data/curves.json` holds both curves again, with the same
-`min_x: 0.7` and no output bounds. Under D-77 the modeling layer cannot read
-NECB data, and the NECB efficiency pass replaces the curve on any coil that
-carries a capacity — an unsized coil silently keeps modeling's version, which
-is how a probe can conclude the NECB data never arrives.
+input-axis floor and no output bounds. Under D-77 the modeling layer cannot
+read NECB data, and the NECB efficiency pass replaces the curve on any coil
+that carries a capacity — an unsized coil silently keeps modeling's version,
+which is how a probe can conclude the NECB data never arrives.
 
-An earlier version of this section dismissed the copy because "the proposed
-building is not bound by the reference Articles". That misses the point, and
-Fable's `198` names it: the defect is not an Article mismatch, it is ENGINE
-SEMANTICS. A part-load floor on the INPUT axis suppresses cycling losses
-whatever building the coil belongs to, so every PROPOSED direct-expansion coil
-built through `coils.py` understates its own fan-cycling energy — in the
-proposed building's FAVOUR, against the compliance target. Order of magnitude
-on the frozen corpus: about 0.1 percentage point of `percent_of_target`, the
-same scale as the reference-side correction this decision makes.
+The defect is not an Article mismatch, it is ENGINE SEMANTICS (Fable, `198`).
+A part-load floor on the INPUT axis suppresses cycling losses whatever
+building the coil belongs to, so every PROPOSED direct-expansion coil built
+through `coils.py` understates its own fan-cycling energy — in the proposed
+building's FAVOUR, against the compliance target, at about a tenth of a
+percentage point of `percent_of_target` on the frozen corpus.
 
 Correcting it needs a modeling CODE change as well as data, because
 `build_cubic` reads only `min_x`/`max_x` and never writes an output bound, and
 it moves proposed-model results, so it carries its own re-freeze. It stays
-open work — but as a known proposed-side bias with a measured scale, not as a
-question of whether the Articles apply.
+open work — but as a known proposed-side bias, not as a question of whether
+the Articles apply.
 
 ### How it is verified
 
 `python/tests/necb/test_dx_plf_as_applied.py` builds a real coil through
 `btap.modeling.hvac.components.coils`, gives it a capacity so the NECB pass
-proceeds, runs `efficiency.apply`, and reads the curve the COIL carries. Three
-mutations that survived the previous, hand-built version of that test now fail
-it: killing `set_limits`'s output-bound writer, nulling the upper output bound,
-and moving the input minimum to 0.1. The comparison is UNCLIPPED, and three
-further mutations fail it: calling the whole domain representable (the original
-defect), moving the seam off its root, and claiming cooling has an upper seam.
+proceeds, runs `efficiency.apply`, and reads the curve the COIL carries. It
+pins all four bounds, both seam roots and the evidence block above, and the
+mutations it kills include the original defect in each of its forms: the
+output-bound writer removed, the upper bound nulled, the input minimum
+restored to a clamp, either seam moved off its root, and any figure in the
+evidence block altered.
 
-A FOURTH claim is withdrawn. This decision said that restoring the clipped
-comparison fails the test; Sol applied it literally and all six tests stayed
-green. He is right, and the reason is instructive: the main comparison now runs
-only over the REPRESENTABLE region, where by construction the target never
-reaches the ceiling, so clipping there is a mathematical no-op. My mutation had
-replaced BOTH occurrences of that expression — including the one inside the
-upper-seam test, which is what actually failed — and I attributed the failure
-to the wrong site. The seam is detected by the seam test, not by the fit
-comparison.
-
-The seam's own pin was also weaker than claimed. It bracketed the crossing at
-+/-0.01, so moving the constant to 0.82 passed; it now asserts the ROOT, that
-the exact target EQUALS the ceiling at 0.8149996906315529 to nine places, and
-brackets at 1e-6. Sol's mutation now fails, and so does 0.8150 — three parts
-in ten million from the root, and comfortably inside the old bracket.
+**This evidence was corrected eight times between 2026-10-10 and 2026-10-11.**
+Not because the measurements were hard, but because the same numbers were
+restated on four surfaces — this decision's summary and body, and both
+editions' curve notes — and drifted on one at a time while guards were added
+for whichever had just drifted. The structural answer, directed by Sol's
+`203` and Fable's `204`, was to delete the repetition: one evidence block, one
+surface, one computed comparison. Git holds the history; `df4e500..HEAD` on
+`ashp-plf-bound` is the range, and the commit messages there are the account.
 
 - **Who/when:** Claude under D-10, 2026-10-10; Sol's `185` found the axis
-  defect and `187` refused the 0.25 domain and the hand-built test.
+  defect, `187` refused the 0.25 domain and the hand-built test, `189` the
+  upper seam, `191` the set's topology, and `199`/`203` the drift; Fable's
+  `198` the unpinned lower seams and `204` the census that ended the guarding.
 - **Evidence:** the retained Article caches at
   `btap/codes/necb/data/necb<edition>/coverage/articles_8_4.json` for sentences
   (4)-(6), and EnergyPlus 25.2.0 `src/EnergyPlus/DXCoils.cc` for the field's
