@@ -91,7 +91,9 @@ def _read_field(body, heads, boundaries):
             continue
         collected = [line.split("**", 2)[-1].lstrip()]
         for later in lines[index + 1:]:
-            if any(later.startswith(f"**{name}") for name in boundaries):
+            if any(later.startswith(f"**{name}.")
+                   or later.startswith(f"**{name}**")
+                   for name in boundaries):
                 break
             if later.startswith("#"):
                 break
@@ -273,6 +275,23 @@ class TestTheReferralPackage(unittest.TestCase):
         self.assertIn(
             "|", section,
             "as must the table of the three wrong published rows")
+        # And the DISPOSITION, which the grammar cannot protect: both the
+        # generator and this file's reader consume `FIELD_HEADINGS`, so
+        # adding "STILL OPEN" to it truncates both sides identically and the
+        # whole module stays green while the package loses the five lines
+        # that say the question is undecided (Sol, `221`). A declared grammar
+        # removes guessing; it does not make the content checkable, and only
+        # a content fact can.
+        self.assertIn(
+            "STILL OPEN", section,
+            "AHJ-7's final disposition must survive. It is what tells an "
+            "authority the question is open: the deviation sets no run "
+            "conditional, so a building with a water-cooled scroll or "
+            "reciprocating chiller is modelled on corrected coefficients "
+            "with nothing in its report saying so")
+        self.assertIn(
+            "nothing in its report saying so", section,
+            "including the sentence naming what the reader will NOT see")
 
     def test_AHJ_16_does_NOT_publish_the_review_loop_history(self):
         """The other direction, also by content.

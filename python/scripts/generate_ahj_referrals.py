@@ -176,6 +176,7 @@ FIELD_HEADINGS = (
     "Article",
     "Status",
     "The ambiguity",
+    "The question",
     "The requirement",
     "The gap",
     "What is missing",
@@ -186,9 +187,16 @@ FIELD_HEADINGS = (
     "Where a reader meets it",
 )
 
+#: A heading ends at a period or at its closing `**`. Without that,
+#: `FIELD_HEADINGS`'s entries were bare PREFIXES: `**Articles of this
+#: Section…**` would have ended a field as if it were `**Article.**`, and
+#: `**Status quo…**` as if it were the status line (Fable, `219`).
+_HEADING_TAIL = r"(?:\.|\*\*)"
+
 _FIELD_END_RE = re.compile(
     r"(?m)^(?:" + "|".join(
-        r"\*\*" + re.escape(name) for name in FIELD_HEADINGS) + r"|#{2,6} )")
+        r"\*\*" + re.escape(name) + _HEADING_TAIL
+        for name in FIELD_HEADINGS) + r"|#{2,6} )")
 
 
 def _field(body: str, headings: tuple, *, collapse: bool = False) -> str | None:
