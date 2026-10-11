@@ -3451,7 +3451,7 @@
   },
   "value": "COP 3.8 (11.0EER) on all 2 stages, binned by total capacity",
   "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3467,7 +3467,7 @@
   },
   "value": "COP 3.98 (15.0SEER) on all 2 stages, binned by total capacity",
   "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3483,7 +3483,7 @@
   },
   "value": "COP 3.8 (11.0EER) on all 2 stages, binned by total capacity",
   "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3499,7 +3499,7 @@
   },
   "value": "COP 3.98 (15.0SEER) on all 2 stages, binned by total capacity",
   "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3515,9 +3515,22 @@
   },
   "value": "COP 3.98 (15.0SEER) on all 2 stages, binned by total capacity",
   "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
+ },
+ {
+  "step": "efficiency",
+  "target": "CoilHeatingDXMultiSpeed_ashp",
+  "action": "model object named 'DXHEAT-REF-PLFFPLR' does not state this edition's Cubic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXHEAT-REF-PLFFPLR (D-89)'",
+  "inputs": {
+   "curve": "DXHEAT-REF-PLFFPLR",
+   "form": "Cubic",
+   "applied": "DXHEAT-REF-PLFFPLR (D-89)"
+  },
+  "ruling": "D-89",
+  "building": "reference building",
+  "level": "warning"
  },
  {
   "step": "efficiency",
@@ -3529,7 +3542,7 @@
   },
   "value": "heating COP 3.54 (3.3COPH) on all 2 stages",
   "article": "NECB 2020 Table 5.2.12.1 (heat pumps, heating)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3543,7 +3556,7 @@
   },
   "value": "heating COP 3.66 (7.4HSPF) on all 2 stages",
   "article": "NECB 2020 Table 5.2.12.1 (heat pumps, heating)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3557,7 +3570,7 @@
   },
   "value": "heating COP 3.54 (3.3COPH) on all 2 stages",
   "article": "NECB 2020 Table 5.2.12.1 (heat pumps, heating)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3571,7 +3584,7 @@
   },
   "value": "heating COP 3.66 (7.4HSPF) on all 2 stages",
   "article": "NECB 2020 Table 5.2.12.1 (heat pumps, heating)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3585,7 +3598,7 @@
   },
   "value": "heating COP 3.66 (7.4HSPF) on all 2 stages",
   "article": "NECB 2020 Table 5.2.12.1 (heat pumps, heating)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3983,7 +3996,7 @@
   "inputs": {
    "run_period": "full year",
    "clean_run": true,
-   "total_site_kwh": 184153,
+   "total_site_kwh": 184244,
    "unmet_heating_h": 0.0,
    "unmet_cooling_h": 231.25
   },
@@ -4139,9 +4152,9 @@
   "action": "proposed does not exceed the building energy target",
   "inputs": {
    "proposed_kwh": 121613.9,
-   "reference_building_energy_target_kwh": 184152.8
+   "reference_building_energy_target_kwh": 184244.4
   },
-  "value": "margin 62538.9 kWh (34.0%)",
+  "value": "margin 62630.5 kWh (34.0%)",
   "article": "8.4.1.2.(2)",
   "level": "decision"
  },

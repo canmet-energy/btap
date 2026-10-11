@@ -3298,7 +3298,7 @@
   },
   "value": "COP 3.98 (15.0SEER) on all 2 stages, binned by total capacity",
   "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3314,7 +3314,7 @@
   },
   "value": "COP 3.98 (15.0SEER) on all 2 stages, binned by total capacity",
   "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3330,7 +3330,7 @@
   },
   "value": "COP 3.8 (11.0EER) on all 2 stages, binned by total capacity",
   "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3346,7 +3346,7 @@
   },
   "value": "COP 3.98 (15.0SEER) on all 2 stages, binned by total capacity",
   "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3362,7 +3362,7 @@
   },
   "value": "COP 3.98 (15.0SEER) on all 2 stages, binned by total capacity",
   "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3720,7 +3720,7 @@
   "inputs": {
    "run_period": "full year",
    "clean_run": true,
-   "total_site_kwh": 147978,
+   "total_site_kwh": 148039,
    "unmet_heating_h": 0.0,
    "unmet_cooling_h": 4.75
   },
@@ -3732,9 +3732,9 @@
   "action": "proposed does not exceed the building energy target",
   "inputs": {
    "proposed_kwh": 117908.3,
-   "reference_building_energy_target_kwh": 147977.8
+   "reference_building_energy_target_kwh": 148038.9
   },
-  "value": "margin 30069.5 kWh (20.3%)",
+  "value": "margin 30130.6 kWh (20.4%)",
   "article": "8.4.1.2.(2)",
   "level": "decision"
  },
@@ -3742,8 +3742,8 @@
   "step": "compliance",
   "action": "energy performance Tier 1 achieved",
   "inputs": {
-   "percent_of_target": 79.7,
-   "improvement_percent": 20.3
+   "percent_of_target": 79.6,
+   "improvement_percent": 20.4
   },
   "article": "10.1.2.1. (Table verified identical 2020/2025)",
   "level": "decision"
@@ -3789,7 +3789,7 @@
   "action": "operational GHG performance level E",
   "inputs": {
    "proposed_kg_co2e": 16716.7,
-   "reference_kg_co2e": 19624.9,
+   "reference_kg_co2e": 19628.3,
    "percent_of_ghg_target": 85.2
   },
   "article": "11.4.1.1.; 11.4.2.1. (NECB 2025)",

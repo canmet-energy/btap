@@ -149,6 +149,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-99** — A reference that cannot satisfy a requirement yields a CONDITIONAL result, not a certification _(runtime)_
 - **D-100** — AHJ dispositions are cited by the deciding rule site; the determination owns only policy _(runtime)_
 - **D-101** — The thermal block is the selection unit; plant, election and disclosure scopes stay larger _(runtime)_
+- **D-102** — The Code states EIR_FPLR; EnergyPlus carries PLF in [0.7, 1.0], and the gaps at BOTH carrier edges are declared _(runtime)_
 
 <!-- TOC END -->
 
@@ -2100,6 +2101,20 @@ implemented by `align_heat_pump_heating_capacity` since D-22.
   `openstudio-hvac/lib/openstudio_hvac/data/necb/reference_rules_{2020,2025}.json`.
 - **Who/when:** phylroy ruled 2026-07-29, implemented by Claude under D-10.
 
+### Which editions this was established against
+
+- **Established:** `necb2020` and `necb2025`, Claude under D-10, 2026-10-10.
+
+`8.4.4.5` (2020) and `8.4.5.5` (2025) are both titled *Lighting*, both carry
+twelve sentences, and their normalised text agrees to a similarity of
+**0.997013**. Every difference is the article's OWN cross-reference
+renumbering as Subsection 8.4.4 became 8.4.5, with one exception verified
+rather than assumed: 2025 drops the symbol `Focc,i` from sentence (3) while
+keeping the requirement word for word. The citation ranges the holding key
+carried are split, because `8.4.4.5.(9)-(12)` is not a FULLMATCH of the
+citation grammar. [[D-57]] rests on the same pair and was established in the
+same reading.
+
 <a id="d-52"></a>
 
 ## D-52 — 8.4.4.13.(2)(b)/(g)/(h): HP cooling sized without oversizing (measured), and the auxiliary-heating fuel is ELECTED from the proposed annual run
@@ -2597,6 +2612,18 @@ cooled fluid to economize with and are warned rather than silently skipped.
   `openstudio-hvac/test/test_helper.rb` (`run_energyplus!` gained an optional
   `run_period:` — shoulder weather is where this control acts).
 - **Who/when:** Claude under D-10 delegation, 2026-07-29.
+
+### Which editions this was established against
+
+- **Established:** `necb2020` and `necb2025`, Claude under D-10, 2026-10-10.
+
+`8.4.4.12` (2020) and `8.4.5.12` (2025) are both titled *Cooling with Outside
+Air*, both are single-sentence articles of 435 characters, and every
+difference between them is their own renumbering — including the
+`Table 8.4.4` → `Table 8.4.5` reference the sentence makes to itself.
+`5.2.2.9`, *Cooling by Indirect Use of Outdoor Air (Water Economizer
+System)*, keeps its number in both editions and differs only by the
+capitalisation of one token in the retained payload.
 
 <a id="d-57"></a>
 
@@ -3206,6 +3233,51 @@ fleet trend table should quote 101.8 / 101.6 / 102.8 / 97.2 / 95.4 for these
 five from here on.
 
 - Who/when: Fable under D-10 delegation, 2026-08-02.
+
+### Which editions this was established against, and how
+
+- **Established:** `necb2020` and `necb2025`, Claude under D-10, 2026-10-10.
+  Before this the entry said `unverified`, and its citations sat in the
+  holding key as a flat list with the two editions' numbers beside each other
+  but no correspondence authored.
+
+The transfer was COMPUTED from both editions' text, not inferred from the
+numbering and not read by eye:
+
+| requirement | 2020 | 2025 | result |
+|---|---|---|---|
+| Interior Lighting Controls | `4.2.2.1` | `4.2.2.1` | **identical**, 8250 characters each |
+| Sidelighted areas | `4.2.2.3` | `4.2.2.3` | identical once the payload's absorbed `4.2.2.4` title is removed |
+| Daylighted area under roof monitors | `4.2.2.4` | `4.2.2.4` | **identical**, 1079 each |
+| Daylighted area under skylights | `4.2.2.5` | `4.2.2.5` | **identical**, 860 each |
+| Reference photocontrol evaluation | `8.4.4.5.(9)-(12)` | `8.4.5.5.(9)-(12)` | transfers, similarity 0.997013 |
+| Space-type control gates | `Table 4.2.1.6` | `Table 4.2.1.6` | 101 rows each; **0 differing cells of 882** in the nine control columns |
+
+Three things in that table are worth stating rather than leaving implicit.
+
+**The 8.4 pair's differences are its own cross-references, with one exception
+I checked rather than assumed.** Five single-character `4`→`5` replacements are
+the article's own renumbering as Subsection 8.4.4 became 8.4.5. The exception:
+2025 drops the SYMBOL `Focc,i` from sentence (3) while keeping the requirement
+word for word — "multiplied by the factor for occupancy control, and the factor
+for personal control, Fpers,i as determined in accordance with Article
+4.3.2.10. for the appropriate occupancy-sensing mechanism". A dropped symbol is
+a drafting difference. I verified it instead of filing it under OCR noise,
+because a dropped occupancy factor WOULD have been normative.
+
+**Table 4.2.1.6 is identical where this decision reads it.** Both editions
+carry 101 rows; eight rows differ and every difference is in the SYNTHESISED
+`Space Category` column or a space-type label (`< 25 m²` against `≤ 25 m²`,
+`Storage room < 5 m²` against `Storage room <5m2`) — never in a control
+column. Both daylighting columns mark 97 of 101 rows in each edition. The
+codes service states the same independently in its own `known_issue`: the nine
+lighting-control columns "are verified against the printed pages and agree
+exactly between the 2020 and 2025 editions (0 differing cells of 882)". An
+earlier account in this repository said 105 rows; 101 is correct.
+
+**The ranges are gone.** `8.4.4.5.(9)-(12)` is not a FULLMATCH of the citation
+grammar, so each sentence is now cited on its own. The holding key's flat list
+could carry a range because nothing validated it.
 
 <a id="d-58"></a>
 
@@ -5684,6 +5756,32 @@ data miss rather than a DF-4 validation. (6) The live scenario counts read 41, t
 them Python-only from their first freeze. R-O re-frozen on the clean tree;
 attribution in the plan log.
 
+### Which editions this was established against
+
+- **Established:** `necb2020` and `necb2025`, Claude under D-10, 2026-10-10.
+
+This decision's subject IS a per-edition difference, and the reading confirms
+the difference is real and structural rather than a renumbering:
+
+```text
+8.4.5.2 Boiler  (2020)   3 sentences   condensing or non-condensing;
+                                       modulating is its own sentence (3),
+                                       by TABLE 8.4.5.2.-B
+8.4.6.2 Boiler  (2025)   2 sentences   condensing, non-condensing OR
+                                       modulating in one sentence, by a
+                                       CURVE that adds return-water
+                                       temperature
+```
+
+So the modulating requirement is `8.4.5.2.(3)` in 2020 and `8.4.6.2.(2)` in
+2025 — an authored correspondence that an equal-suffix rule would refuse, and
+the reason correspondence is authored rather than computed. The furnace pair
+has the same shape. `8.4.4.6`/`8.4.5.6` *Purchased Energy* is a clean transfer
+at similarity 0.998596.
+
+2025's return-water-temperature surface remains deferred as stated above; the
+reading did not change that disposition, it confirmed the Code text it rests on.
+
 <a id="d-90"></a>
 
 ## D-90 — The reference plant's capacity follows the reference's own sizing
@@ -5827,6 +5925,45 @@ with attribution in the plan log.
   `tests/necb/test_plant_capacity_ownership.py`.
 - **Who/when:** Claude with the user, reviewed by Fable and Sol, 2026-09-15.
 
+### Which editions this was established against
+
+- **Established:** `necb2020` and `necb2025`, Claude under D-10, 2026-10-10.
+
+`8.4.4.9`/`8.4.5.9` *Heating System* (similarity 0.998606) and
+`8.4.4.10`/`8.4.5.10` *Cooling Systems* transfer cleanly. The cooling pair
+needed a per-SENTENCE comparison to show it: a positional diff reported
+0.744 because a block had moved, while all nine sentences are identical or
+identical after their own `8.4.4`→`8.4.5` renumbering — sentence (5)'s sole
+difference is its cross-reference to *Subsection 8.4.5* becoming *8.4.6*.
+
+`8.4.1.2.(5)` keeps its number in both editions and differs in wording: 2025
+says the capacities "of the proposed building or the reference building, where
+applicable" rather than "of the proposed or reference building".
+
+**That conditionality is NOT implemented, and an earlier version of this note
+claimed it was.** It said the difference "is already carried per edition in the
+runtime rule data". The only per-edition key is
+`necb_rules.json` `unmet_cooling.minimum_allowance_h`, and both editions' notes
+cite sentence **(4)**, not (5): it carries 2025's 20-hour floor and nothing
+about (5)'s "where applicable". `_iterate_capacities` implements ONE behaviour
+for both editions; it quotes the 2025 wording in its docstring, which is not
+the same as branching on it. Sol caught the substitution of one sentence's
+evidence for another's.
+
+**On the path this decision governs, the qualification is SATISFIED rather
+than ignored.** D-90 is about the reference-building path — Subsection 8.4.4 in NECB
+2020 and Subsection 8.4.5 in NECB 2025 — where a reference
+building exists and is therefore "applicable". Iterating both buildings'
+capacities there is the case 2025's wording retains, not a deviation from it.
+An earlier version of this note mistook the absence of an edition branch for a
+gap; there is nothing to branch on while the reference exists.
+
+The real omission is on the OTHER path and is recorded as
+[[AHJ-21]]: `path="eui"` reaches `_eui_compliance`, which generates no
+reference building and never calls `_iterate_capacities`, so (5) is not
+applied there at all. That is a tool gap outside this decision's scope, not an
+edition difference inside it.
+
 <a id="d-91"></a>
 
 ## D-91 — Reference zone dispatch for one-unit-per-block Systems 3 and 4: the rooftop air terminal runs first
@@ -5943,6 +6080,75 @@ in the plan log.
   compliance tests.
 - **Who/when:** Claude with the user; Fable reviews; decided by Sol,
   2026-09-15.
+
+### Which editions this was established against
+
+- **Established:** `necb2020` and `necb2025`, Claude under D-10, 2026-10-10,
+  **for the reference-building path — Subsection 8.4.4 in NECB 2020 and Subsection 8.4.5 in NECB 2025 this decision governs.** The archetype-EUI
+  path's own unmet-load omission is [[AHJ-21]] and is deliberately not
+  claimed here.
+
+`8.4.4.9.(3)`/`8.4.5.9.(3)` transfers cleanly, and `8.4.2.10.(2)` is
+CHARACTER-IDENTICAL in both editions even though the article's title changed
+from *HVAC Systems Calculations* to *HVAC Systems* — a title change is not a
+requirement change.
+
+`8.4.1.2.(3)` and `(4)` keep their numbers and DO differ substantively, which
+is why this entry could not be established by resolving its citations:
+
+```text
+(4) 2020   proposed unmet cooling hours shall not differ by more than +10%
+           from the reference's
+(4) 2025   ... for thermal blocks for which mechanical cooling is provided,
+           shall not exceed 100 h when complying with Subsection 8.4.4., or
+           not differ by more than +10% OR 20 HOURS, WHICHEVER IS GREATER
+```
+
+The 20-hour floor matters most where the absolute count is small: against a
+reference logging 4.75 unmet cooling hours, 2020 allows 5.225 h and 2025
+allows 24.75 h. That difference IS implemented as data —
+`necb_rules.json` `unmet_cooling.minimum_allowance_h` is `0.0` for 2020 and
+`20.0` for 2025 — and the reading confirms both notes against the Code's text.
+Until 2026-10-11 NOTHING asserted it behaviourally: the floor was accidentally
+disabled during this work (`_minimum_cooling_allowance_h` reduced to
+`return 0.0`, ignoring the ruleset) and 1676 tests stayed green, the only
+failure being `necb_orphan_keys` noticing the rule key had stopped being
+read. `TestTheUnmetCoolingFloorIsPerEdition` now pins it at the call site:
+10 unmet cooling hours against a reference logging 4.75 must FAIL 2020 and
+PASS 2025, which is false the moment the floor stops being applied.
+
+The floor is not the only thing sentences (3) and (4) changed, and quoting only
+the floor left the rest unaccounted for. The other three changes, and what the
+tool does with each:
+
+- **(4)'s mechanical-cooling scope** IS implemented, as `cooling_vacuous` in
+  `_unmet_status`, and DELIBERATELY applied to 2020 as well — a building with
+  no mechanical cooling accrues passive-overheating hours that are not a
+  capacity shortfall. But 2025 scopes it per THERMAL BLOCK and the gate is
+  whole-building, so a building with some cooled and some uncooled blocks is
+  not scoped the way the text reads. That is a narrower gap than the sentence,
+  and it is a gap.
+- **(4)'s (a)/(b) branch.** 2025 offers "not exceed 100 hours ... when
+  complying with Subsection 8.4.4." OR the reference comparison "when
+  complying with Subsection 8.4.5." On the path THIS decision governs, (b) is
+  the applicable branch and is implemented.
+
+  An earlier version of this note said (a) "never applies" because the tool
+  builds a reference building. That was wrong, and Sol's `189` caught it: the
+  tool also has an 8.4.4 path — `path="eui"` reaches `_eui_compliance`, which
+  generates no reference building — and (a) is written FOR that path. So the
+  only branch governing the EUI path is the one left unimplemented. That is
+  [[AHJ-21]], a tool gap, and it is outside this decision's scope rather than
+  absent from the Code.
+- **(3)'s "where applicable".** 2020 requires the 100-hour heating limit "for
+  both the proposed and reference buildings"; 2025 says "for the proposed
+  building and, where applicable, for the reference building".
+  `_unmet_status` requires both. On the reference path a reference building
+  EXISTS and is therefore applicable, so requiring both is exactly what the
+  qualification retains — NOT the over-strict deviation an earlier version of
+  this note called it. The phrase does work on the EUI path, where no
+  reference exists, and there sentence (3) is not applied at all. Again
+  [[AHJ-21]].
 
 <a id="d-92"></a>
 
@@ -7062,3 +7268,240 @@ describes. `adopted` was removed from that entry's outcome list. What remains
 true, and is tested separately, is that `copy_proposed` CAN retain a proposed
 plant with both its fuels; it is simply not an outcome of the question AHJ-1
 asks.
+
+<a id="d-102"></a>
+
+## D-102 — the Code states EIR_FPLR; EnergyPlus carries PLF, and the floor goes on the output
+
+- **Decision:** Claude under D-10 delegation, 2026-10-10, after Sol's `185`
+  and `187`. Two domains meet here and the Code governs only one of them.
+
+**What the Code says.** Sentence (5) of each Article gives a cubic for
+`EIR_FPLR`, the part-load energy input ratio. Sentence (6) defines
+`PLR = Qoperating / Qavailable`. Sentence (4) composes them into operating
+power. Nothing in either Article mentions a part-load FRACTION, a lower limit
+on PLR, or any bound at all.
+
+**What the engine needs.** `Coil:Heating:DX:SingleSpeed` and its cooling and
+multi-speed siblings carry a `PartLoadFractionCorrelationCurve`. EnergyPlus
+25.2.0 samples that field over CurveInput 0.0 to 1.0 and requires its values
+in `[0.7, 1.0]`, resetting them otherwise. PLF is a cycling-loss
+representation, not an EIR.
+
+**The adopted mapping** is therefore `PLF = PLR / EIR_FPLR`, realised as a
+cubic in PLR with:
+
+```text
+input  [0.0, 1.0]     what the engine samples; the Code states no PLR floor
+output [0.7, 1.0]     the engine's own constraint on this field
+```
+
+### The defect this corrects
+
+The heat-pump curve shipped with `minimum_independent_variable_1 = 0.7` — the
+engine's PLF floor placed on the INPUT axis. `coils.py` installs the curve and
+OpenStudio clamps below an input minimum, so every part-load ratio under 0.7
+evaluated at the 0.7 value and the cycling penalty disappeared:
+
+```text
+PLR 0.25   Article target 0.8029   delivered 0.9877
+```
+
+As applied that is 23.0% from the Article; the raw polynomial is 1.8% from it.
+The existing part-load probe reported 1.8% because it evaluated COEFFICIENTS,
+and the defect was in a BOUND. A PLF that is too high understates the cycling
+penalty, so the reference burns less than the Code prescribes and the
+compliance target is tighter than it should be — the error runs against
+proposed buildings.
+
+### Why not 0.25
+
+A 0.25 input minimum was proposed first, taken from the cooling curve, whose
+note says only that its polynomial was FIT over PLR 0.25-1.0. Sol refused it
+(`187`): a fit range is not a Code domain, the cooling curve carries the same
+unsourced choice, and **one unadjudicated clamp cannot validate another**. At
+PLR 0.10 the 0.25 clamp delivers 0.7885 against an exact target of 0.5622 —
+40.2% high, worse than the 0.7 the engine floor alone would give.
+
+### The declared gap, which this decision does not call verified
+
+The exact target falls below the engine's floor under PLR **0.1661**
+(heating) and **0.1745** (cooling), because the Article's EIR cubic keeps a
+non-zero intercept as PLR approaches zero while a cycling PLF cannot reach
+zero. There the reference delivers 0.7 where the Code implies less:
+
+```text
+PLR 0.10   heating exact 0.5622   carrier floor 0.7
+PLR 0.15   heating exact 0.6730   carrier floor 0.7
+```
+
+This is an ENGINE-CARRIER limitation, not a modelling choice and not a
+tolerance. It is recorded with its measured consequence rather than excluded
+by starting a tolerance above it — which is precisely what a 0.25 floor did.
+
+### The second declared gap, at the ceiling
+
+The floor is not the only seam, and saying so only at the floor was wrong.
+
+```text
+PLR 0.81499969   the heating exact target crosses ABOVE 1.0
+PLR 0.9055       its peak, 1.002358  (0.236% over the ceiling)
+PLR 1.0          it returns to exactly 1.000000
+```
+
+A part-load FRACTION above 1.0 would mean better-than-rated efficiency at
+part load; EnergyPlus will not accept it. So over the top 18.5% of the domain
+the Code states a target the field cannot carry, exactly as it does below
+0.1661 — and for the same kind of reason. **Cooling has no upper seam**, and
+the asymmetry is asserted rather than left incidental.
+
+Three different things live in that region and the first version of this
+decision named only the last:
+
+```text
+(a) the Code's target exceeds the ceiling      from PLR 0.815, max 0.236%
+(b) the shipped polynomial UNDER-delivers      worst 0.951% at PLR 0.8437
+(c) the engine's 1.0 clamp becomes active      only from PLR 0.953
+```
+
+So the ceiling does remove a real 1.0077 full-load overshoot — that is (c) —
+but it is NOT the whole story of the top of this curve, and (a) is a declared
+gap rather than a tidied fit. At the peak the coil delivers 0.995107 where the
+Code implies 1.002358; the clamp is not even active there.
+
+### Accepted error where the mapping IS representable
+
+```text
+ASSESSED ENGINE DOMAIN, PLR [0.0, 1.0] — the shipped curve's worst error
+heating   2.699%   at PLR 0.1816     below both seams, so the seams do not move it
+cooling  12.645%   at PLR 0.1745     at its floor
+
+REPRESENTABLE SET — where the field can actually hold the Article target
+heating   PLR [0.1661, 0.8149996906315529] union {1.0}
+cooling   PLR [0.1745, 1.0]
+
+UNREPRESENTABLE GAP, heating   the OPEN interval (0.8149996906315529, 1.0)
+
+Both endpoints BELONG to the representable set and an earlier version of this
+decision excluded one of them. At the root the target equals the ceiling by
+definition — that is what makes it the root — and at full load the Article's
+own coefficients sum to exactly one,
+a + b + c + d = 0.0856522 + 0.9388137 - 0.1834361 + 0.1589702 = 1.0, so
+EIR_FPLR(1.0) = 1 and the target is exactly 1.0. Both values lie inside the
+carrier's CLOSED [0.7, 1.0] range, so the primary interval is closed at the
+root and the full-load point is isolated rather than absent. The gap between
+them is open at both ends. The first version wrote `[0.1661, root)` and its
+test ASSERTED that endpoint must be open, which encoded the error instead of
+detecting it (Sol, `191`).
+```
+
+The cooling number is a finding in its own right: that polynomial was fit over
+0.25-1.0, so the lowest part of its representable region was never in the fit.
+A refit over the heating curve's PRIMARY INTERVAL — [0.1661, root], not the
+whole set — measures **1.236%**, and cooling's over its own region measures
+**5.025%**, both on the same 100 000-INTERVAL least-squares grid (equally
+spaced, endpoints included, maximum relative error measured on that grid, and
+AS APPLIED, i.e. after the engine's output clamps):
+
+```text
+intervals   heating     cooling        (n intervals is n+1 points)
+      200  1.192849%   4.852719%
+      400  1.214230%   4.938354%
+   20 000  1.235388%   5.023286%
+  100 000  1.235735%   5.024681%
+```
+
+**Naming the interval rather than the set matters, because the fit does not
+serve the isolated point.** Evaluated at PLR 1.0 the refit polynomial returns
+1.053994 — it is extrapolating past the domain it was fitted on. Which error
+that represents depends on which of this decision's two measurements is
+meant, and both are legitimate:
+
+```text
+raw polynomial vs the Article at PLR 1.0     5.399%   the fit is poor there
+as applied, after the engine's 1.0 clamp     0.000%   the clamp lands exactly
+                                                      on the target, which is
+                                                      itself exactly 1.0
+```
+
+So a single cubic fitted over the primary interval cannot be said to serve the
+representable SET; it serves the interval, and the isolated point is carried by
+the clamp rather than by the fit. Sol raised this as a topology defect in the
+evidence (`191` follow-up) and he is right that calling it a set refit was
+wrong.
+
+It also matters WHICH fit a figure comes from, and an earlier version of this
+paragraph switched between them mid-sentence. It contrasted "the 5.376% he
+measured" with the 0.000% as-applied value — but 5.376015% is ACCOUNT 2's raw
+full-load error, where 1.0 is one of the fitting observations, while the
+0.000% belongs to Account 1. Two different cubics, presented as one
+comparison. Stated properly, with both accounts' governing maxima rather than
+only their full-load behaviour:
+
+```text
+                        raw at PLR 1.0   clamped at 1.0   MAX as applied
+Account 1 (chosen)        5.399395%          0.000%       1.235735% @ 0.1661
+Account 2 (alternative)   5.376015%          0.000%       1.238728% @ 0.1661
+```
+
+Both are exact at full load once the ceiling applies, so the full-load point
+does not distinguish them; their maxima, both at the LOWER endpoint, do. Sol
+reproduced every figure in that table independently (`195`).
+
+Sol's independent reproduction agrees to six decimals at 20 000 and 100 000
+INTERVALS. An earlier version of this decision published **1.235% / 4.938%** as a
+pair and called it converged: the heating figure was the 20 000-INTERVAL result
+(which does not round to three decimals as 1.235%) and the cooling figure was
+the 400-INTERVAL result. Two densities under one label, which is the same fault
+as two domains under one label further up. An earlier version of this decision
+published 1.877% and 4.853%, measured over PLR [0.1661, 1.0] with the target
+CLIPPED at 1.0 — the old domain and the old clip, carried forward under a
+label that no longer described them. That refit is OPEN WORK and deliberately
+not applied here — it changes reference
+energy results, so it belongs with its own re-freeze and its own adjudication
+of what error is acceptable.
+
+### A second copy, in a layer that cannot see this one
+
+`btap/modeling/hvac/data/curves.json` holds both curves again, with the same
+`min_x: 0.7` and no output bounds. Under D-77 the modeling layer cannot read
+NECB data, and the NECB efficiency pass replaces the curve on any coil that
+carries a capacity — an unsized coil silently keeps modeling's version, which
+is how a probe can conclude the NECB data never arrives. Whether the catalogue
+default should also be corrected is open; the proposed building is not bound by
+the reference Articles.
+
+### How it is verified
+
+`python/tests/necb/test_dx_plf_as_applied.py` builds a real coil through
+`btap.modeling.hvac.components.coils`, gives it a capacity so the NECB pass
+proceeds, runs `efficiency.apply`, and reads the curve the COIL carries. Three
+mutations that survived the previous, hand-built version of that test now fail
+it: killing `set_limits`'s output-bound writer, nulling the upper output bound,
+and moving the input minimum to 0.1. The comparison is UNCLIPPED, and three
+further mutations fail it: calling the whole domain representable (the original
+defect), moving the seam off its root, and claiming cooling has an upper seam.
+
+A FOURTH claim is withdrawn. This decision said that restoring the clipped
+comparison fails the test; Sol applied it literally and all six tests stayed
+green. He is right, and the reason is instructive: the main comparison now runs
+only over the REPRESENTABLE region, where by construction the target never
+reaches the ceiling, so clipping there is a mathematical no-op. My mutation had
+replaced BOTH occurrences of that expression — including the one inside the
+upper-seam test, which is what actually failed — and I attributed the failure
+to the wrong site. The seam is detected by the seam test, not by the fit
+comparison.
+
+The seam's own pin was also weaker than claimed. It bracketed the crossing at
++/-0.01, so moving the constant to 0.82 passed; it now asserts the ROOT, that
+the exact target EQUALS the ceiling at 0.8149996906315529 to nine places, and
+brackets at 1e-6. Sol's mutation now fails, and so does 0.8150 — three parts
+in ten million from the root, and comfortably inside the old bracket.
+
+- **Who/when:** Claude under D-10, 2026-10-10; Sol's `185` found the axis
+  defect and `187` refused the 0.25 domain and the hand-built test.
+- **Evidence:** the retained Article caches at
+  `btap/codes/necb/data/necb<edition>/coverage/articles_8_4.json` for sentences
+  (4)-(6), and EnergyPlus 25.2.0 `src/EnergyPlus/DXCoils.cc` for the field's
+  sampling range and `[0.7, 1.0]` requirement. Two domains, cited separately,
+  because neither alone settles this.

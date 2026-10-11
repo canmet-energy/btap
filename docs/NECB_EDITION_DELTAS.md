@@ -31,7 +31,7 @@ there rather than silently dropped from the comparison.
 |---|---|---|---|---|---|
 | envelope (`envelope_rules.json`) | 75 | 2 | 0 | 0 | 0 |
 | hvac (`reference_rules.json`) | 319 | 24 | 1 | 1 | 0 |
-| hvac_efficiencies (`efficiencies.json`) | 2704 | 25 | 111 | 427 | 48 |
+| hvac_efficiencies (`efficiencies.json`) | 2704 | 24 | 111 | 427 | 48 |
 | lighting (`lighting_rules.json`) | 6 | 0 | 0 | 0 | 0 |
 | loads (`loads_rules.json`) | 0 | 1 | 0 | 0 | 0 |
 | shw (`shw_rules.json`) | 76 | 1 | 3 | 0 | 0 |
@@ -42,7 +42,7 @@ there rather than silently dropped from the comparison.
 | tables/schedules (`tables/schedules.json`) | 7473 | 0 | 0 | 0 | 0 |
 | tables/space_types (`tables/space_types.json`) | 24024 | 0 | 0 | 0 | 0 |
 | tables/table_c1 (`tables/table_c1.json`) | 8827 | 0 | 0 | 0 | 0 |
-| **Total** | **46052** | **53** | **117** | **428** | **48** |
+| **Total** | **46052** | **52** | **117** | **428** | **48** |
 
 ## necb2020 → necb2025
 
@@ -100,7 +100,7 @@ there rather than silently dropped from the comparison.
 </details>
 
 <details>
-<summary><b>hvac_efficiencies</b> (`efficiencies.json`) — 3315 leaves: 2704 identical, 25 renumbered, 111 changed, 427 added, 48 removed (click to expand)</summary>
+<summary><b>hvac_efficiencies</b> (`efficiencies.json`) — 3314 leaves: 2704 identical, 24 renumbered, 111 changed, 427 added, 48 removed (click to expand)</summary>
 
 #### Renumbered
 
@@ -109,7 +109,6 @@ there rather than silently dropped from the comparison.
 | `curves.0.implements.table` | 8.4.5.2.-B | `curves.0.implements.table` | 8.4.6.2 |
 | `curves.1.implements.table` | 8.4.5.2.-A | `curves.1.implements.table` | 8.4.6.2 |
 | `curves.10.notes` | From NECB 2011 Table 8.4.4.21.-E (6).  Converted coefficients for deg. F to deg. C.  Governing requirement in this edition: Article 8.4.5.7. | `curves.10.notes` | From NECB 2011 Table 8.4.4.21.-E (6).  Converted coefficients for deg. F to deg. C.  Governing requirement in this edition: Article 8.4.6.7. |
-| `curves.11.notes` | From NECB 2011 Table 8.4.4.21.-E (4).  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.5.7. | `curves.11.notes` | From NECB 2011 Table 8.4.4.21.-E (4).  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.6.7. |
 | `curves.12.implements.table` | 8.4.5.3 | `curves.12.implements.table` | 8.4.6.3 |
 | `curves.19.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled centrifugal chiller.  Governing requirement in this edition: Article 8.4.5.5. (Tables 8.4.5.5.-A, -B and -C). | `curves.19.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled centrifugal chiller.  Governing requirement in this edition: Article 8.4.6.5. (Tables 8.4.6.5.-A, -B and -C). |
 | `curves.22.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled reciprocating chiller.  Governing requirement in this edition: Article 8.4.5.5. (Tables 8.4.5.5.-A, -B and -C). | `curves.22.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled reciprocating chiller.  Governing requirement in this edition: Article 8.4.6.5. (Tables 8.4.6.5.-A, -B and -C). |

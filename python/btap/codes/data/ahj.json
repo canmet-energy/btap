@@ -190,6 +190,14 @@
         "necb2020",
         "necb2025"
       ]
+    },
+    {
+      "id": "AHJ-21",
+      "title": "the archetype-EUI path applies no unmet-load criteria at all",
+      "status": "tool-gap",
+      "editions": [
+        "necb2025"
+      ]
     }
   ]
 }
