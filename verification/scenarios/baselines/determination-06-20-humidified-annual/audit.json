@@ -3328,7 +3328,7 @@
   },
   "value": "COP 3.98 (15.0SEER) on all 2 stages, binned by total capacity",
   "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3344,7 +3344,7 @@
   },
   "value": "COP 3.98 (15.0SEER) on all 2 stages, binned by total capacity",
   "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3360,7 +3360,7 @@
   },
   "value": "COP 3.8 (11.0EER) on all 2 stages, binned by total capacity",
   "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3376,7 +3376,7 @@
   },
   "value": "COP 3.98 (15.0SEER) on all 2 stages, binned by total capacity",
   "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3392,7 +3392,7 @@
   },
   "value": "COP 3.98 (15.0SEER) on all 2 stages, binned by total capacity",
   "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
+  "ruling": "D-46 D-102",
   "building": "reference building",
   "level": "decision"
  },
@@ -3750,7 +3750,7 @@
   "inputs": {
    "run_period": "full year",
    "clean_run": true,
-   "total_site_kwh": 151206,
+   "total_site_kwh": 151267,
    "unmet_heating_h": 0.0,
    "unmet_cooling_h": 4.75
   },
@@ -3911,9 +3911,9 @@
   "action": "proposed EXCEEDS the building energy target",
   "inputs": {
    "proposed_kwh": 201413.9,
-   "reference_building_energy_target_kwh": 151205.6
+   "reference_building_energy_target_kwh": 151266.7
   },
-  "value": "margin -50208.3 kWh (-33.2%)",
+  "value": "margin -50147.2 kWh (-33.2%)",
   "article": "8.4.1.2.(2)",
   "level": "decision"
  },
