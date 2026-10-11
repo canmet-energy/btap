@@ -27,7 +27,13 @@ from unittest import mock
 
 from btap.audit import AuditLog
 from btap.codes.necb import path
-from tests.necb.support import DDY, EPW, needs_engine, proposed_with_hvac
+from tests.necb.support import (
+    DDY,
+    EPW,
+    needs_engine,
+    needs_sdk,
+    proposed_with_hvac,
+)
 
 SAMPLES = Path(os.environ.get(
     "BTAP_SAMPLES_DIR",
@@ -369,6 +375,161 @@ class TestTheCriteriaArePerThermalBlock(unittest.TestCase):
                         f"{name}: every block is served, so a coil held "
                         "INSIDE zone equipment must still be found — "
                         f"got {per_zone}")
+
+
+@needs_sdk
+class TestCoolingIsAttributedToTheRightBLOCKS(unittest.TestCase):
+    """Configurations the nine-model corpus cannot see.
+
+    Every one of these was found by review, not by the corpus, and the corpus
+    is why: it has no unitary system on an air loop, no VRF terminal unit on
+    one, and no air terminal carrying its own cooling coil. So the nine-model
+    agreement check is necessary and nowhere near sufficient, and these
+    models are built with the SDK instead (Fable, `223`).
+    """
+
+    @staticmethod
+    def _blank(zones=2):
+        import openstudio
+
+        model = openstudio.model.Model()
+        built = []
+        for index in range(zones):
+            zone = openstudio.model.ThermalZone(model)
+            zone.setName(f"Z{index + 1}")
+            built.append(zone)
+        return model, built
+
+    @staticmethod
+    def _serve(model, loop, zones):
+        import openstudio
+
+        for zone in zones:
+            terminal = (openstudio.model
+                        .AirTerminalSingleDuctConstantVolumeNoReheat(
+                            model, model.alwaysOnDiscreteSchedule()))
+            loop.addBranchForZone(zone,
+                                  terminal.to_StraightComponent().get())
+
+    def test_a_unitary_system_ON_AN_AIR_LOOP_cools_its_loops_blocks(self):
+        """The regression I introduced, and the one that cost most.
+
+        `AirLoopHVACUnitarySystem` is a `ZoneHVACComponent` subclass, so
+        `to_ZoneHVACComponent()` succeeds — but on an air loop its
+        `thermalZone()` is EMPTY. Treating that as "placed with nothing
+        attributed" reported no cooled block in a fully cooled building, so
+        (4)(a) went vacuous and 500 h of unmet cooling per block PASSED. The
+        product's own `modeling/hvac/psz.py` builds exactly this shape.
+        """
+        import openstudio
+
+        model, zones = self._blank()
+        loop = openstudio.model.AirLoopHVAC(model)
+        unitary = openstudio.model.AirLoopHVACUnitarySystem(model)
+        coil = openstudio.model.CoilCoolingDXSingleSpeed(model)
+        unitary.setCoolingCoil(coil.to_HVACComponent().get())
+        unitary.addToNode(loop.supplyOutletNode())
+        self._serve(model, loop, zones)
+
+        per_block, unplaceable = path._zone_mechanical_cooling(model)
+        self.assertEqual([], unplaceable)
+        self.assertEqual(
+            {"Z1": True, "Z2": True}, per_block,
+            "every block the loop serves is cooled; reporting none of them "
+            "makes (4)(a) vacuous over a fully cooled building")
+
+    def test_a_VRF_terminal_unit_ON_AN_AIR_LOOP_does_too(self):
+        """Same shape, different class — so the fix is not DX-specific."""
+        import openstudio
+
+        model, zones = self._blank()
+        loop = openstudio.model.AirLoopHVAC(model)
+        openstudio.model.AirConditionerVariableRefrigerantFlow(model)
+        unit = openstudio.model.ZoneHVACTerminalUnitVariableRefrigerantFlow(
+            model,
+            openstudio.model.CoilCoolingDXVariableRefrigerantFlow(model),
+            openstudio.model.CoilHeatingDXVariableRefrigerantFlow(model),
+            openstudio.model.FanOnOff(model,
+                                      model.alwaysOnDiscreteSchedule()))
+        unit.addToNode(loop.supplyOutletNode())
+        self._serve(model, loop, zones)
+
+        per_block, unplaceable = path._zone_mechanical_cooling(model)
+        self.assertEqual([], unplaceable)
+        self.assertEqual({"Z1": True, "Z2": True}, per_block)
+
+    def test_an_air_TERMINALS_own_coil_cools_only_ITS_block(self):
+        """The over-attribution my reorder did not fix, and I said it had.
+
+        An air terminal is not a `ZoneHVACComponent`, so narrowest-first
+        ordering could not reach it: a four-pipe induction unit's chilled-
+        water coil fell through to `airLoopHVAC()` and claimed every block on
+        an otherwise heating-only loop. Terminals are placed through
+        `thermalZone.airLoopHVACTerminal()`, the only direction the SDK
+        offers (Fable, `223`).
+        """
+        import openstudio
+
+        model, zones = self._blank(3)
+        loop = openstudio.model.AirLoopHVAC(model)
+        heat = openstudio.model.CoilHeatingElectric(
+            model, model.alwaysOnDiscreteSchedule())
+        heat.addToNode(loop.supplyOutletNode())
+
+        plant = openstudio.model.PlantLoop(model)
+        plant.setName("Chilled Water Loop")
+        plant.addSupplyBranchForComponent(
+            openstudio.model.ChillerElectricEIR(model))
+        beam_cooling = openstudio.model.CoilCoolingWater(
+            model, model.alwaysOnDiscreteSchedule())
+        plant.addDemandBranchForComponent(beam_cooling)
+        beam = (openstudio.model
+                .AirTerminalSingleDuctConstantVolumeFourPipeInduction(
+                    model, openstudio.model.CoilHeatingWater(
+                        model, model.alwaysOnDiscreteSchedule())))
+        beam.setCoolingCoil(beam_cooling)
+        loop.addBranchForZone(zones[0], beam.to_StraightComponent().get())
+        self._serve(model, loop, zones[1:])
+
+        per_block, unplaceable = path._zone_mechanical_cooling(model)
+        self.assertEqual([], unplaceable)
+        self.assertEqual(
+            {"Z1": True, "Z2": False, "Z3": False}, per_block,
+            "only the block with the cooled terminal is inside (4)(a); the "
+            "other two are heated-only and their passive hours are not a "
+            "capacity shortfall")
+
+    def test_cooling_that_reaches_NO_block_is_vacuous_not_unknown(self):
+        """A chiller serving only a process loop.
+
+        Forcing this INDETERMINATE failed a building the Code does not
+        reach: it has no thermal block "for which mechanical cooling is
+        provided", so (4) is vacuous (Fable, `219`).
+        """
+        import openstudio
+
+        model, _zones = self._blank()
+        plant = openstudio.model.PlantLoop(model)
+        plant.setName("Process Chilled Water")
+        plant.addSupplyBranchForComponent(
+            openstudio.model.ChillerElectricEIR(model))
+        plant.addDemandBranchForComponent(
+            openstudio.model.CoilCoolingWater(
+                model, model.alwaysOnDiscreteSchedule()))
+
+        per_block, unplaceable = path._zone_mechanical_cooling(model)
+        self.assertEqual(
+            [], unplaceable,
+            "every object is PLACED — the plant simply reaches no block")
+        self.assertEqual({"Z1": False, "Z2": False}, per_block)
+        status = path._unmet_status_8_4_4(report(
+            None, None,
+            blocks={"Z1": {"heating": 1.0, "cooling": 900.0},
+                    "Z2": {"heating": 1.0, "cooling": 900.0}},
+            cooled=per_block, mechanical_cooling=True,
+            unplaceable=unplaceable))
+        self.assertTrue(status["cooling_vacuous"])
+        self.assertTrue(status["all_ok"])
 
 
 class TestTheVerdictActuallyComposesIt(unittest.TestCase):

@@ -1375,12 +1375,20 @@ def _zone_mechanical_cooling(model) -> tuple:
     having no cooled block at all — the direction that makes (4)(a) wrongly
     vacuous.
 
-    Resolution is ordered NARROWEST FIRST, which is the correction that
-    matters most here. A coil held inside a zone terminal serves THAT block,
-    even when the terminal sits on an air loop — so a cooled beam or
-    four-pipe induction unit in one zone of an otherwise heating-only loop
-    marked every block on the loop as cooled while `airLoopHVAC()` was tried
-    first (Fable, `219`). Zone containment is therefore asked before the loop.
+    Resolution is ordered NARROWEST FIRST: a zone component with a zone, then
+    an air terminal's own block, then a containing component, then the air
+    loop, then the plant. A coil's scope is the smallest thing that holds it.
+
+    Two corrections are worth naming, because I got each wrong once. A zone
+    component counts only when `thermalZone()` is actually set —
+    `AirLoopHVACUnitarySystem` and a VRF terminal unit are
+    `ZoneHVACComponent` subclasses that sit on AIR LOOPS, and treating those
+    as "placed with nothing attributed" made a fully cooled PSZ building
+    report no cooled block, so (4)(a) went vacuous over 500 h of unmet
+    cooling per block. And an air TERMINAL is not a `ZoneHVACComponent` at
+    all, so reordering the rungs could not reach the cooled-beam case I said
+    it had fixed; terminals are placed through `thermalZone.airLoopHVACTerminal()`,
+    which is the only direction the SDK offers (Fable, `223`).
 
     The second return value is the cooling objects the walk could NOT place.
     That distinction is what keeps a resolution failure from looking like an
@@ -1394,27 +1402,50 @@ def _zone_mechanical_cooling(model) -> tuple:
     cooled = set()
     unresolved = []
 
+    # An air TERMINAL serves exactly one block, and the SDK gives that
+    # relationship only in this direction. Without it, a terminal's own
+    # cooling coil falls through to `airLoopHVAC()` and claims every block on
+    # the loop — so a four-pipe induction unit or cooled beam in ONE zone of
+    # an otherwise heating-only loop marked all of them cooled (Fable, `219`
+    # and `223`; my narrowest-first reorder did NOT fix this, because an air
+    # terminal is not a `ZoneHVACComponent`, and I wrongly said it had).
+    terminal_zone = {}
+    for zone in model.getThermalZones():
+        terminal = zone.airLoopHVACTerminal()
+        if terminal.is_initialized():
+            terminal_zone[terminal.get().handle()] = zone.nameString().upper()
+
     def zone_of(obj, depth=0):
-        """Did this object's blocks get attributed? Zone before loop."""
+        """Did this object's blocks get attributed? Narrowest scope first."""
         if depth > 6:                # these chains are shallow; this bounds a cycle
             return False
+        # A zone component, but ONLY if it actually has a zone.
+        # `AirLoopHVACUnitarySystem` and a VRF terminal unit are
+        # `ZoneHVACComponent` subclasses that can sit on an AIR LOOP, where
+        # `thermalZone()` is empty. Returning "placed" for those made a
+        # fully cooled PSZ building — which `modeling/hvac/psz.py` builds —
+        # report no cooled block at all, so (4)(a) went vacuous and 500 h of
+        # unmet cooling per block passed (Fable, `223`). That is a regression
+        # I introduced; the previous ordering got it right.
         zone_component = obj.to_ZoneHVACComponent()
         if zone_component.is_initialized():
             zone = zone_component.get().thermalZone()
             if zone.is_initialized():
                 cooled.add(zone.get().nameString().upper())
-            return True              # placed, even if the zone is detached
+                return True
+            # else fall through: it is on a loop, not in a zone.
+        if obj.handle() in terminal_zone:
+            cooled.add(terminal_zone[obj.handle()])
+            return True
         component = obj.to_HVACComponent()
         if component.is_initialized():
             component = component.get()
-            # NARROWEST FIRST: a coil inside a zone terminal serves that one
-            # block, not every block on the terminal's air loop.
             held_by = component.containingZoneHVACComponent()
             if held_by.is_initialized():
                 zone = held_by.get().thermalZone()
                 if zone.is_initialized():
                     cooled.add(zone.get().nameString().upper())
-                return True
+                    return True
             containing = component.containingHVACComponent()
             if containing.is_initialized():
                 return zone_of(containing.get(), depth + 1)
