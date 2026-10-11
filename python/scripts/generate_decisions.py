@@ -946,6 +946,9 @@ def main(argv=None) -> int:
                   "generate_decisions.py".format(", ".join(stale)), file=sys.stderr)
             return 1
         print("decisions: both generated outputs are up to date")
+        for code, bare in sorted(_untitled_articles):
+            print(f"decisions: note — {code} article {bare} is cited "
+                  f"correctly but its retained payload carries no title")
         return 0
     for path, fresh in outputs:
         path.write_text(fresh, encoding="utf-8")

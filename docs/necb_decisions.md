@@ -7357,7 +7357,7 @@ PLR 1.0          it returns to exactly 1.000000
 A part-load FRACTION above 1.0 would mean better-than-rated efficiency at
 part load; EnergyPlus will not accept it. So over the top 18.5% of the domain
 the Code states a target the field cannot carry, exactly as it does below
-0.1661 — and for the same kind of reason. **Cooling has no upper seam**, and
+0.16604619095565545 — and for the same kind of reason. **Cooling has no upper seam**, and
 the asymmetry is asserted rather than left incidental.
 
 Three different things live in that region and the first version of this
@@ -7402,19 +7402,25 @@ detecting it (Sol, `191`).
 
 The cooling number is a finding in its own right: that polynomial was fit over
 0.25-1.0, so the lowest part of its representable region was never in the fit.
-A refit over the heating curve's PRIMARY INTERVAL — [0.1661, root], not the
-whole set — measures **1.236%**, and cooling's over its own region measures
-**5.025%**, both on the same 100 000-INTERVAL least-squares grid (equally
+A refit over the heating curve's PRIMARY INTERVAL — [0.16604619095565545,
+the upper root], not the whole set — measures **1.237%**, and cooling's over its own region measures
+**5.029%**, both on the same 100 000-INTERVAL least-squares grid (equally
 spaced, endpoints included, maximum relative error measured on that grid, and
 AS APPLIED, i.e. after the engine's output clamps):
 
 ```text
 intervals   heating     cooling        (n intervals is n+1 points)
-      200  1.192849%   4.852719%
-      400  1.214230%   4.938354%
-   20 000  1.235388%   5.023286%
-  100 000  1.235735%   5.024681%
+      200  1.193942%   4.856725%
+      400  1.215343%   4.942430%
+   20 000  1.236520%   5.027431%
+  100 000  1.236868%   5.028827%
 ```
+
+Every row of that progression was recomputed from the exact lower ROOTS. The
+submitted version fitted from the inward-rounded 0.1661 and 0.1745 while
+calling the domain the primary interval and cooling's own region — so the
+evidence still contained the slivers the same commit had just rejected
+(Sol, `199`). The refit figures move with the endpoint, which is the point:
 
 **Naming the interval rather than the set matters, because the fit does not
 serve the isolated point.** Evaluated at PLR 1.0 the refit polynomial returns
@@ -7445,9 +7451,13 @@ only their full-load behaviour:
 
 ```text
                         raw at PLR 1.0   clamped at 1.0   MAX as applied
-Account 1 (chosen)        5.399395%          0.000%       1.235735% @ 0.1661
-Account 2 (alternative)   5.376015%          0.000%       1.238728% @ 0.1661
+Account 1 (chosen)        5.402193%          0.000%       1.236868% @ the root
+Account 2 (alternative)   5.378805%          0.000%       1.239862% @ the root
 ```
+
+Both rows are fitted from PLR 0.16604619095565545, the exact root. The
+earlier pair — 5.399395%/1.235735% and 5.376015%/1.238728% — came from the
+rounded 0.1661 and is retired.
 
 Both are exact at full load once the ceiling applies, so the full-load point
 does not distinguish them; their maxima, both at the LOWER endpoint, do. Sol

@@ -83,6 +83,30 @@ CLAMP_ACTIVE_FROM = {"heating": 0.953}
 TOLERANCE_PERCENT = {"heating": 3.0, "cooling": 13.0}
 
 
+def _poly(coef, x):
+    return sum(k * x ** i for i, k in enumerate(coef))
+
+
+def _raw_poly(kind, plr):
+    """The shipped cubic BEFORE the engine's output clamps.
+
+    `curve.evaluate()` returns the clamped value, so it cannot show where the
+    polynomial itself crosses the ceiling — which is what the clamp onset IS.
+    """
+    import json
+
+    from btap.codes.necb import _data_root
+
+    data = json.loads((_data_root() / "necb2020" / "efficiencies.json")
+                      .read_text(encoding="utf-8"))
+    name = {"heating": "DXHEAT-REF-PLFFPLR",
+            "cooling": "DXCOOL-REF-COOLPLFFPLR"}[kind]
+    row = next(c for c in data["curves"]
+               if isinstance(c, dict) and c.get("name") == name)
+    c = [row["coeff_1"], row["coeff_2"], row["coeff_3"], row["coeff_4"]]
+    return sum(k * plr ** i for i, k in enumerate(c))
+
+
 def exact_plf(kind, plr):
     eir = sum(c * plr ** i for i, c in enumerate(ARTICLE_EIR_FPLR[kind]))
     return plr / eir
@@ -298,10 +322,6 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                 # polynomial is below the ceiling at this PLR whatever the
                 # bound says, while its comment claimed a check it never
                 # performed (Fable, `198`).
-                self.assertAlmostEqual(
-                    curve.evaluate(at), min(CARRIER_HI, curve.evaluate(at)),
-                    places=12,
-                    msg=f"{kind}: sanity — evaluate() is already clamped")
                 self.assertLess(
                     curve.evaluate(at), CARRIER_HI - 1e-4,
                     f"{kind}: at the peak the polynomial sits BELOW the "
@@ -321,16 +341,24 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                         f"{measured:.3f}% at PLR {m_at:.4f}; D-102 publishes "
                         f"{worst}%")
                 # (c) and the clamp is a SEPARATE fact, active only up here
-                # Pinned from BOTH sides. Fable moved this constant from
-                # 0.953 to 0.5 and the test passed, because only the "below
-                # it, no overshoot" half was asserted.
+                # The onset is where the POLYNOMIAL crosses the ceiling, so
+                # assert the crossing, not a neighbourhood. The previous
+                # version bracketed at +/-0.01 and so admitted anything in
+                # [0.943, 0.963) — Fable passed it 0.945 and 0.960 — while
+                # D-102 publishes 0.953 to three decimals and the file's own
+                # comments condemn exactly this shape for the upper seam.
+                onset = CLAMP_ACTIVE_FROM[kind]
+                self.assertAlmostEqual(
+                    CARRIER_HI, _raw_poly(kind, onset), places=4,
+                    msg=f"{kind}: {onset} is where the polynomial REACHES the "
+                        "ceiling; this is the published onset")
                 self.assertLess(
-                    curve.evaluate(CLAMP_ACTIVE_FROM[kind] - 0.01), CARRIER_HI,
-                    f"{kind}: below this the polynomial does not overshoot")
-                self.assertGreaterEqual(
-                    curve.evaluate(CLAMP_ACTIVE_FROM[kind] + 0.01), CARRIER_HI,
-                    f"{kind}: and above it the clamp IS active — if this "
-                    "fails the stated onset has moved")
+                    _raw_poly(kind, onset - 1e-3), CARRIER_HI,
+                    f"{kind}: a millistep below, it has not reached it")
+                self.assertGreater(
+                    _raw_poly(kind, onset + 1e-3), CARRIER_HI,
+                    f"{kind}: a millistep above, it has — so the clamp "
+                    "becomes active HERE and not 0.01 either way")
                 self.assertAlmostEqual(
                     CARRIER_HI, curve.evaluate(1.0), places=6,
                     msg=f"{kind}: at full load the clamp removes the "
@@ -417,6 +445,77 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                         f"{edition}/{kind}: the note must state this EXACT "
                         f"set, digit for digit:\n  wanted: {wanted}\n"
                         f"  note:   {' '.join(notes.split())[:200]}")
+
+    def test_the_PUBLISHED_refit_is_COMPUTED_from_the_root_constants(self):
+        """D-102's refit figures, recomputed and matched — not enumerated.
+
+        Three times now a refit pair has gone stale because the domain moved
+        under it, and twice the answer was to add the newly retired pair to a
+        list. That does not scale and it did not work: each retirement needed
+        the list extended, and Sol's `199` found the fits still starting at
+        the inward-rounded floors the same commit had rejected.
+
+        So this derives the figure instead. It fits the cubic over
+        `REPRESENTABLE[kind]` — the ROOT constants the seam tests pin — and
+        requires D-102 to publish that number. If a root moves, the expected
+        figure moves with it, and a document carrying the old one fails
+        without anybody remembering to enumerate it.
+        """
+        import pathlib as _p
+
+        source = (_p.Path(__file__).resolve().parents[3]
+                  / "docs" / "decisions" / "D-102.md")
+        if not source.is_file():
+            self.skipTest(f"{source} is not present in this layout")
+        text = source.read_text(encoding="utf-8")
+        for kind in sorted(REPRESENTABLE):
+            with self.subTest(kind=kind):
+                lo, hi = REPRESENTABLE[kind]
+                coef = self.least_squares_cubic(kind, lo, hi, 100_000)
+                worst = max(
+                    abs(max(CARRIER_LO, min(CARRIER_HI, _poly(coef, x)))
+                        - exact_plf(kind, x)) / exact_plf(kind, x) * 100.0
+                    for x in (lo + (hi - lo) * i / 100_000
+                              for i in range(100_001)))
+                shown = f"{worst:.3f}%"
+                # PER SURFACE, not over the union. The first version of this
+                # guard searched the whole document, so reverting the BODY to
+                # the stale pair still passed — the front-matter summary
+                # carried the right figure and `assertIn` found it there. A
+                # union check cannot see one surface going stale, which is the
+                # exact failure mode this decision has had five times.
+                front, _, body = text.partition("+++\n\n")
+                for where, chunk in (("front-matter summary", front),
+                                     ("body", body)):
+                    self.assertIn(
+                        shown, chunk,
+                        f"{kind}: a refit over [{lo}, {hi}] at 100 000 "
+                        f"intervals measures {worst:.6f}%, so the {where} "
+                        f"must publish {shown} and does not. If this fails "
+                        "after a root moved, the figure is stale — recompute "
+                        "it, do not retire it by hand.")
+
+    @staticmethod
+    def least_squares_cubic(kind, lo, hi, intervals):
+        """A plain normal-equations cubic fit, so the expectation is derived."""
+        n = 4
+        m = [[0.0] * (n + 1) for _ in range(n)]
+        for i in range(intervals + 1):
+            x = lo + (hi - lo) * i / intervals
+            basis, y = [1.0, x, x * x, x ** 3], exact_plf(kind, x)
+            for r in range(n):
+                for c in range(n):
+                    m[r][c] += basis[r] * basis[c]
+                m[r][n] += basis[r] * y
+        for col in range(n):
+            piv = max(range(col, n), key=lambda r: abs(m[r][col]))
+            m[col], m[piv] = m[piv], m[col]
+            for r in range(n):
+                if r != col and m[col][col]:
+                    f = m[r][col] / m[col][col]
+                    for c in range(col, n + 1):
+                        m[r][c] -= f * m[col][c]
+        return [m[r][n] / m[r][r] for r in range(n)]
 
     def test_no_RETIRED_pair_is_presented_as_current(self):
         """D-102 carried a superseded result on three surfaces in turn.
