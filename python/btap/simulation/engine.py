@@ -355,7 +355,7 @@ def _install_archive(archive: Path, version: str) -> None:
             f"(the official {asset}). Download the exact release asset — a re-wrapped or "
             "partial archive is refused."
         )
-    _extract(archive, cache_dir(version))
+    _extract_atomically(archive, cache_dir(version))
 
 
 def _download_and_install(version: str) -> None:
@@ -379,9 +379,53 @@ def _download_and_install(version: str) -> None:
                 f"downloaded {asset} has sha256 {digest}, expected {sha256} — refusing to "
                 "install a tampered or truncated engine."
             )
-        _extract(tmp, cache_dir(version))
+        _extract_atomically(tmp, cache_dir(version))
     finally:
         tmp.unlink(missing_ok=True)
+
+
+def _extract_atomically(archive: Path, dest: Path) -> None:
+    """Extract so a CONCURRENT READER never sees a partial install.
+
+    The provisioning lock serialises WRITERS, and the failure it was added for
+    is a READER: `ensure_energyplus` checks the cache BEFORE taking the lock,
+    so a process arriving mid-extraction found `release/energyplus` the moment
+    tar created the entry and ran `--version` on a binary still being written
+    (Fable, `214`). Serialising the installs does not help that process —
+    it never reaches the lock.
+
+    So the tree is built in a sibling staging directory and moved into place
+    with one `os.replace`. A reader then sees either no cache directory at all,
+    and takes the lock, or a complete one. The staging directory is a sibling
+    rather than a child so the rename stays within one filesystem, and it is
+    OUTSIDE `dest`, so `_binary_in`'s glob cannot find a half-written binary
+    in it.
+
+    Removing an existing `dest` is safe because every caller holds the
+    provisioning lock: the only `dest` that can be there is a partial install
+    from a crashed earlier run.
+    """
+    _stage(lambda into: _extract(archive, into), dest)
+
+
+def _stage(build, dest: Path) -> None:
+    """Run `build(staging)` and move the result onto `dest` in one step.
+
+    Separate from `_extract_atomically` so a test can drive the real staging
+    with its own `build` instead of reimplementing the part under test.
+    """
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    staging = Path(tempfile.mkdtemp(prefix=f".{dest.name}.staging-",
+                                    dir=dest.parent))
+    try:
+        build(staging)
+        if dest.exists():
+            shutil.rmtree(dest)
+        os.replace(staging, dest)
+        staging = None
+    finally:
+        if staging is not None:
+            shutil.rmtree(staging, ignore_errors=True)
 
 
 def _extract(archive: Path, dest: Path) -> None:

@@ -53,16 +53,29 @@ def _worker(index, cache, ledger, queue):
     engine._companion_binary = lambda version: None
     engine._verify_version = lambda *args, **kwargs: None
 
-    def fake_install(version):
-        with open(ledger, "a", encoding="utf-8") as handle:
-            handle.write(f"enter {index}\n")
-        time.sleep(INSTALL_SECONDS)
-        release = engine.cache_dir(version) / "release"
+    def extract(into):
+        """Write the binary FIRST, then keep working — as tar does.
+
+        The previous fake created the binary at the END, which made it atomic
+        exactly where the real installer is not, and so it could not see a
+        reader picking up a half-written binary (Fable, `214`). Writing it
+        first and finishing afterwards is the shape that exposes it.
+        """
+        release = into / "release"
         release.mkdir(parents=True, exist_ok=True)
         binary = release / ("energyplus.exe" if sys.platform == "win32"
                             else "energyplus")
         binary.write_text("#!/bin/sh\n", encoding="utf-8")
         binary.chmod(0o755)
+        time.sleep(INSTALL_SECONDS)                  # the rest of the release
+        (release / "Energy+.idd").write_text("x", encoding="utf-8")
+
+    def fake_install(version):
+        with open(ledger, "a", encoding="utf-8") as handle:
+            handle.write(f"enter {index}\n")
+        # Through the REAL staging path, so what is under test is the
+        # product's atomicity and not the fake's.
+        engine._stage(extract, engine.cache_dir(version))
         with open(ledger, "a", encoding="utf-8") as handle:
             handle.write(f"leave {index}\n")
 
@@ -70,8 +83,17 @@ def _worker(index, cache, ledger, queue):
     engine._install_archive = lambda path, version: fake_install(version)
     try:
         resolved = Path(engine.ensure_energyplus())
-        inside = cache in str(resolved)
-        queue.put(("ok" if inside else "wrong-rung", index, str(resolved)))
+        if cache not in str(resolved):
+            queue.put(("wrong-rung", index, str(resolved)))
+        elif not (resolved.parent / "Energy+.idd").is_file():
+            # The install writes the binary first and the rest afterwards, so
+            # a resolution that lacks the later file came from a tree still
+            # being built. This is the reader half of the race: the process
+            # that sees a half-written binary never reaches the lock, so
+            # serialising the writers cannot help it (Fable, `214`).
+            queue.put(("partial", index, str(resolved)))
+        else:
+            queue.put(("ok", index, str(resolved)))
     except Exception as error:                              # noqa: BLE001
         queue.put(("error", index, f"{type(error).__name__}: {error}"))
 
@@ -109,6 +131,12 @@ class TestProvisioningIsExclusiveAcrossProcesses(unittest.TestCase):
                 [], elsewhere,
                 "these processes resolved an engine OUTSIDE the temporary "
                 f"cache, so they never reached the racing path: {elsewhere}")
+            partial = [r for r in results if r[0] == "partial"]
+            self.assertEqual(
+                [], partial,
+                "these processes resolved a HALF-INSTALLED engine, which is "
+                "what `Text file busy` is: the install must be moved into "
+                f"place in one step, not built in place. {partial}")
 
             lines = (Path(ledger).read_text(encoding="utf-8").splitlines()
                      if Path(ledger).exists() else [])
