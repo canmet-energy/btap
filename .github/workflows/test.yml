@@ -98,6 +98,19 @@ jobs:
     runs-on: ${{ vars.CI_RUNNER != '' && format('codebuild-{0}-{1}-{2}', vars.CI_RUNNER, github.run_id, github.run_attempt) || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v5
+        # fetch-depth 0 so no test ever needs to deepen the clone.
+        # `test_manifest_integrity` proves the frozen manifest's
+        # provenance commit is an ancestor of HEAD, and a shallow
+        # clone cannot answer that — git returns 1, the same code as
+        # a genuine "no", for a commit beyond the graft boundary. Its
+        # recovery is to deepen, and this job runs `-n auto` with TWO
+        # modules calling that function, so two processes deepened one
+        # `.git` concurrently and produced a false "came from another
+        # line of history" failure (issue #99). The function now takes
+        # a lock, so this is belt and braces: with a full clone the
+        # racing path is never entered at all.
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
           python-version: '3.11'   # the project floor; local dev may be newer
