@@ -399,6 +399,24 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                 "the refit is measured over heating's PRIMARY INTERVAL; the "
                 "representable set also contains the isolated point 1.0, "
                 "which the fit does not serve")
+        # The sample UNIT drifted twice: first the table labelled intervals
+        # as points, then the prose around it did after the table was fixed.
+        # `range(n + 1)` over n intervals is n + 1 points, and the difference
+        # is measurable at low density (200 points 1.192635% against 200
+        # intervals 1.192849%), so the label is not cosmetic.
+        # Whitespace-NORMALISED, because the document wraps. My first version
+        # of this check looked for "100 000 points" with a space and the live
+        # text had a newline between the number and the unit — the very form
+        # the mutation restored, so the guard passed on the instance it
+        # existed to catch.
+        flat = " ".join(text.split())
+        for density in ("200", "400", "20 000", "100 000"):
+            for unit in (f"{density}-point", f"{density} points",
+                         f"{density}-POINT", f"{density} POINT"):
+                self.assertNotIn(
+                    unit.lower(), flat.lower(),
+                    f"this decision measures {density} INTERVALS, not points; "
+                    f"n intervals is n+1 points and the figures differ")
         for heating, cooling in RETIRED_PAIRS:
             for sentence in re.split(r"(?<=\.)\s+", text):
                 if heating not in sentence or cooling not in sentence:
