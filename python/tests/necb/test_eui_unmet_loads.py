@@ -250,6 +250,54 @@ class TestTheCriteriaArePerThermalBlock(unittest.TestCase):
         self.assertFalse(status["cooling_ok"])
         self.assertEqual({"COOLED": 150.0}, status["cooling_failures"])
 
+    def test_a_cooled_building_with_NO_cooled_block_is_indeterminate(self):
+        """Silence about applicability is not applicability.
+
+        `08-vrf` reached a verdict with the audit line "within 100 h for every
+        one of 0 mechanically cooled thermal block(s)" and `compliant: True`,
+        because no block could be identified as cooled in a building the
+        building-wide flag calls cooled. The resolution is fixed, and this is
+        the guard that stops the next unresolvable equipment type passing
+        (4)(a) over an empty set the same way (Fable, `214`).
+        """
+        status = path._unmet_status_8_4_4(report(
+            None, None,
+            blocks={"Z1": {"heating": 1.0, "cooling": 900.0}},
+            cooled={"Z1": False}, mechanical_cooling=True))
+        self.assertTrue(status["unresolved_cooling"])
+        self.assertTrue(status["indeterminate"])
+        self.assertFalse(
+            status["all_ok"],
+            "a building with cooling whose cooled blocks cannot be "
+            "identified must not PASS (4)(a) over zero blocks")
+
+    def test_a_block_missing_from_the_cooling_map_is_indeterminate(self):
+        """Not an uncooled block — a block whose applicability is unknown.
+
+        Defaulting a missing entry to uncooled let 900 h of unmet cooling
+        pass (Fable, `214`).
+        """
+        status = path._unmet_status_8_4_4(report(
+            None, None,
+            blocks={"Z1": {"heating": 1.0, "cooling": 900.0},
+                    "Z2": {"heating": 1.0, "cooling": 1.0}},
+            cooled={"Z2": True}, mechanical_cooling=True))
+        self.assertEqual(["Z1"], status["unattributed_blocks"])
+        self.assertTrue(status["indeterminate"])
+        self.assertFalse(status["all_ok"])
+
+    def test_the_wholly_uncooled_fast_path_still_PASSES(self):
+        """The control for both guards above: they must not turn an uncooled
+        building into an indeterminate one. `01-baseboard-gas` is that
+        building, and it is a frozen parity scenario."""
+        status = path._unmet_status_8_4_4(report(
+            None, None,
+            blocks={"Z1": {"heating": 10.0, "cooling": 1422.0}},
+            cooled={}, mechanical_cooling=False))
+        self.assertTrue(status["cooling_vacuous"])
+        self.assertFalse(status["indeterminate"])
+        self.assertTrue(status["all_ok"])
+
     def test_absent_block_rows_are_INDETERMINATE_and_the_union_is_not_used(self):
         status = path._unmet_status_8_4_4(report(
             None, None, blocks={},
@@ -271,10 +319,18 @@ class TestTheCriteriaArePerThermalBlock(unittest.TestCase):
         """
         import openstudio
 
+        # The WHOLE corpus, because the two models a three-model sample left
+        # out are where it broke. `08-vrf` came out 0 of 5 cooled with the
+        # building-wide flag True — the 3.11 SDK resolves a VRF coil to
+        # neither an air loop, nor a containing zone component, nor a
+        # containing component — so (4)(a) was evaluated over ZERO blocks and
+        # passed (Fable, `214`).
         expected_any = {"01-baseboard-gas": False, "06-unit-heaters-gas": False,
+                        "07-furnace-forced-air": False,
                         "05-ptac-electric": True, "02-psz-gas-dx": True,
                         "03-vav-reheat-chiller": True,
-                        "04-fancoil-chiller": True}
+                        "04-fancoil-chiller": True,
+                        "08-vrf": True, "09-water-source-hp": True}
         for name, cooled_expected in expected_any.items():
             with self.subTest(model=name):
                 loaded = openstudio.osversion.VersionTranslator().loadModel(

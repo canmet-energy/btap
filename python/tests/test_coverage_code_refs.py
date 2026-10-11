@@ -74,6 +74,16 @@ def test_manifest_inventory_and_every_code_ref_resolves():
     # coverage rows cited articles that do not exist and were DELETED rather
     # than renumbered. One carried a code pointer, hence the ref count. The
     # 2025 claims for the same provisions stay: they exist there.
+    #
+    # Sol's `215` re-declared NECB 2025's 8.4.1.2 from `implemented` to
+    # `partial` — sentence (5)'s capacity iteration is applied on the 8.4.5
+    # reference path and NOT on the 8.4.4 archetype-EUI path (AHJ-21), and
+    # the row claimed both — but BOTH COUNTS ARE UNCHANGED. The article was
+    # re-declared at its true depth rather than split, and it kept its two
+    # code pointers: the R7 ledger's invariant is that live references plus
+    # recorded retirements sum to R6's 313, which admits retirements and path
+    # moves but not additions, so a third pointer would have broken a
+    # historical record to say something the `how` already says.
     assert sum(len(articles) for _path, articles in manifests) == 239
 
     refs = code_refs(manifests)

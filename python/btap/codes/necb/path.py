@@ -1114,9 +1114,17 @@ def _unmet_status_8_4_4(report):
         if float(heating_h) > HEATING_UNMET_LIMIT_H:
             heating_failures[name] = float(heating_h)
 
+    unattributed = set()
     if not cooling_vacuous:
         for name, hours in blocks.items():
-            if not cooled_map.get(str(name).upper(), False):
+            if str(name).upper() not in cooled_map:
+                # A block with unmet hours and no entry in the cooling map is
+                # not an UNCOOLED block; it is a block whose applicability was
+                # never established. Defaulting it to uncooled let 900 h pass
+                # (Fable, `214`).
+                unattributed.add(name)
+                continue
+            if not cooled_map[str(name).upper()]:
                 continue
             cooling_blocks += 1
             cooling_h = (hours or {}).get("cooling")
@@ -1126,18 +1134,33 @@ def _unmet_status_8_4_4(report):
             if float(cooling_h) > COOLING_UNMET_LIMIT_H_8_4_4:
                 cooling_failures[name] = float(cooling_h)
 
-    # Nothing to read means nothing was determined. `blocks` absent is the
-    # plain case; a non-vacuous building whose cooled blocks cannot be
-    # identified is the same situation for (4)(a) specifically; and a block
-    # present with no hours is the third.
-    indeterminate = bool(not blocks or unreadable or (
-        not cooling_vacuous and not cooled_map))
+    # Nothing to read means nothing was determined, in four shapes: no
+    # blocks at all; a block present with no hours; a non-vacuous building
+    # with no cooling map; and a block with hours whose applicability the map
+    # does not cover.
+    #
+    # The fourth includes the case that matters most. A building the
+    # building-wide flag calls cooled, in which NO block could be identified
+    # as cooled, is a resolution failure and not a building to which (4)(a)
+    # happens not to apply: `08-vrf` evaluated the sentence over ZERO blocks
+    # and PASSED, because the SDK does not resolve a VRF coil to its terminal
+    # unit (Fable, `214`). That is fixed in `_zone_mechanical_cooling`, and
+    # this is the guard that stops the next unresolvable equipment type
+    # reaching a verdict the same way — silence about applicability is not
+    # applicability.
+    unresolved_cooling = bool(
+        not cooling_vacuous and blocks and cooling_blocks == 0)
+    indeterminate = bool(not blocks or unreadable or unattributed
+                         or (not cooling_vacuous and not cooled_map)
+                         or unresolved_cooling)
 
     heating_ok = not heating_failures
     cooling_ok = cooling_vacuous or not cooling_failures
     return {"blocks": len(blocks),
             "cooled_blocks": cooling_blocks,
             "unreadable_blocks": sorted(unreadable),
+            "unattributed_blocks": sorted(unattributed),
+            "unresolved_cooling": unresolved_cooling,
             "heating_failures": heating_failures,
             "cooling_failures": cooling_failures,
             "worst_heating_h": max(
@@ -1162,7 +1185,11 @@ def evaluate_unmet_8_4_4(report, audit):
                    "a union over blocks and is NOT substituted for them",
                    inputs={"blocks": status["blocks"],
                            "unreadable_blocks":
-                               status["unreadable_blocks"] or None},
+                               status["unreadable_blocks"] or None,
+                           "unattributed_blocks":
+                               status["unattributed_blocks"] or None,
+                           "no_cooled_block_identified":
+                               status["unresolved_cooling"] or None},
                    article="8.4.1.2.(3)", ahj="AHJ-21")
         return False
     audit.decision(
@@ -1342,49 +1369,79 @@ def _zone_mechanical_cooling(model) -> dict:
     MODEL contains any. Once one block is cooled that flag is true for the
     whole building, so passive-overheating hours from an uncooled block enter
     the determination and can fail a sentence that never reached them (Sol,
-    `212`, blocker 2).
+    `212`).
 
-    Cooling is resolved TO blocks rather than asked OF them: a block's own
-    equipment list carries the PTAC, not the DX coil inside it, so matching
-    equipment types marked a fully cooled PTAC building as having no cooled
-    block at all — the direction that makes (4) wrongly vacuous. Each cooling
-    object instead resolves through the SDK's containment accessors: an air
-    loop's coil reaches that loop's zones, a zone component's coil reaches its
-    own zone, and a coil inside a unitary reaches whatever contains the
-    unitary.
+    Cooling is resolved TO blocks rather than asked OF them, because a block's
+    equipment list carries the PTAC and not the DX coil inside it: matching
+    equipment types reported `05-ptac-electric`, a fully cooled building, as
+    having no cooled block at all — the direction that makes (4)(a) wrongly
+    vacuous.
+
+    Resolution has two rungs, and the second is why this is not just the
+    containment accessors. A VRF cooling coil answers `airLoopHVAC`,
+    `containingZoneHVACComponent` AND `containingHVACComponent` all empty in
+    the 3.11 SDK, so `08-vrf` came out 0 of 5 cooled with the building-wide
+    flag True, and (4)(a) was then evaluated over ZERO blocks and passed
+    (Fable, `214`). So when containment cannot answer, the object's REFERENCE
+    GRAPH does: `sources()` gives the objects that point at this coil, and a
+    terminal unit among them resolves through `to_ZoneHVACComponent()` to the
+    block it serves. That is a general relationship rather than a list of
+    equipment types, which is what keeps the next unlisted terminal unit from
+    reintroducing this.
     """
     cooled = set()
 
-    def reach(component, depth=0):
-        if depth > 8:            # containment is shallow; this only bounds a cycle
-            return
-        loop = component.airLoopHVAC()
-        if loop.is_initialized():
-            for zone in loop.get().thermalZones():
-                cooled.add(zone.nameString().upper())
-            return
-        zone_component = component.containingZoneHVACComponent()
+    def zone_of(obj, depth=0):
+        """The blocks one object serves, by containment then by reference."""
+        if depth > 6:                # these chains are shallow; this bounds a cycle
+            return False
+        zone_component = obj.to_ZoneHVACComponent()
         if zone_component.is_initialized():
             zone = zone_component.get().thermalZone()
             if zone.is_initialized():
                 cooled.add(zone.get().nameString().upper())
-            return
-        containing = component.containingHVACComponent()
-        if containing.is_initialized():
-            reach(containing.get(), depth + 1)
+                return True
+        component = obj.to_HVACComponent()
+        if component.is_initialized():
+            component = component.get()
+            loop = component.airLoopHVAC()
+            if loop.is_initialized():
+                for zone in loop.get().thermalZones():
+                    cooled.add(zone.nameString().upper())
+                return True
+            held_by = component.containingZoneHVACComponent()
+            if held_by.is_initialized():
+                zone = held_by.get().thermalZone()
+                if zone.is_initialized():
+                    cooled.add(zone.get().nameString().upper())
+                    return True
+            containing = component.containingHVACComponent()
+            if containing.is_initialized():
+                return zone_of(containing.get(), depth + 1)
+        # Containment is silent: ask what POINTS AT this object.
+        for source in obj.sources():
+            as_model_object = source.to_ModelObject()
+            if not as_model_object.is_initialized():
+                continue
+            if zone_of(as_model_object.get(), depth + 1):
+                return True
+        return False
 
     for obj in model.modelObjects():
         type_name = obj.iddObjectType().valueName()
         if not _COOLING_PATTERN.search(type_name):
             continue
+        # A chiller or district-cooling node is UPSTREAM of whatever serves a
+        # block: the coil drawing on that loop is itself matched here and
+        # resolves to its own blocks, so attributing the plant as well would
+        # mark every block on the loop's demand side as cooled, including
+        # blocks served only for process or service-water demand.
         if _UPSTREAM_COOLING_PATTERN.search(type_name):
             continue
-        component = obj.to_HVACComponent()
-        if component.is_initialized():
-            reach(component.get())
+        zone_of(obj)
 
-    # An ideal-loads block is cooled by definition and is not an HVACComponent
-    # reachable through the walk above.
+    # An ideal-loads block is cooled by definition, and the flag lives on the
+    # zone rather than on any object the walk above would reach.
     for zone in model.getThermalZones():
         if zone.useIdealAirLoads():
             cooled.add(zone.nameString().upper())

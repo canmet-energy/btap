@@ -15,12 +15,13 @@
    {
     "article": "8.4.1.2.",
     "title": "Determination of Compliance",
-    "status": "implemented",
-    "how": "The pipeline computes the (2) annual-energy verdict (against the 8.4.4 EUI target or the 8.4.5 reference building), the (3)/(4) unmet-hours verdicts (with the vacuous-cooling determination when the proposed has no mechanical cooling), and the sentence-(5) capacity auto-iteration — per-thermal-block: each failing zone’s Sizing:Zone factors are raised, secant-targeted from that zone’s own (factor, unmet-hours) history across rounds, with a global SizingParameters fallback when per-zone data cannot attribute the failure, and hard-sized-equipment stall detection — compliance.rb; asserted by test_compliance.rb.",
+    "status": "partial",
+    "how": "The pipeline computes the (2) annual-energy verdict (against the 8.4.4 EUI target or the 8.4.5 reference building), the (3)/(4) unmet-hours verdicts per THERMAL BLOCK — the Facility row is a union over blocks and is not read — with (4) scoped to blocks for which mechanical cooling is provided and vacuous where the proposed has none, and the sentence-(5) capacity auto-iteration: each failing zone’s Sizing:Zone factors are raised, secant-targeted from that zone’s own (factor, unmet-hours) history across rounds, with a global SizingParameters fallback when per-zone data cannot attribute the failure, and hard-sized-equipment stall detection. On the archetype-EUI path (Subsection 8.4.4) the (3) and (4)(a) verdicts are applied per thermal block and compose into the determination, but sentence (5) is NOT: iterating the capacities of the user’s own design is a different act from iterating a reference’s and its mechanics are unadjudicated, so a failure is reported NOT COMPLIANT with a warning naming (5).",
     "code": [
      "python/btap/codes/compliance.py#_evaluate",
      "python/btap/codes/compliance.py#_evaluate_unmet"
-    ]
+    ],
+    "gaps": "sentence (5)’s incremental capacity increase is applied on the 8.4.5 reference path only; on the 8.4.4 archetype-EUI path it is not applied and the run says so (AHJ-21)"
    },
    {
     "article": "8.4.1.5.",
