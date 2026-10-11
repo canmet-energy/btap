@@ -5938,8 +5938,22 @@ difference is its cross-reference to *Subsection 8.4.5* becoming *8.4.6*.
 
 `8.4.1.2.(5)` keeps its number in both editions and differs in wording: 2025
 says the capacities "of the proposed building or the reference building, where
-applicable" rather than "of the proposed or reference building". The
-conditionality is already carried per edition in the runtime rule data.
+applicable" rather than "of the proposed or reference building".
+
+**That conditionality is NOT implemented, and an earlier version of this note
+claimed it was.** It said the difference "is already carried per edition in the
+runtime rule data". The only per-edition key is
+`necb_rules.json` `unmet_cooling.minimum_allowance_h`, and both editions' notes
+cite sentence **(4)**, not (5): it carries 2025's 20-hour floor and nothing
+about (5)'s "where applicable". `_iterate_capacities` implements ONE behaviour
+for both editions; it quotes the 2025 wording in its docstring, which is not
+the same as branching on it. Sol caught the substitution of one sentence's
+evidence for another's.
+
+Whether (5) needs an edition branch at all is open: the phrase softens WHICH
+buildings must be iterated, and the tool iterates whichever building fails,
+which is defensible under both wordings. That is an argument, not an
+implementation, and it is recorded here as the former.
 
 <a id="d-91"></a>
 
@@ -6080,10 +6094,40 @@ is why this entry could not be established by resolving its citations:
 
 The 20-hour floor matters most where the absolute count is small: against a
 reference logging 4.75 unmet cooling hours, 2020 allows 5.225 h and 2025
-allows 24.75 h. That per-edition difference is already implemented as data —
+allows 24.75 h. That difference IS implemented as data —
 `necb_rules.json` `unmet_cooling.minimum_allowance_h` is `0.0` for 2020 and
-`20.0` for 2025 — and the reading confirms both of those notes against the
-Code's own text.
+`20.0` for 2025 — and the reading confirms both notes against the Code's text.
+Until 2026-10-11 NOTHING asserted it behaviourally: the floor was accidentally
+disabled during this work (`_minimum_cooling_allowance_h` reduced to
+`return 0.0`, ignoring the ruleset) and 1676 tests stayed green, the only
+failure being `necb_orphan_keys` noticing the rule key had stopped being
+read. `TestTheUnmetCoolingFloorIsPerEdition` now pins it at the call site:
+10 unmet cooling hours against a reference logging 4.75 must FAIL 2020 and
+PASS 2025, which is false the moment the floor stops being applied.
+
+The floor is not the only thing sentences (3) and (4) changed, and quoting only
+the floor left the rest unaccounted for. The other three changes, and what the
+tool does with each:
+
+- **(4)'s mechanical-cooling scope** IS implemented, as `cooling_vacuous` in
+  `_unmet_status`, and DELIBERATELY applied to 2020 as well — a building with
+  no mechanical cooling accrues passive-overheating hours that are not a
+  capacity shortfall. But 2025 scopes it per THERMAL BLOCK and the gate is
+  whole-building, so a building with some cooled and some uncooled blocks is
+  not scoped the way the text reads. That is a narrower gap than the sentence,
+  and it is a gap.
+- **(4)'s (a)/(b) branch.** 2025 offers "not exceed 100 hours ... when
+  complying with Subsection 8.4.4." OR the reference comparison "when
+  complying with Subsection 8.4.5." Only (b) is implemented, which is correct
+  for this tool: it builds a reference building, so it complies under 8.4.5
+  and (a) never applies. Stated rather than left silent.
+- **(3)'s "where applicable".** 2020 requires the 100-hour heating limit "for
+  both the proposed and reference buildings"; 2025 says "for the proposed
+  building and, where applicable, for the reference building".
+  `_unmet_status` requires BOTH in both editions
+  (`proposed_heating_ok and reference_heating_ok`), so the tool is STRICTER
+  than 2025 permits. A conservative deviation is still a deviation and is
+  recorded as one.
 
 <a id="d-92"></a>
 
@@ -7274,6 +7318,36 @@ This is an ENGINE-CARRIER limitation, not a modelling choice and not a
 tolerance. It is recorded with its measured consequence rather than excluded
 by starting a tolerance above it — which is precisely what a 0.25 floor did.
 
+### The second declared gap, at the ceiling
+
+The floor is not the only seam, and saying so only at the floor was wrong.
+
+```text
+PLR 0.81499969   the heating exact target crosses ABOVE 1.0
+PLR 0.9055       its peak, 1.002358  (0.236% over the ceiling)
+PLR 1.0          it returns to exactly 1.000000
+```
+
+A part-load FRACTION above 1.0 would mean better-than-rated efficiency at
+part load; EnergyPlus will not accept it. So over the top 18.5% of the domain
+the Code states a target the field cannot carry, exactly as it does below
+0.1661 — and for the same kind of reason. **Cooling has no upper seam**, and
+the asymmetry is asserted rather than left incidental.
+
+Three different things live in that region and the first version of this
+decision named only the last:
+
+```text
+(a) the Code's target exceeds the ceiling      from PLR 0.815, max 0.236%
+(b) the shipped polynomial UNDER-delivers      worst 0.951% at PLR 0.8437
+(c) the engine's 1.0 clamp becomes active      only from PLR 0.953
+```
+
+So the ceiling does remove a real 1.0077 full-load overshoot — that is (c) —
+but it is NOT the whole story of the top of this curve, and (a) is a declared
+gap rather than a tidied fit. At the peak the coil delivers 0.995107 where the
+Code implies 1.002358; the clamp is not even active there.
+
 ### Accepted error where the mapping IS representable
 
 ```text
@@ -7305,7 +7379,10 @@ the reference Articles.
 proceeds, runs `efficiency.apply`, and reads the curve the COIL carries. Three
 mutations that survived the previous, hand-built version of that test now fail
 it: killing `set_limits`'s output-bound writer, nulling the upper output bound,
-and moving the input minimum to 0.1.
+and moving the input minimum to 0.1. The comparison is UNCLIPPED, and four
+further mutations fail it: calling the whole domain representable (the original
+defect), moving the seam, claiming cooling has an upper seam, and restoring the
+clipped comparison that hid the seam in the first place.
 
 - **Who/when:** Claude under D-10, 2026-10-10; Sol's `185` found the axis
   defect and `187` refused the 0.25 domain and the hand-built test.

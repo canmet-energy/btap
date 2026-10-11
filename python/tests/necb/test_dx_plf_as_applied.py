@@ -40,7 +40,28 @@ ARTICLE_EIR_FPLR = {
 CARRIER_LO, CARRIER_HI = 0.7, 1.0
 #: Below this PLR the Article's target falls under the carrier floor and is NOT
 #: representable. D-102 records that as a declared gap; it is not a tolerance.
-REPRESENTABLE_FROM = {"heating": 0.1661, "cooling": 0.1745}
+#: The region where the engine's PLF field can actually HOLD the transformed
+#: Article target, as (from, to). It is NOT contiguous for heating, and
+#: D-102's first version said it was: the exact target rises above the 1.0
+#: ceiling from PLR 0.815 to full load, so there is a seam at EACH end.
+#: Sol found this because the comparison below clipped the target to the
+#: carrier before differencing, which cannot reveal that the carrier
+#: truncates the target — the same shape as the 0.25 floor he refused.
+REPRESENTABLE = {"heating": (0.1661, 0.8149), "cooling": (0.1745, 1.0)}
+REPRESENTABLE_FROM = {k: v[0] for k, v in REPRESENTABLE.items()}
+
+#: Where the heating target crosses ABOVE what the field accepts. Pinned to
+#: the digits so the seam cannot silently widen.
+UPPER_SEAM = {"heating": 0.81499969, "cooling": None}
+#: Its peak excess over the ceiling, and where.
+UPPER_SEAM_PEAK = {"heating": (1.002358, 0.9055)}
+#: Three DIFFERENT things live in the top of this domain and D-102's first
+#: version named only the last: (a) the Code's target exceeds the field's
+#: ceiling from the seam to full load; (b) the shipped polynomial UNDER-delivers
+#: against that target, worst at PLR 0.8437; (c) the engine's 1.0 clamp only
+#: becomes active much higher, where the polynomial itself overshoots.
+UPPER_SEAM_WORST_SHORTFALL = {"heating": (0.951, 0.8437)}
+CLAMP_ACTIVE_FROM = {"heating": 0.953}
 #: The fit error D-102 accepts where the mapping IS representable, per curve.
 TOLERANCE_PERCENT = {"heating": 3.0, "cooling": 13.0}
 
@@ -124,13 +145,22 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                     "overshoot, so its absence is not cosmetic")
 
     def test_as_applied_matches_the_article_where_the_carrier_can_hold_it(self):
-        for kind, floor in sorted(REPRESENTABLE_FROM.items()):
+        for kind in sorted(REPRESENTABLE):
             with self.subTest(kind=kind):
                 curve = self.coil_plf_curve(kind)
+                lo, hi = REPRESENTABLE[kind]
                 worst, at = 0.0, None
                 for step in range(0, 201):
-                    plr = floor + (1.0 - floor) * step / 200
-                    want = min(exact_plf(kind, plr), CARRIER_HI)
+                    plr = lo + (hi - lo) * step / 200
+                    # UNCLIPPED. Clipping the target to CARRIER_HI here is what
+                    # hid the upper seam: a target trimmed to the bound being
+                    # validated cannot show that the bound trims the target.
+                    want = exact_plf(kind, plr)
+                    self.assertLessEqual(
+                        want, CARRIER_HI + 1e-9,
+                        f"{kind}: PLR {plr:.4f} is inside the declared "
+                        "representable region but its exact target exceeds the "
+                        "carrier — the region bounds are wrong, not the curve")
                     rel = abs(curve.evaluate(plr) - want) / want * 100.0
                     if rel > worst:
                         worst, at = rel, plr
@@ -138,6 +168,70 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                     worst, TOLERANCE_PERCENT[kind],
                     f"{kind}: {worst:.2f}% from the Article at PLR {at:.3f}, "
                     f"as the coil's own curve evaluates it")
+
+    def test_above_the_carrier_CEILING_the_gap_is_DECLARED_too(self):
+        """The seam at the OTHER end, which D-102's first version missed.
+
+        The heating Article's transformed target rises ABOVE 1.0 over roughly
+        the top fifth of the domain and returns to exactly 1.0 only at full
+        load. EnergyPlus will not accept a part-load fraction over 1.0, so the
+        reference delivers 1.0 there and the Code implies slightly more. The
+        excess is small — 0.236 % at its peak — but it is a region the Code
+        states and the carrier cannot hold, which is the same kind of thing as
+        the floor and was disclosed only at the floor.
+
+        Cooling has NO upper seam. Asserting its absence keeps the asymmetry
+        deliberate rather than incidental.
+        """
+        for kind in sorted(REPRESENTABLE):
+            with self.subTest(kind=kind):
+                curve, seam = self.coil_plf_curve(kind), UPPER_SEAM[kind]
+                if seam is None:
+                    worst = max(exact_plf(kind, i / 1000.0)
+                                for i in range(1, 1001))
+                    self.assertLessEqual(
+                        worst, CARRIER_HI + 1e-9,
+                        f"{kind}: this curve is declared to have no upper "
+                        f"seam, but its target reaches {worst:.6f}")
+                    continue
+                self.assertLess(
+                    exact_plf(kind, seam - 0.01), CARRIER_HI,
+                    f"{kind}: just BELOW the seam the target still fits")
+                self.assertGreater(
+                    exact_plf(kind, seam + 0.01), CARRIER_HI,
+                    f"{kind}: just ABOVE it the target does NOT fit — if this "
+                    "fails the seam has moved and D-102's figure is stale")
+                peak, at = UPPER_SEAM_PEAK[kind]
+                self.assertAlmostEqual(
+                    peak, exact_plf(kind, at), places=5,
+                    msg=f"{kind}: the peak excess D-102 publishes")
+                # (b) the coil can deliver AT MOST the ceiling here, and in
+                # fact delivers LESS, because the polynomial under-runs the
+                # target before the clamp is anywhere near active. An earlier
+                # version of this test asserted the coil delivers exactly 1.0
+                # and failed, which is how the distinction surfaced.
+                worst, worst_at = UPPER_SEAM_WORST_SHORTFALL[kind]
+                self.assertLessEqual(curve.evaluate(at), CARRIER_HI + 1e-9, kind)
+                measured, m_at = 0.0, None
+                for step in range(0, 201):
+                    plr = seam + (1.0 - seam) * step / 200
+                    want = exact_plf(kind, plr)
+                    rel = abs(curve.evaluate(plr) - want) / want * 100.0
+                    if rel > measured:
+                        measured, m_at = rel, plr
+                self.assertAlmostEqual(
+                    worst, measured, places=2,
+                    msg=f"{kind}: the shortfall across the seam region is "
+                        f"{measured:.3f}% at PLR {m_at:.4f}; D-102 publishes "
+                        f"{worst}%")
+                # (c) and the clamp is a SEPARATE fact, active only up here
+                self.assertLess(
+                    curve.evaluate(CLAMP_ACTIVE_FROM[kind] - 0.01), CARRIER_HI,
+                    f"{kind}: below this the polynomial does not overshoot")
+                self.assertAlmostEqual(
+                    CARRIER_HI, curve.evaluate(1.0), places=6,
+                    msg=f"{kind}: at full load the clamp removes the "
+                        "polynomial's own 1.0077 overshoot")
 
     def test_below_the_carrier_floor_the_gap_is_DECLARED_not_hidden(self):
         """The region D-102 may not call verified.

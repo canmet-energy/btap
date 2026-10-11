@@ -287,3 +287,58 @@ class TestReferenceRulesAnnual(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestTheUnmetCoolingFloorIsPerEdition(unittest.TestCase):
+    """2025's 8.4.1.2.(4) floor must reach the VERDICT, not just the data.
+
+    This class exists because the floor was silently disabled during
+    development — `_minimum_cooling_allowance_h` was reduced to `return 0.0`,
+    ignoring the ruleset — and the whole suite stayed green: 1676 tests passed
+    and the ONLY failure was `necb_orphan_keys`, which noticed the rule key
+    had stopped being read. A behavioural guarantee that nothing behavioural
+    asserts is not a guarantee, so these tests go through `_unmet_status`,
+    the call site the verdict and the capacity loop both use, rather than
+    through the helper.
+    """
+
+    #: A reference logging few unmet cooling hours is where the floor decides
+    #: the verdict: +10% of 4.75 is 0.475 h, while the floor is 20 h.
+    REFERENCE_COOLING_H = 4.75
+    PROPOSED_COOLING_H = 10.0
+
+    def status(self, code):
+        from btap.codes import resolve
+        from btap.codes.necb import path
+
+        report = {
+            "proposed": {"unmet_occupied_hours": {
+                "heating": 0.0, "cooling": self.PROPOSED_COOLING_H},
+                "mechanical_cooling": True},
+            "reference": {"unmet_occupied_hours": {
+                "heating": 0.0, "cooling": self.REFERENCE_COOLING_H}},
+        }
+        return path._unmet_status(report, resolve(code))
+
+    def test_the_declared_floor_reaches_the_allowance(self):
+        for code, expected in (("necb2020", 0.475), ("necb2025", 20.0)):
+            with self.subTest(code=code):
+                self.assertAlmostEqual(
+                    expected, self.status(code)["allowance"], places=6,
+                    msg=f"{code}: the allowance is max(+10% of the reference, "
+                        "this edition's declared floor); a hardcoded 0.0 in "
+                        "_minimum_cooling_allowance_h makes both editions 0.475")
+
+    def test_the_SAME_hours_pass_2025_and_fail_2020(self):
+        """The discriminating case, which is the point of the floor.
+
+        10 unmet cooling hours against a reference logging 4.75: over 2020's
+        5.225 h ceiling, inside 2025's 24.75 h. If both editions agree here,
+        the floor is not being applied.
+        """
+        self.assertFalse(
+            self.status("necb2020")["cooling_ok"],
+            "necb2020 allows +10% and no floor, so 10 h must FAIL")
+        self.assertTrue(
+            self.status("necb2025")["cooling_ok"],
+            "necb2025 allows 20 h, so the same 10 h must PASS")
