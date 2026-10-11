@@ -67,6 +67,22 @@ jobs:
       - name: generate_decisions.py --check
         run: python3 python/scripts/generate_decisions.py --check
 
+      # The referral package belongs HERE and not in `test.yml`, for exactly
+      # the reason this workflow exists. `docs/NECB_AHJ_QUESTIONS.md` is the
+      # authored register and `docs/NECB_AHJ_REFERRALS.md` is generated from
+      # it; `test.yml` carries `paths-ignore: ['**.md', 'docs/**']`, so a
+      # register edit touches nothing it watches and neither `lint` nor
+      # `python` runs. The gate was in `test.yml` and was therefore INERT for
+      # the only edit that can make the package stale (Fable, `212`).
+      # BOTH AHJ generators, because the package's selection is only as
+      # current as the registry it is cross-checked against, and a register
+      # edit is a docs-only change either way.
+      - name: generate_ahj_registry.py --check
+        run: python3 python/scripts/generate_ahj_registry.py --check
+
+      - name: generate_ahj_referrals.py --check
+        run: python3 python/scripts/generate_ahj_referrals.py --check
+
       # Source schema, both generated outputs, runtime citations, short-link
       # resolution. stdlib unittest, so no dependency install is needed.
       - name: decision source and registry gates
@@ -75,4 +91,6 @@ jobs:
           python3 -m unittest -v \
             tests.necb.test_decisions_registry \
             tests.necb.test_decisions_registry_sync \
-            tests.necb.test_decisions_generator
+            tests.necb.test_decisions_generator \
+            tests.necb.test_ahj_referral_package \
+            tests.necb.test_ahj_register

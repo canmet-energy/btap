@@ -234,6 +234,32 @@ class TestDecisionsGateIsPathUnfiltered(unittest.TestCase):
                       "line, with nothing appended that could swallow its exit "
                       "status")
 
+    def test_the_AHJ_gates_are_in_THIS_workflow_and_not_the_filtered_one(self):
+        """`docs/NECB_AHJ_QUESTIONS.md` is canonical for the same reason
+        `docs/decisions/D-NN.md` is, and it is ignored by `test.yml` for the
+        same reason.
+
+        Both AHJ `--check` commands were in `test.yml`, behind
+        `paths-ignore: ['**.md', 'docs/**']`. The canonical source IS a
+        docs-only path, so the gate was unreachable from the one edit that can
+        make its output stale — exactly the anti-correlation this workflow was
+        created to fix, reintroduced on a different canonical source (Sol,
+        `213`; Fable, `212`).
+        """
+        here = executed_lines(GATE.read_text(encoding="utf-8"))
+        filtered = executed_lines(MAIN.read_text(encoding="utf-8"))
+        for script in ("generate_ahj_registry.py", "generate_ahj_referrals.py"):
+            command = f"python3 python/scripts/{script} --check"
+            with self.subTest(script=script):
+                self.assertIn(
+                    command, here,
+                    f"{GATE.name} must run exactly `{command}` as its own "
+                    "line — the register is canonical and docs-only")
+                self.assertNotIn(
+                    command, filtered,
+                    f"{MAIN.name} path-ignores docs/**, so {script}'s check "
+                    "there cannot see a register edit; it belongs only here")
+
     def test_a_neutralized_check_does_not_satisfy_the_contract(self):
         for form, why in ((EXACT_CHECK + " || true", "or-true"),
                           (EXACT_CHECK + "; true", "semicolon-true"),
