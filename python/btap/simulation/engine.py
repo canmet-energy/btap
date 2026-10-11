@@ -30,6 +30,7 @@ E+ version) so the module stays importable without the SDK.
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import os
 import platform
@@ -186,11 +187,30 @@ def ensure_energyplus() -> Path:
         _resolved = cached
         return cached
 
+    # PROVISION UNDER A LOCK, re-checking the cache inside it.
+    #
+    # The cache lookup above and the install below are a check-then-act over a
+    # directory shared by every process on the machine, and `pytest -n auto`
+    # starts a cold job with N workers that all reach here at once. They then
+    # extract the same ~230 MB release over each other, and a worker running
+    # the binary another worker is rewriting gets:
+    #
+    #     OSError: [Errno 26] Text file busy: '.../energyplus'
+    #
+    # which is a provisioning race reported as a test failure, non-
+    # deterministically, in whichever test happened to be scheduled there.
+    #
+    # The re-check INSIDE the lock is what makes this correct rather than
+    # merely serialised: the workers that wait find the engine already
+    # installed and return it, instead of taking turns re-extracting it.
     archive = os.environ.get("BTAP_ENERGYPLUS_ARCHIVE", "").strip()
-    if archive:
-        _install_archive(Path(archive), version)
-    else:
-        _download_and_install(version)
+    with _provision_lock(version):
+        cached = _binary_in(cache_dir(version))
+        if cached is None:
+            if archive:
+                _install_archive(Path(archive), version)
+            else:
+                _download_and_install(version)
 
     binary = _binary_in(cache_dir(version))
     if binary is None:
@@ -201,6 +221,62 @@ def ensure_energyplus() -> Path:
     _verify_version(binary, version, source="provisioned engine")
     _resolved = binary
     return binary
+
+
+@contextlib.contextmanager
+def _provision_lock(version: str):
+    """Exclusive, cross-PROCESS lock over one version's cache directory.
+
+    Cross-process because the racing parties are xdist workers, which are
+    separate interpreters — a threading lock would not see them. The lock file
+    lives beside the version directory rather than inside it, so it survives
+    the directory being created by whichever worker wins.
+
+    A lock that cannot be taken must not prevent provisioning: on a platform
+    or filesystem without advisory locking this degrades to the old unlocked
+    behaviour, which is the pre-existing race rather than a new failure.
+    """
+    target = cache_dir(version)
+    try:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        handle = open(target.parent / f".{target.name}.provision.lock", "a+")
+    except OSError:
+        yield                       # unlockable: proceed as before
+        return
+
+    locker = unlocker = None
+    try:
+        if sys.platform == "win32":
+            import msvcrt
+
+            def locker():
+                msvcrt.locking(handle.fileno(), msvcrt.LK_LOCK, 1)
+
+            def unlocker():
+                msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
+        else:
+            import fcntl
+
+            def locker():
+                fcntl.flock(handle, fcntl.LOCK_EX)
+
+            def unlocker():
+                fcntl.flock(handle, fcntl.LOCK_UN)
+
+        held = False
+        try:
+            locker()
+            held = True
+        except OSError:
+            pass                    # advisory locking unavailable; see above
+        try:
+            yield
+        finally:
+            if held:
+                with contextlib.suppress(OSError):
+                    unlocker()
+    finally:
+        handle.close()
 
 
 def cache_dir(version: str) -> Path:
