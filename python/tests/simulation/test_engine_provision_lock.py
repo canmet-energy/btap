@@ -224,9 +224,42 @@ class TestTheLockDoesNotFailOpen(unittest.TestCase):
         message = str(caught.exception)
         self.assertIn("advisory locking is unavailable", message)
         self.assertIn(
-            "BTAP_ENERGYPLUS", message,
+            "BTAP_ENERGYPLUS to an existing", message,
             "and it must name the override that skips provisioning, so the "
             "refusal leaves the user a way forward")
+        # The remedy must actually BYPASS the failed operation.
+        # `BTAP_ENERGYPLUS_ARCHIVE` does not: `ensure_energyplus` reads it and
+        # then enters this lock, calling `_install_archive` INSIDE it — so
+        # offering it as a way out of a locking failure sends the reader back
+        # into the thing that just failed (Sol, `217`).
+        self.assertIn(
+            "does NOT help", message,
+            "and it must say that the archive variable is not a way out")
+
+    def test_the_refusals_name_only_remedies_that_actually_BYPASS(self):
+        """Checked against the resolution ORDER, not against the prose.
+
+        `BTAP_ENERGYPLUS` is read at the first rung and returns before any
+        locking or provisioning. `BTAP_ENERGYPLUS_ARCHIVE` is read just before
+        the lock and consumed inside it. A message may therefore offer the
+        first as an escape and must not offer the second.
+        """
+        import inspect
+
+        source = inspect.getsource(self.engine.ensure_energyplus)
+        override = source.index('"BTAP_ENERGYPLUS"')
+        archive = source.index("BTAP_ENERGYPLUS_ARCHIVE")
+        lock = source.index("_provision_lock")
+        install = source.index("_install_archive")
+        self.assertLess(
+            override, lock,
+            "the override must resolve before the lock for the message to be "
+            "true; if this moved, the refusals need rewriting")
+        self.assertLess(
+            lock, install,
+            "and the archive is installed INSIDE the lock, which is why it "
+            "cannot be offered as an escape from a locking failure")
+        self.assertLess(archive, lock)
 
     def test_the_lock_does_not_LEAK_when_the_body_raises(self):
         """A failed install must not block the next attempt.

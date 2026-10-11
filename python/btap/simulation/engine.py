@@ -274,8 +274,8 @@ def _provision_lock(version: str, timeout: float = PROVISION_LOCK_TIMEOUT_S):
         raise EngineError(
             f"cannot open the provisioning lock {lock_path} ({error}). The "
             "engine cache is not usable for concurrent provisioning; set "
-            "BTAP_ENERGYPLUS to an existing install, or "
-            "BTAP_ENERGYPLUS_ARCHIVE to the downloaded release asset."
+            "BTAP_ENERGYPLUS to an existing EnergyPlus install, which is "
+            "resolved before any locking or provisioning happens."
         ) from error
 
     if sys.platform == "win32":
@@ -313,15 +313,25 @@ def _provision_lock(version: str, timeout: float = PROVISION_LOCK_TIMEOUT_S):
                         f"({error}). Provisioning cannot be made exclusive "
                         "there, and proceeding would let concurrent processes "
                         "install over each other; set BTAP_ENERGYPLUS to an "
-                        "existing install, or BTAP_ENERGYPLUS_ARCHIVE to the "
-                        "downloaded release asset."
+                        "existing EnergyPlus install, which is resolved "
+                        "before any locking or provisioning happens. "
+                        "BTAP_ENERGYPLUS_ARCHIVE does NOT help here: it "
+                        "changes where the archive comes from, and is still "
+                        "installed under this lock."
                     ) from error
                 if time.monotonic() >= deadline:
                     raise EngineError(
                         f"waited {timeout:.0f}s for another process to "
                         f"finish provisioning EnergyPlus {version} "
-                        f"({lock_path} is still held). If no such process is "
-                        "running, delete that lock file."
+                        f"({lock_path} is still held). An advisory lock is "
+                        "released when the holding process exits, so there IS "
+                        "a live holder — find and stop it, or set "
+                        "BTAP_ENERGYPLUS to an existing install, which is "
+                        "resolved before any locking happens. Do NOT delete "
+                        "the lock file: the lock belongs to that path's "
+                        "inode, so removing it lets the next caller create "
+                        "and lock a new one while the holder still owns the "
+                        "old, which defeats the exclusion entirely."
                     ) from error
                 time.sleep(PROVISION_LOCK_POLL_S)
         yield
