@@ -56,8 +56,15 @@ CARRIER_EPS = 1e-9
 #: makes it the root, so the point is representable. The first version wrote
 #: this half-open and asserted the endpoint was open — encoding the error
 #: instead of detecting it (Sol, `191`).
-REPRESENTABLE = {"heating": (0.1661, 0.8149996906315529),
-                 "cooling": (0.1745, 1.0)}
+#: Both ends are ROOTS, published to their digits. Fable (`198`) mutated the
+#: heating floor from 0.1661 to 0.30 in this constant AND both shipped notes
+#: and every test still passed: the upper seam was pinned to nine places
+#: while the LOWER seams — the boundary of this decision's central finding —
+#: were pinned to nothing. They were also rounded INWARD, which excludes the
+#: worst sliver of the region and understated cooling as 12.645% where its
+#: own root gives 12.663%.
+REPRESENTABLE = {"heating": (0.16604619095565545, 0.8149996906315529),
+                 "cooling": (0.17442759262761687, 1.0)}
 REPRESENTABLE_FROM = {k: v[0] for k, v in REPRESENTABLE.items()}
 
 #: Where the heating target crosses ABOVE what the field accepts. Pinned to
@@ -70,7 +77,7 @@ UPPER_SEAM_PEAK = {"heating": (1.002358, 0.9055)}
 #: ceiling from the seam to full load; (b) the shipped polynomial UNDER-delivers
 #: against that target, worst at PLR 0.8437; (c) the engine's 1.0 clamp only
 #: becomes active much higher, where the polynomial itself overshoots.
-UPPER_SEAM_WORST_SHORTFALL = {"heating": (0.951, 0.8437)}
+UPPER_SEAM_WORST_SHORTFALL = {"heating": (0.9509, 0.8437)}
 CLAMP_ACTIVE_FROM = {"heating": 0.953}
 #: The fit error D-102 accepts where the mapping IS representable, per curve.
 TOLERANCE_PERCENT = {"heating": 3.0, "cooling": 13.0}
@@ -179,6 +186,31 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                     f"{kind}: {worst:.2f}% from the Article at PLR {at:.3f}, "
                     f"as the coil's own curve evaluates it")
 
+    def test_the_LOWER_seam_is_the_root_too(self):
+        """The floor end of the declared gap, pinned like the ceiling end.
+
+        D-102's central finding is the region below the carrier floor, and its
+        boundary was the one number in this file pinned to nothing: Fable
+        moved it from 0.1661 to 0.30 here and in both shipped notes and
+        every test passed. It was also rounded INWARD, so the published
+        cooling maximum was measured from inside its own region and came out
+        12.645% where the root gives 12.663%.
+        """
+        for kind in sorted(REPRESENTABLE):
+            with self.subTest(kind=kind):
+                lo = REPRESENTABLE[kind][0]
+                self.assertAlmostEqual(
+                    CARRIER_LO, exact_plf(kind, lo), places=9,
+                    msg=f"{kind}: the lower seam is the ROOT of "
+                        "exact_plf(PLR) = 0.7, not a rounded neighbour")
+                self.assertGreater(
+                    exact_plf(kind, lo + 1e-6), CARRIER_LO,
+                    f"{kind}: one micro-step above, the target clears the floor")
+                self.assertLess(
+                    exact_plf(kind, lo - 1e-6), CARRIER_LO,
+                    f"{kind}: one micro-step below, it does not — so the "
+                    "declared gap is open at this end as well")
+
     def test_above_the_carrier_CEILING_the_gap_is_DECLARED_too(self):
         """The seam at the OTHER end, which D-102's first version missed.
 
@@ -258,7 +290,24 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                 # version of this test asserted the coil delivers exactly 1.0
                 # and failed, which is how the distinction surfaced.
                 worst, worst_at = UPPER_SEAM_WORST_SHORTFALL[kind]
-                self.assertLessEqual(curve.evaluate(at), CARRIER_HI + CARRIER_EPS, kind)
+                # Assert what is actually TRUE here, which is that the clamp is
+                # NOT active at the peak: the polynomial reads 0.9951, below
+                # the ceiling, so the shortfall is the fit's and not the
+                # carrier's. The previous assertion — delivered <= ceiling —
+                # could not fail under any product mutation, because the
+                # polynomial is below the ceiling at this PLR whatever the
+                # bound says, while its comment claimed a check it never
+                # performed (Fable, `198`).
+                self.assertAlmostEqual(
+                    curve.evaluate(at), min(CARRIER_HI, curve.evaluate(at)),
+                    places=12,
+                    msg=f"{kind}: sanity — evaluate() is already clamped")
+                self.assertLess(
+                    curve.evaluate(at), CARRIER_HI - 1e-4,
+                    f"{kind}: at the peak the polynomial sits BELOW the "
+                    "ceiling, so the clamp is not what causes the shortfall "
+                    "here — if this fails, the clamp has reached the peak and "
+                    "the account of (b) versus (c) no longer holds")
                 measured, m_at = 0.0, None
                 for step in range(0, 201):
                     plr = seam + (1.0 - seam) * step / 200
@@ -267,14 +316,21 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                     if rel > measured:
                         measured, m_at = rel, plr
                 self.assertAlmostEqual(
-                    worst, measured, places=2,
+                    worst, measured, places=3,
                     msg=f"{kind}: the shortfall across the seam region is "
                         f"{measured:.3f}% at PLR {m_at:.4f}; D-102 publishes "
                         f"{worst}%")
                 # (c) and the clamp is a SEPARATE fact, active only up here
+                # Pinned from BOTH sides. Fable moved this constant from
+                # 0.953 to 0.5 and the test passed, because only the "below
+                # it, no overshoot" half was asserted.
                 self.assertLess(
                     curve.evaluate(CLAMP_ACTIVE_FROM[kind] - 0.01), CARRIER_HI,
                     f"{kind}: below this the polynomial does not overshoot")
+                self.assertGreaterEqual(
+                    curve.evaluate(CLAMP_ACTIVE_FROM[kind] + 0.01), CARRIER_HI,
+                    f"{kind}: and above it the clamp IS active — if this "
+                    "fails the stated onset has moved")
                 self.assertAlmostEqual(
                     CARRIER_HI, curve.evaluate(1.0), places=6,
                     msg=f"{kind}: at full load the clamp removes the "
@@ -349,7 +405,7 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                     else:
                         # a disconnected set: the closed interval, the isolated
                         # full-load point, and the OPEN gap between them
-                        wanted = (f"representable set is PLR [{lo}, {seam!r}] "
+                        wanted = (f"representable set PLR [{lo}, {seam!r}] "
                                   "union {1.0}")
                         self.assertIn(
                             f"OPEN interval ({seam!r}, 1.0)", notes,

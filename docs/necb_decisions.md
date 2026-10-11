@@ -7325,8 +7325,13 @@ PLR 0.10 the 0.25 clamp delivers 0.7885 against an exact target of 0.5622 —
 
 ### The declared gap, which this decision does not call verified
 
-The exact target falls below the engine's floor under PLR **0.1661**
-(heating) and **0.1745** (cooling), because the Article's EIR cubic keeps a
+The exact target falls below the engine's floor under PLR
+**0.16604619095565545** (heating) and **0.17442759262761687** (cooling) — the ROOTS of
+`exact_plf(PLR) = 0.7`, published to their digits as the upper seam is, because
+an earlier version rounded them INWARD to 0.1661 and 0.1745 and then measured
+from there. Rounding a gap boundary inward excludes the worst sliver of the
+region: cooling's maximum is 12.645% from 0.1745 and **12.663%** from its
+actual root. The Article's EIR cubic keeps a
 non-zero intercept as PLR approaches zero while a cycling PLF cannot reach
 zero. There the reference delivers 0.7 where the Code implies less:
 
@@ -7372,13 +7377,13 @@ Code implies 1.002358; the clamp is not even active there.
 ### Accepted error where the mapping IS representable
 
 ```text
-ASSESSED ENGINE DOMAIN, PLR [0.0, 1.0] — the shipped curve's worst error
-heating   2.699%   at PLR 0.1816     below both seams, so the seams do not move it
-cooling  12.645%   at PLR 0.1745     at its floor
-
 REPRESENTABLE SET — where the field can actually hold the Article target
-heating   PLR [0.1661, 0.8149996906315529] union {1.0}
-cooling   PLR [0.1745, 1.0]
+heating   PLR [0.16604619095565545, 0.8149996906315529] union {1.0}
+cooling   PLR [0.17442759262761687, 1.0]
+
+WORST AS-APPLIED ERROR over that set, against the EXACT Article target
+heating   2.699%    at PLR 0.181558   between the seams, not below them
+cooling  12.663%    at its lower root
 
 UNREPRESENTABLE GAP, heating   the OPEN interval (0.8149996906315529, 1.0)
 
@@ -7467,9 +7472,23 @@ of what error is acceptable.
 `min_x: 0.7` and no output bounds. Under D-77 the modeling layer cannot read
 NECB data, and the NECB efficiency pass replaces the curve on any coil that
 carries a capacity — an unsized coil silently keeps modeling's version, which
-is how a probe can conclude the NECB data never arrives. Whether the catalogue
-default should also be corrected is open; the proposed building is not bound by
-the reference Articles.
+is how a probe can conclude the NECB data never arrives.
+
+An earlier version of this section dismissed the copy because "the proposed
+building is not bound by the reference Articles". That misses the point, and
+Fable's `198` names it: the defect is not an Article mismatch, it is ENGINE
+SEMANTICS. A part-load floor on the INPUT axis suppresses cycling losses
+whatever building the coil belongs to, so every PROPOSED direct-expansion coil
+built through `coils.py` understates its own fan-cycling energy — in the
+proposed building's FAVOUR, against the compliance target. Order of magnitude
+on the frozen corpus: about 0.1 percentage point of `percent_of_target`, the
+same scale as the reference-side correction this decision makes.
+
+Correcting it needs a modeling CODE change as well as data, because
+`build_cubic` reads only `min_x`/`max_x` and never writes an output bound, and
+it moves proposed-model results, so it carries its own re-freeze. It stays
+open work — but as a known proposed-side bias with a measured scale, not as a
+question of whether the Articles apply.
 
 ### How it is verified
 

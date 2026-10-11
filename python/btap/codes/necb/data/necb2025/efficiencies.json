@@ -2215,7 +2215,7 @@
       "maximum_independent_variable_2": null,
       "minimum_dependent_variable_output": 0.7,
       "maximum_dependent_variable_output": 1.0,
-      "notes": "PLF = PLR / EIR_FPLR from Article 8.4.6.4.(5), realised in EnergyPlus's cycling PLF field. Polynomial refit 2026-07-22 over PLR 0.25-1.0. Bounds and domain per D-102: input [0.0, 1.0] as the engine samples it, output [0.7, 1.0] as the engine requires. Worst error 12.645% over the representable region PLR [0.1745, 1.0] — the old fit range excluded part of it. See D-102."
+      "notes": "PLF = PLR / EIR_FPLR from Article 8.4.6.4.(5), realised in EnergyPlus's cycling PLF field. Polynomial refit 2026-07-22 over PLR 0.25-1.0. Bounds and domain per D-102: input [0.0, 1.0] as the engine samples it, output [0.7, 1.0] as the engine requires. Worst as-applied error 12.663% against the exact Article target over the representable region PLR [0.17442759262761687, 1.0] — the old fit range excluded part of it. See D-102."
     },
     {
       "name": "DXHEAT-REF-CAPFFLOW",
@@ -2340,7 +2340,7 @@
       "maximum_independent_variable_2": null,
       "minimum_dependent_variable_output": 0.7,
       "maximum_dependent_variable_output": 1.0,
-      "notes": "PLF = PLR / EIR_FPLR from Article 8.4.6.7.(5), realised in EnergyPlus's cycling PLF field. Polynomial inherited from NECB 2011 Table 8.4.4.21.-E (4). Bounds and domain per D-102: input [0.0, 1.0] as the engine samples it, output [0.7, 1.0] as the engine requires. Worst error 2.699% over the assessed engine domain PLR [0.0, 1.0], at PLR 0.1816. The representable set is PLR [0.1661, 0.8149996906315529] union {1.0} — TWO seams and a disconnection, not one region: below 0.1661 the Code's target falls under the engine's 0.7 floor, and on the OPEN interval (0.8149996906315529, 1.0) it rises above the 1.0 ceiling, peaking at 1.002358 near PLR 0.9055. Both endpoints are representable. See D-102."
+      "notes": "PLF = PLR / EIR_FPLR from Article 8.4.6.7.(5), realised in EnergyPlus's cycling PLF field. Polynomial inherited from NECB 2011 Table 8.4.4.21.-E (4). Bounds and domain per D-102: input [0.0, 1.0] as the engine samples it, output [0.7, 1.0] as the engine requires. Worst as-applied error 2.699% against the exact Article target over the representable set PLR [0.16604619095565545, 0.8149996906315529] union {1.0}, at PLR 0.181558 — TWO seams and a disconnection, not one region: below 0.1661 the Code's target falls under the engine's 0.7 floor, and on the OPEN interval (0.8149996906315529, 1.0) it rises above the 1.0 ceiling, peaking at 1.002358 near PLR 0.9055. Both endpoints are representable. See D-102."
     },
     {
       "name": "FURNACE-PLF-ATMOSPHERIC",

@@ -170,7 +170,9 @@ def _bare_article(value: str):
 
 #: Articles cited correctly whose retained payload carries no title. Not an
 #: error: the codes service itself returns an empty title for NECB 2025's
-#: 8.4.6.7 while serving its full text (D-102).
+#: 8.4.6.7 while serving its full text (D-102). REPORTED by `main`, because a
+#: collector nothing reads is not a disclosure — the comment used to promise
+#: it "says so" while the set was write-only (Fable, `198`).
 _untitled_articles: set = set()
 
 
@@ -948,6 +950,9 @@ def main(argv=None) -> int:
     for path, fresh in outputs:
         path.write_text(fresh, encoding="utf-8")
     print("decisions: wrote {} and {}".format(args.doc.name, args.registry.name))
+    for code, bare in sorted(_untitled_articles):
+        print(f"decisions: note — {code} article {bare} is cited correctly but "
+              f"its retained payload carries no title")
     return 0
 
 
