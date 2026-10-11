@@ -22,8 +22,10 @@ The engine itself is never downloaded here. The companion lookup and the
 version verification are suppressed and the install is a fake that sleeps and
 writes a stub, so what is under test is the exclusion, not the provisioner.
 """
+import errno
 import multiprocessing as mp
 import os
+import pathlib
 import sys
 import tempfile
 import time
@@ -157,6 +159,91 @@ class TestProvisioningIsExclusiveAcrossProcesses(unittest.TestCase):
                 1, concurrent,
                 f"peak concurrent installs was {concurrent}; concurrent "
                 "extraction into one cache directory IS the defect")
+
+
+class TestTheLockDoesNotFailOpen(unittest.TestCase):
+    """Contention WAITS; an unlockable filesystem RAISES.
+
+    The first version caught every locking error and yielded the critical
+    section unlocked, so Windows' `LK_LOCK` giving up after ten seconds, or a
+    filesystem without advisory locking, silently resumed the racy behaviour
+    the lock exists to remove (Sol, `214`). These are the tests he asked for
+    in place of skipping the path and assuming it was equivalent.
+    """
+
+    def setUp(self):
+        from btap.simulation import engine
+
+        self.engine = engine
+        self.work = tempfile.TemporaryDirectory(prefix="btap-lock-")
+        self.addCleanup(self.work.cleanup)
+        self._cache_dir = engine.cache_dir
+        engine.cache_dir = lambda version: (
+            pathlib.Path(self.work.name) / "cache" / version)
+        self.addCleanup(lambda: setattr(engine, "cache_dir", self._cache_dir))
+
+    def test_a_held_lock_makes_the_second_caller_WAIT_then_give_up(self):
+        """Bounded, and it must not proceed.
+
+        Driven with a tiny timeout so the test is fast; the shipped value is
+        sized for a 230 MB download instead.
+        """
+        engine = self.engine
+        with engine._provision_lock("1.2.3"):
+            started = time.monotonic()
+            with self.assertRaises(engine.EngineError) as caught:
+                with engine._provision_lock("1.2.3", timeout=0.75):
+                    self.fail(
+                        "the second caller entered the critical section while "
+                        "the first still held the lock — that is the race")
+            waited = time.monotonic() - started
+        self.assertIn("waited", str(caught.exception).lower())
+        self.assertGreaterEqual(
+            waited, 0.7,
+            f"it must WAIT for the operation, not fail at once (waited "
+            f"{waited:.2f}s of a 0.75s budget)")
+
+    def test_an_unlockable_filesystem_RAISES_instead_of_proceeding(self):
+        """`ENOLCK` is not contention and no wait resolves it."""
+        engine = self.engine
+        if sys.platform == "win32":
+            self.skipTest("the POSIX errno path is what this asserts")
+        import fcntl
+
+        real = fcntl.flock
+
+        def refuses(*args, **kwargs):
+            raise OSError(errno.ENOLCK, "no locks available")
+
+        fcntl.flock = refuses
+        self.addCleanup(lambda: setattr(fcntl, "flock", real))
+        with self.assertRaises(engine.EngineError) as caught:
+            with engine._provision_lock("1.2.3", timeout=5.0):
+                self.fail("an unlockable filesystem must not yield the "
+                          "critical section — that is the silent fallback")
+        message = str(caught.exception)
+        self.assertIn("advisory locking is unavailable", message)
+        self.assertIn(
+            "BTAP_ENERGYPLUS", message,
+            "and it must name the override that skips provisioning, so the "
+            "refusal leaves the user a way forward")
+
+    def test_the_lock_does_not_LEAK_when_the_body_raises(self):
+        """A failed install must not block the next attempt.
+
+        What this does NOT prove: that the explicit `release()` is doing the
+        work. Deleting it leaves this green, because closing the file handle
+        drops a `flock` on POSIX anyway — so the explicit unlock is
+        defensive, not load-bearing, and I am not going to claim a mutation
+        it survives. The property asserted is the one that matters to a
+        caller: after a raising body, the lock is available again.
+        """
+        engine = self.engine
+        with self.assertRaises(ValueError):
+            with engine._provision_lock("1.2.3"):
+                raise ValueError("boom")
+        with engine._provision_lock("1.2.3", timeout=2.0):
+            pass
 
 
 if __name__ == "__main__":

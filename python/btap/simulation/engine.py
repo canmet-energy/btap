@@ -31,6 +31,7 @@ E+ version) so the module stays importable without the SDK.
 from __future__ import annotations
 
 import contextlib
+import errno
 import hashlib
 import os
 import platform
@@ -40,6 +41,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import time
 import urllib.request
 import zipfile
 from pathlib import Path
@@ -74,6 +76,14 @@ _ASSETS = {
 }
 
 _DOWNLOAD_BASE = "https://github.com/NREL/EnergyPlus/releases/download"
+
+#: `flock`/`locking` errnos that mean the FILESYSTEM cannot lock, as opposed
+#: to the lock being held by someone else. Waiting cannot resolve these.
+_LOCK_UNSUPPORTED_ERRNOS = frozenset(
+    code for code in (getattr(errno, name, None)
+                      for name in ("ENOLCK", "EOPNOTSUPP", "ENOTSUP",
+                                   "EINVAL", "ENOSYS", "EPERM"))
+    if code is not None)
 
 _resolved: Path | None = None  # per-process memo (verification runs the binary)
 
@@ -223,59 +233,102 @@ def ensure_energyplus() -> Path:
     return binary
 
 
+#: How long to wait for another process to finish provisioning. Sized for the
+#: operation it waits on — a ~230 MB download and extraction — not for a
+#: lock that is merely held briefly.
+PROVISION_LOCK_TIMEOUT_S = 900.0
+PROVISION_LOCK_POLL_S = 0.25
+
+
 @contextlib.contextmanager
-def _provision_lock(version: str):
+def _provision_lock(version: str, timeout: float = PROVISION_LOCK_TIMEOUT_S):
     """Exclusive, cross-PROCESS lock over one version's cache directory.
 
     Cross-process because the racing parties are xdist workers, which are
-    separate interpreters — a threading lock would not see them. The lock file
-    lives beside the version directory rather than inside it, so it survives
-    the directory being created by whichever worker wins.
+    separate interpreters — a threading lock would not see them.
 
-    A lock that cannot be taken must not prevent provisioning: on a platform
-    or filesystem without advisory locking this degrades to the old unlocked
-    behaviour, which is the pre-existing race rather than a new failure.
+    It does NOT fail open. The first version caught every locking error and
+    then yielded the critical section unlocked, which meant Windows'
+    `msvcrt.LK_LOCK` giving up after about ten seconds, or a filesystem
+    without advisory locking, silently resumed the racy behaviour this exists
+    to remove — and a fallback like that cannot support a claim of exclusive
+    provisioning (Sol, `214`). Instead:
+
+    * contention WAITS, bounded by `timeout` and sized for a 230 MB download
+      and extraction rather than for a briefly held lock; and
+    * a lock that cannot be taken at all raises `EngineError`, naming the two
+      overrides that skip provisioning entirely.
+
+    Raising is the right failure here because the alternative is a silent
+    return to a known defect. A reader is protected regardless by
+    `_extract_atomically`, which publishes the install in one `os.replace`;
+    this lock is what stops two processes doing the same 230 MB of work and
+    replacing each other's result.
     """
     target = cache_dir(version)
+    lock_path = target.parent / f".{target.name}.provision.lock"
     try:
         target.parent.mkdir(parents=True, exist_ok=True)
-        handle = open(target.parent / f".{target.name}.provision.lock", "a+")
-    except OSError:
-        yield                       # unlockable: proceed as before
-        return
+        handle = open(lock_path, "a+")
+    except OSError as error:
+        raise EngineError(
+            f"cannot open the provisioning lock {lock_path} ({error}). The "
+            "engine cache is not usable for concurrent provisioning; set "
+            "BTAP_ENERGYPLUS to an existing install, or "
+            "BTAP_ENERGYPLUS_ARCHIVE to the downloaded release asset."
+        ) from error
 
-    locker = unlocker = None
+    if sys.platform == "win32":
+        import msvcrt
+
+        def acquire():
+            msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+
+        def release():
+            msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
+    else:
+        import fcntl
+
+        def acquire():
+            fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+
+        def release():
+            fcntl.flock(handle, fcntl.LOCK_UN)
+
+    deadline = time.monotonic() + timeout
+    held = False
     try:
-        if sys.platform == "win32":
-            import msvcrt
-
-            def locker():
-                msvcrt.locking(handle.fileno(), msvcrt.LK_LOCK, 1)
-
-            def unlocker():
-                msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
-        else:
-            import fcntl
-
-            def locker():
-                fcntl.flock(handle, fcntl.LOCK_EX)
-
-            def unlocker():
-                fcntl.flock(handle, fcntl.LOCK_UN)
-
-        held = False
-        try:
-            locker()
-            held = True
-        except OSError:
-            pass                    # advisory locking unavailable; see above
-        try:
-            yield
-        finally:
-            if held:
-                with contextlib.suppress(OSError):
-                    unlocker()
+        while True:
+            try:
+                acquire()
+                held = True
+                break
+            except OSError as error:
+                # A filesystem that does not support advisory locking at all
+                # reports it distinctly from contention, and no amount of
+                # waiting will change it.
+                if error.errno in _LOCK_UNSUPPORTED_ERRNOS:
+                    raise EngineError(
+                        f"advisory locking is unavailable on {lock_path} "
+                        f"({error}). Provisioning cannot be made exclusive "
+                        "there, and proceeding would let concurrent processes "
+                        "install over each other; set BTAP_ENERGYPLUS to an "
+                        "existing install, or BTAP_ENERGYPLUS_ARCHIVE to the "
+                        "downloaded release asset."
+                    ) from error
+                if time.monotonic() >= deadline:
+                    raise EngineError(
+                        f"waited {timeout:.0f}s for another process to "
+                        f"finish provisioning EnergyPlus {version} "
+                        f"({lock_path} is still held). If no such process is "
+                        "running, delete that lock file."
+                    ) from error
+                time.sleep(PROVISION_LOCK_POLL_S)
+        yield
     finally:
+        if held:
+            with contextlib.suppress(OSError):
+                release()
         handle.close()
 
 
