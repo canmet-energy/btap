@@ -2,7 +2,7 @@
  "version": 2,
  "spec_sha256": "ca661a5cfb1a69f6b16b7f0b4d2f2e4afb4a593e3fcb1af37f4107fcf050e107",
  "provenance": {
-  "commit": "0a0d27adef300741b2202948024f9af7137f6890",
+  "commit": "9c04b2422240e9fc09644d5531bc2d85181a270f",
   "dirty": false,
   "freezer_sha256": "a05b10c3bfccbd9869593e030d8e65757ecf311b39907f2030e7729935a4145e",
   "defs_sha256": "dbf3786c678429e6b0dd0f26a1cc4a5ab4627ea56d8fe34869e780e1307f9194",
@@ -10,7 +10,7 @@
   "api_worker_sha256": "3264ee133bd08fdfebcda263349280cf8bda19555fbb1166f0c55e6cc5931f0f",
   "compare_runs_sha256": "b8f1f60f5e285047ede41cdcb933296564ec0130a8c3946ab03b5a6a014e08ec",
   "audit_scenario_sha256": "eec293247a2ce2f8fcdcfb657a4e346a452ec44aafb4be4174f7cb75e588010b",
-  "gate_sha256": "794b824aab3f66221c04569fd81bfaf81308569918086bc17087bf59c18cbec1",
+  "gate_sha256": "7bf98198a0965d6da0281ddec26411d0e67e8565edb76277542ca1715007adbc",
   "openstudio_cli": "3.11.0+241b8abb4d",
   "producer": {
    "openstudio": "3.11.0+241b8abb4d",
@@ -2519,8 +2519,8 @@
     }
    ],
    "baseline_sha256": {
-    "audit.json": "f6fa98e1788e709aa48b2b0ac61040784d2ac214254737180215be66b19ad98c",
-    "audit.txt": "ad9d7c5fec3ed8baa6ec70a7f65d7641b96853dadda4caadcad6c19cf98086da",
+    "audit.json": "411eb1a0988ec0d784549ece1f305538013563cfe9552939f00199f291688ed4",
+    "audit.txt": "ee58558a181f04c13fa474ceae5ba164b08888bb42150dcbb73f554bbd42776f",
     "report.json": "987b89c3fd32477ef7f65b185e626604b14a916c9f2ae248868ebf9b6979fa44",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "2e99d5c1b018174e0a7916fbca6acb11ee9870916bfbb35e9a1867ad7defbd6b"
@@ -2578,8 +2578,8 @@
     }
    ],
    "baseline_sha256": {
-    "audit.json": "d1d9be4d0fb440288bc6c8bae4e92f226454b1428120aa76d838499e2226a83e",
-    "audit.txt": "b250e704a0f6388383405db7eeba3097ed43f0cbc9db22a08e99bd1ca17071d5",
+    "audit.json": "f6f06f7eaecbc7bbd34a054f87ae940b6a575445d6377755b61edc10377dfc0c",
+    "audit.txt": "271953050850f9cb913ac1643f65b67f9323ce6976004a08b2686d4a52de619c",
     "report.json": "df20f81ee692c659d3bf71597f8928d917ace358c0fd7bfebeec2302b163448e",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "0cd1c7f0214b49a8941a6f2a2a71e749c77b211cf004ff36749d32342a3a0233"
@@ -2715,8 +2715,8 @@
     }
    ],
    "baseline_sha256": {
-    "audit.json": "3c338dc04ef9a6d7cb772652dbfdc8929c2001fce2adba94afba10b3fc505531",
-    "audit.txt": "1510375ae723cf2de98708382aeb159d509715e97655e3b90e54b6c77252c112",
+    "audit.json": "2252fccbc74f1461fa65f106089ab94262d77d84af810349a57f76e09d7e66bc",
+    "audit.txt": "bc16b946de5ed949f82368396df39c264ba6785479b8a4f31997d349f8fdf3ee",
     "report.json": "8688b5494aef3baec2e15791a0422885f95f3d4a3db744f2a650818b7df648eb"
    }
   },
@@ -2817,9 +2817,9 @@
     }
    ],
    "baseline_sha256": {
-    "audit.json": "2ee3276404be45d7ee13797407c87a64de7f53dfce3bf35e8ea35cee906a1b15",
-    "audit.txt": "2f2d8290c3f94cf381cf2552d41d061f55986ddce3eed731965be7bae7fb01b8",
-    "report.json": "7a3eeea88827cfe20e41762ba6058f4c6334669efd08c9f94235a6e0d7dc6370"
+    "audit.json": "d7d65ca3a7a46d955ac3466f9c47740506e94a74602971db23783cbc76a2f645",
+    "audit.txt": "6af1ae64b5af3650388c82ee7b246f6137a650fb67bdada151d577d1a6d8be34",
+    "report.json": "144ec007594c627be58bc37201e73220ba28d865d7a0fc7619212d936b2d3cff"
    }
   }
  ],

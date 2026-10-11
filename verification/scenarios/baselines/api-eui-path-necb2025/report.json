@@ -57,6 +57,7 @@
    "THERMAL ZONE 4": false,
    "THERMAL ZONE 5": false
   },
+  "unplaceable_cooling": [],
   "ghg_kg_co2e": 18966.8
  },
  "reference": {

@@ -223,10 +223,11 @@
  },
  {
   "step": "compliance",
-  "action": "sentence (4)(a) is vacuous \u2014 the proposed building has no mechanical cooling, so it has no thermal block \"for which mechanical cooling is provided\"",
+  "action": "sentence (4)(a) is vacuous \u2014 the proposed building has no thermal block \"for which mechanical cooling is provided\"",
   "inputs": {
    "blocks": 5,
-   "cooled_blocks": 0
+   "cooled_blocks": 0,
+   "building_has_cooling": false
   },
   "article": "8.4.1.2.(4)(a)",
   "ahj": "AHJ-21",
@@ -250,7 +251,8 @@
    "decisions_citing": 2,
    "code": [
     "python/btap/codes/compliance.py#_evaluate",
-    "python/btap/codes/compliance.py#_evaluate_unmet"
+    "python/btap/codes/compliance.py#_evaluate_unmet",
+    "python/btap/codes/necb/path.py#evaluate_unmet_8_4_4"
    ]
   },
   "article": "8.4.1.2.",

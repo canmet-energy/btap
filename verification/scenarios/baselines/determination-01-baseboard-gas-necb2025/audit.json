@@ -3803,7 +3803,8 @@
    "decisions_citing": 5,
    "code": [
     "python/btap/codes/compliance.py#_evaluate",
-    "python/btap/codes/compliance.py#_evaluate_unmet"
+    "python/btap/codes/compliance.py#_evaluate_unmet",
+    "python/btap/codes/necb/path.py#evaluate_unmet_8_4_4"
    ]
   },
   "article": "8.4.1.2.",
