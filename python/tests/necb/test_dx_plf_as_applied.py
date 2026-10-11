@@ -347,20 +347,23 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                 self.assertAlmostEqual(
                     worst, measured, places=3,
                     msg=f"{kind}: the shortfall across the seam region is "
-                        f"{measured:.3f}% at PLR {m_at:.4f}; D-102 publishes "
-                        f"{worst}%")
+                        f"{measured:.3f}% at PLR {m_at:.4f}; {worst}% is a "
+                        "TEST-LOCAL pin — D-102 publishes only the analytical "
+                        "upper-gap bound, not this exact shortfall")
                 # (c) and the clamp is a SEPARATE fact, active only up here
                 # The onset is where the POLYNOMIAL crosses the ceiling, so
                 # assert the crossing, not a neighbourhood. The previous
                 # version bracketed at +/-0.01 and so admitted anything in
-                # [0.943, 0.963) — Fable passed it 0.945 and 0.960 — while
-                # D-102 publishes 0.953 to three decimals and the file's own
-                # comments condemn exactly this shape for the upper seam.
+                # [0.943, 0.963) — Fable passed it 0.945 and 0.960, and the
+                # file's own comments condemn a bracket of that shape. The
+                # onset is a TEST-LOCAL pin: D-102 does not publish it, having
+                # kept only the analytical upper-gap bound.
                 onset = CLAMP_ACTIVE_FROM[kind]
                 self.assertAlmostEqual(
                     CARRIER_HI, _raw_poly(kind, onset), places=4,
                     msg=f"{kind}: {onset} is where the polynomial REACHES the "
-                        "ceiling; this is the published onset")
+                        "ceiling; this is the test-local clamp onset, not "
+                        "a figure D-102 publishes")
                 self.assertLess(
                     _raw_poly(kind, onset - 1e-3), CARRIER_HI,
                     f"{kind}: a millistep below, it has not reached it")
