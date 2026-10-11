@@ -39,10 +39,14 @@ ARTICLE_EIR_FPLR = {
 #: EnergyPlus constrains its cycling PLF carrier to [0.7, 1.0] and samples the
 #: field over 0.0-1.0 (`DXCoils.cc`, 25.2.0). Neither bound is in the Code.
 CARRIER_LO, CARRIER_HI = 0.7, 1.0
-#: The part-load ratio the defect witness is quoted at, and the input-axis
-#: floor that shipped before this decision. Together they reproduce the
-#: headline: at PLR 0.25 an input floor at 0.7 clamps the evaluation to 0.7.
-DEFECT_PLR, OLD_INPUT_FLOOR = 0.25, 0.7
+#: The part-load ratio the defect witness is quoted at. The floor that
+#: shipped is NOT a free constant: the defect was putting the CARRIER's
+#: own floor on the input axis, so it IS `CARRIER_LO` and is bound to it.
+#: Sol (`205`, `207`) moved a free version to 0.75, updated the block to
+#: what it then computed, and every test passed while the witness no
+#: longer described the shipped defect.
+DEFECT_PLR = 0.25
+OLD_INPUT_FLOOR = CARRIER_LO
 #: Slack for comparisons AGAINST a carrier edge. The seam root equals the
 #: ceiling by construction, so its evaluation differs between platforms by
 #: an ULP; CI saw 1.0000000000000002 where this host saw 1.0.
@@ -318,7 +322,7 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                 peak, at = UPPER_SEAM_PEAK[kind]
                 self.assertAlmostEqual(
                     peak, exact_plf(kind, at), places=5,
-                    msg=f"{kind}: the peak excess D-102 publishes")
+                    msg=f"{kind}: the peak excess, which D-102 now states only as a BOUND — less than a quarter of a percent — so this test is where the exact value lives")
                 # (b) the coil can deliver AT MOST the ceiling here, and in
                 # fact delivers LESS, because the polynomial under-runs the
                 # target before the clamp is anywhere near active. An earlier
@@ -442,12 +446,23 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
             self.skipTest(f"{source} is not present in this layout")
         text = source.read_text(encoding="utf-8")
 
-        blocks = re.findall(r"```text\n(representable set.*?)```", text, re.S)
+        # Count the FENCE, independently of whether its content already
+        # looks like the expected block. Sol (`207`) appended a second valid
+        # `text` fence whose first content line was blank and everything
+        # passed: a count that keys on `representable set` being the first
+        # characters cannot see a stale block that starts differently, which
+        # is the one a careless edit would leave.
+        fenced = re.findall(r"```text\n(.*?)```", text, re.S)
+        self.assertEqual(
+            1, len(fenced),
+            f"D-102 must carry EXACTLY ONE fenced `text` block and carries "
+            f"{len(fenced)}; a second is a copy that can go stale, and any "
+            "search would read only one of them")
+        blocks = [b for b in fenced if b.strip().startswith("representable set")]
         self.assertEqual(
             1, len(blocks),
-            "D-102 must carry EXACTLY ONE evidence block; a second one is a "
-            "copy that can go stale, and a regex search would read only the "
-            "first")
+            "that one block must be the evidence block, starting "
+            "'representable set'")
 
         heat_lo, heat_hi = REPRESENTABLE["heating"]
         cool_lo, cool_hi = REPRESENTABLE["cooling"]
@@ -548,6 +563,16 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                         wanted, notes,
                         f"{edition}/{kind}: the note must state the pinned "
                         f"endpoints verbatim — {wanted}")
+                    # Exactly ONE region statement per note. Fable (`208`)
+                    # judged the substring defensible here — it is
+                    # bracket-delimited with both endpoints in order, so no
+                    # digit changes undetected — but a stale SECOND statement
+                    # appended beside the pinned one would pass, which is the
+                    # duplication shape this decision was corrected for twice.
+                    self.assertEqual(
+                        1, notes.count("PLR ["),
+                        f"{edition}/{kind}: one region statement, not two — a "
+                        "copy is a place to drift")
 
     def test_every_curve_note_cites_D_102(self):
         """The runtime ruling lives in the decision, and the data points at it."""

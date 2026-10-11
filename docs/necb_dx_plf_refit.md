@@ -40,7 +40,7 @@ does not distinguish them; their maxima, both at the LOWER root, do.
 ## Regenerating the figures
 
 ```bash
-python3 docs/scripts/necb_dx_plf_refit.py            # the table below
+python3 docs/scripts/necb_dx_plf_refit.py            # human-readable
 python3 docs/scripts/necb_dx_plf_refit.py --json     # machine-readable
 ```
 

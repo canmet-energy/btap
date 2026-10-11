@@ -867,7 +867,10 @@ reported figure agreeing:
 Every block is now 0.0 h heating and 0.5–1.75 h cooling, so the comparison
 basis holds setpoint. The run still reports NOT COMPLIANT and that is now a
 statement about the PROPOSED building — 167 150 kWh against the reference's
-148 858 kWh, 112.3% of target — which is what a performance path is for.
+148 919 kWh, 112.2% of target — which is what a performance path is for.
+(D-101 recorded 148 858 kWh and 112.3% when this entry was written; D-102
+corrected the reference DX part-load curve's axis, which moved the reference
+up. The verdict is unchanged.)
 
 The witness is the frozen scenario
 `determination-03-18-vav-hw-subset-reheat-annual` (parity lane, full year, not
