@@ -43,6 +43,13 @@ authority where the two cannot both be satisfied.
 **Established by.** Sol `119`, `120`, narrowing his own earlier "expressly
 unresolved".
 
+**EXTENDED 2026-10-07 to cover D-52's own assumptions**, which Sol's `122`
+audit identified. Clause (2)(g) says "largest annual energy use" and does not
+define the energy BASIS; D-52 reads it as delivered heat. Nor does it supply a
+fallback: D-52 uses a structural fuel proxy when the heat-pump share is at or
+below the 33% proviso or when annual data are absent. Both are local choices
+the article does not make.
+
 **What the tool does meanwhile.** The (5) disclosure runs on the heat-pump
 path as well as the structural one, and says the allocation is NOT VERIFIED.
 It does not claim the auxiliary election eliminates electric reference
@@ -186,50 +193,6 @@ claimed: D-97's runtime warning and Sol's `126` both say the retained
 default may bias the reference in EITHER direction. Declining to guess is
 defensible; calling the result conservative was not.
 
-
-**Guard 7 is MET since 2026-10-09, and how it was unmet is a finding worth
-keeping.** Sol's `127` requires one full-year frozen artifact per
-approval-required id. AHJ-16 fires on exactly one corpus model, sample 18
-(`18-vav-hw-subset-reheat`), and only in the SIZING tier, which reaches no
-determination. Driven through a real annual run on 2026-10-08 it reached one —
-`conditional`, with AHJ-16 on the Hot Water Loop — so the wiring was sound.
-
-That run was still refused as a baseline, because its REFERENCE building did
-not hold setpoint: 932.25 unmet heating hours and 542.25 unmet cooling against
-the proposed building's 0.0 and 4.0, where Article 8.4.1.2.(3) allows 100 h. The
-non-compliant verdict was the reference failing, not the proposed building. Sol
-refused exactly this standard of evidence for AHJ-11 in `130` — a reference
-that completes without conditioning is not a comparison, and "EnergyPlus
-exited zero is not the Code's test". Freezing it would have recorded a broken
-reference as the expected baseline.
-
-The cause was not sample 18. It was the selector: one "single-zone" System 3
-air loop served all five retained thermal blocks, following one elected control
-zone while the other four drifted. **D-101** made the thermal block the
-selection unit, and the corrected full-year run was measured twice with every
-reported figure agreeing:
-
-| | before D-101 | after |
-|---|---:|---:|
-| reference unmet heating | 932.25 h | **0.0 h** |
-| reference unmet cooling | 542.25 h | **4.75 h** |
-| proposed unmet cooling | 4.0 h | 4.0 h |
-
-Every block is now 0.0 h heating and 0.5–1.75 h cooling, so the comparison
-basis holds setpoint. The run still reports NOT COMPLIANT and that is now a
-statement about the PROPOSED building — 167 150 kWh against the reference's
-148 919 kWh, 112.2% of target — which is what a performance path is for.
-(D-101 recorded 148 858 kWh and 112.3% when this entry was written; D-102
-corrected the reference DX part-load curve's axis, which moved the reference
-up. The verdict is unchanged.)
-
-The witness is the frozen scenario
-`determination-03-18-vav-hw-subset-reheat-annual` (parity lane, full year, not
-`--quick`, since Article 8.4.1.2 makes a quick run a non-determination). Its
-assertions pin the determination, `ahj_ids` of AHJ-1/AHJ-14/AHJ-16, the
-reference's unmet hours per block, and that the verdict is the proposed
-building's.
-
 ---
 
 ## `alternative-solution`
@@ -305,6 +268,12 @@ database", that it is identical in both editions, and advises: "Do not use the
 Water-cooled Scroll/Reciprocating or Air-cooled Screw EIR_FT rows without
 correction; verify each polynomial at its rating point before use."
 
+**Why an authority must weigh in.** Complying literally with the printed
+coefficient produces an absurd result; using the corrected coefficient departs
+from the text as published. Neither is a calculation a tool can be said to
+have got right, and the choice changes modelled chiller energy. A project
+relying on either needs its authority to accept which reading applies.
+
 **Established by.** The codes service's own errata
 (`services/codes/docs/errata-necb-chiller-eir-ft.md`), surfaced in the
 `known_issue` of the archived payload at
@@ -341,6 +310,11 @@ curve is shipped at all.** That answers the erratum for this entry; the
 absence itself is a separate `tool-gap` and is now **AHJ-17**, because one
 entry cannot carry a referral and a tool gap under one status without making
 the taxonomy untruthful (Sol, clearance review of be2118d).
+
+**STILL OPEN, and phylroy's call.** The deviation sets no run conditional, so a
+building with a water-cooled scroll or reciprocating chiller is modelled on
+corrected coefficients with nothing in its report saying so. Same shape of
+hole as AHJ-5.
 
 ---
 

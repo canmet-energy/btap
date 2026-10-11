@@ -51,13 +51,39 @@ def _register_body(register, ident):
     return register[start:nxt if nxt != -1 else len(register)]
 
 
-def _read_field(body, heads):
+def _published_field(section, label, all_labels):
+    """One field's text out of the PUBLISHED section.
+
+    Ends at the next published label or at the section's `---` rule,
+    whichever comes first.
+    """
+    opener = f"**{label}.** "
+    tail = section[section.index(opener) + len(opener):]
+    stops = [tail.index(f"**{other}.** ") for other in all_labels
+             if other != label and f"**{other}.** " in tail]
+    if "\n---" in tail:
+        stops.append(tail.index("\n---"))
+    return tail[:min(stops)] if stops else tail
+
+
+def _read_field(body, heads, boundaries):
     """A field's whole text, LINE BY LINE — a second implementation.
 
-    Deliberately not the generator's regex: a field runs from the line
-    opening `**Label...**` to the next line that opens a bold label or a
-    sub-heading. Written differently on purpose, so a change to the
-    generator's reader cannot carry this test's expectation along with it.
+    Deliberately not the generator's regex, but it takes the same RECOGNISED
+    HEADINGS, because that is the register's grammar and two copies of a
+    grammar is worse than one. The first version of this reader invented its
+    own typographic rule — "stop at a bold run that opens and closes on one
+    line" — identical to the generator's, so both cut AHJ-7's requirement at
+    its `**Why an authority must weigh in.**` sub-paragraph and both ran
+    AHJ-16's interim behaviour through 50 lines of review-loop history
+    (Fable, `217`). Sharing a WRONG rule is what made the comparison useless;
+    sharing the authored grammar is the point of having one.
+
+    What makes this test able to fail is therefore not this reader. It is
+    `test_fields_are_IDENTICAL_to_the_register` comparing for equality rather
+    than containment — so over-reading fails too — and the two content
+    assertions below, which name text that must and must not appear and are
+    independent of any parsing rule at all.
     """
     lines = body.split("\n")
     for index, line in enumerate(lines):
@@ -65,7 +91,7 @@ def _read_field(body, heads):
             continue
         collected = [line.split("**", 2)[-1].lstrip()]
         for later in lines[index + 1:]:
-            if later.startswith("**") and later.find("**", 2) != -1:
+            if any(later.startswith(f"**{name}") for name in boundaries):
                 break
             if later.startswith("#"):
                 break
@@ -184,71 +210,103 @@ class TestTheReferralPackage(unittest.TestCase):
                     "does not meet IS what an authority is being asked to "
                     "accept, and it must be in the package")
 
-    def test_no_field_is_TRUNCATED_against_the_register(self):
-        """Every field, whole — read INDEPENDENTLY of the generator.
+    def test_fields_are_IDENTICAL_to_the_register(self):
+        """Equality, not containment — so OVER-reading fails too.
 
-        `_field` stopped at the first blank line, so AHJ-7's requirement
-        published 246 of its 1150 characters and ended on the colon
-        introducing the coefficient table it dropped: the authority was asked
-        to accept a non-conforming substitution and shown neither the three
-        wrong published rows nor the paragraph headed "Why an authority must
-        weigh in". AHJ-1 lost 842 characters and AHJ-10 357 (Sol, `216`;
-        Fable, `214`).
-
-        The first version of this test called the generator's own `_field` to
-        say what the package SHOULD contain, so restoring the blank-line stop
-        truncated both sides equally and all five tests stayed green. A check
-        that defines its expectation with the code under test cannot fail.
-
-        So the field is read here by a second, deliberately different
-        implementation — line-based rather than regex-based, same rule. Two
-        implementations of one simple rule is the point; if they disagree, one
-        of them is wrong.
+        Containment could only ever catch a field that lost text. An
+        over-reading generator passes it trivially, and that is the state the
+        package shipped in: AHJ-16's interim behaviour ran on through 50 lines
+        of review-loop history, 68 lines against 16-29 for the other
+        referrals, and nothing failed (Fable, `217`).
         """
         if not OUTPUT.is_file():
             self.skipTest(f"{OUTPUT} is not present in this layout")
+        generator = _generator()
         register = REGISTER.read_text(encoding="utf-8")
-        published = " ".join(OUTPUT.read_text(encoding="utf-8").split())
+        text = OUTPUT.read_text(encoding="utf-8")
         wanted = [r["id"] for r in entries()
                   if r.get("status") in ("referral", "alternative-solution")]
-        labels = {"article": ("Article",),
-                  "question": ("The ambiguity", "The question",
-                               "The requirement"),
-                  "established": ("Established by",),
-                  "meanwhile": ("What the tool does meanwhile",
-                                "What the tool does now")}
+        labels = (("The question", generator.FIELDS["question"]),
+                  ("Established by", generator.FIELDS["established"]),
+                  ("What the tool does meanwhile", generator.FIELDS["meanwhile"]))
         for ident in wanted:
             body = _register_body(register, ident)
-            for key, heads in labels.items():
-                with self.subTest(entry=ident, field=key):
-                    text = _read_field(body, heads)
-                    self.assertTrue(
-                        text, f"{ident}: the register states no {key}")
-                    normalised = " ".join(text.split())
-                    self.assertIn(
-                        normalised, published,
-                        f"{ident}.{key}: {len(normalised)} characters in the "
-                        "register are not all in the package. A field "
-                        "truncated in the middle still reads as prose, which "
-                        "is why this compares the TEXT and not its length")
+            start_ = text.index(f"### {ident} — ")
+            nxt_ = text.find("\n### ", start_ + 4)
+            section = text[start_:nxt_ if nxt_ != -1 else len(text)]
+            for label, heads in labels:
+                with self.subTest(entry=ident, field=label):
+                    want = _read_field(body, heads,
+                                       generator.FIELD_HEADINGS)
+                    got = _published_field(section, label,
+                                           [o for o, _ in labels])
+                    self.assertEqual(
+                        " ".join(want.split()), " ".join(got.split()),
+                        f"{ident}.{label}: the package and the register must "
+                        "carry the SAME text — equality, because containment "
+                        "cannot see the package carrying MORE")
+
+    def test_AHJ_7_publishes_the_paragraph_that_states_the_CHOICE(self):
+        """A content fact, independent of any parsing rule.
+
+        AHJ-7's requirement ends with `**Why an authority must weigh in.**`:
+        complying literally with the printed coefficient is absurd, the
+        corrected one departs from the published text, and "a project relying
+        on either needs its authority to accept which reading applies". That
+        sentence IS the referral. The typographic field-end rule dropped it
+        because the heading happens to fit on one line (Fable, `217`; Sol's
+        `216` named it).
+        """
+        if not OUTPUT.is_file():
+            self.skipTest(f"{OUTPUT} is not present in this layout")
+        text = OUTPUT.read_text(encoding="utf-8")
+        start_ = text.index("### AHJ-7 — ")
+        nxt_ = text.find("\n### ", start_ + 4)
+        section = text[start_:nxt_ if nxt_ != -1 else len(text)]
+        self.assertIn(
+            "Why an authority must weigh in", section,
+            "AHJ-7 is an alternative solution and this is the paragraph "
+            "saying what an authority is being asked to accept")
+        self.assertIn(
+            "needs its authority to accept which reading applies", section,
+            "and the sentence that states the choice must survive")
+        self.assertIn(
+            "|", section,
+            "as must the table of the three wrong published rows")
+
+    def test_AHJ_16_does_NOT_publish_the_review_loop_history(self):
+        """The other direction, also by content.
+
+        AHJ-16's register entry carries a Guard-7 history of how its frozen
+        artifact was obtained — a real record, and not what an authority is
+        being asked. It reached the package because the field-end rule missed
+        a heading that WRAPPED.
+        """
+        if not OUTPUT.is_file():
+            self.skipTest(f"{OUTPUT} is not present in this layout")
+        text = OUTPUT.read_text(encoding="utf-8")
+        start_ = text.index("### AHJ-16 — ")
+        nxt_ = text.find("\n### ", start_ + 4)
+        section = text[start_:nxt_ if nxt_ != -1 else len(text)]
+        for leaked in ("Guard 7 is MET", "refused as a baseline",
+                       "before D-101"):
+            with self.subTest(phrase=leaked):
+                self.assertNotIn(
+                    leaked, section,
+                    f"{leaked!r} is this project's review history, not a "
+                    "question for an authority")
 
     def test_the_READER_itself_sees_more_than_one_paragraph(self):
-        """The control for the test above.
-
-        If this file's own reader stopped at a blank line too, the comparison
-        would pass against a truncated package and prove nothing. AHJ-7's
-        requirement is the case: four material parts under one heading,
-        including the table of wrong coefficients.
-        """
+        """The control: if this file's reader stopped early too, the equality
+        above would hold against a truncated package."""
         register = REGISTER.read_text(encoding="utf-8")
+        generator = _generator()
         text = _read_field(_register_body(register, "AHJ-7"),
-                           ("The requirement", "The question"))
+                           ("The requirement", "The question"),
+                           generator.FIELD_HEADINGS)
         self.assertGreater(
-            len(text), 900,
-            "AHJ-7's requirement is a multi-paragraph field with a table; a "
-            f"reader returning {len(text)} characters has stopped early, and "
-            "this file's other assertions are then vacuous")
-        self.assertIn(
-            "|", text,
-            "the coefficient table is part of the requirement — it names the "
-            "three wrong published rows an authority is asked about")
+            len(text), 1400,
+            "AHJ-7's requirement spans its table AND its closing paragraph; "
+            f"a reader returning {len(text)} characters has stopped early")
+        self.assertIn("Why an authority must weigh in", text)
+        self.assertIn("|", text)

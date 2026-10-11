@@ -158,9 +158,37 @@ def _sections() -> dict:
     return out
 
 
-#: Where a field ENDS: the next field heading, a sub-heading, or the entry.
-#: Not the first blank line — see `_field`.
-_FIELD_END_RE = re.compile(r"(?m)^(?:\*\*[A-Z][^*\n]*\*\*|#{2,6} )")
+#: The register's RECOGNISED field headings — a closed set, which is what
+#: makes a field's end decidable.
+#:
+#: The previous rule was typographic: "a bold run that opens and closes on one
+#: line". That is not the register's grammar, and it was wrong in BOTH
+#: directions (Fable, `217`). It cut AHJ-7's requirement at its own
+#: `**Why an authority must weigh in.**` sub-paragraph — the paragraph that
+#: states the choice, and the one Sol named — because that line happens to
+#: fit. And it ran AHJ-16's interim behaviour on through 50 lines of
+#: review-loop history, because `**Guard 7 is MET since …**` happens to WRAP.
+#: Whether a field ended depended on where the text wrapped.
+#:
+#: A bold run that is not in this set is EMPHASIS INSIDE a field, not a
+#: boundary. Adding a new authored field heading means adding it here.
+FIELD_HEADINGS = (
+    "Article",
+    "Status",
+    "The ambiguity",
+    "The requirement",
+    "The gap",
+    "What is missing",
+    "Why it matters",
+    "Established by",
+    "What the tool does meanwhile",
+    "What the tool does now",
+    "Where a reader meets it",
+)
+
+_FIELD_END_RE = re.compile(
+    r"(?m)^(?:" + "|".join(
+        r"\*\*" + re.escape(name) for name in FIELD_HEADINGS) + r"|#{2,6} )")
 
 
 def _field(body: str, headings: tuple, *, collapse: bool = False) -> str | None:

@@ -835,6 +835,8 @@ claimed: D-97's runtime warning and Sol's `126` both say the retained
 default may bias the reference in EITHER direction. Declining to guess is
 defensible; calling the result conservative was not.
 
+**Where a reader meets it.** The frozen full-year parity scenario below, and
+the Guard-7 history of how that artifact was obtained.
 
 **Guard 7 is MET since 2026-10-09, and how it was unmet is a finding worth
 keeping.** Sol's `127` requires one full-year frozen artifact per
