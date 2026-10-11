@@ -123,7 +123,12 @@ def main(argv=None):
         if rec["upper_root"]:
             print(f"  upper root                {rec['upper_root']!r}")
         print(f"  SHIPPED worst as applied  {rec['shipped_worst']:.6f}%")
-        print("  refit over the representable set, by sample density:")
+        domain = ("primary interval" if rec["upper_root"]
+                  else "representable region")
+        # Account 1 fits heating's PRIMARY INTERVAL, not its whole
+        # (disconnected) set — calling it "the representable set" repeats the
+        # conflation D-102 was corrected for.
+        print(f"  refit over the {domain}, by sample density:")
         for n, w in rec["progression"].items():
             print(f"    {n:>7} intervals        {w:.6f}%")
         for name in ("account_1", "account_2"):

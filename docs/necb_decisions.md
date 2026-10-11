@@ -7340,17 +7340,22 @@ limit.
 **At the floor.** As PLR approaches zero the Article's EIR cubic keeps its
 non-zero intercept, so the exact target tends to zero while a cycling PLF
 cannot go below the carrier's floor. Under the lower root the reference
-therefore delivers the floor where the Code implies less. This is an
-ENGINE-CARRIER limitation, not a modelling choice and not a tolerance, and it
-is recorded with its measured consequence rather than excluded by starting a
-tolerance above it — which is precisely what a 0.25 floor did.
+therefore delivers the floor where the Code implies less — at a tenth of
+rated load, roughly 0.56 against the carrier's 0.70. That one load is worth
+stating because it is the comparison that refused the 0.25 floor: a clamp
+there delivers further from the Article than the carrier's own limit does.
 
-**At the ceiling.** A part-load FRACTION above 1.0 would mean better-than-rated
-efficiency at part load, and EnergyPlus will not accept it. Over the top fifth
-of the heating domain the Code states a target the field cannot carry, by a
-fraction of a percent, and the clamp is what makes full load exact. **Cooling
-has no upper seam**, and the asymmetry is asserted in the tests rather than
-left incidental.
+This is an ENGINE-CARRIER limitation, not a modelling choice and not a
+tolerance, and it is declared rather than excluded by starting a tolerance
+above it — which is precisely what a 0.25 floor did.
+
+**At the ceiling.** A part-load FRACTION above 1.0 would mean
+better-than-rated efficiency at part load, and EnergyPlus will not accept it.
+Over the top fifth of the heating domain the Code states a target the field
+cannot carry — by LESS THAN A QUARTER OF A PERCENT at its worst, a bound that
+follows from the Article cubic alone and so cannot drift — and the clamp is
+what makes full load exact. **Cooling has no upper seam**, and the asymmetry
+is asserted in the tests rather than left incidental.
 
 Both roots BELONG to the representable set: at each one the target equals the
 bound by definition, which is what makes it the root. At full load the
@@ -7358,6 +7363,19 @@ Article's own coefficients sum to exactly one, so the target is exactly the
 ceiling there and that isolated point is representable too — the gap is the
 OPEN interval between the upper root and full load, and the set is
 disconnected rather than merely short.
+
+### What the correction cost, measured
+
+The claim that this gap is "recorded with its measured consequence" was made
+before any consequence was recorded (Fable, `206`). On the frozen corpus the
+correction moved five annual determinations' reference total site energy up by
+**0.04% to 0.05%**, and `determination-03`'s verdict from 112.3% to 112.2% of
+target — **a tenth of a percentage point**. The direction is the one the
+physics requires: the cycling penalty now applies below the old floor, so the
+reference burns more, the target grows, and proposed-over-target falls.
+
+Those are dated measurements of one re-freeze, not properties of the curve, so
+they live in prose and in the baselines rather than in the evidence block.
 
 ### A refit is open work, and lives elsewhere
 
@@ -7408,7 +7426,7 @@ restated on four surfaces — this decision's summary and body, and both
 editions' curve notes — and drifted on one at a time while guards were added
 for whichever had just drifted. The structural answer, directed by Sol's
 `203` and Fable's `204`, was to delete the repetition: one evidence block, one
-surface, one computed comparison. Git holds the history; `df4e500..HEAD` on
+surface, one computed comparison. Git holds the history; `df4e500..f524dbe` on
 `ashp-plf-bound` is the range, and the commit messages there are the account.
 
 - **Who/when:** Claude under D-10, 2026-10-10; Sol's `185` found the axis

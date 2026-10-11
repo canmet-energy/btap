@@ -415,20 +415,24 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                                  f"{name} differs between editions")
 
     def test_the_EVIDENCE_BLOCK_is_computed(self):
-        """D-102's one evidence block, every field recomputed and matched.
+        """D-102's one evidence block, RENDERED from the constants and compared
+        whole.
 
         This replaces four guards that each chased the figures the previous
         review round had moved. Fable's `204` census ended that approach: 70
-        distinct figures in the body, 5 tied to a computation, ~55 tied to
-        nothing — including the headline the decision exists for. Guard nine
-        would have pinned six more and left 59.
+        figures in the body, 5 tied to a computation, ~55 tied to nothing —
+        including the headline the decision exists for.
 
-        So the document now states its measured figures ONCE, in one fenced
-        block on one surface, and this derives every field of it from the
-        shipped curve and the Article cubic. A broad `assertIn` over the body
-        cannot do this: the same figure appearing elsewhere satisfies it,
-        which is how `12.663%` reverting in the governing table stayed green
-        (Sol, `203`).
+        The first version of THIS guard checked each field as a substring, and
+        `206` showed four ways past it: swapping the witness's target and
+        delivered values (which INVERTS the defect — a reference
+        over-penalising instead of under-penalising — and still matches),
+        renaming a row label, changing the quoted PLR, and appending a second
+        stale block below the real one. A substring search cannot see
+        structure, order, or duplication.
+
+        So the whole block is rendered from the derived values and compared as
+        one string, and the document must contain exactly one of them.
         """
         import pathlib as _p
 
@@ -436,56 +440,65 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                   / "docs" / "decisions" / "D-102.md")
         if not source.is_file():
             self.skipTest(f"{source} is not present in this layout")
-        block = re.search(r"```text\n(representable set.*?)```",
-                          source.read_text(encoding="utf-8"), re.S)
-        self.assertIsNotNone(
-            block, "D-102 must carry its evidence block, starting "
-                   "'representable set'")
-        lines = [" ".join(line.split())
-                 for line in block.group(1).strip().split("\n")]
+        text = source.read_text(encoding="utf-8")
 
-        expected = []
-        for kind in ("heating", "cooling"):
-            lo, hi = REPRESENTABLE[kind]
-            seam = UPPER_SEAM[kind]
-            self.assertAlmostEqual(CARRIER_LO, exact_plf(kind, lo), places=9)
-            shape = (f"[{lo}, {seam!r}] union {{1.0}}" if seam
-                     else f"[{lo}, {hi}]")
-            expected.append(f"{kind} {shape}")
-        for kind in ("heating", "cooling"):
-            worst, _ = self.measured_maximum(kind)
-            expected.append(f"{kind} {worst:.3f}%")
+        blocks = re.findall(r"```text\n(representable set.*?)```", text, re.S)
+        self.assertEqual(
+            1, len(blocks),
+            "D-102 must carry EXACTLY ONE evidence block; a second one is a "
+            "copy that can go stale, and a regex search would read only the "
+            "first")
 
-        # The DEFECT WITNESS, which is the reason this decision exists and was
-        # the one figure in the block still tied to nothing: Fable moved
-        # 23.0% to 32.0% and every test stayed green (`204`, R4-f). All four
-        # of its numbers are derivable — the Article target at PLR 0.25, what
-        # an INPUT floor at 0.7 delivered there, and the two errors.
+        heat_lo, heat_hi = REPRESENTABLE["heating"]
+        cool_lo, cool_hi = REPRESENTABLE["cooling"]
+        # EVERY declared endpoint is derived, cooling's upper one included.
+        # It used to be a free constant: Sol moved it to 0.9 in the constant
+        # AND the block and all 8 tests passed, because the no-upper-seam
+        # branch proves the target never EXCEEDS the ceiling through 1.0 and
+        # never that the declared set REACHES 1.0 (`205`). Two independent
+        # facts pin it — the engine's own input domain, and the Article cubic
+        # being normalised there.
+        for kind, hi in (("heating", heat_hi), ("cooling", cool_hi)):
+            curve = self.coil_plf_curve(kind)
+            if UPPER_SEAM[kind] is None:
+                self.assertEqual(
+                    curve.maximumValueofx(), hi,
+                    f"{kind}: with no upper seam the representable set runs to "
+                    "the engine's own input maximum, not to a free constant")
+                self.assertAlmostEqual(
+                    CARRIER_HI, exact_plf(kind, hi), places=9,
+                    msg=f"{kind}: and the Article is normalised there, so the "
+                        "target equals the ceiling at that endpoint")
+        heat_worst, _ = self.measured_maximum("heating")
+        cool_worst, _ = self.measured_maximum("cooling")
         target = exact_plf("heating", DEFECT_PLR)
         delivered = max(CARRIER_LO,
                         min(CARRIER_HI, _raw_poly("heating", OLD_INPUT_FLOOR)))
-        raw = _raw_poly("heating", DEFECT_PLR)
-        witness = [
-            f"{target:.4f}", f"{delivered:.4f}",
-            f"{abs(delivered - target) / target * 100:.1f}% as applied",
-            f"{abs(raw - target) / target * 100:.1f}% raw",
-        ]
-        for want in witness:
-            self.assertIn(
-                want, " ".join(lines),
-                f"the evidence block's defect witness must state {want!r}: at "
-                f"PLR {DEFECT_PLR} an input floor at {OLD_INPUT_FLOOR} "
-                "delivered that against the Article's target, which is why "
-                "this decision exists")
+        as_applied = abs(delivered - target) / target * 100
+        raw = abs(_raw_poly("heating", DEFECT_PLR) - target) / target * 100
+        self.assertAlmostEqual(CARRIER_LO, exact_plf("heating", heat_lo), places=9)
+        self.assertAlmostEqual(CARRIER_LO, exact_plf("cooling", cool_lo), places=9)
+        self.assertAlmostEqual(CARRIER_HI, exact_plf("heating", heat_hi), places=9)
 
-        flat = " ".join(lines)
-        for want in expected:
-            field, _, value = want.partition(" ")
-            self.assertRegex(
-                flat, re.escape(field) + r"\s+" + re.escape(value),
-                f"the evidence block must state {field} {value}; computed "
-                f"from the shipped curve and the Article cubic. Block as "
-                f"published:\n  " + "\n  ".join(lines))
+        expected = (
+            f"representable set   heating  [{heat_lo}, {heat_hi}] union {{1.0}}\n"
+            f"                    cooling  [{cool_lo}, {cool_hi}]\n"
+            f"worst as applied    heating  {heat_worst:.3f}%    "
+            f"cooling  {cool_worst:.3f}%\n"
+            f"defect corrected    at PLR {DEFECT_PLR} the curve delivered "
+            f"{delivered:.4f} against an Article\n"
+            f"                    target of {target:.4f} \u2014 "
+            f"{as_applied:.1f}% as applied, {raw:.1f}% raw"
+        )
+        def flat(s):
+            return "\n".join(" ".join(x.split())
+                              for x in s.strip().split("\n"))
+        self.assertEqual(
+            flat(expected), flat(blocks[0]),
+            "the evidence block must be EXACTLY what the shipped curve and the "
+            "Article cubic produce — every figure, every label, and the order "
+            "of the witness's target and delivered values, which swapped "
+            "inverts the defect this decision corrects")
 
     def measured_maximum(self, kind):
         """Worst as-applied relative error over the representable set."""
@@ -498,6 +511,43 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
             if rel > worst:
                 worst, at = rel, plr
         return worst, at
+
+    def test_the_note_ENDPOINTS_are_the_pinned_ones(self):
+        """The endpoints kept in the notes as row data, tied to the constants.
+
+        Sol's `203` directed keeping the exact endpoints in the curve notes —
+        they are data about the row, unlike the maxima, which are adjudication
+        evidence and now live only in the evidence block. But deleting the old
+        region guard left them unpinned: changing NECB 2020's heating note
+        lower root to `0.266046...` left every test green (`205`). A provenance
+        hash detects changed BYTES; refreshing the manifest blesses the wrong
+        sentence.
+
+        This is one row-metadata contract, not a return to four evidence
+        surfaces. It checks only the endpoints, and only that they are the
+        same ones the seam tests derive.
+        """
+        import json
+
+        from btap.codes.necb import _data_root
+
+        NAMES = {"heating": "DXHEAT-REF-PLFFPLR",
+                 "cooling": "DXCOOL-REF-COOLPLFFPLR"}
+        for edition in ("necb2020", "necb2025"):
+            data = json.loads((_data_root() / edition / "efficiencies.json")
+                              .read_text(encoding="utf-8"))
+            for kind, name in sorted(NAMES.items()):
+                with self.subTest(edition=edition, kind=kind):
+                    row = next(c for c in data["curves"]
+                               if isinstance(c, dict) and c.get("name") == name)
+                    notes, seam = row.get("notes") or "", UPPER_SEAM[kind]
+                    lo, hi = REPRESENTABLE[kind]
+                    wanted = (f"PLR [{lo}, {seam!r}] union {{1.0}}" if seam
+                              else f"PLR [{lo}, {hi}]")
+                    self.assertIn(
+                        wanted, notes,
+                        f"{edition}/{kind}: the note must state the pinned "
+                        f"endpoints verbatim — {wanted}")
 
     def test_every_curve_note_cites_D_102(self):
         """The runtime ruling lives in the decision, and the data points at it."""
