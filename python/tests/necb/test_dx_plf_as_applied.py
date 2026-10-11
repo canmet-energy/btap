@@ -350,39 +350,53 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
                         f"set, digit for digit:\n  wanted: {wanted}\n"
                         f"  note:   {' '.join(notes.split())[:200]}")
 
-    def test_no_RETIRED_figure_is_presented_as_current(self):
-        """D-102 carried a superseded number on three surfaces in turn.
+    def test_no_RETIRED_pair_is_presented_as_current(self):
+        """D-102 carried a superseded result on three surfaces in turn.
 
         The upper seam shortened the representable region, which moved the
-        refit figures. I corrected the body table, then the shipped data
-        notes, then — after Sol found it again — the front-matter summary,
-        each time leaving a parallel surface stating the old pair as a current
-        measurement. Fixing instances was not fixing the class.
+        refit figures; then naming the interval rather than the set moved them
+        again. Each time I corrected one surface and left a parallel one
+        stating the old PAIR as a current measurement — body table, then
+        shipped notes, then the front-matter summary, which is where Sol found
+        it.
 
-        So a retired figure may appear ONLY inside a sentence that marks it
-        retired. That is checkable, and it fails the moment one is quoted as
-        a live result.
+        The unit guarded is the PAIR, not the digit. An individual figure
+        legitimately appears in the density progression — `1.235388%` IS the
+        20 000-interval heating result and belongs in that table. What may not
+        appear is a retired heating/cooling pair offered together as THE
+        result, which is the mistake actually made. A first version of this
+        guard enumerated bare digits and failed on the table it had just
+        published, and a second enumerated only the ORIGINAL pair, leaving the
+        pair retired in the same commit unguarded.
         """
         import pathlib
 
-        RETIRED = ("1.877", "4.853")
-        MARKERS = ("earlier version", "superseded", "no longer", "stale")
+        RETIRED_PAIRS = (("1.877", "4.853"), ("1.235", "4.938"))
+        MARKERS = ("earlier version", "superseded", "no longer", "stale",
+                   "was wrong", "retired")
         source = (pathlib.Path(__file__).resolve().parents[3]
                   / "docs" / "decisions" / "D-102.md")
         if not source.is_file():   # installed-wheel smoke run, no repo docs
             self.skipTest(f"{source} is not present in this layout")
-        text = source.read_text(encoding="utf-8")
-        for figure in RETIRED:
+        # PROSE only. A fenced block is DATA — the density progression
+        # legitimately lists 1.235388% beside 4.938354% because those are the
+        # 20 000- and 400-interval results, and it carries no sentence
+        # punctuation, so an unfiltered scan reads the whole table as one
+        # sentence making a claim. What is guarded is a claim, not a column.
+        text = re.sub(r"```.*?```", " ", source.read_text(encoding="utf-8"),
+                      flags=re.S)
+        self.assertNotIn("```", text, "every fenced block must be stripped")
+        for heating, cooling in RETIRED_PAIRS:
             for sentence in re.split(r"(?<=\.)\s+", text):
-                if figure not in sentence:
+                if heating not in sentence or cooling not in sentence:
                     continue
-                with self.subTest(figure=figure):
+                with self.subTest(pair=f"{heating}/{cooling}"):
                     self.assertTrue(
                         any(m in sentence.lower() for m in MARKERS),
-                        f"{figure}% is a RETIRED refit figure, measured over "
-                        "the old domain with the target clipped. It appears "
-                        "here without any marker that it is superseded:\n"
-                        f"  {' '.join(sentence.split())[:220]}")
+                        f"{heating}% / {cooling}% is a RETIRED refit pair. It "
+                        "appears here offered as a current result, with no "
+                        "marker that it is superseded:\n"
+                        f"  {' '.join(sentence.split())[:240]}")
 
     def test_every_curve_note_cites_D_102(self):
         """The runtime ruling lives in the decision, and the data points at it."""
