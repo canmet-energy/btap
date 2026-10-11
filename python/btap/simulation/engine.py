@@ -478,6 +478,12 @@ def _stage(build, dest: Path) -> None:
     with its own `build` instead of reimplementing the part under test.
     """
     dest.parent.mkdir(parents=True, exist_ok=True)
+    # A hard-killed build leaves its staging directory behind — ~230 MB that
+    # nothing will ever claim (Fable, `214`). Every caller holds the
+    # provisioning lock, so any staging sibling here belongs to a process
+    # that is gone.
+    for orphan in dest.parent.glob(f".{dest.name}.staging-*"):
+        shutil.rmtree(orphan, ignore_errors=True)
     staging = Path(tempfile.mkdtemp(prefix=f".{dest.name}.staging-",
                                     dir=dest.parent))
     try:

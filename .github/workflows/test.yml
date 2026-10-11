@@ -106,9 +106,13 @@ jobs:
         # recovery is to deepen, and this job runs `-n auto` with TWO
         # modules calling that function, so two processes deepened one
         # `.git` concurrently and produced a false "came from another
-        # line of history" failure (issue #99). The function now takes
-        # a lock, so this is belt and braces: with a full clone the
-        # racing path is never entered at all.
+        # line of history" failure (issue #99). With a full clone the
+        # racing path is never entered at all, which is the whole fix
+        # here: the in-code lock for it is deliberately NOT in this
+        # change, because `test_frozen_scenarios.py` is one of the seven
+        # files `gate_sha256` hashes and editing it would demand a full
+        # re-freeze for a no-op. #99 stays open for the local
+        # shallow-clone case and records that trigger.
         with:
           fetch-depth: 0
       - uses: actions/setup-python@v6

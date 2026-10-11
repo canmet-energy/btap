@@ -62,6 +62,7 @@ def _worker(index, cache, ledger, queue):
         exactly where the real installer is not, and so it could not see a
         reader picking up a half-written binary (Fable, `214`). Writing it
         first and finishing afterwards is the shape that exposes it.
+
         """
         release = into / "release"
         release.mkdir(parents=True, exist_ok=True)
@@ -159,6 +160,83 @@ class TestProvisioningIsExclusiveAcrossProcesses(unittest.TestCase):
                 1, concurrent,
                 f"peak concurrent installs was {concurrent}; concurrent "
                 "extraction into one cache directory IS the defect")
+
+
+class TestThePublishIsAtomic(unittest.TestCase):
+    """A partial install is never VISIBLE at the cache path.
+
+    This is the reader half of the race, and it does not need a race to
+    test. `ensure_energyplus` checks the cache before taking the lock, so a
+    process arriving mid-install resolves whatever is visible at that moment;
+    the property that protects it is simply that nothing incomplete is ever
+    visible there.
+
+    I first tried to catch this by orchestrating four processes and timing
+    them. Fable (`217`) measured that version escaping 2 runs in 25, and my
+    attempt to fix it with a handshake made it escape 25 of 25 — the readers
+    could not reach the cache inside the window at all, so the test became
+    weaker while looking stronger. A race whose outcome depends on process
+    scheduling cannot carry an invariant. Asking the question directly can:
+    AT THE MOMENT the install has written its binary and nothing else, is
+    anything resolvable at `cache_dir`?
+    """
+
+    def setUp(self):
+        from btap.simulation import engine
+
+        self.engine = engine
+        self.work = tempfile.TemporaryDirectory(prefix="btap-atomic-")
+        self.addCleanup(self.work.cleanup)
+        self.target = pathlib.Path(self.work.name) / "cache" / "1.2.3"
+
+    def test_nothing_is_resolvable_at_the_cache_PATH_mid_install(self):
+        engine = self.engine
+        seen = []
+
+        def build(into):
+            release = into / "release"
+            release.mkdir(parents=True, exist_ok=True)
+            binary = release / "energyplus"
+            binary.write_text("#!/bin/sh\n", encoding="utf-8")
+            binary.chmod(0o755)
+            # The binary exists and the release does not. What would a
+            # process checking the cache right now resolve?
+            seen.append(engine._binary_in(self.target))
+            (release / "Energy+.idd").write_text("x", encoding="utf-8")
+
+        engine._stage(build, self.target)
+
+        self.assertEqual(
+            [None], seen,
+            "mid-install, `_binary_in` resolved "
+            f"{seen!r} at the cache path. A process checking the cache then "
+            "returns that binary and runs `--version` on a file still being "
+            "written — which is the `Text file busy` this fix exists to "
+            "remove. The install must be published in ONE step")
+        self.assertTrue(
+            engine._binary_in(self.target),
+            "and afterwards it must resolve, or the staging never landed")
+        self.assertTrue(
+            (engine._binary_in(self.target).parent / "Energy+.idd").is_file(),
+            "with the whole release, not just the binary")
+
+    def test_a_crashed_install_leaves_nothing_resolvable(self):
+        """`_stage` must not publish a tree its builder failed to finish."""
+        engine = self.engine
+
+        def build(into):
+            (into / "release").mkdir(parents=True, exist_ok=True)
+            (into / "release" / "energyplus").write_text("x", encoding="utf-8")
+            raise RuntimeError("download died")
+
+        with self.assertRaises(RuntimeError):
+            engine._stage(build, self.target)
+        self.assertIsNone(
+            engine._binary_in(self.target),
+            "a failed install must leave the cache EMPTY, not half-published")
+        self.assertEqual(
+            [], list(self.target.parent.glob(".*staging-*")),
+            "and it must not leave its staging directory behind")
 
 
 class TestTheLockDoesNotFailOpen(unittest.TestCase):
