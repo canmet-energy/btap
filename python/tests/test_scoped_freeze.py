@@ -619,8 +619,19 @@ class TestTheFullFreezePathREACHESAssembly(unittest.TestCase):
         freeze.scenario_defs.all_scenarios = lambda *a, **k: []
         freeze.producer_identity = lambda *a, **k: {
             "openstudio_cli": "3.11.0", "producer": "test"}
+        # The attestation must be the COMMITTED one. Returning `None`
+        # here made the immutable guard fire — correctly, since erasing
+        # D-84's record is exactly what it exists to stop — and the run
+        # never reached promotion. A stub that trips a guard under test
+        # measures the stub.
+        committed = json.loads(
+            freeze.runner.MANIFEST.read_text(encoding="utf-8"))
+        attestation = committed["provenance"].get(
+            "final_cross_language_attestation")
         freeze.seal_accounting = lambda *a, **k: (
-            {"python-only": 0}, {"ruby": 0}, None)
+            committed["provenance"]["active_seals"],
+            committed["provenance"]["retired_seals"],
+            attestation)
         with mock.patch.object(sys, "argv", ["freeze.py", *argv]):
             try:
                 freeze.main()
@@ -630,21 +641,32 @@ class TestTheFullFreezePathREACHESAssembly(unittest.TestCase):
                 return type(error).__name__, str(error)
         return "returned", ""
 
-    def test_the_full_path_does_not_die_on_an_UNSET_previous(self):
-        """The regression. Any outcome but `UnboundLocalError` is progress.
+    def test_the_full_path_reaches_PROMOTION_with_an_empty_corpus(self):
+        """The regression, asserted on the outcome rather than its absence.
 
-        A clean empty corpus cannot actually promote — there is no baselines
-        directory to move — so the honest assertion is that it gets THAT
-        far, not that it succeeds.
+        My first version said "any outcome but `UnboundLocalError` is
+        progress" and asserted exactly that — which accepts EVERY other
+        failure, including ones that would mean the orchestration broke
+        somewhere new (Sol, `238`). A test that passes on an unbounded set
+        of failures is not a witness.
+
+        With an empty scenario set a full freeze runs no engine, assembles a
+        manifest describing zero scenarios, and then cannot promote because
+        no baselines directory was ever created. That specific outcome is
+        the proof it got all the way through both helpers: `assemble_scope`
+        and `assemble_manifest` both took `previous`, and promotion is the
+        step after them.
         """
         kind, message = self._main_with_no_scenarios(["--allow-dirty"])
-        self.assertNotEqual(
-            "UnboundLocalError", kind,
-            "the full-freeze path reached promotion assembly with "
-            f"`previous` unset: {message}")
-        self.assertNotIn(
-            "previous", message,
-            f"an error still mentioning `previous`: {kind}: {message}")
+        self.assertEqual(
+            "FileNotFoundError", kind,
+            "a full freeze over an empty corpus must reach PROMOTION and "
+            "fail there for want of a baselines directory. Anything else "
+            f"means it stopped earlier: {kind}: {message}")
+        self.assertIn(
+            "baselines", message,
+            "and it must be the baselines directory it could not find, not "
+            f"some other missing path: {message}")
 
     def test_a_SCOPED_run_still_refuses_without_a_manifest_to_carry(self):
         """The counterweight: initialising `previous` must not weaken this.
