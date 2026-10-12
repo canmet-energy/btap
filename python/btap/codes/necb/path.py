@@ -1250,6 +1250,31 @@ def evaluate_unmet_8_4_4(report, audit):
                         report["proposed"].get("mechanical_cooling")},
             article="8.4.1.2.(4)(a)", ahj="AHJ-21")
     elif not status["cooling_known"]:
+        # A KNOWN failure is reported as a failure, even while the sentence's
+        # full scope is unresolved. Both facts are true and an authority
+        # needs both: "block A exceeds 100 h" and "some other object could
+        # not be placed". Reporting only the second hid the first — a block
+        # measured at 900 unmet hours and KNOWN to be mechanically cooled
+        # disappeared behind "cannot be established" because an unrelated
+        # stray coil was unplaceable (Fable, `229` NB-3). The verdict was
+        # right either way; the evidence cited the wrong thing, which is the
+        # same defect Sol's `220` found when one warning spoke for two
+        # sentences.
+        if status["cooling_failures"]:
+            audit.warn(
+                "compliance",
+                "unmet cooling hours EXCEED 100 h for "
+                f"{len(status['cooling_failures'])} thermal block(s) KNOWN "
+                "to be mechanically cooled, AND the sentence's full scope "
+                "could not be established — the exceedance is established "
+                "on its own and does not depend on the unresolved part",
+                inputs={"failing_blocks": status["cooling_failures"],
+                        "limit_h": COOLING_UNMET_LIMIT_H_8_4_4,
+                        "unplaceable_cooling":
+                            status["unplaceable_cooling"] or None,
+                        "unattributed_blocks":
+                            status["unattributed_blocks"] or None},
+                article="8.4.1.2.(4)(a)", ahj="AHJ-21")
         audit.warn(
             "compliance",
             "which thermal blocks (4)(a) APPLIES to cannot be established "

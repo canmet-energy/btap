@@ -510,3 +510,84 @@ class TestTheUnresolvedBranchAndTheOracle(unittest.TestCase):
             "both sides come from `_zone_mechanical_cooling`, patching the "
             "inward walk changes nothing and the comparison can never "
             "disagree with the walk it is meant to check")
+
+
+class TestAKnownExceedanceIsNotHiddenByAnUnknown(unittest.TestCase):
+    """A known failure and an unresolved scope are two facts, not one.
+
+    A block measured at 900 unmet cooling hours and KNOWN to be mechanically
+    cooled disappeared from the audit behind "which blocks (4)(a) applies to
+    cannot be established", because an unrelated stray coil elsewhere in the
+    model was unplaceable (Fable, `229` NB-3). The verdict was right either
+    way — both paths fail — so this is evidence, not arithmetic: an authority
+    was told the sentence could not be determined when one of its blocks
+    demonstrably failed it.
+
+    Same defect class as Sol's `220`, where one warning spoke for two
+    sentences and named the wrong one.
+    """
+
+    LIMIT = 100.0
+
+    def _entries(self, rows, cooling_map, unplaceable):
+        from btap.audit.log import AuditLog
+        audit = AuditLog()
+        report = {"proposed": {
+            "zone_unmet_occupied_hours": rows,
+            "zone_mechanical_cooling": cooling_map,
+            "mechanical_cooling": True,
+            "unplaceable_cooling": unplaceable,
+            "total_site_kwh": 1.0}}
+        path.evaluate_unmet_8_4_4(report, audit)
+        return [e for e in audit.entries
+                if "8.4.1.2.(4)" in str(e.get("article"))]
+
+    def test_the_exceedance_is_stated_even_while_the_scope_is_unresolved(self):
+        entries = self._entries(
+            {"A": {"heating": 1.0, "cooling": 900.0},
+             "B": {"heating": 1.0, "cooling": 2.0}},
+            {"A": True, "B": True}, ["some stray coil"])
+        actions = " | ".join(e["action"] for e in entries)
+        self.assertIn(
+            "EXCEED 100 h", actions,
+            "block A is KNOWN cooled and measured at 900 h, so the "
+            "exceedance is established on its own and must be stated — it "
+            "does not depend on the part that could not be resolved")
+        self.assertIn(
+            "cannot be established", actions,
+            "and the unresolved scope must STILL be disclosed; replacing "
+            "one truth with the other is the defect, in either direction")
+        failing = [e for e in entries if "EXCEED" in e["action"]]
+        self.assertEqual(
+            {"A": 900.0}, failing[0]["inputs"]["failing_blocks"],
+            "and it must name WHICH block, not a count alone")
+
+    def test_an_unresolved_scope_with_no_known_failure_invents_none(self):
+        """The control: the new entry must not appear when nothing failed."""
+        entries = self._entries(
+            {"A": {"heating": 1.0, "cooling": 2.0},
+             "B": {"heating": 1.0, "cooling": 3.0}},
+            {"A": True, "B": True}, ["some stray coil"])
+        actions = " | ".join(e["action"] for e in entries)
+        self.assertNotIn("EXCEED 100 h", actions,
+                         "no block exceeds the limit, so no exceedance may "
+                         "be reported")
+        self.assertIn("cannot be established", actions)
+
+    def test_a_fully_resolved_failure_stays_a_DECISION(self):
+        """The other control: the normal path is not downgraded to a warning.
+
+        Without this, "always warn" would satisfy the test above.
+        """
+        entries = self._entries(
+            {"A": {"heating": 1.0, "cooling": 900.0},
+             "B": {"heating": 1.0, "cooling": 2.0}},
+            {"A": True, "B": True}, [])
+        self.assertEqual(
+            1, len(entries),
+            "a resolved model gets ONE entry for (4)(a), not a warning "
+            "beside it")
+        self.assertEqual("decision", entries[0]["level"],
+                         "a determined sentence is a decision; only an "
+                         "unresolved scope warns")
+        self.assertIn("EXCEED 100 h", entries[0]["action"])
