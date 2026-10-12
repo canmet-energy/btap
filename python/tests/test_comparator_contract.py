@@ -58,6 +58,7 @@ believe the rest of the file.
 import importlib.util
 import json
 import pathlib
+import re
 import subprocess
 import sys
 import tempfile
@@ -137,6 +138,31 @@ AUDIT_FIELDS = (
 
 
 CASES = [
+    # A citation QUOTED INSIDE PROSE. `evidence` and
+    # `boiler_count_subclause` do this in the frozen audits, and they need
+    # the float tolerance for their measured numbers, so the field cannot be
+    # exempted wholesale — the TOKEN has to carry the distinction.
+    Case("a citation quoted inside PROSE is never tolerated",
+         {"audit": [{"evidence": "Article 8.4.5.2. states FHeatPLC as a "
+                                 "fuel-INPUT ratio"}]},
+         {"audit": [{"evidence": "Article 8.4.5.20. states FHeatPLC as a "
+                                 "fuel-INPUT ratio"}]},
+         differs=True,
+         why="8.4.5.2 and 8.4.5.20 are different articles; `evidence` needs "
+             "the float tolerance for its measured numbers, so the TOKEN "
+             "has to carry the distinction and not the field",
+         path="audit.json"),
+    # And the measurement the tolerance exists for, in the SAME field, so
+    # the two cannot be satisfied by exempting the field.
+    Case("a measured float in the same field is still tolerated",
+         {"audit": [{"evidence": "worst block 58.750000 h"}]},
+         {"audit": [{"evidence": "worst block 58.7500001 h"}]},
+         differs=False,
+         why="the control for the case above: one dot is a measurement and "
+             "keeps its tolerance, so neither case can be satisfied by "
+             "exempting `evidence` wholesale",
+         path="audit.json"),
+
     # --- structure --------------------------------------------------------
     Case("identical documents agree",
          {"a": 1, "b": "x", "c": None}, {"a": 1, "b": "x", "c": None},
@@ -281,6 +307,7 @@ MUTATIONS = [
             "a string's non-numeric text must match exactly",
             "a string with a different count of numbers is reported",
             "critical field 'compliance_determination' is never tolerated",
+            "a citation quoted inside PROSE is never tolerated",
         })),
     # `article`, `ruling`, `ahj`, `level` and `target` are NOT here: they go
     # through the exact-identifier path now, so defeating `strings_equal`
@@ -324,13 +351,38 @@ MUTATIONS = [
     Mutation(
         "identifiers lose their exact comparison",
         lambda m, s: {**s, "exact_string_paths": []},
-        # The citation pairs above differ only in a way the string-float
-        # rule equates, so removing the exemption makes them compare EQUAL.
-        # `level` is not numeric, so it survives.
-        # Only `article` — the others' ids differ by whole numbers, which
-        # the float rule never equated, so they are not defended by the
-        # exemption and must not claim to be.
-        frozenset({"audit 'article' is never tolerated"})),
+        # NOTHING, and that is the honest prediction: there are TWO
+        # independent defences here and each covers what the other misses,
+        # so removing either alone leaves the citation axes defended.
+        #
+        # `exact_string_paths` was the first fix: name the fields whose whole
+        # value is an identifier, compare those byte-for-byte. Then the
+        # frozen audits turned out to quote citations INSIDE prose —
+        # `evidence` carrying "Article 8.4.5.2. states FHeatPLC as a
+        # fuel-INPUT ratio", `boiler_count_subclause` carrying "NOT
+        # ESTABLISHED: 8.4.4.9.(6) bands the requirement" — in fields that
+        # need the float tolerance for their measured numbers. A field-level
+        # exemption cannot serve both, so the second defence went into the
+        # TOKEN: a dotted run of three or more components is compared
+        # textually, one dot or none keeps the tolerance.
+        #
+        # The division of labour, which the two mutations here measure: the
+        # path list alone defends the AXES, the token rule alone defends
+        # PROSE, and `article` is covered by both. I first wrote that the
+        # token rule made the path list redundant. The mutation below says
+        # otherwise — with the token rule gone, the path list is what still
+        # holds `article` — so the list stays on its own merits.
+        frozenset()),
+    Mutation(
+        "a dotted identifier is read as a number again",
+        lambda m, s: (setattr(m, "DOTTED_ID_RE", re.compile(r"(?!x)x")), s)[1],
+        # PROSE only. With no identifier rule, `8.4.5.2` and `8.4.5.20`
+        # tokenise to 5.2 and 5.20 and compare EQUAL wherever a citation is
+        # quoted inside prose. The `article` AXIS survives, because
+        # `exact_string_paths` keeps it out of `strings_equal` entirely —
+        # which is the measurement that proves the two defences are not
+        # duplicates of each other.
+        frozenset({"a citation quoted inside PROSE is never tolerated"})),
     Mutation(
         "the citation axes added to strip_keys",
         lambda m, s: {**s, "strip_keys":

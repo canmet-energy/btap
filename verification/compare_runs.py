@@ -60,9 +60,38 @@ def exact_string(path, spec):
     return False
 
 
+#: A dotted run of THREE or more components — `8.4.5.2`, `3.11.0` — which is
+#: an identifier, never a measurement. A measured float has at most one dot.
+DOTTED_ID_RE = re.compile(r"\d+(?:\.\d+){2,}")
+
+
 def strings_equal(a, b, spec):
+    """Equal as prose, with a float tolerance for the numbers inside it.
+
+    The tolerance exists so an audit line reading "worst 58.750000" matches a
+    re-run's "58.7500001". It is applied to NUMERIC TOKENS, and that made
+    `4.1` and `4.10` the same number — so `8.4.4.1.(2)` and `8.4.4.10.(2)`,
+    two DIFFERENT NECB articles, compared equal (Fable, `228`).
+
+    `spec.exact_string_paths` fixed the citation AXES, where the whole string
+    is an identifier. It did not fix a citation quoted INSIDE prose, and the
+    frozen audits are full of those: `evidence` carries "Article 8.4.5.2.
+    states FHeatPLC as a fuel-INPUT ratio", `boiler_count_subclause` carries
+    "NOT ESTABLISHED: 8.4.4.9.(6) bands the requirement". Those keys need the
+    tolerance for their measured floats and must not have it for their
+    citations.
+
+    So the discriminator is the TOKEN, not the field: a dotted run of three
+    or more components is an identifier and is compared textually; one dot or
+    none is a measurement and keeps the tolerance. `58.750000` is a
+    measurement, `8.4.5.2` is not, and no field has to choose between them.
+    """
     if a == b:
         return True
+    # Identifiers first, textually, before any numeric reading of them.
+    if DOTTED_ID_RE.findall(a) != DOTTED_ID_RE.findall(b):
+        return False
+    a, b = DOTTED_ID_RE.sub("\x00", a), DOTTED_ID_RE.sub("\x00", b)
     tol = float(spec.get("string_float_tol", 1e-6))
     na, nb = NUM_RE.findall(a), NUM_RE.findall(b)
     if len(na) != len(nb):
