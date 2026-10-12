@@ -176,12 +176,13 @@ def _translates(openstudio, model):
 @needs_sdk
 class TestTheDedicatedOutdoorAirSystemPreconditions(unittest.TestCase):
     def test_each_served_loop_needs_its_OWN_outdoor_air_system(self):
-        """Precondition (a). The failure is a CRASH, not an error.
+        """Precondition (a). The first missing loop makes this a CRASH.
 
-        Without an OA system on each served loop the forward translator hits
-        `BOOST_ASSERT: Assertion oas failed` at line 115 and the process
-        dies — reviewer-reproduced as subprocess exit -11 (SIGSEGV). There
-        is no exception to catch and no translator error to read.
+        Without an OA system on a served loop the forward translator emits
+        `BOOST_ASSERT: Assertion oas failed` at line 115. When the first
+        served loop is missing it, the process dies at exit -11 (SIGSEGV).
+        A later missing loop can log that same assertion and still return 0,
+        so return code alone is not the complete diagnostic.
         """
         import openstudio
 
@@ -202,25 +203,33 @@ class TestTheDedicatedOutdoorAirSystemPreconditions(unittest.TestCase):
         self.assertIn("Assertion oas failed", err,
                       "and the abort must still be the one documented here")
 
-    def test_ONE_served_loop_missing_its_own_OA_system_still_aborts(self):
-        """Four correct loops cannot satisfy the first loop's precondition."""
+    def test_EACH_single_missing_loop_is_diagnosed(self):
+        """Four correct loops cannot mask any one loop's missing OA system."""
         import openstudio
 
-        model = _two_zone_doas(openstudio, missing_loop_oa=0)
-        loops = model.getAirLoopHVACs()
-        own_oa = sum(
-            loop.airLoopHVACOutdoorAirSystem().is_initialized()
-            for loop in loops)
-        self.assertEqual(
-            len(loops) - 1, own_oa,
-            "the fixture must omit exactly one served loop's own OA system")
+        for missing in range(5):
+            with self.subTest(missing_loop=missing):
+                model = _two_zone_doas(
+                    openstudio, missing_loop_oa=missing)
+                loops = model.getAirLoopHVACs()
+                own_oa = sum(
+                    loop.airLoopHVACOutdoorAirSystem().is_initialized()
+                    for loop in loops)
+                self.assertEqual(
+                    len(loops) - 1, own_oa,
+                    "the fixture must omit exactly one served loop's own "
+                    "OA system")
 
-        code, _objects, err = _translates(openstudio, model)
-        self.assertNotEqual(
-            0, code,
-            "one missing per-loop OA system must not be masked by all the "
-            "served loops that satisfy the precondition")
-        self.assertIn("Assertion oas failed", err)
+                code, _objects, err = _translates(openstudio, model)
+                self.assertIn(
+                    "Assertion oas failed", err,
+                    "a missing later loop can return 0, but it must not be "
+                    "accepted without the SDK's precondition diagnostic")
+                if missing == 0:
+                    self.assertNotEqual(
+                        0, code,
+                        "the measured first-loop case aborts the child; "
+                        "running this translator in-process would kill pytest")
 
     def test_the_fan_must_be_a_SYSTEM_model_or_OnOff_not_CV_or_VV(self):
         """Precondition (b), with my over-broad claim corrected.
