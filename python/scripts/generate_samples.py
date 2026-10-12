@@ -300,17 +300,22 @@ def fixture() -> str:
     return str(resources.files("btap.modeling.hvac") / "data" / "5ZoneNoHVAC.osm")
 
 
-def simulatable() -> set[str] | None:
-    """Never ship a model that cannot simulate. The catalog sweep
-    (scripts/simulate_all_systems.py / rake hvac:simulate_systems) records which
-    systems produce a simulate-able model; honour it here so this list
-    self-corrects when a system is fixed rather than needing a human to
-    remember. All 97 pass as of the defrost-curve fix; the gate stays because
-    the next regression should stop a sample, not ship one.
+SUPPORTED_SYSTEM_STATUS_SCHEMA = 1
+
+
+def simulatable() -> set[str]:
+    """Names with a clean recorded design-day sizing run.
+
+    `scripts/simulate_all_systems.py` records which systems completed sizing
+    on the recorded DDY with zero Severe or Fatal errors. Honour that narrow
+    result here so the sample set self-corrects when a system is fixed. All
+    97 pass as of the defrost-curve fix; the gate stays because the next
+    sizing regression should stop a sample, not ship one.
 
     The Python-owned fixture is authoritative after R6. Missing data is loud:
-    returning ``None`` would silently generate every catalog system and make
-    this safety gate vacuous."""
+    silently generating every catalog system would make this gate vacuous.
+    An unknown schema is equally loud: this reader may not guess what a
+    future verdict shape means."""
     path = PYTHON_ROOT / "tests" / "fixtures" / "system_simulation_status.json"
     if not path.is_file():
         raise FileNotFoundError(f"missing Python system status fixture: {path}")
@@ -320,6 +325,13 @@ def simulatable() -> set[str] | None:
     # FUNCTION IS THE SECOND READER, and I updated only the first: CI caught
     # it as `TypeError: string indices must be integers` on a dict I was
     # iterating as a list.
+    produced_by = verdict.get("produced_by")
+    schema = (produced_by.get("schema_version")
+              if isinstance(produced_by, dict) else None)
+    if schema != SUPPORTED_SYSTEM_STATUS_SCHEMA:
+        raise ValueError(
+            "unsupported system simulation status schema_version "
+            f"{schema!r}; expected {SUPPORTED_SYSTEM_STATUS_SCHEMA}")
     return {row["name"] for row in verdict["systems"]
             if row["status"] == "ok"}
 
@@ -374,11 +386,11 @@ def generate(out: Path) -> list[tuple[str, str, int]]:
     notes: dict[str, str] = {}
 
     def gate(slug, system):
-        # The Ruby SKIPS an un-simulate-able system; under the fail-fast
-        # contract a skip would silently shrink the corpus, so it is a refusal.
-        if ok is not None and system not in ok:
-            print(f"  REFUSED {slug}: '{system}' is not in the simulate-able set",
-                  file=sys.stderr)
+        # The Ruby SKIPS a system outside the sizing-clean set; under the
+        # fail-fast contract a skip would silently shrink the corpus.
+        if system not in ok:
+            print(f"  REFUSED {slug}: '{system}' is not in the sizing-clean "
+                  "design-day set", file=sys.stderr)
             raise SystemExit(1)
 
     for slug, system in SAMPLES:
