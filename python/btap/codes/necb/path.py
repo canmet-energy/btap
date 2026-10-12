@@ -1359,6 +1359,75 @@ def _hard_sized_phrase(names):
     return shown
 
 
+def _zone_cooling_inward(model) -> dict:
+    """Which blocks have cooling, walked INWARD from each block.
+
+    The independent half of the attribution invariant. `_zone_mechanical_
+    cooling` starts at every cooling object and resolves OUTWARD to the
+    blocks it serves; this starts at every block and asks what serves IT.
+    The two use opposite edges of the same object graph — outward follows
+    `sources()` and the containment accessors, inward follows `targets()`
+    from a block's own equipment, terminal and air loop — so a bug in either
+    direction surfaces as a DISAGREEMENT rather than as a quiet wrong answer.
+
+    That is the point. Every cooling-attribution defect in this file was
+    found by a reviewer hand-building one topology at a time: a VRF coil the
+    3.11 SDK does not link to its terminal unit, a unitary system on an air
+    loop whose `thermalZone()` is empty, an air terminal carrying its own
+    coil. Each was one shape, each passed the nine-model corpus, and each
+    cost a review round. A second opinion catches the class instead of the
+    instance (Sol's `227`, Fable's `226`).
+    """
+    cooled = {}
+    for zone in model.getThermalZones():
+        seeds = list(zone.equipment())
+        terminal = zone.airLoopHVACTerminal()
+        if terminal.is_initialized():
+            seeds.append(terminal.get())
+        try:
+            loops = list(zone.airLoopHVACs())
+        except (AttributeError, TypeError):      # older SDK: one loop only
+            single = zone.airLoopHVAC()
+            loops = [single.get()] if single.is_initialized() else []
+        for loop in loops:
+            seeds.extend(loop.supplyComponents())
+
+        found = False
+        seen = set()
+        queue = [(seed, 0) for seed in seeds]
+        while queue and not found:
+            obj, depth = queue.pop()
+            if depth > 4 or obj.handle() in seen:
+                continue
+            seen.add(obj.handle())
+            name = obj.iddObjectType().valueName()
+            if (_COOLING_PATTERN.search(name)
+                    and not _UPSTREAM_COOLING_PATTERN.search(name)):
+                found = True
+                break
+            for target in obj.targets():
+                as_object = target.to_ModelObject()
+                if as_object.is_initialized():
+                    queue.append((as_object.get(), depth + 1))
+        cooled[zone.nameString().upper()] = (
+            found or bool(zone.useIdealAirLoads()))
+    return cooled
+
+
+def cooling_attribution_disagreement(model) -> dict:
+    """Blocks the two traversals disagree about: `{BLOCK: (outward, inward)}`.
+
+    Empty is the expected answer. A non-empty result means one direction has
+    a bug for this topology, and a caller must SAY so rather than pick a
+    side: which side is wrong is exactly what is not known.
+    """
+    outward, _unplaceable = _zone_mechanical_cooling(model)
+    inward = _zone_cooling_inward(model)
+    return {block: (outward.get(block), inward.get(block))
+            for block in sorted(set(outward) | set(inward))
+            if outward.get(block) != inward.get(block)}
+
+
 def _zone_mechanical_cooling(model) -> tuple:
     """`({BLOCK: cooled}, [unresolved cooling object, ...])`.
 
