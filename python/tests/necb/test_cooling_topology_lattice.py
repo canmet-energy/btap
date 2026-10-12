@@ -72,6 +72,37 @@ TOPOLOGY_CONFIGS = (
     ("staged coils (NECB reference, builds a unitary)", {"staged_coils": True}),
 )
 
+#: Config overrides that are only meaningful for ONE family, each flipping a
+#: value the catalogue carries on one side only. `TOPOLOGY_CONFIGS` above is a
+#: cross-product over every family, which is wrong for these: `cooling` exists
+#: on exactly one catalogue row and `mau` on none at all, so a blanket
+#: override would be asserting over families that never read the key.
+#:
+#: Every one of these ran and agreed before it was listed — they are COVERAGE,
+#: not defects (Fable, `229` NB-4). The reason to list them anyway is the
+#: reason the lattice exists: `staged_coils` is reachable only from the NECB
+#: reference rules and never from the catalogue, and it was the single route
+#: to a unitary system on an air loop. A flag the catalogue exercises on one
+#: side only is the same shape of gap.
+#:
+#: Each entry is grounded in what the code actually reads, not guessed:
+#: `furnace` carries `cooling: False` and `ventilation: True`; `wshp` carries
+#: `ventilation: False`; `vrf` carries `zone_ventilation: True`; `psz` carries
+#: `per_zone: True`; `fan_coils` reads `mau` with a default of True and has no
+#: catalogue row for it; `ashp_baseboard` reads `vent_type` as a binary
+#: against `'doas'`.
+FAMILY_CONFIGS = (
+    ("furnace", "cooling added to a heating-only furnace", {"cooling": True}),
+    ("furnace", "ventilation removed", {"ventilation": False}),
+    ("wshp", "ventilation added", {"ventilation": True}),
+    ("vrf", "zone ventilation removed", {"zone_ventilation": False}),
+    ("psz", "one unit for the group instead of per zone",
+     {"per_zone": False}),
+    ("fan_coils", "no makeup-air unit", {"mau": False}),
+    ("ecm_ashp_baseboard", "ventilation that is not a DOAS",
+     {"vent_type": "mau"}),
+)
+
 
 def _catalogue():
     return json.loads(CATALOGUE.read_text(encoding="utf-8"))["systems"]
@@ -184,6 +215,82 @@ class TestCoolingAttributionOverTheCatalogue(unittest.TestCase):
                         any(outward.values()),
                         f"{family} with {label}: per-block map and "
                         "building-wide flag disagree")
+
+    def test_the_PER_FAMILY_config_flips_agree_too(self):
+        """The third axis: a flag the catalogue carries on one side only.
+
+        `TOPOLOGY_CONFIGS` is a cross-product over every family, which is the
+        wrong shape for these — `cooling` exists on one catalogue row and
+        `mau` on none, so a blanket override would assert over families that
+        never read the key. Each entry here is paired with the one family
+        whose code reads it (Fable, `229` NB-4).
+
+        Unlike the `staged_coils` axis, none of these was hiding a defect:
+        every one ran and agreed before it was listed. They are here because
+        a flag exercised on one side only is the same SHAPE of gap that
+        `staged_coils` turned out to be, and because a skip would otherwise
+        be indistinguishable from a pass.
+
+        **What this axis does and does not defend**, measured rather than
+        assumed:
+
+        ```text
+        CONTROL                     1 passed, 7 subtests
+        containment rung removed    1 passed, 7 subtests   <-- NOT caught
+        inward walk emptied         7 FAILED
+        ```
+
+        None of these seven families builds a DOAS, so the OA-stream
+        containment rung is out of their reach — that rung is defended by
+        `test_a_DOAS_coil_resolves_at_EVERY_distance_from_its_OA_system`.
+        What this axis defends is the forward/reverse invariant itself
+        across topologies the catalogue does not reach. Saying which
+        mutation it survives is the point: an axis credited with coverage it
+        does not have is worse than no axis.
+        """
+        import openstudio
+
+        import btap.modeling as modeling
+
+        by_family = {}
+        for entry in _catalogue():
+            by_family.setdefault(entry.get("family"), entry["name"])
+
+        exercised = 0
+        for family, label, config in FAMILY_CONFIGS:
+            with self.subTest(family=family, config=label):
+                self.assertIn(
+                    family, by_family,
+                    f"{family} is named in FAMILY_CONFIGS and is not in the "
+                    "catalogue — the override would assert over nothing")
+                name = by_family[family]
+                loaded = openstudio.osversion.VersionTranslator().loadModel(
+                    openstudio.toPath(str(FIXTURE)))
+                model = loaded.get()
+                zones = sorted(model.getThermalZones(),
+                               key=lambda z: z.nameString())
+                modeling.build_system(model, name, zones,
+                                      config=dict(config))
+                exercised += 1
+                gap = path.cooling_attribution_disagreement(model)
+                self.assertEqual(
+                    {}, gap,
+                    f"{family} with {label}: the two directions disagree "
+                    f"about {sorted(gap)} — {gap}")
+                outward, unplaceable = path._zone_mechanical_cooling(model)
+                self.assertEqual([], unplaceable, f"{family}/{label}")
+                self.assertEqual(
+                    path._mechanical_cooling(model), any(outward.values()),
+                    f"{family} with {label}: per-block map and "
+                    "building-wide flag disagree")
+
+        # No `skipTest` above, deliberately. Each override is paired with the
+        # family that reads it, so a build failure is a real finding rather
+        # than an inapplicable combination — and a silent skip would make
+        # this test pass while exercising nothing.
+        self.assertEqual(
+            len(FAMILY_CONFIGS), exercised,
+            "every per-family override must have actually built")
 
     def test_the_unitary_shape_is_actually_REACHED_by_the_config_axis(self):
         """A guard on the axis: if `staged_coils` stopped producing a
