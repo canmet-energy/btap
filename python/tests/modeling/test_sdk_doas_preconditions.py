@@ -7,14 +7,16 @@ preconditions outdoor air and feeds the OA inlet of several air loops, which
 is what a model authored in the OpenStudio App contains.
 
 `btap.codes.necb.path` reads models it did not build, so these preconditions
-matter whether or not this package ever ships such a system. All three were
-MEASURED, and all three are invisible in process: the SDK accepts the wrong
-arrangement and either EnergyPlus refuses it or the translator kills the
-process.
+matter whether or not this package ever ships such a system. The SDK accepts
+the wrong arrangement. A missing OA system on the first loop added to the
+dedicated system crashes the translator; on a later loop it instead reuses
+the previous loop's nodes, emits a miswired IDF, and EnergyPlus accepts that
+IDF sizing-clean. A reader of user-authored models therefore cannot rely on
+either layer to reject the graph.
 
-Every claim here was independently re-measured by a reviewer (Fable, `238`),
-and three of my original statements were WRONG in ways recorded beside them.
-These tests carry the corrected facts, not the ones I first wrote.
+The measurements and their review corrections are recorded beside the
+individual claims. These tests carry the executable facts, not a universal
+claim that every invalid arrangement fails in the same way.
 
 No catalogue row. An earlier version of this work added two, and they were
 withdrawn: the per-zone loops were sized for ventilation while being the
@@ -27,7 +29,7 @@ Table 8.4.x.7.-A, which is not a thing a test author gets to decide.
 import pathlib
 import unittest
 
-from tests.support import needs_sdk
+from tests.support import needs_engine
 
 WEATHER = (pathlib.Path(__file__).resolve().parents[1] / "fixtures"
            / "weather")
@@ -35,24 +37,18 @@ EPW = WEATHER / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw"
 DDY = WEATHER / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.ddy"
 
 
-def _two_zone_doas(openstudio, *, per_loop_oa_system=True,
-                   missing_loop_oa=None, fan="system",
-                   setpoints="both-coils"):
+def _shared_fixture_doas(openstudio, *, per_loop_oa_system=True,
+                         missing_loop_oa=None, fan="system",
+                         setpoints="both-coils"):
     """A central DOAS over per-zone air loops on the SHARED FIXTURE.
 
     `per_loop_oa_system`, `missing_loop_oa`, `fan` and `setpoints` are the
     three precondition axes below. A tuple of fan types builds one dedicated
     system per type over disjoint served-loop groups.
 
-    The fixture is `5ZoneNoHVAC.osm`, not a synthetic `Model()`. I built a
-    synthetic two-zone model first and spent three rounds making it valid —
-    a single-zone reheat manager missing a required property, then zone
-    sizing not requested — and each defect fired on EVERY case, so all four
-    fan variants and all four setpoint variants reported the SAME error and
-    the distinctions under test were invisible. A fixture whose own fault
-    masks the property is worse than no test. This one already carries
-    zones, loads, thermostats and sizing, and the rest of this directory
-    uses it.
+    `5ZoneNoHVAC.osm` already carries geometry, loads, thermostats and sizing,
+    so an unrelated fixture defect cannot make every fan or setpoint variant
+    fail for the same reason.
     """
     from tests.support import load_fixture
 
@@ -71,19 +67,20 @@ def _two_zone_doas(openstudio, *, per_loop_oa_system=True,
                     .AirTerminalSingleDuctConstantVolumeNoReheat(
                         model, always))
         loop.addBranchForZone(zone, terminal.to_StraightComponent().get())
-        # `SetpointManagerScheduled`, not `SingleZoneReheat`. These
-        # synthetic zones carry no loads or geometry, so a single-zone
-        # reheat manager is Severe for a missing required property — and
-        # that defect fired on EVERY case, making all four fan variants and
-        # all four setpoint variants report the same error. A fixture whose
-        # own fault masks the property under test proves nothing.
+        # A fixed scheduled manager isolates these DOAS preconditions from
+        # single-zone-reheat control-zone requirements.
         manager = openstudio.model.SetpointManagerScheduled(
             model, openstudio.model.ScheduleRuleset(model, 13.0))
         manager.addToNode(loop.supplyOutletNode())
         if per_loop_oa_system:
             own = openstudio.model.AirLoopHVACOutdoorAirSystem(
                 model, openstudio.model.ControllerOutdoorAir(model))
+            own.setName(f"AL{index} Own OA System")
             own.addToNode(loop.supplyInletNode())
+            own.outboardOANode().get().setName(
+                f"AL{index} DOAS Supply Port")
+            own.outboardReliefNode().get().setName(
+                f"AL{index} DOAS Relief Port")
         loops.append(loop)
 
     neutral = openstudio.model.ScheduleRuleset(model, 20.0)
@@ -141,14 +138,14 @@ def _two_zone_doas(openstudio, *, per_loop_oa_system=True,
     return model
 
 
-def _translates(openstudio, model):
-    """Does the forward translator survive this model?
+def _translate_in_child(openstudio, model):
+    """Translate crash-isolated and return the emitted DOAS wiring.
 
-    IN A CHILD PROCESS, because the failure under test is not an exception:
-    the translator hits `BOOST_ASSERT` and the process dies on SIGSEGV. The
-    same reason `modeling/CLAUDE.md` gives for running every glTF export out
-    of process.
+    A missing first loop port segfaults. A later missing port logs the same
+    assertion but returns a workspace built with stale nodes from the prior
+    insertion-order loop. Both must be observed without risking pytest.
     """
+    import json
     import subprocess
     import sys
     import tempfile
@@ -157,23 +154,32 @@ def _translates(openstudio, model):
         osm = pathlib.Path(work) / "m.osm"
         model.save(openstudio.toPath(str(osm)), True)
         script = (
-            "import sys, openstudio as o\n"
+            "import json, sys, openstudio as o\n"
             "m = o.osversion.VersionTranslator().loadModel("
             "o.toPath(sys.argv[1])).get()\n"
             "w = o.energyplus.ForwardTranslator().translateModel(m)\n"
-            # The SDK writes its own log lines to stdout, so the count goes
-            # on a marked line the caller can find.
-            "print('OBJECTS=%d' % len(w.objects()))\n")
+            "wiring = {}\n"
+            "for obj in w.objects():\n"
+            "    kind = obj.iddObject().name()\n"
+            "    if kind in ('AirLoopHVAC:Mixer', 'AirLoopHVAC:Splitter'):\n"
+            "        wiring[kind] = [\n"
+            "            obj.getString(i).get()\n"
+            "            if obj.getString(i).is_initialized() else None\n"
+            "            for i in range(obj.numFields())]\n"
+            # SDK logs also use stdout, so emit one uniquely marked JSON line.
+            "print('TRANSLATION=' + json.dumps({\n"
+            "    'objects': len(w.objects()), 'wiring': wiring},\n"
+            "    sort_keys=True))\n")
         done = subprocess.run([sys.executable, "-c", script, str(osm)],
                               capture_output=True, text=True, timeout=600)
-    count = ""
+    translated = None
     for line in done.stdout.splitlines():
-        if line.startswith("OBJECTS="):
-            count = line.split("=", 1)[1]
-    return done.returncode, count, done.stdout + done.stderr
+        if line.startswith("TRANSLATION="):
+            translated = json.loads(line.split("=", 1)[1])
+    return done.returncode, translated, done.stdout + done.stderr
 
 
-@needs_sdk
+@needs_engine
 class TestTheDedicatedOutdoorAirSystemPreconditions(unittest.TestCase):
     def test_each_served_loop_needs_its_OWN_outdoor_air_system(self):
         """Precondition (a). The first missing loop makes this a CRASH.
@@ -186,15 +192,17 @@ class TestTheDedicatedOutdoorAirSystemPreconditions(unittest.TestCase):
         """
         import openstudio
 
-        with_own = _two_zone_doas(openstudio, per_loop_oa_system=True)
-        code, objects, _err = _translates(openstudio, with_own)
+        with_own = _shared_fixture_doas(
+            openstudio, per_loop_oa_system=True)
+        code, translated, _err = _translate_in_child(openstudio, with_own)
         self.assertEqual(0, code,
                          "a DOAS whose served loops each carry their own OA "
                          "system must translate")
-        self.assertGreater(int(objects), 0)
+        self.assertGreater(translated["objects"], 0)
 
-        without = _two_zone_doas(openstudio, per_loop_oa_system=False)
-        code, _objects, err = _translates(openstudio, without)
+        without = _shared_fixture_doas(
+            openstudio, per_loop_oa_system=False)
+        code, _translated, err = _translate_in_child(openstudio, without)
         self.assertNotEqual(
             0, code,
             "a DOAS over loops with NO outdoor-air system of their own must "
@@ -209,7 +217,7 @@ class TestTheDedicatedOutdoorAirSystemPreconditions(unittest.TestCase):
 
         for missing in range(5):
             with self.subTest(missing_loop=missing):
-                model = _two_zone_doas(
+                model = _shared_fixture_doas(
                     openstudio, missing_loop_oa=missing)
                 loops = model.getAirLoopHVACs()
                 own_oa = sum(
@@ -220,7 +228,8 @@ class TestTheDedicatedOutdoorAirSystemPreconditions(unittest.TestCase):
                     "the fixture must omit exactly one served loop's own "
                     "OA system")
 
-                code, _objects, err = _translates(openstudio, model)
+                code, _translated, err = _translate_in_child(
+                    openstudio, model)
                 self.assertIn(
                     "Assertion oas failed", err,
                     "a missing later loop can return 0, but it must not be "
@@ -230,6 +239,64 @@ class TestTheDedicatedOutdoorAirSystemPreconditions(unittest.TestCase):
                         0, code,
                         "the measured first-loop case aborts the child; "
                         "running this translator in-process would kill pytest")
+
+    def test_a_later_missing_loop_is_MISWIRED_and_energyplus_ACCEPTS_it(self):
+        """The assertion log is not a refusal and cannot be treated as one.
+
+        The translator iterates `airLoops()` in insertion order. With AL1's
+        OA system missing, it reuses AL0's ports: AL0 appears twice in the
+        central mixer/splitter and AL1 appears not at all. EnergyPlus then
+        accepts that disconnected-zone graph sizing-clean.
+        """
+        import re
+
+        import openstudio
+
+        import btap.simulation as simulation
+
+        model = _shared_fixture_doas(openstudio, missing_loop_oa=1)
+        dedicated = model.getAirLoopHVACDedicatedOutdoorAirSystems()[0]
+        insertion_names = [
+            "Z first", "A second", "Y third", "B fourth", "X fifth"]
+        for loop, name in zip(dedicated.airLoops(), insertion_names):
+            loop.setName(name)
+        self.assertNotEqual(
+            insertion_names, sorted(insertion_names),
+            "the witness must distinguish insertion order from name order")
+        self.assertEqual(
+            insertion_names,
+            [loop.nameString() for loop in dedicated.airLoops()],
+            "the corrupt position is insertion order, not loop-name order")
+
+        code, translated, err = _translate_in_child(openstudio, model)
+        self.assertEqual(
+            0, code,
+            "a later missing OA system does not crash the translator")
+        self.assertIn("Assertion oas failed", err)
+        wiring = translated["wiring"]
+        self.assertEqual(
+            ["AL0 DOAS Supply Port", "AL0 DOAS Supply Port",
+             "AL2 DOAS Supply Port", "AL3 DOAS Supply Port",
+             "AL4 DOAS Supply Port"],
+            wiring["AirLoopHVAC:Splitter"][2:],
+            "AL0's supply port is duplicated and AL1 is connected to nothing")
+        self.assertEqual(
+            ["AL0 DOAS Relief Port", "AL0 DOAS Relief Port",
+             "AL2 DOAS Relief Port", "AL3 DOAS Relief Port",
+             "AL4 DOAS Relief Port"],
+            wiring["AirLoopHVAC:Mixer"][2:],
+            "AL0's relief port is duplicated and AL1 is connected to nothing")
+
+        clean, severe, fatal, detail, engine_err = _run(simulation, model)
+        warnings = len(re.findall(
+            r"\*\*\s*Warning\s*\*\*", engine_err))
+        self.assertTrue(
+            clean,
+            "EnergyPlus accepts the translator's duplicated-node graph; "
+            f"first severity was {detail}")
+        self.assertEqual(
+            (0, 0, 16), (severe, fatal, warnings),
+            "the corrupt graph is sizing-clean with warnings, not refused")
 
     def test_the_fan_must_be_a_SYSTEM_model_or_OnOff_not_CV_or_VV(self):
         """Precondition (b), with my over-broad claim corrected.
@@ -252,7 +319,7 @@ class TestTheDedicatedOutdoorAirSystemPreconditions(unittest.TestCase):
         for fan, expect_clean in (("system", True), ("onoff", True),
                                   ("constant", False), ("variable", False)):
             with self.subTest(fan=fan):
-                model = _two_zone_doas(openstudio, fan=fan)
+                model = _shared_fixture_doas(openstudio, fan=fan)
                 clean, severe, _fatal, detail, err = _run(simulation,
                                                            model)
                 self.assertEqual(
@@ -273,7 +340,7 @@ class TestTheDedicatedOutdoorAirSystemPreconditions(unittest.TestCase):
         for fans, expect_clean in ((("system", "onoff"), True),
                                    (("system", "constant"), False)):
             with self.subTest(fans=fans):
-                model = _two_zone_doas(openstudio, fan=fans)
+                model = _shared_fixture_doas(openstudio, fan=fans)
                 self.assertEqual(
                     2, len(model.getAirLoopHVACDedicatedOutdoorAirSystems()),
                     "the fixture must contain both fan arrangements")
@@ -319,7 +386,8 @@ class TestTheDedicatedOutdoorAirSystemPreconditions(unittest.TestCase):
                                         ("inboard-only", False),
                                         ("none", False)):
             with self.subTest(setpoints=setpoints):
-                model = _two_zone_doas(openstudio, setpoints=setpoints)
+                model = _shared_fixture_doas(
+                    openstudio, setpoints=setpoints)
                 clean, severe, _fatal, detail, _err = _run(simulation,
                                                             model)
                 self.assertEqual(
@@ -341,7 +409,8 @@ class TestTheDedicatedOutdoorAirSystemPreconditions(unittest.TestCase):
         )
         for setpoints, reason in cases:
             with self.subTest(setpoints=setpoints):
-                model = _two_zone_doas(openstudio, setpoints=setpoints)
+                model = _shared_fixture_doas(
+                    openstudio, setpoints=setpoints)
                 clean, severe, fatal, detail, err = _run(simulation, model)
                 self.assertFalse(
                     clean,
@@ -366,7 +435,8 @@ class TestTheDedicatedOutdoorAirSystemPreconditions(unittest.TestCase):
 
         import btap.simulation as simulation
 
-        without_fan_node = _two_zone_doas(openstudio, setpoints="both-coils")
+        without_fan_node = _shared_fixture_doas(
+            openstudio, setpoints="both-coils")
         clean, severe, _fatal, detail, _err = _run(simulation,
                                                     without_fan_node)
         self.assertTrue(
