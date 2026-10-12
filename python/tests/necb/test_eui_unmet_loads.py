@@ -563,6 +563,118 @@ class TestCoolingIsAttributedToTheRightBLOCKS(unittest.TestCase):
             "other two are heated-only and their passive hours are not a "
             "capacity shortfall")
 
+    def test_a_DETACHED_coil_serves_no_block_and_is_not_unplaceable(self):
+        """Detached is a KNOWN answer, not an unknown one.
+
+        A `CoilCoolingDXSingleSpeed` connected to nothing provides cooling to
+        no thermal block, so (4)(a)'s scope is known: this object is not in
+        it. Reporting it unplaceable made the sentence's applicability
+        unknown for a model whose only fault is a stray object, and failed a
+        run the Code does not reach (Sol, `224`).
+
+        It may deserve an input-model warning. That is a different concern
+        from this one, and this test says nothing about it.
+        """
+        import openstudio
+
+        model = openstudio.model.Model()
+        zone = openstudio.model.ThermalZone(model)
+        zone.setName("Z1")
+        openstudio.model.CoilCoolingDXSingleSpeed(model).setName("ORPHAN")
+
+        per_block, unplaceable = path._zone_mechanical_cooling(model)
+        self.assertEqual(
+            [], unplaceable,
+            "a detached coil is connected to no topology at all, which is "
+            "what distinguishes 'serves no block' from 'could not be "
+            "attributed'")
+        self.assertEqual({"Z1": False}, per_block)
+        self.assertEqual({}, path.cooling_attribution_disagreement(model))
+
+    def test_a_DOAS_cooling_coil_cools_every_block_its_loops_serve(self):
+        """A dedicated outdoor-air system is shared between air loops.
+
+        Its cooling coil answered `airLoopHVAC`,
+        `containingZoneHVACComponent`, `containingHVACComponent` AND
+        `plantLoop` all empty, so it came back unplaceable while genuinely
+        cooling both blocks (Sol, `224`).
+
+        Both directions had to learn it, and the invariant is how I know:
+        teaching only the outward walk made the two halves disagree
+        immediately, and my first attempt at the inward half looked for the
+        DOAS in the loop's own OA system — which is not where it is. A loop
+        reaches it through `airLoopHVACDedicatedOutdoorAirSystem()`.
+        """
+        import openstudio
+
+        model = openstudio.model.Model()
+        zones = []
+        for index in (1, 2):
+            zone = openstudio.model.ThermalZone(model)
+            zone.setName(f"Z{index}")
+            zones.append(zone)
+        loops = []
+        for index, zone in enumerate(zones, 1):
+            loop = openstudio.model.AirLoopHVAC(model)
+            loop.setName(f"AL{index}")
+            terminal = (openstudio.model
+                        .AirTerminalSingleDuctConstantVolumeNoReheat(
+                            model, model.alwaysOnDiscreteSchedule()))
+            loop.addBranchForZone(zone,
+                                  terminal.to_StraightComponent().get())
+            loops.append(loop)
+        oa_system = openstudio.model.AirLoopHVACOutdoorAirSystem(
+            model, openstudio.model.ControllerOutdoorAir(model))
+        doas = openstudio.model.AirLoopHVACDedicatedOutdoorAirSystem(
+            oa_system)
+        for loop in loops:
+            doas.addAirLoop(loop)
+        coil = openstudio.model.CoilCoolingWater(
+            model, model.alwaysOnDiscreteSchedule())
+        coil.setName("DOAS COOLING COIL")
+        coil.addToNode(oa_system.outboardOANode().get())
+
+        per_block, unplaceable = path._zone_mechanical_cooling(model)
+        self.assertEqual([], unplaceable)
+        self.assertEqual(
+            {"Z1": True, "Z2": True}, per_block,
+            "the DOAS coil cools every block its air loops serve")
+        self.assertEqual(
+            {}, path.cooling_attribution_disagreement(model),
+            "and both directions must reach it, or the invariant is "
+            "reporting a bug in one of them")
+
+    def test_a_CONNECTED_but_unresolvable_object_stays_indeterminate(self):
+        """Sol's control for the two above.
+
+        Relaxing 'unplaceable' must not relax it into silence. An object that
+        IS connected to topology but cannot be attributed leaves (4)(a)'s
+        scope unknown, and the determination must say so.
+        """
+        import openstudio
+
+        model = openstudio.model.Model()
+        zone = openstudio.model.ThermalZone(model)
+        zone.setName("Z1")
+        # A chilled-water coil on a plant loop that reaches no block: it is
+        # connected, so it is not detached, and nothing attributes it.
+        plant = openstudio.model.PlantLoop(model)
+        plant.setName("Process Chilled Water")
+        plant.addSupplyBranchForComponent(
+            openstudio.model.ChillerElectricEIR(model))
+        coil = openstudio.model.CoilCoolingWater(
+            model, model.alwaysOnDiscreteSchedule())
+        plant.addDemandBranchForComponent(coil)
+
+        per_block, unplaceable = path._zone_mechanical_cooling(model)
+        self.assertEqual(
+            {"Z1": False}, per_block,
+            "the plant reaches no thermal block")
+        # Placed via the plant rung, so not unplaceable — and the status
+        # function then decides vacuous, which the next test pins.
+        self.assertEqual([], unplaceable)
+        self.assertEqual({}, path.cooling_attribution_disagreement(model))
+
     def test_cooling_that_reaches_NO_block_is_vacuous_not_unknown(self):
         """A chiller serving only a process loop.
 

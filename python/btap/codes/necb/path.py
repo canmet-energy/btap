@@ -1387,6 +1387,56 @@ def _hard_sized_phrase(names):
     return shown
 
 
+#: Objects that place a cooling coil in a topology. Reaching one of these
+#: means the coil IS connected to something, so failing to attribute it is an
+#: unresolved question rather than a stray object.
+_TOPOLOGY_TYPES = re.compile(
+    r"AirLoopHVAC|PlantLoop|ThermalZone|ZoneHVAC|AirTerminal|"
+    r"OutdoorAirSystem")
+
+
+def _as_doas(obj):
+    """The dedicated outdoor-air system this object IS, or None."""
+    caster = getattr(obj, "to_AirLoopHVACDedicatedOutdoorAirSystem", None)
+    if caster is None:
+        return None
+    got = caster()
+    return got.get() if got.is_initialized() else None
+
+
+def _as_oa_system(obj):
+    """The outdoor-air system this object IS, or None."""
+    caster = getattr(obj, "to_AirLoopHVACOutdoorAirSystem", None)
+    if caster is None:
+        return None
+    got = caster()
+    return got.get() if got.is_initialized() else None
+
+
+def _reaches_no_topology(obj, depth=6) -> bool:
+    """Is this object connected to no HVAC topology whatever?
+
+    Walks the reference graph outward and looks for anything that could place
+    a coil. A detached object's graph holds only its own connections and
+    nodes, and that is what distinguishes "serves no block" — a known answer
+    — from "could not be attributed" — an unknown one.
+    """
+    seen = set()
+    frontier = [(obj, 0)]
+    while frontier:
+        current, level = frontier.pop()
+        if level > depth or current.handle() in seen:
+            continue
+        seen.add(current.handle())
+        if level and _TOPOLOGY_TYPES.search(current.iddObjectType().valueName()):
+            return False
+        for source in current.sources():
+            as_model_object = source.to_ModelObject()
+            if as_model_object.is_initialized():
+                frontier.append((as_model_object.get(), level + 1))
+    return True
+
+
 def _zone_cooling_inward(model) -> dict:
     """Which blocks have cooling, walked INWARD from each block.
 
@@ -1419,6 +1469,26 @@ def _zone_cooling_inward(model) -> dict:
             loops = [single.get()] if single.is_initialized() else []
         for loop in loops:
             seeds.extend(loop.supplyComponents())
+            # The loop's OWN outdoor-air system, when it has one.
+            own_oa = loop.airLoopHVACOutdoorAirSystem()
+            if own_oa.is_initialized():
+                seeds.extend(own_oa.get().oaComponents())
+                seeds.extend(own_oa.get().reliefComponents())
+            # And a DEDICATED system shared with other loops: a cooling coil
+            # in there serves this block as much as one on the loop itself.
+            # A DOAS is not the loop's own OA system — the loop reaches it
+            # through `airLoopHVACDedicatedOutdoorAirSystem()`, and my first
+            # attempt here looked for it in the wrong place. The invariant
+            # reported the two halves disagreeing both times, which is what
+            # it is for.
+            shared = getattr(
+                loop, "airLoopHVACDedicatedOutdoorAirSystem", None)
+            if shared is not None:
+                shared = shared()
+                if shared.is_initialized():
+                    inner = shared.get().airLoopHVACOutdoorAirSystem()
+                    seeds.extend(inner.oaComponents())
+                    seeds.extend(inner.reliefComponents())
 
         found = False
         seen = set()
@@ -1556,6 +1626,27 @@ def _zone_mechanical_cooling(model) -> tuple:
                 # a loop carrying only process or service-water demand reaches
                 # no thermal block. Placed, with nothing to attribute.
                 return True
+        # A DEDICATED OUTDOOR-AIR SYSTEM serves every block of every air loop
+        # it feeds, and its coil reaches none of the rungs above: a DOAS
+        # cooling coil answered `airLoopHVAC`, `containingZoneHVACComponent`,
+        # `containingHVACComponent` AND `plantLoop` all empty, so it came back
+        # unplaceable while genuinely cooling both blocks (Sol, `224`).
+        doas = _as_doas(obj)
+        if doas is not None:
+            for loop in doas.airLoops():
+                for zone in loop.thermalZones():
+                    cooled.add(zone.nameString().upper())
+            return True
+        # A plain outdoor-air system belongs to one loop, or sits inside a
+        # DOAS, which its own sources reach.
+        oa_system = _as_oa_system(obj)
+        if oa_system is not None:
+            loop = oa_system.airLoopHVAC()
+            if loop.is_initialized():
+                for zone in loop.get().thermalZones():
+                    cooled.add(zone.nameString().upper())
+                return True
+
         # Containment is silent: ask what POINTS AT this object.
         for source in obj.sources():
             as_model_object = source.to_ModelObject()
@@ -1576,8 +1667,22 @@ def _zone_mechanical_cooling(model) -> tuple:
         # blocks served only for process or service-water demand.
         if _UPSTREAM_COOLING_PATTERN.search(type_name):
             continue
-        if not zone_of(obj):
-            unresolved.append(obj.nameString())
+        if zone_of(obj):
+            continue
+        # DETACHED is not UNRESOLVED. An object connected to no HVAC
+        # topology at all provides cooling to no thermal block, so (4)(a)'s
+        # scope is known: this object is not in it. Calling it unplaceable
+        # made the sentence's applicability unknown for a model whose only
+        # fault is a stray object (Sol, `224`) — it may deserve an
+        # input-model warning, which is a different concern from this one.
+        #
+        # The test is whether the object's reference graph reaches any
+        # topology at all. A detached coil's graph holds nothing but its own
+        # connections and nodes; a DOAS coil's reaches the outdoor-air
+        # system at depth four and the DOAS at depth five.
+        if _reaches_no_topology(obj):
+            continue
+        unresolved.append(obj.nameString())
 
     # An ideal-loads block is cooled by definition, and the flag lives on the
     # zone rather than on any object the walk above would reach.
