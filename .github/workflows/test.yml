@@ -240,9 +240,16 @@ jobs:
       # VM incident). `--check` re-runs and diffs without writing, so a
       # drifted verdict fails here instead of being quietly rewritten.
       - name: The catalogue simulation sweep, re-run and diffed
-        working-directory: python
         run: |
-          .venv/bin/python ../python/scripts/simulate_all_systems.py --check
+          # The SAME interpreter and PYTHONPATH the suite above uses:
+          # `/opt/btap-ci/venv/bin` for the dependencies and the
+          # OpenStudio tree for the SDK. My first two attempts guessed —
+          # `.venv/bin/python`, which does not exist in this image, gave
+          # exit 127, and bare `python3` would not have the venv's
+          # packages.
+          PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
+            /opt/btap-ci/venv/bin/python \
+            python/scripts/simulate_all_systems.py --check
       - name: Coverage summary
         if: always()
         working-directory: python
