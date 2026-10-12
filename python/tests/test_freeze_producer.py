@@ -171,6 +171,21 @@ class TestProducerIdentity(unittest.TestCase):
             invocation["openstudio_cli"],
             "an unavailable informational CLI probe is unknown, not fatal")
 
+    def test_a_timed_out_CLI_probe_does_not_break_the_invocation_record(self):
+        """A hung informational probe is unknown, not a freeze failure."""
+        from unittest import mock
+
+        producer = {"openstudio": "3.11.0+test"}
+        timeout = self.freeze.subprocess.TimeoutExpired(
+            ["openstudio", "openstudio_version"], 120)
+        with mock.patch.object(self.freeze, "producer_identity",
+                               return_value=producer), \
+                mock.patch.object(self.freeze.subprocess, "run",
+                                  side_effect=timeout):
+            invocation = self.freeze.invocation_producer()
+        self.assertEqual(producer, invocation["producer"])
+        self.assertIsNone(invocation["openstudio_cli"])
+
 
 class TestItIsARecordAndNotAGate(unittest.TestCase):
     """The negative property, pinned BEHAVIOURALLY. See the module docstring.

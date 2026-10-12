@@ -695,9 +695,27 @@ class TestTheFullFreezePathREACHESAssembly(unittest.TestCase):
             "publish": sentinel,
         }
         external = AssertionError("the in-memory witness touched the host")
+        host_events = []
+        audit_enabled = False
+        watched_events = {
+            "open", "subprocess.Popen", "os.listdir", "os.scandir",
+            "os.mkdir", "os.rename", "os.remove", "os.rmdir",
+        }
+
+        def audit_host_access(event, _args):
+            if audit_enabled and (
+                    event in watched_events
+                    or event.startswith(("shutil.", "tempfile."))):
+                host_events.append(event)
+
+        # Audit hooks cannot be removed, so this closure is active only for
+        # the call below and inert for every later test.
+        sys.addaudithook(audit_host_access)
         with mock.patch.object(sys, "argv", ["freeze.py"]), \
                 mock.patch.object(freeze, "git", side_effect=external), \
                 mock.patch.object(freeze.subprocess, "run",
+                                  side_effect=external), \
+                mock.patch.object(freeze.subprocess, "Popen",
                                   side_effect=external), \
                 mock.patch.object(freeze.tempfile, "mkdtemp",
                                   side_effect=external), \
@@ -705,16 +723,35 @@ class TestTheFullFreezePathREACHESAssembly(unittest.TestCase):
                                   side_effect=external), \
                 mock.patch.object(pathlib.Path, "read_text",
                                   side_effect=external), \
+                mock.patch.object(pathlib.Path, "read_bytes",
+                                  side_effect=external), \
+                mock.patch.object(pathlib.Path, "exists",
+                                  side_effect=external), \
                 mock.patch.object(pathlib.Path, "write_text",
                                   side_effect=external), \
                 mock.patch.object(pathlib.Path, "mkdir",
-                                  side_effect=external):
-            with self.assertRaises(ReachedPublication):
-                freeze.main(environment=environment)
+                                  side_effect=external), \
+                mock.patch.object(freeze.os, "listdir",
+                                  side_effect=external), \
+                mock.patch.object(freeze.os, "makedirs",
+                                  side_effect=external), \
+                mock.patch.object(freeze.shutil, "copyfile",
+                                  side_effect=external), \
+                mock.patch("builtins.open", side_effect=external):
+            audit_enabled = True
+            try:
+                with self.assertRaises(ReachedPublication):
+                    freeze.main(environment=environment)
+            finally:
+                audit_enabled = False
 
         self.assertIsNone(
             captured["baselines"],
             "an empty in-memory run must not allocate a staging tree")
+        self.assertEqual(
+            [], host_events,
+            "the in-memory witness must not touch files, directories, "
+            "temporary storage or subprocesses through an unpatched route")
         self.assertEqual([], captured["manifest"]["scenarios"])
         self.assertEqual(
             attestation,

@@ -543,12 +543,13 @@ def promote(staged_baselines, staged_manifest, dest_baselines,
             dest_manifest, mover=shutil.move):
     """Backup-swap promotion (the export_goldens pattern): the previous
     valid baselines+manifest survive a failure at any of the four promotion
-    moves, verified by negative controls that inject each failure in turn.
-    ``mover`` is injectable for exactly that control; production always
-    uses shutil.move."""
+    moves, and a failed first publication leaves neither newcomer standing.
+    Both paths have negative controls. ``mover`` is injectable for exactly
+    those controls; production always uses shutil.move."""
     backup_b = Path(str(dest_baselines) + f".backup.{os.getpid()}")
     backup_m = Path(str(dest_manifest) + f".backup.{os.getpid()}")
     moved_b = moved_m = False
+    landed_b = landed_m = False
     try:
         if dest_baselines.exists():
             mover(str(dest_baselines), str(backup_b))
@@ -557,20 +558,19 @@ def promote(staged_baselines, staged_manifest, dest_baselines,
             mover(str(dest_manifest), str(backup_m))
             moved_m = True
         mover(str(staged_baselines), str(dest_baselines))
+        landed_b = True
         mover(str(staged_manifest), str(dest_manifest))
+        landed_m = True
     except BaseException:
-        # FULL rollback to the previous consistent state: a partial
-        # promotion (new baselines in, old manifest still current — the
-        # torn state the negative control reproduces) is rolled BACK, not
-        # left standing. Whatever now occupies a dest that has a backup is
-        # the unpromoted newcomer; remove it and restore the backup.
+        # Remove every newcomer that landed, including on a first freeze
+        # where no backup exists, then restore the previous pair.
+        if landed_b and dest_baselines.exists():
+            shutil.rmtree(str(dest_baselines))
+        if landed_m and dest_manifest.exists():
+            os.remove(str(dest_manifest))
         if moved_b and backup_b.exists():
-            if dest_baselines.exists():
-                shutil.rmtree(str(dest_baselines))
             shutil.move(str(backup_b), str(dest_baselines))
         if moved_m and backup_m.exists():
-            if dest_manifest.exists():
-                os.remove(str(dest_manifest))
             shutil.move(str(backup_m), str(dest_manifest))
         raise
     for backup in (backup_b, backup_m):
@@ -724,7 +724,7 @@ def invocation_producer():
             text=True, check=False, timeout=120)
         if out.returncode == 0:
             openstudio_cli = out.stdout.strip() or None
-    except OSError:
+    except (OSError, subprocess.SubprocessError):
         pass
     return {"producer": producer_identity(),
             "openstudio_cli": openstudio_cli}
