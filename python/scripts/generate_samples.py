@@ -314,8 +314,14 @@ def simulatable() -> set[str] | None:
     path = PYTHON_ROOT / "tests" / "fixtures" / "system_simulation_status.json"
     if not path.is_file():
         raise FileNotFoundError(f"missing Python system status fixture: {path}")
-    rows = json.loads(path.read_text(encoding="utf-8"))
-    return {r["name"] for r in rows if r["status"] == "ok"}
+    verdict = json.loads(path.read_text(encoding="utf-8"))
+    # The verdict gained a `produced_by` block when the sweep that writes it
+    # was finally written, so the rows moved under a `systems` key. THIS
+    # FUNCTION IS THE SECOND READER, and I updated only the first: CI caught
+    # it as `TypeError: string indices must be integers` on a dict I was
+    # iterating as a list.
+    return {row["name"] for row in verdict["systems"]
+            if row["status"] == "ok"}
 
 
 def seed(code="necb2020"):
