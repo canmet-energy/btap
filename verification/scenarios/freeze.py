@@ -542,31 +542,32 @@ def assemble_manifest(frozen, previous, carried, this_producer,
 def promote(staged_baselines, staged_manifest, dest_baselines,
             dest_manifest, mover=shutil.move):
     """Backup-swap promotion (the export_goldens pattern): the previous
-    valid baselines+manifest survive a failure at any of the four promotion
-    moves, and a failed first publication leaves neither newcomer standing.
-    Both paths have negative controls. ``mover`` is injectable for exactly
-    those controls; production always uses shutil.move."""
+    valid baselines+manifest survive failures injected before each move and
+    during either cross-device publication move, and a failed first
+    publication leaves neither newcomer standing. The two backup moves are
+    same-filesystem atomic renames in production. ``mover`` is injectable for
+    the negative controls; production always uses shutil.move."""
     backup_b = Path(str(dest_baselines) + f".backup.{os.getpid()}")
     backup_m = Path(str(dest_manifest) + f".backup.{os.getpid()}")
     moved_b = moved_m = False
-    landed_b = landed_m = False
+    existed_b = dest_baselines.exists()
+    existed_m = dest_manifest.exists()
     try:
-        if dest_baselines.exists():
+        if existed_b:
             mover(str(dest_baselines), str(backup_b))
             moved_b = True
-        if dest_manifest.exists():
+        if existed_m:
             mover(str(dest_manifest), str(backup_m))
             moved_m = True
         mover(str(staged_baselines), str(dest_baselines))
-        landed_b = True
         mover(str(staged_manifest), str(dest_manifest))
-        landed_m = True
     except BaseException:
-        # Remove every newcomer that landed, including on a first freeze
-        # where no backup exists, then restore the previous pair.
-        if landed_b and dest_baselines.exists():
+        # A cross-device move may raise after copying some or all of the
+        # newcomer. Remove whatever occupies a vacated or formerly absent
+        # destination before restoring the previous pair.
+        if (moved_b or not existed_b) and dest_baselines.exists():
             shutil.rmtree(str(dest_baselines))
-        if landed_m and dest_manifest.exists():
+        if (moved_m or not existed_m) and dest_manifest.exists():
             os.remove(str(dest_manifest))
         if moved_b and backup_b.exists():
             shutil.move(str(backup_b), str(dest_baselines))

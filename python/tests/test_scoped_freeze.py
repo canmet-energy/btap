@@ -652,8 +652,15 @@ class TestTheFullFreezePathREACHESAssembly(unittest.TestCase):
 
         Publication is the step after both assembly helpers. Reaching this
         sentinel with their manifest proves `previous` made it through the
-        real `main()` call site. Supplying the external environment in
-        memory makes that witness independent of OpenStudio, Git and disk.
+        real `main()` call site. Patching the loader, rather than passing its
+        result directly to `main()`, also proves the default path consumes
+        the loaded production seams. The in-memory environment keeps that
+        witness independent of OpenStudio, Git and disk.
+
+        CPython exposes no audit event for the stat family, so the audit
+        tripwire below cannot observe Path.stat, Path.is_file or os.stat.
+        Direct mocks cover known calls; the hook covers auditable file,
+        directory and process access.
         """
         class ReachedPublication(Exception):
             """Raised by the in-memory publisher."""
@@ -700,6 +707,7 @@ class TestTheFullFreezePathREACHESAssembly(unittest.TestCase):
         watched_events = {
             "open", "subprocess.Popen", "os.listdir", "os.scandir",
             "os.mkdir", "os.rename", "os.remove", "os.rmdir",
+            "os.system", "os.posix_spawn", "os.exec", "os.spawn", "os.fork",
         }
 
         def audit_host_access(event, _args):
@@ -712,6 +720,9 @@ class TestTheFullFreezePathREACHESAssembly(unittest.TestCase):
         # the call below and inert for every later test.
         sys.addaudithook(audit_host_access)
         with mock.patch.object(sys, "argv", ["freeze.py"]), \
+                mock.patch.object(
+                    freeze, "load_freeze_environment",
+                    return_value=environment) as load_environment, \
                 mock.patch.object(freeze, "git", side_effect=external), \
                 mock.patch.object(freeze.subprocess, "run",
                                   side_effect=external), \
@@ -741,10 +752,11 @@ class TestTheFullFreezePathREACHESAssembly(unittest.TestCase):
             audit_enabled = True
             try:
                 with self.assertRaises(ReachedPublication):
-                    freeze.main(environment=environment)
+                    freeze.main()
             finally:
                 audit_enabled = False
 
+        load_environment.assert_called_once_with()
         self.assertIsNone(
             captured["baselines"],
             "an empty in-memory run must not allocate a staging tree")

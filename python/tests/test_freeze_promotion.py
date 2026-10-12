@@ -112,6 +112,79 @@ class TestFreezePromotionRollback(unittest.TestCase):
                 "move, not in setup or rollback")
             self._assert_previous_pair(work, paths[2], paths[3])
 
+    def _assert_previous_state(self, work, dest_baselines, dest_manifest,
+                               prior_baselines, prior_manifest):
+        if prior_baselines:
+            self.assertEqual(
+                self.OLD_BASELINES, _tree_bytes(dest_baselines))
+        else:
+            self.assertFalse(dest_baselines.exists())
+        if prior_manifest:
+            self.assertEqual(self.OLD_MANIFEST, dest_manifest.read_bytes())
+        else:
+            self.assertFalse(dest_manifest.exists())
+        self.assertEqual(
+            [], list(work.glob("*.backup.*")),
+            "rollback must restore the prior occupancy without nesting or "
+            "leaving a second recoverable state")
+
+    def _fail_after_publication_started(
+            self, target, shape, prior_baselines, prior_manifest):
+        with tempfile.TemporaryDirectory(
+                prefix=f"freeze-promote-{target}-{shape}-") as tmp:
+            work = pathlib.Path(tmp)
+            staged_baselines = work / "staged-baselines"
+            staged_manifest = work / "staged-manifest.json"
+            dest_baselines = work / "baselines"
+            dest_manifest = work / "manifest.json"
+            self._write_tree(staged_baselines, self.NEW_BASELINES)
+            staged_manifest.write_bytes(self.NEW_MANIFEST)
+            if prior_baselines:
+                self._write_tree(dest_baselines, self.OLD_BASELINES)
+            if prior_manifest:
+                dest_manifest.write_bytes(self.OLD_MANIFEST)
+
+            failed_source = (staged_baselines if target == "baselines"
+                             else staged_manifest)
+            injected = []
+
+            def mover(source, destination):
+                source = pathlib.Path(source)
+                destination = pathlib.Path(destination)
+                if source != failed_source:
+                    return shutil.move(source, destination)
+
+                if shape == "complete":
+                    shutil.move(source, destination)
+                elif source.is_dir():
+                    first = next(
+                        path for path in sorted(source.rglob("*"))
+                        if path.is_file())
+                    partial = destination / first.relative_to(source)
+                    partial.parent.mkdir(parents=True)
+                    shutil.copy2(first, partial)
+                else:
+                    payload = source.read_bytes()
+                    destination.write_bytes(payload[:len(payload) // 2])
+                injected.append((target, shape))
+                raise InjectedMoveFailure(
+                    f"{shape} {target} publication")
+
+            with self.assertRaisesRegex(
+                    InjectedMoveFailure,
+                    f"{shape} {target} publication"):
+                self.freeze.promote(
+                    staged_baselines, staged_manifest,
+                    dest_baselines, dest_manifest, mover=mover)
+
+            self.assertEqual(
+                [(target, shape)], injected,
+                "the failure must occur after occupying the named "
+                "publication destination")
+            self._assert_previous_state(
+                work, dest_baselines, dest_manifest,
+                prior_baselines, prior_manifest)
+
     def test_EACH_of_the_four_move_failures_restores_the_previous_pair(self):
         for fail_at in range(1, 5):
             with self.subTest(failed_move=fail_at):
@@ -134,6 +207,21 @@ class TestFreezePromotionRollback(unittest.TestCase):
             observed["manifest_absent"],
             "the old manifest must be in backup when the fourth move fails; "
             "the assertion after rollback proves it was restored")
+
+    def test_PARTIAL_or_complete_publication_then_failure_restores_occupancy(
+            self):
+        """Cross-device moves can raise after creating their destination."""
+        for prior_baselines in (False, True):
+            for prior_manifest in (False, True):
+                for target in ("baselines", "manifest"):
+                    for shape in ("partial", "complete"):
+                        with self.subTest(
+                                prior_baselines=prior_baselines,
+                                prior_manifest=prior_manifest,
+                                target=target, shape=shape):
+                            self._fail_after_publication_started(
+                                target, shape, prior_baselines,
+                                prior_manifest)
 
     def test_manifest_failure_removes_new_baselines_without_an_old_tree(self):
         """A first freeze must not leave half of a new pair standing."""
