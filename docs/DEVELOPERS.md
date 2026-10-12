@@ -428,15 +428,14 @@ failure.
 Squash freely. Rebase merging is still disabled on this repository, which is
 incidental now rather than load-bearing.
 
-When it does happen the `main-red` job opens an issue naming the run and this
-recovery path, assigned to `vars.MAIN_RED_ASSIGNEE` (or whoever pushed), and
-closes it again when a push run on `main` is green. It tells someone; it does
-not block anything.
+The `main-red` job opens an issue naming the run and the lane that failed,
+assigned to `vars.MAIN_RED_ASSIGNEE` (or whoever pushed), and closes it again
+when a push run on `main` is green. It tells someone; it does not block
+anything.
 
-If one is squash- or rebase-merged by mistake, re-freeze from the resulting `main` commit
-and submit the minimal re-pin immediately; a pure repair moves only provenance
-metadata and no baseline. And check the post-merge `main` run before calling
-the work done — green PR-head CI is a different claim (D-94).
+**Check the post-merge `main` run before calling the work done.** Green
+PR-head CI is a different claim, and D-94's stop condition is the `main` run
+— which is independent of merge method and survives this retirement.
 
 The 31 scenarios that once had live
 Ruby seals are now `python-only:post-handoff` and retain their retired seal plus

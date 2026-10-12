@@ -334,6 +334,81 @@ def tb_non_vacuity(run_dir, side):
     return problems
 
 
+def assemble_scope(frozen, carried, baselines, previous, all_ids, runner,
+                   fail):
+    """Carry the unselected baselines in, verify everything, return the set.
+
+    Extracted from `main()` so the POSITIVE scoped-freeze path can be tested
+    without an engine. `228` asked for a successful synthetic scope proving
+    both the selected and carried sides, and `231` recorded that the
+    refusals were still only strings grepped out of this file. Neither is
+    testable while the logic lives inside the function that runs
+    EnergyPlus; `python/tests/test_scoped_freeze.py` now drives this.
+
+    `fail` is the caller's abort — `die` in production — so a test can
+    observe a refusal as an exception instead of a process exit.
+    """
+    for sc in carried:
+        source = runner.BASELINES / sc["id"]
+        if not source.is_dir():
+            # A scenario with no baseline FILES has no directory: Git does
+            # not store an empty one, so `internal-dead-remote` is absent on
+            # every fresh clone and in every new worktree — which is where
+            # DEVELOPERS.md says to freeze. Refusing there made `--scenario`
+            # unusable in its documented setting (Fable, `228`).
+            if sc.get("baseline_sha256"):
+                fail(f"{sc['id']} declares baselines but {source} is "
+                     "missing; a scoped freeze cannot carry forward a "
+                     "baseline that is not there.")
+            (baselines / sc["id"]).mkdir(parents=True)
+            continue
+        shutil.copytree(source, baselines / sc["id"])
+    frozen = frozen + carried
+    frozen.sort(key=lambda sc: all_ids.index(sc["id"]))
+
+    # The guard that makes a scoped freeze safe: the manifest it is about to
+    # write must describe EVERY defined scenario, and the staged tree must
+    # hold a directory for each. Anything less and the promotion deletes
+    # baselines while publishing a manifest that agrees with the deletion.
+    written = [sc["id"] for sc in frozen]
+    if written != all_ids:
+        fail("refusing to promote: the manifest would describe "
+             f"{len(written)} scenarios and {len(all_ids)} are defined. "
+             f"Missing {sorted(set(all_ids) - set(written))}, "
+             f"unexpected {sorted(set(written) - set(all_ids))}.")
+    absent = [i for i in all_ids if not (baselines / i).is_dir()]
+    if absent:
+        fail(f"refusing to promote: no staged baseline directory for "
+             f"{absent}")
+    # THE verification, for every entry — carried and re-run alike. A scope
+    # published a corrupted baseline under its stale hash and an undeclared
+    # extra file and reported success, because nothing compared the staged
+    # tree against the manifest about to describe it (Fable, `228`).
+    #
+    # I first wrote this as two checks, one at carry time against the
+    # committed hashes and this one at promotion time. The mutation matrix
+    # said the carry-time half caught nothing the staged half did not:
+    # disabling it killed no test, because for a carried entry the two
+    # manifests hold the same hashes. One check, in the place that covers
+    # every entry, is the whole property —
+    # `test_a_RE_RUN_scenario_whose_hash_is_wrong_refuses` is the case the
+    # carry-time version could never have caught.
+    staged_problems = []
+    previous_baselines = runner.BASELINES
+    runner.BASELINES = baselines
+    try:
+        for sc in frozen:
+            staged_problems.extend(
+                runner.verify_baselines(sc, {"scenarios": frozen}))
+    finally:
+        runner.BASELINES = previous_baselines
+    if staged_problems:
+        fail("refusing to promote: the staged tree does not match the "
+             "manifest about to describe it:\n  "
+             + "\n  ".join(staged_problems))
+    return frozen
+
+
 def promote(staged_baselines, staged_manifest, dest_baselines,
             dest_manifest, mover=shutil.move):
     """Backup-swap promotion (the export_goldens pattern): the previous
@@ -721,67 +796,8 @@ def main():
         frozen.append({**sc, "baseline_sha256": hashes,
                        "produced_by": this_producer})
 
-    # Carry the unselected baselines into the staging tree, so the
-    # whole-directory promotion below publishes a COMPLETE set.
-    carry_problems = []
-    for sc in carried:
-        source = runner.BASELINES / sc["id"]
-        if not source.is_dir():
-            # A scenario with no baseline FILES has no directory: Git does
-            # not store an empty one, so `internal-dead-remote` is absent on
-            # every fresh clone and in every new worktree — which is where
-            # DEVELOPERS.md says to freeze. Refusing there made `--scenario`
-            # unusable in its documented setting (Fable, `228`).
-            if sc.get("baseline_sha256"):
-                die(f"{sc['id']} declares baselines but {source} is "
-                    "missing; a scoped freeze cannot carry forward a "
-                    "baseline that is not there.")
-            (baselines / sc["id"]).mkdir(parents=True)
-            continue
-        shutil.copytree(source, baselines / sc["id"])
-        # VERIFY what is carried, against the hashes being carried with it.
-        # A scope published a corrupted baseline under its stale hash and an
-        # undeclared extra file, and reported success: the gate would have
-        # caught both on the NEXT run, after the bad bytes were committed
-        # (Fable, `228`). Checking here means the freeze refuses instead.
-        carry_problems.extend(runner.verify_baselines(sc, previous))
-    if carry_problems:
-        die("refusing to promote: these CARRIED baselines do not match the "
-            "hashes being carried with them, so a scoped freeze would "
-            "publish bytes nobody approved:\n  "
-            + "\n  ".join(carry_problems))
-    frozen = frozen + carried
-    frozen.sort(key=lambda sc: all_ids.index(sc["id"]))
-
-    # The guard that makes a scoped freeze safe: the manifest it is about to
-    # write must describe EVERY defined scenario, and the staged tree must
-    # hold a directory for each. Anything less and the promotion deletes
-    # baselines while publishing a manifest that agrees with the deletion.
-    written = [sc["id"] for sc in frozen]
-    if written != all_ids:
-        die("refusing to promote: the manifest would describe "
-            f"{len(written)} scenarios and {len(all_ids)} are defined. "
-            f"Missing {sorted(set(all_ids) - set(written))}, "
-            f"unexpected {sorted(set(written) - set(all_ids))}.")
-    absent = [i for i in all_ids if not (baselines / i).is_dir()]
-    if absent:
-        die(f"refusing to promote: no staged baseline directory for {absent}")
-    # And every staged directory must hold what its entry declares. For a
-    # re-run scenario `freeze.py` wrote both; for a carried one this is the
-    # second look, after the copy.
-    staged_problems = []
-    previous_baselines = runner.BASELINES
-    runner.BASELINES = baselines
-    try:
-        for sc in frozen:
-            staged_problems.extend(
-                runner.verify_baselines(sc, {"scenarios": frozen}))
-    finally:
-        runner.BASELINES = previous_baselines
-    if staged_problems:
-        die("refusing to promote: the staged tree does not match the "
-            "manifest about to describe it:\n  "
-            + "\n  ".join(staged_problems))
+    frozen = assemble_scope(frozen, carried, baselines, previous, all_ids,
+                            runner, die)
 
     counts = {}
     for sc in frozen:

@@ -7522,7 +7522,7 @@ had rewritten the history it read. An AHJ-facing report loses nothing when an
 old freeze commit stops being an ancestor. `provenance.commit` stays as
 informational history; nothing requires it to be reachable.
 
-**D-95 in full.** Its merge-method exception existed only to keep that
+**D-95's active merge-method exception.** It existed only to keep that
 assertion executable. Freeze-carrying PRs may merge by any method.
 
 **Issue #99's `--unshallow` lock, the `fetch-depth: 0` requirement, and the
@@ -7542,7 +7542,18 @@ compliance-critical fields that may never be stripped or made tolerant.
 
 That file carries two assertions about itself, because a guard that cannot
 fail is the defect this decision exists to stop: each mutation must break
-EXACTLY its named cases, and every case must be broken by some mutation.
+EXACTLY its named cases, and every case that EXPECTS A DIFFERENCE must be
+broken by some mutation.
+
+The qualifier is load-bearing and the first version of this paragraph
+dropped it, claiming "every case" while the test filters to `c.differs`
+(Sol, `231`). An agreement case — a tolerated float, an absent key equal to
+an explicit null — cannot be broken by DISABLING a clause, because disabling
+a clause only ever removes reports. It would take a TIGHTENING mutation, and
+those are a different instrument: the agreement cases are defended by the
+other half of the same test, which fails if a satisfying input is reported.
+Two of them are now paired with a difference case in the SAME field, so
+neither half can be satisfied by exempting the field.
 
 **`main-red`'s ancestry-specific diagnosis.** The incident lifecycle stays.
 Main being green matters for reasons much broader than D-95.

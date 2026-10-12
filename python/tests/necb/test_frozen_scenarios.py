@@ -88,7 +88,13 @@ class TestFrozenScenarios(unittest.TestCase):
 
     def test_manifest_integrity(self):
         """Runs in EVERY lane: schema sanity, spec hash pin, per-scenario
-        baseline existence + sha256, provenance ancestry."""
+        baseline existence + sha256, and the authored definitions compared
+        against the records CI executes.
+
+        NOT provenance ancestry. That assertion is gone with D-103, and this
+        docstring still named it (Sol, `231`); `provenance.commit` is a
+        record now, compared against nothing.
+        """
         m = self.manifest
         self.assertEqual(m["spec_sha256"],
                          self.runner.sha256(REPO_ROOT / "verification" / "spec.json"),
@@ -100,7 +106,7 @@ class TestFrozenScenarios(unittest.TestCase):
         # `api_worker_sha256`, `compare_runs_sha256`, `audit_scenario_sha256`
         # and `gate_sha256` — are gone (Sol, `227`). A hash of `runner.py`
         # proved that `runner.py` changed, not that the change weakened
-        # comparison; 28 of 89 manifest commits were hash-only re-freezes, a
+        # comparison; 28 of 89 manifest commits touched no baseline file, a
         # comment-level edit re-froze 54 scenarios, and the coupling deferred
         # issue #99's lock for rounds. The property they reached for is now
         # tested directly in `python/tests/test_comparator_contract.py`, case

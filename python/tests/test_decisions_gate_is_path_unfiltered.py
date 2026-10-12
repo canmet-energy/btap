@@ -406,8 +406,16 @@ class TestDecisionsGateIsPathUnfiltered(unittest.TestCase):
             if not workflow.is_file():
                 continue
             text = workflow.read_text(encoding="utf-8")
-            for match in re.finditer(r"<<\s*(?!['\"])(\w+)\n(.*?)\n\s*\1",
-                                     text, re.S):
+            # `<<-?` because the tab-stripping form is a heredoc too, and
+            # the terminator is anchored to a WHOLE line because that is
+            # bash's own rule — `\n\s*EOF` also matches `EOFs are markers`
+            # mid-body, which truncates the body and hides whatever follows.
+            # Both holes were in my first version of this guard and both
+            # were demonstrated to pass it while bash executed the
+            # backticks (Fable, `231` R2).
+            for match in re.finditer(
+                    r"<<-?[ \t]*(?!['\"])(\w+)\n(.*?)^[ \t]*\1[ \t]*$",
+                    text, re.S | re.M):
                 body = match.group(2)
                 offenders = [line.strip() for line in body.split("\n")
                              if re.search(r"(?<!\\)`", line)]

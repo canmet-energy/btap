@@ -122,18 +122,34 @@ CRITICAL = (
 #: `8.4.1.2.(3)` against `8.4.1.2.(4)(a)`, which differs plainly, so the case
 #: passed while the property it claimed was false.
 #:
-#: The vulnerability is specific to DOTTED numbering, and saying so is part
-#: of the fix. `D-10` against `D-100` tokenises to 10 and 100, and `AHJ-1`
-#: against `AHJ-10` to 1 and 10 — neither pair is numerically equal, so a
-#: ruling or register id could never be confused with another by this rule.
-#: Those cases pin that the axes are compared at all; `article` pins that
-#: identifiers are compared EXACTLY.
+#: My narrowing of that claim was itself wrong, and both reviewers caught it
+#: independently (Sol's `231`, Fable's `231` R3). I wrote that a ruling or
+#: register id "could never be confused" because `D-10` and `D-100`
+#: tokenise to 10 and 100. True, and not the question: the grammar is an
+#: unbounded `D-\d+` with no canonical-spelling predicate, so `D-07` and
+#: `D-7` are both accepted spellings of one id and compared EQUAL, as did
+#: `AHJ-1` and `AHJ-01`; and past 2**53, `D-9007199254740992` and
+#: `D-9007199254740993` are different ids that parse to the same float.
+#:
+#: The true statement is narrower than mine and wider than the dotted case:
+#: no two REGISTERED ids collided, because every registered id is spelled
+#: without a leading zero and is far below 2**53. That is a property of
+#: today's register, not of the comparator.
+#:
+#: So the token rule is not about dots. An INTEGER token is compared
+#: textually — the tolerance exists for measured floats — and a dotted run
+#: of three or more components is compared textually because it is an
+#: identifier. Between them, no citation and no authority id is read as a
+#: number anywhere.
 AUDIT_FIELDS = (
     ("article", "8.4.4.1.(2)", "8.4.4.10.(2)"),
     ("ruling", "D-102", "D-101"),
     ("ahj", "AHJ-21", "AHJ-1"),
     ("level", "warning", "info"),
     ("target", "Thermal Zone 1", "Thermal Zone 2"),
+    # `step` is in `exact_string_paths` and had no case at all, so the spec
+    # claimed a field exact that nothing exercised (Fable, `231` R3).
+    ("step", "compliance", "sizing"),
 )
 
 
@@ -310,8 +326,9 @@ MUTATIONS = [
             "a citation quoted inside PROSE is never tolerated",
         })),
     # `article`, `ruling`, `ahj`, `level` and `target` are NOT here: they go
-    # through the exact-identifier path now, so defeating `strings_equal`
-    # cannot reach them. That is the point of the exemption.
+    # through the exact-identifier path, so defeating `strings_equal`
+    # cannot reach them. The prose cases ARE here, because a citation
+    # quoted inside `evidence` has no exempt path to take.
     # Worth knowing, from building the table: the audit's `ruling` and `ahj`
     # ids are compared through the STRING-float rule, because "AHJ-21" and
     # "AHJ-1" share their non-numeric text and differ only in digits. The
@@ -387,12 +404,13 @@ MUTATIONS = [
         "the citation axes added to strip_keys",
         lambda m, s: {**s, "strip_keys":
                       s["strip_keys"] + ["article", "ruling", "ahj", "level",
-                                        "target"]},
+                                        "target", "step"]},
         frozenset({"audit 'article' is never tolerated",
                    "audit 'ruling' is never tolerated",
                    "audit 'ahj' is never tolerated",
                    "audit 'level' is never tolerated",
-                   "audit 'target' is never tolerated"})),
+                   "audit 'target' is never tolerated",
+                   "audit 'step' is never tolerated"})),
     Mutation(
         "stripping stops being recursive",
         lambda m, s: (setattr(m, "strip_keys", lambda n, k: (
@@ -770,9 +788,18 @@ class TestTheComparatorsFileAndProcessContract(unittest.TestCase):
             "green, while the test's name and D-103 both claimed exact "
             "status (Sol, `228`) — and a harness that distinguishes 1 from "
             "2 would have been silently reclassified")
+        # STDOUT, not `stdout + stderr`. `main()` prints every difference
+        # line with `print()`, so stdout is the documented channel — and
+        # searching the concatenation meant sending the whole report to
+        # stderr kept this test green (Sol, `231`). A harness that reads one
+        # channel would have lost the report without a failing test.
         self.assertIn(
-            "compliant", moved.stdout + moved.stderr,
-            "and it must say WHICH field moved, or the failure is unusable")
+            "compliant", moved.stdout,
+            "the difference report must reach STDOUT, where `main()` prints "
+            "it; a harness reading one channel must not lose it silently")
+        self.assertIn(
+            "DIFF", moved.stdout,
+            "and stdout must carry the summary line as well as the detail")
 
 
 if __name__ == "__main__":

@@ -52,6 +52,31 @@ def _runner():
     return _load("scenario_runner_contract", SCENARIOS_DIR / "runner.py")
 
 
+def _mutated_runner(old, new, name="scenario_runner_patched"):
+    """`runner.py` with one clause replaced, loaded from a mirrored tree.
+
+    The tree SHAPE has to be mirrored, not just the file: `runner.py`
+    computes `REPO_ROOT` from its own location and loads
+    `verification/compare_runs.py` and `spec.json` relative to it.
+    """
+    source = (SCENARIOS_DIR / "runner.py").read_text(encoding="utf-8")
+    if source.count(old) != 1:
+        raise AssertionError(
+            f"the clause to patch is not uniquely present in runner.py: "
+            f"{old[:60]!r}")
+    work = pathlib.Path(tempfile.mkdtemp(prefix="cmp-mut-"))
+    scenarios = work / "verification" / "scenarios"
+    scenarios.mkdir(parents=True)
+    for sibling in SCENARIOS_DIR.glob("*.py"):
+        shutil.copy2(sibling, scenarios / sibling.name)
+    shutil.copy2(REPO_ROOT / "verification" / "compare_runs.py",
+                 work / "verification" / "compare_runs.py")
+    shutil.copy2(SPEC_PATH, work / "verification" / "spec.json")
+    (scenarios / "runner.py").write_text(source.replace(old, new),
+                                         encoding="utf-8")
+    return _load(name, scenarios / "runner.py"), work
+
+
 @dataclass
 class Case:
     """One scenario contract, a run that breaks it, and one that does not."""
@@ -130,6 +155,41 @@ CASES = [
         baseline={"audit.txt": "x\n"},
         bad_files={}, good_files={"audit.txt": "x\n"},
         why="an artifact that stopped being written at all"),
+    # Sol's `231` B2: the NORMALIZED text mode and the stderr stream had no
+    # case at all, so `if False and mode == "normalized"` and
+    # `if mode == "exact" and stream != "stderr"` both left the suite green —
+    # 4 passed, 27 subtests — while committed scenarios declare both.
+    Case(
+        "a NORMALIZED text artifact",
+        _scenario(text_files={"audit.txt": "normalized"}),
+        bad_run={}, good_run={},
+        baseline={"audit.txt": "ran in <RUN_DIR>\nVERDICT: compliant\n"},
+        bad_files={"audit.txt": "ran in {RUN_DIR}\nVERDICT: NOT compliant\n"},
+        good_files={"audit.txt": "ran in {RUN_DIR}\nVERDICT: compliant\n"},
+        why="normalized is not a weaker comparison, it is the same "
+            "comparison after run-specific paths are folded out; the "
+            "baseline here is already normalized, so only the VERDICT "
+            "moves"),
+    Case(
+        "a normalized artifact whose RUN-SPECIFIC path still differs",
+        _scenario(text_files={"audit.txt": "normalized"}),
+        bad_run={}, good_run={},
+        baseline={"audit.txt": "ran in <RUN_DIR>\n"},
+        # The run dir is folded to a placeholder, so a DIFFERENT run dir must
+        # still agree. This is the half that makes the mode worth having, and
+        # it is an agreement case, so it fails if normalization is REMOVED
+        # as well as if it is weakened.
+        bad_files={"audit.txt": "ran in /somewhere/else\n"},
+        good_files={"audit.txt": "ran in {RUN_DIR}\n"},
+        why="a path that varies per run must not read as a difference"),
+    Case(
+        "an EXACT stderr stream",
+        _scenario(streams={"stderr": "exact"}),
+        bad_run={"stderr": "WARNING: two energy sources\n"},
+        good_run={"stderr": "WARNING: one energy source\n"},
+        baseline={"stderr.txt": "WARNING: one energy source\n"},
+        why="warnings are never silent, and stderr is where they go; the "
+            "stream loop ran for both and only `stdout` was pinned"),
     Case(
         "an EXACT stream",
         _scenario(streams={"stdout": "exact"}),
@@ -215,7 +275,12 @@ MUTATIONS = [
         "text artifacts not compared",
         "        if baseline_n != live_n:",
         "        if False:",
-        frozenset({"an EXACT text artifact"})),
+        # Every text-artifact case, exact and normalized alike: this is the
+        # one comparison all of them end at.
+        frozenset({"an EXACT text artifact",
+                   "a NORMALIZED text artifact",
+                   "a normalized artifact whose RUN-SPECIFIC path still "
+                   "differs"})),
     # NOT in this table: disabling the None guard
     # (`if baseline is None or live is None:`) makes `compare()` RAISE rather
     # than go quiet, and a raise is a loud failure. The guard converts a
@@ -223,10 +288,34 @@ MUTATIONS = [
     # artifact and a green run. Claiming it blinds a case would be claiming
     # a mutation I cannot demonstrate.
     Mutation(
+        "the normalized text mode is skipped (Sol's installed defect)",
+        '        if mode == "normalized":',
+        '        if False and mode == "normalized":',
+        # NOTHING, and the reason is worth stating. Falling through to the
+        # exact branch compares an un-normalized live file against a
+        # normalized baseline, so the mode's removal shows up as a FALSE
+        # POSITIVE on the satisfying run, not as blindness on the violating
+        # one. This table measures blindness, so it cannot see it.
+        #
+        # What catches it is the other half of
+        # `test_compare_REPORTS_each_violation_and_passes_each_good_run`,
+        # and `test_the_normalized_mode_is_what_lets_a_RUN_SPECIFIC_path_agree`
+        # below asserts exactly that, so the clause is defended by a named
+        # mechanism rather than by this one claiming a reach it does not
+        # have.
+        frozenset()),
+    Mutation(
+        "stderr is excluded from the exact-stream comparison "
+        "(Sol's installed defect)",
+        '        if mode == "exact":\n            frozen = (base / f"{stream}.txt")',
+        '        if mode == "exact" and stream != "stderr":\n'
+        '            frozen = (base / f"{stream}.txt")',
+        frozenset({"an EXACT stderr stream"})),
+    Mutation(
         "exact streams not compared",
         'if frozen.read_text(encoding="utf-8") != normalize(live, run.run_dir or "<none>", run.scratch):',
         'if False and frozen.read_text(encoding="utf-8") != normalize(live, run.run_dir or "<none>", run.scratch):',
-        frozenset({"an EXACT stream"})),
+        frozenset({"an EXACT stream", "an EXACT stderr stream"})),
     Mutation(
         "required stream fragments not checked",
         "            if needle not in live:",
@@ -281,7 +370,14 @@ class _Harness:
         self.run_dir.mkdir()
         files = case.bad_files if which == "bad" else case.good_files
         for name, text in files.items():
-            (self.run_dir / name).write_text(text, encoding="utf-8")
+            # `{RUN_DIR}` becomes the REAL run-dir path, which is what a live
+            # artifact contains and what `normalize()` folds to `<RUN_DIR>`.
+            # The placeholder cannot be written literally into the live file:
+            # `normalize()` RAISES if its raw input already holds one, so a
+            # fixture that pre-normalizes is testing the raise.
+            (self.run_dir / name).write_text(
+                text.replace("{RUN_DIR}", str(self.run_dir)),
+                encoding="utf-8")
         overrides = case.bad_run if which == "bad" else case.good_run
         self.run = runner.ScenarioRun(
             exit_code=overrides.get("exit_code", 0),
@@ -336,6 +432,41 @@ def _notices(runner, case):
 class TestTheScenarioComparatorContract(unittest.TestCase):
     def setUp(self):
         self.runner = _runner()
+
+    def test_the_normalized_mode_is_what_lets_a_RUN_SPECIFIC_path_agree(self):
+        """The clause the mutation table cannot reach, asserted directly.
+
+        Skipping `if mode == "normalized"` does not blind `compare()`; it
+        makes it complain about a run that is CORRECT, because an
+        un-normalized live file never matches a normalized baseline. That is
+        a false positive, and the table above measures blindness only (Sol's
+        `231` B2 installed this defect and saw 4 passed, 27 subtests).
+
+        So this asserts the mode's actual purpose: a run dir that differs
+        from the frozen one must still agree, and must stop agreeing when
+        the mode is skipped.
+        """
+        case = next(c for c in CASES
+                    if c.name == "a normalized artifact whose RUN-SPECIFIC "
+                                 "path still differs")
+        runner = _runner()
+        _noticed, complained = _notices(runner, case)
+        self.assertFalse(complained,
+                         "a run-specific path must normalize to agreement")
+
+        patched, work = _mutated_runner(
+            '        if mode == "normalized":',
+            '        if False and mode == "normalized":',
+            name="scenario_runner_normalized_off")
+        try:
+            _noticed, complained = _notices(patched, case)
+        finally:
+            shutil.rmtree(work, ignore_errors=True)
+        self.assertTrue(
+            complained,
+            "with the normalized mode skipped, an un-normalized live file "
+            "cannot match a normalized baseline — so this clause must be "
+            "what makes the agreement case agree")
 
     def test_the_case_table_covers_each_contract_once(self):
         names = [c.name for c in CASES]

@@ -98,7 +98,22 @@ def strings_equal(a, b, spec):
         return False
     if NUM_RE.sub("", a) != NUM_RE.sub("", b):
         return False
-    return all(numbers_equal(x, y, tol) for x, y in zip(na, nb))
+    for x, y in zip(na, nb):
+        # An INTEGER token is compared textually. The tolerance exists for
+        # measured floats, and an integer has no formatting wobble that
+        # needs it — while reading one as a number destroys identity two
+        # ways. `D-01` and `D-1` are both accepted spellings under the
+        # unbounded `D-\d+` grammar and parse to the same number, and
+        # `D-9007199254740992` and `D-9007199254740993` are different ids
+        # that parse to the same float past 2**53 (Sol, `231`). The dotted
+        # rule above does not reach either, because neither has a dot.
+        if "." not in x and "." not in y:
+            if x != y:
+                return False
+            continue
+        if not numbers_equal(x, y, tol):
+            return False
+    return True
 
 
 def diff(a, b, spec, path, out):
