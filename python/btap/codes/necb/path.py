@@ -1261,7 +1261,14 @@ def evaluate_unmet_8_4_4(report, audit):
         # same defect Sol's `220` found when one warning spoke for two
         # sentences.
         if status["cooling_failures"]:
-            audit.warn(
+            # A DECISION, not a warning. The exceedance is established on
+            # its own evidence, and the report checklist keys its glyph on
+            # `level` ALONE: as a warning this rendered the same block with
+            # the same verdict as a warning row when a stray coil existed
+            # and as a fail row when it did not (Fable, `236`). The audit
+            # text being SHOUTED does not reach the renderer; the level
+            # does.
+            audit.decision(
                 "compliance",
                 "unmet cooling hours EXCEED 100 h for "
                 f"{len(status['cooling_failures'])} thermal block(s) KNOWN "
@@ -1465,6 +1472,18 @@ def _hard_sized_phrase(names):
 #:
 #: `test_the_substring_matches_are_all_real_topology` drives the shapes
 #: rather than pinning 137 names that move with the SDK.
+#: An air-to-air exchanger, which couples the relief stream to the OA
+#: stream. `HeatExchangerAirToAirSensibleAndLatent` is the one the SDK
+#: builds; the prefix covers the family.
+#:
+#: `iddObjectType().valueName()` SEPARATES the words —
+#: `OS_HeatExchanger_AirToAir_SensibleAndLatent` — and my first version
+#: wrote the class name as it appears in Python, `HeatExchangerAirToAir`,
+#: which matched nothing. The relief fix silently did not fire. Written from
+#: the actual string this time, with the separator optional so both spellings
+#: match.
+_EXCHANGER_PATTERN = re.compile(r"HeatExchanger_?AirToAir")
+
 _TOPOLOGY_TYPES = re.compile(
     r"AirLoopHVAC|PlantLoop|ThermalZone|ZoneHVAC|AirTerminal|"
     r"OutdoorAirSystem")
@@ -1513,8 +1532,47 @@ def _oa_system_holding(obj):
         for component in oa_system.oaComponents():
             if component.handle() == handle:
                 return oa_system, "oa"
-        for component in oa_system.reliefComponents():
+        relief = list(oa_system.reliefComponents())
+        for component in relief:
             if component.handle() == handle:
+                # A RELIEF COMPONENT WITH AN EXCHANGER DOWNSTREAM IS NOT
+                # EXHAUST-ONLY. `reliefComponents()` is ordered, so this is
+                # a membership question rather than a walk: an
+                # air-to-air heat exchanger later in the list transfers what
+                # this object did to the exhaust INTO the outdoor-air
+                # stream, which is indirect evaporative cooling and a real
+                # low-energy ventilation strategy.
+                #
+                # Fable's `236`: an `EvaporativeCoolerDirectResearchSpecial`
+                # on relief, upstream of a straddling
+                # `HeatExchangerAirToAirSensibleAndLatent`, cooled the
+                # supply air while BOTH walks said "cools no block" — so
+                # (4)(a) went vacuous and 900 unmet hours passed on a model
+                # EnergyPlus accepts with zero severe errors. My rule
+                # "relief air is exhausted" was true in isolation and false
+                # once an exchanger couples the streams.
+                # ANY exchanger in this relief stream, not only one later
+                # in the list. Fable's `236` prescribed "an HX after me in
+                # `reliefComponents()`", and I could not establish that the
+                # list's order is relief FLOW order: building his fixture
+                # here gave `[Node, HX, Node, EvaporativeCooler, Node]`
+                # while his probe reported the cooler before the HX. Relief
+                # air flows zone-to-outdoors, the opposite of the OA stream,
+                # so "later in the list" and "downstream in the air" are not
+                # obviously the same question and I am not going to assert
+                # they are on a reading I have not verified.
+                #
+                # The conservative reading attributes the component as an
+                # OA-stream one whenever an exchanger is present at all.
+                # Over-attributing puts the block INSIDE (4)(a)'s scope and
+                # judges its unmet hours; under-attributing excuses them,
+                # which is the failure this blocker is about. The exact
+                # ordering question is recorded in the handoff for whoever
+                # establishes the direction.
+                if any(_EXCHANGER_PATTERN.search(
+                        other.iddObjectType().valueName())
+                        for other in relief):
+                    return oa_system, "relief_through_exchanger"
                 return oa_system, "relief"
     return None, None
 
@@ -1541,6 +1599,29 @@ def _reaches_no_topology(obj, depth=6) -> bool:
             if as_model_object.is_initialized():
                 frontier.append((as_model_object.get(), level + 1))
     return True
+
+
+def _relief_reaching_supply(oa_system):
+    """Relief-stream components an exchanger couples back to the OA stream.
+
+    `reliefComponents()` is ordered outboard to inboard, so a component with
+    an air-to-air exchanger LATER in the list has what it did to the exhaust
+    transferred into the outdoor air. Those objects condition the supply and
+    serve whatever the OA system serves.
+
+    The inward walk needs this for the same reason the outward walk does,
+    and for a sharper one: if only the outward walk learned it, the two
+    would disagree on every such model and the oracle would report a
+    disagreement instead of an answer. Seeding ALL relief components was the
+    original blind spot (`229` NB-1); seeding the ones that reach the supply
+    is the narrow version of the same idea.
+    """
+    relief = list(oa_system.reliefComponents())
+    if not any(_EXCHANGER_PATTERN.search(c.iddObjectType().valueName())
+               for c in relief):
+        return []
+    return [c for c in relief
+            if not _EXCHANGER_PATTERN.search(c.iddObjectType().valueName())]
 
 
 def _zone_cooling_inward(model) -> dict:
@@ -1579,10 +1660,13 @@ def _zone_cooling_inward(model) -> dict:
             own_oa = loop.airLoopHVACOutdoorAirSystem()
             if own_oa.is_initialized():
                 seeds.extend(own_oa.get().oaComponents())
-                # NOT `reliefComponents()`: exhaust-side equipment cools no
-                # block, and seeding it here is what made the two walks
+                # Not every relief component: exhaust-side equipment cools
+                # no block, and seeding all of it is what made the two walks
                 # agree about a relief coil they were both wrong about
-                # (Fable, `229` NB-1).
+                # (`229` NB-1). Only the ones an exchanger couples back into
+                # the supply, which is the case that made them agree in the
+                # OTHER direction (`236`).
+                seeds.extend(_relief_reaching_supply(own_oa.get()))
             # And a DEDICATED system shared with other loops: a cooling coil
             # in there serves this block as much as one on the loop itself.
             # A DOAS is not the loop's own OA system — the loop reaches it
@@ -1597,7 +1681,7 @@ def _zone_cooling_inward(model) -> dict:
                 if shared.is_initialized():
                     inner = shared.get().airLoopHVACOutdoorAirSystem()
                     seeds.extend(inner.oaComponents())
-                    # Relief is exhaust; see the note above.
+                    seeds.extend(_relief_reaching_supply(inner))
 
         found = False
         seen = set()
@@ -1695,14 +1779,54 @@ def _zone_mechanical_cooling(model) -> tuple:
         """Did this object's blocks get attributed? Narrowest scope first."""
         if depth > 6:                # these chains are shallow; this bounds a cycle
             return False
-        # RELIEF FIRST, before any rung that could place this object by
-        # proximity. On a PLAIN loop a relief-stream coil answers
+        # OA-SYSTEM MEMBERSHIP FIRST, before any rung that places this
+        # object by proximity or by its water side. Two defects made this
+        # the right position, both found by running it:
+        #
+        # On a PLAIN loop a relief-stream coil answers
         # `component.airLoopHVAC()` with that loop — it IS on the loop — so
-        # the loop rung below attributed it to every zone the loop serves
-        # before the stream was ever consulted. Relief air is exhausted and
-        # the coil cools no block, so the question has to be asked first
-        # (Fable, `229` NB-1).
-        if _oa_system_holding(obj)[1] == "relief":
+        # the loop rung attributed it to every zone the loop serves before
+        # the stream was consulted (Fable, `229` NB-1).
+        #
+        # And a CHILLED-WATER DOAS coil answers `plantLoop()`, which sat
+        # above the containment rung and won: the outward walk returned
+        # False, the inward True, and the oracle had to rescue the run. So
+        # the containment fix did not reach the coil type a running DOAS
+        # actually uses, and my own test fixture used a PLANT-LESS water
+        # coil — the single shape that skips the rung (Fable, `236`).
+        holder, stream = _oa_system_holding(obj)
+        if holder is not None:
+            if stream == "relief":
+                # EXHAUST-ONLY relief. `relief_through_exchanger` is NOT
+                # handled here: it falls through to the OA attribution
+                # below, which is precisely "attribute it as an OA-stream
+                # component" (Fable, `236`).
+                # See `relief_through_exchanger` above
+                # for the case where an exchanger makes this false.
+                #
+                # RELIEF AIR IS EXHAUSTED. A cooling coil on the relief
+                # stream conditions air leaving the building, so it cools no
+                # thermal block — PLACED, with nothing to attribute, like a
+                # plant loop carrying only process demand.
+                #
+                # Both walks used to attribute it to every zone of the loop
+                # and AGREE, because the inward walk seeded
+                # `reliefComponents()` too: independence had been traded for
+                # agreement in exactly one place (Fable, `229` NB-1).
+                return True
+            loop = holder.airLoopHVAC()
+            if loop.is_initialized():
+                for zone in loop.get().thermalZones():
+                    cooled.add(zone.nameString().upper())
+                return True
+            dedicated = holder.airLoopHVACDedicatedOutdoorAirSystem()
+            if dedicated.is_initialized():
+                for served in dedicated.get().airLoops():
+                    for zone in served.thermalZones():
+                        cooled.add(zone.nameString().upper())
+                return True
+            # In an OA stream that feeds no loop: PLACED, with nothing to
+            # attribute — not the same as unresolved.
             return True
 
         # A zone component, but ONLY if it actually has a zone.
@@ -1770,39 +1894,6 @@ def _zone_mechanical_cooling(model) -> tuple:
         # bounded walk below because it does not depend on distance: a
         # cooling coil with a fan and a heating coil inboard of it sits
         # twelve hops from its own outdoor-air system (Fable, `228`).
-        holder, stream = _oa_system_holding(obj)
-        if stream == "relief":
-            # RELIEF AIR IS EXHAUSTED. A cooling coil on the relief stream
-            # conditions air leaving the building, so it cools no thermal
-            # block — it is PLACED, with nothing to attribute, like a plant
-            # loop carrying only process demand.
-            #
-            # Both walks used to attribute it to every zone of the loop and
-            # AGREE about it, because the inward walk seeded
-            # `reliefComponents()` as well. That agreement was the
-            # invariant's blind spot rather than its evidence: independence
-            # had been traded for agreement in exactly one place, and this
-            # is the case it hid (Fable, `229` NB-1). The inward walk no
-            # longer seeds relief either, so the two agree here because they
-            # are both right.
-            return True
-        if holder is not None:
-            loop = holder.airLoopHVAC()
-            if loop.is_initialized():
-                for zone in loop.get().thermalZones():
-                    cooled.add(zone.nameString().upper())
-                return True
-            dedicated = holder.airLoopHVACDedicatedOutdoorAirSystem()
-            if dedicated.is_initialized():
-                for served in dedicated.get().airLoops():
-                    for zone in served.thermalZones():
-                        cooled.add(zone.nameString().upper())
-                return True
-            # In an OA stream that feeds no loop: PLACED, with nothing to
-            # attribute — the same answer as a plant loop carrying only
-            # process demand, and not the same as unresolved.
-            return True
-
         # Containment is silent: ask what POINTS AT this object.
         for source in obj.sources():
             as_model_object = source.to_ModelObject()

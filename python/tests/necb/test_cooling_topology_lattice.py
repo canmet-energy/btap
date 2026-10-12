@@ -581,6 +581,41 @@ class TestTheUnresolvedBranchAndTheOracle(unittest.TestCase):
             "exactly one of the two belongs in `unplaceable`, so neither "
             "answer can be a constant")
 
+    def test_the_inward_walk_does_not_DELEGATE_to_the_outward_one(self):
+        """Independence asserted on the BODY, not on the name.
+
+        The test below patches `path._zone_cooling_inward` and requires a
+        disagreement to appear. That proves the oracle reads a function
+        CALLED `_zone_cooling_inward` — nothing more. Replacing that
+        function's BODY with `return _zone_mechanical_cooling(model)[0]`
+        survived all 54 tests and 167 subtests, because the patch stood in
+        front of the body it was meant to examine (Fable, `236`).
+
+        The symmetric test has teeth: patch the OTHER walk to a wrong
+        constant and require the inward result UNMOVED. A walk that
+        delegates moves with it; a walk that computes its own answer does
+        not.
+        """
+        import unittest.mock
+
+        model = self._doas()
+        honest = path._zone_cooling_inward(model)
+        self.assertEqual({"Z1": True}, honest,
+                         "the fixture must be cooled for this to mean "
+                         "anything")
+
+        wrong = ({"Z1": False}, ["a fabricated unplaceable object"])
+        with unittest.mock.patch.object(path, "_zone_mechanical_cooling",
+                                        return_value=wrong):
+            under_patch = path._zone_cooling_inward(model)
+
+        self.assertEqual(
+            honest, under_patch,
+            "the INWARD walk moved when the OUTWARD walk was replaced, so "
+            "it is reading the outward answer rather than computing its "
+            "own — and an oracle comparing one walk with itself always "
+            "agrees")
+
     def test_the_oracle_reads_TWO_sources_and_not_one_twice(self):
         """Independence is the whole value, so it is asserted, not assumed.
 
@@ -758,6 +793,96 @@ class TestReliefAirIsExhaustAndCoolsNothing(unittest.TestCase):
                     [], unplaceable,
                     "and it is PLACED — relief is a known answer, not an "
                     "unresolved attribution")
+
+    def _with_cooler_and_exchanger(self, on_loop, exchanger):
+        """A relief-stream cooler, optionally with a straddling exchanger."""
+        import openstudio
+
+        model = openstudio.model.Model()
+        zone = openstudio.model.ThermalZone(model)
+        zone.setName("Z1")
+        loop = openstudio.model.AirLoopHVAC(model)
+        loop.setName("AL1")
+        terminal = (openstudio.model
+                    .AirTerminalSingleDuctConstantVolumeNoReheat(
+                        model, model.alwaysOnDiscreteSchedule()))
+        loop.addBranchForZone(zone, terminal.to_StraightComponent().get())
+        oa_system = openstudio.model.AirLoopHVACOutdoorAirSystem(
+            model, openstudio.model.ControllerOutdoorAir(model))
+        if on_loop:
+            oa_system.addToNode(loop.supplyInletNode())
+        else:
+            dedicated = (openstudio.model
+                         .AirLoopHVACDedicatedOutdoorAirSystem(oa_system))
+            dedicated.addAirLoop(loop)
+        if exchanger:
+            (openstudio.model.HeatExchangerAirToAirSensibleAndLatent(model)
+             .addToNode(oa_system.outboardOANode().get()))
+        cooler = openstudio.model.EvaporativeCoolerDirectResearchSpecial(
+            model, model.alwaysOnDiscreteSchedule())
+        cooler.setName("relief evap")
+        cooler.addToNode(oa_system.outboardReliefNode().get())
+        return model
+
+    def test_a_relief_cooler_with_a_straddling_EXCHANGER_does_cool(self):
+        """"Relief air is exhausted" is false once an exchanger couples it.
+
+        An `EvaporativeCoolerDirectResearchSpecial` on the relief stream
+        with a `HeatExchangerAirToAirSensibleAndLatent` straddling the two
+        streams chills the exhaust, and the exchanger transfers that cooling
+        into the outdoor air — indirect evaporative cooling, a real
+        low-energy ventilation strategy.
+
+        Both walks called it "cools no block", so (4)(a) went vacuous and
+        900 unmet cooling hours passed on a model EnergyPlus accepts with
+        ZERO severe errors (Fable, `236`). My relief rule was true in
+        isolation and false for this topology.
+        """
+        for label, on_loop in (("a plain air loop", True),
+                               ("a dedicated outdoor-air system", False)):
+            with self.subTest(topology=label):
+                model = self._with_cooler_and_exchanger(on_loop, True)
+                outward, unplaceable = path._zone_mechanical_cooling(model)
+                self.assertEqual(
+                    {"Z1": True}, outward,
+                    f"{label}: the exchanger carries the relief cooler's "
+                    "effect into the supply, so the block IS mechanically "
+                    "cooled and (4)(a) applies to it")
+                self.assertEqual([], unplaceable)
+
+    def test_the_INWARD_walk_reaches_the_coupled_cooler_too(self):
+        """Or the two agree by construction, which is the original defect.
+
+        If only the outward walk learned about exchanger-coupled relief, the
+        walks would disagree on every such model and the oracle would report
+        a disagreement instead of an answer. Seeding ALL relief components
+        was the first blind spot (`229` NB-1); seeding only the ones an
+        exchanger couples back is the narrow version.
+        """
+        for on_loop in (True, False):
+            with self.subTest(on_loop=on_loop):
+                model = self._with_cooler_and_exchanger(on_loop, True)
+                self.assertEqual(
+                    {"Z1": True}, path._zone_cooling_inward(model),
+                    "the inward walk must reach it on its own")
+                self.assertEqual(
+                    {}, path.cooling_attribution_disagreement(model),
+                    "and the two must agree because both are right")
+
+    def test_the_same_cooler_with_NO_exchanger_still_cools_nothing(self):
+        """The control. Without it, "always attribute relief" passes above.
+
+        No exchanger, so nothing carries the cooler's effect back into the
+        supply: the block is uncooled and (4)(a) is vacuous for it.
+        """
+        for on_loop in (True, False):
+            with self.subTest(on_loop=on_loop):
+                model = self._with_cooler_and_exchanger(on_loop, False)
+                outward, unplaceable = path._zone_mechanical_cooling(model)
+                self.assertEqual({"Z1": False}, outward)
+                self.assertEqual([], unplaceable)
+                self.assertEqual(
+                    {}, path.cooling_attribution_disagreement(model))
 
     def test_an_OA_side_coil_on_the_same_system_DOES_cool(self):
         """The control, and the reason this is not just "ignore the OAS".
