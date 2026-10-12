@@ -1507,6 +1507,13 @@ def _as_oa_system(obj):
     return got.get() if got.is_initialized() else None
 
 
+def _has_downstream_relief_exchanger(relief, position):
+    """Whether a later relief-air component transfers this one's effect."""
+    return any(
+        _EXCHANGER_PATTERN.search(component.iddObjectType().valueName())
+        for component in relief[position + 1:])
+
+
 def _oa_system_holding(obj):
     """The outdoor-air system whose OA or relief stream HOLDS this object.
 
@@ -1533,15 +1540,14 @@ def _oa_system_holding(obj):
             if component.handle() == handle:
                 return oa_system, "oa"
         relief = list(oa_system.reliefComponents())
-        for component in relief:
+        for position, component in enumerate(relief):
             if component.handle() == handle:
                 # A RELIEF COMPONENT WITH AN EXCHANGER DOWNSTREAM IS NOT
-                # EXHAUST-ONLY. `reliefComponents()` is ordered, so this is
-                # a membership question rather than a walk: an
-                # air-to-air heat exchanger later in the list transfers what
-                # this object did to the exhaust INTO the outdoor-air
-                # stream, which is indirect evaporative cooling and a real
-                # low-energy ventilation strategy.
+                # EXHAUST-ONLY. `reliefComponents()` follows relief airflow
+                # from `reliefAirModelObject()` to `outboardReliefNode()`.
+                # An air-to-air exchanger later in the list therefore
+                # transfers what this object did to the exhaust INTO the
+                # outdoor-air stream, which is indirect evaporative cooling.
                 #
                 # Fable's `236`: an `EvaporativeCoolerDirectResearchSpecial`
                 # on relief, upstream of a straddling
@@ -1551,27 +1557,11 @@ def _oa_system_holding(obj):
                 # EnergyPlus accepts with zero severe errors. My rule
                 # "relief air is exhausted" was true in isolation and false
                 # once an exchanger couples the streams.
-                # ANY exchanger in this relief stream, not only one later
-                # in the list. Fable's `236` prescribed "an HX after me in
-                # `reliefComponents()`", and I could not establish that the
-                # list's order is relief FLOW order: building his fixture
-                # here gave `[Node, HX, Node, EvaporativeCooler, Node]`
-                # while his probe reported the cooler before the HX. Relief
-                # air flows zone-to-outdoors, the opposite of the OA stream,
-                # so "later in the list" and "downstream in the air" are not
-                # obviously the same question and I am not going to assert
-                # they are on a reading I have not verified.
                 #
-                # The conservative reading attributes the component as an
-                # OA-stream one whenever an exchanger is present at all.
-                # Over-attributing puts the block INSIDE (4)(a)'s scope and
-                # judges its unmet hours; under-attributing excuses them,
-                # which is the failure this blocker is about. The exact
-                # ordering question is recorded in the handoff for whoever
-                # establishes the direction.
-                if any(_EXCHANGER_PATTERN.search(
-                        other.iddObjectType().valueName())
-                        for other in relief):
+                # A component after the exchanger is exhaust-only. Treating
+                # any exchanger anywhere in the stream as sufficient falsely
+                # put that component's blocks inside (4)(a)'s scope.
+                if _has_downstream_relief_exchanger(relief, position):
                     return oa_system, "relief_through_exchanger"
                 return oa_system, "relief"
     return None, None
@@ -1604,10 +1594,11 @@ def _reaches_no_topology(obj, depth=6) -> bool:
 def _relief_reaching_supply(oa_system):
     """Relief-stream components an exchanger couples back to the OA stream.
 
-    `reliefComponents()` is ordered outboard to inboard, so a component with
-    an air-to-air exchanger LATER in the list has what it did to the exhaust
-    transferred into the outdoor air. Those objects condition the supply and
-    serve whatever the OA system serves.
+    `reliefComponents()` follows airflow from `reliefAirModelObject()` toward
+    `outboardReliefNode()`, so only a component with an air-to-air exchanger
+    LATER in the list has what it did to the exhaust transferred into the
+    outdoor air. Those objects condition the supply and serve whatever the
+    OA system serves.
 
     The inward walk needs this for the same reason the outward walk does,
     and for a sharper one: if only the outward walk learned it, the two
@@ -1617,11 +1608,11 @@ def _relief_reaching_supply(oa_system):
     is the narrow version of the same idea.
     """
     relief = list(oa_system.reliefComponents())
-    if not any(_EXCHANGER_PATTERN.search(c.iddObjectType().valueName())
-               for c in relief):
-        return []
-    return [c for c in relief
-            if not _EXCHANGER_PATTERN.search(c.iddObjectType().valueName())]
+    return [
+        component for position, component in enumerate(relief)
+        if not _EXCHANGER_PATTERN.search(
+            component.iddObjectType().valueName())
+        and _has_downstream_relief_exchanger(relief, position)]
 
 
 def _zone_cooling_inward(model) -> dict:

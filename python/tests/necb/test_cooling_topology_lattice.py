@@ -42,6 +42,7 @@ import pathlib
 import unittest
 
 from btap.codes.necb import path
+from btap.codes.report import checklist as Checklist
 from tests.necb.support import needs_sdk
 
 HVAC_DATA = (pathlib.Path(path.__file__).resolve().parents[2]
@@ -358,7 +359,7 @@ class TestTheUnresolvedBranchAndTheOracle(unittest.TestCase):
     test defends.
     """
 
-    def _doas(self, inboard=()):
+    def _doas(self, inboard=(), plant_connected=False):
         """A DOAS whose cooling coil is `inboard` components from the OAS.
 
         This is the shape that defeated the bounded source walk: an
@@ -389,6 +390,9 @@ class TestTheUnresolvedBranchAndTheOracle(unittest.TestCase):
             model, model.alwaysOnDiscreteSchedule())
         coil.setName("DOAS Cooling Coil")
         coil.addToNode(oa_system.outboardOANode().get())
+        if plant_connected:
+            plant = openstudio.model.PlantLoop(model)
+            self.assertTrue(plant.addDemandBranchForComponent(coil))
         return model
 
     def test_a_DOAS_coil_resolves_at_EVERY_distance_from_its_OA_system(self):
@@ -445,6 +449,19 @@ class TestTheUnresolvedBranchAndTheOracle(unittest.TestCase):
                     {}, path.cooling_attribution_disagreement(model),
                     "the two walks disagree about this DOAS, so one of them "
                     "is wrong and the block's cooling status is unknown")
+
+    def test_a_PLANT_CONNECTED_DOAS_coil_is_placed_by_its_air_side(self):
+        """The OA membership must win before the coil's plant-side scope."""
+        model = self._doas(plant_connected=True)
+        coil = model.getCoilCoolingWaters()[0]
+        self.assertTrue(
+            coil.plantLoop().is_initialized(),
+            "the fixture must reach the plant rung that hid the DOAS")
+        outward, unplaceable = path._zone_mechanical_cooling(model)
+        self.assertEqual({"Z1": True}, outward)
+        self.assertEqual([], unplaceable)
+        self.assertEqual({"Z1": True}, path._zone_cooling_inward(model))
+        self.assertEqual({}, path.cooling_attribution_disagreement(model))
 
     def test_a_DISAGREEMENT_makes_the_block_unplaceable_not_passing(self):
         """The runtime consequence, driven by a forced disagreement.
@@ -703,6 +720,17 @@ class TestAKnownExceedanceIsNotHiddenByAnUnknown(unittest.TestCase):
         self.assertEqual(
             {"A": 900.0}, failing[0]["inputs"]["failing_blocks"],
             "and it must name WHICH block, not a count alone")
+        self.assertEqual(
+            "decision", failing[0]["level"],
+            "the known exceedance is a determination even though the "
+            "remaining applicability evidence is unresolved")
+        failing_index = entries.index(failing[0])
+        row = next(r for r in Checklist.rows(entries)
+                   if r.audit_index == failing_index)
+        self.assertEqual(
+            "fail", row.glyph,
+            "the AHJ-facing checklist must render the known exceedance as "
+            "a failure, not turn it into the unresolved warning beside it")
 
     def test_an_unresolved_scope_with_no_known_failure_invents_none(self):
         """The control: the new entry must not appear when nothing failed."""
@@ -794,8 +822,8 @@ class TestReliefAirIsExhaustAndCoolsNothing(unittest.TestCase):
                     "and it is PLACED — relief is a known answer, not an "
                     "unresolved attribution")
 
-    def _with_cooler_and_exchanger(self, on_loop, exchanger):
-        """A relief-stream cooler, optionally with a straddling exchanger."""
+    def _with_cooler_and_exchanger(self, on_loop, arrangement):
+        """A relief cooler upstream/downstream of an HX, or with no HX."""
         import openstudio
 
         model = openstudio.model.Model()
@@ -815,14 +843,43 @@ class TestReliefAirIsExhaustAndCoolsNothing(unittest.TestCase):
             dedicated = (openstudio.model
                          .AirLoopHVACDedicatedOutdoorAirSystem(oa_system))
             dedicated.addAirLoop(loop)
-        if exchanger:
-            (openstudio.model.HeatExchangerAirToAirSensibleAndLatent(model)
-             .addToNode(oa_system.outboardOANode().get()))
+        exchanger = None
+        if arrangement != "none":
+            exchanger = (
+                openstudio.model
+                .HeatExchangerAirToAirSensibleAndLatent(model))
+            exchanger.setName("relief HX")
+            exchanger.addToNode(oa_system.outboardOANode().get())
         cooler = openstudio.model.EvaporativeCoolerDirectResearchSpecial(
             model, model.alwaysOnDiscreteSchedule())
         cooler.setName("relief evap")
-        cooler.addToNode(oa_system.outboardReliefNode().get())
+        node = oa_system.outboardReliefNode().get()
+        if arrangement == "upstream":
+            node = (exchanger.secondaryAirInletModelObject().get()
+                    .to_Node().get())
+        cooler.addToNode(node)
         return model
+
+    def test_relief_components_follow_RELIEF_AIRFLOW(self):
+        """The ordered property is anchored in port connectivity, not names."""
+        model = self._with_cooler_and_exchanger(True, "upstream")
+        oa_system = model.getAirLoopHVACOutdoorAirSystems()[0]
+        cooler = model.getEvaporativeCoolerDirectResearchSpecials()[0]
+        exchanger = model.getHeatExchangerAirToAirSensibleAndLatents()[0]
+        relief = list(oa_system.reliefComponents())
+
+        self.assertEqual(
+            oa_system.reliefAirModelObject().get().handle(),
+            relief[0].handle())
+        self.assertEqual(
+            oa_system.outboardReliefNode().get().handle(),
+            relief[-1].handle())
+        self.assertLess(relief.index(cooler), relief.index(exchanger))
+        self.assertEqual(
+            cooler.outletModelObject().get().handle(),
+            exchanger.secondaryAirInletModelObject().get().handle(),
+            "the cooler is upstream because its outlet feeds the "
+            "exchanger's secondary inlet")
 
     def test_a_relief_cooler_with_a_straddling_EXCHANGER_does_cool(self):
         """"Relief air is exhausted" is false once an exchanger couples it.
@@ -841,7 +898,8 @@ class TestReliefAirIsExhaustAndCoolsNothing(unittest.TestCase):
         for label, on_loop in (("a plain air loop", True),
                                ("a dedicated outdoor-air system", False)):
             with self.subTest(topology=label):
-                model = self._with_cooler_and_exchanger(on_loop, True)
+                model = self._with_cooler_and_exchanger(
+                    on_loop, "upstream")
                 outward, unplaceable = path._zone_mechanical_cooling(model)
                 self.assertEqual(
                     {"Z1": True}, outward,
@@ -861,7 +919,8 @@ class TestReliefAirIsExhaustAndCoolsNothing(unittest.TestCase):
         """
         for on_loop in (True, False):
             with self.subTest(on_loop=on_loop):
-                model = self._with_cooler_and_exchanger(on_loop, True)
+                model = self._with_cooler_and_exchanger(
+                    on_loop, "upstream")
                 self.assertEqual(
                     {"Z1": True}, path._zone_cooling_inward(model),
                     "the inward walk must reach it on its own")
@@ -877,10 +936,25 @@ class TestReliefAirIsExhaustAndCoolsNothing(unittest.TestCase):
         """
         for on_loop in (True, False):
             with self.subTest(on_loop=on_loop):
-                model = self._with_cooler_and_exchanger(on_loop, False)
+                model = self._with_cooler_and_exchanger(on_loop, "none")
                 outward, unplaceable = path._zone_mechanical_cooling(model)
                 self.assertEqual({"Z1": False}, outward)
                 self.assertEqual([], unplaceable)
+                self.assertEqual(
+                    {}, path.cooling_attribution_disagreement(model))
+
+    def test_a_relief_cooler_DOWNSTREAM_of_the_exchanger_cools_nothing(self):
+        """The exchanger cannot transfer an effect added after it."""
+        for label, on_loop in (("a plain air loop", True),
+                               ("a dedicated outdoor-air system", False)):
+            with self.subTest(topology=label):
+                model = self._with_cooler_and_exchanger(
+                    on_loop, "downstream")
+                outward, unplaceable = path._zone_mechanical_cooling(model)
+                self.assertEqual({"Z1": False}, outward)
+                self.assertEqual([], unplaceable)
+                self.assertEqual(
+                    {"Z1": False}, path._zone_cooling_inward(model))
                 self.assertEqual(
                     {}, path.cooling_attribution_disagreement(model))
 
