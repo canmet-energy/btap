@@ -105,6 +105,14 @@ ALLOWLIST = {
                 "verification/oracle — the shared harness, not a gem tree"),
     },
     # --- cross-language (Leg B) and oracle (Leg C) tests --------------------
+    "python/tests/test_comparator_contract.py": {
+        "refs": ["verification/"],
+        "retires": "N/A-verification",
+        "why": "the frozen-scenario comparator's contract tests, which replace "
+               "the seven machinery hashes Sol's `227` retired; they load "
+               "verification/compare_runs.py and its spec because that IS the "
+               "subject",
+    },
     "python/tests/test_freeze_producer.py": {
         "refs": ["verification/"],
         "retires": "R1-adjudicated",
