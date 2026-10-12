@@ -45,8 +45,8 @@ GENERATED_SCENARIO_KEYS = frozenset({"baseline_sha256", "produced_by"})
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-import runner  # noqa: E402
-import scenario_defs  # noqa: E402
+import runner
+import scenario_defs
 
 REPO_ROOT = runner.REPO_ROOT
 RUBY_CLI = REPO_ROOT / "btap-necb" / "exe" / "btap-compliance.rb"
@@ -188,7 +188,6 @@ def check_required_python_engines(scenarios):
         return
     try:
         import tbd
-
         from btap.codes.necb.envelope import thermal_bridging
     except ImportError as error:
         raise ValueError(
@@ -334,15 +333,29 @@ def tb_non_vacuity(run_dir, side):
     return problems
 
 
-#: Provenance fields that describe the WHOLE corpus or are immutable
-#: records. A scoped freeze must carry each one forward unchanged. Declared
-#: as data so `python/tests/test_scoped_freeze.py` can mutate the set one
-#: field at a time and prove each is guarded — removing
-#: `final_cross_language_attestation` from an inline tuple left every scoped
-#: test green (Sol, `233`).
-CORPUS_WIDE_PROVENANCE = ("active_seals", "retired_seals",
-                          "final_cross_language_attestation",
-                          "attestation_note")
+#: IMMUTABLE records, guarded on EVERY path. D-84's final cross-language
+#: attestation names a specific commit and CI run, and D-103 keeps it:
+#: neither may be reduced nor recreated. A full freeze does not get to
+#: invent one.
+#:
+#: My first version guarded these only when a scope carried baselines
+#: forward, which left the full path unwired — mutating what `main()` passes
+#: as `final_attestation` to `{"commit": "1"*40, "run_id": 2}` passed 30
+#: tests, across every scoped-freeze test, the seal-transition suite and
+#: manifest integrity (Sol, `237`). And my "full freeze may move all of
+#: them" control ASSERTED that a fabricated attestation is accepted, which
+#: contradicts the decision it was meant to respect.
+IMMUTABLE_PROVENANCE = ("final_cross_language_attestation",
+                        "attestation_note")
+
+#: Fields a FULL freeze may legitimately move — it owns the whole corpus, so
+#: a changed seal tally is a real result — and a SCOPE may not, because it
+#: re-ran a subset and cannot speak for the rest.
+SCOPE_ONLY_PROVENANCE = ("active_seals", "retired_seals")
+
+#: Declared as data so `python/tests/test_scoped_freeze.py` can drop one
+#: field at a time and prove each is guarded.
+CORPUS_WIDE_PROVENANCE = SCOPE_ONLY_PROVENANCE + IMMUTABLE_PROVENANCE
 
 
 def assemble_scope(frozen, carried, baselines, previous, all_ids, runner,
@@ -489,9 +502,21 @@ def assemble_manifest(frozen, previous, carried, this_producer,
     # the whole corpus or are immutable records, so a scope that moves one has
     # a bug — and the count guard in `assemble_scope` cannot see it, because
     # the scenario count stays right while the content is destroyed.
+    previous_provenance = previous.get("provenance") or {}
+    # THE IMMUTABLE HALF, on every path. A full freeze may re-seal; it may
+    # not mint a new D-84 attestation.
+    for field in IMMUTABLE_PROVENANCE:
+        if field in previous_provenance and (
+                manifest["provenance"].get(field)
+                != previous_provenance.get(field)):
+            fail("refusing to promote: provenance." + field + " is "
+                 "IMMUTABLE — D-84's final cross-language attestation names "
+                 "a specific commit and CI run, and D-103 keeps it: it may "
+                 "be neither reduced nor recreated.\n"
+                 f"  was: {json.dumps(previous_provenance.get(field))}\n"
+                 f"  now: {json.dumps(manifest['provenance'].get(field))}")
     if carried:
-        previous_provenance = previous["provenance"]
-        for field in CORPUS_WIDE_PROVENANCE:
+        for field in SCOPE_ONLY_PROVENANCE:
             if manifest["provenance"].get(field) != previous_provenance.get(field):
                 fail("refusing to promote: a scoped freeze changed "
                      f"provenance.{field}, which describes the whole corpus "
@@ -716,6 +741,25 @@ def main():
     every_scenario = list(scenarios)
     all_ids = [sc["id"] for sc in every_scenario]
     carried = []
+    # `previous` is the committed manifest, and BOTH paths pass it on: the
+    # scope needs it to carry baselines forward, and the manifest assembly
+    # needs it to guard the corpus-wide fields. It used to be assigned only
+    # inside the `--scenario` branch below, so an ordinary FULL freeze
+    # reached promotion assembly and died with
+    #
+    #     UnboundLocalError: cannot access local variable 'previous'
+    #
+    # after every expensive run (Sol, `237`). My full-freeze test called
+    # `assemble_manifest()` directly with a synthetic `previous`, so it
+    # never executed the branch it claimed to control — a helper test
+    # standing in for a call-site test.
+    #
+    # A full freeze owns the whole corpus, so an absent manifest is not an
+    # error here: the guards keyed on `carried` do not run, and an empty
+    # prior state is the honest description of "there was nothing before".
+    previous = {"scenarios": [], "provenance": {}}
+    if runner.MANIFEST.is_file():
+        previous = json.loads(runner.MANIFEST.read_text(encoding="utf-8"))
     if args.scenario:
         wanted = list(dict.fromkeys(args.scenario))
         unknown = [i for i in wanted if i not in all_ids]
@@ -726,7 +770,6 @@ def main():
             die("--scenario needs an existing manifest to carry the "
                 "unselected baselines forward; there is none, so run a full "
                 "freeze first.")
-        previous = json.loads(runner.MANIFEST.read_text(encoding="utf-8"))
         known = {s["id"]: s for s in previous["scenarios"]}
         missing = [i for i in all_ids if i not in known and i not in wanted]
         if missing:

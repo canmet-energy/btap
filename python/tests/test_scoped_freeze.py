@@ -63,6 +63,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 FREEZE = REPO_ROOT / "verification" / "scenarios" / "freeze.py"
@@ -438,10 +439,13 @@ class TestTheScopedProvenanceGuardEXECUTES(unittest.TestCase):
             "carried": [{"id": "b"}] if carried else [],
             "this_producer": {"openstudio_cli": "3.11.0",
                               "producer": "P1"},
+            # `.get` because one case deliberately has an EMPTY prior
+            # provenance — a first freeze of a fresh corpus — and the
+            # defaults must not assume there was something before.
             "active_seals": dict(
-                self.previous["provenance"]["active_seals"]),
+                self.previous["provenance"].get("active_seals") or {}),
             "retired_seals": dict(
-                self.previous["provenance"]["retired_seals"]),
+                self.previous["provenance"].get("retired_seals") or {}),
             "final_attestation": dict(self.ATTESTATION),
             "dirty": "", "commit": "deadbeef",
             "runner": self.runner, "fail": fail,
@@ -513,7 +517,7 @@ class TestTheScopedProvenanceGuardEXECUTES(unittest.TestCase):
             self._assemble(final_attestation={"commit": "0" * 40})
         message = str(caught.exception)
         self.assertIn("final_cross_language_attestation", message)
-        self.assertIn("immutable", message,
+        self.assertIn("IMMUTABLE", message,
                       "the refusal must say WHY, or a maintainer reads it as "
                       "a stale-cache problem and re-runs the freeze")
 
@@ -525,18 +529,135 @@ class TestTheScopedProvenanceGuardEXECUTES(unittest.TestCase):
         self.assertIn("spec_sha256", str(caught.exception))
         self.assertIn("run a full freeze", str(caught.exception))
 
-    def test_a_FULL_freeze_may_move_all_of_them(self):
-        """The guard is for a SCOPE. A full freeze owns the whole corpus.
+    def test_a_FULL_freeze_may_RE_SEAL_but_not_mint_an_attestation(self):
+        """The guard is for a SCOPE — except the immutable half, which is not.
 
-        Without this, guarding unconditionally would pass every test above
-        while making a legitimate re-seal impossible.
+        My first version of this control asserted that a full freeze may
+        replace `final_cross_language_attestation` with
+        `{"commit": "1"*40, "run_id": "2"}`. That CONTRADICTS the decision it
+        was written to respect: D-84's attestation names a specific commit
+        and CI run, D-103 keeps it, and it may be neither reduced nor
+        recreated. A full freeze owns the corpus; it does not get to mint a
+        cross-language attestation that no cross-language run produced.
+
+        Sol's `237` found the same gap in the wiring, not only in the
+        description: mutating what `main()` passes as `final_attestation`
+        passed 30 tests across every scoped-freeze test, the seal-transition
+        suite and manifest integrity.
         """
-        manifest = self._assemble(
-            carried=False,
-            active_seals={"python-only": 99},
-            final_attestation={"commit": "1" * 40, "run_id": "2"})
+        # Seals MAY move on a full freeze: the corpus changed, so the tally
+        # changing is a real result.
+        manifest = self._assemble(carried=False,
+                                  active_seals={"python-only": 99})
         self.assertEqual({"python-only": 99},
-                         manifest["provenance"]["active_seals"])
-        self.assertEqual({"commit": "1" * 40, "run_id": "2"},
-                         manifest["provenance"]
-                         ["final_cross_language_attestation"])
+                         manifest["provenance"]["active_seals"],
+                         "a full freeze owns the whole corpus, so a changed "
+                         "seal tally is a legitimate outcome")
+
+        # The ATTESTATION may not, on any path.
+        with self.assertRaises(AssertionError) as caught:
+            self._assemble(carried=False,
+                           final_attestation={"commit": "1" * 40,
+                                              "run_id": "2"})
+        message = str(caught.exception)
+        self.assertIn("final_cross_language_attestation", message)
+        self.assertIn("IMMUTABLE", message)
+        self.assertIn("D-84", message,
+                      "the refusal must name the decision, or a maintainer "
+                      "reads it as a stale-cache problem and re-runs")
+
+    def test_the_immutable_guard_applies_to_a_SCOPE_as_well(self):
+        """Both paths, so neither can be the only one wired."""
+        with self.assertRaises(AssertionError) as caught:
+            self._assemble(carried=True,
+                           final_attestation={"commit": "2" * 40})
+        self.assertIn("IMMUTABLE", str(caught.exception))
+
+    def test_an_absent_prior_manifest_is_not_an_attestation_violation(self):
+        """A first freeze has nothing to preserve, and must not be refused.
+
+        Without this, guarding unconditionally would make the very first
+        freeze of a fresh corpus impossible — the mirror of the defect
+        above.
+        """
+        spec = self.previous["spec_sha256"]
+        seals = dict(self.previous["provenance"]["active_seals"])
+        retired = dict(self.previous["provenance"]["retired_seals"])
+        self.previous = {"spec_sha256": spec, "provenance": {},
+                         "scenarios": []}
+        manifest = self._assemble(carried=False,
+                                  active_seals=seals,
+                                  retired_seals=retired,
+                                  final_attestation={"commit": "3" * 40})
+        self.assertEqual(
+            {"commit": "3" * 40},
+            manifest["provenance"]["final_cross_language_attestation"],
+            "there was no prior attestation to contradict")
+
+
+class TestTheFullFreezePathREACHESAssembly(unittest.TestCase):
+    """`main()` with no `--scenario`, driven with no engine.
+
+    `previous` was assigned only inside the `--scenario` branch and passed
+    unconditionally to both helpers, so an ordinary FULL freeze died at
+    promotion assembly — `UnboundLocalError: cannot access local variable
+    'previous'` — AFTER every expensive run (Sol, `237`).
+
+    My `test_a_FULL_freeze_may_...` control called `assemble_manifest()`
+    directly with a synthetic `previous`, so it never executed the branch it
+    claimed to control. Sol said plainly that a helper-only call does not
+    close this, and he was right: the helpers were fine and the call site
+    was broken.
+
+    This drives `main()` itself. The engine is never reached because the
+    scenario set is empty; what is under test is the ORCHESTRATION between
+    argument parsing and promotion.
+    """
+
+    def _main_with_no_scenarios(self, argv):
+        freeze = _load_freeze()
+        freeze.scenario_defs.all_scenarios = lambda *a, **k: []
+        freeze.producer_identity = lambda *a, **k: {
+            "openstudio_cli": "3.11.0", "producer": "test"}
+        freeze.seal_accounting = lambda *a, **k: (
+            {"python-only": 0}, {"ruby": 0}, None)
+        with mock.patch.object(sys, "argv", ["freeze.py", *argv]):
+            try:
+                freeze.main()
+            except SystemExit as exit_code:
+                return "exit", str(exit_code)
+            except Exception as error:                        # noqa: BLE001
+                return type(error).__name__, str(error)
+        return "returned", ""
+
+    def test_the_full_path_does_not_die_on_an_UNSET_previous(self):
+        """The regression. Any outcome but `UnboundLocalError` is progress.
+
+        A clean empty corpus cannot actually promote — there is no baselines
+        directory to move — so the honest assertion is that it gets THAT
+        far, not that it succeeds.
+        """
+        kind, message = self._main_with_no_scenarios(["--allow-dirty"])
+        self.assertNotEqual(
+            "UnboundLocalError", kind,
+            "the full-freeze path reached promotion assembly with "
+            f"`previous` unset: {message}")
+        self.assertNotIn(
+            "previous", message,
+            f"an error still mentioning `previous`: {kind}: {message}")
+
+    def test_a_SCOPED_run_still_refuses_without_a_manifest_to_carry(self):
+        """The counterweight: initialising `previous` must not weaken this.
+
+        A scope needs a prior manifest BY DEFINITION — it carries baselines
+        forward from it. Giving the full path a neutral empty prior must not
+        make a scope accept one.
+        """
+        freeze = _load_freeze()
+        if not freeze.runner.MANIFEST.is_file():
+            self.skipTest("this repository has a committed manifest")
+        kind, message = self._main_with_no_scenarios(
+            ["--allow-dirty", "--scenario", "no-such-scenario-id"])
+        self.assertEqual("exit", kind,
+                         "an unknown scenario id must be refused")
+        self.assertIn("no such scenario", message.lower())
