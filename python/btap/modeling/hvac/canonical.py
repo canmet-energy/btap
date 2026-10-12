@@ -96,6 +96,11 @@ def primary_part(row):
         return f"water-source heat pumps on a {rej} loop"
     if family == 'doas':
         return 'DOAS ventilation'
+    if family == 'central_doas':
+        # Distinct from 'doas': that one is a 100% OA loop serving zones
+        # directly; this is the SDK's dedicated unit feeding several loops'
+        # OA inlets.
+        return 'central DOAS feeding per-zone air loops'
     if family == 'vrf':
         return 'VRF heat recovery system'
     if family == 'doas_pthp':

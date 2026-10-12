@@ -1150,6 +1150,27 @@
           }
         }
       ]
+    },
+    {
+      "name": "Central DOAS with per-zone air loops",
+      "family": "central_doas",
+      "heating_type": "Electric",
+      "sizing": "necb_mau_ptac",
+      "needs_boiler": false,
+      "origin": "generic",
+      "comment": "the SDK's AirLoopHVACDedicatedOutdoorAirSystem: ONE outdoor-air unit preconditions air for several zone air loops. Distinct from the 'doas' family, which is a 100% OA loop serving zones directly through uncontrolled diffusers"
+    },
+    {
+      "name": "Central DOAS with chilled-water precooling",
+      "family": "central_doas",
+      "heating_type": "Electric",
+      "sizing": "necb_mau_ptac",
+      "needs_boiler": false,
+      "needs_chiller": true,
+      "chiller_type": "Scroll",
+      "chw_source": "water_cooled",
+      "origin": "generic",
+      "comment": "the same central unit with its precool coil on a chilled-water plant, which is the more usual arrangement where one exists"
     }
   ]
 }

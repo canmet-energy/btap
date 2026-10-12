@@ -26,6 +26,7 @@ FAMILIES = {
     'evap_cooler': ('evap_cooler', 'EvapCooler'),
     'wshp': ('wshp', 'Wshp'),
     'doas': ('doas', 'Doas'),
+    'central_doas': ('central_doas', 'CentralDoas'),
     'vrf': ('vrf', 'Vrf'),
     'zone_ervs': ('zone_ervs', 'ZoneErvs'),
 }

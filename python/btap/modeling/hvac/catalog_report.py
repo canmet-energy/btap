@@ -145,6 +145,9 @@ FAMILY_BLURB = {
     'baseboards': 'Perimeter baseboard heating only, no central air system.',
     'composite': 'A dedicated ventilation unit paired with separate zone conditioning (fan coils, water/ground-source heat pumps, or residential AC).',
     'doas': 'Dedicated outdoor air system providing ventilation only; zone conditioning is separate.',
+    'central_doas': ('One AirLoopHVACDedicatedOutdoorAirSystem preconditions '
+                     'outdoor air for several per-zone air loops, each of '
+                     'which conditions its own zone.'),
     'doas_pthp': 'Dedicated outdoor air with packaged terminal heat pumps at each zone (NECB ECM hs11).',
     'ecm_ashp_baseboard': 'Air-source (or cold-climate) heat pump for primary heating and cooling with baseboard backup (NECB ECMs hs09/hs12).',
     'ecm_doas_vrf': 'Dedicated outdoor air with variable refrigerant flow zone terminals on an air-source heat pump (NECB ECMs hs08/hs13).',
@@ -164,7 +167,9 @@ FAMILY_BLURB = {
 
 FAMILY_TITLES = {
     'baseboards': 'Baseboard heating', 'composite': 'Composite (DOAS + zone conditioning)',
-    'doas': 'Dedicated outdoor air', 'doas_pthp': 'DOAS + PTHP (ECM hs11)',
+    'doas': 'Dedicated outdoor air',
+    'central_doas': 'Central DOAS + per-zone loops',
+    'doas_pthp': 'DOAS + PTHP (ECM hs11)',
     'ecm_ashp_baseboard': 'ASHP + baseboard (ECM hs09/hs12)',
     'ecm_doas_vrf': 'DOAS + VRF (ECM hs08/hs13)',
     'ecm_hp_fancoils': 'Heat-pump plant fan coils (ECM hs14-16)',
