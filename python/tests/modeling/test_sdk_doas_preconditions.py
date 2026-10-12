@@ -36,12 +36,13 @@ DDY = WEATHER / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.ddy"
 
 
 def _two_zone_doas(openstudio, *, per_loop_oa_system=True,
-                   fan="system", setpoints="both-coils"):
+                   missing_loop_oa=None, fan="system",
+                   setpoints="both-coils"):
     """A central DOAS over per-zone air loops on the SHARED FIXTURE.
 
-    `per_loop_oa_system`, `fan` and `setpoints` are the three axes the
-    preconditions below turn, so each test states its own topology rather
-    than inheriting one.
+    `per_loop_oa_system`, `missing_loop_oa`, `fan` and `setpoints` are the
+    three precondition axes below. A tuple of fan types builds one dedicated
+    system per type over disjoint served-loop groups.
 
     The fixture is `5ZoneNoHVAC.osm`, not a synthetic `Model()`. I built a
     synthetic two-zone model first and spent three rounds making it valid —
@@ -85,51 +86,58 @@ def _two_zone_doas(openstudio, *, per_loop_oa_system=True,
             own.addToNode(loop.supplyInletNode())
         loops.append(loop)
 
-    oa_system = openstudio.model.AirLoopHVACOutdoorAirSystem(
-        model, openstudio.model.ControllerOutdoorAir(model))
-    dedicated = (openstudio.model
-                 .AirLoopHVACDedicatedOutdoorAirSystem(oa_system))
-    dedicated.setName("Central DOAS")
-    for loop in loops:
-        dedicated.addAirLoop(loop)
-
-    # Outdoors inward: preheat, precool, fan. `addToNode(outboardOANode())`
-    # inserts at the outdoor-air inlet, so the LAST added is outermost.
-    if fan == "system":
-        made = openstudio.model.FanSystemModel(model)
-    elif fan == "constant":
-        made = openstudio.model.FanConstantVolume(model, always)
-    elif fan == "variable":
-        made = openstudio.model.FanVariableVolume(model, always)
-    elif fan == "onoff":
-        made = openstudio.model.FanOnOff(model, always)
-    else:
-        made = None
-    if made is not None:
-        made.setName("DOAS Supply Fan")
-        made.addToNode(oa_system.outboardOANode().get())
-    precool = openstudio.model.CoilCoolingDXSingleSpeed(model)
-    precool.setName("DOAS Precool Coil")
-    precool.addToNode(oa_system.outboardOANode().get())
-    preheat = openstudio.model.CoilHeatingElectric(model, always)
-    preheat.setName("DOAS Preheat Coil")
-    preheat.addToNode(oa_system.outboardOANode().get())
-
     neutral = openstudio.model.ScheduleRuleset(model, 20.0)
     neutral.setName("DOAS Neutral Supply Air Temp")
-    nodes = [c.to_Node().get() for c in oa_system.oaComponents()
-             if c.to_Node().is_initialized()]
-    # `nodes` runs outboard to inboard: [OA inlet, preheat out, precool out,
-    # fan out]. The OA inlet is raw outdoor air with nothing to control.
-    wanted = {
-        "both-coils": nodes[1:3],
-        "all-nodes": nodes[1:],
-        "inboard-only": nodes[-1:],
-        "none": [],
-    }[setpoints]
-    for node in wanted:
-        openstudio.model.SetpointManagerScheduled(
-            model, neutral).addToNode(node)
+    fan_types = (fan,) if isinstance(fan, str) else tuple(fan)
+    for doas_index, fan_type in enumerate(fan_types):
+        oa_system = openstudio.model.AirLoopHVACOutdoorAirSystem(
+            model, openstudio.model.ControllerOutdoorAir(model))
+        dedicated = (openstudio.model
+                     .AirLoopHVACDedicatedOutdoorAirSystem(oa_system))
+        dedicated.setName(f"Central DOAS {doas_index + 1}")
+        for loop in loops[doas_index::len(fan_types)]:
+            dedicated.addAirLoop(loop)
+
+        # Outdoors inward: preheat, precool, fan.
+        if fan_type == "system":
+            made = openstudio.model.FanSystemModel(model)
+        elif fan_type == "constant":
+            made = openstudio.model.FanConstantVolume(model, always)
+        elif fan_type == "variable":
+            made = openstudio.model.FanVariableVolume(model, always)
+        elif fan_type == "onoff":
+            made = openstudio.model.FanOnOff(model, always)
+        else:
+            made = None
+        if made is not None:
+            made.setName(f"DOAS {doas_index + 1} Supply Fan")
+            made.addToNode(oa_system.outboardOANode().get())
+        precool = openstudio.model.CoilCoolingDXSingleSpeed(model)
+        precool.setName(f"DOAS {doas_index + 1} Precool Coil")
+        precool.addToNode(oa_system.outboardOANode().get())
+        preheat = openstudio.model.CoilHeatingElectric(model, always)
+        preheat.setName(f"DOAS {doas_index + 1} Preheat Coil")
+        preheat.addToNode(oa_system.outboardOANode().get())
+
+        nodes = [c.to_Node().get() for c in oa_system.oaComponents()
+                 if c.to_Node().is_initialized()]
+        # `nodes` runs outboard to inboard: OA inlet, preheat out, precool
+        # out, fan out. Raw outdoor air has nothing to control.
+        wanted = {
+            "both-coils": nodes[1:3],
+            "all-nodes": nodes[1:],
+            "preheat-only": nodes[1:2],
+            "precool-only": nodes[2:3],
+            "inboard-only": nodes[-1:],
+            "none": [],
+        }[setpoints]
+        for node in wanted:
+            openstudio.model.SetpointManagerScheduled(
+                model, neutral).addToNode(node)
+    if missing_loop_oa is not None:
+        own = loops[missing_loop_oa].airLoopHVACOutdoorAirSystem()
+        if own.is_initialized():
+            own.get().remove()
     return model
 
 
@@ -194,6 +202,26 @@ class TestTheDedicatedOutdoorAirSystemPreconditions(unittest.TestCase):
         self.assertIn("Assertion oas failed", err,
                       "and the abort must still be the one documented here")
 
+    def test_ONE_served_loop_missing_its_own_OA_system_still_aborts(self):
+        """Four correct loops cannot satisfy the first loop's precondition."""
+        import openstudio
+
+        model = _two_zone_doas(openstudio, missing_loop_oa=0)
+        loops = model.getAirLoopHVACs()
+        own_oa = sum(
+            loop.airLoopHVACOutdoorAirSystem().is_initialized()
+            for loop in loops)
+        self.assertEqual(
+            len(loops) - 1, own_oa,
+            "the fixture must omit exactly one served loop's own OA system")
+
+        code, _objects, err = _translates(openstudio, model)
+        self.assertNotEqual(
+            0, code,
+            "one missing per-loop OA system must not be masked by all the "
+            "served loops that satisfy the precondition")
+        self.assertIn("Assertion oas failed", err)
+
     def test_the_fan_must_be_a_SYSTEM_model_or_OnOff_not_CV_or_VV(self):
         """Precondition (b), with my over-broad claim corrected.
 
@@ -226,6 +254,31 @@ class TestTheDedicatedOutdoorAirSystemPreconditions(unittest.TestCase):
                     self.assertIn("can not be used as a component", err,
                                   f"{fan}: refused for a different reason "
                                   f"than the documented one — {detail}")
+
+    def test_mixed_DOAS_fans_are_decided_PER_dedicated_system(self):
+        """One permitted fan cannot mask a refused fan in a sibling DOAS."""
+        import openstudio
+
+        import btap.simulation as simulation
+
+        for fans, expect_clean in ((("system", "onoff"), True),
+                                   (("system", "constant"), False)):
+            with self.subTest(fans=fans):
+                model = _two_zone_doas(openstudio, fan=fans)
+                self.assertEqual(
+                    2, len(model.getAirLoopHVACDedicatedOutdoorAirSystems()),
+                    "the fixture must contain both fan arrangements")
+                clean, severe, _fatal, detail, err = _run(
+                    simulation, model)
+                self.assertEqual(
+                    expect_clean, clean,
+                    f"{fans}: expected clean={expect_clean}, got severe="
+                    f"{severe} — {detail}")
+                if not expect_clean:
+                    self.assertIn(
+                        "can not be used as a component", err,
+                        "the mixed model must fail because of its refused "
+                        "constant-volume DOAS fan, not an unrelated defect")
 
     def test_each_COIL_needs_a_setpoint_at_its_own_outlet(self):
         """Precondition (c), and my anecdote about it was not reproducible.
@@ -264,6 +317,34 @@ class TestTheDedicatedOutdoorAirSystemPreconditions(unittest.TestCase):
                     expect_clean, clean,
                     f"{setpoints}: expected clean={expect_clean}, got "
                     f"severe={severe} — {detail}")
+
+    def test_each_SINGLE_missing_coil_setpoint_names_that_coil(self):
+        """The sibling coil's setpoint cannot satisfy the missing outlet."""
+        import openstudio
+
+        import btap.simulation as simulation
+
+        cases = (
+            ("preheat-only",
+             "CoilSystem:Cooling:DX: Missing temperature setpoint"),
+            ("precool-only",
+             "Missing temperature setpoint for heating coil"),
+        )
+        for setpoints, reason in cases:
+            with self.subTest(setpoints=setpoints):
+                model = _two_zone_doas(openstudio, setpoints=setpoints)
+                clean, severe, fatal, detail, err = _run(simulation, model)
+                self.assertFalse(
+                    clean,
+                    f"{setpoints}: one missing coil setpoint must be refused")
+                self.assertEqual(
+                    (1, 1), (severe, fatal),
+                    f"{setpoints}: expected the one causal Severe and its "
+                    f"terminal Fatal — {detail}")
+                self.assertIn(
+                    reason, err,
+                    f"{setpoints}: the error must identify the coil whose "
+                    "own outlet lacks a setpoint")
 
     def test_a_setpoint_on_the_FAN_outlet_is_not_required(self):
         """The narrower half of (c), asserted so the claim stays honest.
