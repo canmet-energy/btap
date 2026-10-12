@@ -641,32 +641,86 @@ class TestTheFullFreezePathREACHESAssembly(unittest.TestCase):
                 return type(error).__name__, str(error)
         return "returned", ""
 
-    def test_the_full_path_reaches_PROMOTION_with_an_empty_corpus(self):
-        """The regression, asserted on the outcome rather than its absence.
+    def test_the_full_path_REACHES_publication_with_previous_in_hand(self):
+        """The regression, through one in-memory environment seam.
 
-        My first version said "any outcome but `UnboundLocalError` is
-        progress" and asserted exactly that — which accepts EVERY other
-        failure, including ones that would mean the orchestration broke
-        somewhere new (Sol, `238`). A test that passes on an unbounded set
-        of failures is not a witness.
+        Earlier versions accepted every failure except `UnboundLocalError`,
+        then expected a particular missing directory. The latter passed
+        locally and failed on the bare runner because an inline
+        `subprocess.run(["openstudio", ...])` reached a different missing
+        thing first. Neither outcome proved the orchestration.
 
-        With an empty scenario set a full freeze runs no engine, assembles a
-        manifest describing zero scenarios, and then cannot promote because
-        no baselines directory was ever created. That specific outcome is
-        the proof it got all the way through both helpers: `assemble_scope`
-        and `assemble_manifest` both took `previous`, and promotion is the
-        step after them.
+        Publication is the step after both assembly helpers. Reaching this
+        sentinel with their manifest proves `previous` made it through the
+        real `main()` call site. Supplying the external environment in
+        memory makes that witness independent of OpenStudio, Git and disk.
         """
-        kind, message = self._main_with_no_scenarios(["--allow-dirty"])
+        class ReachedPublication(Exception):
+            """Raised by the in-memory publisher."""
+
+        freeze = _load_freeze()
+        freeze.scenario_defs.all_scenarios = lambda *a, **k: []
+        attestation = {
+            "commit": "8" * 40,
+            "run_id": 33544573991,
+            "run_url": "https://example.invalid/runs/33544573991",
+        }
+        freeze.seal_accounting = lambda *a, **k: (
+            {"python-only:post-handoff": 0, "python-only": 0},
+            {"ruby": 0, "ruby-api": 0},
+            attestation)
+        captured = {}
+
+        def sentinel(manifest, baselines):
+            captured["manifest"] = manifest
+            captured["baselines"] = baselines
+            raise ReachedPublication
+
+        environment = {
+            "dirty": False,
+            "commit": "9" * 40,
+            "slugs": [],
+            "previous": {
+                "scenarios": [],
+                "provenance": {
+                    "final_cross_language_attestation": attestation,
+                },
+            },
+            "producer": lambda: {
+                "openstudio_cli": "3.11.0",
+                "producer": {"openstudio": "3.11.0"},
+            },
+            "spec_sha256": "a" * 64,
+            "sample_manifest_sha256": "b" * 64,
+            "publish": sentinel,
+        }
+        external = AssertionError("the in-memory witness touched the host")
+        with mock.patch.object(sys, "argv", ["freeze.py"]), \
+                mock.patch.object(freeze, "git", side_effect=external), \
+                mock.patch.object(freeze.subprocess, "run",
+                                  side_effect=external), \
+                mock.patch.object(freeze.tempfile, "mkdtemp",
+                                  side_effect=external), \
+                mock.patch.object(freeze.runner, "sha256",
+                                  side_effect=external), \
+                mock.patch.object(pathlib.Path, "read_text",
+                                  side_effect=external), \
+                mock.patch.object(pathlib.Path, "write_text",
+                                  side_effect=external), \
+                mock.patch.object(pathlib.Path, "mkdir",
+                                  side_effect=external):
+            with self.assertRaises(ReachedPublication):
+                freeze.main(environment=environment)
+
+        self.assertIsNone(
+            captured["baselines"],
+            "an empty in-memory run must not allocate a staging tree")
+        self.assertEqual([], captured["manifest"]["scenarios"])
         self.assertEqual(
-            "FileNotFoundError", kind,
-            "a full freeze over an empty corpus must reach PROMOTION and "
-            "fail there for want of a baselines directory. Anything else "
-            f"means it stopped earlier: {kind}: {message}")
-        self.assertIn(
-            "baselines", message,
-            "and it must be the baselines directory it could not find, not "
-            f"some other missing path: {message}")
+            attestation,
+            captured["manifest"]["provenance"]
+            ["final_cross_language_attestation"],
+            "the immutable D-84 record must survive main-to-manifest wiring")
 
     def test_a_SCOPED_run_still_refuses_without_a_manifest_to_carry(self):
         """The counterweight: initialising `previous` must not weaken this.

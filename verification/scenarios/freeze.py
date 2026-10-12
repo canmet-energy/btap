@@ -435,7 +435,8 @@ def assemble_scope(frozen, carried, baselines, previous, all_ids, runner,
 
 def assemble_manifest(frozen, previous, carried, this_producer,
                       active_seals, retired_seals, final_attestation,
-                      dirty, commit, runner, fail):
+                      dirty, commit, runner, fail, spec_sha256=None,
+                      sample_manifest_sha256=None):
     """Build the manifest and GUARD the corpus-wide fields a scope must keep.
 
     Extracted from `main()` for the same reason as `assemble_scope()`: the
@@ -452,9 +453,16 @@ def assemble_manifest(frozen, previous, carried, this_producer,
     counts = {}
     for sc in frozen:
         counts[sc["lane"]] = counts.get(sc["lane"], 0) + 1
+    if spec_sha256 is None:
+        spec_sha256 = runner.sha256(
+            REPO_ROOT / "verification" / "spec.json")
+    if sample_manifest_sha256 is None:
+        sample_manifest_sha256 = runner.sha256(
+            runner.PYTHON_ROOT / "scripts" / "sample_manifest.json")
+
     manifest = {
         "version": 2,
-        "spec_sha256": runner.sha256(REPO_ROOT / "verification" / "spec.json"),
+        "spec_sha256": spec_sha256,
         "provenance": {
             # `commit` is INFORMATIONAL history: which commit produced this
             # freeze. Nothing requires it to be reachable from a later HEAD
@@ -492,8 +500,7 @@ def assemble_manifest(frozen, previous, carried, this_producer,
                                 "identity is retained after product-Ruby retirement",
         },
         "corpus": {"generator": "python",
-                   "sample_manifest_sha256": runner.sha256(
-                       runner.PYTHON_ROOT / "scripts" / "sample_manifest.json")},
+                   "sample_manifest_sha256": sample_manifest_sha256},
         "counts": counts,
         "scenarios": frozen,
         "uncovered": scenario_defs.UNCOVERED,
@@ -569,6 +576,20 @@ def promote(staged_baselines, staged_manifest, dest_baselines,
     for backup in (backup_b, backup_m):
         if backup.exists():
             (shutil.rmtree if backup.is_dir() else os.remove)(str(backup))
+
+
+def publish_freeze(manifest, baselines):
+    """Write and atomically promote one fully assembled freeze."""
+    if baselines is None:
+        staging = Path(tempfile.mkdtemp(prefix="freeze-out-"))
+        baselines = staging / "baselines"
+        baselines.mkdir()
+    else:
+        staging = baselines.parent
+    staged_manifest = staging / "manifest.json"
+    staged_manifest.write_text(
+        json.dumps(manifest, indent=1) + "\n", encoding="utf-8")
+    promote(baselines, staged_manifest, runner.BASELINES, runner.MANIFEST)
 
 
 def producer_identity():
@@ -694,7 +715,42 @@ def producer_identity():
     return identity
 
 
-def main():
+def invocation_producer():
+    """The producer record for this invocation, with a soft CLI probe."""
+    openstudio_cli = None
+    try:
+        out = subprocess.run(
+            ["openstudio", "openstudio_version"], capture_output=True,
+            text=True, check=False, timeout=120)
+        if out.returncode == 0:
+            openstudio_cli = out.stdout.strip() or None
+    except OSError:
+        pass
+    return {"producer": producer_identity(),
+            "openstudio_cli": openstudio_cli}
+
+
+def load_freeze_environment():
+    """Load external state once; tests may supply the same data in memory."""
+    sample_manifest = runner.PYTHON_ROOT / "scripts" / "sample_manifest.json"
+    previous = {"scenarios": [], "provenance": {}}
+    if runner.MANIFEST.is_file():
+        previous = json.loads(runner.MANIFEST.read_text(encoding="utf-8"))
+    return {
+        "dirty": bool(git("status", "--porcelain")),
+        "commit": git("rev-parse", "HEAD"),
+        "slugs": json.loads(sample_manifest.read_text(
+            encoding="utf-8"))["samples"],
+        "previous": previous,
+        "producer": invocation_producer,
+        "spec_sha256": runner.sha256(
+            REPO_ROOT / "verification" / "spec.json"),
+        "sample_manifest_sha256": runner.sha256(sample_manifest),
+        "publish": publish_freeze,
+    }
+
+
+def main(environment=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--allow-dirty", action="store_true",
                     help="dev override, recorded in provenance")
@@ -719,14 +775,13 @@ def main():
             "stack instead. Unset it to freeze; `remote` is for verifying "
             "against baselines that already exist.")
 
-    dirty = bool(git("status", "--porcelain"))
+    environment = environment or load_freeze_environment()
+    dirty = environment["dirty"]
     if dirty and not args.allow_dirty:
         die("dirty source tree — baselines must be reproducible from a "
             "commit SHA. Commit first (PR-1 commit 1), then freeze.")
 
-
-    slugs = json.loads((runner.PYTHON_ROOT / "scripts" / "sample_manifest.json")
-                       .read_text(encoding="utf-8"))["samples"]
+    slugs = environment["slugs"]
     scenarios = scenario_defs.all_scenarios(slugs)
 
     # SCOPED re-freeze (Sol, `227`). A full 54-scenario freeze for one moved
@@ -757,9 +812,7 @@ def main():
     # A full freeze owns the whole corpus, so an absent manifest is not an
     # error here: the guards keyed on `carried` do not run, and an empty
     # prior state is the honest description of "there was nothing before".
-    previous = {"scenarios": [], "provenance": {}}
-    if runner.MANIFEST.is_file():
-        previous = json.loads(runner.MANIFEST.read_text(encoding="utf-8"))
+    previous = environment["previous"]
     if args.scenario:
         wanted = list(dict.fromkeys(args.scenario))
         unknown = [i for i in wanted if i not in all_ids]
@@ -825,22 +878,19 @@ def main():
         die(str(error))
     check_required_energyplus(scenarios)
 
-    cr = runner.load_compare_runs()
-    spec = cr.load_spec(REPO_ROOT / "verification" / "spec.json")
-
-    global CTX_CORPUS, CTX_LONE
-    work = Path(tempfile.mkdtemp(prefix="freeze-"))
-    CTX_CORPUS = runner.ensure_corpus(work)
-    CTX_LONE = runner.lone_epw(work)
-
-    staging = Path(tempfile.mkdtemp(prefix="freeze-out-"))
-    baselines = staging / "baselines"
+    cr = spec = work = None
+    baselines = None
+    if scenarios:
+        cr = runner.load_compare_runs()
+        spec = cr.load_spec(REPO_ROOT / "verification" / "spec.json")
+        global CTX_CORPUS, CTX_LONE
+        work = Path(tempfile.mkdtemp(prefix="freeze-"))
+        CTX_CORPUS = runner.ensure_corpus(work)
+        CTX_LONE = runner.lone_epw(work)
+        staging = Path(tempfile.mkdtemp(prefix="freeze-out-"))
+        baselines = staging / "baselines"
     frozen = []
-    this_producer = {"producer": producer_identity(),
-                     "openstudio_cli": subprocess.run(
-                         ["openstudio", "openstudio_version"],
-                         capture_output=True, text=True,
-                         check=False).stdout.strip()}
+    this_producer = environment["producer"]()
 
     for sc in scenarios:
         print(f"== {sc['id']} ({sc['lane']}, seal={sc['seal'].split(':')[0]})",
@@ -937,19 +987,17 @@ def main():
         frozen.append({**sc, "baseline_sha256": hashes,
                        "produced_by": this_producer})
 
-    frozen = assemble_scope(frozen, carried, baselines, previous, all_ids,
+    scope_baselines = baselines if baselines is not None else Path()
+    frozen = assemble_scope(frozen, carried, scope_baselines, previous, all_ids,
                             runner, die)
 
     manifest = assemble_manifest(
         frozen, previous, carried, this_producer, active_seals,
-        retired_seals, final_attestation, dirty, git("rev-parse", "HEAD"),
-        runner, die)
+        retired_seals, final_attestation, dirty, environment["commit"],
+        runner, die, spec_sha256=environment["spec_sha256"],
+        sample_manifest_sha256=environment["sample_manifest_sha256"])
 
-    (staging / "manifest.json").write_text(
-        json.dumps(manifest, indent=1) + "\n", encoding="utf-8")
-
-    promote(baselines, staging / "manifest.json",
-            runner.BASELINES, runner.MANIFEST)
+    environment["publish"](manifest, baselines)
     print(f"frozen {len(frozen)} scenarios "
             f"({manifest['counts']}), active seals {active_seals}, "
             f"retired seals {retired_seals}; manifest written")
