@@ -284,6 +284,70 @@ class TestTheCriteriaArePerThermalBlock(unittest.TestCase):
         self.assertTrue(status["heating_known"])
         self.assertTrue(status["heating_ok"])
 
+    def test_a_COOLED_block_with_no_result_row_is_indeterminate(self):
+        """The other direction of the same gap, one level earlier.
+
+        The model says Z1 is cooled; EnergyPlus produced a row only for
+        uncooled Z2. `cooled_blocks` was counted while iterating the ROWS, so
+        Z1 was never seen: the count reached zero, the sentence went vacuous,
+        and the run PASSED (Sol, `224`).
+
+        The cooled set now comes from the applicability map, and the two maps
+        are compared in both directions. Neither gap is vacuity — a row with
+        no applicability entry has unknown applicability, and a cooled block
+        with no row has no measurement.
+        """
+        status = path._unmet_status_8_4_4(report(
+            None, None,
+            blocks={"Z2": {"heating": 1.0, "cooling": 1.0}},
+            cooled={"Z1": True, "Z2": False}, mechanical_cooling=True))
+        self.assertEqual(
+            1, status["cooled_blocks"],
+            "the cooled count comes from the applicability map, so a block "
+            "with no result row is still counted")
+        self.assertEqual(["Z1"], status["unmeasured_cooled_blocks"])
+        self.assertFalse(
+            status["cooling_vacuous"],
+            "a building with a cooled block is not one the sentence fails to "
+            "reach")
+        self.assertFalse(status["cooling_known"])
+        self.assertFalse(
+            status["all_ok"],
+            "a cooled block with no measured hours cannot pass (4)(a)")
+
+    def test_sentence_5_is_claimed_ONLY_when_a_limit_is_known_exceeded(self):
+        """(5) applies to loads that are not met, not to missing evidence.
+
+        Reaching it on `not all_ok` told a run whose heating was 1 h and
+        whose cooling applicability was unresolved to increase capacities
+        that nothing had shown to be short (Sol, `224`). The indeterminate
+        verdict stands on its own.
+        """
+        from btap.audit import AuditLog
+
+        unknown = report(
+            None, None,
+            blocks={"Z1": {"heating": 1.0, "cooling": 900.0}},
+            cooled={"Z1": False}, mechanical_cooling=True,
+            unplaceable=["Unplaceable Cooling Coil"])
+        audit = AuditLog()
+        self.assertFalse(path.evaluate_unmet_8_4_4(unknown, audit))
+        self.assertNotIn(
+            "8.4.1.2.(5)", [e["article"] for e in audit.entries],
+            "nothing is known to be unmet here, so a required capacity "
+            "increase has not been established")
+
+        exceeded = report(
+            None, None,
+            blocks={"Z1": {"heating": 150.0, "cooling": 1.0}},
+            cooled={"Z1": True})
+        audit = AuditLog()
+        self.assertFalse(path.evaluate_unmet_8_4_4(exceeded, audit))
+        self.assertIn(
+            "8.4.1.2.(5)", [e["article"] for e in audit.entries],
+            "and a block genuinely over its limit must still carry the "
+            "sentence-(5) disclosure — the gate narrowed, it did not close")
+
     def test_a_block_missing_from_the_cooling_map_is_indeterminate(self):
         """Not an uncooled block — a block whose applicability is unknown.
 

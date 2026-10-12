@@ -1106,22 +1106,40 @@ def _unmet_status_8_4_4(report):
     heating_ok = heating_known and not heating_failures
 
     # ---- sentence (4)(a): cooling, every MECHANICALLY COOLED block --------
+    #
+    # The cooled set comes from the APPLICABILITY MAP, not from the result
+    # rows. Counting it while iterating rows meant a block the model says is
+    # cooled but EnergyPlus produced no row for was never seen at all:
+    # `cooled_blocks` reached 0, the sentence went vacuous, and the run
+    # PASSED (Sol, `224`). That is the same silence-as-pass defect already
+    # fixed for a present row with an absent value, one level earlier.
+    #
+    # The two maps are compared in BOTH directions, because each gap is a
+    # different kind of unknown and neither is vacuity: a result block absent
+    # from the applicability map has unknown applicability, and a cooled
+    # applicability block absent from the results has no measurement.
     building_has_cooling = section.get("mechanical_cooling") is not False
+    rows = {str(name).upper(): name for name in blocks}
+    cooled_names = sorted(name for name, is_cooled in cooled_map.items()
+                          if is_cooled)
+    cooled_blocks = len(cooled_names)
+
     cooling_failures, cooling_unreadable, unattributed = {}, set(), set()
-    cooled_blocks = 0
-    for name, hours in blocks.items():
-        if str(name).upper() not in cooled_map:
-            unattributed.add(name)
+    unmeasured = set()
+    for name in rows:
+        if name not in cooled_map:
+            unattributed.add(rows[name])
+    for upper in cooled_names:
+        original = rows.get(upper)
+        if original is None:
+            unmeasured.add(upper)
             continue
-        if not cooled_map[str(name).upper()]:
-            continue
-        cooled_blocks += 1
-        value = (hours or {}).get("cooling")
+        value = (blocks[original] or {}).get("cooling")
         if value is None:
-            cooling_unreadable.add(name)
+            cooling_unreadable.add(original)
             continue
         if float(value) > COOLING_UNMET_LIMIT_H_8_4_4:
-            cooling_failures[name] = float(value)
+            cooling_failures[original] = float(value)
 
     # Vacuous where the sentence reaches no block, and that is a DECIDED
     # outcome: either the building has no mechanical cooling at all, or every
@@ -1131,7 +1149,8 @@ def _unmet_status_8_4_4(report):
                            and not unattributed))
     cooling_known = cooling_vacuous or (
         bool(blocks) and bool(cooled_map) and not unplaceable
-        and not unattributed and not cooling_unreadable)
+        and not unattributed and not cooling_unreadable
+        and not unmeasured)
     cooling_ok = cooling_vacuous or (cooling_known and not cooling_failures)
 
     return {"blocks": len(blocks),
@@ -1141,6 +1160,7 @@ def _unmet_status_8_4_4(report):
             "heating_unreadable": sorted(heating_unreadable),
             "cooling_unreadable": sorted(cooling_unreadable),
             "unattributed_blocks": sorted(unattributed),
+            "unmeasured_cooled_blocks": sorted(unmeasured),
             "unplaceable_cooling": sorted(unplaceable),
             "worst_heating_h": max(
                 (float((h or {}).get("heating") or 0.0)
@@ -1210,6 +1230,8 @@ def evaluate_unmet_8_4_4(report, audit):
                         status["unplaceable_cooling"] or None,
                     "unattributed_blocks":
                         status["unattributed_blocks"] or None,
+                    "unmeasured_cooled_blocks":
+                        status["unmeasured_cooled_blocks"] or None,
                     "unreadable_blocks":
                         status["cooling_unreadable"] or None},
             article="8.4.1.2.(4)(a)", ahj="AHJ-21")
@@ -1235,7 +1257,13 @@ def evaluate_unmet_8_4_4(report, audit):
                    "shortfall"),
             article="8.4.1.2.(4)(a)", ahj="AHJ-21")
 
-    if not status["all_ok"]:
+    # Sentence (5) applies to loads that are NOT MET. Reaching it on
+    # `not all_ok` conflated a block known to be over its limit with missing
+    # evidence, so a run with heating at 1 h and unresolved cooling
+    # applicability was told to increase capacities that nothing had shown to
+    # be short (Sol, `224`). The indeterminate verdict stands on its own; it
+    # does not imply a required capacity increase.
+    if status["heating_failures"] or status["cooling_failures"]:
         audit.warn(
             "compliance",
             "8.4.1.2.(5) requires the proposed building's capacities to be "
