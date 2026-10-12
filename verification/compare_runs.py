@@ -64,6 +64,11 @@ def exact_string(path, spec):
 #: an identifier, never a measurement. A measured float has at most one dot.
 DOTTED_ID_RE = re.compile(r"\d+(?:\.\d+){2,}")
 
+#: A whole-number token: no decimal point AND no exponent. `NUM_RE` accepts
+#: an exponent, so "no dot" is not the same question — `1e3` is a float
+#: spelled without one (Sol, `233`).
+INT_RE = re.compile(r"-?\d+")
+
 
 def strings_equal(a, b, spec):
     """Equal as prose, with a float tolerance for the numbers inside it.
@@ -81,10 +86,13 @@ def strings_equal(a, b, spec):
     tolerance for their measured floats and must not have it for their
     citations.
 
-    So the discriminator is the TOKEN, not the field: a dotted run of three
-    or more components is an identifier and is compared textually; one dot or
-    none is a measurement and keeps the tolerance. `58.750000` is a
-    measurement, `8.4.5.2` is not, and no field has to choose between them.
+    So the discriminator is the TOKEN, not the field. A dotted run of
+    three or more components is an identifier, and so is a whole-number
+    token: both are compared textually. Everything else is a measurement
+    and keeps the tolerance, INCLUDING scientific notation — `NUM_RE`
+    accepts an exponent, so `1e3` is a float spelled without a dot, and
+    classifying by the absence of one reported it against `1e+3` (Sol,
+    `233`). `58.750000` is a measurement; `8.4.5.2` and `D-01` are not.
     """
     if a == b:
         return True
@@ -107,7 +115,13 @@ def strings_equal(a, b, spec):
         # `D-9007199254740992` and `D-9007199254740993` are different ids
         # that parse to the same float past 2**53 (Sol, `231`). The dotted
         # rule above does not reach either, because neither has a dot.
-        if "." not in x and "." not in y:
+        #
+        # An integer is recognised by its GRAMMAR, not by the absence of a
+        # dot. `NUM_RE` accepts an exponent, so `1e3` and `10000000e-7` have
+        # no dot and are floats: the dotless test called them integers and
+        # reported `1e3` against `1e+3` — the same number — as a difference
+        # (Sol, `233`).
+        if INT_RE.fullmatch(x) and INT_RE.fullmatch(y):
             if x != y:
                 return False
             continue

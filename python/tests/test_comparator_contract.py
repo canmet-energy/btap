@@ -132,15 +132,22 @@ CRITICAL = (
 #: `D-9007199254740993` are different ids that parse to the same float.
 #:
 #: The true statement is narrower than mine and wider than the dotted case:
-#: no two REGISTERED ids collided, because every registered id is spelled
-#: without a leading zero and is far below 2**53. That is a property of
-#: today's register, not of the comparator.
+#: no two REGISTERED ids collided. My stated REASON for that was also wrong
+#: — I wrote that every registered id is spelled without a leading zero, and
+#: `D-01` through `D-09` are registered ids (Sol, `233`). They do not collide
+#: only because no alternate `D-1` through `D-9` spelling is registered at
+#: the same time, and because every current numeric value sits far below
+#: 2**53. Both are properties of today's register, not of the comparator, and
+#: the id grammar is unbounded with thousands expected as other code families
+#: arrive.
 #:
-#: So the token rule is not about dots. An INTEGER token is compared
-#: textually — the tolerance exists for measured floats — and a dotted run
-#: of three or more components is compared textually because it is an
-#: identifier. Between them, no citation and no authority id is read as a
-#: number anywhere.
+#: So the token rule is not about dots. An INTEGER token — recognised by its
+#: GRAMMAR, because `NUM_RE` accepts an exponent and `1e3` is a dotless
+#: float — is compared textually, since the tolerance exists for measured
+#: floats. A dotted run of three or more components is compared textually
+#: because it is an identifier. Between them, no citation and no authority id
+#: is read as a number anywhere, and scientific notation keeps its
+#: tolerance.
 AUDIT_FIELDS = (
     ("article", "8.4.4.1.(2)", "8.4.4.10.(2)"),
     ("ruling", "D-102", "D-101"),
@@ -154,6 +161,83 @@ AUDIT_FIELDS = (
 
 
 CASES = [
+    # IDENTIFIERS IN TOLERANT PROSE. The `ruling` and `ahj` cases below use
+    # exempt PATHS, so they never reach `strings_equal` and cannot witness
+    # the integer rule. These do: `evidence` and `warnings` keep the float
+    # tolerance, and the frozen reports quote authority ids in both.
+    #
+    # Without them, `if False and INT_RE.fullmatch(x)...` left the whole
+    # contract green — 10 passed, 62 subtests — while the fix it disabled
+    # was the one this PR's commit message led with (Sol, `233`).
+    Case("a decision id in prose differs only by a LEADING ZERO",
+         {"report": {"warnings": ["AHJ-1 (alternative-solution) applies"]}},
+         {"report": {"warnings": ["AHJ-01 (alternative-solution) applies"]}},
+         differs=True,
+         why="`D-\\d+` and `AHJ-\\d+` are unbounded with no "
+             "canonical-spelling predicate, so both spellings are accepted "
+             "and parsed to one number. 2026-10-12: D-01..D-09 ARE "
+             "registered ids; they do not collide only because no alternate "
+             "D-1..D-9 spelling is registered at the same time",
+         path="report.json"),
+    Case("a decision id in prose differs past 2**53",
+         {"report": {"warnings": ["see D-9007199254740992 for the ruling"]}},
+         {"report": {"warnings": ["see D-9007199254740993 for the ruling"]}},
+         differs=True,
+         why="two different ids that parse to ONE float; the id grammar is "
+             "unbounded and thousands are expected as other code families "
+             "arrive",
+         path="report.json"),
+    Case("a plain integer count in prose is not tolerated",
+         {"audit": [{"evidence": "5 of 7 blocks"}]},
+         {"audit": [{"evidence": "6 of 7 blocks"}]},
+         differs=True,
+         why="a count is an integer: there is no wobble to tolerate, and "
+             "this is the case that fails if the integer branch is removed "
+             "without any identifier being involved",
+         path="audit.json"),
+    # SCIENTIFIC NOTATION is a float spelled without a dot. `NUM_RE` accepts
+    # an exponent, so classifying an integer as "contains no dot" made `1e3`
+    # and `1e+3` — the same number — a difference (Sol, `233`).
+    Case("a float in scientific notation keeps its tolerance",
+         {"audit": [{"evidence": "load 10000000e-7 kW"}]},
+         {"audit": [{"evidence": "load 10000001e-7 kW"}]},
+         differs=False,
+         why="these differ by 1e-7, inside `string_float_tol`; the dotless "
+             "test called them integers and reported them",
+         path="audit.json"),
+    Case("the same float in two exponent spellings agrees",
+         {"audit": [{"evidence": "load 1e3 W"}]},
+         {"audit": [{"evidence": "load 1e+3 W"}]},
+         differs=False,
+         why="numerically identical, and the only difference is the sign on "
+             "the exponent",
+         path="audit.json"),
+    Case("a real change in scientific notation is still reported",
+         {"audit": [{"evidence": "load 1e3 W"}]},
+         {"audit": [{"evidence": "load 2e3 W"}]},
+         differs=True,
+         why="the control for the two above: restoring the tolerance must "
+             "not make every exponent-spelled number equal",
+         path="audit.json"),
+    # ONE STRING carrying BOTH an unchanged citation and a wobbling float.
+    # Sol's `233`: the suite had a citation string and a measurement string
+    # and none with both, so `if DOTTED_ID_RE.search(a): return a == b` —
+    # making all citation-bearing prose wholly exact — passed everything.
+    Case("a citation and an in-tolerance float in ONE string agree",
+         {"audit": [{"evidence": "Article 8.4.5.2. gives worst 58.750000"}]},
+         {"audit": [{"evidence": "Article 8.4.5.2. gives worst 58.7500001"}]},
+         differs=False,
+         why="the citation is unchanged and the float moved by 1e-7, so the "
+             "string agrees — a rule that made any citation-bearing string "
+             "exact would report this",
+         path="audit.json"),
+    Case("a CHANGED citation beside a wobbling float is reported",
+         {"audit": [{"evidence": "Article 8.4.5.2. gives worst 58.750000"}]},
+         {"audit": [{"evidence": "Article 8.4.5.20. gives worst 58.7500001"}]},
+         differs=True,
+         why="its counterpart: the tolerance on the float must not carry "
+             "the citation with it",
+         path="audit.json"),
     # A citation QUOTED INSIDE PROSE. `evidence` and
     # `boiler_count_subclause` do this in the frozen audits, and they need
     # the float tolerance for their measured numbers, so the field cannot be
@@ -315,6 +399,7 @@ MUTATIONS = [
             "critical field 'total_site_kwh' is never tolerated",
             "critical field 'building_energy_target_kwh' is never tolerated",
             "critical field 'tier' is never tolerated",
+            "a real change in scientific notation is still reported",
         })),
     Mutation(
         "strings always equal",
@@ -324,6 +409,11 @@ MUTATIONS = [
             "a string with a different count of numbers is reported",
             "critical field 'compliance_determination' is never tolerated",
             "a citation quoted inside PROSE is never tolerated",
+            "a CHANGED citation beside a wobbling float is reported",
+            "a decision id in prose differs only by a LEADING ZERO",
+            "a decision id in prose differs past 2**53",
+            "a plain integer count in prose is not tolerated",
+            "a real change in scientific notation is still reported",
         })),
     # `article`, `ruling`, `ahj`, `level` and `target` are NOT here: they go
     # through the exact-identifier path, so defeating `strings_equal`
@@ -380,8 +470,9 @@ MUTATIONS = [
         # ESTABLISHED: 8.4.4.9.(6) bands the requirement" — in fields that
         # need the float tolerance for their measured numbers. A field-level
         # exemption cannot serve both, so the second defence went into the
-        # TOKEN: a dotted run of three or more components is compared
-        # textually, one dot or none keeps the tolerance.
+        # TOKEN: a dotted run of three or more components and a
+        # whole-number token are compared textually; everything
+        # else, including scientific notation, keeps the tolerance.
         #
         # The division of labour, which the two mutations here measure: the
         # path list alone defends the AXES, the token rule alone defends
@@ -391,6 +482,25 @@ MUTATIONS = [
         # holds `article` — so the list stays on its own merits.
         frozenset()),
     Mutation(
+        "an integer token is read as a number again",
+        lambda m, s: (setattr(m, "INT_RE", re.compile(r"(?!x)x")), s)[1],
+        # The two identifier cases, and NOT the bare count — `5` against `6`
+        # differs by 1, which the 1e-6 tolerance reports whatever the
+        # classifier does. That measurement is the point: the integer rule
+        # earns its place only where two DIFFERENT integers are numerically
+        # equal (a leading zero) or indistinguishable as floats (past
+        # 2**53). The count case stays as the control proving the branch
+        # does not break ordinary numbers.
+        frozenset({"a decision id in prose differs only by a LEADING ZERO",
+                   "a decision id in prose differs past 2**53"})),
+    Mutation(
+        "an integer is classified by the ABSENCE OF A DOT",
+        lambda m, s: (setattr(m, "INT_RE", re.compile(r"[^.]*")), s)[1],
+        # The defect Sol found: `NUM_RE` accepts an exponent, so a dotless
+        # classifier calls `1e3` an integer and reports it against `1e+3`.
+        frozenset({"a float in scientific notation keeps its tolerance",
+                   "the same float in two exponent spellings agrees"})),
+    Mutation(
         "a dotted identifier is read as a number again",
         lambda m, s: (setattr(m, "DOTTED_ID_RE", re.compile(r"(?!x)x")), s)[1],
         # PROSE only. With no identifier rule, `8.4.5.2` and `8.4.5.20`
@@ -399,7 +509,8 @@ MUTATIONS = [
         # `exact_string_paths` keeps it out of `strings_equal` entirely —
         # which is the measurement that proves the two defences are not
         # duplicates of each other.
-        frozenset({"a citation quoted inside PROSE is never tolerated"})),
+        frozenset({"a citation quoted inside PROSE is never tolerated",
+                   "a CHANGED citation beside a wobbling float is reported"})),
     Mutation(
         "the citation axes added to strip_keys",
         lambda m, s: {**s, "strip_keys":
