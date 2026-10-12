@@ -542,8 +542,8 @@ def assemble_manifest(frozen, previous, carried, this_producer,
 def promote(staged_baselines, staged_manifest, dest_baselines,
             dest_manifest, mover=shutil.move):
     """Backup-swap promotion (the export_goldens pattern): the previous
-    valid baselines+manifest survive ANY failed step — verified by a
-    negative control that injects a mover failure mid-promotion.
+    valid baselines+manifest survive a failure at any of the four promotion
+    moves, verified by negative controls that inject each failure in turn.
     ``mover`` is injectable for exactly that control; production always
     uses shutil.move."""
     backup_b = Path(str(dest_baselines) + f".backup.{os.getpid()}")
