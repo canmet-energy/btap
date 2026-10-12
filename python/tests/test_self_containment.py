@@ -113,6 +113,13 @@ ALLOWLIST = {
                "scope that forgets what it does not own destroys the seal "
                "tallies and D-84's attestation while reporting success",
     },
+    "python/tests/test_freeze_promotion.py": {
+        "refs": ["verification/"],
+        "retires": "N/A-verification",
+        "why": "the frozen-baseline publication contract: it executes "
+               "verification/scenarios/freeze.py because promote() and its "
+               "injectable four-move rollback are the production subject",
+    },
     "python/tests/test_scenario_comparator_contract.py": {
         "refs": ["verification/"],
         "retires": "N/A-verification",
