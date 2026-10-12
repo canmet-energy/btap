@@ -227,6 +227,22 @@ jobs:
       # (--cov-fail-under=84, above) sits below the 2026-09-14 local baseline
       # of 85.3%; the baseline and its history are in
       # docs/necb_rule_verification.md. Raise the floor as coverage rises.
+      # THE 99-SYSTEM ENERGYPLUS SWEEP, which is what makes the committed
+      # verdict a gate rather than a dated snapshot. Sol's `234`: a
+      # catalogue row edited under its own name left every status test
+      # green, because they compare names against a file nobody re-produced.
+      # The catalogue digest now catches a row edit; only running the sweep
+      # catches a change INSIDE a builder whose row is untouched.
+      #
+      # It belongs here rather than in `python`: this lane already has
+      # EnergyPlus, and it is dispatch-only, so a PR pays nothing. ~8 min
+      # serial for 99 systems — one at a time, deliberately (CLAUDE.md's
+      # VM incident). `--check` re-runs and diffs without writing, so a
+      # drifted verdict fails here instead of being quietly rewritten.
+      - name: The catalogue simulation sweep, re-run and diffed
+        working-directory: python
+        run: |
+          .venv/bin/python ../python/scripts/simulate_all_systems.py --check
       - name: Coverage summary
         if: always()
         working-directory: python
