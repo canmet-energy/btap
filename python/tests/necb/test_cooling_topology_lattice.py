@@ -698,3 +698,191 @@ class TestAKnownExceedanceIsNotHiddenByAnUnknown(unittest.TestCase):
                          "a determined sentence is a decision; only an "
                          "unresolved scope warns")
         self.assertIn("EXCEED 100 h", entries[0]["action"])
+
+
+@needs_sdk
+class TestReliefAirIsExhaustAndCoolsNothing(unittest.TestCase):
+    """The case where the invariant's two walks agreed and were both wrong.
+
+    A `CoilCoolingWater` on `oas.outboardReliefNode()` was attributed to
+    every zone of the loop by BOTH walks, with `gap={}`. Relief air is
+    exhausted — that coil conditions air leaving the building and cools no
+    thermal block.
+
+    The agreement was not evidence. The inward walk seeded
+    `reliefComponents()` as well as `oaComponents()`, so independence had
+    been traded for agreement in exactly one place and this is the case it
+    hid (Fable, `229` NB-1). It failed CLOSED — an uncooled block's passive
+    overheating hours got judged against (4)(a) — which is why it was
+    non-blocking and not why it was acceptable.
+    """
+
+    def _with_coil_on(self, node_name, on_loop):
+        import openstudio
+
+        model = openstudio.model.Model()
+        zone = openstudio.model.ThermalZone(model)
+        zone.setName("Z1")
+        loop = openstudio.model.AirLoopHVAC(model)
+        loop.setName("AL1")
+        terminal = (openstudio.model
+                    .AirTerminalSingleDuctConstantVolumeNoReheat(
+                        model, model.alwaysOnDiscreteSchedule()))
+        loop.addBranchForZone(zone, terminal.to_StraightComponent().get())
+        oa_system = openstudio.model.AirLoopHVACOutdoorAirSystem(
+            model, openstudio.model.ControllerOutdoorAir(model))
+        if on_loop:
+            oa_system.addToNode(loop.supplyInletNode())
+        else:
+            dedicated = (openstudio.model
+                         .AirLoopHVACDedicatedOutdoorAirSystem(oa_system))
+            dedicated.addAirLoop(loop)
+        coil = openstudio.model.CoilCoolingWater(
+            model, model.alwaysOnDiscreteSchedule())
+        coil.setName("coil")
+        coil.addToNode(getattr(oa_system, node_name)().get())
+        return model
+
+    def test_a_RELIEF_side_coil_cools_no_block(self):
+        for label, on_loop in (("a plain air loop", True),
+                               ("a dedicated outdoor-air system", False)):
+            with self.subTest(topology=label):
+                model = self._with_coil_on("outboardReliefNode", on_loop)
+                outward, unplaceable = path._zone_mechanical_cooling(model)
+                self.assertEqual(
+                    {"Z1": False}, outward,
+                    f"{label}: a coil on the relief stream conditions air "
+                    "leaving the building; attributing it to the loop's "
+                    "zones judges an uncooled block against (4)(a)")
+                self.assertEqual(
+                    [], unplaceable,
+                    "and it is PLACED — relief is a known answer, not an "
+                    "unresolved attribution")
+
+    def test_an_OA_side_coil_on_the_same_system_DOES_cool(self):
+        """The control, and the reason this is not just "ignore the OAS".
+
+        The same object on the OA stream of the same outdoor-air system
+        serves every block the loop serves. Only the stream differs.
+        """
+        for label, on_loop in (("a plain air loop", True),
+                               ("a dedicated outdoor-air system", False)):
+            with self.subTest(topology=label):
+                model = self._with_coil_on("outboardOANode", on_loop)
+                outward, unplaceable = path._zone_mechanical_cooling(model)
+                self.assertEqual({"Z1": True}, outward,
+                                 f"{label}: an OA-stream coil conditions "
+                                 "air entering the zones")
+                self.assertEqual([], unplaceable)
+
+    def test_the_two_walks_agree_about_relief_because_BOTH_are_right(self):
+        """Agreement is only evidence when the walks are independent.
+
+        The inward walk no longer seeds `reliefComponents()`, so it reaches
+        this answer on its own rather than by being shaped to match.
+        """
+        for on_loop in (True, False):
+            with self.subTest(on_loop=on_loop):
+                model = self._with_coil_on("outboardReliefNode", on_loop)
+                self.assertEqual(
+                    {}, path.cooling_attribution_disagreement(model))
+                self.assertEqual(
+                    {"Z1": False}, path._zone_cooling_inward(model),
+                    "the INWARD walk must reach 'not cooled' by itself")
+
+
+@needs_sdk
+class TestTheTopologyPatternMatchesBySubstring(unittest.TestCase):
+    """`_TOPOLOGY_TYPES` over-matches, and the direction is what makes it safe.
+
+    `AirLoopHVAC` also matches `AirLoopHVAC_ZoneSplitter`, `_ZoneMixer`,
+    `_ReturnPlenum`, `_SupplyPlenum` and `_UnitarySystem`; `ZoneHVAC`
+    matches `ZoneHVAC_EquipmentList` (Fable, `229` NB-5). 137 of the SDK's
+    1429 IDD type names match.
+
+    Every one of those IS topology, so the accident gives the right answer.
+    This pins the SHAPES rather than the 137 names, which move with the SDK,
+    and it pins the direction: a type matched in error makes an object
+    UNRESOLVED rather than detached, and unresolved is the conservative
+    answer — the reverse asserts that a coil cools nothing, which is the
+    defect `224` found.
+    """
+
+    def test_every_stem_in_the_pattern_is_a_real_topology_stem(self):
+        """The stems themselves, so a careless addition is visible."""
+        stems = path._TOPOLOGY_TYPES.pattern.replace('"', "").split("|")
+        self.assertEqual(
+            ["AirLoopHVAC", "PlantLoop", "ThermalZone", "ZoneHVAC",
+             "AirTerminal", "OutdoorAirSystem"],
+            [s.strip() for s in stems],
+            "the stem list is the whole of this heuristic; a new stem "
+            "widens what counts as topology and needs saying out loud")
+
+    def test_the_substring_matches_are_all_real_topology(self):
+        """A coil behind each flagged type must RESOLVE, not be detached.
+
+        These are the matches Fable named. If the pattern missed them the
+        object would be called detached — asserting it cools nothing.
+        """
+        import openstudio
+
+        model = openstudio.model.Model()
+        zone = openstudio.model.ThermalZone(model)
+        zone.setName("Z1")
+        loop = openstudio.model.AirLoopHVAC(model)
+        loop.setName("AL1")
+        terminal = (openstudio.model
+                    .AirTerminalSingleDuctConstantVolumeNoReheat(
+                        model, model.alwaysOnDiscreteSchedule()))
+        loop.addBranchForZone(zone, terminal.to_StraightComponent().get())
+        coil = openstudio.model.CoilCoolingWater(
+            model, model.alwaysOnDiscreteSchedule())
+        coil.addToNode(loop.supplyOutletNode())
+
+        # A loop serving a zone has a splitter and a mixer by construction,
+        # so this model already contains the flagged types.
+        present = {obj.iddObjectType().valueName()
+                   for obj in model.modelObjects()}
+        for flagged in ("OS_AirLoopHVAC_ZoneSplitter",
+                        "OS_AirLoopHVAC_ZoneMixer",
+                        "OS_ZoneHVAC_EquipmentList"):
+            with self.subTest(type=flagged):
+                self.assertIn(
+                    flagged, present,
+                    "this fixture is supposed to contain the flagged type")
+                self.assertTrue(
+                    path._TOPOLOGY_TYPES.search(flagged),
+                    f"{flagged} matches by substring and IS topology — a "
+                    "pattern that stopped matching it would call an object "
+                    "behind it detached")
+
+        outward, unplaceable = path._zone_mechanical_cooling(model)
+        self.assertEqual({"Z1": True}, outward)
+        self.assertEqual([], unplaceable)
+
+    def test_an_over_match_makes_an_object_UNRESOLVED_not_detached(self):
+        """The direction of error, asserted rather than assumed.
+
+        `_reaches_no_topology` returning False routes an unplaceable object
+        to `unplaceable` — a declared unknown — instead of silently
+        excluding it from (4)(a)'s scope.
+        """
+        import openstudio
+
+        model = openstudio.model.Model()
+        openstudio.model.ThermalZone(model).setName("Z1")
+        fan = openstudio.model.FanOnOff(
+            model, model.alwaysOnDiscreteSchedule())
+        unit = openstudio.model.ZoneHVACPackagedTerminalAirConditioner(
+            model, model.alwaysOnDiscreteSchedule(), fan,
+            openstudio.model.CoilHeatingElectric(
+                model, model.alwaysOnDiscreteSchedule()),
+            openstudio.model.CoilCoolingDXSingleSpeed(model))
+        unit.setName("orphan PTAC")
+        _outward, unplaceable = path._zone_mechanical_cooling(model)
+        self.assertNotEqual(
+            [], unplaceable,
+            "the orphan PTAC reaches topology types and places no block, so "
+            "the conservative answer is UNRESOLVED — being wrong in this "
+            "direction costs a declared unknown, and being wrong in the "
+            "other asserts that a coil cools nothing")

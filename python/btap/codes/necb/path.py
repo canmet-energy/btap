@@ -1447,6 +1447,24 @@ def _hard_sized_phrase(names):
 #: Objects that place a cooling coil in a topology. Reaching one of these
 #: means the coil IS connected to something, so failing to attribute it is an
 #: unresolved question rather than a stray object.
+#: Type-name stems that mean "this object is part of HVAC topology", matched
+#: by SUBSTRING. Used only by `_reaches_no_topology`, to tell a DETACHED
+#: object — which serves no block, a known answer — from one that reaches
+#: real topology and could not be attributed, which is unknown.
+#:
+#: Substring matching reaches 137 of the SDK's 1429 IDD type names, and
+#: Fable's `229` NB-5 is right that `AirLoopHVAC` also matches
+#: `AirLoopHVAC_ZoneSplitter`, `_ZoneMixer`, `_ReturnPlenum`,
+#: `_SupplyPlenum` and `_UnitarySystem`, and `ZoneHVAC` matches
+#: `ZoneHVAC_EquipmentList`. Every one of those IS topology, so the accident
+#: gives the right answer — but an accident is not a reason, and the
+#: direction of error is what makes it safe to keep: a type matched in error
+#: makes an object UNRESOLVED instead of detached, and unresolved is the
+#: conservative answer. The reverse — failing to match real topology —
+#: would assert that a coil cools nothing, which is the defect `224` found.
+#:
+#: `test_the_substring_matches_are_all_real_topology` drives the shapes
+#: rather than pinning 137 names that move with the SDK.
 _TOPOLOGY_TYPES = re.compile(
     r"AirLoopHVAC|PlantLoop|ThermalZone|ZoneHVAC|AirTerminal|"
     r"OutdoorAirSystem")
@@ -1473,6 +1491,11 @@ def _as_oa_system(obj):
 def _oa_system_holding(obj):
     """The outdoor-air system whose OA or relief stream HOLDS this object.
 
+    Returns `(oa_system, stream)` where `stream` is `'oa'` or `'relief'`,
+    because the two mean OPPOSITE things for attribution and treating them
+    alike attributed an exhaust-side coil to every block (Fable, `229`
+    NB-1).
+
     MEMBERSHIP, not distance. The source walk below bounds its depth, and a
     bound is a guess about how far away a container sits: an
     `AirLoopHVACOutdoorAirSystem` references only its controller and two port
@@ -1487,11 +1510,13 @@ def _oa_system_holding(obj):
     """
     handle = obj.handle()
     for oa_system in obj.model().getAirLoopHVACOutdoorAirSystems():
-        for component in list(oa_system.oaComponents()) + \
-                list(oa_system.reliefComponents()):
+        for component in oa_system.oaComponents():
             if component.handle() == handle:
-                return oa_system
-    return None
+                return oa_system, "oa"
+        for component in oa_system.reliefComponents():
+            if component.handle() == handle:
+                return oa_system, "relief"
+    return None, None
 
 
 def _reaches_no_topology(obj, depth=6) -> bool:
@@ -1554,7 +1579,10 @@ def _zone_cooling_inward(model) -> dict:
             own_oa = loop.airLoopHVACOutdoorAirSystem()
             if own_oa.is_initialized():
                 seeds.extend(own_oa.get().oaComponents())
-                seeds.extend(own_oa.get().reliefComponents())
+                # NOT `reliefComponents()`: exhaust-side equipment cools no
+                # block, and seeding it here is what made the two walks
+                # agree about a relief coil they were both wrong about
+                # (Fable, `229` NB-1).
             # And a DEDICATED system shared with other loops: a cooling coil
             # in there serves this block as much as one on the loop itself.
             # A DOAS is not the loop's own OA system — the loop reaches it
@@ -1569,7 +1597,7 @@ def _zone_cooling_inward(model) -> dict:
                 if shared.is_initialized():
                     inner = shared.get().airLoopHVACOutdoorAirSystem()
                     seeds.extend(inner.oaComponents())
-                    seeds.extend(inner.reliefComponents())
+                    # Relief is exhaust; see the note above.
 
         found = False
         seen = set()
@@ -1667,6 +1695,16 @@ def _zone_mechanical_cooling(model) -> tuple:
         """Did this object's blocks get attributed? Narrowest scope first."""
         if depth > 6:                # these chains are shallow; this bounds a cycle
             return False
+        # RELIEF FIRST, before any rung that could place this object by
+        # proximity. On a PLAIN loop a relief-stream coil answers
+        # `component.airLoopHVAC()` with that loop — it IS on the loop — so
+        # the loop rung below attributed it to every zone the loop serves
+        # before the stream was ever consulted. Relief air is exhausted and
+        # the coil cools no block, so the question has to be asked first
+        # (Fable, `229` NB-1).
+        if _oa_system_holding(obj)[1] == "relief":
+            return True
+
         # A zone component, but ONLY if it actually has a zone.
         # `AirLoopHVACUnitarySystem` and a VRF terminal unit are
         # `ZoneHVACComponent` subclasses that can sit on an AIR LOOP, where
@@ -1732,7 +1770,22 @@ def _zone_mechanical_cooling(model) -> tuple:
         # bounded walk below because it does not depend on distance: a
         # cooling coil with a fan and a heating coil inboard of it sits
         # twelve hops from its own outdoor-air system (Fable, `228`).
-        holder = _oa_system_holding(obj)
+        holder, stream = _oa_system_holding(obj)
+        if stream == "relief":
+            # RELIEF AIR IS EXHAUSTED. A cooling coil on the relief stream
+            # conditions air leaving the building, so it cools no thermal
+            # block — it is PLACED, with nothing to attribute, like a plant
+            # loop carrying only process demand.
+            #
+            # Both walks used to attribute it to every zone of the loop and
+            # AGREE about it, because the inward walk seeded
+            # `reliefComponents()` as well. That agreement was the
+            # invariant's blind spot rather than its evidence: independence
+            # had been traded for agreement in exactly one place, and this
+            # is the case it hid (Fable, `229` NB-1). The inward walk no
+            # longer seeds relief either, so the two agree here because they
+            # are both right.
+            return True
         if holder is not None:
             loop = holder.airLoopHVAC()
             if loop.is_initialized():
