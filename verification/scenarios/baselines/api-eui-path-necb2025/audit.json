@@ -209,7 +209,7 @@
  },
  {
   "step": "compliance",
-  "action": "unmet heating hours within 100 h for every one of 5 thermal block(s)",
+  "action": "unmet heating hours within 100 h for every one of 5 thermal block(s) with reported hours",
   "inputs": {
    "blocks": 5,
    "worst_block_h": 58.75,
