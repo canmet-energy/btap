@@ -334,6 +334,17 @@ def tb_non_vacuity(run_dir, side):
     return problems
 
 
+#: Provenance fields that describe the WHOLE corpus or are immutable
+#: records. A scoped freeze must carry each one forward unchanged. Declared
+#: as data so `python/tests/test_scoped_freeze.py` can mutate the set one
+#: field at a time and prove each is guarded — removing
+#: `final_cross_language_attestation` from an inline tuple left every scoped
+#: test green (Sol, `233`).
+CORPUS_WIDE_PROVENANCE = ("active_seals", "retired_seals",
+                          "final_cross_language_attestation",
+                          "attestation_note")
+
+
 def assemble_scope(frozen, carried, baselines, previous, all_ids, runner,
                    fail):
     """Carry the unselected baselines in, verify everything, return the set.
@@ -407,6 +418,93 @@ def assemble_scope(frozen, carried, baselines, previous, all_ids, runner,
              "manifest about to describe it:\n  "
              + "\n  ".join(staged_problems))
     return frozen
+
+
+def assemble_manifest(frozen, previous, carried, this_producer,
+                      active_seals, retired_seals, final_attestation,
+                      dirty, commit, runner, fail):
+    """Build the manifest and GUARD the corpus-wide fields a scope must keep.
+
+    Extracted from `main()` for the same reason as `assemble_scope()`: the
+    property could not be executed while it lived inside the function that
+    runs EnergyPlus. `231` required a witness for the seal, attestation and
+    `spec_sha256` half specifically, and `233` measured the gap — removing
+    `final_cross_language_attestation` from the guarded tuple left all
+    sixteen scoped-freeze tests green, because the only thing watching it
+    was a source-substring assertion.
+
+    `fail` is the caller's abort, so a test sees a refusal as an exception
+    rather than a process exit.
+    """
+    counts = {}
+    for sc in frozen:
+        counts[sc["lane"]] = counts.get(sc["lane"], 0) + 1
+    manifest = {
+        "version": 2,
+        "spec_sha256": runner.sha256(REPO_ROOT / "verification" / "spec.json"),
+        "provenance": {
+            # `commit` is INFORMATIONAL history: which commit produced this
+            # freeze. Nothing requires it to be reachable from a later HEAD
+            # (Sol, `227`) — that assertion proved only that a freeze commit
+            # remained in one Git lineage, and its two firings were
+            # self-created outages after squash merges rewrote the history it
+            # read.
+            "commit": commit, "dirty": dirty,
+            # The seven machinery hashes are GONE. A hash of `runner.py`
+            # proved that `runner.py` changed, not whether the change
+            # weakened comparison, and it made every file it covered
+            # expensive to touch: 28 of 89 manifest commits here touched no
+            # baseline file. The comparator's behaviour is tested directly in
+            # `python/tests/test_comparator_contract.py`.
+            #
+            # `spec_sha256` above is deliberately kept: it pins the
+            # adjudicated comparison RULES, which is a different claim from
+            # pinning the source of the code that applies them.
+            # WHO ran THIS freeze invocation. Per-scenario identity lives
+            # on each scenario entry as `produced_by`, because a scoped
+            # freeze leaves most baselines untouched and this block cannot
+            # describe them (Sol, `228`). A record, never a gate — no test
+            # compares either against the running machine, because a
+            # baseline frozen on one host must stay verifiable on another.
+            "openstudio_cli": this_producer["openstudio_cli"],
+            "producer": this_producer["producer"],
+            "producer_scope": ("this invocation only; see each scenario's "
+                               "`produced_by` for the baseline that bears "
+                               "it"),
+            "active_seals": active_seals,
+            "retired_seals": retired_seals,
+            "final_cross_language_attestation": final_attestation,
+            "attestation_note": "the final cross-language CI run validates "
+                                "its own ancestor commit; its immutable run "
+                                "identity is retained after product-Ruby retirement",
+        },
+        "corpus": {"generator": "python",
+                   "sample_manifest_sha256": runner.sha256(
+                       runner.PYTHON_ROOT / "scripts" / "sample_manifest.json")},
+        "counts": counts,
+        "scenarios": frozen,
+        "uncovered": scenario_defs.UNCOVERED,
+    }
+    # A SCOPED freeze may change only what it re-ran. These fields describe
+    # the whole corpus or are immutable records, so a scope that moves one has
+    # a bug — and the count guard in `assemble_scope` cannot see it, because
+    # the scenario count stays right while the content is destroyed.
+    if carried:
+        previous_provenance = previous["provenance"]
+        for field in CORPUS_WIDE_PROVENANCE:
+            if manifest["provenance"].get(field) != previous_provenance.get(field):
+                fail("refusing to promote: a scoped freeze changed "
+                     f"provenance.{field}, which describes the whole corpus "
+                     "rather than the scenarios re-run.\n"
+                     f"  was: {json.dumps(previous_provenance.get(field))}\n"
+                     f"  now: {json.dumps(manifest['provenance'].get(field))}\n"
+                     "D-84's attestation in particular is immutable (Sol, "
+                     "`227`).")
+        if manifest["spec_sha256"] != previous.get("spec_sha256"):
+            fail("refusing to promote: a scoped freeze changed spec_sha256. "
+                 "The comparison rules moved, so every baseline needs "
+                 "re-verifying — run a full freeze.")
+    return manifest
 
 
 def promote(staged_baselines, staged_manifest, dest_baselines,
@@ -799,75 +897,10 @@ def main():
     frozen = assemble_scope(frozen, carried, baselines, previous, all_ids,
                             runner, die)
 
-    counts = {}
-    for sc in frozen:
-        counts[sc["lane"]] = counts.get(sc["lane"], 0) + 1
-    manifest = {
-        "version": 2,
-        "spec_sha256": runner.sha256(REPO_ROOT / "verification" / "spec.json"),
-        "provenance": {
-            # `commit` is INFORMATIONAL history: which commit produced this
-            # freeze. Nothing requires it to be reachable from a later HEAD
-            # (Sol, `227`) — that assertion proved only that a freeze commit
-            # remained in one Git lineage, and its two firings were
-            # self-created outages after squash merges rewrote the history it
-            # read.
-            "commit": git("rev-parse", "HEAD"), "dirty": dirty,
-            # The seven machinery hashes are GONE. A hash of `runner.py`
-            # proved that `runner.py` changed, not whether the change
-            # weakened comparison, and it made every file it covered
-            # expensive to touch: 28 of 89 manifest commits here were
-            # hash-only re-freezes. The comparator's behaviour is tested
-            # directly in `python/tests/test_comparator_contract.py`.
-            #
-            # `spec_sha256` above is deliberately kept: it pins the
-            # adjudicated comparison RULES, which is a different claim from
-            # pinning the source of the code that applies them.
-            # WHO ran THIS freeze invocation. Per-scenario identity lives
-            # on each scenario entry as `produced_by`, because a scoped
-            # freeze leaves most baselines untouched and this block cannot
-            # describe them (Sol, `228`). A record, never a gate — no test
-            # compares either against the running machine, because a
-            # baseline frozen on one host must stay verifiable on another.
-            "openstudio_cli": this_producer["openstudio_cli"],
-            "producer": this_producer["producer"],
-            "producer_scope": ("this invocation only; see each scenario's "
-                               "`produced_by` for the baseline that bears "
-                               "it"),
-            "active_seals": active_seals,
-            "retired_seals": retired_seals,
-            "final_cross_language_attestation": final_attestation,
-            "attestation_note": "the final cross-language CI run validates "
-                                "its own ancestor commit; its immutable run "
-                                "identity is retained after product-Ruby retirement",
-        },
-        "corpus": {"generator": "python",
-                   "sample_manifest_sha256": runner.sha256(
-                       runner.PYTHON_ROOT / "scripts" / "sample_manifest.json")},
-        "counts": counts,
-        "scenarios": frozen,
-        "uncovered": scenario_defs.UNCOVERED,
-    }
-    # A SCOPED freeze may change only what it re-ran. These fields describe
-    # the whole corpus or are immutable records, so a scope that moves one has
-    # a bug — and the count guard above cannot see it, because the scenario
-    # count stays right while the content is destroyed.
-    if carried:
-        previous_provenance = previous["provenance"]
-        for field in ("active_seals", "retired_seals",
-                      "final_cross_language_attestation", "attestation_note"):
-            if manifest["provenance"].get(field) != previous_provenance.get(field):
-                die("refusing to promote: a scoped freeze changed "
-                    f"provenance.{field}, which describes the whole corpus "
-                    "rather than the scenarios re-run.\n"
-                    f"  was: {json.dumps(previous_provenance.get(field))}\n"
-                    f"  now: {json.dumps(manifest['provenance'].get(field))}\n"
-                    "D-84's attestation in particular is immutable (Sol, "
-                    "`227`).")
-        if manifest["spec_sha256"] != previous.get("spec_sha256"):
-            die("refusing to promote: a scoped freeze changed spec_sha256. "
-                "The comparison rules moved, so every baseline needs "
-                "re-verifying — run a full freeze.")
+    manifest = assemble_manifest(
+        frozen, previous, carried, this_producer, active_seals,
+        retired_seals, final_attestation, dirty, git("rev-parse", "HEAD"),
+        runner, die)
 
     (staging / "manifest.json").write_text(
         json.dumps(manifest, indent=1) + "\n", encoding="utf-8")
@@ -875,7 +908,7 @@ def main():
     promote(baselines, staging / "manifest.json",
             runner.BASELINES, runner.MANIFEST)
     print(f"frozen {len(frozen)} scenarios "
-            f"({counts}), active seals {active_seals}, "
+            f"({manifest['counts']}), active seals {active_seals}, "
             f"retired seals {retired_seals}; manifest written")
 
 

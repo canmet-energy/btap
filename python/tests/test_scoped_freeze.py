@@ -383,3 +383,160 @@ class TestTheScopedFreezePOSITIVEPath(unittest.TestCase):
             self._assemble()
         self.assertIn("rerun-c", str(caught.exception))
         self.assertIn("the staged tree does not match", str(caught.exception))
+
+
+class TestTheScopedProvenanceGuardEXECUTES(unittest.TestCase):
+    """The corpus-wide half of a scoped freeze, driven rather than grepped.
+
+    `assemble_scope()` covers the scenario TREE. It ends before manifest
+    provenance is assembled, so the seals, the D-84 attestation and
+    `spec_sha256` were watched only by a source-substring assertion — and
+    `233` measured what that is worth: removing
+    `final_cross_language_attestation` from the guarded tuple left all
+    sixteen scoped-freeze tests green.
+
+    `assemble_manifest()` is extracted for this, and `CORPUS_WIDE_PROVENANCE`
+    is data so each field can be dropped from the guard one at a time.
+    """
+
+    #: A previous manifest carrying the records a scope must not touch. The
+    #: attestation is D-84's, which `227` ruled immutable in terms.
+    ATTESTATION = {
+        "commit": "85ab14352677093e24038d933cf1071e5b03431a",
+        "run_id": "33544573991",
+        "ruby_parity_runs": 45, "ruby_parity_assertions": 629,
+    }
+
+    def setUp(self):
+        self.freeze = _load_freeze()
+        self.runner = self.freeze.runner
+        self.previous = {
+            "spec_sha256": self.runner.sha256(
+                REPO_ROOT / "verification" / "spec.json"),
+            "provenance": {
+                "active_seals": {"python-only": 23,
+                                 "python-only:post-handoff": 31},
+                "retired_seals": {"ruby": 29, "ruby-api": 2},
+                "final_cross_language_attestation": dict(self.ATTESTATION),
+                "attestation_note": "the final cross-language CI run "
+                                    "validates its own ancestor commit; its "
+                                    "immutable run identity is retained "
+                                    "after product-Ruby retirement",
+            },
+            "scenarios": [],
+        }
+        self.frozen = [{"id": "a", "lane": "python", "files": [],
+                        "baseline_sha256": {}}]
+
+    def _assemble(self, *, carried=True, **overrides):
+        def fail(message):
+            raise AssertionError(message)
+
+        kwargs = {
+            "frozen": self.frozen,
+            "previous": self.previous,
+            "carried": [{"id": "b"}] if carried else [],
+            "this_producer": {"openstudio_cli": "3.11.0",
+                              "producer": "P1"},
+            "active_seals": dict(
+                self.previous["provenance"]["active_seals"]),
+            "retired_seals": dict(
+                self.previous["provenance"]["retired_seals"]),
+            "final_attestation": dict(self.ATTESTATION),
+            "dirty": "", "commit": "deadbeef",
+            "runner": self.runner, "fail": fail,
+        }
+        kwargs.update(overrides)
+        return self.freeze.assemble_manifest(**kwargs)
+
+    def test_a_scope_that_keeps_everything_is_accepted(self):
+        """The control. Without it, "refuse always" passes every test below."""
+        manifest = self._assemble()
+        provenance = manifest["provenance"]
+        self.assertEqual(self.ATTESTATION,
+                         provenance["final_cross_language_attestation"])
+        self.assertEqual({"python-only": 23,
+                          "python-only:post-handoff": 31},
+                         provenance["active_seals"])
+        self.assertEqual({"ruby": 29, "ruby-api": 2},
+                         provenance["retired_seals"])
+        self.assertEqual(self.previous["spec_sha256"],
+                         manifest["spec_sha256"])
+        self.assertEqual("P1", provenance["producer"])
+        self.assertIn("this invocation only", provenance["producer_scope"],
+                      "the global block must say it speaks for this "
+                      "invocation and point at the per-scenario field")
+
+    def test_each_CORPUS_WIDE_field_is_refused_when_a_scope_moves_it(self):
+        """One case per guarded field, so none can be dropped unnoticed."""
+        moved = {
+            "active_seals": {"active_seals": {"python-only": 1}},
+            "retired_seals": {"retired_seals": {}},
+            "final_cross_language_attestation": {
+                "final_attestation": {"commit": "0" * 40, "run_id": "1"}},
+        }
+        for field, override in moved.items():
+            with self.subTest(field=field):
+                self.assertIn(field, self.freeze.CORPUS_WIDE_PROVENANCE,
+                              f"{field} must be in the guarded set")
+                with self.assertRaises(AssertionError) as caught:
+                    self._assemble(**override)
+                self.assertIn(field, str(caught.exception))
+                self.assertIn("refusing to promote", str(caught.exception))
+
+    def test_a_moved_attestation_NOTE_is_refused_too(self):
+        """The fourth guarded field, which had no case until it was measured.
+
+        `attestation_note` is a literal in `assemble_manifest`, so a scope
+        cannot move it by passing a different value — which is why it needed
+        a different shape of case. What CAN move is the previous manifest's
+        copy: if the note's wording is edited in the source, a scoped freeze
+        would rewrite the committed record silently.
+
+        Dropping it from `CORPUS_WIDE_PROVENANCE` left all 21 tests green,
+        which is the same hole Sol found for the attestation itself one
+        field over.
+        """
+        self.previous["provenance"]["attestation_note"] = (
+            "an older wording of the same record")
+        with self.assertRaises(AssertionError) as caught:
+            self._assemble()
+        self.assertIn("attestation_note", str(caught.exception))
+        self.assertIn("refusing to promote", str(caught.exception))
+
+    def test_the_D_84_attestation_is_refused_by_NAME(self):
+        """D-84's record is the one `227` ruled immutable in terms.
+
+        This is the field whose guard `233` removed with no test noticing.
+        """
+        with self.assertRaises(AssertionError) as caught:
+            self._assemble(final_attestation={"commit": "0" * 40})
+        message = str(caught.exception)
+        self.assertIn("final_cross_language_attestation", message)
+        self.assertIn("immutable", message,
+                      "the refusal must say WHY, or a maintainer reads it as "
+                      "a stale-cache problem and re-runs the freeze")
+
+    def test_a_moved_spec_sha256_refuses_a_scope(self):
+        """The comparison rules moved, so no scope can establish the rest."""
+        self.previous["spec_sha256"] = "0" * 64
+        with self.assertRaises(AssertionError) as caught:
+            self._assemble()
+        self.assertIn("spec_sha256", str(caught.exception))
+        self.assertIn("run a full freeze", str(caught.exception))
+
+    def test_a_FULL_freeze_may_move_all_of_them(self):
+        """The guard is for a SCOPE. A full freeze owns the whole corpus.
+
+        Without this, guarding unconditionally would pass every test above
+        while making a legitimate re-seal impossible.
+        """
+        manifest = self._assemble(
+            carried=False,
+            active_seals={"python-only": 99},
+            final_attestation={"commit": "1" * 40, "run_id": "2"})
+        self.assertEqual({"python-only": 99},
+                         manifest["provenance"]["active_seals"])
+        self.assertEqual({"commit": "1" * 40, "run_id": "2"},
+                         manifest["provenance"]
+                         ["final_cross_language_attestation"])

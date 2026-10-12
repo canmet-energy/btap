@@ -256,8 +256,12 @@ is a long job — and a full re-freeze for one moved output is what made the
 corpus expensive enough to defer correctness fixes (D-103).
 
 ```bash
-"$PY" ../verification/scenarios/freeze.py --scenario verdict-compliant
-"$PY" ../verification/scenarios/freeze.py --scenario a --scenario b
+# From the repository root, with the venv's python — self-contained, unlike
+# the worktree recipe further down which assigns $PY first.
+PYTHONPATH=python python/.venv/bin/python \
+  verification/scenarios/freeze.py --scenario verdict-compliant
+PYTHONPATH=python python/.venv/bin/python \
+  verification/scenarios/freeze.py --scenario a --scenario b
 ```
 
 What it guarantees, and what it refuses:
@@ -278,8 +282,22 @@ What it guarantees, and what it refuses:
 - It refuses outright if `spec.json` moved: the comparison rules changed, so
   every baseline needs re-verifying and a scope cannot establish that.
 
-`python/tests/test_scoped_freeze.py` executes all of these against
-`assemble_scope()` with no engine. No CI job runs `--scenario` itself.
+`python/tests/test_scoped_freeze.py` executes these with no engine, against
+two extracted helpers — and it is worth knowing which half you are relying
+on:
+
+- `assemble_scope()` owns the scenario TREE: carried bytes and hashes, the
+  per-scenario `produced_by`, the refusals, and completeness.
+- `assemble_manifest()` owns the CORPUS-WIDE provenance: the seal tallies,
+  D-84's attestation, `attestation_note` and `spec_sha256`. Each guarded
+  field has its own case, and dropping any one from
+  `CORPUS_WIDE_PROVENANCE` fails a named test.
+- Unselected-definition DRIFT is still source-inspected, not executed. It
+  lives in `main()` beside the selection, and the module docstring labels it
+  as the weaker evidence it is.
+
+**No CI job runs `--scenario` itself**, so the above is the whole of its
+automated evidence.
 
 **"Clean" includes untracked files, so freeze in a `git worktree`.** `freeze.py`
 refuses on `git status --porcelain`, which lists untracked paths — and this
