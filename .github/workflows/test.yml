@@ -448,14 +448,11 @@ jobs:
           - run: ${RUN_URL}
           - lint: ${LINT} · python: ${PYTHON} · verify: ${VERIFY}
 
-          **Check the frozen-manifest provenance first.** The known cause of a
-          main-only failure is D-95: a PR carrying a re-freeze was SQUASH-merged,
-          so the commit \`freeze.py\` recorded is no longer an ancestor of
-          \`HEAD\` and \`test_manifest_integrity\` fails on \`main\` while every
-          branch check was green. (Rebase was the other route; it is disabled on
-          this repository. Squash is the one still available and still wrong for
-          these PRs.) Recovery is a re-freeze from this commit and a minimal
-          re-pin — see [D-95](${REPO_URL}/blob/main/docs/necb_decisions.md#d-95).
+          **Check which lane failed first.** A main-only failure usually
+          means a lane that PRs skip: \`verify\`, \`parity\` and
+          \`parity-scenarios\` are dispatch-only, so a PR-green change can
+          still move them. Identify the job and its lane before assuming a
+          cause.
 
           Under D-94 the work item that caused this is not closed until a push
           run on \`main\` is green. This issue closes itself when one is.

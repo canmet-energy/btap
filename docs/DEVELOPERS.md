@@ -250,6 +250,55 @@ When a deliberate behaviour change affects output, run
 `verification/scenarios/freeze.py` from a clean tree and commit the resulting
 baselines and provenance with the change.
 
+**`--scenario ID` re-freezes one scenario and carries the rest forward.**
+Repeatable. Without it every scenario is re-run, which for the annual lanes
+is a long job — and a full re-freeze for one moved output is what made the
+corpus expensive enough to defer correctness fixes (D-103).
+
+```bash
+# From the repository root, with the venv's python — self-contained, unlike
+# the worktree recipe further down which assigns $PY first.
+PYTHONPATH=python python/.venv/bin/python \
+  verification/scenarios/freeze.py --scenario verdict-compliant
+PYTHONPATH=python python/.venv/bin/python \
+  verification/scenarios/freeze.py --scenario a --scenario b
+```
+
+What it guarantees, and what it refuses:
+
+- A carried entry keeps its own bytes, hashes, definition and
+  `produced_by` — the producer identity is PER SCENARIO, so a scope on one
+  host does not relabel 53 baselines made on another.
+- Corpus-wide facts — seal tallies, `final_cross_language_attestation`,
+  `spec_sha256` — are computed from EVERY scenario, not the subset, and a
+  field-level guard refuses if a scope would change one.
+- It refuses if the staged tree disagrees with the manifest about to
+  describe it: a corrupted carried baseline, an undeclared file or
+  subdirectory, or a re-run entry whose own hash is wrong.
+- It refuses if the manifest would describe fewer scenarios than are
+  defined, because the promotion replaces the whole directory.
+- If an UNSELECTED definition changed since the last freeze, that scenario
+  is added to the selected set and re-run rather than carried stale.
+- It refuses outright if `spec.json` moved: the comparison rules changed, so
+  every baseline needs re-verifying and a scope cannot establish that.
+
+`python/tests/test_scoped_freeze.py` executes these with no engine, against
+two extracted helpers — and it is worth knowing which half you are relying
+on:
+
+- `assemble_scope()` owns the scenario TREE: carried bytes and hashes, the
+  per-scenario `produced_by`, the refusals, and completeness.
+- `assemble_manifest()` owns the CORPUS-WIDE provenance: the seal tallies,
+  D-84's attestation, `attestation_note` and `spec_sha256`. Each guarded
+  field has its own case, and dropping any one from
+  `CORPUS_WIDE_PROVENANCE` fails a named test.
+- Unselected-definition DRIFT is still source-inspected, not executed. It
+  lives in `main()` beside the selection, and the module docstring labels it
+  as the weaker evidence it is.
+
+**No CI job runs `--scenario` itself**, so the above is the whole of its
+automated evidence.
+
 **"Clean" includes untracked files, so freeze in a `git worktree`.** `freeze.py`
 refuses on `git status --porcelain`, which lists untracked paths — and this
 repository normally has other people's work-in-progress sitting in the tree, so
@@ -410,31 +459,32 @@ human believes it. Sol ruled the strict predicate stays (2026-10-04): an
 untracked `conftest.py`, `sitecustomize.py`, `.pth` or globbed data file can all
 affect a run, so tracked-only cleanliness would weaken the provenance claim.
 
-**Merge a freeze-carrying PR with GitHub's "Create a merge commit" (D-95).** A
-PR that changes frozen baselines or the manifest provenance counts as
-freeze-carrying — look for `manifest.json` or `baselines/` in the diff.
-`freeze.py` records the commit it ran at — a branch commit — and
-`test_manifest_integrity` requires that commit to be an ancestor of `HEAD`,
-which is a separate claim from the content hashes the manifest already pins.
+**Any merge method is now fine for a freeze-carrying PR (D-103).** This used
+to say "Create a merge commit", because `freeze.py` recorded the commit it
+ran at and `test_manifest_integrity` required that commit to be an ancestor of
+`HEAD`. A squash gives the merged commit a new SHA, so the recorded pointer
+stopped being an ancestor and `main` went red *after* the merge while every
+branch check was green. That happened twice, for three days across two merges.
 
-**Neither "Squash and merge" nor "Rebase and merge" will do.** Both give the
-merged commit a new SHA, so the recorded branch commit is no longer an
-ancestor and `main` goes red *after* the merge while every branch check was
-green. Rebase merging is disabled on this repository, so that route is closed
-mechanically — but it is the route that never bit: both measured breakages were
-squashes, and the squash button is still there and still wrong for these PRs.
-This is not theoretical: `main` failed that way for three days across two
-merges, with a different stale pointer each time.
+The ancestry assertion is gone, with the recorded pointer and the machinery
+hashes, because none of them was ever recorded first discovering a wrong
+compliance behaviour — they discovered facts about Git. What the manifest
+pins is content: every baseline's sha256, the comparison spec's sha256, and
+the authored scenario definitions compared against the records CI executes.
+A squash does not move any of those, so it can no longer produce that
+failure.
 
-When it does happen the `main-red` job opens an issue naming the run and this
-recovery path, assigned to `vars.MAIN_RED_ASSIGNEE` (or whoever pushed), and
-closes it again when a push run on `main` is green. It tells someone; it does
-not block anything.
+Squash freely. Rebase merging is still disabled on this repository, which is
+incidental now rather than load-bearing.
 
-If one is squash- or rebase-merged by mistake, re-freeze from the resulting `main` commit
-and submit the minimal re-pin immediately; a pure repair moves only provenance
-metadata and no baseline. And check the post-merge `main` run before calling
-the work done — green PR-head CI is a different claim (D-94).
+The `main-red` job opens an issue naming the run and the lane that failed,
+assigned to `vars.MAIN_RED_ASSIGNEE` (or whoever pushed), and closes it again
+when a push run on `main` is green. It tells someone; it does not block
+anything.
+
+**Check the post-merge `main` run before calling the work done.** Green
+PR-head CI is a different claim, and D-94's stop condition is the `main` run
+— which is independent of merge method and survives this retirement.
 
 The 31 scenarios that once had live
 Ruby seals are now `python-only:post-handoff` and retain their retired seal plus

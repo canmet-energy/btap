@@ -150,6 +150,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-100** — AHJ dispositions are cited by the deciding rule site; the determination owns only policy _(runtime)_
 - **D-101** — The thermal block is the selection unit; plant, election and disclosure scopes stay larger _(runtime)_
 - **D-102** — The Code states EIR_FPLR; EnergyPlus carries PLF in [0.7, 1.0], and the gaps at BOTH carrier edges are declared _(runtime)_
+- **D-103** — Verification evidence is a property of behaviour, not of Git lineage or of machinery source hashes _(process)_
 
 <!-- TOC END -->
 
@@ -7447,3 +7448,175 @@ surface, one computed comparison. Git holds the history; `df4e500..f524dbe` on
   (4)-(6), and EnergyPlus 25.2.0 `src/EnergyPlus/DXCoils.cc` for the field's
   sampling range and `[0.7, 1.0]` requirement. Two domains, cited separately,
   because neither alone settles this.
+
+<a id="d-103"></a>
+
+## D-103 — Verification evidence is a property of behaviour, not of Git lineage or of machinery source hashes
+
+**Decided 2026-10-12.** Fable critiqued the whole verification and review
+framework (`226`); Sol ruled on it (`227`); phylroy asked for both and adopted
+the ruling. This decision records it prospectively. It retracts nothing that
+D-84, D-94 or D-95 claimed at the time they were written.
+
+### What the evidence was
+
+Two things are recorded separately here, because they have different
+standing: what Fable reported, and what Sol independently verified.
+
+**Fable's reported classification** (`226`), across PRs #98, #100, #101 and
+#102: 175 findings in 32 review files; 35 product defects, two of them
+pre-existing; **74 about the instrument** — 50 in verification code and 24 in
+fixes to verification code; and PR #98 closing with no in-scope product
+defect, its product change right at its first commit. He also reports that
+every one of the 35 was found by a reviewer hand-building a hostile input.
+
+**What Sol verified** (`227`): 32 review files totalling 4,532 lines; the
+manifest and baseline churn; the approximate verification-to-product ratio;
+and no traced counterexample to the claim that an independent witness was the
+first detector in every case. He expressly declined to certify the exact
+taxonomy without its row-level ledger, noted repeated carry-forward findings
+and the product/artifact boundary, and judged "hand-building" too literal for
+the existing-VRF-corpus cross-check.
+
+So the 175/35/74 split is Fable's count, not an audited one, and this
+decision does not rest on it. What it rests on is the verified part: the
+independent-witness finding, the churn, and the ratio.
+
+Sol corrected the strongest form of the catch claim, and the corrected form
+is the one adopted here:
+
+> No documented case exists in which the ancestry gate, a machinery hash, a
+> result hash, a byte-equality seal or a citation count FIRST discovered a
+> wrong compliance behaviour.
+
+Not "never caught anything". The decisions gate caught a stale regenerate
+before a commit (`02e7f893`); the R6/R7 chain caught one wrong live code
+pointer (`67ffbf32`); the ancestry gate fired twice, exactly as designed, on
+squash-merge lineage violations. Those were real. They were also not what the
+mechanisms cost.
+
+The cost, as measured: 28 of 89 manifest commits touched no baseline file at
+all. One coverage wording change re-froze 90 baseline files. A single
+coverage data row sat behind fourteen gates. Verification code is roughly
+1.45× product code.
+
+### The diagnosis
+
+Effort grows without bound where a check's oracle is DERIVED FROM THE SUBJECT
+it checks. A hash of `runner.py` asks whether `runner.py` is what it was, and
+a reader wanting to know whether comparison still works gets no answer. Four
+independent oracles exist in this repository — the Code payload, the
+OpenStudio object graph, prior behaviour, and data-to-code correspondence —
+and most of the verification tier consults none of them. Where one was
+consulted, checks were cheap and bit on first contact.
+
+### Retired
+
+**The current-freeze ancestry gate.** `provenance.commit` being reachable from
+the present `HEAD` proves that a freeze commit remains in one Git lineage. It
+does not prove the Code interpretation is right, that the current runner
+executed the scenario, that the baseline represents the current product, or
+that a report tells an authority the truth. Both of its firings were
+self-created outages: it rejected unchanged behaviour because a squash merge
+had rewritten the history it read. An AHJ-facing report loses nothing when an
+old freeze commit stops being an ancestor. `provenance.commit` stays as
+informational history; nothing requires it to be reachable.
+
+**D-95's active merge-method exception.** It existed only to keep that
+assertion executable. Freeze-carrying PRs may merge by any method.
+
+**Issue #99's `--unshallow` lock, the `fetch-depth: 0` requirement, and the
+job-classification seal.** Same reason. The seal had thirteen known escapes
+across four review rounds, each closed by widening it, and the room it was
+sealing is now empty.
+
+**The seven machinery source hashes** — `freezer_sha256`, `defs_sha256`,
+`runner_sha256`, `api_worker_sha256`, `compare_runs_sha256`,
+`audit_scenario_sha256`, `gate_sha256`. Replaced BEFORE deletion by
+`python/tests/test_comparator_contract.py`, which tests the comparator's
+contract case by case: changed, added and removed baseline files; added and
+removed mapping keys; booleans, strings, numbers, null and nested containers;
+list order where order is significant; each tolerance boundary inside and
+outside; every stripped-key class; exact exit status; and the
+compliance-critical fields that may never be stripped or made tolerant.
+
+That file carries two assertions about itself, because a guard that cannot
+fail is the defect this decision exists to stop: each mutation must break
+EXACTLY its named cases, and every case that EXPECTS A DIFFERENCE must be
+broken by some mutation.
+
+The qualifier is load-bearing and the first version of this paragraph
+dropped it, claiming "every case" while the test filters to `c.differs`
+(Sol, `231`). An agreement case — a tolerated float, an absent key equal to
+an explicit null — cannot be broken by DISABLING a clause, because disabling
+a clause only ever removes reports. It would take a TIGHTENING mutation, and
+those are a different instrument: the agreement cases are defended by the
+other half of the same test, which fails if a satisfying input is reported.
+Two of them are now paired with a difference case in the SAME field, so
+neither half can be satisfied by exempting the field.
+
+**`main-red`'s ancestry-specific diagnosis.** The incident lifecycle stays.
+Main being green matters for reasons much broader than D-95.
+
+### Kept, and why a report reader needs them
+
+- **Per-file baseline hashes and behaviour comparison.** These establish which
+  bytes were approved and whether present behaviour still agrees.
+- **`spec_sha256`.** It pins the adjudicated comparison RULES. That is a
+  different claim from pinning the source of the code that applies them, and a
+  silent tolerance change under frozen baselines is exactly what it catches.
+- **Authored semantic expectations.** Both documented frozen-corpus catches
+  came through these, not through byte equality.
+- **Archived normative-source hashes**, so a Code payload cannot be swapped
+  under a citation.
+- **D-84's final cross-language attestation. IMMUTABLE.** Its commit and
+  Actions run validate that historical commit. They do not need to be
+  ancestors of any future commit, and the record may be neither reduced nor
+  recreated. A scoped freeze destroyed it once during this work and was
+  caught by reading a diff; `freeze.py` now refuses to promote a scope that
+  moves it.
+- **Orphan-key detection and coverage pointer resolution**, which consult
+  data-to-code correspondence and have caught real defects.
+- **Citation VALIDITY.** The three citation COUNT baselines are kept for now
+  and may be deleted only when a semantic no-loss replacement lands.
+
+### Still open at the time of this decision
+
+The R6/R7 ledgers ARE TO BE closed and archived rather than deleted, in a
+later change: at this head `test_coverage_code_refs.py` still actively chains
+both mappings and the retirements file to the live manifests and still sums to
+313, so the repository is not yet in that state. The post-R7 additions file
+required in `220` is withdrawn prospectively. The TOML-canonical migration for the AHJ register and the
+decision sources, the removal of the generated JSON runtime projections, and
+the installed-wheel semantic verification that would replace the edition
+result hash are approved in principle and not yet done.
+
+### What supersedes what
+
+D-94's review loop stands, with its merged-main stop condition kept for its
+general value and its ancestry rationale retired. D-95's ACTIVE enforcement —
+the merge-method exception — is superseded; its record of the two squash
+incidents stands, because they happened. Neither decision is rewritten: both
+made their claims honestly on the evidence then available.
+
+### The review-loop change adopted with this
+
+A blocker is, by default, a failing test or minimal reproducer at a named
+head — not prose. For an unresolved Code reading a test cannot decide the
+question, so an admissible blocker there is the normative text, the product's
+output, the contradiction, and the requested adjudication; once adjudicated,
+the accepted rule becomes a test before the fix clears. A contested
+interpretation is never encoded in a test and then cited as the authority.
+
+A guard hole does not block merely because a further syntactic variant
+exists. It is filed when the current output is right, the PR is not selling
+that guard as its primary property, and an independent witness already pins
+the behaviour. For a verification-only PR, failure of the guard it exists to
+provide remains a blocker in the first adversarial round, and further
+variants of the same class are filed.
+
+First review is parallel; Sol owns normative interpretation and report
+meaning, Fable owns adversarial implementation; the reviewer who raised the
+last accepted blocker clears its fix. After review begins, a fix round may
+change behaviour only to satisfy an accepted reproducer or an adjudicated
+property — a newly discovered unrelated change gets its own issue.

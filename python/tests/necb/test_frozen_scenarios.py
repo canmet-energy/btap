@@ -13,6 +13,7 @@ FAILURE naming the remedy.
 """
 
 import importlib.util
+import json
 import os
 import tempfile
 import unittest
@@ -21,6 +22,10 @@ from pathlib import Path
 from tests.support import REPO_ROOT
 
 SCENARIOS_DIR = REPO_ROOT / "verification" / "scenarios"
+
+#: Keys `freeze.py` ADDS to an authored scenario definition. Everything else
+#: in a manifest entry must equal what `scenario_defs.py` declares today.
+GENERATED_SCENARIO_KEYS = frozenset({"baseline_sha256", "produced_by"})
 LANES = tuple(os.environ.get("BTAP_SCENARIO_LANES", "python").split(","))
 REQUIRED = os.environ.get("BTAP_SCENARIOS_REQUIRED") == "1"
 
@@ -45,6 +50,8 @@ class TestFrozenScenarios(unittest.TestCase):
             raise unittest.SkipTest(msg + " (BTAP_SCENARIOS_REQUIRED=1 "
                                     "makes this a failure)")
         cls.runner = _load("scenario_runner", SCENARIOS_DIR / "runner.py")
+        cls.defs = _load("scenario_defs_gate",
+                         SCENARIOS_DIR / "scenario_defs.py")
         cls.manifest = cls.runner.load_manifest()
         cls.cr = cls.runner.load_compare_runs()
         cls.spec = cls.cr.load_spec(REPO_ROOT / "verification" / "spec.json")
@@ -54,35 +61,103 @@ class TestFrozenScenarios(unittest.TestCase):
     def tearDownClass(cls):
         cls.scratch.cleanup()
 
+    def test_the_generated_key_set_matches_the_PRODUCER(self):
+        """The gate and `freeze.py` must agree on what the freeze adds.
+
+        Both carry `GENERATED_SCENARIO_KEYS`, and the exact
+        definitions-to-manifest comparison is only sound while they do: a key
+        the producer adds and the gate does not exclude fails every scenario,
+        and a key the gate excludes without the producer adding it silently
+        stops being compared. Two copies of one fact, so the fact is
+        asserted.
+        """
+        source = (SCENARIOS_DIR / "freeze.py").read_text(encoding="utf-8")
+        for key in sorted(GENERATED_SCENARIO_KEYS):
+            with self.subTest(key=key):
+                self.assertIn(
+                    f'"{key}"', source,
+                    f"the gate excludes {key!r} from the contract "
+                    "comparison, but freeze.py never writes it — so a real "
+                    "authored field by that name would stop being checked")
+        self.assertIn(
+            "GENERATED_SCENARIO_KEYS = frozenset({\"baseline_sha256\", "
+            "\"produced_by\"})", source,
+            "freeze.py must declare the same generated-key set this gate "
+            "uses; if it diverges, the exact comparison is unsound in one "
+            "direction or the other")
+
     def test_manifest_integrity(self):
         """Runs in EVERY lane: schema sanity, spec hash pin, per-scenario
-        baseline existence + sha256, provenance ancestry."""
+        baseline existence + sha256, and the authored definitions compared
+        against the records CI executes.
+
+        NOT provenance ancestry. That assertion is gone with D-103, and this
+        docstring still named it (Sol, `231`); `provenance.commit` is a
+        record now, compared against nothing.
+        """
         m = self.manifest
         self.assertEqual(m["spec_sha256"],
                          self.runner.sha256(REPO_ROOT / "verification" / "spec.json"),
                          "verification/spec.json changed after the freeze — "
                          "an adjudicated re-freeze is required, never a "
                          "silent rules change under frozen baselines")
-        # The interpreter machinery is pinned (review High): the code that
-        # executes, normalizes, and compares frozen baselines must be the
-        # code that froze them — a change here is a behaviour change and
-        # demands an adjudicated re-freeze, never a silent reinterpretation.
-        machinery = {
-            "freezer_sha256": SCENARIOS_DIR / "freeze.py",
-            "defs_sha256": SCENARIOS_DIR / "scenario_defs.py",
-            "runner_sha256": SCENARIOS_DIR / "runner.py",
-            "api_worker_sha256": SCENARIOS_DIR / "api_worker.py",
-            "compare_runs_sha256": REPO_ROOT / "verification" / "compare_runs.py",
-            "audit_scenario_sha256": SCENARIOS_DIR / "audit_scenario.py",
-            "gate_sha256": Path(__file__),
-        }
-        for key, path in machinery.items():
-            self.assertEqual(
-                m["provenance"].get(key), self.runner.sha256(path),
-                f"{path.name} changed after the freeze ({key}) — the frozen "
-                "baselines' INTERPRETER moved under them; re-run "
-                "verification/scenarios/freeze.py (adjudicated) so the "
-                "machinery and the baselines are pinned together")
+        # The seven machinery hashes that used to be asserted here —
+        # `freezer_sha256`, `defs_sha256`, `runner_sha256`,
+        # `api_worker_sha256`, `compare_runs_sha256`, `audit_scenario_sha256`
+        # and `gate_sha256` — are gone (Sol, `227`). A hash of `runner.py`
+        # proved that `runner.py` changed, not that the change weakened
+        # comparison; 28 of 89 manifest commits touched no baseline file, a
+        # comment-level edit re-froze 54 scenarios, and the coupling deferred
+        # issue #99's lock for rounds. The property they reached for is now
+        # tested directly in `python/tests/test_comparator_contract.py`, case
+        # by case, with each case shown to go red on its own mutation.
+        #
+        # `spec_sha256` STAYS: it pins the adjudicated comparison RULES, not
+        # the source of the code that applies them, and a silent tolerance
+        # change under frozen baselines is exactly what it catches.
+        # The AUTHORED definitions must still be the ones the manifest
+        # describes. This is the semantic replacement for `defs_sha256`, and
+        # it is a stronger claim than that hash made: a hash said
+        # `scenario_defs.py` was unchanged, this says every scenario CI
+        # executes is the scenario the file currently declares.
+        #
+        # Without it, editing an authored contract is silently ignored —
+        # Sol (`228`) changed `usage-unknown-flag`'s `expect_exit` from 2 to
+        # 99 and every manifest test stayed green while CI kept running the
+        # stored 2. The same escape covered a changed command, lane, file
+        # contract, assertion, timeout or seal.
+        #
+        # The freeze adds exactly two keys — `baseline_sha256` and
+        # `produced_by` — so the comparison is exact rather than a field
+        # allowlist that drifts. A new generated key must be added HERE
+        # deliberately; forgetting makes this test fail rather than start
+        # ignoring a contract.
+        slugs = json.loads(
+            (self.runner.PYTHON_ROOT / "scripts" / "sample_manifest.json")
+            .read_text(encoding="utf-8"))["samples"]
+        authored = {s["id"]: s for s in self.defs.all_scenarios(slugs)}
+        stored = {s["id"]: s for s in m["scenarios"]}
+        self.assertEqual(
+            sorted(authored), sorted(stored),
+            "the authored scenario set and the frozen manifest disagree "
+            "about which scenarios exist — a definition was added or "
+            "removed without a re-freeze")
+        contract_drift = []
+        for scenario_id, entry in sorted(stored.items()):
+            trimmed = {key: value for key, value in entry.items()
+                       if key not in GENERATED_SCENARIO_KEYS}
+            if trimmed != authored[scenario_id]:
+                moved = sorted(
+                    key for key in set(trimmed) | set(authored[scenario_id])
+                    if trimmed.get(key) != authored[scenario_id].get(key))
+                contract_drift.append(f"{scenario_id}: {moved}")
+        self.assertEqual(
+            [], contract_drift,
+            "these scenarios' AUTHORED contracts no longer match what the "
+            "manifest froze, so CI is executing the old contract:\n  "
+            + "\n  ".join(contract_drift)
+            + "\nRe-freeze them (freeze.py --scenario <id> ...), or revert "
+              "the definition.")
 
         ids = [s["id"] for s in m["scenarios"]]
         self.assertEqual(len(ids), len(set(ids)), "duplicate scenario ids")
@@ -95,59 +170,26 @@ class TestFrozenScenarios(unittest.TestCase):
         for s in m["scenarios"]:
             problems.extend(self.runner.verify_baselines(s, m))
         self.assertEqual([], problems, "\n".join(problems))
-        import subprocess
-        commit = m["provenance"]["commit"]
-
-        def is_ancestor():
-            return subprocess.run(
-                ["git", "-C", str(REPO_ROOT), "merge-base", "--is-ancestor",
-                 commit, "HEAD"], capture_output=True, check=False).returncode
-
-        def shallow():
-            done = subprocess.run(
-                ["git", "-C", str(REPO_ROOT), "rev-parse",
-                 "--is-shallow-repository"], capture_output=True, check=False)
-            return done.stdout.decode().strip() == "true"
-
-        rc = is_ancestor()
-        # A SHALLOW clone cannot answer this, and it does not say so: git
-        # returns 128 when the object is missing entirely, but 1 — the same
-        # code as a genuine "no" — for a commit that IS present and sits
-        # beyond the graft boundary, because it cannot walk past it. Recovering
-        # on 128 alone therefore believed a traversal that never happened.
+        # The provenance ancestry assertion that used to close this method
+        # is DELETED (Sol, `227`). `provenance.commit` being reachable from
+        # the present HEAD proved only that a freeze commit remained in one
+        # Git lineage. It did not prove the Code interpretation was right,
+        # that the current runner executed the scenario, that the baseline
+        # represents the current product, or that a report tells an authority
+        # the truth. Per-file hashes establish which bytes were approved and
+        # running the current product against them establishes whether
+        # behaviour still agrees; "made on this line of history" is
+        # repository bookkeeping, not a compliance property.
         #
-        # The consequence was worse than a skipped check. The failure below
-        # accuses the baselines of having "come from another line of history",
-        # which is specific, alarming, and was false: the commit was a real
-        # ancestor the clone simply could not reach. It stayed hidden because a
-        # push to main carries a manifest commit inside the shallow window and
-        # every PR that reached this check had re-frozen, which rewrites that
-        # commit to a recent one — so the first PR that did NOT re-freeze found
-        # it.
+        # It fired twice, on `9f48d45` and `235145a`, and both were
+        # self-created outages: the gate rejected unchanged behaviour because
+        # a squash merge had rewritten the history it read. Deleting it
+        # retires D-95's merge-method exception, the unshallow lock, the
+        # `fetch-depth: 0` requirement and the job-digest seal, all of which
+        # existed only to keep this one line executable.
         #
-        # Deepening is still conditional on the clone actually being shallow, so
-        # a genuine "not an ancestor" on a full clone fails immediately and is
-        # never softened into a fetch-and-shrug.
-        if rc != 0 and shallow():
-            # FETCH, so ancestry is PROVEN rather than shrugged at (review
-            # Medium: the common CI path must not routinely skip this).
-            subprocess.run(["git", "-C", str(REPO_ROOT), "fetch", "--quiet",
-                            "--unshallow"], capture_output=True, check=False)
-            subprocess.run(["git", "-C", str(REPO_ROOT), "fetch", "--quiet",
-                            "origin", commit], capture_output=True,
-                           check=False)
-            rc = is_ancestor()
-        if rc == 1:
-            self.fail(f"manifest provenance commit {commit[:12]} is NOT an "
-                      "ancestor of HEAD — these baselines came from another "
-                      "line of history")
-        if rc != 0:
-            msg = (f"cannot PROVE provenance commit {commit[:12]} is an "
-                   "ancestor of HEAD even after fetching (git exit "
-                   f"{rc}) — unknown must fail in required mode")
-            if REQUIRED:
-                self.fail(msg)
-            self.skipTest(msg)
+        # `provenance.commit` itself stays in the manifest as informational
+        # history. Nothing requires it to be reachable.
 
     def test_post_handoff_seals_retain_the_final_attestation(self):
         scenarios = self.manifest["scenarios"]

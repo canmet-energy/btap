@@ -1,16 +1,9 @@
 {
  "version": 2,
- "spec_sha256": "ca661a5cfb1a69f6b16b7f0b4d2f2e4afb4a593e3fcb1af37f4107fcf050e107",
+ "spec_sha256": "f7d5cb76db9e77c526024a6545047ba19f6517332372b39242c64682168be76c",
  "provenance": {
-  "commit": "9d9007f7f0f4e986cee48d81a1af34e2ff67183e",
+  "commit": "780cf688d90820da522dfcff406bc960f83871c1",
   "dirty": false,
-  "freezer_sha256": "a05b10c3bfccbd9869593e030d8e65757ecf311b39907f2030e7729935a4145e",
-  "defs_sha256": "dbf3786c678429e6b0dd0f26a1cc4a5ab4627ea56d8fe34869e780e1307f9194",
-  "runner_sha256": "f5fa6467f22f3a2aee19ef3d5637a9194ff1a76e66f6dad73d7c5b4db6302de1",
-  "api_worker_sha256": "3264ee133bd08fdfebcda263349280cf8bda19555fbb1166f0c55e6cc5931f0f",
-  "compare_runs_sha256": "b8f1f60f5e285047ede41cdcb933296564ec0130a8c3946ab03b5a6a014e08ec",
-  "audit_scenario_sha256": "eec293247a2ce2f8fcdcfb657a4e346a452ec44aafb4be4174f7cb75e588010b",
-  "gate_sha256": "794b824aab3f66221c04569fd81bfaf81308569918086bc17087bf59c18cbec1",
   "openstudio_cli": "3.11.0+241b8abb4d",
   "producer": {
    "openstudio": "3.11.0+241b8abb4d",
@@ -23,6 +16,7 @@
    "openstudio_driver": "3.11.0+241b8abb4d",
    "energyplus_driver": "25.2.0-cf7368216c"
   },
+  "producer_scope": "this invocation only; see each scenario's `produced_by` for the baseline that bears it",
   "active_seals": {
    "python-only:post-handoff": 31,
    "python-only": 23
@@ -92,6 +86,20 @@
     "report.json": "45816b17b7896996833bda90e38d09e1f9ce2070e2309025a645672504a15f44",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "70456f63c4cd17296f999111ac6a8a085e1011d69087f38327a9cb76b6c041de"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -138,6 +146,20 @@
     "report.json": "eb932579f125d8603d9539c68910f345d3696fb317e562d424c1153a35504a06",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "a6ffb1c03a084ede2c896970baeb4f5776b9ddea60dd21baa2fb0d4b3cbd1564"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -184,6 +206,20 @@
     "report.json": "fb4469ebbe705ba71b8f4f2694f9e7429943c5494fc22cfec450b7fa247f4b04",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "710805a663bfecaf63bcb887d6ca08b35d98e7ab1ad84f57b8e3b3323013c144"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -230,6 +266,20 @@
     "report.json": "eb932579f125d8603d9539c68910f345d3696fb317e562d424c1153a35504a06",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "f548b7f59c4e1ac29692bba901cb96ad91988ce61dc9ab27c3e5bff8652f12e8"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -276,6 +326,20 @@
     "report.json": "6d9bd69b90b446cf6437ab48e3c0fc8ceb3b8dbd07213498e0a430309b06b67c",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "7dbf8f2fc3d13b1fa1fb27c07257c79c5700d8bd44a61a8f75517a9f6094bed2"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -322,6 +386,20 @@
     "report.json": "45816b17b7896996833bda90e38d09e1f9ce2070e2309025a645672504a15f44",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "70456f63c4cd17296f999111ac6a8a085e1011d69087f38327a9cb76b6c041de"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -368,6 +446,20 @@
     "report.json": "45816b17b7896996833bda90e38d09e1f9ce2070e2309025a645672504a15f44",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "70456f63c4cd17296f999111ac6a8a085e1011d69087f38327a9cb76b6c041de"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -414,6 +506,20 @@
     "report.json": "65511e7ceccea428c5ec9bc632cebc3d7a111319dfa191513508ec22b8aa617d",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "ae5493f9630ad5d3e9dcf13bdadce4994e8cda2b14e7b8503f71d0380a58228e"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -460,6 +566,20 @@
     "report.json": "f69f907fb118f44323b50bf6aa933ea4c6df3a2afb0be509d224c00b57aac24b",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "20cb3ce7d35de330d462aaf1f2512352d134a9906dedabe5fae7f425d7f0606e"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -506,6 +626,20 @@
     "report.json": "f6eef0f9990b6155ec8ae9e5bb32fc2f2c02ee1a0046aca883e1f6822293a2d5",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "5bf5d5f0806880646a3833bf58b18dd637f0287a4d6116ede342e9723ce51d82"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -552,6 +686,20 @@
     "report.json": "d363f9a11d69bfe4dae4eff1e2f0d5bff6615dad8c66e5a56954286bd1575698",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "12c50aec4b8b378757482f0ddf48dccc8479a5b78ff0e3e9a9ec396bfacf03ab"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -598,6 +746,20 @@
     "report.json": "d363f9a11d69bfe4dae4eff1e2f0d5bff6615dad8c66e5a56954286bd1575698",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "12c50aec4b8b378757482f0ddf48dccc8479a5b78ff0e3e9a9ec396bfacf03ab"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -644,6 +806,20 @@
     "report.json": "eb932579f125d8603d9539c68910f345d3696fb317e562d424c1153a35504a06",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "f548b7f59c4e1ac29692bba901cb96ad91988ce61dc9ab27c3e5bff8652f12e8"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -690,6 +866,20 @@
     "report.json": "45816b17b7896996833bda90e38d09e1f9ce2070e2309025a645672504a15f44",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "70456f63c4cd17296f999111ac6a8a085e1011d69087f38327a9cb76b6c041de"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -736,6 +926,20 @@
     "report.json": "01449f60b2f264c9d0311bfe8de1c2ec19f3c109faa029a5d662a592f3d510b8",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "62ee258ff3610818f7fee4e157bb8e8e56ca17950bf02e1fb4d88ef69cbf9439"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -782,6 +986,20 @@
     "report.json": "6a251d7da023da593445b73619d5342638dc2a25bbbd36d7cccb58da7d2069ac",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "67affdbc4844ecf4a3184b9d647e050ec47b68c6b568f8aa6593c6eedd7227c4"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -823,6 +1041,20 @@
     "report.json": "ae81dc7364c1bbf11a94703cf3877ece4d9d44d9534b956c0343a01cae8f00cb",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "d0b879a029167c54a2577aaf97ccd842b3db12f966d1b521019b76016feb08d8"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -864,6 +1096,20 @@
     "report.json": "ae81dc7364c1bbf11a94703cf3877ece4d9d44d9534b956c0343a01cae8f00cb",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "d0b879a029167c54a2577aaf97ccd842b3db12f966d1b521019b76016feb08d8"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -905,6 +1151,20 @@
     "report.json": "89500ee5cd51092d26e5b0ca1d7975fede5eec044b54ffec358a61eb412a2449",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "b94d87a0ecf550c6c4fee0f4fc9b4868b4e3c4aef791a7f381c586a5f7180657"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -946,6 +1206,20 @@
     "report.json": "9177cec4b083318ee9d37450e499a8310080e954758ca30b132e6e93bb896868",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "755091134565b1d5592c94f89a1805c2762d7fa1189da93fc99a7221cfd4bc4d"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -994,6 +1268,20 @@
     "report.json": "b1dbc9e02bc4791d683fbb9aeda5ddce6b67b1835bbd006534edfb462987a04f",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "ed873f730f1c04f4414ecb078fb96630750986489687ea25864ef4154523686b"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -1042,6 +1330,20 @@
     "report.json": "83c67cf91fb24f88f377b9364cf666e5317c7eba9b9b6591a0b0ebf616608434",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "51c325df8f92bb10bc4aa032ab3f7b382530a6d98266464b2f841b8a625e2d67"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -1090,6 +1392,20 @@
     "report.json": "83c67cf91fb24f88f377b9364cf666e5317c7eba9b9b6591a0b0ebf616608434",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "51c325df8f92bb10bc4aa032ab3f7b382530a6d98266464b2f841b8a625e2d67"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -1138,6 +1454,20 @@
     "report.json": "1a643be55638281cb75e393dacee141b1239c31f4b3918616ccf169dd202e1ea",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "b987ecd9a19bbcd1af8623bb46a1c820b0500e050a3afbad24c14cf0e461fa07"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -1201,6 +1531,20 @@
     "report.json": "fc5e4bb3b436ca6b268a9870d5921965c1d6b86fdcb52cc49e268f81b772ff51",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "915065a040275ab48a1c43c4dc29f762616a8835f47eb3d76a6801279f79a9d8"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -1264,6 +1608,20 @@
     "report.json": "e3d3bd807e4702e6b685ab0219f6f1d9414799dfb23da13599c295f3f63dde71",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "516904240c0e715e1533786e05345afc82a782a515db6c20f2d89df3955ac828"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -1307,6 +1665,20 @@
     "report.json": "f6a42f4d3ded331b42766fb48bd9f295d7be32e84344ba7e7bbe881cf08469fd",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "3089b848c7f36e51e033bfecf1d4dd21a031e43b862ab484f5b91d41f6b80bc0"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -1365,6 +1737,20 @@
     "report.json": "e210d1acf9c09b82350d4d88951ba15354a6ca60e0e02ac0a3824c4ea1a2ce71",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "cd69006a6ede7669241d5d5e7596ce9480c3989de6c06e0a806132669a49555c"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -1408,6 +1794,20 @@
     "report.json": "72e84fc8699d4e906acf6ccdcd7b302b8d9462ef8acd4a74bef91f7bb0c7a952",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "7f89a939bd1a5a6292d73aebaeb6705ac847bfb6e2a4c4e07611ccf592dddf9d"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -1451,6 +1851,20 @@
     "report.json": "42d964bf599b7a4a980d41e6dfe17a15847a851bd7870ef5016d85eada9a96b3",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "f5b25833ed2b1b392691217618d09bc346fcd88dbc6fa469165e201e45f65ce6"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -1509,6 +1923,20 @@
     "report.json": "f5c796e1707791c7f1dd585f1517cbc54f419643e1ebbec8a2d02e1eb4263d88",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "16eacc0e0775f0f72fdfa55be4a07ebfbe3a5c67adfc40f93e12f61a8612d92d"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -1567,6 +1995,20 @@
     "report.json": "323c0d65de633afea570c64f291f799cbd73d06f054679ab2a6bb98c9d6c3b55",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "aec7423e327fdb8bc66d1f6650c1d3ccfdc3de9dd5c95d31fe16aee991ba3f18"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -1605,6 +2047,20 @@
     "audit.json": "947ff955d1d98b1c53089903dba0f6d189fed74c559eec52ff0dc3933521dc8d",
     "audit.txt": "f7fd7a3746e5fc942f2eaae5b128eb77ce55676358b2489a7fd424e301f75c71",
     "report.json": "ce0291d695b5f0fc8c298f8b3d2d44ee306409aa63a4e8ee50903a8d0dae419e"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -1633,6 +2089,20 @@
    "baseline_sha256": {
     "audit.json": "5e4fdbe79c2e6f1c14e52133a5700c2af80c7f54f80308ca1382f27bca02e4d4",
     "audit.txt": "adcdc3643964de8b6a3f770fd907957858858e28e154639b9af4eb42b617e7c0"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -1661,6 +2131,20 @@
    "baseline_sha256": {
     "stderr.txt": "5ab3ff58fac5faedaedb83313b7aa855750bd2bfff3d3ab42c2b7463897754d7",
     "stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -1690,6 +2174,20 @@
    "baseline_sha256": {
     "stderr.txt": "d7c13ffb9e9c054e14cdc31c652e61800c916338ac82bdadf56789d781bb8fae",
     "stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -1720,6 +2218,20 @@
    "baseline_sha256": {
     "stderr.txt": "7a8ded9f19fe686f89f935ce945f1bb1ffdeff68c5d00a2ebad9ee1747a76655",
     "stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -1756,6 +2268,20 @@
    "baseline_sha256": {
     "stderr.txt": "4e21d320d0c8b0b82fd8ef269706918e9472d3fadf9911d49dddc26de30ae001",
     "stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -1794,6 +2320,20 @@
    "baseline_sha256": {
     "stderr.txt": "fa1edfe7cf7f0bfded5f597951f22c47edc80975404068cc0d175e6063f4b234",
     "stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -1832,6 +2372,20 @@
    "baseline_sha256": {
     "stderr.txt": "f8cd8def3446546134699c4bc0c598450c2873b8190d0f458d23c193aa0f1437",
     "stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -1898,6 +2452,20 @@
     "audit.txt": "a18dc4be15e636f1c6709e8e8df05a87cef2261ce26bb903efad8568070eb2de",
     "stderr.txt": "b3e180ddad79ce620d5d856fd7295ec863c46561a8fa49c3c1f4621248771ee2",
     "stdout.txt": "7d42964aa4b6f46855636c46df90a75fff601e212928ee989b9ba971a4e3245e"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -1947,6 +2515,20 @@
    "baseline_sha256": {
     "stderr.txt": "0c9341b306e3fed904fb5149be270620362bd1712447bd783bc10f25c2ea4918",
     "stdout.txt": "b5bb490bcfb168db785c7277bd288d3caf1bf6480d83374c33700b6ae1ec2569"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -1994,7 +2576,21 @@
     "stderr": "fragments"
    },
    "seal": "python-only:the Ruby remote backend's failure text and retry behaviour are environment-shaped; the exit-CODE classification parity is pinned by both exit maps being byte-comparable",
-   "baseline_sha256": {}
+   "baseline_sha256": {},
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
+   }
   },
   {
    "id": "verdict-compliant",
@@ -2012,6 +2608,20 @@
    "seal": "python-only:synthetic result construction is implementation-internal; rendering equivalence was held by Leg B at the freeze commit",
    "baseline_sha256": {
     "stdout.txt": "ac439367dafd02ea94474f5d6d405119aa4c6b202cb7accd2d76489a6b0c3e25"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -2030,6 +2640,20 @@
    "seal": "python-only:synthetic result construction is implementation-internal; rendering equivalence was held by Leg B at the freeze commit",
    "baseline_sha256": {
     "stdout.txt": "1e410c2429769eb5c81435dd2369353bdf52d392b311453fdda7a03d30b4a6b6"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -2137,6 +2761,20 @@
     "report.json": "42f168f7102e553cbcd7470965009ec5fd6d8d20795afb5235b019098a71d557",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "d4eb489f6969bd8fc23ea7e5004ab14a81cf1f072d403787bc26cfd4267423f4"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -2207,6 +2845,20 @@
     "report.json": "de16f672f6e0020ab42e580e04fba558880c07e4dcd395673aec98724c4625b1",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "fdd9ea82d8d76f5b0a97a55d11554465bab53197e149ac110b569698f3c07869"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -2278,6 +2930,20 @@
     "report.json": "0ad28839765d185c39532e867c6d0de57bbab0b89bf1777fbc8570b6c6e3a867",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "7fe821934475aa4f3e8d09f1981d80792f98d588b9aa2260124cdb157d9b284f"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -2361,6 +3027,20 @@
     "report.json": "4b2e3d9d679cc9f4de0bbd5d8d8ec51be702d7fa7a524075e991d0ec40e8e3e3",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "13218f542d9d0c9d3a4d6ce91153c47bec4840d48471857cbd4a769a4f2f4dd8"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -2464,6 +3144,20 @@
     "audit.json": "2fda933d951a2d3808e8b057c5d78b4209b6513dcd1a136a5d7725f0e4078255",
     "audit.txt": "02a3740cd1a04daa57d5b54c91c505cf4de160567545bae45fad764d000ebc43",
     "report.json": "376727f3434135fb5dc52766d137004dabbcce1ca2858992c25d7cde5cd64300"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -2524,6 +3218,20 @@
     "report.json": "f637456ccf67fec5bcaadf11ed8e8ade90282ab50f138f26f4c98b5651affa61",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "fff32bb35373ad25535137def1a90bab8b945ccea14e008bcd387de8fb3b5fb9"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -2583,6 +3291,20 @@
     "report.json": "ccacea8f6c4d3dee1999c728cdd29d70cc147f19cad5bcb45a9e59d8160e3873",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "133fcd013cb5c71992f7289ddab2f9e0f61997fa8c65cda2a0dc1e2aa25a4b07"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -2718,6 +3440,20 @@
     "audit.json": "244f20682edfe2f836aed19326cff0b47e0812c3f362f4d043415df784c2ff35",
     "audit.txt": "20c9b191445b279dd50b24784cf4c1753a53e812f2f3ac3609b08b06624e7da2",
     "report.json": "17c73db467e1280e46c5f5f61322255ea0292c30e6678e06f0691a846d7f370e"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   },
   {
@@ -2820,6 +3556,20 @@
     "audit.json": "d2e1bc96b50790020f89d56f851f40e2b2cee1cd6f1116956d7f2a457030861c",
     "audit.txt": "1af0cb7cafa14110d0227871ab5a6ea2a0d2c493b87a981a587a47d77bd4622b",
     "report.json": "30c4132e98fb44731b0bef1d32cd475741b7b7b8bdff964f633e973cf8de96e4"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
    }
   }
  ],

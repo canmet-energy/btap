@@ -52,16 +52,82 @@ def numbers_equal(a, b, tol):
     return abs(float(a) - float(b)) <= tol
 
 
+def exact_string(path, spec):
+    """Is this path an identifier, exempt from the string-float tolerance?"""
+    for pattern in spec.get("exact_string_paths", []):
+        if re.search(pattern, path):
+            return True
+    return False
+
+
+#: A dotted run of THREE or more components — `8.4.5.2`, `3.11.0` — which is
+#: an identifier, never a measurement. A measured float has at most one dot.
+DOTTED_ID_RE = re.compile(r"\d+(?:\.\d+){2,}")
+
+#: A whole-number token: no decimal point AND no exponent. `NUM_RE` accepts
+#: an exponent, so "no dot" is not the same question — `1e3` is a float
+#: spelled without one (Sol, `233`).
+INT_RE = re.compile(r"-?\d+")
+
+
 def strings_equal(a, b, spec):
+    """Equal as prose, with a float tolerance for the numbers inside it.
+
+    The tolerance exists so an audit line reading "worst 58.750000" matches a
+    re-run's "58.7500001". It is applied to NUMERIC TOKENS, and that made
+    `4.1` and `4.10` the same number — so `8.4.4.1.(2)` and `8.4.4.10.(2)`,
+    two DIFFERENT NECB articles, compared equal (Fable, `228`).
+
+    `spec.exact_string_paths` fixed the citation AXES, where the whole string
+    is an identifier. It did not fix a citation quoted INSIDE prose, and the
+    frozen audits are full of those: `evidence` carries "Article 8.4.5.2.
+    states FHeatPLC as a fuel-INPUT ratio", `boiler_count_subclause` carries
+    "NOT ESTABLISHED: 8.4.4.9.(6) bands the requirement". Those keys need the
+    tolerance for their measured floats and must not have it for their
+    citations.
+
+    So the discriminator is the TOKEN, not the field. A dotted run of
+    three or more components is an identifier, and so is a whole-number
+    token: both are compared textually. Everything else is a measurement
+    and keeps the tolerance, INCLUDING scientific notation — `NUM_RE`
+    accepts an exponent, so `1e3` is a float spelled without a dot, and
+    classifying by the absence of one reported it against `1e+3` (Sol,
+    `233`). `58.750000` is a measurement; `8.4.5.2` and `D-01` are not.
+    """
     if a == b:
         return True
+    # Identifiers first, textually, before any numeric reading of them.
+    if DOTTED_ID_RE.findall(a) != DOTTED_ID_RE.findall(b):
+        return False
+    a, b = DOTTED_ID_RE.sub("\x00", a), DOTTED_ID_RE.sub("\x00", b)
     tol = float(spec.get("string_float_tol", 1e-6))
     na, nb = NUM_RE.findall(a), NUM_RE.findall(b)
     if len(na) != len(nb):
         return False
     if NUM_RE.sub("", a) != NUM_RE.sub("", b):
         return False
-    return all(numbers_equal(x, y, tol) for x, y in zip(na, nb))
+    for x, y in zip(na, nb):
+        # An INTEGER token is compared textually. The tolerance exists for
+        # measured floats, and an integer has no formatting wobble that
+        # needs it — while reading one as a number destroys identity two
+        # ways. `D-01` and `D-1` are both accepted spellings under the
+        # unbounded `D-\d+` grammar and parse to the same number, and
+        # `D-9007199254740992` and `D-9007199254740993` are different ids
+        # that parse to the same float past 2**53 (Sol, `231`). The dotted
+        # rule above does not reach either, because neither has a dot.
+        #
+        # An integer is recognised by its GRAMMAR, not by the absence of a
+        # dot. `NUM_RE` accepts an exponent, so `1e3` and `10000000e-7` have
+        # no dot and are floats: the dotless test called them integers and
+        # reported `1e3` against `1e+3` — the same number — as a difference
+        # (Sol, `233`).
+        if INT_RE.fullmatch(x) and INT_RE.fullmatch(y):
+            if x != y:
+                return False
+            continue
+        if not numbers_equal(x, y, tol):
+            return False
+    return True
 
 
 def diff(a, b, spec, path, out):
@@ -99,6 +165,16 @@ def diff(a, b, spec, path, out):
             out.append(f"{path}: {a!r} vs {b!r}")
         return
     if isinstance(a, str) and isinstance(b, str):
+        if exact_string(path, spec):
+            # An IDENTIFIER, compared byte-for-byte. `strings_equal`
+            # tokenises numbers so audit prose can carry a formatted float,
+            # and a citation is not prose: `8.4.4.1.(2)` and
+            # `8.4.4.10.(2)` tokenise to 4.1 and 4.10, numerically equal
+            # with identical skeletons, so two DIFFERENT articles compared
+            # the same (Fable, `228`).
+            if a != b:
+                out.append(f"{path}: {a!r} vs {b!r}")
+            return
         if not strings_equal(a, b, spec):
             out.append(f"{path}: {a!r} vs {b!r}")
         return

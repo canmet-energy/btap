@@ -105,6 +105,37 @@ ALLOWLIST = {
                 "verification/oracle — the shared harness, not a gem tree"),
     },
     # --- cross-language (Leg B) and oracle (Leg C) tests --------------------
+    "python/tests/test_scoped_freeze.py": {
+        "refs": ["verification/"],
+        "retires": "N/A-verification",
+        "why": "the scoped-freeze contract: it reads "
+               "verification/scenarios/freeze.py and the manifest, because a "
+               "scope that forgets what it does not own destroys the seal "
+               "tallies and D-84's attestation while reporting success",
+    },
+    "python/tests/test_freeze_promotion.py": {
+        "refs": ["verification/"],
+        "retires": "N/A-verification",
+        "why": "the frozen-baseline publication contract: it executes "
+               "verification/scenarios/freeze.py because promote() and its "
+               "injectable four-move rollback are the production subject",
+    },
+    "python/tests/test_scenario_comparator_contract.py": {
+        "refs": ["verification/"],
+        "retires": "N/A-verification",
+        "why": "`runner.compare()`'s scenario-level contract, which the "
+               "deleted `runner_sha256` was the only thing covering; it "
+               "loads verification/scenarios/runner.py because that IS the "
+               "subject",
+    },
+    "python/tests/test_comparator_contract.py": {
+        "refs": ["verification/"],
+        "retires": "N/A-verification",
+        "why": "the frozen-scenario comparator's contract tests, which replace "
+               "the seven machinery hashes Sol's `227` retired; they load "
+               "verification/compare_runs.py and its spec because that IS the "
+               "subject",
+    },
     "python/tests/test_freeze_producer.py": {
         "refs": ["verification/"],
         "retires": "R1-adjudicated",
