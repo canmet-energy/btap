@@ -237,3 +237,276 @@ class TestCoolingAttributionOverTheCatalogue(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@needs_sdk
+class TestTheUnresolvedBranchAndTheOracle(unittest.TestCase):
+    """The branches that say "I do not know", and the comparison that finds them.
+
+    Everything else in this file asserts a RESOLVED answer. Fable's `228`
+    pointed out that every SDK-built assertion on `unplaceable` in the whole
+    suite is `[]`, so `_reaches_no_topology` could `return True`
+    unconditionally — declaring every cooling object detached — and 37 tests
+    with 141 subtests stayed green. A branch no test fires is a branch no
+    test defends.
+    """
+
+    def _doas(self, inboard=()):
+        """A DOAS whose cooling coil is `inboard` components from the OAS.
+
+        This is the shape that defeated the bounded source walk: an
+        `AirLoopHVACOutdoorAirSystem` references only its controller and two
+        port Connections, so each OA-stream component costs four hops. The
+        coil ALONE resolved at depth four; with a fan and a heating coil
+        inboard it sits at twelve.
+        """
+        import openstudio
+
+        model = openstudio.model.Model()
+        zone = openstudio.model.ThermalZone(model)
+        zone.setName("Z1")
+        loop = openstudio.model.AirLoopHVAC(model)
+        loop.setName("AL1")
+        terminal = (openstudio.model
+                    .AirTerminalSingleDuctConstantVolumeNoReheat(
+                        model, model.alwaysOnDiscreteSchedule()))
+        loop.addBranchForZone(zone, terminal.to_StraightComponent().get())
+        oa_system = openstudio.model.AirLoopHVACOutdoorAirSystem(
+            model, openstudio.model.ControllerOutdoorAir(model))
+        dedicated = (openstudio.model
+                     .AirLoopHVACDedicatedOutdoorAirSystem(oa_system))
+        dedicated.addAirLoop(loop)
+        for make in inboard:
+            make(model).addToNode(oa_system.outboardOANode().get())
+        coil = openstudio.model.CoilCoolingWater(
+            model, model.alwaysOnDiscreteSchedule())
+        coil.setName("DOAS Cooling Coil")
+        coil.addToNode(oa_system.outboardOANode().get())
+        return model
+
+    def test_a_DOAS_coil_resolves_at_EVERY_distance_from_its_OA_system(self):
+        """Containment, not depth.
+
+        With a bounded source walk the one-component case passed and the
+        textbook case — a fan and a heating coil inboard of the cooling coil
+        — was reported DETACHED, which made 8.4.1.2.(4)(a) vacuous and
+        passed 900 unmet cooling hours (Fable, `228`).
+        """
+        import openstudio
+
+        def fan(model):
+            return openstudio.model.FanVariableVolume(
+                model, model.alwaysOnDiscreteSchedule())
+
+        def heating(model):
+            return openstudio.model.CoilHeatingElectric(
+                model, model.alwaysOnDiscreteSchedule())
+
+        for label, inboard in (("the coil alone", ()),
+                               ("a fan inboard", (fan,)),
+                               ("a fan and a heating coil inboard",
+                                (fan, heating)),
+                               ("four components inboard",
+                                (fan, heating, fan, heating))):
+            with self.subTest(inboard=label):
+                model = self._doas(inboard)
+                cooling_map, unplaceable = path._zone_mechanical_cooling(model)
+                self.assertEqual(
+                    {"Z1": True}, cooling_map,
+                    f"a DOAS cooling coil with {label} must place its block "
+                    "regardless of how far it sits from the OA system")
+                self.assertEqual([], unplaceable)
+
+    def test_the_two_walks_AGREE_on_every_DOAS_distance(self):
+        """The oracle is the independent witness, so it must be consulted.
+
+        `cooling_attribution_disagreement` compares an outward walk from
+        cooling objects against an inward walk from blocks. It reported
+        `{'Z1': (False, True)}` on the defect above, in every probe — the
+        finding was available to any run that asked.
+        """
+        import openstudio
+
+        def fan(model):
+            return openstudio.model.FanVariableVolume(
+                model, model.alwaysOnDiscreteSchedule())
+
+        for count in range(4):
+            with self.subTest(inboard=count):
+                model = self._doas((fan,) * count)
+                self.assertEqual(
+                    {}, path.cooling_attribution_disagreement(model),
+                    "the two walks disagree about this DOAS, so one of them "
+                    "is wrong and the block's cooling status is unknown")
+
+    def test_a_DISAGREEMENT_makes_the_block_unplaceable_not_passing(self):
+        """The runtime consequence, driven by a forced disagreement.
+
+        This does not depend on any particular model defect: it asserts that
+        when the two walks disagree, the deciding function treats the block
+        as UNKNOWN. Before `228` the disagreement had no runtime caller at
+        all, so a wrong outward walk became `cooling_vacuous` and passed.
+        """
+        unplaceable = []
+        disagreement = {"Z1": (False, True)}
+        for block in disagreement:
+            if block not in unplaceable:
+                unplaceable.append(block)
+        report = {"proposed": {
+            "zone_unmet_occupied_hours": {"Z1": {"heating": 1.0,
+                                                 "cooling": 900.0}},
+            "zone_mechanical_cooling": {"Z1": False},
+            "mechanical_cooling": True,
+            "unplaceable_cooling": sorted(unplaceable)}}
+        status = path._unmet_status_8_4_4(report)
+        self.assertFalse(status["cooling_known"],
+                         "a block the two walks disagree about has an "
+                         "UNKNOWN cooling status")
+        self.assertFalse(status["cooling_vacuous"],
+                         "an unknown cooling status is not a vacuous (4)(a)")
+        self.assertFalse(status["all_ok"],
+                         "900 unmet cooling hours must not pass because the "
+                         "attribution could not be established")
+
+    def test_a_genuinely_DETACHED_coil_is_still_detached(self):
+        """The counterweight: the fix must not turn `detached` into unknown.
+
+        A stray coil connected to no topology serves no block, so (4)(a)'s
+        scope is KNOWN and excludes it (Sol, `224`). This is the control for
+        the test above: without it, "make everything unresolved" would pass.
+        """
+        import openstudio
+
+        model = openstudio.model.Model()
+        openstudio.model.ThermalZone(model).setName("Z1")
+        stray = openstudio.model.CoilCoolingWater(
+            model, model.alwaysOnDiscreteSchedule())
+        stray.setName("stray coil")
+        cooling_map, unplaceable = path._zone_mechanical_cooling(model)
+        self.assertEqual({"Z1": False}, cooling_map)
+        self.assertEqual([], unplaceable,
+                         "a detached coil is a known non-participant, not an "
+                         "unresolved attribution")
+
+    def test_an_object_that_REACHES_topology_but_places_no_block_is_unresolved(
+            self):
+        """The branch Fable's `228` mutation proved untested.
+
+        `_reaches_no_topology` separates two different answers: an object
+        connected to nothing serves no block, so (4)(a)'s scope is KNOWN and
+        excludes it; an object that reaches real HVAC topology but resolves
+        to no block is an attribution this tool could not make, which is
+        UNKNOWN. Both end the loop, and only the second may appear in
+        `unplaceable`.
+
+        Every SDK-built assertion on `unplaceable` in this suite was `[]`, so
+        `return True` at the top of that function — "everything is detached"
+        — left 37 tests and 141 subtests green. These two fixtures are the
+        ones that distinguish it: an orphan PTAC and an orphan unitary system
+        each carry a fan and coils, so their graphs reach topology, while no
+        thermal zone owns them.
+        """
+        import openstudio
+
+        def orphan_ptac(model):
+            fan = openstudio.model.FanOnOff(
+                model, model.alwaysOnDiscreteSchedule())
+            heating = openstudio.model.CoilHeatingElectric(
+                model, model.alwaysOnDiscreteSchedule())
+            cooling = openstudio.model.CoilCoolingDXSingleSpeed(model)
+            unit = openstudio.model.ZoneHVACPackagedTerminalAirConditioner(
+                model, model.alwaysOnDiscreteSchedule(), fan, heating,
+                cooling)
+            unit.setName("orphan PTAC")
+
+        def orphan_unitary(model):
+            unit = openstudio.model.AirLoopHVACUnitarySystem(model)
+            unit.setSupplyFan(openstudio.model.FanOnOff(
+                model, model.alwaysOnDiscreteSchedule()))
+            unit.setCoolingCoil(
+                openstudio.model.CoilCoolingDXSingleSpeed(model))
+            unit.setHeatingCoil(openstudio.model.CoilHeatingElectric(
+                model, model.alwaysOnDiscreteSchedule()))
+            unit.setName("orphan unitary")
+
+        for label, build in (("an orphan PTAC", orphan_ptac),
+                             ("an orphan unitary system", orphan_unitary)):
+            with self.subTest(fixture=label):
+                model = openstudio.model.Model()
+                openstudio.model.ThermalZone(model).setName("Z1")
+                build(model)
+                cooling_map, unplaceable = path._zone_mechanical_cooling(model)
+                self.assertEqual({"Z1": False}, cooling_map)
+                self.assertNotEqual(
+                    [], unplaceable,
+                    f"{label} reaches HVAC topology and places no block, so "
+                    "its attribution is UNKNOWN and must be reported — "
+                    "calling it detached asserts it cools nothing, which "
+                    "this tool has not established")
+
+    def test_the_two_answers_are_not_interchangeable(self):
+        """Both directions, in one place, so neither can be collapsed.
+
+        A single-sided assertion is satisfiable by a constant: "everything
+        unresolved" passes the test above and "everything detached" passes
+        the detached control. Only the pair pins the distinction.
+        """
+        import openstudio
+
+        model = openstudio.model.Model()
+        openstudio.model.ThermalZone(model).setName("Z1")
+        bare = openstudio.model.CoilCoolingWater(
+            model, model.alwaysOnDiscreteSchedule())
+        bare.setName("bare coil")
+        fan = openstudio.model.FanOnOff(
+            model, model.alwaysOnDiscreteSchedule())
+        unit = openstudio.model.ZoneHVACPackagedTerminalAirConditioner(
+            model, model.alwaysOnDiscreteSchedule(), fan,
+            openstudio.model.CoilHeatingElectric(
+                model, model.alwaysOnDiscreteSchedule()),
+            openstudio.model.CoilCoolingDXSingleSpeed(model))
+        unit.setName("orphan PTAC")
+
+        _cooling_map, unplaceable = path._zone_mechanical_cooling(model)
+        self.assertEqual(
+            ["Coil Cooling DX Single Speed 1"], unplaceable,
+            "the PTAC's coil is unresolved and the bare coil is detached: "
+            "exactly one of the two belongs in `unplaceable`, so neither "
+            "answer can be a constant")
+
+    def test_the_oracle_reads_TWO_sources_and_not_one_twice(self):
+        """Independence is the whole value, so it is asserted, not assumed.
+
+        Replacing the inward walk with the outward one —
+        `inward = _zone_mechanical_cooling(model)[0]` — leaves an oracle that
+        can never disagree with anything. It survived every other test in
+        this file: 9 passed, 145 subtests, while the comparison had become
+        worthless. Fable's `228` NB-1 made the weaker form of this point,
+        that two walks I wrote agreeing is thin evidence; this is the
+        stronger one, that nothing checked they were two walks at all.
+
+        The test patches ONE side to a known-wrong answer. If the two sides
+        came from the same call, the patch would not be consulted and the
+        oracle would report agreement.
+        """
+        import unittest.mock
+
+        import openstudio
+
+        model = self._doas()
+        outward, _unplaceable = path._zone_mechanical_cooling(model)
+        self.assertEqual({"Z1": True}, outward,
+                         "the fixture must be cooled for the patch below to "
+                         "create a disagreement")
+        del openstudio
+
+        with unittest.mock.patch.object(path, "_zone_cooling_inward",
+                                        return_value={"Z1": False}):
+            disagreement = path.cooling_attribution_disagreement(model)
+
+        self.assertEqual(
+            {"Z1": (True, False)}, disagreement,
+            "the oracle must read the INWARD walk as a separate source: if "
+            "both sides come from `_zone_mechanical_cooling`, patching the "
+            "inward walk changes nothing and the comparison can never "
+            "disagree with the walk it is meant to check")

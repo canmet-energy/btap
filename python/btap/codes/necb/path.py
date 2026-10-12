@@ -815,8 +815,39 @@ def _eui_compliance(model, *, ruleset, weather, hdd, run_dir, simulate,
             # mechanical cooling is provided" — one building-wide flag marks a
             # mixed building's uncooled blocks as cooled.
             cooling_map, unplaceable = _zone_mechanical_cooling(proposed)
+            # TWO INDEPENDENT WALKS, COMPARED IN EVERY RUN. The outward walk
+            # starts at cooling objects and asks which block each serves; the
+            # inward walk starts at blocks and asks what cools them. They
+            # consult different accessors, so a defect in one is visible as
+            # disagreement with the other — and a block the two disagree
+            # about is one whose cooling status this tool does not know,
+            # which is NOT the same as a block that is not cooled.
+            #
+            # Sol's `227 §G` asked for this in product rather than in a
+            # test, "because every real run benefits from it". It earns that
+            # immediately: the DOAS defect Fable found in `228` — a cooling
+            # coil with a fan inboard of it, reported detached and passing
+            # (4)(a) vacuously over 900 unmet hours — shows up here as
+            # `{Z1: (False, True)}`. A run that consulted the comparison
+            # would have gone indeterminate instead of passing.
+            disagreement = cooling_attribution_disagreement(proposed)
+            for block, (outward, inward) in sorted(disagreement.items()):
+                if block not in unplaceable:
+                    unplaceable.append(block)
+                audit.warn(
+                    "proposed cooling attribution",
+                    "COOLING ATTRIBUTION DISAGREES BETWEEN TWO INDEPENDENT "
+                    "WALKS, so this block's cooling status is UNKNOWN and "
+                    "sentence (4) cannot be scoped to it",
+                    target=block,
+                    inputs={"outward_from_cooling_objects": outward,
+                            "inward_from_the_block": inward},
+                    article="8.4.1.2.(4)")
+            unplaceable = sorted(unplaceable)
             report["proposed"]["zone_mechanical_cooling"] = cooling_map
             report["proposed"]["unplaceable_cooling"] = unplaceable
+            report["proposed"]["cooling_attribution_disagreement"] = {
+                block: list(pair) for block, pair in disagreement.items()}
             proposed_kwh = report["proposed"]["total_site_kwh"]
             energy_ok = proposed_kwh <= target["bet_kwh"]
             audit.decision(
@@ -1194,10 +1225,11 @@ def evaluate_unmet_8_4_4(report, audit):
         audit.decision(
             "compliance",
             f"unmet heating hours within 100 h for every one of "
-            f"{status['blocks']} thermal block(s)" if status["heating_ok"]
+            f"{status['blocks']} thermal block(s) with reported hours"
+            if status["heating_ok"]
             else "unmet heating hours EXCEED 100 h for "
                  f"{len(status['heating_failures'])} of {status['blocks']} "
-                 "thermal block(s)",
+                 "thermal block(s) with reported hours",
             inputs={"blocks": status["blocks"],
                     "worst_block_h": status["worst_heating_h"],
                     "failing_blocks": status["heating_failures"] or None,
@@ -1411,6 +1443,30 @@ def _as_oa_system(obj):
         return None
     got = caster()
     return got.get() if got.is_initialized() else None
+
+
+def _oa_system_holding(obj):
+    """The outdoor-air system whose OA or relief stream HOLDS this object.
+
+    MEMBERSHIP, not distance. The source walk below bounds its depth, and a
+    bound is a guess about how far away a container sits: an
+    `AirLoopHVACOutdoorAirSystem` references only its controller and two port
+    Connections, so every component on the OA stream costs four hops. A
+    cooling coil ALONE on that stream resolved at depth four; put the
+    textbook fan and heating coil inboard of it and the same coil sits at
+    twelve, so the walk reported it DETACHED and 8.4.1.2.(4)(a) passed
+    vacuously over 900 unmet hours (Fable, `228`).
+
+    Raising the bound would only move the wall. `oaComponents()` answers the
+    question exactly: either the object is in that stream or it is not.
+    """
+    handle = obj.handle()
+    for oa_system in obj.model().getAirLoopHVACOutdoorAirSystems():
+        for component in list(oa_system.oaComponents()) + \
+                list(oa_system.reliefComponents()):
+            if component.handle() == handle:
+                return oa_system
+    return None
 
 
 def _reaches_no_topology(obj, depth=6) -> bool:
@@ -1646,6 +1702,28 @@ def _zone_mechanical_cooling(model) -> tuple:
                 for zone in loop.get().thermalZones():
                     cooled.add(zone.nameString().upper())
                 return True
+
+        # An OA-STREAM component, by membership. This runs before the
+        # bounded walk below because it does not depend on distance: a
+        # cooling coil with a fan and a heating coil inboard of it sits
+        # twelve hops from its own outdoor-air system (Fable, `228`).
+        holder = _oa_system_holding(obj)
+        if holder is not None:
+            loop = holder.airLoopHVAC()
+            if loop.is_initialized():
+                for zone in loop.get().thermalZones():
+                    cooled.add(zone.nameString().upper())
+                return True
+            dedicated = holder.airLoopHVACDedicatedOutdoorAirSystem()
+            if dedicated.is_initialized():
+                for served in dedicated.get().airLoops():
+                    for zone in served.thermalZones():
+                        cooled.add(zone.nameString().upper())
+                return True
+            # In an OA stream that feeds no loop: PLACED, with nothing to
+            # attribute — the same answer as a plant loop carrying only
+            # process demand, and not the same as unresolved.
+            return True
 
         # Containment is silent: ask what POINTS AT this object.
         for source in obj.sources():
