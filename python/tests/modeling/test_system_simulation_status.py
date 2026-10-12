@@ -1,10 +1,12 @@
-"""Port of test_system_simulation_status.rb.
+"""The catalogue sweep's committed evidence.
 
-Every catalog system must produce a model EnergyPlus can at least start.
-The defect class this guards is a required performance-curve field left
-UNSET — the SDK models that as merely absent, so every in-process assertion
-passes and the model looks fine right up until E+ refuses it (the VRF
-defrost-EIR curve incident).
+Every catalogue system, built on the bare fixture, must complete the recorded
+sizing or annual mode with zero Severe or Fatal errors. This does not certify
+the seeded samples: the humidified-PSZ incident is the live case where a clean
+catalogue system became an unsimulable sample after generation modified it.
+The defect class this guards is a required performance-curve field left UNSET
+— the SDK models that as merely absent, so every in-process assertion passes
+and the model looks fine until EnergyPlus reaches it.
 
 Simulating 97 systems takes about eight minutes one at a time, so the sweep
 lives in `python/scripts/simulate_all_systems.py` and this test reads the
@@ -33,6 +35,10 @@ STATUS = FIXTURES / "system_simulation_status.json"
 # way: every one of the 97 catalog systems produces a model EnergyPlus will
 # start.
 KNOWN_BAD: dict = {}
+
+SIZING_MODE = "sizing-only (design days from the DDY; no run period)"
+ANNUAL_MODE = "annual (full run period from the EPW)"
+SUPPORTED_MODES = (SIZING_MODE, ANNUAL_MODE)
 
 
 @needs_sdk
@@ -166,19 +172,7 @@ class TestSystemSimulationStatus(unittest.TestCase):
                         f"{row['name']}: claims ok with "
                         f"{row['severe']} severe / {row['fatal']} fatal")
 
-    def test_produced_by_names_the_PRODUCER_and_the_INPUTS(self):
-        """Semantically validated, not merely non-empty.
-
-        Replacing every value with the string "fabricated" passed the first
-        version. And the record named the SDK and an `openstudio` CLI probe
-        while OMITTING EnergyPlus — the program whose success is the verdict
-        — and the DDY that supplies the design days (Sol, `234`).
-
-        Validated against the artifact's own contract, NOT against this
-        host: evidence produced on one supported machine must stay readable
-        on another.
-        """
-        produced = self.verdict.get("produced_by")
+    def _assert_valid_producer(self, produced):
         self.assertIsInstance(produced, dict)
         for field in ("openstudio_sdk", "energyplus", "fixture", "epw",
                       "ddy", "mode", "source_revision", "generated_utc"):
@@ -192,8 +186,9 @@ class TestSystemSimulationStatus(unittest.TestCase):
             produced["energyplus"], r"EnergyPlus.*\d+\.\d+\.\d+",
             "EnergyPlus is the program whose Severe/Fatal count this "
             "verdict reports, and its build must be identified")
-        self.assertIn("sizing", produced["mode"].lower(),
-                      "the mode must say what was actually run")
+        self.assertIn(
+            produced["mode"], SUPPORTED_MODES,
+            "the mode must identify one supported sweep claim exactly")
         for digest in ("fixture_sha256", "epw_sha256", "ddy_sha256"):
             with self.subTest(field=digest):
                 self.assertRegex(
@@ -208,6 +203,26 @@ class TestSystemSimulationStatus(unittest.TestCase):
             "a timestamp, whose absence this module cited as part of the "
             "problem it was fixing")
 
+    def test_produced_by_names_the_PRODUCER_and_the_INPUTS(self):
+        """Semantically validated, not merely non-empty.
+
+        Replacing every value with the string "fabricated" passed the first
+        version. And the record named the SDK and an `openstudio` CLI probe
+        while OMITTING EnergyPlus — the program whose success is the verdict
+        — and the DDY that supplies the design days (Sol, `234`).
+
+        Validated against the artifact's own contract, NOT against this
+        host: evidence produced on one supported machine must stay readable
+        on another.
+        """
+        self._assert_valid_producer(self.verdict.get("produced_by"))
+
+    def test_ANNUAL_is_an_admissible_stronger_verdict_mode(self):
+        """An annual sweep includes the sizing periods and may be committed."""
+        produced = dict(self.verdict["produced_by"])
+        produced["mode"] = ANNUAL_MODE
+        self._assert_valid_producer(produced)
+
     def test_the_status_file_covers_every_catalog_system(self):
         from btap.modeling.hvac import catalog
         catalog_names = sorted(r["name"] for r in catalog.rows())
@@ -219,7 +234,8 @@ class TestSystemSimulationStatus(unittest.TestCase):
     def test_no_system_has_newly_broken(self):
         regressions = [n for n in self.failing if n not in KNOWN_BAD]
         self.assertEqual([], regressions,
-                         "system(s) that used to build a simulate-able model now do not: "
+                         "system(s) whose recorded simulation used to be clean "
+                         "now fail: "
                          + ", ".join(regressions))
 
     def test_no_stale_exemptions(self):

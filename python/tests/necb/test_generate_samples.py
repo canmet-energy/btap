@@ -16,11 +16,13 @@ vacuously. That is the failure this file exists to make impossible.
 from __future__ import annotations
 
 import importlib.util
+import io
 import json
 import re
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stderr
 from pathlib import Path
 from unittest import mock
 
@@ -80,6 +82,24 @@ class TestSimulationVerdictReader(unittest.TestCase):
             ],
         }
         self.assertEqual({"clean"}, self._read(verdict))
+
+    @needs_sdk
+    def test_generate_REFUSES_before_seed_when_the_status_gate_excludes_it(self):
+        """The schema-aware reader must remain wired into `generate()`."""
+        out = Path(self.enterContext(
+            tempfile.TemporaryDirectory(prefix="sample-gate-callsite-"))
+        ) / "samples"
+        with mock.patch.object(self.generator, "simulatable",
+                               return_value=set()), \
+                mock.patch.object(
+                    self.generator, "seed",
+                    side_effect=SystemExit("seed reached")) as seed, \
+                redirect_stderr(io.StringIO()) as stderr:
+            with self.assertRaises(SystemExit):
+                self.generator.generate(out)
+        self.assertIn("REFUSED 01-baseboard-gas", stderr.getvalue())
+        seed.assert_not_called()
+        self.assertEqual([], list(out.glob("*.osm")))
 
 
 @needs_sdk

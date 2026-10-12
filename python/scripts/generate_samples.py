@@ -312,6 +312,11 @@ def simulatable() -> set[str]:
     97 pass as of the defrost-curve fix; the gate stays because the next
     sizing regression should stop a sample, not ship one.
 
+    The sweep certifies each system on the BARE fixture, not the seeded sample
+    this generator ships. The humidified-PSZ incident is the live distinction:
+    a sizing-clean catalogue system still produced an unsimulable sample after
+    humidification was added here, so sample-specific tests remain necessary.
+
     The Python-owned fixture is authoritative after R6. Missing data is loud:
     silently generating every catalog system would make this gate vacuous.
     An unknown schema is equally loud: this reader may not guess what a

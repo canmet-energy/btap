@@ -2,10 +2,11 @@
 """Simulate every catalogue system and write the verdict file from real runs.
 
 `python/tests/modeling/test_system_simulation_status.py` asserts that every
-catalogue system produces a model EnergyPlus will start. The defect class it
-guards is a required performance-curve field left UNSET: the SDK models that
-as merely absent, so every in-process assertion passes and the model looks
-fine right up until E+ refuses it — the VRF defrost-EIR curve incident.
+catalogue system, built on the bare fixture, completes the recorded sizing or
+annual mode with zero Severe or Fatal errors. The defect class it guards is a
+required performance-curve field left UNSET: the SDK models that as merely
+absent, so every in-process assertion passes and the model looks fine until
+EnergyPlus reaches it — the VRF defrost-EIR curve incident.
 
 **That test reads a verdict this script produces, and this script did not
 exist.** Its docstring named a Ruby twin at
@@ -54,6 +55,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import pathlib
 import re
 import shutil
@@ -102,6 +104,69 @@ SCHEMA_VERSION = 1
 #: nobody has to handle.
 STATUSES = ("ok", "build_error", "simulation_error", "sweep_error",
             "fixture_error")
+
+SIZING_MODE = "sizing-only (design days from the DDY; no run period)"
+ANNUAL_MODE = "annual (full run period from the EPW)"
+SUPPORTED_MODES = (SIZING_MODE, ANNUAL_MODE)
+
+
+def validate_status_payload(payload):
+    """Validate the committed verdict before spending a sweep against it."""
+    if not isinstance(payload, dict):
+        raise ValueError("top level must be an object")
+    produced_by = payload.get("produced_by")
+    if not isinstance(produced_by, dict):
+        raise ValueError("produced_by must be an object")
+    schema = produced_by.get("schema_version")
+    if schema != SCHEMA_VERSION:
+        raise ValueError(
+            f"unsupported schema_version {schema!r}; expected "
+            f"{SCHEMA_VERSION}")
+    mode = produced_by.get("mode")
+    if mode not in SUPPORTED_MODES:
+        raise ValueError(
+            f"unsupported produced_by.mode {mode!r}; expected one of "
+            f"{SUPPORTED_MODES!r}")
+    systems = payload.get("systems")
+    if not isinstance(systems, list):
+        raise ValueError("systems must be a list")
+
+    names = set()
+    for index, row in enumerate(systems):
+        if not isinstance(row, dict):
+            raise ValueError(f"systems[{index}] must be an object")
+        name = row.get("name")
+        if not isinstance(name, str) or not name:
+            raise ValueError(f"systems[{index}].name must be non-empty")
+        if name in names:
+            raise ValueError(f"duplicate system verdict for {name!r}")
+        names.add(name)
+        status = row.get("status")
+        if status not in STATUSES:
+            raise ValueError(
+                f"{name!r} has unsupported status {status!r}")
+        for field in ("severe", "fatal"):
+            value = row.get(field)
+            if type(value) is not int or value < 0:
+                raise ValueError(
+                    f"{name!r}.{field} must be a non-negative integer")
+        if not isinstance(row.get("completed"), bool):
+            raise ValueError(f"{name!r}.completed must be a boolean")
+        seconds = row.get("seconds")
+        if (isinstance(seconds, bool)
+                or not isinstance(seconds, (int, float))
+                or not math.isfinite(seconds)
+                or seconds <= 0):
+            raise ValueError(
+                f"{name!r}.seconds must be a positive finite number")
+        if status == "ok" and (
+                not row["completed"]
+                or row["severe"] != 0
+                or row["fatal"] != 0):
+            raise ValueError(
+                f"{name!r} claims ok with completed={row['completed']!r}, "
+                f"severe={row['severe']}, fatal={row['fatal']}")
+    return systems, mode
 
 
 def _sha256(path):
@@ -161,8 +226,7 @@ def producer_identity(annual=False):
         "openstudio_sdk": sdk,
         # The program whose Severe/Fatal count this verdict reports.
         "energyplus": _probe(["energyplus", "--version"]),
-        "mode": ("annual (full run period from the EPW)" if annual else
-                 "sizing-only (design days from the DDY; no run period)"),
+        "mode": ANNUAL_MODE if annual else SIZING_MODE,
         # WHAT WAS VERIFIED. A catalogue row edited under its own name
         # leaves every name-based check green, which is the stale-artifact
         # attack both reviewers landed (Sol's `234` B1, Fable's `234`). This
@@ -203,7 +267,7 @@ def _read_err(run_dir):
 
 
 def simulate_one(row, keep_dir=None, annual=False):
-    """Build one system on the fixture and run sizing. Returns a verdict dict.
+    """Build one system and run sizing, plus annual when requested.
 
     Every failure mode is CAUGHT and recorded rather than raised, because a
     sweep that stops at the first broken system tells you about one system.
@@ -314,6 +378,25 @@ def main():
         if not required.is_file():
             sys.exit(f"missing: {required}")
 
+    committed = None
+    committed_rows = None
+    if args.check:
+        try:
+            committed = json.loads(STATUS.read_text(encoding="utf-8"))
+            committed_rows, committed_mode = validate_status_payload(
+                committed)
+        except (OSError, ValueError) as error:
+            print(f"invalid committed verdict: {error}")
+            sys.exit(1)
+        if args.annual and committed_mode != ANNUAL_MODE:
+            print("invalid --check mode: --annual was requested but the "
+                  f"committed verdict records {committed_mode!r}")
+            sys.exit(1)
+        # `--check` must re-run the claim the committed artifact makes. This
+        # keeps the unchanged CI command valid if the stronger annual verdict
+        # replaces today's sizing-only one.
+        args.annual = committed_mode == ANNUAL_MODE
+
     rows = catalogue_rows()
     if args.name:
         rows = [r for r in rows
@@ -323,8 +406,10 @@ def main():
     if not rows:
         sys.exit("no catalogue rows selected")
 
+    mode_label = ("annual plus sizing periods" if args.annual
+                  else "sizing only")
     print(f"sweeping {len(rows)} of {len(catalogue_rows())} catalogue "
-          f"systems, sizing only, one at a time", flush=True)
+          f"systems, {mode_label}, one at a time", flush=True)
     verdicts = []
     for index, row in enumerate(rows, 1):
         keep = (str(pathlib.Path(args.keep) / f"{index:03d}")
@@ -350,10 +435,7 @@ def main():
         "systems": sorted(verdicts, key=lambda v: v["name"]),
     }
     if args.check:
-        committed = json.loads(STATUS.read_text(encoding="utf-8"))
-        previous = ({v["name"]: v.get("status")
-                     for v in committed.get("systems", committed)}
-                    if committed else {})
+        previous = {v["name"]: v["status"] for v in committed_rows}
         current = {v["name"]: v["status"] for v in verdicts}
         moved = {n: (previous.get(n), s) for n, s in current.items()
                  if previous.get(n) != s}
@@ -367,20 +449,19 @@ def main():
         # first version gated it on a full sweep, so `--check --limit 1`
         # with a planted phantom row still said "no verdict moved" and
         # exited 0 (Fable, `234`).
-        if True:
-            catalogue = {row["name"] for row in catalogue_rows()}
-            stale = sorted(set(previous) - catalogue)
-            missing = sorted(catalogue - set(previous))
-            if stale or missing:
-                print("\nthe committed verdict does not describe this "
-                      "catalogue:")
-                for name in stale:
-                    print(f"  verdict has a row for {name!r}, which the "
-                          "catalogue does not")
-                for name in missing:
-                    print(f"  catalogue has {name!r}, which the verdict does "
-                          "not")
-                sys.exit(1)
+        catalogue = {row["name"] for row in catalogue_rows()}
+        stale = sorted(set(previous) - catalogue)
+        missing = sorted(catalogue - set(previous))
+        if stale or missing:
+            print("\nthe committed verdict does not describe this "
+                  "catalogue:")
+            for name in stale:
+                print(f"  verdict has a row for {name!r}, which the "
+                      "catalogue does not")
+            for name in missing:
+                print(f"  catalogue has {name!r}, which the verdict does "
+                      "not")
+            sys.exit(1)
         if moved:
             print("\nverdicts that MOVED against the committed file:")
             for name, (was, now) in sorted(moved.items()):

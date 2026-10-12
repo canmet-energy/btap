@@ -21,6 +21,7 @@ import pathlib
 import sys
 import unittest
 from contextlib import redirect_stdout
+from copy import deepcopy
 from unittest import mock
 
 from tests.support import REPO_ROOT
@@ -61,6 +62,32 @@ class TestTheSweepsExitStatus(unittest.TestCase):
 
     def _a_real_name(self):
         return self.sweep.catalogue_rows()[0]["name"]
+
+    def _committed(self):
+        return json.loads(
+            pathlib.Path(self.sweep.STATUS).read_text(encoding="utf-8"))
+
+    def _run_with_status(self, payload, argv):
+        scratch = pathlib.Path(self.enterContext(
+            __import__("tempfile").TemporaryDirectory(
+                prefix="sweep-status-reader-")))
+        stored = scratch / "status.json"
+        stored.write_text(json.dumps(payload), encoding="utf-8")
+        simulated = mock.Mock(side_effect=AssertionError(
+            "the sweep ran before validating its committed verdict"))
+        with mock.patch.object(self.sweep, "STATUS", stored), \
+                mock.patch.object(self.sweep, "simulate_one", simulated), \
+                mock.patch.object(sys, "argv",
+                                  ["simulate_all_systems.py", *argv]), \
+                redirect_stdout(io.StringIO()) as out:
+            try:
+                self.sweep.main()
+            except SystemExit as exit_code:
+                code = (exit_code.code if isinstance(exit_code.code, int)
+                        else 1)
+            else:
+                code = 0
+        return code, out.getvalue(), simulated
 
     def test_a_PARTIAL_sweep_that_finds_a_failure_exits_NONZERO(self):
         """The exact defect: the documented smoke command exited 0."""
@@ -106,8 +133,7 @@ class TestTheSweepsExitStatus(unittest.TestCase):
 
     def test_CHECK_reports_a_verdict_that_MOVED(self):
         """The ordinary `--check` case: a recorded `ok` that now fails."""
-        committed = json.loads(
-            pathlib.Path(self.sweep.STATUS).read_text(encoding="utf-8"))
+        committed = self._committed()
         already_ok = next(row["name"] for row in committed["systems"]
                           if row["status"] == "ok")
         code, text = self._run(["--check", "--name", already_ok],
@@ -132,9 +158,9 @@ class TestTheSweepsExitStatus(unittest.TestCase):
         """
         rows = self.sweep.catalogue_rows()
         name = rows[0]["name"]
+        committed = self._committed()
         verdict = {
-            "produced_by": {"openstudio_cli": "x", "openstudio_sdk": "x",
-                            "fixture": "x", "weather": "x", "mode": "x"},
+            "produced_by": committed["produced_by"],
             "systems": [{"name": row["name"], "family": row["family"],
                          "status": "build_error" if row["name"] == name
                                    else "ok",
@@ -158,6 +184,70 @@ class TestTheSweepsExitStatus(unittest.TestCase):
             "a system that FAILED this run is a failure whether or not its "
             "recorded status moved; exiting 0 here reports a broken system "
             "as healthy")
+
+    def test_CHECK_refuses_malformed_evidence_BEFORE_running_the_sweep(self):
+        committed = self._committed()
+        malformed = []
+
+        wrong_schema = deepcopy(committed)
+        wrong_schema["produced_by"]["schema_version"] = 999
+        malformed.append(("schema", wrong_schema, "schema_version 999"))
+
+        no_producer = deepcopy(committed)
+        del no_producer["produced_by"]
+        malformed.append(("producer", no_producer,
+                          "produced_by must be an object"))
+
+        wrong_mode = deepcopy(committed)
+        wrong_mode["produced_by"]["mode"] = "mystery run"
+        malformed.append(("mode", wrong_mode, "unsupported produced_by.mode"))
+
+        false_ok = deepcopy(committed)
+        false_ok["systems"][0]["severe"] = 3
+        malformed.append(("false ok", false_ok, "claims ok"))
+
+        malformed.append(("pre-schema", committed["systems"],
+                          "top level must be an object"))
+
+        for label, payload, reason in malformed:
+            with self.subTest(shape=label):
+                code, text, simulated = self._run_with_status(
+                    payload, ["--check", "--limit", "1"])
+                self.assertNotEqual(0, code)
+                self.assertIn("invalid committed verdict", text)
+                self.assertIn(reason, text)
+                simulated.assert_not_called()
+
+    def test_CHECK_replays_an_ANNUAL_verdict_in_ANNUAL_mode(self):
+        committed = self._committed()
+        committed["produced_by"]["mode"] = self.sweep.ANNUAL_MODE
+        scratch = pathlib.Path(self.enterContext(
+            __import__("tempfile").TemporaryDirectory(
+                prefix="sweep-annual-reader-")))
+        stored = scratch / "status.json"
+        stored.write_text(json.dumps(committed), encoding="utf-8")
+        annual_arguments = []
+
+        def fake(row, keep_dir=None, annual=False):
+            annual_arguments.append(annual)
+            return {"name": row["name"], "family": row["family"],
+                    "status": "ok", "severe": 0, "fatal": 0,
+                    "completed": True, "seconds": 0.1}
+
+        with mock.patch.object(self.sweep, "STATUS", stored), \
+                mock.patch.object(self.sweep, "simulate_one", fake), \
+                mock.patch.object(self.sweep, "producer_identity",
+                                  return_value=committed["produced_by"]), \
+                mock.patch.object(
+                    sys, "argv",
+                    ["simulate_all_systems.py", "--check", "--limit", "1"]), \
+                redirect_stdout(io.StringIO()) as out:
+            with self.assertRaises(SystemExit) as caught:
+                self.sweep.main()
+        self.assertEqual(0, caught.exception.code)
+        self.assertEqual([True], annual_arguments)
+        self.assertIn("annual plus sizing periods", out.getvalue())
+        self.assertIn("no verdict moved", out.getvalue())
 
     def test_the_verdict_fixture_is_the_one_the_script_writes(self):
         """A smaller claim, worth pinning: both point at the same file."""
