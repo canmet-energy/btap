@@ -90,24 +90,51 @@ class Case:
 
 
 #: The compliance-critical fields. A difference in any of these must be
-#: reported: none may be stripped, and none may acquire a tolerance. They are
-#: listed as data so a reader can see the set, and so adding one is one line.
+#: reported: none may be stripped, and none may acquire a tolerance. Listed
+#: as data so a reader can see the set, and so adding one is one line.
+#:
+#: Every name here must be a key the baselines actually carry. My first
+#: version listed `exit_code` and `energy_tier`, which occur ZERO times in
+#: any `report.json` — the real key is `tier` — so two of the six cases were
+#: guarding fields that do not exist (Fable, `228`). The test below pins the
+#: set against the frozen reports, because a name that matches nothing is a
+#: case that cannot fail for the right reason.
+#:
+#: The process exit status is covered separately, by running the comparator
+#: as a subprocess: it is not a key in a report.
 CRITICAL = (
     ("compliant", True, False),
     ("compliance_determination", "conditional", "pass"),
-    ("exit_code", 0, 1),
     ("total_site_kwh", 167150.0, 167150.5),
     ("building_energy_target_kwh", 148919.0, 148919.5),
-    ("energy_tier", 1, 2),
+    ("tier", 1, 2),
 )
 
 #: Audit citation axes (D-100) and the warning level. Same rule.
+#:
+#: `article` carries a pair that defeats the STRING-FLOAT rule, because that
+#: is where the vulnerability actually is. `strings_equal` tokenises numbers,
+#: so `8.4.4.1.(2)` and `8.4.4.10.(2)` became the tokens 4.1 and 4.10 —
+#: numerically equal, identical skeletons — and two DIFFERENT articles
+#: compared the same. Eight such pairs occur among the articles the frozen
+#: audits emit (Fable, `228`). My first version of this case used
+#: `8.4.1.2.(3)` against `8.4.1.2.(4)(a)`, which differs plainly, so the case
+#: passed while the property it claimed was false.
+#:
+#: The vulnerability is specific to DOTTED numbering, and saying so is part
+#: of the fix. `D-10` against `D-100` tokenises to 10 and 100, and `AHJ-1`
+#: against `AHJ-10` to 1 and 10 — neither pair is numerically equal, so a
+#: ruling or register id could never be confused with another by this rule.
+#: Those cases pin that the axes are compared at all; `article` pins that
+#: identifiers are compared EXACTLY.
 AUDIT_FIELDS = (
-    ("article", "8.4.1.2.(3)", "8.4.1.2.(4)(a)"),
+    ("article", "8.4.4.1.(2)", "8.4.4.10.(2)"),
     ("ruling", "D-102", "D-101"),
     ("ahj", "AHJ-21", "AHJ-1"),
     ("level", "warning", "info"),
+    ("target", "Thermal Zone 1", "Thermal Zone 2"),
 )
+
 
 CASES = [
     # --- structure --------------------------------------------------------
@@ -245,10 +272,7 @@ MUTATIONS = [
             "unmet hours just outside 1e-6 are reported",
             "critical field 'total_site_kwh' is never tolerated",
             "critical field 'building_energy_target_kwh' is never tolerated",
-            "critical field 'energy_tier' is never tolerated",
-            "critical field 'exit_code' is never tolerated",
-            "audit 'ruling' is never tolerated",
-            "audit 'ahj' is never tolerated",
+            "critical field 'tier' is never tolerated",
         })),
     Mutation(
         "strings always equal",
@@ -257,11 +281,10 @@ MUTATIONS = [
             "a string's non-numeric text must match exactly",
             "a string with a different count of numbers is reported",
             "critical field 'compliance_determination' is never tolerated",
-            "audit 'article' is never tolerated",
-            "audit 'ruling' is never tolerated",
-            "audit 'ahj' is never tolerated",
-            "audit 'level' is never tolerated",
         })),
+    # `article`, `ruling`, `ahj`, `level` and `target` are NOT here: they go
+    # through the exact-identifier path now, so defeating `strings_equal`
+    # cannot reach them. That is the point of the exemption.
     # Worth knowing, from building the table: the audit's `ruling` and `ahj`
     # ids are compared through the STRING-float rule, because "AHJ-21" and
     # "AHJ-1" share their non-numeric text and differ only in digits. The
@@ -285,10 +308,9 @@ MUTATIONS = [
             {"path_regex": name, "abs": 10.0}
             for name, _l, _r in CRITICAL]},
         frozenset({
-            "critical field 'exit_code' is never tolerated",
             "critical field 'total_site_kwh' is never tolerated",
             "critical field 'building_energy_target_kwh' is never tolerated",
-            "critical field 'energy_tier' is never tolerated",
+            "critical field 'tier' is never tolerated",
         })),
     Mutation(
         "unmet hours given a 1e-3 tolerance",
@@ -300,13 +322,25 @@ MUTATIONS = [
         lambda m, s: {**s, "strip_keys": s["strip_keys"] + ["compliant"]},
         frozenset({"critical field 'compliant' is never tolerated"})),
     Mutation(
+        "identifiers lose their exact comparison",
+        lambda m, s: {**s, "exact_string_paths": []},
+        # The citation pairs above differ only in a way the string-float
+        # rule equates, so removing the exemption makes them compare EQUAL.
+        # `level` is not numeric, so it survives.
+        # Only `article` — the others' ids differ by whole numbers, which
+        # the float rule never equated, so they are not defended by the
+        # exemption and must not claim to be.
+        frozenset({"audit 'article' is never tolerated"})),
+    Mutation(
         "the citation axes added to strip_keys",
         lambda m, s: {**s, "strip_keys":
-                      s["strip_keys"] + ["article", "ruling", "ahj", "level"]},
+                      s["strip_keys"] + ["article", "ruling", "ahj", "level",
+                                        "target"]},
         frozenset({"audit 'article' is never tolerated",
                    "audit 'ruling' is never tolerated",
                    "audit 'ahj' is never tolerated",
-                   "audit 'level' is never tolerated"})),
+                   "audit 'level' is never tolerated",
+                   "audit 'target' is never tolerated"})),
     Mutation(
         "stripping stops being recursive",
         lambda m, s: (setattr(m, "strip_keys", lambda n, k: (
@@ -501,6 +535,40 @@ class TestTheComparatorContract(unittest.TestCase):
                          "one of them unambiguously")
         self.assertTrue(any(c.differs for c in CASES))
         self.assertTrue(any(not c.differs for c in CASES))
+
+    def test_every_CRITICAL_field_is_a_key_the_baselines_carry(self):
+        """A guarded field that does not exist is not guarded.
+
+        `exit_code` and `energy_tier` were in this list and occur zero times
+        in any frozen `report.json` — the real key is `tier` (Fable, `228`).
+        Each case still passed, because the comparator reports a difference
+        in any key; they were simply not about the compliance fields they
+        named.
+        """
+        baselines = (REPO_ROOT / "verification" / "scenarios" / "baselines")
+        if not baselines.is_dir():
+            self.skipTest(f"{baselines} is not present in this layout")
+        present = set()
+
+        def walk(node):
+            if isinstance(node, dict):
+                for key, value in node.items():
+                    present.add(key)
+                    walk(value)
+            elif isinstance(node, list):
+                for value in node:
+                    walk(value)
+
+        for report in baselines.glob("*/report.json"):
+            walk(json.loads(report.read_text(encoding="utf-8")))
+        for name, _left, _right in CRITICAL:
+            with self.subTest(field=name):
+                self.assertIn(
+                    name, present,
+                    f"{name!r} is listed as compliance-critical and appears "
+                    "in no frozen report.json, so its case guards nothing. "
+                    "Either the writer renamed it — update this list — or "
+                    "the name was always wrong")
 
     def test_every_case_gets_its_authored_answer(self):
         for case in CASES:

@@ -52,6 +52,14 @@ def numbers_equal(a, b, tol):
     return abs(float(a) - float(b)) <= tol
 
 
+def exact_string(path, spec):
+    """Is this path an identifier, exempt from the string-float tolerance?"""
+    for pattern in spec.get("exact_string_paths", []):
+        if re.search(pattern, path):
+            return True
+    return False
+
+
 def strings_equal(a, b, spec):
     if a == b:
         return True
@@ -99,6 +107,16 @@ def diff(a, b, spec, path, out):
             out.append(f"{path}: {a!r} vs {b!r}")
         return
     if isinstance(a, str) and isinstance(b, str):
+        if exact_string(path, spec):
+            # An IDENTIFIER, compared byte-for-byte. `strings_equal`
+            # tokenises numbers so audit prose can carry a formatted float,
+            # and a citation is not prose: `8.4.4.1.(2)` and
+            # `8.4.4.10.(2)` tokenise to 4.1 and 4.10, numerically equal
+            # with identical skeletons, so two DIFFERENT articles compared
+            # the same (Fable, `228`).
+            if a != b:
+                out.append(f"{path}: {a!r} vs {b!r}")
+            return
         if not strings_equal(a, b, spec):
             out.append(f"{path}: {a!r} vs {b!r}")
         return

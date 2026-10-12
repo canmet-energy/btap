@@ -723,13 +723,33 @@ def main():
 
     # Carry the unselected baselines into the staging tree, so the
     # whole-directory promotion below publishes a COMPLETE set.
+    carry_problems = []
     for sc in carried:
         source = runner.BASELINES / sc["id"]
         if not source.is_dir():
-            die(f"{sc['id']} is in the manifest but {source} is missing; a "
-                "scoped freeze cannot carry forward a baseline that is not "
-                "there.")
+            # A scenario with no baseline FILES has no directory: Git does
+            # not store an empty one, so `internal-dead-remote` is absent on
+            # every fresh clone and in every new worktree — which is where
+            # DEVELOPERS.md says to freeze. Refusing there made `--scenario`
+            # unusable in its documented setting (Fable, `228`).
+            if sc.get("baseline_sha256"):
+                die(f"{sc['id']} declares baselines but {source} is "
+                    "missing; a scoped freeze cannot carry forward a "
+                    "baseline that is not there.")
+            (baselines / sc["id"]).mkdir(parents=True)
+            continue
         shutil.copytree(source, baselines / sc["id"])
+        # VERIFY what is carried, against the hashes being carried with it.
+        # A scope published a corrupted baseline under its stale hash and an
+        # undeclared extra file, and reported success: the gate would have
+        # caught both on the NEXT run, after the bad bytes were committed
+        # (Fable, `228`). Checking here means the freeze refuses instead.
+        carry_problems.extend(runner.verify_baselines(sc, previous))
+    if carry_problems:
+        die("refusing to promote: these CARRIED baselines do not match the "
+            "hashes being carried with them, so a scoped freeze would "
+            "publish bytes nobody approved:\n  "
+            + "\n  ".join(carry_problems))
     frozen = frozen + carried
     frozen.sort(key=lambda sc: all_ids.index(sc["id"]))
 
@@ -746,6 +766,22 @@ def main():
     absent = [i for i in all_ids if not (baselines / i).is_dir()]
     if absent:
         die(f"refusing to promote: no staged baseline directory for {absent}")
+    # And every staged directory must hold what its entry declares. For a
+    # re-run scenario `freeze.py` wrote both; for a carried one this is the
+    # second look, after the copy.
+    staged_problems = []
+    previous_baselines = runner.BASELINES
+    runner.BASELINES = baselines
+    try:
+        for sc in frozen:
+            staged_problems.extend(
+                runner.verify_baselines(sc, {"scenarios": frozen}))
+    finally:
+        runner.BASELINES = previous_baselines
+    if staged_problems:
+        die("refusing to promote: the staged tree does not match the "
+            "manifest about to describe it:\n  "
+            + "\n  ".join(staged_problems))
 
     counts = {}
     for sc in frozen:

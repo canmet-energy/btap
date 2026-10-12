@@ -7460,18 +7460,30 @@ D-84, D-94 or D-95 claimed at the time they were written.
 
 ### What the evidence was
 
-Across four PRs — #98, #100, #101, #102 — there were 175 findings in 32
-review files. 35 were product defects, two of them pre-existing. **74 were
-about the instrument**: 50 in verification code and 24 in fixes to
-verification code. PR #98 closed with no in-scope product defect at all; its
-product change had been right at its first commit.
+Two things are recorded separately here, because they have different
+standing: what Fable reported, and what Sol independently verified.
 
-Every one of the 35 product defects was found by a reviewer hand-building a
-hostile input. None was found by a baseline hash, a count, a ledger, a
-provenance hash, the decisions gate, a register test or a workflow seal.
+**Fable's reported classification** (`226`), across PRs #98, #100, #101 and
+#102: 175 findings in 32 review files; 35 product defects, two of them
+pre-existing; **74 about the instrument** — 50 in verification code and 24 in
+fixes to verification code; and PR #98 closing with no in-scope product
+defect, its product change right at its first commit. He also reports that
+every one of the 35 was found by a reviewer hand-building a hostile input.
 
-Sol corrected the strongest form of that claim and the corrected form is the
-one adopted here:
+**What Sol verified** (`227`): 32 review files totalling 4,532 lines; the
+manifest and baseline churn; the approximate verification-to-product ratio;
+and no traced counterexample to the claim that an independent witness was the
+first detector in every case. He expressly declined to certify the exact
+taxonomy without its row-level ledger, noted repeated carry-forward findings
+and the product/artifact boundary, and judged "hand-building" too literal for
+the existing-VRF-corpus cross-check.
+
+So the 175/35/74 split is Fable's count, not an audited one, and this
+decision does not rest on it. What it rests on is the verified part: the
+independent-witness finding, the churn, and the ratio.
+
+Sol corrected the strongest form of the catch claim, and the corrected form
+is the one adopted here:
 
 > No documented case exists in which the ancestry gate, a machinery hash, a
 > result hash, a byte-equality seal or a citation count FIRST discovered a
@@ -7483,9 +7495,10 @@ pointer (`67ffbf32`); the ancestry gate fired twice, exactly as designed, on
 squash-merge lineage violations. Those were real. They were also not what the
 mechanisms cost.
 
-The cost: 28 of 89 manifest commits were hash-only re-freezes. One coverage
-wording change re-froze 90 baseline files. A single coverage data row sat
-behind fourteen gates. Verification code is 1.45× product code.
+The cost, as measured: 28 of 89 manifest commits touched no baseline file at
+all. One coverage wording change re-froze 90 baseline files. A single
+coverage data row sat behind fourteen gates. Verification code is roughly
+1.45× product code.
 
 ### The diagnosis
 
@@ -7558,9 +7571,11 @@ Main being green matters for reasons much broader than D-95.
 
 ### Still open at the time of this decision
 
-The R6/R7 ledgers are closed and archived rather than deleted: they stop
-evolving, and the post-R7 additions file required in `220` is withdrawn
-prospectively. The TOML-canonical migration for the AHJ register and the
+The R6/R7 ledgers ARE TO BE closed and archived rather than deleted, in a
+later change: at this head `test_coverage_code_refs.py` still actively chains
+both mappings and the retirements file to the live manifests and still sums to
+313, so the repository is not yet in that state. The post-R7 additions file
+required in `220` is withdrawn prospectively. The TOML-canonical migration for the AHJ register and the
 decision sources, the removal of the generated JSON runtime projections, and
 the installed-wheel semantic verification that would replace the edition
 result hash are approved in principle and not yet done.
@@ -7568,9 +7583,10 @@ result hash are approved in principle and not yet done.
 ### What supersedes what
 
 D-94's review loop stands, with its merged-main stop condition kept for its
-general value and its ancestry rationale retired. D-95 is superseded in full.
-Neither is rewritten: both made their claims honestly on the evidence then
-available, and the two squash incidents D-95 describes did happen.
+general value and its ancestry rationale retired. D-95's ACTIVE enforcement —
+the merge-method exception — is superseded; its record of the two squash
+incidents stands, because they happened. Neither decision is rewritten: both
+made their claims honestly on the evidence then available.
 
 ### The review-loop change adopted with this
 

@@ -387,6 +387,40 @@ class TestDecisionsGateIsPathUnfiltered(unittest.TestCase):
         self.assertIn("-m unittest", executed)
         self.assertNotIn("pip install", executed)
 
+    def test_no_UNQUOTED_heredoc_executes_its_own_backticks(self):
+        """A workflow heredoc that must expand `${VAR}` also runs backticks.
+
+        `main-red` builds its issue body with `body=$(cat <<EOF`, unquoted
+        because it interpolates the commit and run URL. I then wrote three
+        lane names in backticks inside it, so bash executed them and the
+        posted incident read "a lane that PRs skip: ,\n and  are
+        dispatch-only" — an incident report that had eaten its own content
+        (Fable, `228`).
+
+        This checks every unquoted heredoc in both workflows, because the
+        next one will be written by someone who has not read that story.
+        """
+        import re
+
+        for workflow in (GATE, MAIN):
+            if not workflow.is_file():
+                continue
+            text = workflow.read_text(encoding="utf-8")
+            for match in re.finditer(r"<<\s*(?!['\"])(\w+)\n(.*?)\n\s*\1",
+                                     text, re.S):
+                body = match.group(2)
+                offenders = [line.strip() for line in body.split("\n")
+                             if re.search(r"(?<!\\)`", line)]
+                with self.subTest(workflow=workflow.name,
+                                  delimiter=match.group(1)):
+                    self.assertEqual(
+                        [], offenders,
+                        f"{workflow.name}: an UNQUOTED heredoc "
+                        f"(<<{match.group(1)}) contains unescaped backticks, "
+                        "which bash executes as commands. Escape them as "
+                        "\\` or quote the delimiter if the body needs no "
+                        f"expansion. Offending lines: {offenders[:3]}")
+
     def test_the_main_workflow_still_ignores_docs_which_is_why_this_exists(self):
         """Pins the premise. If `test.yml` stops ignoring `docs/**`, this gate
         becomes redundant rather than load-bearing, and whoever changes that
