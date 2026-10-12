@@ -105,6 +105,14 @@ ALLOWLIST = {
                 "verification/oracle — the shared harness, not a gem tree"),
     },
     # --- cross-language (Leg B) and oracle (Leg C) tests --------------------
+    "python/tests/test_scoped_freeze.py": {
+        "refs": ["verification/"],
+        "retires": "N/A-verification",
+        "why": "the scoped-freeze contract: it reads "
+               "verification/scenarios/freeze.py and the manifest, because a "
+               "scope that forgets what it does not own destroys the seal "
+               "tallies and D-84's attestation while reporting success",
+    },
     "python/tests/test_comparator_contract.py": {
         "refs": ["verification/"],
         "retires": "N/A-verification",

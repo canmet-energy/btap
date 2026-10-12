@@ -535,7 +535,8 @@ def main():
     # the guard below: `promote` MOVES the whole baselines directory, so a
     # scope that forgets to carry the rest would delete 53 baselines and
     # write a manifest that agrees with the deletion.
-    all_ids = [sc["id"] for sc in scenarios]
+    every_scenario = list(scenarios)
+    all_ids = [sc["id"] for sc in every_scenario]
     carried = []
     if args.scenario:
         wanted = list(dict.fromkeys(args.scenario))
@@ -560,7 +561,20 @@ def main():
               f"{len(carried)} forward", flush=True)
     check_env_hygiene(scenarios)
     try:
-        active_seals, retired_seals, final_attestation = seal_accounting(scenarios)
+        # From EVERY defined scenario, never the scoped subset. The manifest
+        # describes the whole corpus whichever scenarios were re-run, and
+        # these three fields are corpus-wide facts: the seal tallies and
+        # D-84's final cross-language attestation.
+        #
+        # Computing them from the subset is what my first `--scenario`
+        # implementation did, and it wrote `active_seals` 31/23 -> 0/1,
+        # `retired_seals` 29/2 -> 0/0, and
+        # `final_cross_language_attestation` -> null. Sol's `227` rules that
+        # attestation IMMUTABLE and says in terms not to reduce or recreate
+        # it. The count guard before the promotion did not see it, because
+        # the scenario COUNT was right; only the diff did.
+        active_seals, retired_seals, final_attestation = seal_accounting(
+            every_scenario)
         check_required_python_engines(scenarios)
     except ValueError as error:
         die(str(error))
@@ -733,6 +747,27 @@ def main():
         "scenarios": frozen,
         "uncovered": scenario_defs.UNCOVERED,
     }
+    # A SCOPED freeze may change only what it re-ran. These fields describe
+    # the whole corpus or are immutable records, so a scope that moves one has
+    # a bug — and the count guard above cannot see it, because the scenario
+    # count stays right while the content is destroyed.
+    if carried:
+        previous_provenance = previous["provenance"]
+        for field in ("active_seals", "retired_seals",
+                      "final_cross_language_attestation", "attestation_note"):
+            if manifest["provenance"].get(field) != previous_provenance.get(field):
+                die("refusing to promote: a scoped freeze changed "
+                    f"provenance.{field}, which describes the whole corpus "
+                    "rather than the scenarios re-run.\n"
+                    f"  was: {json.dumps(previous_provenance.get(field))}\n"
+                    f"  now: {json.dumps(manifest['provenance'].get(field))}\n"
+                    "D-84's attestation in particular is immutable (Sol, "
+                    "`227`).")
+        if manifest["spec_sha256"] != previous.get("spec_sha256"):
+            die("refusing to promote: a scoped freeze changed spec_sha256. "
+                "The comparison rules moved, so every baseline needs "
+                "re-verifying — run a full freeze.")
+
     (staging / "manifest.json").write_text(
         json.dumps(manifest, indent=1) + "\n", encoding="utf-8")
 
