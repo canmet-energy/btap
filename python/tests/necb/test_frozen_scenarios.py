@@ -13,6 +13,7 @@ FAILURE naming the remedy.
 """
 
 import importlib.util
+import json
 import os
 import tempfile
 import unittest
@@ -21,6 +22,10 @@ from pathlib import Path
 from tests.support import REPO_ROOT
 
 SCENARIOS_DIR = REPO_ROOT / "verification" / "scenarios"
+
+#: Keys `freeze.py` ADDS to an authored scenario definition. Everything else
+#: in a manifest entry must equal what `scenario_defs.py` declares today.
+GENERATED_SCENARIO_KEYS = frozenset({"baseline_sha256", "produced_by"})
 LANES = tuple(os.environ.get("BTAP_SCENARIO_LANES", "python").split(","))
 REQUIRED = os.environ.get("BTAP_SCENARIOS_REQUIRED") == "1"
 
@@ -45,6 +50,8 @@ class TestFrozenScenarios(unittest.TestCase):
             raise unittest.SkipTest(msg + " (BTAP_SCENARIOS_REQUIRED=1 "
                                     "makes this a failure)")
         cls.runner = _load("scenario_runner", SCENARIOS_DIR / "runner.py")
+        cls.defs = _load("scenario_defs_gate",
+                         SCENARIOS_DIR / "scenario_defs.py")
         cls.manifest = cls.runner.load_manifest()
         cls.cr = cls.runner.load_compare_runs()
         cls.spec = cls.cr.load_spec(REPO_ROOT / "verification" / "spec.json")
@@ -53,6 +60,31 @@ class TestFrozenScenarios(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.scratch.cleanup()
+
+    def test_the_generated_key_set_matches_the_PRODUCER(self):
+        """The gate and `freeze.py` must agree on what the freeze adds.
+
+        Both carry `GENERATED_SCENARIO_KEYS`, and the exact
+        definitions-to-manifest comparison is only sound while they do: a key
+        the producer adds and the gate does not exclude fails every scenario,
+        and a key the gate excludes without the producer adding it silently
+        stops being compared. Two copies of one fact, so the fact is
+        asserted.
+        """
+        source = (SCENARIOS_DIR / "freeze.py").read_text(encoding="utf-8")
+        for key in sorted(GENERATED_SCENARIO_KEYS):
+            with self.subTest(key=key):
+                self.assertIn(
+                    f'"{key}"', source,
+                    f"the gate excludes {key!r} from the contract "
+                    "comparison, but freeze.py never writes it — so a real "
+                    "authored field by that name would stop being checked")
+        self.assertIn(
+            "GENERATED_SCENARIO_KEYS = frozenset({\"baseline_sha256\", "
+            "\"produced_by\"})", source,
+            "freeze.py must declare the same generated-key set this gate "
+            "uses; if it diverges, the exact comparison is unsound in one "
+            "direction or the other")
 
     def test_manifest_integrity(self):
         """Runs in EVERY lane: schema sanity, spec hash pin, per-scenario
@@ -77,6 +109,50 @@ class TestFrozenScenarios(unittest.TestCase):
         # `spec_sha256` STAYS: it pins the adjudicated comparison RULES, not
         # the source of the code that applies them, and a silent tolerance
         # change under frozen baselines is exactly what it catches.
+        # The AUTHORED definitions must still be the ones the manifest
+        # describes. This is the semantic replacement for `defs_sha256`, and
+        # it is a stronger claim than that hash made: a hash said
+        # `scenario_defs.py` was unchanged, this says every scenario CI
+        # executes is the scenario the file currently declares.
+        #
+        # Without it, editing an authored contract is silently ignored —
+        # Sol (`228`) changed `usage-unknown-flag`'s `expect_exit` from 2 to
+        # 99 and every manifest test stayed green while CI kept running the
+        # stored 2. The same escape covered a changed command, lane, file
+        # contract, assertion, timeout or seal.
+        #
+        # The freeze adds exactly two keys — `baseline_sha256` and
+        # `produced_by` — so the comparison is exact rather than a field
+        # allowlist that drifts. A new generated key must be added HERE
+        # deliberately; forgetting makes this test fail rather than start
+        # ignoring a contract.
+        slugs = json.loads(
+            (self.runner.PYTHON_ROOT / "scripts" / "sample_manifest.json")
+            .read_text(encoding="utf-8"))["samples"]
+        authored = {s["id"]: s for s in self.defs.all_scenarios(slugs)}
+        stored = {s["id"]: s for s in m["scenarios"]}
+        self.assertEqual(
+            sorted(authored), sorted(stored),
+            "the authored scenario set and the frozen manifest disagree "
+            "about which scenarios exist — a definition was added or "
+            "removed without a re-freeze")
+        contract_drift = []
+        for scenario_id, entry in sorted(stored.items()):
+            trimmed = {key: value for key, value in entry.items()
+                       if key not in GENERATED_SCENARIO_KEYS}
+            if trimmed != authored[scenario_id]:
+                moved = sorted(
+                    key for key in set(trimmed) | set(authored[scenario_id])
+                    if trimmed.get(key) != authored[scenario_id].get(key))
+                contract_drift.append(f"{scenario_id}: {moved}")
+        self.assertEqual(
+            [], contract_drift,
+            "these scenarios' AUTHORED contracts no longer match what the "
+            "manifest froze, so CI is executing the old contract:\n  "
+            + "\n  ".join(contract_drift)
+            + "\nRe-freeze them (freeze.py --scenario <id> ...), or revert "
+              "the definition.")
+
         ids = [s["id"] for s in m["scenarios"]]
         self.assertEqual(len(ids), len(set(ids)), "duplicate scenario ids")
         by_lane = {}

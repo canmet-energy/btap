@@ -38,6 +38,11 @@ import sys
 import tempfile
 from pathlib import Path
 
+#: Keys this script ADDS to an authored scenario definition. The gate in
+#: `python/tests/necb/test_frozen_scenarios.py` carries the same set, and a
+#: new generated key has to be added to both.
+GENERATED_SCENARIO_KEYS = frozenset({"baseline_sha256", "produced_by"})
+
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import runner  # noqa: E402
@@ -555,6 +560,30 @@ def main():
             die(f"--scenario cannot carry {missing} forward: they are "
                 "defined but absent from the current manifest, so only a "
                 "full freeze can establish them.")
+        # A scope may only carry forward a definition that has NOT changed.
+        # Copying every unselected entry by id published the old contract for
+        # any scenario edited since the last freeze and reported success:
+        # `freeze.py --scenario B` after editing A froze B and silently kept
+        # A's stale contract (Sol, `228`).
+        #
+        # `baseline_sha256` is the only key the freeze adds, so the
+        # comparison is exact. A changed definition is ADDED to the selected
+        # set rather than refused: the author's intent is unambiguous, and
+        # re-running it is what makes the manifest true.
+        authored = {sc["id"]: sc for sc in every_scenario}
+        drifted = []
+        for scenario_id in all_ids:
+            if scenario_id in wanted:
+                continue
+            stored = {k: v for k, v in known[scenario_id].items()
+                      if k not in GENERATED_SCENARIO_KEYS}
+            if stored != authored[scenario_id]:
+                drifted.append(scenario_id)
+        if drifted:
+            print(f"scoped freeze: {len(drifted)} unselected definition(s) "
+                  f"changed since the last freeze, adding them: {drifted}",
+                  flush=True)
+            wanted = list(dict.fromkeys(wanted + drifted))
         carried = [known[i] for i in all_ids if i not in wanted]
         scenarios = [sc for sc in scenarios if sc["id"] in wanted]
         print(f"scoped freeze: re-running {len(scenarios)}, carrying "
@@ -591,6 +620,11 @@ def main():
     staging = Path(tempfile.mkdtemp(prefix="freeze-out-"))
     baselines = staging / "baselines"
     frozen = []
+    this_producer = {"producer": producer_identity(),
+                     "openstudio_cli": subprocess.run(
+                         ["openstudio", "openstudio_version"],
+                         capture_output=True, text=True,
+                         check=False).stdout.strip()}
 
     for sc in scenarios:
         print(f"== {sc['id']} ({sc['lane']}, seal={sc['seal'].split(':')[0]})",
@@ -674,7 +708,18 @@ def main():
                                                     encoding="utf-8")
         for f in sorted(dest.iterdir()):
             hashes[f.name] = runner.sha256(f)
-        frozen.append({**sc, "baseline_sha256": hashes})
+        # Producer identity PER SCENARIO (Sol, `228`). The manifest used to
+        # carry one global block describing "the engine stack that produced
+        # the baselines", and a scoped freeze recomputed it: running one
+        # scenario on host P1 rewrote the record for 53 baselines produced on
+        # P0, making it true for one and false for the rest. Preserving the
+        # old block globally would have been wrong the other way.
+        #
+        # This is evidence provenance, not a host gate: no test compares it
+        # against the running machine, because a baseline frozen on one host
+        # must stay verifiable on another.
+        frozen.append({**sc, "baseline_sha256": hashes,
+                       "produced_by": this_producer})
 
     # Carry the unselected baselines into the staging tree, so the
     # whole-directory promotion below publishes a COMPLETE set.
@@ -726,13 +771,17 @@ def main():
             # `spec_sha256` above is deliberately kept: it pins the
             # adjudicated comparison RULES, which is a different claim from
             # pinning the source of the code that applies them.
-            "openstudio_cli": subprocess.run(
-                ["openstudio", "openstudio_version"], capture_output=True,
-                text=True, check=False).stdout.strip(),
-                # WHO produced this freeze. A record, never a gate — no
-            # test compares these against the running machine, because a
+            # WHO ran THIS freeze invocation. Per-scenario identity lives
+            # on each scenario entry as `produced_by`, because a scoped
+            # freeze leaves most baselines untouched and this block cannot
+            # describe them (Sol, `228`). A record, never a gate — no test
+            # compares either against the running machine, because a
             # baseline frozen on one host must stay verifiable on another.
-            "producer": producer_identity(),
+            "openstudio_cli": this_producer["openstudio_cli"],
+            "producer": this_producer["producer"],
+            "producer_scope": ("this invocation only; see each scenario's "
+                               "`produced_by` for the baseline that bears "
+                               "it"),
             "active_seals": active_seals,
             "retired_seals": retired_seals,
             "final_cross_language_attestation": final_attestation,

@@ -113,6 +113,14 @@ ALLOWLIST = {
                "scope that forgets what it does not own destroys the seal "
                "tallies and D-84's attestation while reporting success",
     },
+    "python/tests/test_scenario_comparator_contract.py": {
+        "refs": ["verification/"],
+        "retires": "N/A-verification",
+        "why": "`runner.compare()`'s scenario-level contract, which the "
+               "deleted `runner_sha256` was the only thing covering; it "
+               "loads verification/scenarios/runner.py because that IS the "
+               "subject",
+    },
     "python/tests/test_comparator_contract.py": {
         "refs": ["verification/"],
         "retires": "N/A-verification",

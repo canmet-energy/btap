@@ -643,10 +643,13 @@ class TestTheComparatorsFileAndProcessContract(unittest.TestCase):
             [sys.executable, str(COMPARATOR), str(self.a), str(self.b),
              "--spec", str(SPEC_PATH)],
             capture_output=True, text=True, check=False)
-        self.assertNotEqual(
-            0, moved.returncode,
-            "a moved verdict must exit non-zero, or every harness that reads "
-            "the status believes the comparison passed")
+        self.assertEqual(
+            1, moved.returncode,
+            "a moved verdict must exit EXACTLY 1. `assertNotEqual(0)` let "
+            "the difference return change from 1 to 2 with all nine tests "
+            "green, while the test's name and D-103 both claimed exact "
+            "status (Sol, `228`) — and a harness that distinguishes 1 from "
+            "2 would have been silently reclassified")
         self.assertIn(
             "compliant", moved.stdout + moved.stderr,
             "and it must say WHICH field moved, or the failure is unusable")
