@@ -105,6 +105,10 @@ SCHEMA_VERSION = 1
 STATUSES = ("ok", "build_error", "simulation_error", "sweep_error",
             "fixture_error")
 
+#: Only these statuses reached EnergyPlus, so only these rows can carry its
+#: Severe/Fatal counts and completion marker.
+ENERGYPLUS_STATUSES = ("ok", "simulation_error")
+
 SIZING_MODE = "sizing-only (design days from the DDY; no run period)"
 ANNUAL_MODE = "annual (full run period from the EPW)"
 SUPPORTED_MODES = (SIZING_MODE, ANNUAL_MODE)
@@ -145,6 +149,15 @@ def validate_status_payload(payload):
         if status not in STATUSES:
             raise ValueError(
                 f"{name!r} has unsupported status {status!r}")
+        seconds = row.get("seconds")
+        if (isinstance(seconds, bool)
+                or not isinstance(seconds, (int, float))
+                or not math.isfinite(seconds)
+                or seconds < 0):
+            raise ValueError(
+                f"{name!r}.seconds must be a non-negative finite number")
+        if status not in ENERGYPLUS_STATUSES:
+            continue
         for field in ("severe", "fatal"):
             value = row.get(field)
             if type(value) is not int or value < 0:
@@ -152,13 +165,6 @@ def validate_status_payload(payload):
                     f"{name!r}.{field} must be a non-negative integer")
         if not isinstance(row.get("completed"), bool):
             raise ValueError(f"{name!r}.completed must be a boolean")
-        seconds = row.get("seconds")
-        if (isinstance(seconds, bool)
-                or not isinstance(seconds, (int, float))
-                or not math.isfinite(seconds)
-                or seconds <= 0):
-            raise ValueError(
-                f"{name!r}.seconds must be a positive finite number")
         if status == "ok" and (
                 not row["completed"]
                 or row["severe"] != 0
@@ -430,10 +436,6 @@ def main():
     for verdict in failed:
         print(f"  {verdict['status']:18} {verdict['name']}")
 
-    payload = {
-        "produced_by": producer_identity(annual=args.annual),
-        "systems": sorted(verdicts, key=lambda v: v["name"]),
-    }
     if args.check:
         previous = {v["name"]: v["status"] for v in committed_rows}
         current = {v["name"]: v["status"] for v in verdicts}
@@ -486,6 +488,10 @@ def main():
         # what ran was healthy.
         sys.exit(1 if failed else 0)
 
+    payload = {
+        "produced_by": producer_identity(annual=args.annual),
+        "systems": sorted(verdicts, key=lambda v: v["name"]),
+    }
     STATUS.write_text(json.dumps(payload, indent=2, ensure_ascii=False)
                       + "\n", encoding="utf-8")
     print(f"\nwrote {STATUS.relative_to(REPO_ROOT)}")

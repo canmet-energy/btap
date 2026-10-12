@@ -24,7 +24,7 @@ from contextlib import redirect_stdout
 from copy import deepcopy
 from unittest import mock
 
-from tests.support import REPO_ROOT
+from tests.support import REPO_ROOT, needs_sdk
 
 SCRIPT = REPO_ROOT / "python" / "scripts" / "simulate_all_systems.py"
 
@@ -44,10 +44,20 @@ class TestTheSweepsExitStatus(unittest.TestCase):
     def _run(self, argv, verdicts):
         """Run `main()` with `simulate_one` stubbed. Returns the exit code."""
         def fake(row, keep_dir=None, annual=False):
-            status = verdicts.get(row["name"], "ok")
-            return {"name": row["name"], "family": row["family"],
-                    "status": status, "severe": 0 if status == "ok" else 1,
-                    "fatal": 0, "completed": status == "ok", "seconds": 0.1}
+            selected = verdicts.get(row["name"], "ok")
+            if isinstance(selected, dict):
+                return dict(selected)
+            verdict = {
+                "name": row["name"], "family": row["family"],
+                "status": selected, "seconds": 0.1,
+            }
+            if selected in self.sweep.ENERGYPLUS_STATUSES:
+                verdict.update(
+                    severe=0 if selected == "ok" else 1,
+                    fatal=0, completed=selected == "ok")
+            else:
+                verdict["detail"] = f"producer-shaped {selected}"
+            return verdict
 
         with mock.patch.object(self.sweep, "simulate_one", fake), \
                 mock.patch.object(sys, "argv", ["simulate_all_systems.py",
@@ -66,6 +76,29 @@ class TestTheSweepsExitStatus(unittest.TestCase):
     def _committed(self):
         return json.loads(
             pathlib.Path(self.sweep.STATUS).read_text(encoding="utf-8"))
+
+    def _producer_failure(self, status):
+        row = self.sweep.catalogue_rows()[0]
+        if status == "build_error":
+            import btap.modeling as modeling
+
+            patch = mock.patch.object(
+                modeling, "build_system",
+                side_effect=RuntimeError("producer-contract build failure"))
+        elif status == "fixture_error":
+            import openstudio
+
+            unloaded = mock.Mock()
+            unloaded.is_initialized.return_value = False
+            patch = mock.patch.object(
+                openstudio.osversion.VersionTranslator, "loadModel",
+                return_value=unloaded)
+        else:
+            raise AssertionError(f"unsupported producer failure {status}")
+        with patch:
+            verdict = self.sweep.simulate_one(row)
+        self.assertEqual(status, verdict["status"])
+        return verdict
 
     def _run_with_status(self, payload, argv):
         scratch = pathlib.Path(self.enterContext(
@@ -141,6 +174,7 @@ class TestTheSweepsExitStatus(unittest.TestCase):
         self.assertNotEqual(0, code)
         self.assertIn("MOVED", text)
 
+    @needs_sdk
     def test_CHECK_exits_nonzero_for_a_failure_whose_status_did_NOT_move(self):
         """The case the ordinary one cannot reach, and it needed building.
 
@@ -156,18 +190,14 @@ class TestTheSweepsExitStatus(unittest.TestCase):
         unwitnessed: restoring a bare `return` here kept all six tests
         green.
         """
-        rows = self.sweep.catalogue_rows()
-        name = rows[0]["name"]
+        failure = self._producer_failure("build_error")
+        name = failure["name"]
         committed = self._committed()
-        verdict = {
-            "produced_by": committed["produced_by"],
-            "systems": [{"name": row["name"], "family": row["family"],
-                         "status": "build_error" if row["name"] == name
-                                   else "ok",
-                         "severe": 0, "fatal": 0, "completed": True,
-                         "seconds": 0.1}
-                        for row in rows],
-        }
+        verdict = deepcopy(committed)
+        verdict["systems"] = [
+            failure if row["name"] == name else row
+            for row in verdict["systems"]
+        ]
         scratch = pathlib.Path(self.enterContext(
             __import__("tempfile").TemporaryDirectory(prefix="sweep-check-")))
         stored = scratch / "status.json"
@@ -175,7 +205,11 @@ class TestTheSweepsExitStatus(unittest.TestCase):
 
         with mock.patch.object(self.sweep, "STATUS", stored):
             code, text = self._run(["--check", "--name", name],
-                                   {name: "build_error"})
+                                   {name: failure})
+        self.assertNotIn(
+            "invalid committed verdict", text,
+            "the producer's build_error row is evidence of a broken system, "
+            "not a malformed artifact")
         self.assertIn("no verdict moved", text,
                       "the recorded status already said build_error, so "
                       "nothing moved — that is the condition under test")
@@ -184,6 +218,23 @@ class TestTheSweepsExitStatus(unittest.TestCase):
             "a system that FAILED this run is a failure whether or not its "
             "recorded status moved; exiting 0 here reports a broken system "
             "as healthy")
+
+    @needs_sdk
+    def test_validator_accepts_PRODUCER_failures_before_EnergyPlus(self):
+        committed = self._committed()
+        for status in ("build_error", "fixture_error"):
+            with self.subTest(status=status):
+                row = self._producer_failure(status)
+                self.assertNotIn("severe", row)
+                self.assertNotIn("fatal", row)
+                self.assertNotIn("completed", row)
+                systems, mode = self.sweep.validate_status_payload({
+                    "produced_by": committed["produced_by"],
+                    "systems": [row],
+                })
+                self.assertEqual([row], systems)
+                self.assertEqual(
+                    committed["produced_by"]["mode"], mode)
 
     def test_CHECK_refuses_malformed_evidence_BEFORE_running_the_sweep(self):
         committed = self._committed()
@@ -234,10 +285,13 @@ class TestTheSweepsExitStatus(unittest.TestCase):
                     "status": "ok", "severe": 0, "fatal": 0,
                     "completed": True, "seconds": 0.1}
 
+        producer = mock.Mock(side_effect=AssertionError(
+            "--check must not probe producer identity for an artifact it "
+            "will not write"))
         with mock.patch.object(self.sweep, "STATUS", stored), \
                 mock.patch.object(self.sweep, "simulate_one", fake), \
                 mock.patch.object(self.sweep, "producer_identity",
-                                  return_value=committed["produced_by"]), \
+                                  producer), \
                 mock.patch.object(
                     sys, "argv",
                     ["simulate_all_systems.py", "--check", "--limit", "1"]), \
@@ -246,6 +300,7 @@ class TestTheSweepsExitStatus(unittest.TestCase):
                 self.sweep.main()
         self.assertEqual(0, caught.exception.code)
         self.assertEqual([True], annual_arguments)
+        producer.assert_not_called()
         self.assertIn("annual plus sizing periods", out.getvalue())
         self.assertIn("no verdict moved", out.getvalue())
 

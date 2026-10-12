@@ -84,22 +84,37 @@ class TestSimulationVerdictReader(unittest.TestCase):
         self.assertEqual({"clean"}, self._read(verdict))
 
     @needs_sdk
-    def test_generate_REFUSES_before_seed_when_the_status_gate_excludes_it(self):
-        """The schema-aware reader must remain wired into `generate()`."""
-        out = Path(self.enterContext(
-            tempfile.TemporaryDirectory(prefix="sample-gate-callsite-"))
-        ) / "samples"
-        with mock.patch.object(self.generator, "simulatable",
-                               return_value=set()), \
-                mock.patch.object(
-                    self.generator, "seed",
-                    side_effect=SystemExit("seed reached")) as seed, \
-                redirect_stderr(io.StringIO()) as stderr:
-            with self.assertRaises(SystemExit):
-                self.generator.generate(out)
-        self.assertIn("REFUSED 01-baseboard-gas", stderr.getvalue())
-        seed.assert_not_called()
-        self.assertEqual([], list(out.glob("*.osm")))
+    def test_generate_PREFLIGHTS_plain_and_stress_systems_before_seed(self):
+        """Every catalogue-backed sample source must pass the status gate."""
+        required = [
+            *self.generator.SAMPLES,
+            self.generator.SUBSET_REHEAT[:2],
+            *((slug, system)
+              for slug, system, _note, _setup
+              in self.generator.STRESS_CASES),
+        ]
+        available = {system for _slug, system in required}
+        cases = (
+            ("plain", self.generator.SAMPLES[0]),
+            ("stress-only", self.generator.STRESS_CASES[0][:2]),
+        )
+        for source, (slug, system) in cases:
+            with self.subTest(source=source), \
+                    tempfile.TemporaryDirectory(
+                        prefix="sample-gate-callsite-") as tmp:
+                out = Path(tmp) / "samples"
+                with mock.patch.object(
+                        self.generator, "simulatable",
+                        return_value=available - {system}), \
+                        mock.patch.object(
+                            self.generator, "seed",
+                            side_effect=SystemExit("seed reached")) as seed, \
+                        redirect_stderr(io.StringIO()) as stderr:
+                    with self.assertRaises(SystemExit):
+                        self.generator.generate(out)
+                self.assertIn(f"REFUSED {slug}", stderr.getvalue())
+                seed.assert_not_called()
+                self.assertEqual([], list(out.glob("*.osm")))
 
 
 @needs_sdk

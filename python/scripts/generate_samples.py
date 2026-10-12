@@ -398,8 +398,14 @@ def generate(out: Path) -> list[tuple[str, str, int]]:
                   "design-day set", file=sys.stderr)
             raise SystemExit(1)
 
-    for slug, system in SAMPLES:
+    required = list(SAMPLES)
+    required.append(SUBSET_REHEAT[:2])
+    required.extend((slug, system)
+                    for slug, system, _note, _setup in STRESS_CASES)
+    for slug, system in required:
         gate(slug, system)
+
+    for slug, system in SAMPLES:
         try:
             model = seed("necb2020")
             modeling.build_system(model, system, sorted_by_name(model.getThermalZones()))
@@ -433,7 +439,6 @@ def generate(out: Path) -> list[tuple[str, str, int]]:
     # all-electric VAV's terminals, so the loop reaches its blocks only through
     # the held-coil accessor and only for the zones it truly serves.
     slug, system, reheated = SUBSET_REHEAT
-    gate(slug, system)
     try:
         model = seed("necb2020")
         modeling.build_system(model, system,
@@ -469,7 +474,6 @@ def generate(out: Path) -> list[tuple[str, str, int]]:
           f"{size / 1_048_576.0:6.1f} MB")
 
     for slug, system, note, setup in STRESS_CASES:
-        gate(slug, system)
         try:
             model = seed("necb2020")
             # Most setup shapes the model the system is then built ONTO —

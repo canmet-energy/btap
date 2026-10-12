@@ -18,32 +18,39 @@ evidence (Claude, 2026-10-12).
 This test is hard in BOTH directions: a newly-broken system fails here, and
 so does a system that starts working, because a stale exemption would hide
 the next regression behind it. It is also hard about the verdict ITSELF —
-every row must carry the error counts, the completion flag and the elapsed
-time from a real run, and the file must say what produced it.
+rows that reached EnergyPlus must carry its error counts and completion flag,
+every row must carry elapsed time, and the file must say what produced it.
 """
 
+import importlib.util
 import json
-import math
 import pathlib
+import sys
 import unittest
 
-from tests.support import FIXTURES, needs_sdk
+from tests.support import FIXTURES, REPO_ROOT, needs_sdk
 
 STATUS = FIXTURES / "system_simulation_status.json"
+SCRIPT = REPO_ROOT / "python" / "scripts" / "simulate_all_systems.py"
 
 # Known broken, with the root cause. EMPTY, and the goal is to keep it that
-# way: every one of the 97 catalog systems produces a model EnergyPlus will
-# start.
+# way: every one of the 97 catalog systems completes the recorded mode cleanly.
 KNOWN_BAD: dict = {}
 
-SIZING_MODE = "sizing-only (design days from the DDY; no run period)"
-ANNUAL_MODE = "annual (full run period from the EPW)"
-SUPPORTED_MODES = (SIZING_MODE, ANNUAL_MODE)
+
+def _load_sweep():
+    spec = importlib.util.spec_from_file_location(
+        "status_sweep_under_test", SCRIPT)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["status_sweep_under_test"] = module
+    spec.loader.exec_module(module)
+    return module
 
 
 @needs_sdk
 class TestSystemSimulationStatus(unittest.TestCase):
     def setUp(self):
+        self.sweep = _load_sweep()
         self.verdict = json.loads(STATUS.read_text(encoding="utf-8"))
         self.rows = self.verdict["systems"]
         self.failing = sorted(r["name"] for r in self.rows if r["status"] != "ok")
@@ -57,7 +64,8 @@ class TestSystemSimulationStatus(unittest.TestCase):
         (Sol, `234`).
         """
         self.assertEqual(
-            1, self.verdict["produced_by"].get("schema_version"),
+            self.sweep.SCHEMA_VERSION,
+            self.verdict["produced_by"].get("schema_version"),
             "unknown verdict schema — a reader must refuse it, not guess")
 
     def test_the_verdict_describes_this_catalogue_EXACTLY(self):
@@ -125,52 +133,19 @@ class TestSystemSimulationStatus(unittest.TestCase):
             "moved verdict with the change")
 
     def test_every_row_carries_RUN_EVIDENCE_OF_THE_RIGHT_TYPE(self):
-        """`"ok"` alone is indistinguishable from `"ok"` somebody typed.
+        """Apply the producer's schema instead of maintaining a second one.
 
-        And so is evidence of the wrong TYPE. `severe=False, fatal=False,
-        completed="NO completion line", seconds=True` satisfied every
-        assertion in the first version of this test, because `False == 0`,
-        a non-empty string is truthy and `True > 0` (Sol, `234`). Booleans
-        are integers in Python, so the counts must be checked for not being
-        booleans explicitly.
+        A build or fixture failure never reached EnergyPlus, so requiring its
+        counters fabricated evidence the producer cannot emit. `ok` and
+        `simulation_error` did reach it and retain the strict counter and
+        completion contract.
         """
-        statuses = ("ok", "build_error", "simulation_error", "sweep_error",
-                    "fixture_error")
-        for row in self.rows:
-            with self.subTest(system=row["name"]):
-                self.assertIn(
-                    row["status"], statuses,
-                    "status must come from the producer's closed vocabulary")
-                for field in ("severe", "fatal"):
-                    value = row.get(field)
-                    self.assertIsInstance(
-                        value, int,
-                        f"{field} must be an integer count")
-                    self.assertNotIsInstance(
-                        value, bool,
-                        f"{field} is a COUNT, and a bool satisfies "
-                        "`isinstance(x, int)` while carrying no count")
-                    self.assertGreaterEqual(value, 0, field)
-                self.assertIsInstance(
-                    row.get("completed"), bool,
-                    "completed is a flag; a non-empty string is truthy and "
-                    "says nothing")
-                seconds = row.get("seconds")
-                self.assertIsInstance(seconds, (int, float))
-                self.assertNotIsInstance(
-                    seconds, bool, "seconds is a duration, not a flag")
-                self.assertTrue(
-                    math.isfinite(seconds) and seconds > 0,
-                    "a run that took no time did not run")
-                if row["status"] == "ok":
-                    self.assertIs(
-                        True, row["completed"],
-                        f"{row['name']}: claims ok and EnergyPlus never "
-                        "printed its completion line")
-                    self.assertEqual(
-                        (0, 0), (row["severe"], row["fatal"]),
-                        f"{row['name']}: claims ok with "
-                        f"{row['severe']} severe / {row['fatal']} fatal")
+        try:
+            rows, mode = self.sweep.validate_status_payload(self.verdict)
+        except ValueError as error:
+            self.fail(f"invalid producer verdict: {error}")
+        self.assertEqual(self.rows, rows)
+        self.assertEqual(self.verdict["produced_by"]["mode"], mode)
 
     def _assert_valid_producer(self, produced):
         self.assertIsInstance(produced, dict)
@@ -187,7 +162,7 @@ class TestSystemSimulationStatus(unittest.TestCase):
             "EnergyPlus is the program whose Severe/Fatal count this "
             "verdict reports, and its build must be identified")
         self.assertIn(
-            produced["mode"], SUPPORTED_MODES,
+            produced["mode"], self.sweep.SUPPORTED_MODES,
             "the mode must identify one supported sweep claim exactly")
         for digest in ("fixture_sha256", "epw_sha256", "ddy_sha256"):
             with self.subTest(field=digest):
@@ -220,7 +195,7 @@ class TestSystemSimulationStatus(unittest.TestCase):
     def test_ANNUAL_is_an_admissible_stronger_verdict_mode(self):
         """An annual sweep includes the sizing periods and may be committed."""
         produced = dict(self.verdict["produced_by"])
-        produced["mode"] = ANNUAL_MODE
+        produced["mode"] = self.sweep.ANNUAL_MODE
         self._assert_valid_producer(produced)
 
     def test_the_status_file_covers_every_catalog_system(self):
