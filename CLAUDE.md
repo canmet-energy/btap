@@ -303,9 +303,11 @@ boundary; post-R6 freezes do not recreate cross-language evidence.
 - **`parity-scenarios`**: dispatch-only annual frozen scenarios, beside `parity`.
 - **`main-red`**: an incident lifecycle for `main`. A failed push run opens or
   updates an issue assigned to `vars.MAIN_RED_ASSIGNEE` (else the pusher),
-  naming the run and pointing at D-95's provenance recovery; a green push run
-  closes it. D-94's stop condition requires that run to be green, and a
-  failed-run email had already proved insufficient.
+  naming the run and which lane failed; a green push run closes it. D-94's
+  stop condition requires that run to be green, and a failed-run email had
+  already proved insufficient. It no longer points at D-95's provenance
+  recovery: D-103 retired the ancestry gate, so a stale pointer is not among
+  the ways `main` can go red.
 
 `verify`, `parity` and `parity-scenarios` run in the CI image
 `ghcr.io/canmet-energy/btap-ci` (`infra/ci-image/Dockerfile`: the OpenStudio

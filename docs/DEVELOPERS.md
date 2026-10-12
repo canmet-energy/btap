@@ -410,21 +410,23 @@ human believes it. Sol ruled the strict predicate stays (2026-10-04): an
 untracked `conftest.py`, `sitecustomize.py`, `.pth` or globbed data file can all
 affect a run, so tracked-only cleanliness would weaken the provenance claim.
 
-**Merge a freeze-carrying PR with GitHub's "Create a merge commit" (D-95).** A
-PR that changes frozen baselines or the manifest provenance counts as
-freeze-carrying — look for `manifest.json` or `baselines/` in the diff.
-`freeze.py` records the commit it ran at — a branch commit — and
-`test_manifest_integrity` requires that commit to be an ancestor of `HEAD`,
-which is a separate claim from the content hashes the manifest already pins.
+**Any merge method is now fine for a freeze-carrying PR (D-103).** This used
+to say "Create a merge commit", because `freeze.py` recorded the commit it
+ran at and `test_manifest_integrity` required that commit to be an ancestor of
+`HEAD`. A squash gives the merged commit a new SHA, so the recorded pointer
+stopped being an ancestor and `main` went red *after* the merge while every
+branch check was green. That happened twice, for three days across two merges.
 
-**Neither "Squash and merge" nor "Rebase and merge" will do.** Both give the
-merged commit a new SHA, so the recorded branch commit is no longer an
-ancestor and `main` goes red *after* the merge while every branch check was
-green. Rebase merging is disabled on this repository, so that route is closed
-mechanically — but it is the route that never bit: both measured breakages were
-squashes, and the squash button is still there and still wrong for these PRs.
-This is not theoretical: `main` failed that way for three days across two
-merges, with a different stale pointer each time.
+The ancestry assertion is gone, with the recorded pointer and the machinery
+hashes, because none of them was ever recorded first discovering a wrong
+compliance behaviour — they discovered facts about Git. What the manifest
+pins is content: every baseline's sha256, the comparison spec's sha256, and
+the authored scenario definitions compared against the records CI executes.
+A squash does not move any of those, so it can no longer produce that
+failure.
+
+Squash freely. Rebase merging is still disabled on this repository, which is
+incidental now rather than load-bearing.
 
 When it does happen the `main-red` job opens an issue naming the run and this
 recovery path, assigned to `vars.MAIN_RED_ASSIGNEE` (or whoever pushed), and

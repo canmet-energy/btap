@@ -28,10 +28,27 @@ producer rather than by re-deriving its arithmetic:
 3. an unknown id, a missing manifest, or an id absent from the manifest is
    refused rather than guessed at.
 
-They run the refusal paths, which need no simulation. The positive path — a
-real scoped freeze preserving 53 baselines byte-for-byte — needs an engine and
-is exercised by `verification/scenarios/freeze.py --scenario` in the parity
-lane; the module-level docstring above records the measured result.
+They run the refusal paths, which need no simulation.
+
+**The positive path is exercised BY HAND, and no CI job runs it.** This
+docstring used to say the parity lane exercised it. It does not: no workflow
+passes `--scenario` at all, so that sentence credited a measurement nobody
+takes (Fable, `228`). Saying where a check does NOT reach is the point of
+writing it down.
+
+What a hand run has established, in a scratch worktree at this head:
+
+```text
+--scenario verdict-compliant, 53 carried   frozen 54 scenarios, seals intact
+a CORRUPTED carried baseline               REFUSED, naming the file
+an UNDECLARED extra file in a baseline     REFUSED, naming the file
+a STALE definition for a carried scenario  added to the selected set, re-run
+the empty `internal-dead-remote` directory absent on a fresh clone; handled
+```
+
+Those runs need an engine, which is why they are not here. The five source
+assertions below are what can be checked without one, and they are source
+assertions — they prove the guards are written, not that they fire.
 """
 import json
 import pathlib
