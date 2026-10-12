@@ -4945,6 +4945,10 @@ repaired, and the index is titled by id order alone.
 
 ## D-82 — The R4 verification handoff is complete: the frozen scenario suite replaces the live Ruby-vs-Python Leg-B gates, the drivers are dormant, and Ruby backports stop
 
+**Superseded in part by [D-103](#d-103), 2026-10-12:** the machinery-hash
+and provenance-ancestry enforcement described below are retired. The R4
+handoff, seal and period evidence remain historical.
+
 **Decided:** The R4 verification handoff is COMPLETE (2026-08-29). The
 frozen scenario suite (`verification/scenarios/` +
 `python/tests/necb/test_frozen_scenarios.py`) replaces the live
@@ -6468,6 +6472,11 @@ tool does with each:
 
 ## D-95 — Freeze-carrying PRs merge with a merge commit, not a squash or rebase
 
+**Superseded by [D-103](#d-103), 2026-10-12:** the active merge-method
+exception and provenance-ancestry enforcement are retired. Freeze-carrying
+PRs may use any merge method; the two squash incidents and this period
+account remain historical.
+
 - **Decision:** a PR that changes frozen baselines or the manifest provenance
   `freeze.py` produces is merged with a **merge commit** — not a squash, and
   not a rebase. Both of those give the merged commit a new SHA, and this
@@ -7521,6 +7530,14 @@ self-created outages: it rejected unchanged behaviour because a squash merge
 had rewritten the history it read. An AHJ-facing report loses nothing when an
 old freeze commit stops being an ancestor. `provenance.commit` stays as
 informational history; nothing requires it to be reachable.
+
+**Producer revisions in other generated evidence follow the same boundary.**
+A `source_revision` identifies the source state that produced that artifact.
+Its presence and SHA shape may be validated as attribution; no test may
+require it to be reachable from the current branch. A rebase can make the
+producer commit absent from the rewritten branch without making the
+historical record false. Current validity comes from re-running the behaviour
+check, not from inferring it through Git ancestry.
 
 **D-95's active merge-method exception.** It existed only to keep that
 assertion executable. Freeze-carrying PRs may merge by any method.
