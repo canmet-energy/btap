@@ -250,6 +250,37 @@ When a deliberate behaviour change affects output, run
 `verification/scenarios/freeze.py` from a clean tree and commit the resulting
 baselines and provenance with the change.
 
+**`--scenario ID` re-freezes one scenario and carries the rest forward.**
+Repeatable. Without it every scenario is re-run, which for the annual lanes
+is a long job — and a full re-freeze for one moved output is what made the
+corpus expensive enough to defer correctness fixes (D-103).
+
+```bash
+"$PY" ../verification/scenarios/freeze.py --scenario verdict-compliant
+"$PY" ../verification/scenarios/freeze.py --scenario a --scenario b
+```
+
+What it guarantees, and what it refuses:
+
+- A carried entry keeps its own bytes, hashes, definition and
+  `produced_by` — the producer identity is PER SCENARIO, so a scope on one
+  host does not relabel 53 baselines made on another.
+- Corpus-wide facts — seal tallies, `final_cross_language_attestation`,
+  `spec_sha256` — are computed from EVERY scenario, not the subset, and a
+  field-level guard refuses if a scope would change one.
+- It refuses if the staged tree disagrees with the manifest about to
+  describe it: a corrupted carried baseline, an undeclared file or
+  subdirectory, or a re-run entry whose own hash is wrong.
+- It refuses if the manifest would describe fewer scenarios than are
+  defined, because the promotion replaces the whole directory.
+- If an UNSELECTED definition changed since the last freeze, that scenario
+  is added to the selected set and re-run rather than carried stale.
+- It refuses outright if `spec.json` moved: the comparison rules changed, so
+  every baseline needs re-verifying and a scope cannot establish that.
+
+`python/tests/test_scoped_freeze.py` executes all of these against
+`assemble_scope()` with no engine. No CI job runs `--scenario` itself.
+
 **"Clean" includes untracked files, so freeze in a `git worktree`.** `freeze.py`
 refuses on `git status --porcelain`, which lists untracked paths — and this
 repository normally has other people's work-in-progress sitting in the tree, so
