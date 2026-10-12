@@ -63,27 +63,20 @@ class TestFrozenScenarios(unittest.TestCase):
                          "verification/spec.json changed after the freeze — "
                          "an adjudicated re-freeze is required, never a "
                          "silent rules change under frozen baselines")
-        # The interpreter machinery is pinned (review High): the code that
-        # executes, normalizes, and compares frozen baselines must be the
-        # code that froze them — a change here is a behaviour change and
-        # demands an adjudicated re-freeze, never a silent reinterpretation.
-        machinery = {
-            "freezer_sha256": SCENARIOS_DIR / "freeze.py",
-            "defs_sha256": SCENARIOS_DIR / "scenario_defs.py",
-            "runner_sha256": SCENARIOS_DIR / "runner.py",
-            "api_worker_sha256": SCENARIOS_DIR / "api_worker.py",
-            "compare_runs_sha256": REPO_ROOT / "verification" / "compare_runs.py",
-            "audit_scenario_sha256": SCENARIOS_DIR / "audit_scenario.py",
-            "gate_sha256": Path(__file__),
-        }
-        for key, path in machinery.items():
-            self.assertEqual(
-                m["provenance"].get(key), self.runner.sha256(path),
-                f"{path.name} changed after the freeze ({key}) — the frozen "
-                "baselines' INTERPRETER moved under them; re-run "
-                "verification/scenarios/freeze.py (adjudicated) so the "
-                "machinery and the baselines are pinned together")
-
+        # The seven machinery hashes that used to be asserted here —
+        # `freezer_sha256`, `defs_sha256`, `runner_sha256`,
+        # `api_worker_sha256`, `compare_runs_sha256`, `audit_scenario_sha256`
+        # and `gate_sha256` — are gone (Sol, `227`). A hash of `runner.py`
+        # proved that `runner.py` changed, not that the change weakened
+        # comparison; 28 of 89 manifest commits were hash-only re-freezes, a
+        # comment-level edit re-froze 54 scenarios, and the coupling deferred
+        # issue #99's lock for rounds. The property they reached for is now
+        # tested directly in `python/tests/test_comparator_contract.py`, case
+        # by case, with each case shown to go red on its own mutation.
+        #
+        # `spec_sha256` STAYS: it pins the adjudicated comparison RULES, not
+        # the source of the code that applies them, and a silent tolerance
+        # change under frozen baselines is exactly what it catches.
         ids = [s["id"] for s in m["scenarios"]]
         self.assertEqual(len(ids), len(set(ids)), "duplicate scenario ids")
         by_lane = {}
@@ -95,59 +88,26 @@ class TestFrozenScenarios(unittest.TestCase):
         for s in m["scenarios"]:
             problems.extend(self.runner.verify_baselines(s, m))
         self.assertEqual([], problems, "\n".join(problems))
-        import subprocess
-        commit = m["provenance"]["commit"]
-
-        def is_ancestor():
-            return subprocess.run(
-                ["git", "-C", str(REPO_ROOT), "merge-base", "--is-ancestor",
-                 commit, "HEAD"], capture_output=True, check=False).returncode
-
-        def shallow():
-            done = subprocess.run(
-                ["git", "-C", str(REPO_ROOT), "rev-parse",
-                 "--is-shallow-repository"], capture_output=True, check=False)
-            return done.stdout.decode().strip() == "true"
-
-        rc = is_ancestor()
-        # A SHALLOW clone cannot answer this, and it does not say so: git
-        # returns 128 when the object is missing entirely, but 1 — the same
-        # code as a genuine "no" — for a commit that IS present and sits
-        # beyond the graft boundary, because it cannot walk past it. Recovering
-        # on 128 alone therefore believed a traversal that never happened.
+        # The provenance ancestry assertion that used to close this method
+        # is DELETED (Sol, `227`). `provenance.commit` being reachable from
+        # the present HEAD proved only that a freeze commit remained in one
+        # Git lineage. It did not prove the Code interpretation was right,
+        # that the current runner executed the scenario, that the baseline
+        # represents the current product, or that a report tells an authority
+        # the truth. Per-file hashes establish which bytes were approved and
+        # running the current product against them establishes whether
+        # behaviour still agrees; "made on this line of history" is
+        # repository bookkeeping, not a compliance property.
         #
-        # The consequence was worse than a skipped check. The failure below
-        # accuses the baselines of having "come from another line of history",
-        # which is specific, alarming, and was false: the commit was a real
-        # ancestor the clone simply could not reach. It stayed hidden because a
-        # push to main carries a manifest commit inside the shallow window and
-        # every PR that reached this check had re-frozen, which rewrites that
-        # commit to a recent one — so the first PR that did NOT re-freeze found
-        # it.
+        # It fired twice, on `9f48d45` and `235145a`, and both were
+        # self-created outages: the gate rejected unchanged behaviour because
+        # a squash merge had rewritten the history it read. Deleting it
+        # retires D-95's merge-method exception, the unshallow lock, the
+        # `fetch-depth: 0` requirement and the job-digest seal, all of which
+        # existed only to keep this one line executable.
         #
-        # Deepening is still conditional on the clone actually being shallow, so
-        # a genuine "not an ancestor" on a full clone fails immediately and is
-        # never softened into a fetch-and-shrug.
-        if rc != 0 and shallow():
-            # FETCH, so ancestry is PROVEN rather than shrugged at (review
-            # Medium: the common CI path must not routinely skip this).
-            subprocess.run(["git", "-C", str(REPO_ROOT), "fetch", "--quiet",
-                            "--unshallow"], capture_output=True, check=False)
-            subprocess.run(["git", "-C", str(REPO_ROOT), "fetch", "--quiet",
-                            "origin", commit], capture_output=True,
-                           check=False)
-            rc = is_ancestor()
-        if rc == 1:
-            self.fail(f"manifest provenance commit {commit[:12]} is NOT an "
-                      "ancestor of HEAD — these baselines came from another "
-                      "line of history")
-        if rc != 0:
-            msg = (f"cannot PROVE provenance commit {commit[:12]} is an "
-                   "ancestor of HEAD even after fetching (git exit "
-                   f"{rc}) — unknown must fail in required mode")
-            if REQUIRED:
-                self.fail(msg)
-            self.skipTest(msg)
+        # `provenance.commit` itself stays in the manifest as informational
+        # history. Nothing requires it to be reachable.
 
     def test_post_handoff_seals_retain_the_final_attestation(self):
         scenarios = self.manifest["scenarios"]

@@ -495,6 +495,10 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--allow-dirty", action="store_true",
                     help="dev override, recorded in provenance")
+    ap.add_argument("--scenario", action="append", metavar="ID", default=None,
+                    help="re-freeze only these scenario ids, carrying every "
+                         "other baseline forward unchanged. Repeatable. "
+                         "Without it, every scenario is re-frozen.")
     args = ap.parse_args()
 
     # A FREEZE MAY ONLY RUN LOCALLY. Verifying against existing baselines on the
@@ -517,9 +521,43 @@ def main():
         die("dirty source tree — baselines must be reproducible from a "
             "commit SHA. Commit first (PR-1 commit 1), then freeze.")
 
+
     slugs = json.loads((runner.PYTHON_ROOT / "scripts" / "sample_manifest.json")
                        .read_text(encoding="utf-8"))["samples"]
     scenarios = scenario_defs.all_scenarios(slugs)
+
+    # SCOPED re-freeze (Sol, `227`). A full 54-scenario freeze for one moved
+    # output is what made the machinery hashes expensive enough to defer a
+    # correctness fix; 28 of 89 manifest commits here were hash-only.
+    #
+    # The selected ids are re-run and every other baseline is carried
+    # forward verbatim, including its recorded hashes. That is only safe with
+    # the guard below: `promote` MOVES the whole baselines directory, so a
+    # scope that forgets to carry the rest would delete 53 baselines and
+    # write a manifest that agrees with the deletion.
+    all_ids = [sc["id"] for sc in scenarios]
+    carried = []
+    if args.scenario:
+        wanted = list(dict.fromkeys(args.scenario))
+        unknown = [i for i in wanted if i not in all_ids]
+        if unknown:
+            die(f"--scenario: no such scenario(s) {unknown}. Ids come from "
+                "verification/scenarios/scenario_defs.py.")
+        if not runner.MANIFEST.exists():
+            die("--scenario needs an existing manifest to carry the "
+                "unselected baselines forward; there is none, so run a full "
+                "freeze first.")
+        previous = json.loads(runner.MANIFEST.read_text(encoding="utf-8"))
+        known = {s["id"]: s for s in previous["scenarios"]}
+        missing = [i for i in all_ids if i not in known and i not in wanted]
+        if missing:
+            die(f"--scenario cannot carry {missing} forward: they are "
+                "defined but absent from the current manifest, so only a "
+                "full freeze can establish them.")
+        carried = [known[i] for i in all_ids if i not in wanted]
+        scenarios = [sc for sc in scenarios if sc["id"] in wanted]
+        print(f"scoped freeze: re-running {len(scenarios)}, carrying "
+              f"{len(carried)} forward", flush=True)
     check_env_hygiene(scenarios)
     try:
         active_seals, retired_seals, final_attestation = seal_accounting(scenarios)
@@ -624,6 +662,32 @@ def main():
             hashes[f.name] = runner.sha256(f)
         frozen.append({**sc, "baseline_sha256": hashes})
 
+    # Carry the unselected baselines into the staging tree, so the
+    # whole-directory promotion below publishes a COMPLETE set.
+    for sc in carried:
+        source = runner.BASELINES / sc["id"]
+        if not source.is_dir():
+            die(f"{sc['id']} is in the manifest but {source} is missing; a "
+                "scoped freeze cannot carry forward a baseline that is not "
+                "there.")
+        shutil.copytree(source, baselines / sc["id"])
+    frozen = frozen + carried
+    frozen.sort(key=lambda sc: all_ids.index(sc["id"]))
+
+    # The guard that makes a scoped freeze safe: the manifest it is about to
+    # write must describe EVERY defined scenario, and the staged tree must
+    # hold a directory for each. Anything less and the promotion deletes
+    # baselines while publishing a manifest that agrees with the deletion.
+    written = [sc["id"] for sc in frozen]
+    if written != all_ids:
+        die("refusing to promote: the manifest would describe "
+            f"{len(written)} scenarios and {len(all_ids)} are defined. "
+            f"Missing {sorted(set(all_ids) - set(written))}, "
+            f"unexpected {sorted(set(written) - set(all_ids))}.")
+    absent = [i for i in all_ids if not (baselines / i).is_dir()]
+    if absent:
+        die(f"refusing to promote: no staged baseline directory for {absent}")
+
     counts = {}
     for sc in frozen:
         counts[sc["lane"]] = counts.get(sc["lane"], 0) + 1
@@ -631,23 +695,23 @@ def main():
         "version": 2,
         "spec_sha256": runner.sha256(REPO_ROOT / "verification" / "spec.json"),
         "provenance": {
+            # `commit` is INFORMATIONAL history: which commit produced this
+            # freeze. Nothing requires it to be reachable from a later HEAD
+            # (Sol, `227`) — that assertion proved only that a freeze commit
+            # remained in one Git lineage, and its two firings were
+            # self-created outages after squash merges rewrote the history it
+            # read.
             "commit": git("rev-parse", "HEAD"), "dirty": dirty,
-            # The INTERPRETER MACHINERY is pinned too (post-merge review
-            # High): a change to what executes/normalizes/compares frozen
-            # baselines is a behaviour change and demands a re-freeze.
-            "freezer_sha256": runner.sha256(__file__),
-            "defs_sha256": runner.sha256(HERE / "scenario_defs.py"),
-            "runner_sha256": runner.sha256(HERE / "runner.py"),
-            # The API worker, the comparison semantics and the audit-scenario
-            # constructor execute or shape frozen runs too (post-9a review
-            # High): pinned with the rest of the machinery.
-            "api_worker_sha256": runner.sha256(HERE / "api_worker.py"),
-            "compare_runs_sha256": runner.sha256(
-                REPO_ROOT / "verification" / "compare_runs.py"),
-            "audit_scenario_sha256": runner.sha256(HERE / "audit_scenario.py"),
-            "gate_sha256": runner.sha256(
-                runner.PYTHON_ROOT / "tests" / "necb"
-                / "test_frozen_scenarios.py"),
+            # The seven machinery hashes are GONE. A hash of `runner.py`
+            # proved that `runner.py` changed, not whether the change
+            # weakened comparison, and it made every file it covered
+            # expensive to touch: 28 of 89 manifest commits here were
+            # hash-only re-freezes. The comparator's behaviour is tested
+            # directly in `python/tests/test_comparator_contract.py`.
+            #
+            # `spec_sha256` above is deliberately kept: it pins the
+            # adjudicated comparison RULES, which is a different claim from
+            # pinning the source of the code that applies them.
             "openstudio_cli": subprocess.run(
                 ["openstudio", "openstudio_version"], capture_output=True,
                 text=True, check=False).stdout.strip(),
