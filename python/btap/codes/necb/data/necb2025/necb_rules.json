@@ -22,7 +22,7 @@
      "python/btap/codes/compliance.py#_evaluate_unmet",
      "python/btap/codes/necb/path.py#evaluate_unmet_8_4_4"
     ],
-    "gaps": "sentence (5)’s incremental capacity increase is applied on the 8.4.5 reference path only; on the 8.4.4 archetype-EUI path it is not applied and the run says so (AHJ-21)"
+    "gaps": "On the 8.4.5 reference-building path, sentences (3) and (4)(b) read each building’s Facility row instead of evaluating every thermal block, so a block that exceeds its own limit can pass when the Facility-level comparison passes; sentence (5)’s incremental capacity increase is applied on the 8.4.5 reference path only, while on the 8.4.4 archetype-EUI path it is not applied and the run says so (AHJ-21)."
    },
    {
     "article": "8.4.1.5.",

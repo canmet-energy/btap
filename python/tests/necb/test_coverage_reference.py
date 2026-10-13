@@ -90,5 +90,51 @@ class TestCoverageCLI(unittest.TestCase):
         self.assertIn("fetch", proc.stdout)
 
 
+class TestUmbrellaCoverageDeclarations(unittest.TestCase):
+    @staticmethod
+    def determination_row(code):
+        from btap.codes import resolve
+
+        articles = resolve(code).rules("umbrella")["article_coverage"]["articles"]
+        return next(row for row in articles if row["article"] == "8.4.1.2.")
+
+    def test_reference_path_per_block_gap_is_partial_in_every_edition(self):
+        for code in ("necb2020", "necb2025"):
+            with self.subTest(code=code):
+                row = self.determination_row(code)
+                self.assertEqual(
+                    "partial", row["status"],
+                    "the reference path reads the Facility row instead of "
+                    "evaluating each thermal block, so this row must warn")
+                gaps = row.get("gaps") or ""
+                self.assertRegex(gaps, r"reference-building path")
+                self.assertRegex(gaps, r"Facility")
+                self.assertRegex(gaps, r"thermal block")
+                self.assertRegex(
+                    gaps, r"can pass",
+                    "the gap must state its verdict consequence, not merely "
+                    "name a different data source")
+
+        self.assertRegex(
+            self.determination_row("necb2025")["gaps"],
+            r"sentence \(5\).*archetype-EUI",
+            "the existing EUI-path capacity-iteration gap must remain visible")
+
+    def test_the_gap_reaches_every_runtime_audit_as_a_warning(self):
+        from btap.audit import AuditLog, emit_coverage
+
+        for code in ("necb2020", "necb2025"):
+            with self.subTest(code=code):
+                row = self.determination_row(code)
+                audit = AuditLog()
+                emit_coverage({"articles": [row]}, audit)
+                self.assertEqual(1, len(audit.entries))
+                emitted = audit.entries[0]
+                self.assertEqual("warning", emitted["level"])
+                self.assertEqual("partial", emitted["inputs"]["status"])
+                self.assertIn(". Gaps: ", emitted["action"])
+                self.assertIn(row["gaps"], emitted["action"])
+
+
 if __name__ == "__main__":
     unittest.main()
