@@ -133,6 +133,18 @@ NRCan building-stock records.
 
 ## Traps
 
+- **`AirLoopHVACDedicatedOutdoorAirSystem` has three measured preconditions;
+  see `tests/modeling/test_sdk_doas_preconditions.py`.** Every served air loop
+  needs its own `AirLoopHVACOutdoorAirSystem`; `Fan:ConstantVolume` and
+  `Fan:VariableVolume` are refused as dedicated-system components; and each
+  preheat/precool coil needs a setpoint at its own outlet (the fan outlet does
+  not). A missing own OA system on the first insertion-order loop can segfault
+  the forward translator; on a later loop it duplicates the previous loop's
+  ports, leaves the loop disconnected, and EnergyPlus sizes the IDF with zero
+  Severe/Fatal errors and no mixer/splitter diagnostic. There is no product
+  guard yet: OA-reading rules treat the absent system as not applicable and
+  silently skip it, so engine acceptance does not validate a user-authored
+  DOAS graph.
 - **Floor-plan zone colours hash zone names with a local djb2, never the
   builtin `hash()`.** Python randomizes `str` hashing per process
   (`PYTHONHASHSEED`), so colours would change on every run and every diff of

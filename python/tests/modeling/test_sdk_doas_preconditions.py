@@ -246,10 +246,9 @@ class TestTheDedicatedOutdoorAirSystemPreconditions(unittest.TestCase):
         The translator iterates `airLoops()` in insertion order. With AL1's
         OA system missing, it reuses AL0's ports: AL0 appears twice in the
         central mixer/splitter and AL1 appears not at all. EnergyPlus then
-        accepts that disconnected-zone graph sizing-clean.
+        accepts that disconnected-zone graph sizing-clean and says nothing
+        about either miswired central object.
         """
-        import re
-
         import openstudio
 
         import btap.simulation as simulation
@@ -287,16 +286,24 @@ class TestTheDedicatedOutdoorAirSystemPreconditions(unittest.TestCase):
             wiring["AirLoopHVAC:Mixer"][2:],
             "AL0's relief port is duplicated and AL1 is connected to nothing")
 
+        # Local.run translates in-process. The child translation above proved
+        # this later-loop shape returns normally; the first-loop crash shape
+        # is never handed to Local.run.
         clean, severe, fatal, detail, engine_err = _run(simulation, model)
-        warnings = len(re.findall(
-            r"\*\*\s*Warning\s*\*\*", engine_err))
         self.assertTrue(
             clean,
             "EnergyPlus accepts the translator's duplicated-node graph; "
             f"first severity was {detail}")
         self.assertEqual(
-            (0, 0, 16), (severe, fatal, warnings),
-            "the corrupt graph is sizing-clean with warnings, not refused")
+            (0, 0), (severe, fatal),
+            "the corrupt graph is sizing-clean, not refused")
+        for absent in ("Central DOAS 1 Mixer",
+                       "Central DOAS 1 Splitter"):
+            self.assertNotIn(
+                absent.casefold(), engine_err.casefold(),
+                "EnergyPlus must remain silent about the miswired central "
+                f"object {absent!r}; an engine diagnostic would change "
+                "the finding this regression records")
 
     def test_the_fan_must_be_a_SYSTEM_model_or_OnOff_not_CV_or_VV(self):
         """Precondition (b), with my over-broad claim corrected.
