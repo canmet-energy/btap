@@ -9,17 +9,24 @@ that happen to comply.
 from __future__ import annotations
 
 import contextlib
+import copy
+import importlib.util
 import io
 import json
 import sys
 import tempfile
 import tomllib
+import types
 import unittest
 from pathlib import Path
+from unittest import mock
 
 PYTHON_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(PYTHON_ROOT / "scripts"))
 import generate_decisions as G  # noqa: E402
+
+# G put this checkout's python/ first on sys.path.
+from btap.codes import decisions as Loader  # noqa: E402
 
 EM = G.EM_DASH
 
@@ -50,6 +57,63 @@ def write(directory, meta=None, body=None, name=None):
     path = Path(directory) / (name or (meta["id"] + ".md"))
     path.write_text(G.source_text(meta, body), encoding="utf-8")
     return path
+
+
+KEY = "heat_pump_reference_by_source"
+
+#: The structured form (docs/plans/DECISION_APPLICABILITY_PLAN.md). Every NECB
+#: reference is one its edition's committed provision index records as
+#: PRESENT -- sentences, an Appendix note, a Division A sentence, a table and
+#: a table note -- so the validated path runs rather than being skipped. The
+#: related NECB record and the incorporated external standard show that
+#: neither role establishes an edition: `editions` is derived from the two
+#: governing records alone, and none is authored.
+STRUCTURED_META = {
+    "id": "D-01",
+    "title": "A compact registry title",
+    "kind": "runtime",
+    "articles": {KEY: {
+        "label": "Reference system for a proposed heat pump, by heat source",
+        "decided": ("Water-loop and other heat pumps follow different "
+                    "reference-system selection branches."),
+        "sources": [
+            {"code": "necb", "edition": "2020", "role": "governing",
+             "references": ["8.4.4.13.(1)", "8.4.4.13.(2)", "Note A-8.4.4.13"]},
+            {"code": "necb", "edition": "2025", "role": "governing",
+             "references": ["8.4.5.13.(1)", "8.4.5.13.(2)", "Note A-8.4.5.13"]},
+            {"code": "necb", "edition": "2020", "role": "related",
+             "references": ["Division A 1.1.1.1.(1)", "Table 8.4.4.7.-B",
+                            "Table 8.4.4.7.-B Note (1)"]},
+            {"code": "ashrae-62.1", "edition": "2016",
+             "role": "incorporated-reference", "references": ["6.2.2.1"]},
+        ]}},
+    "summary": "A paraphrase of what was decided.",
+}
+
+
+def structured(edit=None, **over):
+    """A deep copy of `STRUCTURED_META` with top-level overrides, then
+    `edit(meta)` applied in place, so no test leaks a mutation into another."""
+    meta = copy.deepcopy(STRUCTURED_META)
+    meta.update(copy.deepcopy(over))
+    if edit is not None:
+        edit(meta)
+    return meta
+
+
+def requirement(meta, key=KEY):
+    return meta["articles"][key]
+
+
+def record(meta, index, key=KEY):
+    return meta["articles"][key]["sources"][index]
+
+
+def inner(front):
+    """The TOML between a front matter's two fences."""
+    lines = front.split("\n")
+    assert lines[0] == lines[-1] == G.FENCE, front
+    return "\n".join(lines[1:-1])
 
 
 class TestTomlWriter(unittest.TestCase):
@@ -861,6 +925,842 @@ class TestTheEditionsField(unittest.TestCase):
         self.assertIn("necb2020", codes)
         self.assertIn("necb2025", codes)
         self.assertNotIn("unverified", codes)
+
+
+class TestStructuredSources(unittest.TestCase):
+    """The structured requirement form: ``label``, ``decided`` and one
+    ``[[articles.<key>.sources]]`` record per code, edition and role.
+
+    Each refusal is driven by a copy of `STRUCTURED_META` that breaks exactly
+    one rule, and the unmodified fixture is the control that the rule does
+    not also refuse a correct record.
+    """
+
+    def check(self, meta):
+        G.validate(meta["id"] + ".md", meta, GOOD_BODY)
+
+    def rejects(self, message, meta):
+        with self.assertRaises(ValueError) as caught:
+            self.check(meta)
+        self.assertIn(message, str(caught.exception))
+        return str(caught.exception)
+
+    # ------------------------------------------------------------ accepted
+
+    def test_the_representative_record_round_trips_through_its_file(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = write(directory, meta=structured())
+            text = path.read_text(encoding="utf-8")
+            meta, body = G.parse_source(path)
+        self.assertEqual(STRUCTURED_META, meta)
+        self.assertEqual(GOOD_BODY, body)
+        self.assertEqual(text, G.source_text(meta, body),
+                         "a structured source must rewrite to itself")
+        self.assertNotIn("editions", meta, "editions is derived, not authored")
+
+    def test_editions_is_DERIVED_from_the_governing_sources(self):
+        self.assertEqual(["necb2020", "necb2025"],
+                         G.governing_code_ids(STRUCTURED_META["articles"]))
+
+    def test_an_authored_editions_EQUAL_to_the_derivation_is_accepted(self):
+        self.check(structured(editions=["necb2020", "necb2025"]))
+
+    def test_an_authored_editions_that_CONFLICTS_is_refused(self):
+        for editions in (["necb2020"], ["necb2025"], ["unverified"],
+                         ["necb2025", "necb2020"]):
+            with self.subTest(editions=editions):
+                self.rejects("but the governing sources derive",
+                             structured(editions=editions))
+
+    def test_related_and_incorporated_sources_never_establish_an_edition(self):
+        def demote_2025(meta):
+            record(meta, 1)["role"] = "related"
+
+        meta = structured(demote_2025)
+        self.check(meta)
+        self.assertEqual(["necb2020"], G.governing_code_ids(meta["articles"]))
+        self.check(structured(demote_2025, editions=["necb2020"]))
+        self.rejects("but the governing sources derive",
+                     structured(demote_2025, editions=["necb2020", "necb2025"]))
+
+    def test_a_FUTURE_edition_may_be_cited_as_related_and_is_disclosed(self):
+        """Its reference repeats a governing 2020 citation, which is the
+        control that one-role-per-provision is keyed by edition as well."""
+        def cite_2030(meta):
+            requirement(meta)["sources"].append(
+                {"code": "necb", "edition": "2030", "role": "related",
+                 "references": ["8.4.4.13.(1)"]})
+
+        meta = structured(cite_2030)
+        self.check(meta)
+        self.assertEqual(["necb2020", "necb2025"],
+                         G.governing_code_ids(meta["articles"]))
+        self.assertIn(("D-01", KEY, "necb", "2030", "related"),
+                      G.unvalidated_sources({"D-01": (meta, GOOD_BODY)}))
+
+    def test_only_sources_no_index_validates_are_disclosed(self):
+        """The registered necb 2020 related record is validated, so it is not
+        listed; the external standard is carried as authored, so it is."""
+        self.assertEqual(
+            [("D-01", KEY, "ashrae-62.1", "2016", "incorporated-reference")],
+            G.unvalidated_sources({"D-01": (structured(), GOOD_BODY),
+                                   "D-02": (dict(GOOD_META, id="D-02"),
+                                            GOOD_BODY)}))
+
+    def test_an_external_standard_keeps_its_own_citation_grammar(self):
+        self.check(structured(lambda m: record(m, 3).update(
+            references=["Section 6.2.2.1", "Table 6-1"])))
+
+    def test_an_addendum_style_edition_string_is_accepted(self):
+        self.check(structured(lambda m: record(m, 3).update(
+            edition="2016-addendum-a1")))
+
+    def test_one_code_and_edition_may_carry_two_roles(self):
+        """The fixture's necb 2020 governing and related records: the record
+        identity is code, edition AND role."""
+        roles = [(r["code"], r["edition"], r["role"])
+                 for r in requirement(STRUCTURED_META)["sources"]]
+        self.assertIn(("necb", "2020", "governing"), roles)
+        self.assertIn(("necb", "2020", "related"), roles)
+        self.check(structured())
+
+    def test_requirements_that_govern_the_same_editions_are_accepted(self):
+        self.check(structured(self.second_requirement(both_editions=True)))
+
+    # ------------------------------------------- mixing the legacy forms
+
+    def test_the_legacy_holding_keys_may_not_sit_beside_sources(self):
+        for reserved, value in (("unverified", ["8.4.4.13.(1)"]),
+                                ("not_applicable", [])):
+            with self.subTest(reserved=reserved):
+                meta = structured(
+                    lambda m, r=reserved, v=value: m["articles"].update({r: v}))
+                self.rejects("may not mix the legacy {!r} key".format(reserved),
+                             meta)
+                with tempfile.TemporaryDirectory() as directory:
+                    with self.assertRaises(ValueError) as caught:
+                        G.parse_source(write(directory, meta=meta))
+                self.assertIn("may not mix the legacy", str(caught.exception))
+
+    def test_a_legacy_requirement_may_not_sit_beside_a_structured_one(self):
+        def add_legacy(meta):
+            meta["articles"]["hydronic_pumps"] = {
+                "label": "Hydronic pump power", "necb2020": ["8.4.4.14."]}
+
+        for over in ({}, {"editions": ["necb2020", "necb2025"]}):
+            with self.subTest(**over):
+                message = self.rejects(
+                    "convert every requirement of a decision together",
+                    structured(add_legacy, **over))
+                self.assertIn("hydronic_pumps", message)
+
+    def test_a_half_converted_requirement_is_refused_by_name(self):
+        """``decided`` beside per-edition lists reaches the structured
+        validator, which names the leftover key, rather than the legacy one,
+        which would call ``decided`` an unregistered code id."""
+        def half(meta):
+            requirement(meta).pop("sources")
+            requirement(meta)["necb2020"] = ["8.4.4.13.(1)"]
+
+        self.rejects("has unexpected key(s) ['necb2020']", structured(half))
+
+    def second_requirement(self, both_editions):
+        def add(meta):
+            sources = [{"code": "necb", "edition": "2020", "role": "governing",
+                        "references": ["8.4.4.13.(2)(a)"]}]
+            if both_editions:
+                sources.append({"code": "necb", "edition": "2025",
+                                "role": "governing",
+                                "references": ["8.4.5.13.(2)"]})
+            meta["articles"]["water_loop_branch"] = {
+                "label": "Water-loop heat pump branch",
+                "decided": "The water-loop branch is selected by heat source.",
+                "sources": sources}
+        return add
+
+    def test_requirements_must_govern_the_same_editions(self):
+        self.rejects("requirements govern different editions",
+                     structured(self.second_requirement(both_editions=False)))
+
+    # -------------------------------------------------- the requirement
+
+    def test_a_requirement_key_must_be_a_stable_id(self):
+        for key in ("Heat_pump", "heat-pump", "1heat", "heat pump", ""):
+            with self.subTest(key=key):
+                self.rejects("must match", structured(
+                    lambda m, k=key: m.update(articles={k: requirement(m)})))
+
+    def test_a_requirement_carries_only_label_decided_and_sources(self):
+        self.rejects("has unexpected key(s) ['necb2020']", structured(
+            lambda m: requirement(m).update(necb2020=["8.4.4.13.(1)"])))
+
+    def test_label_and_decided_must_be_non_empty_strings(self):
+        for field in ("label", "decided"):
+            for value in ("", "   ", 3, None, ["text"]):
+                with self.subTest(field=field, value=value):
+                    self.rejects(
+                        "needs a non-empty {} string".format(field),
+                        structured(lambda m, f=field, v=value:
+                                   requirement(m).update({f: v})))
+            with self.subTest(field=field, value="missing"):
+                self.rejects("needs a non-empty {} string".format(field),
+                             structured(lambda m, f=field:
+                                        requirement(m).pop(f)))
+
+    def test_decided_may_not_repeat_the_decision_wide_summary(self):
+        for decided in (STRUCTURED_META["summary"],
+                        "  a PARAPHRASE of what\nwas decided.  "):
+            with self.subTest(decided=decided):
+                self.rejects("repeats the decision-wide summary", structured(
+                    lambda m, d=decided: requirement(m).update(decided=d)))
+
+    def test_a_requirement_needs_at_least_one_source_record(self):
+        message = "needs at least one [[articles.{}.sources]] record".format(KEY)
+        for sources in ([], "necb 2020", {"code": "necb"}):
+            with self.subTest(sources=sources):
+                self.rejects(message, structured(
+                    lambda m, s=sources: requirement(m).update(sources=s)))
+        self.rejects(message, structured(
+            lambda m: requirement(m).pop("sources")))
+
+    def test_one_record_per_code_edition_and_role(self):
+        self.rejects(
+            "repeats code='necb' edition='2020' role='governing'",
+            structured(lambda m: requirement(m)["sources"].append(
+                {"code": "necb", "edition": "2020", "role": "governing",
+                 "references": ["8.4.4.13.(2)(a)"]})))
+
+    def test_a_governing_source_must_be_a_registered_runtime_edition(self):
+        for code, edition, reference in (("necb", "2030", "8.4.4.13.(1)"),
+                                         ("ashrae-62.1", "2016", "6.2.2.1")):
+            with self.subTest(code=code, edition=edition):
+                message = self.rejects(
+                    "is not a registered runtime edition",
+                    structured(lambda m, c=code, e=edition, r=reference:
+                               requirement(m)["sources"].append(
+                                   {"code": c, "edition": e,
+                                    "role": "governing", "references": [r]})))
+                self.assertIn("(necb 2020, necb 2025)", message)
+
+    def test_one_provision_has_one_role_in_a_requirement(self):
+        self.rejects("one provision has one role", structured(
+            lambda m: record(m, 2)["references"].append("8.4.4.13.(1)")))
+
+    def test_a_requirement_needs_a_governing_source(self):
+        self.rejects("has no governing source", structured(
+            lambda m: requirement(m).update(sources=requirement(m)["sources"][2:])))
+
+    # -------------------------------------------------------- one record
+
+    def test_a_source_record_must_be_a_table(self):
+        for value in ("necb 2020", ["necb", "2020"], 7):
+            with self.subTest(value=value):
+                self.rejects("source 1 must be a table", structured(
+                    lambda m, v=value: requirement(m)["sources"].__setitem__(0, v)))
+
+    def test_a_source_record_has_exactly_its_four_fields(self):
+        self.rejects("unexpected ['note'] / missing []", structured(
+            lambda m: record(m, 0).update(note="x")))
+        for field in ("code", "edition", "role", "references"):
+            with self.subTest(missing=field):
+                self.rejects("unexpected [] / missing [{!r}]".format(field),
+                             structured(lambda m, f=field: record(m, 0).pop(f)))
+
+    def test_code_is_a_stable_lower_case_family_id(self):
+        for code in ("NECB", "Necb", "necb 2020", "", "ashrae_62.1", "-necb",
+                     "necb.", 7, None):
+            with self.subTest(code=code):
+                self.rejects("is not a stable lower-case family id", structured(
+                    lambda m, c=code: record(m, 0).update(code=c)))
+
+    def test_a_runtime_code_id_is_not_a_family(self):
+        for code_id, family, edition in (("necb2020", "necb", "2020"),
+                                         ("necb2025", "necb", "2025")):
+            with self.subTest(code=code_id):
+                message = self.rejects(
+                    "is a runtime code id, not a family",
+                    structured(lambda m, c=code_id: record(m, 3).update(code=c)))
+                self.assertIn("write code = {!r} and edition = {!r}".format(
+                    family, edition), message)
+
+    def test_edition_is_a_QUOTED_string(self):
+        for edition, kind in ((2020, "int"), (2020.0, "float")):
+            with self.subTest(edition=edition):
+                self.rejects(
+                    "edition must be a quoted string, got {}".format(kind),
+                    structured(lambda m, e=edition: record(m, 0).update(edition=e)))
+
+    def test_a_malformed_edition_is_refused(self):
+        for edition in ("", "2020 ", "NECB2020", "2020-", "20 20", "2020/a1"):
+            with self.subTest(edition=edition):
+                self.rejects("is malformed", structured(
+                    lambda m, e=edition: record(m, 3).update(edition=e)))
+
+    def test_role_is_one_of_three(self):
+        for role in ("Governing", "incorporated", "informative", "", None):
+            with self.subTest(role=role):
+                self.rejects(
+                    "is not one of governing, incorporated-reference, related",
+                    structured(lambda m, r=role: record(m, 3).update(role=r)))
+
+    def test_references_are_a_non_empty_list_of_clean_distinct_strings(self):
+        """On a validated record AND an external one: these checks are the
+        whole of what an external source gets, so they must not depend on a
+        provision index."""
+        cases = (
+            ([], "references must be a non-empty list"),
+            ("8.4.4.13.(1)", "references must be a non-empty list"),
+            ([1], "not a non-blank string"),
+            ([""], "not a non-blank string"),
+            (["  "], "not a non-blank string"),
+            ([" 8.4.4.13.(1)"], "carries stray whitespace"),
+            (["8.4.4.13.(1) "], "carries stray whitespace"),
+            (["Note  A-8.4.4.13"], "carries stray whitespace"),
+            (["8.4.4.13.(1)", "8.4.4.13.(1)"], "cites '8.4.4.13.(1)' twice"),
+        )
+        for index in (0, 3):
+            for references, message in cases:
+                with self.subTest(record=index, references=references):
+                    self.rejects(message, structured(
+                        lambda m, i=index, r=references:
+                        record(m, i).update(references=r)))
+
+    # -------------------------------------- against the provision index
+
+    def test_a_reference_must_use_the_canonical_spelling(self):
+        cases = (
+            (0, 0, "Sentence 8.4.4.13.(1)", "8.4.4.13.(1)"),
+            (0, 0, "8.4.4.13(1)", "8.4.4.13.(1)"),
+            (0, 0, "Division B 8.4.4.13.(1)", "8.4.4.13.(1)"),
+            (0, 2, "Note A-8.4.4.13.", "Note A-8.4.4.13"),
+            (2, 0, "division a 1.1.1.1.(1)", "Division A 1.1.1.1.(1)"),
+        )
+        for index, position, written, canonical in cases:
+            with self.subTest(written=written):
+                message = self.rejects(
+                    "is not the canonical spelling -- write {!r}".format(canonical),
+                    structured(lambda m, i=index, p=position, w=written:
+                               record(m, i)["references"].__setitem__(p, w)))
+                self.assertIn(repr(written), message)
+
+    def test_a_malformed_NECB_citation_is_refused(self):
+        for reference in ("8.4.4", "Table 8.4.4.7-B", "A-8.4.4.13",
+                          "8.4.4.13.(2) (g)"):
+            with self.subTest(reference=reference):
+                self.rejects("malformed NECB provision citation", structured(
+                    lambda m, r=reference: record(m, 0)["references"].append(r)))
+
+    def test_an_unregistered_NECB_edition_still_uses_NECB_grammar(self):
+        """No index validates necb 2030, but its family's grammar does: a
+        related record cannot carry a spelling no edition would accept."""
+        for reference, message in (
+                ("Note A-8.4.4.13.", "is not the canonical spelling"),
+                ("8.4.4", "malformed NECB provision citation")):
+            with self.subTest(reference=reference):
+                self.rejects(message, structured(
+                    lambda m, r=reference: requirement(m)["sources"].append(
+                        {"code": "necb", "edition": "2030", "role": "related",
+                         "references": [r]})))
+
+    def test_a_reference_must_be_PRESENT_in_its_edition_index(self):
+        cases = (
+            (0, "8.4.4.13.(3)",
+             "8.4.4.13.(3) is absent from the complete child inventory of "
+             "8.4.4.13 in necb2020"),
+            (0, "8.4.1.5", "8.4.1.5 is authority-confirmed absent from necb2020"),
+            (0, "8.4.4.9.(5)", "8.4.4.9.(5) has no committed evidence in necb2020"),
+            (0, "8.4.5.13.(1)", "8.4.5.13.(1) has no committed evidence in necb2020"),
+            (1, "8.4.4.13.(1)", "8.4.4.13.(1) has no committed evidence in necb2025"),
+            (2, "Table 8.4.4.7.-B Note (9)",
+             "Table 8.4.4.7.-B Note (9) is absent from the complete child "
+             "inventory of Table 8.4.4.7.-B in necb2020"),
+            (0, "Note A-8.4.4.99",
+             "Note A-8.4.4.99 has no committed evidence in necb2020"),
+            (2, "Table 8.4.4.7.-Z",
+             "Table 8.4.4.7.-Z has no committed evidence in necb2020"),
+        )
+        for index, reference, detail in cases:
+            with self.subTest(reference=reference, record=index):
+                message = self.rejects(detail, structured(
+                    lambda m, i=index, r=reference:
+                    record(m, i)["references"].append(r)))
+                self.assertIn("a source must cite a provision its edition's "
+                              "index records as present", message)
+                self.assertNotIn(" is present (", message,
+                                 "no present neighbour, so no hint")
+
+    def test_an_ARTICLE_cited_as_a_TABLE_is_refused_with_a_hint(self):
+        message = self.rejects(
+            "Table 8.4.4.13 has no committed evidence in necb2020",
+            structured(lambda m: record(m, 0)["references"].append(
+                "Table 8.4.4.13")))
+        self.assertIn("; 8.4.4.13 is present (an Article and a Table are "
+                      "different provisions)", message)
+
+    def test_an_UNQUALIFIED_Division_A_citation_is_refused_with_a_hint(self):
+        message = self.rejects(
+            "1.1.1.1.(2) is absent from the complete child inventory",
+            structured(lambda m: record(m, 2)["references"].append("1.1.1.1.(2)")))
+        self.assertIn("; Division A 1.1.1.1.(2) is present (an unqualified "
+                      "number is Division B, so a Division A citation says so)",
+                      message)
+        self.check(structured(lambda m: record(m, 2)["references"].append(
+            "Division A 1.1.1.1.(2)")))
+
+    def stubbed(self, status, provision=None, reference="8.4.4.13.(1)",
+                code_id="necb2020"):
+        """`check_citation` answering ``status`` for one reference, and the
+        committed index for every other: the stale, unsupported and
+        unknown-status branches cannot be reached through committed data."""
+        real = G.provisions.check_citation
+
+        def fake(code, value):
+            if code == code_id and value == reference:
+                citation = G.provisions.parse_citation(value, family="necb")
+                return G.provisions.ProvisionCheck(
+                    code, citation, status, "stub detail for " + value,
+                    provision)
+            return real(code, value)
+
+        return mock.patch.object(G.provisions, "check_citation", fake)
+
+    def test_the_stub_itself_admits_a_present_record(self):
+        with self.stubbed("present", {"kind": "sentence", "status": "present"}):
+            self.check(structured())
+
+    def test_a_TABLE_cited_as_an_ARTICLE_is_refused_with_a_hint(self):
+        """Neither committed index has a suffix-less table, so the reverse
+        direction runs on a stub that holds ``Table 8.4.4.13``."""
+        real = G.provisions.check_citation
+
+        def fake(code, value):
+            citation = G.provisions.parse_citation(value, family="necb")
+            if code == "necb2020" and citation.canonical == "Table 8.4.4.13":
+                return G.provisions.ProvisionCheck(
+                    code, citation, "present", "present",
+                    {"kind": "table", "status": "present"})
+            if code == "necb2020" and citation.canonical == "8.4.4.13":
+                return G.provisions.ProvisionCheck(
+                    code, citation, "not-indexed",
+                    "8.4.4.13 has no committed evidence in necb2020")
+            return real(code, value)
+
+        with mock.patch.object(G.provisions, "check_citation", fake):
+            message = self.rejects(
+                "8.4.4.13 has no committed evidence in necb2020",
+                structured(lambda m: record(m, 0)["references"].append(
+                    "8.4.4.13")))
+        self.assertIn("; Table 8.4.4.13 is present (an Article and a Table are "
+                      "different provisions)", message)
+
+    def test_a_STALE_index_is_refused(self):
+        with self.stubbed("stale"):
+            self.rejects("refresh the provision index", structured())
+
+    def test_a_registered_edition_with_NO_index_is_refused(self):
+        with self.stubbed("unsupported"):
+            self.rejects("its provision index, and there is none", structured())
+
+    def test_an_UNKNOWN_status_fails_closed(self):
+        with self.stubbed("plausible"):
+            self.rejects("unexpected provision status 'plausible'", structured())
+
+    def test_a_present_record_of_another_KIND_is_refused(self):
+        with self.stubbed("present", {"kind": "table", "status": "present"}):
+            self.rejects("records '8.4.4.13.(1)' as a table, but the citation "
+                         "is a sentence", structured())
+        with self.stubbed("present", None):
+            self.rejects("records '8.4.4.13.(1)' as a None", structured())
+
+    def test_an_unreadable_index_is_refused_with_its_location(self):
+        def broken(code, value):
+            raise G.provisions.ProvisionIndexError("index is corrupt")
+
+        with mock.patch.object(G.provisions, "check_citation", broken):
+            self.rejects("articles['{}'] source 1: index is corrupt".format(KEY),
+                         structured())
+
+
+class TestStructuredWriter(unittest.TestCase):
+    """The writer emits a structured requirement as a table plus a TOML
+    ARRAY OF TABLES, and parses back to exactly what it was given."""
+
+    SMALL = {
+        "id": "D-01", "title": "T", "kind": "runtime",
+        "articles": {"k": {"label": "L", "decided": "D", "sources": [
+            {"code": "necb", "edition": "2020", "role": "governing",
+             "references": ["8.4.4.13.(1)", "Note A-8.4.4.13"]},
+            {"code": "ashrae-62.1", "edition": "2016",
+             "role": "incorporated-reference", "references": ["6.2.2.1"]}]}},
+        "summary": "S",
+    }
+
+    def test_the_exact_layout(self):
+        """One record per ``[[...]]`` header, in authored order, one reference
+        per line, so a review diff shows exactly which citation moved."""
+        self.assertEqual("\n".join([
+            "+++",
+            'id = "D-01"',
+            'title = "T"',
+            'kind = "runtime"',
+            'summary = "S"',
+            "",
+            "[articles.k]",
+            'label = "L"',
+            'decided = "D"',
+            "",
+            "[[articles.k.sources]]",
+            'code = "necb"',
+            'edition = "2020"',
+            'role = "governing"',
+            "references = [",
+            '  "8.4.4.13.(1)",',
+            '  "Note A-8.4.4.13",',
+            "]",
+            "",
+            "[[articles.k.sources]]",
+            'code = "ashrae-62.1"',
+            'edition = "2016"',
+            'role = "incorporated-reference"',
+            "references = [",
+            '  "6.2.2.1",',
+            "]",
+            "+++",
+        ]), G.front_matter(self.SMALL))
+
+    def test_an_authored_editions_is_written_in_its_field_position(self):
+        lines = G.front_matter(dict(self.SMALL, editions=["necb2020"])).split("\n")
+        self.assertEqual('editions = ["necb2020"]', lines[4])
+        self.assertEqual('summary = "S"', lines[5])
+        self.assertFalse(any(line.startswith("editions")
+                             for line in G.front_matter(self.SMALL).split("\n")))
+
+    def test_the_writer_is_the_inverse_of_the_parser(self):
+        for case, meta in enumerate((self.SMALL, structured(),
+                                     structured(editions=["necb2020", "necb2025"]))):
+            with self.subTest(case=case):
+                self.assertEqual(meta, tomllib.loads(inner(G.front_matter(meta))))
+
+    def test_requirements_in_key_order_and_records_in_AUTHORED_order(self):
+        def shape(meta):
+            requirement(meta)["sources"].reverse()
+            block = copy.deepcopy(requirement(meta))
+            meta["articles"] = {"zeta_req": block, KEY: requirement(meta),
+                                "alpha_req": copy.deepcopy(block)}
+
+        meta = structured(shape)
+        text = G.front_matter(meta)
+        positions = [text.index("[articles.{}]".format(key))
+                     for key in ("alpha_req", KEY, "zeta_req")]
+        self.assertEqual(sorted(positions), positions)
+        parsed = tomllib.loads(inner(text))
+        self.assertEqual(["alpha_req", KEY, "zeta_req"], list(parsed["articles"]))
+        self.assertEqual(meta["articles"][KEY]["sources"],
+                         parsed["articles"][KEY]["sources"])
+        self.assertEqual("ashrae-62.1",
+                         parsed["articles"][KEY]["sources"][0]["code"])
+
+    def test_hostile_text_cannot_break_out_of_the_array_of_tables(self):
+        meta = dict(self.SMALL, articles={"k": {
+            "label": 'x"\n[[articles.k.sources]]\ncode = "evil',
+            "decided": 'a"]\n[articles.z]\nlabel = "b',
+            "sources": [{
+                "code": 'necb"\nrole = "governing',
+                "edition": "2020\n]",
+                "role": "re\\lated",
+                "references": ['8.4"\n]\nreferences = ["x', "tab\there", "]"]}]}})
+        self.assertEqual(meta, tomllib.loads(inner(G.front_matter(meta))))
+
+    def test_the_writer_refuses_what_it_cannot_write_faithfully(self):
+        cases = (
+            (ValueError, "must match", lambda m: m.update(
+                articles={"a]\n[x": requirement(m)})),
+            (ValueError, "must match", lambda m: m.update(
+                articles={"Heat_Pump": requirement(m)})),
+            (ValueError, "unexpected ['necb2020'] / missing []",
+             lambda m: requirement(m).update(necb2020=["8.4.4.13.(1)"])),
+            (ValueError, "missing ['decided']",
+             lambda m: requirement(m).pop("decided")),
+            (ValueError, "sources must be a list of tables",
+             lambda m: requirement(m).update(sources="necb")),
+            (ValueError, "has a source that is not a table",
+             lambda m: requirement(m)["sources"].__setitem__(0, "necb 2020")),
+            (ValueError, "source unexpected ['note'] / missing []",
+             lambda m: record(m, 0).update(note="x")),
+            (ValueError, "source unexpected [] / missing ['role']",
+             lambda m: record(m, 0).pop("role")),
+            (TypeError, "not a string: 2020",
+             lambda m: record(m, 0).update(edition=2020)),
+            (TypeError, "not a list of references",
+             lambda m: record(m, 0).update(references="8.4.4.13.(1)")),
+            (TypeError, "not a string: 1",
+             lambda m: record(m, 0).update(references=[1])),
+        )
+        for error, message, edit in cases:
+            with self.subTest(message=message):
+                with self.assertRaises(error) as caught:
+                    G.front_matter(structured(edit))
+                self.assertIn(message, str(caught.exception))
+
+
+class TestSchemaTwoRegistry(unittest.TestCase):
+    """`decisions.json` is schema 2: the root ``decisions`` array the runtime
+    reads, a legacy entry exactly as before, and a structured entry carrying
+    ``requirements`` with the ``editions`` its governing sources derive."""
+
+    LEGACY_FIELDS = ["id", "title", "kind", "articles", "editions", "summary"]
+    STRUCTURED_FIELDS = ["id", "title", "kind", "editions", "summary",
+                         "requirements"]
+
+    @classmethod
+    def setUpClass(cls):
+        cls.metas = [
+            dict(GOOD_META, id="D-01"),
+            structured(id="D-02"),
+            dict(GOOD_META, id="D-03", editions=["unverified"],
+                 articles={"unverified": ["8.4.4.14."]}),
+            dict(GOOD_META, id="D-04", editions=["not_applicable"],
+                 articles={"not_applicable": []}),
+        ]
+        cls.directory = Path(tempfile.mkdtemp())
+        for meta in cls.metas:
+            write(cls.directory, meta=meta,
+                  body=GOOD_BODY.replace("D-01", meta["id"]))
+        (cls.directory / G.PREAMBLE_FILE).write_text("# Log\n", encoding="utf-8")
+        (cls.directory / G.META_FILE).write_text(
+            json.dumps({"registry_comment": ["generated"]}) + "\n",
+            encoding="utf-8")
+        _, registry = G.generate(cls.directory)
+        cls.payload = json.loads(registry)
+        cls.by_id = {entry["id"]: entry for entry in cls.payload["decisions"]}
+
+    def test_the_constants_match_the_layout_this_test_pins(self):
+        self.assertEqual(tuple(self.LEGACY_FIELDS), G.FIELDS)
+        self.assertEqual(tuple(self.STRUCTURED_FIELDS), G.STRUCTURED_FIELDS)
+
+    def test_the_top_level_is_schema_2_with_the_root_decisions_array(self):
+        self.assertEqual(["_comment", "schema", "decisions"], list(self.payload))
+        self.assertEqual(["generated"], self.payload["_comment"])
+        self.assertIs(type(self.payload["schema"]), int)
+        self.assertEqual(2, self.payload["schema"])
+        self.assertEqual(Loader.SCHEMA, G.REGISTRY_SCHEMA)
+        self.assertIs(self.payload["decisions"], Loader._validated(self.payload),
+                      "the runtime loader must accept what the generator writes")
+        self.assertEqual(["D-01", "D-02", "D-03", "D-04"],
+                         [entry["id"] for entry in self.payload["decisions"]])
+
+    def test_a_legacy_entry_is_its_front_matter_unchanged(self):
+        for meta in self.metas:
+            if meta["id"] == "D-02":
+                continue
+            with self.subTest(decision=meta["id"]):
+                entry = self.by_id[meta["id"]]
+                self.assertEqual(self.LEGACY_FIELDS, list(entry))
+                self.assertEqual({field: meta[field] for field in self.LEGACY_FIELDS},
+                                 entry)
+
+    def test_a_structured_entry_projects_requirements(self):
+        entry = self.by_id["D-02"]
+        block = STRUCTURED_META["articles"][KEY]
+        self.assertEqual(self.STRUCTURED_FIELDS, list(entry))
+        self.assertNotIn("articles", entry)
+        for field in ("title", "kind", "summary"):
+            self.assertEqual(STRUCTURED_META[field], entry[field])
+        self.assertEqual(["necb2020", "necb2025"], entry["editions"])
+        self.assertEqual([{"id": KEY, "label": block["label"],
+                           "decided": block["decided"],
+                           "sources": block["sources"]}], entry["requirements"])
+        self.assertEqual(["id", "label", "decided", "sources"],
+                         list(entry["requirements"][0]))
+        for source in entry["requirements"][0]["sources"]:
+            self.assertEqual(["code", "edition", "role", "references"],
+                             list(source))
+
+    def test_every_generated_source_equals_its_canonical_TOML(self):
+        """Read with tomllib directly, not through the generator's parser."""
+        text = (self.directory / "D-02.md").read_text(encoding="utf-8")
+        front = text[:text.index("\n" + G.FENCE + "\n", 1) + len(G.FENCE) + 1]
+        authored = tomllib.loads(inner(front))
+        projected = {requirement["id"]: requirement["sources"]
+                     for requirement in self.by_id["D-02"]["requirements"]}
+        self.assertEqual({key: block["sources"]
+                          for key, block in authored["articles"].items()},
+                         projected)
+
+    def test_requirements_are_projected_in_key_order(self):
+        def unsorted(meta):
+            block = requirement(meta)
+            meta["articles"] = {"zeta_req": copy.deepcopy(block), KEY: block,
+                                "alpha_req": copy.deepcopy(block)}
+
+        entry = G.registry_entry(structured(unsorted))
+        self.assertEqual(["alpha_req", KEY, "zeta_req"],
+                         [item["id"] for item in entry["requirements"]])
+
+    def test_the_projection_does_not_alias_the_source(self):
+        meta = structured()
+        entry = G.registry_entry(meta)
+        entry["requirements"][0]["sources"][0]["references"].append("x")
+        self.assertEqual(STRUCTURED_META, meta)
+
+
+class TestSharedRequirementKeys(unittest.TestCase):
+    """One requirement key names one requirement wherever it appears, so its
+    form, label and governing citations must agree across decisions. Each
+    decision's own ``decided`` and cross-references may differ."""
+
+    @staticmethod
+    def entries(*metas):
+        return {meta["id"]: (meta, GOOD_BODY) for meta in metas}
+
+    def refuses(self, message, *metas):
+        with self.assertRaises(ValueError) as caught:
+            G.check_shared_requirements(self.entries(*metas))
+        self.assertIn(message, str(caught.exception))
+
+    def test_a_shared_key_that_agrees_is_accepted(self):
+        def own_result(meta):
+            requirement(meta)["decided"] = "D-02 decides its own result."
+            requirement(meta)["sources"] = requirement(meta)["sources"][:2]
+            record(meta, 0)["references"].reverse()
+
+        G.check_shared_requirements(
+            self.entries(structured(), structured(own_result, id="D-02")))
+
+    def test_a_shared_key_with_another_LABEL_is_refused(self):
+        self.refuses("is labelled", structured(), structured(
+            lambda m: requirement(m).update(label="Another label"), id="D-02"))
+
+    def test_a_shared_key_citing_other_GOVERNING_provisions_is_refused(self):
+        edits = {
+            "a dropped reference": lambda m: record(m, 0)["references"].pop(),
+            "a dropped edition": lambda m: requirement(m)["sources"].pop(1),
+            "a demoted edition": lambda m: record(m, 1).update(role="related"),
+        }
+        for name, edit in edits.items():
+            with self.subTest(name):
+                self.refuses("cites different governing provisions",
+                             structured(), structured(edit, id="D-02"))
+
+    def test_a_shared_key_is_converted_in_every_decision_together(self):
+        legacy = dict(GOOD_META, editions=["necb2020", "necb2025"], articles={
+            KEY: {"label": requirement(STRUCTURED_META)["label"],
+                  "necb2020": ["8.4.4.13.(1)"], "necb2025": ["8.4.5.13.(1)"]}})
+        self.refuses("convert every user of a shared key together",
+                     legacy, structured(id="D-02"))
+
+    def test_legacy_shared_keys_are_held_to_the_same_rule(self):
+        self.refuses("is labelled", GOOD_META, dict(GOOD_META, id="D-02", articles={
+            "hydronic_pumps": {"label": "Pumps", "necb2020": ["8.4.4.14."]}}))
+        self.refuses("cites different governing provisions", GOOD_META,
+                     dict(GOOD_META, id="D-02", articles={"hydronic_pumps": {
+                         "label": "Hydronic pump power",
+                         "necb2020": ["8.4.4.14.(1)"]}}))
+        G.check_shared_requirements(self.entries(
+            GOOD_META, dict(GOOD_META, id="D-02", articles={"hydronic_pumps": {
+                "label": "Hydronic pump power",
+                "necb2020": ["Article 8.4.4.14."]}})))
+
+    def test_the_holding_keys_are_not_requirements(self):
+        G.check_shared_requirements(self.entries(
+            dict(GOOD_META, editions=["unverified"],
+                 articles={"unverified": ["8.4.4.14."]}),
+            dict(GOOD_META, id="D-02", editions=["unverified"],
+                 articles={"unverified": ["8.4.4.9.(5)"]})))
+
+    def test_reading_the_sources_applies_the_rule(self):
+        directory = Path(tempfile.mkdtemp())
+        write(directory, meta=structured())
+        write(directory, meta=structured(
+            lambda m: requirement(m).update(label="Another label"), id="D-02"),
+            body=GOOD_BODY.replace("D-01", "D-02"))
+        (directory / G.PREAMBLE_FILE).write_text("# Log\n", encoding="utf-8")
+        (directory / G.META_FILE).write_text('{"registry_comment": []}\n',
+                                             encoding="utf-8")
+        with self.assertRaises(ValueError) as caught:
+            G.generate(directory)
+        self.assertIn("is labelled", str(caught.exception))
+
+
+class TestUnvalidatedSourcesAreNamed(unittest.TestCase):
+    """A source no provision index validates is accepted, so it is SAID: both
+    the writing run and ``--check`` print one note per such record."""
+
+    NOTE = ("decisions: note — D-01 articles['heat_pump_reference_by_source'] "
+            "cites ashrae-62.1 2016 (incorporated-reference), which no "
+            "registered provision index validates; it is carried as authored "
+            "and establishes no edition")
+
+    def run_both(self, meta):
+        root = Path(tempfile.mkdtemp())
+        sources, outputs = root / "sources", root / "outputs"
+        sources.mkdir()
+        outputs.mkdir()
+        write(sources, meta=meta)
+        (sources / G.PREAMBLE_FILE).write_text("# Log\n", encoding="utf-8")
+        (sources / G.META_FILE).write_text('{"registry_comment": []}\n',
+                                           encoding="utf-8")
+        argv = ["--source-dir", str(sources), "--doc", str(outputs / "doc.md"),
+                "--registry", str(outputs / "registry.json")]
+        for args in (argv, ["--check", *argv]):
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out), \
+                    contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(0, G.main(args))
+            yield args[0] == "--check", [line for line in out.getvalue().splitlines()
+                                         if "D-01 articles" in line]
+
+    def test_both_branches_name_the_external_record(self):
+        for checking, notes in self.run_both(structured()):
+            with self.subTest(check=checking):
+                self.assertEqual([self.NOTE], notes)
+
+    def test_a_validated_record_is_not_named(self):
+        meta = structured(lambda m: requirement(m)["sources"].pop())
+        for checking, notes in self.run_both(meta):
+            with self.subTest(check=checking):
+                self.assertEqual([], notes)
+
+
+class TestTheProvisionIndexIsThisCheckouts(unittest.TestCase):
+    """Structured sources are validated against THIS checkout's provision
+    index. A `btap` imported from another tree would answer from that tree's
+    data, so the generator refuses to load at all."""
+
+    SCRIPT = PYTHON_ROOT / "scripts" / "generate_decisions.py"
+
+    def load(self, name):
+        spec = importlib.util.spec_from_file_location(name, self.SCRIPT)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
+    def test_btap_is_imported_from_this_checkout(self):
+        for module in (G.btap_codes, G.provisions, Loader):
+            with self.subTest(module=module.__name__):
+                self.assertTrue(Path(module.__file__).resolve().is_relative_to(
+                    G.PYTHON_DIR / "btap"))
+        self.load("generate_decisions_same_tree")       # the control
+
+    def test_a_btap_from_another_tree_is_refused(self):
+        elsewhere = PYTHON_ROOT.parent.parent / "another-checkout" / "python"
+        btap = types.ModuleType("btap")
+        btap.__file__ = str(elsewhere / "btap" / "__init__.py")
+        btap.__path__ = [str(elsewhere / "btap")]
+        codes = types.ModuleType("btap.codes")
+        codes.__file__ = str(elsewhere / "btap" / "codes" / "__init__.py")
+        codes.__path__ = [str(elsewhere / "btap" / "codes")]
+        provisions = types.ModuleType("btap.codes.provisions")
+        decisions = types.ModuleType("btap.codes.decisions")
+        decisions.SCHEMA = Loader.SCHEMA
+        btap.codes, codes.provisions, codes.decisions = codes, provisions, decisions
+        with mock.patch.dict(sys.modules, {
+                "btap": btap, "btap.codes": codes,
+                "btap.codes.provisions": provisions,
+                "btap.codes.decisions": decisions}):
+            with self.assertRaises(ImportError) as caught:
+                self.load("generate_decisions_other_tree")
+        self.assertIn("must validate against", str(caught.exception))
 
 
 if __name__ == "__main__":

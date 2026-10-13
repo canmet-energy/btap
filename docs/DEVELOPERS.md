@@ -176,6 +176,25 @@ gates. To add or change a decision, edit the one source file and regenerate --
 never the two outputs. The registry tests enforce the source schema, both
 generated outputs, short-link resolution and runtime citations.
 
+A requirement may also take the structured source form planned in
+[DECISION_APPLICABILITY_PLAN.md](plans/DECISION_APPLICABILITY_PLAN.md). It
+keeps its key and `label`, and adds a `decided` paraphrase and one
+`[[articles.<key>.sources]]` record (`code`, `edition`, `role`, `references`)
+per code, edition and role.
+
+The generator checks the references in a registered NECB edition against that
+edition's provision index, which is described below. It then derives the
+decision's `editions` from `governing` records only. `incorporated-reference`
+and `related` records never establish an edition. A reference no index can
+validate, such as one from another standard, is carried as authored and named
+on a `decisions: note` line.
+
+`decisions.json` is schema 2. Every entry keeps `id`, `title`, `kind` and
+`summary`, which are all the runtime reads. A structured entry carries
+`requirements` instead of `articles`.
+
+No decision has been converted yet; the tests exercise the form on fixtures.
+
 The two generated coverage documents are
 [NECB_COVERAGE.md](NECB_COVERAGE.md) and
 [NECB_8_4_COVERAGE.html](NECB_8_4_COVERAGE.html). Their retained filenames are
@@ -238,6 +257,10 @@ Decision front matter carries `editions`: the code ids the decision governs,
 or `unverified`. Validated against the editions discovered under
 `btap/codes/necb/data/`, so a typo or a retired id fails the generator rather
 than quietly misinforming a reader. No collective words — list the ids.
+
+A structured decision may omit the field. The generator derives it from the
+`governing` source records. During the transition the field may still be
+authored, but it must then equal that derived list exactly, order included.
 
 ```bash
 cd python && .venv/bin/python -m unittest tests.necb.test_decisions_generator

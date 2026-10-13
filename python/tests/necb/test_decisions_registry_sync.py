@@ -5,22 +5,39 @@ repository's actual state: that every source parses, that the two generated
 artifacts are in step with the sources, and that neither artifact has been
 hand-edited. The generator's own behaviour -- its parser, its TOML writer and
 its validation -- is exercised in ``test_decisions_generator.py``.
+
+The registry is schema 2. Every entry keeps the ``id``, ``title``, ``kind``
+and ``summary`` the runtime reads; a legacy entry is its front matter, and a
+structured one projects ``requirements`` with an ``editions`` derived from
+its governing sources. The expected projections here are computed from the
+sources directly, not by the generator, and a structured decision is run end
+to end beside the committed tree.
 """
 
 from __future__ import annotations
 
+import contextlib
+import io
 import json
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
+import tomllib
 import unittest
 from pathlib import Path
+from unittest import mock
 
 PYTHON_ROOT = Path(__file__).resolve().parent.parent.parent
 REPO_ROOT = PYTHON_ROOT.parent
 
 sys.path.insert(0, str(PYTHON_ROOT / "scripts"))
 import generate_decisions as G  # noqa: E402
+
+# G put this checkout's python/ first on sys.path.
+import btap.codes as codes  # noqa: E402
+from btap.codes import decisions as Loader  # noqa: E402
 
 PYTHON_REGISTRY = PYTHON_ROOT / "btap" / "codes" / "data" / "decisions.json"
 DECISIONS_DOC = REPO_ROOT / "docs" / "necb_decisions.md"
@@ -30,6 +47,50 @@ SCRIPT = PYTHON_ROOT / "scripts" / "generate_decisions.py"
 #: Unbounded digits, matching the generator: D-01..D-99 were all taken.
 ID_PATTERN = re.compile(r"^D-\d+$")
 HEADING_PATTERN = re.compile(r"^## (D-\d+)\b", re.MULTILINE)
+
+#: The schema-2 entry layouts, written out here rather than read from the
+#: generator, so a changed field list in the generator fails this module.
+LEGACY_FIELDS = ("id", "title", "kind", "articles", "editions", "summary")
+STRUCTURED_FIELDS = ("id", "title", "kind", "editions", "summary", "requirements")
+#: What `btap.codes.decisions` and the report's rulings appendix read.
+RUNTIME_FIELDS = ("id", "title", "kind", "summary")
+
+
+def runtime_editions():
+    """``(family, edition) -> code id``, from the runtime registry."""
+    return {(codes.resolve(code_id).family, codes.resolve(code_id).edition): code_id
+            for code_id in codes.code_ids()}
+
+
+def expected_entry(meta):
+    """The registry entry one front matter must project to.
+
+    The form is read off the source: a structured requirement carries
+    ``sources``. Only governing records contribute to ``editions``.
+    """
+    articles = meta["articles"]
+    if not any(isinstance(block, dict) and "sources" in block
+               for block in articles.values()):
+        return {field: meta[field] for field in LEGACY_FIELDS}
+    runtime = runtime_editions()
+    editions = sorted({runtime[(source["code"], source["edition"])]
+                       for block in articles.values()
+                       for source in block["sources"]
+                       if source["role"] == "governing"})
+    requirements = [
+        {"id": key, "label": block["label"], "decided": block["decided"],
+         "sources": [{field: source[field]
+                      for field in ("code", "edition", "role", "references")}
+                     for source in block["sources"]]}
+        for key, block in sorted(articles.items())]
+    return {"id": meta["id"], "title": meta["title"], "kind": meta["kind"],
+            "editions": editions, "summary": meta["summary"],
+            "requirements": requirements}
+
+
+def ordered(value):
+    """JSON text, so a comparison also holds every level's key ORDER."""
+    return json.dumps(value, indent=1, ensure_ascii=False)
 
 
 class TestDecisionSources(unittest.TestCase):
@@ -152,12 +213,213 @@ class TestGeneratedOutputsAreInStep(unittest.TestCase):
                     self.doc, "the anchor must sit immediately above its heading")
 
     def test_the_registry_is_the_front_matter_projection(self):
-        """The JSON carries the five registry fields and nothing else."""
+        """Each entry is its source's schema-2 projection, field order
+        included: the front matter for a legacy decision, ``requirements``
+        and the derived ``editions`` for a structured one."""
         for entry in json.loads(self.registry)["decisions"]:
             with self.subTest(decision=entry["id"]):
-                self.assertEqual(tuple(entry), G.FIELDS)
-                self.assertEqual(entry, {f: self.entries[entry["id"]][0][f]
-                                         for f in G.FIELDS})
+                self.assertEqual(
+                    ordered(expected_entry(self.entries[entry["id"]][0])),
+                    ordered(entry))
+                self.assertIn(tuple(entry), (LEGACY_FIELDS, STRUCTURED_FIELDS))
+
+    def test_the_registry_is_schema_2_around_its_root_array(self):
+        payload = json.loads(self.registry)
+        self.assertEqual(["_comment", "schema", "decisions"], list(payload))
+        self.assertIs(int, type(payload["schema"]))
+        self.assertEqual(2, payload["schema"])
+        self.assertEqual(Loader.SCHEMA, payload["schema"])
+        meta = json.loads((SOURCE_DIR / G.META_FILE).read_text(encoding="utf-8"))
+        self.assertEqual(meta["registry_comment"], payload["_comment"])
+
+    def test_every_entry_keeps_the_fields_the_runtime_reads(self):
+        """``id``, ``title``, ``kind`` and ``summary`` are what resolves a
+        ruling and fills the report's rulings appendix, in either form."""
+        for entry in json.loads(self.registry)["decisions"]:
+            meta = self.entries[entry["id"]][0]
+            with self.subTest(decision=entry["id"]):
+                self.assertEqual({field: meta[field] for field in RUNTIME_FIELDS},
+                                 {field: entry[field] for field in RUNTIME_FIELDS})
+
+    def test_the_runtime_loader_serves_the_generated_array(self):
+        self.assertTrue(Path(Loader.__file__).resolve().is_relative_to(
+            PYTHON_ROOT / "btap"), Loader.__file__)
+        with mock.patch.object(Loader, "_all", None), \
+                mock.patch.object(Loader, "_by_id", None):
+            self.assertEqual(json.loads(self.registry)["decisions"],
+                             Loader.all_decisions())
+
+
+#: A structured decision as an author writes it, in the writer's own layout.
+#: Its NECB references are ones each edition's committed provision index
+#: records as present; the related NECB record and the incorporated external
+#: standard sit beside the two governing records and establish nothing.
+STRUCTURED_SOURCE = """\
++++
+id = "{id}"
+title = "Fixture: a structured decision beside the committed tree"
+kind = "runtime"
+summary = "A fixture decision that exists only inside this test."
+
+[articles.heat_pump_reference_by_source]
+label = "Reference system for a proposed heat pump, by heat source"
+decided = "Water-loop and other heat pumps follow different reference-system selection branches."
+
+[[articles.heat_pump_reference_by_source.sources]]
+code = "necb"
+edition = "2020"
+role = "governing"
+references = [
+  "8.4.4.13.(1)",
+  "8.4.4.13.(2)",
+  "Note A-8.4.4.13",
+]
+
+[[articles.heat_pump_reference_by_source.sources]]
+code = "necb"
+edition = "2025"
+role = "governing"
+references = [
+  "8.4.5.13.(1)",
+  "8.4.5.13.(2)",
+  "Note A-8.4.5.13",
+]
+
+[[articles.heat_pump_reference_by_source.sources]]
+code = "necb"
+edition = "2020"
+role = "related"
+references = [
+  "Table 8.4.4.7.-B",
+]
+
+[[articles.heat_pump_reference_by_source.sources]]
+code = "ashrae-62.1"
+edition = "2016"
+role = "incorporated-reference"
+references = [
+  "6.2.2.1",
+]
++++
+
+## {id} — A structured fixture decision
+
+Body text.
+"""
+
+
+class TestAStructuredDecisionBesideTheCommittedTree(unittest.TestCase):
+    """End to end, on a COPY of the committed sources plus one structured
+    decision at the next free id: the generator accepts it beside every
+    legacy decision, no committed entry or section moves, and the runtime
+    loader resolves it from the file the generator wrote."""
+
+    KEY = "heat_pump_reference_by_source"
+
+    @classmethod
+    def setUpClass(cls):
+        scratch = tempfile.TemporaryDirectory()
+        cls.addClassCleanup(scratch.cleanup)
+        root = Path(scratch.name)
+        cls.source_dir = root / "decisions"
+        shutil.copytree(SOURCE_DIR, cls.source_dir)
+        taken = [int(path.stem[len("D-"):]) for path in SOURCE_DIR.glob("D-*.md")]
+        cls.new_id = "D-{}".format(max(taken) + 1)
+        cls.text = STRUCTURED_SOURCE.format(id=cls.new_id)
+        cls.path = cls.source_dir / (cls.new_id + ".md")
+        cls.path.write_text(cls.text, encoding="utf-8")
+        cls.front = tomllib.loads(cls.text.split(G.FENCE + "\n")[1])
+        cls.body = cls.text.split("\n" + G.FENCE + "\n\n", 1)[1]
+
+        cls.doc_path = root / "necb_decisions.md"
+        cls.registry_path = root / "data" / "decisions.json"
+        cls.registry_path.parent.mkdir()
+        arguments = ["--source-dir", str(cls.source_dir), "--doc", str(cls.doc_path),
+                     "--registry", str(cls.registry_path)]
+        cls.outcomes = {}
+        for mode, argv in (("write", arguments), ("check", ["--check", *arguments])):
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out), contextlib.redirect_stderr(out):
+                cls.outcomes[mode] = (G.main(argv), out.getvalue())
+        cls.doc = cls.doc_path.read_text(encoding="utf-8")
+        cls.payload = json.loads(cls.registry_path.read_text(encoding="utf-8"))
+        cls.committed = json.loads(PYTHON_REGISTRY.read_text(encoding="utf-8"))
+
+    def test_the_fixture_key_is_not_a_committed_requirement(self):
+        """Otherwise the shared-key rule, not the structured form, would be
+        what this class exercises."""
+        _, entries, _ = G.read_sources(SOURCE_DIR)
+        self.assertFalse(any(self.KEY in meta["articles"]
+                             for meta, _ in entries.values()))
+
+    def test_both_branches_accept_it(self):
+        for mode, (code, output) in self.outcomes.items():
+            with self.subTest(mode=mode):
+                self.assertEqual(0, code, output)
+
+    def test_the_authored_file_is_already_in_the_writers_layout(self):
+        meta, body = G.parse_source(self.path)
+        self.assertEqual(self.text, G.source_text(meta, body))
+
+    def test_its_entry_is_the_structured_projection(self):
+        entry = self.payload["decisions"][-1]
+        self.assertEqual(self.new_id, entry["id"])
+        self.assertEqual(ordered(expected_entry(self.front)), ordered(entry))
+        self.assertEqual(STRUCTURED_FIELDS, tuple(entry))
+        self.assertNotIn("articles", entry)
+        # Literal, not derived: the two governing records and nothing else.
+        self.assertEqual(["necb2020", "necb2025"], entry["editions"])
+        (requirement,) = entry["requirements"]
+        self.assertEqual(self.KEY, requirement["id"])
+        self.assertEqual(
+            [("necb", "2020", "governing"), ("necb", "2025", "governing"),
+             ("necb", "2020", "related"),
+             ("ashrae-62.1", "2016", "incorporated-reference")],
+            [(source["code"], source["edition"], source["role"])
+             for source in requirement["sources"]])
+
+    def test_no_committed_entry_moves(self):
+        self.assertEqual(self.committed["_comment"], self.payload["_comment"])
+        self.assertEqual(self.committed["schema"], self.payload["schema"])
+        self.assertEqual(ordered(self.committed["decisions"]),
+                         ordered(self.payload["decisions"][:-1]))
+
+    def test_the_document_gains_one_index_line_and_one_section(self):
+        """Byte-exact: the committed document with exactly the new decision's
+        index line and its anchored section added, and nothing else."""
+        committed = DECISIONS_DOC.read_text(encoding="utf-8")
+        head, end, tail = committed.partition("\n\n<!-- TOC END -->")
+        self.assertTrue(end, "the committed document has no index end marker")
+        line = "- **{}** — {} _(runtime)_".format(self.new_id, self.front["title"])
+        self.assertEqual(
+            head + "\n" + line + end + tail + "\n"
+            + '<a id="{}"></a>\n\n'.format(self.new_id.lower()) + self.body,
+            self.doc)
+
+    def test_the_runtime_loader_resolves_it_from_the_written_file(self):
+        with mock.patch.object(Loader, "DATA_DIR", self.registry_path.parent), \
+                mock.patch.object(Loader, "_all", None), \
+                mock.patch.object(Loader, "_by_id", None):
+            entry = Loader.lookup(self.new_id)
+            self.assertEqual(self.front["title"], entry["title"])
+            self.assertEqual(self.front["summary"], entry["summary"])
+            self.assertIn(entry, Loader.of_kind("runtime"))
+            self.assertEqual([item["id"] for item in self.payload["decisions"]],
+                             Loader.ids())
+
+    def test_only_its_external_record_is_disclosed(self):
+        """The committed tree carries no source an index cannot validate, the
+        related NECB 2020 record is validated, and the external standard is
+        named on both branches."""
+        note = ("decisions: note — {} articles[{!r}] cites ashrae-62.1 2016 "
+                "(incorporated-reference), which no registered provision index "
+                "validates; it is carried as authored and establishes no "
+                "edition").format(self.new_id, self.KEY)
+        for mode, (_, output) in self.outcomes.items():
+            with self.subTest(mode=mode):
+                self.assertEqual(
+                    [note], [line for line in output.splitlines()
+                             if "provision index validates" in line])
 
 
 class TestTheMigrationCannotRunAgain(unittest.TestCase):

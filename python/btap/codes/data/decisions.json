@@ -7,6 +7,10 @@
     "the authored record. This file is the runtime projection of their front matter,",
     "in numeric decision-id order.",
     "",
+    "schema 2: a legacy entry carries its front matter's `articles` and `editions`; a",
+    "structured entry carries `requirements` (id, label, decided, sources) and an `editions`",
+    "derived from its governing sources only. The runtime reads id, title, kind and summary.",
+    "",
     "The adjudicated interpretations and product decisions governing the NECB Part 8",
     "pipeline. Runtime code cites these ids through the AuditLog `ruling:` kwarg, and the",
     "AHJ report's rulings appendix renders the ones that actually fired in a run, so a",
@@ -27,6 +31,7 @@
     "Summaries are PARAPHRASE — never reproduce NECB text verbatim here (D-01 governs where",
     "code text may be reproduced, and this file is not one of those places)."
   ],
+  "schema": 2,
   "decisions": [
     {
       "id": "D-01",

@@ -165,6 +165,59 @@ carried by the key and label; a second correct citation and a wrong existing
 one are not structurally distinguishable, and Sol ruled that case out of
 scope rather than admitting another heuristic.
 
+**The structured source form** is the migration target of
+`docs/plans/DECISION_APPLICABILITY_PLAN.md`. The generator accepts it beside the
+legacy form, but no decision has been converted yet. A requirement keeps its
+key and `label`, adds a committee-facing `decided` paraphrase, and carries one
+`[[articles.<key>.sources]]` record per `code` family, `edition` STRING and
+`role`:
+
+```toml
+[articles.heat_pump_reference_by_source]
+label = "Reference system for a proposed heat pump, by heat source"
+decided = "Water-loop and other heat pumps follow different reference-system selection branches."
+
+[[articles.heat_pump_reference_by_source.sources]]
+code = "necb"
+edition = "2020"
+role = "governing"
+references = [
+  "8.4.4.13.(1)",
+  "Note A-8.4.4.13",
+]
+```
+
+Only `governing` records establish applicability. Each one must name a
+registered runtime edition, and every requirement of the decision must govern
+the same editions; a decision that differs by edition is split, as in the
+legacy form. The decision's `editions` is DERIVED from those records. Either
+omit `editions`, or, during the transition, author exactly the derived list.
+
+`incorporated-reference` and `related` records may name future editions and
+other standards, but they never establish an edition.
+
+NECB references in a registered edition must meet three conditions:
+
+- they use the CANONICAL spelling, such as `Note A-8.4.4.13` or
+  `Division A 1.1.1.1.(1)`;
+- that edition's `coverage/provisions.json` records the provision as present;
+- the recorded provision is of the cited kind.
+
+An unregistered NECB edition is held to the citation grammar only. Any other
+standard is carried as authored and is named on a `decisions: note` line.
+
+A decision is converted whole: no structured requirement may sit beside a
+legacy one or beside the reserved `unverified` or `not_applicable` key. A
+requirement key shared by several decisions names ONE requirement in either
+form, so it carries one label and the same governing citations everywhere.
+Converting it means converting it in every decision that uses it, together.
+
+`decisions.json` is schema 2. Its root `decisions` array keeps every entry's
+`id`, `title`, `kind` and `summary`, which are all that `btap.codes.decisions`
+and the report's rulings appendix read. A structured entry carries
+`requirements` (`id`, `label`, `decided`, `sources`) instead of `articles`.
+The loader refuses any other schema number.
+
 **The id grammar is `^D-\d+$`, unbounded.** `^D-\d{2}$` allowed exactly 100
 ids and D-01 through D-99 all existed, so the registry had run out (D-100
 through D-103 exist today); a fixed three
