@@ -50,6 +50,12 @@ from btap.codes.pipeline import Verdict
 from btap.simulation import runner
 
 HEATING_UNMET_LIMIT_H = 100.0    # 8.4.1.2.(3)
+#: 8.4.1.2.(4)(a). On the Subsection 8.4.4 path the cooling criterion
+#: is an ABSOLUTE limit on the proposed building, not a comparison
+#: with a reference that this path never builds. (4)(b)'s +10%/20 h
+#: allowance is the 8.4.5 branch and does not apply here, which is
+#: why this is a separate constant rather than a reuse.
+COOLING_UNMET_LIMIT_H_8_4_4 = 100.0
 SECANT_TARGET_FRACTION = 0.9     # aim below the limit so noise can't strand the last hour
 SECANT_MAX_STEP = 2.0            # per-round growth cap (never below the configured `step`)
 SECANT_MIN_IMPROVEMENT_H = 1.0   # observations closer than this can't support a slope
@@ -58,6 +64,14 @@ SECANT_MIN_IMPROVEMENT_H = 1.0   # observations closer than this can't support a
 _COOLING_PATTERN = re.compile(
     r"Coil_Cooling|CoilSystem_Cooling|Chiller|EvaporativeCooler|DistrictCooling|"
     r"IdealLoadsAirSystem")
+
+#: Cooling objects that sit UPSTREAM of whatever serves a thermal block. A
+#: chiller or a district-cooling node cools a plant loop, and the coil drawing
+#: on that loop is itself matched by `_COOLING_PATTERN` and resolves to its own
+#: blocks — so attributing the plant as well would mark every block on the
+#: loop's demand side as cooled, including blocks served only for process or
+#: service-water demand.
+_UPSTREAM_COOLING_PATTERN = re.compile(r"Chiller|DistrictCooling")
 
 
 # --------------------------------------------------------------------------
@@ -787,16 +801,71 @@ def _eui_compliance(model, *, ruleset, weather, hdd, run_dir, simulate,
             compliance._run_annual(
                 proposed, os.path.join(run_dir, "proposed_annual"),
                 run_period, report["proposed"], audit=audit)
+            # (4)'s vacuity rule needs this, and this path never gets it from
+            # `prepare_annual`: that runs inside `pipeline._proposed_annual`,
+            # the REFERENCE flow, while this path calls `_run_annual` directly
+            # and only rejoins the pipeline at `_finalize`. Without it the
+            # lookup returns None rather than False, the clause stops being
+            # vacuous, and an uncooled building is judged on its
+            # passive-overheating hours — the exact false positive the
+            # reference path's vacuity rule exists to prevent.
+            report["proposed"]["mechanical_cooling"] = _mechanical_cooling(
+                proposed)
+            # And PER BLOCK, because (4) is scoped to each block "for which
+            # mechanical cooling is provided" — one building-wide flag marks a
+            # mixed building's uncooled blocks as cooled.
+            cooling_map, unplaceable = _zone_mechanical_cooling(proposed)
+            # TWO OPPOSITE-DIRECTION WALKS, COMPARED IN EVERY RUN. They are
+            # independent for object-to-block traversal, but both deliberately
+            # share `_has_downstream_relief_exchanger`; dedicated topology
+            # tests, not this comparison, guard that one direction judgement.
+            # A block they disagree about is one whose cooling status this
+            # tool does not know, not a block that is uncooled.
+            #
+            # Sol's `227 §G` asked for this in product rather than in a
+            # test, "because every real run benefits from it". It earns that
+            # immediately: the DOAS defect Fable found in `228` — a cooling
+            # coil with a fan inboard of it, reported detached and passing
+            # (4)(a) vacuously over 900 unmet hours — shows up here as
+            # `{Z1: (False, True)}`. A run that consulted the comparison
+            # would have gone indeterminate instead of passing.
+            disagreement = cooling_attribution_disagreement(proposed)
+            for block, (outward, inward) in sorted(disagreement.items()):
+                if block not in unplaceable:
+                    unplaceable.append(block)
+                audit.warn(
+                    "proposed cooling attribution",
+                    "COOLING ATTRIBUTION DISAGREES BETWEEN THE OUTWARD AND "
+                    "INWARD WALKS, so this block's cooling status is UNKNOWN "
+                    "and sentence (4) cannot be scoped to it",
+                    target=block,
+                    inputs={"outward_from_cooling_objects": outward,
+                            "inward_from_the_block": inward},
+                    article="8.4.1.2.(4)")
+            unplaceable = sorted(unplaceable)
+            report["proposed"]["zone_mechanical_cooling"] = cooling_map
+            report["proposed"]["unplaceable_cooling"] = unplaceable
+            report["proposed"]["cooling_attribution_disagreement"] = {
+                block: list(pair) for block, pair in disagreement.items()}
             proposed_kwh = report["proposed"]["total_site_kwh"]
-            compliant = proposed_kwh <= target["bet_kwh"]
+            energy_ok = proposed_kwh <= target["bet_kwh"]
             audit.decision(
                 "compliance",
                 "proposed does not exceed the archetype-EUI building energy "
-                "target" if compliant
+                "target" if energy_ok
                 else "proposed EXCEEDS the archetype-EUI building energy target",
                 inputs={"proposed_kwh": proposed_kwh,
                         "bet_kwh": target["bet_kwh"]},
                 article="8.4.4.1.(2)")
+            # 8.4.1.2.(3) and (4)(a). The energy comparison is NOT the whole
+            # determination, and until 2026-10-11 it was the whole of it on
+            # this path: a model could be declared compliant with any number
+            # of unmet thermal-block hours, and (4)(a) is the branch of (4)
+            # written FOR a building complying under Subsection 8.4.4 (AHJ-21,
+            # Sol's `189`). Composed the same way the reference path composes
+            # `energy_ok and unmet_ok`.
+            unmet_ok = evaluate_unmet_8_4_4(report, audit)
+            compliant = energy_ok and unmet_ok
             report.update(tiers.energy_tier(proposed_kwh, target["bet_kwh"],
                                             audit=audit))
             if province_state and part11_ghg is not None:
@@ -1016,6 +1085,260 @@ def evaluate_unmet(report, ruleset, audit):
     return status["all_ok"]
 
 
+def _unmet_status_8_4_4(report):
+    """(3) and (4)(a) PER THERMAL BLOCK, each decided on its OWN evidence.
+
+    The archetype-EUI path builds NO reference model, so (3)'s "and, where
+    applicable, for the reference building" has nothing to apply to and (4)'s
+    reference comparison is unavailable by construction. 2025 writes the
+    branch for exactly this case: (4)(a) is an absolute 100 h on the proposed
+    building "when complying with Subsection 8.4.4.", against (4)(b)'s
+    reference comparison "when complying with Subsection 8.4.5."
+
+    Both sentences are written per thermal block, and the FACILITY row cannot
+    stand in for them. Facility time is a union over blocks, so disjoint
+    unmet periods sum past 100 h with no single block anywhere near it: Sol's
+    `212` gave the facility-reading version 150 h with two blocks at 75 h each
+    and it returned not-compliant on a building where every block conformed.
+
+    **The two criteria are tracked separately**, which is Sol's `220`. A
+    single combined flag reported BOTH unknown when only (4)(a)'s
+    applicability was unresolved: given a block with heating 1.0 h, cooling
+    900.0 h and no resolvable cooled block, it warned that "(3) and (4)(a)
+    cannot be determined" — but (3) CAN be determined from 1.0 h and passes.
+    The final verdict was right and its AHJ-facing evidence was false, citing
+    the wrong operative sentence.
+
+    **And an unresolved object is not the same as no cooled block.** A
+    building whose cooling serves only process or service-water demand
+    genuinely has no thermal block "for which mechanical cooling is
+    provided", so (4) is VACUOUS there. Only a cooling object the model walk
+    cannot place leaves applicability unknown (Fable, `219`).
+    """
+    section = report["proposed"]
+    blocks = section.get("zone_unmet_occupied_hours") or {}
+    cooled_map = {str(k).upper(): bool(v) for k, v in
+                  (section.get("zone_mechanical_cooling") or {}).items()}
+    unplaceable = list(section.get("unplaceable_cooling") or [])
+
+    # ---- sentence (3): heating, every block -------------------------------
+    heating_failures, heating_unreadable = {}, set()
+    for name, hours in blocks.items():
+        value = (hours or {}).get("heating")
+        if value is None:
+            # A block with absent hours is not a conforming block. Skipping
+            # it would make silence a pass, one block at a time.
+            heating_unreadable.add(name)
+            continue
+        if float(value) > HEATING_UNMET_LIMIT_H:
+            heating_failures[name] = float(value)
+    heating_known = bool(blocks) and not heating_unreadable
+    heating_ok = heating_known and not heating_failures
+
+    # ---- sentence (4)(a): cooling, every MECHANICALLY COOLED block --------
+    #
+    # The cooled set comes from the APPLICABILITY MAP, not from the result
+    # rows. Counting it while iterating rows meant a block the model says is
+    # cooled but EnergyPlus produced no row for was never seen at all:
+    # `cooled_blocks` reached 0, the sentence went vacuous, and the run
+    # PASSED (Sol, `224`). That is the same silence-as-pass defect already
+    # fixed for a present row with an absent value, one level earlier.
+    #
+    # The two maps are compared in BOTH directions, because each gap is a
+    # different kind of unknown and neither is vacuity: a result block absent
+    # from the applicability map has unknown applicability, and a cooled
+    # applicability block absent from the results has no measurement.
+    building_has_cooling = section.get("mechanical_cooling") is not False
+    rows = {str(name).upper(): name for name in blocks}
+    cooled_names = sorted(name for name, is_cooled in cooled_map.items()
+                          if is_cooled)
+    cooled_blocks = len(cooled_names)
+
+    cooling_failures, cooling_unreadable, unattributed = {}, set(), set()
+    unmeasured = set()
+    for name in rows:
+        if name not in cooled_map:
+            unattributed.add(rows[name])
+    for upper in cooled_names:
+        original = rows.get(upper)
+        if original is None:
+            unmeasured.add(upper)
+            continue
+        value = (blocks[original] or {}).get("cooling")
+        if value is None:
+            cooling_unreadable.add(original)
+            continue
+        if float(value) > COOLING_UNMET_LIMIT_H_8_4_4:
+            cooling_failures[original] = float(value)
+
+    # Vacuous where the sentence reaches no block, and that is a DECIDED
+    # outcome: either the building has no mechanical cooling at all, or every
+    # cooling object was placed and none of them reaches a thermal block.
+    cooling_vacuous = (not building_has_cooling
+                       or (not unplaceable and cooled_blocks == 0
+                           and not unattributed))
+    cooling_known = cooling_vacuous or (
+        bool(blocks) and bool(cooled_map) and not unplaceable
+        and not unattributed and not cooling_unreadable
+        and not unmeasured)
+    cooling_ok = cooling_vacuous or (cooling_known and not cooling_failures)
+
+    return {"blocks": len(blocks),
+            "cooled_blocks": cooled_blocks,
+            "heating_failures": heating_failures,
+            "cooling_failures": cooling_failures,
+            "heating_unreadable": sorted(heating_unreadable),
+            "cooling_unreadable": sorted(cooling_unreadable),
+            "unattributed_blocks": sorted(unattributed),
+            "unmeasured_cooled_blocks": sorted(unmeasured),
+            "unplaceable_cooling": sorted(unplaceable),
+            "worst_heating_h": max(
+                (float((h or {}).get("heating") or 0.0)
+                 for h in blocks.values()), default=None),
+            "cooling_vacuous": cooling_vacuous,
+            "heating_known": heating_known,
+            "cooling_known": cooling_known,
+            "heating_ok": heating_ok,
+            "cooling_ok": cooling_ok,
+            "all_ok": heating_ok and cooling_ok}
+
+
+def evaluate_unmet_8_4_4(report, audit):
+    """Audit (3) and (4)(a) per thermal block on the archetype-EUI path and
+    return the verdict. Each sentence is reported on its OWN evidence: one
+    being undeterminable does not make the other unknown (Sol, `220`)."""
+    status = _unmet_status_8_4_4(report)
+
+    # ---- sentence (3) -----------------------------------------------------
+    if not status["heating_known"]:
+        audit.warn(
+            "compliance",
+            "per-thermal-block unmet HEATING hours are UNAVAILABLE for the "
+            "proposed building, so 8.4.1.2.(3) cannot be determined — the "
+            "Facility row is a union over blocks and is NOT substituted for "
+            "them",
+            inputs={"blocks": status["blocks"],
+                    "unreadable_blocks": status["heating_unreadable"] or None},
+            article="8.4.1.2.(3)", ahj="AHJ-21")
+    else:
+        audit.decision(
+            "compliance",
+            f"unmet heating hours within 100 h for every one of "
+            f"{status['blocks']} thermal block(s) with reported hours"
+            if status["heating_ok"]
+            else "unmet heating hours EXCEED 100 h for "
+                 f"{len(status['heating_failures'])} of {status['blocks']} "
+                 "thermal block(s) with reported hours",
+            inputs={"blocks": status["blocks"],
+                    "worst_block_h": status["worst_heating_h"],
+                    "failing_blocks": status["heating_failures"] or None,
+                    "limit_h": HEATING_UNMET_LIMIT_H},
+            value=("the reference building is not applicable on this path — "
+                   "8.4.4 derives the target from Table 8.4.4.1 and builds no "
+                   "reference, which is what (3)'s \"where applicable\" admits"),
+            article="8.4.1.2.(3)", ahj="AHJ-21")
+
+    # ---- sentence (4)(a) --------------------------------------------------
+    if status["cooling_vacuous"]:
+        audit.decision(
+            "compliance",
+            "sentence (4)(a) is vacuous — the proposed building has no "
+            "thermal block \"for which mechanical cooling is provided\"",
+            inputs={"blocks": status["blocks"], "cooled_blocks": 0,
+                    "building_has_cooling":
+                        report["proposed"].get("mechanical_cooling")},
+            article="8.4.1.2.(4)(a)", ahj="AHJ-21")
+    elif not status["cooling_known"]:
+        # A KNOWN failure is reported as a failure, even while the sentence's
+        # full scope is unresolved. Both facts are true and an authority
+        # needs both: "block A exceeds 100 h" and "some other object could
+        # not be placed". Reporting only the second hid the first — a block
+        # measured at 900 unmet hours and KNOWN to be mechanically cooled
+        # disappeared behind "cannot be established" because an unrelated
+        # stray coil was unplaceable (Fable, `229` NB-3). The verdict was
+        # right either way; the evidence cited the wrong thing, which is the
+        # same defect Sol's `220` found when one warning spoke for two
+        # sentences.
+        if status["cooling_failures"]:
+            # A DECISION, not a warning. The exceedance is established on
+            # its own evidence, and the report checklist keys its glyph on
+            # `level` ALONE: as a warning this rendered the same block with
+            # the same verdict as a warning row when a stray coil existed
+            # and as a fail row when it did not (Fable, `236`). The audit
+            # text being SHOUTED does not reach the renderer; the level
+            # does.
+            audit.decision(
+                "compliance",
+                "unmet cooling hours EXCEED 100 h for "
+                f"{len(status['cooling_failures'])} thermal block(s) KNOWN "
+                "to be mechanically cooled, AND the sentence's full scope "
+                "could not be established — the exceedance is established "
+                "on its own and does not depend on the unresolved part",
+                inputs={"failing_blocks": status["cooling_failures"],
+                        "limit_h": COOLING_UNMET_LIMIT_H_8_4_4,
+                        "unplaceable_cooling":
+                            status["unplaceable_cooling"] or None,
+                        "unattributed_blocks":
+                            status["unattributed_blocks"] or None},
+                article="8.4.1.2.(4)(a)", ahj="AHJ-21")
+        audit.warn(
+            "compliance",
+            "which thermal blocks (4)(a) APPLIES to cannot be established "
+            "for the proposed building, so the sentence cannot be determined "
+            "— cooling equipment is present and at least one object or block "
+            "could not be placed",
+            inputs={"blocks": status["blocks"],
+                    "cooled_blocks": status["cooled_blocks"],
+                    "unplaceable_cooling":
+                        status["unplaceable_cooling"] or None,
+                    "unattributed_blocks":
+                        status["unattributed_blocks"] or None,
+                    "unmeasured_cooled_blocks":
+                        status["unmeasured_cooled_blocks"] or None,
+                    "unreadable_blocks":
+                        status["cooling_unreadable"] or None},
+            article="8.4.1.2.(4)(a)", ahj="AHJ-21")
+    else:
+        audit.decision(
+            "compliance",
+            f"unmet cooling hours within 100 h for every one of "
+            f"{status['cooled_blocks']} mechanically cooled thermal block(s)"
+            if status["cooling_ok"]
+            else "unmet cooling hours EXCEED 100 h for "
+                 f"{len(status['cooling_failures'])} of "
+                 f"{status['cooled_blocks']} mechanically cooled thermal "
+                 "block(s)",
+            inputs={"cooled_blocks": status["cooled_blocks"],
+                    "blocks": status["blocks"],
+                    "failing_blocks": status["cooling_failures"] or None,
+                    "limit_h": COOLING_UNMET_LIMIT_H_8_4_4},
+            value=("8.4.1.2.(4)(a), the branch for a building complying under "
+                   "Subsection 8.4.4 — an absolute limit per mechanically "
+                   "cooled thermal block, not (4)(b)'s allowance over a "
+                   "reference. Uncooled blocks are OUTSIDE the sentence: "
+                   "their passive-overheating hours are not a capacity "
+                   "shortfall"),
+            article="8.4.1.2.(4)(a)", ahj="AHJ-21")
+
+    # Sentence (5) applies to loads that are NOT MET. Reaching it on
+    # `not all_ok` conflated a block known to be over its limit with missing
+    # evidence, so a run with heating at 1 h and unresolved cooling
+    # applicability was told to increase capacities that nothing had shown to
+    # be short (Sol, `224`). The indeterminate verdict stands on its own; it
+    # does not imply a required capacity increase.
+    if status["heating_failures"] or status["cooling_failures"]:
+        audit.warn(
+            "compliance",
+            "8.4.1.2.(5) requires the proposed building's capacities to be "
+            "incrementally increased until these loads are met. That is NOT "
+            "done on this path: raising the capacities of the user's own "
+            "design is a different act from raising a reference's, and its "
+            "mechanics are unadjudicated (AHJ-21). The verdict below is "
+            "therefore NOT COMPLIANT rather than remediated.",
+            article="8.4.1.2.(5)", ahj="AHJ-21")
+    return status["all_ok"]
+
+
 def _minimum_cooling_allowance_h(ruleset):
     """The absolute floor, in hours, under 8.4.1.2.(4)'s cooling allowance.
 
@@ -1125,6 +1448,494 @@ def _hard_sized_phrase(names):
     if len(names) > 5:
         shown += f" and {len(names) - 5} more"
     return shown
+
+
+#: Objects that place a cooling coil in a topology. Reaching one of these
+#: means the coil IS connected to something, so failing to attribute it is an
+#: unresolved question rather than a stray object.
+#: Type-name stems that mean "this object is part of HVAC topology", matched
+#: by SUBSTRING. Used only by `_reaches_no_topology`, to tell a DETACHED
+#: object — which serves no block, a known answer — from one that reaches
+#: real topology and could not be attributed, which is unknown.
+#:
+#: Substring matching reaches 137 of the SDK's 1429 IDD type names, and
+#: Fable's `229` NB-5 is right that `AirLoopHVAC` also matches
+#: `AirLoopHVAC_ZoneSplitter`, `_ZoneMixer`, `_ReturnPlenum`,
+#: `_SupplyPlenum` and `_UnitarySystem`, and `ZoneHVAC` matches
+#: `ZoneHVAC_EquipmentList`. Every one of those IS topology, so the accident
+#: gives the right answer — but an accident is not a reason, and the
+#: direction of error is what makes it safe to keep: a type matched in error
+#: makes an object UNRESOLVED instead of detached, and unresolved is the
+#: conservative answer. The reverse — failing to match real topology —
+#: would assert that a coil cools nothing, which is the defect `224` found.
+#:
+#: `test_the_substring_matches_are_all_real_topology` drives the shapes
+#: rather than pinning 137 names that move with the SDK.
+#: An air-to-air exchanger, which couples the relief stream to the OA
+#: stream. `HeatExchangerAirToAirSensibleAndLatent` is the one the SDK
+#: builds; the prefix covers the family.
+#:
+#: `iddObjectType().valueName()` SEPARATES the words —
+#: `OS_HeatExchanger_AirToAir_SensibleAndLatent` — and my first version
+#: wrote the class name as it appears in Python, `HeatExchangerAirToAir`,
+#: which matched nothing. The relief fix silently did not fire. Written from
+#: the actual string this time, with the separator optional so both spellings
+#: match.
+_EXCHANGER_PATTERN = re.compile(r"HeatExchanger_?AirToAir")
+
+_TOPOLOGY_TYPES = re.compile(
+    r"AirLoopHVAC|PlantLoop|ThermalZone|ZoneHVAC|AirTerminal|"
+    r"OutdoorAirSystem")
+
+
+def _as_doas(obj):
+    """The dedicated outdoor-air system this object IS, or None."""
+    caster = getattr(obj, "to_AirLoopHVACDedicatedOutdoorAirSystem", None)
+    if caster is None:
+        return None
+    got = caster()
+    return got.get() if got.is_initialized() else None
+
+
+def _as_oa_system(obj):
+    """The outdoor-air system this object IS, or None."""
+    caster = getattr(obj, "to_AirLoopHVACOutdoorAirSystem", None)
+    if caster is None:
+        return None
+    got = caster()
+    return got.get() if got.is_initialized() else None
+
+
+def _has_downstream_relief_exchanger(relief, position):
+    """Whether a later relief-air component transfers this one's effect."""
+    return any(
+        _EXCHANGER_PATTERN.search(component.iddObjectType().valueName())
+        for component in relief[position + 1:])
+
+
+def _oa_system_holding(obj):
+    """The outdoor-air system whose OA or relief stream HOLDS this object.
+
+    Returns `(oa_system, stream)` where `stream` is `'oa'` or `'relief'`,
+    because the two mean OPPOSITE things for attribution and treating them
+    alike attributed an exhaust-side coil to every block (Fable, `229`
+    NB-1).
+
+    MEMBERSHIP, not distance. The source walk below bounds its depth, and a
+    bound is a guess about how far away a container sits: an
+    `AirLoopHVACOutdoorAirSystem` references only its controller and two port
+    Connections, so every component on the OA stream costs four hops. A
+    cooling coil ALONE on that stream resolved at depth four; put the
+    textbook fan and heating coil inboard of it and the same coil sits at
+    twelve, so the walk reported it DETACHED and 8.4.1.2.(4)(a) passed
+    vacuously over 900 unmet hours (Fable, `228`).
+
+    Raising the bound would only move the wall. `oaComponents()` answers the
+    question exactly: either the object is in that stream or it is not.
+    """
+    handle = obj.handle()
+    for oa_system in obj.model().getAirLoopHVACOutdoorAirSystems():
+        for component in oa_system.oaComponents():
+            if component.handle() == handle:
+                return oa_system, "oa"
+        relief = list(oa_system.reliefComponents())
+        for position, component in enumerate(relief):
+            if component.handle() == handle:
+                # A RELIEF COMPONENT WITH AN EXCHANGER DOWNSTREAM IS NOT
+                # EXHAUST-ONLY. `reliefComponents()` follows relief airflow
+                # from `reliefAirModelObject()` to `outboardReliefNode()`.
+                # An air-to-air exchanger later in the list therefore
+                # transfers what this object did to the exhaust INTO the
+                # outdoor-air stream, which is indirect evaporative cooling.
+                #
+                # Fable's `236`: an `EvaporativeCoolerDirectResearchSpecial`
+                # on relief, upstream of a straddling
+                # `HeatExchangerAirToAirSensibleAndLatent`, cooled the
+                # supply air while BOTH walks said "cools no block" — so
+                # (4)(a) went vacuous and 900 unmet hours passed on a model
+                # EnergyPlus accepts with zero severe errors. My rule
+                # "relief air is exhausted" was true in isolation and false
+                # once an exchanger couples the streams.
+                #
+                # A component after the exchanger is exhaust-only. Treating
+                # any exchanger anywhere in the stream as sufficient falsely
+                # put that component's blocks inside (4)(a)'s scope.
+                if _has_downstream_relief_exchanger(relief, position):
+                    return oa_system, "relief_through_exchanger"
+                return oa_system, "relief"
+    return None, None
+
+
+def _reaches_no_topology(obj, depth=6) -> bool:
+    """Is this object connected to no HVAC topology whatever?
+
+    Walks the reference graph outward and looks for anything that could place
+    a coil. A detached object's graph holds only its own connections and
+    nodes, and that is what distinguishes "serves no block" — a known answer
+    — from "could not be attributed" — an unknown one.
+    """
+    seen = set()
+    frontier = [(obj, 0)]
+    while frontier:
+        current, level = frontier.pop()
+        if level > depth or current.handle() in seen:
+            continue
+        seen.add(current.handle())
+        if level and _TOPOLOGY_TYPES.search(current.iddObjectType().valueName()):
+            return False
+        for source in current.sources():
+            as_model_object = source.to_ModelObject()
+            if as_model_object.is_initialized():
+                frontier.append((as_model_object.get(), level + 1))
+    return True
+
+
+def _relief_reaching_supply(oa_system):
+    """Relief-stream components an exchanger couples back to the OA stream.
+
+    `reliefComponents()` follows airflow from `reliefAirModelObject()` toward
+    `outboardReliefNode()`, so only a component with an air-to-air exchanger
+    LATER in the list has what it did to the exhaust transferred into the
+    outdoor air. Those objects condition the supply and serve whatever the
+    OA system serves.
+
+    The inward walk needs this for the same reason the outward walk does,
+    and for a sharper one: if only the outward walk learned it, the two
+    would disagree on every such model and the oracle would report a
+    disagreement instead of an answer. Seeding ALL relief components was the
+    original blind spot (`229` NB-1); seeding the ones that reach the supply
+    is the narrow version of the same idea.
+    """
+    relief = list(oa_system.reliefComponents())
+    return [
+        component for position, component in enumerate(relief)
+        if not _EXCHANGER_PATTERN.search(
+            component.iddObjectType().valueName())
+        and _has_downstream_relief_exchanger(relief, position)]
+
+
+def _zone_cooling_inward(model) -> dict:
+    """Which blocks have cooling, walked INWARD from each block.
+
+    The opposite-direction half of the attribution invariant. `_zone_
+    mechanical_cooling` starts at every cooling object and resolves OUTWARD
+    to the blocks it serves; this starts at every block and asks what serves
+    IT. The two use opposite edges of the same object graph — outward follows
+    `sources()` and the containment accessors, inward follows `targets()` from
+    a block's own equipment, terminal and air loop — so a bug in either
+    traversal usually surfaces as a DISAGREEMENT rather than as a quiet wrong
+    answer. Both traversals share `_has_downstream_relief_exchanger`, however,
+    so only the dedicated relief-topology tests can detect a direction error
+    in that helper.
+
+    That is the point. Every cooling-attribution defect in this file was
+    found by a reviewer hand-building one topology at a time: a VRF coil the
+    3.11 SDK does not link to its terminal unit, a unitary system on an air
+    loop whose `thermalZone()` is empty, an air terminal carrying its own
+    coil. Each was one shape, each passed the nine-model corpus, and each
+    cost a review round. A second opinion catches the class instead of the
+    instance (Sol's `227`, Fable's `226`).
+    """
+    cooled = {}
+    for zone in model.getThermalZones():
+        seeds = list(zone.equipment())
+        terminal = zone.airLoopHVACTerminal()
+        if terminal.is_initialized():
+            seeds.append(terminal.get())
+        try:
+            loops = list(zone.airLoopHVACs())
+        except (AttributeError, TypeError):      # older SDK: one loop only
+            single = zone.airLoopHVAC()
+            loops = [single.get()] if single.is_initialized() else []
+        for loop in loops:
+            seeds.extend(loop.supplyComponents())
+            # The loop's OWN outdoor-air system, when it has one.
+            own_oa = loop.airLoopHVACOutdoorAirSystem()
+            if own_oa.is_initialized():
+                seeds.extend(own_oa.get().oaComponents())
+                # Not every relief component: exhaust-side equipment cools
+                # no block, and seeding all of it is what made the two walks
+                # agree about a relief coil they were both wrong about
+                # (`229` NB-1). Only the ones an exchanger couples back into
+                # the supply, which is the case that made them agree in the
+                # OTHER direction (`236`).
+                seeds.extend(_relief_reaching_supply(own_oa.get()))
+            # And a DEDICATED system shared with other loops: a cooling coil
+            # in there serves this block as much as one on the loop itself.
+            # A DOAS is not the loop's own OA system — the loop reaches it
+            # through `airLoopHVACDedicatedOutdoorAirSystem()`, and my first
+            # attempt here looked for it in the wrong place. The invariant
+            # reported the two halves disagreeing both times, which is what
+            # it is for.
+            shared = getattr(
+                loop, "airLoopHVACDedicatedOutdoorAirSystem", None)
+            if shared is not None:
+                shared = shared()
+                if shared.is_initialized():
+                    inner = shared.get().airLoopHVACOutdoorAirSystem()
+                    seeds.extend(inner.oaComponents())
+                    seeds.extend(_relief_reaching_supply(inner))
+
+        found = False
+        seen = set()
+        queue = [(seed, 0) for seed in seeds]
+        while queue and not found:
+            obj, depth = queue.pop()
+            if depth > 4 or obj.handle() in seen:
+                continue
+            seen.add(obj.handle())
+            name = obj.iddObjectType().valueName()
+            if (_COOLING_PATTERN.search(name)
+                    and not _UPSTREAM_COOLING_PATTERN.search(name)):
+                found = True
+                break
+            for target in obj.targets():
+                as_object = target.to_ModelObject()
+                if as_object.is_initialized():
+                    queue.append((as_object.get(), depth + 1))
+        cooled[zone.nameString().upper()] = (
+            found or bool(zone.useIdealAirLoads()))
+    return cooled
+
+
+def cooling_attribution_disagreement(model) -> dict:
+    """Blocks the two traversals disagree about: `{BLOCK: (outward, inward)}`.
+
+    Empty is the expected answer. A non-empty result means one direction has
+    a bug for this topology, and a caller must SAY so rather than pick a
+    side: which side is wrong is exactly what is not known. This is not an
+    oracle for their shared relief/exchanger direction helper; dedicated
+    topology tests guard that common dependency.
+    """
+    outward, _unplaceable = _zone_mechanical_cooling(model)
+    inward = _zone_cooling_inward(model)
+    return {block: (outward.get(block), inward.get(block))
+            for block in sorted(set(outward) | set(inward))
+            if outward.get(block) != inward.get(block)}
+
+
+def _zone_mechanical_cooling(model) -> tuple:
+    """`({BLOCK: cooled}, [unresolved cooling object, ...])`.
+
+    8.4.1.2.(4) is scoped to "each thermal block ... for which mechanical
+    cooling is provided", and `_mechanical_cooling` answers only whether the
+    MODEL contains any. Once one block is cooled that flag is true for the
+    whole building, so passive-overheating hours from an uncooled block enter
+    the determination and can fail a sentence that never reached them (Sol,
+    `212`).
+
+    Cooling is resolved TO blocks rather than asked OF them, because a block's
+    equipment list carries the PTAC and not the DX coil inside it: matching
+    equipment types reported `05-ptac-electric`, a fully cooled building, as
+    having no cooled block at all — the direction that makes (4)(a) wrongly
+    vacuous.
+
+    Resolution is ordered NARROWEST FIRST: a zone component with a zone, then
+    an air terminal's own block, then a containing component, then the air
+    loop, then the plant. A coil's scope is the smallest thing that holds it.
+
+    Two corrections are worth naming, because I got each wrong once. A zone
+    component counts only when `thermalZone()` is actually set —
+    `AirLoopHVACUnitarySystem` and a VRF terminal unit are
+    `ZoneHVACComponent` subclasses that sit on AIR LOOPS, and treating those
+    as "placed with nothing attributed" made a fully cooled PSZ building
+    report no cooled block, so (4)(a) went vacuous over 500 h of unmet
+    cooling per block. And an air TERMINAL is not a `ZoneHVACComponent` at
+    all, so reordering the rungs could not reach the cooled-beam case I said
+    it had fixed; terminals are placed through `thermalZone.airLoopHVACTerminal()`,
+    which is the only direction the SDK offers (Fable, `223`).
+
+    The second return value is the cooling objects the walk could NOT place.
+    That distinction is what keeps a resolution failure from looking like an
+    answer: a building whose cooling serves only process or service-water
+    demand genuinely has NO cooled thermal block, and (4) is vacuous there,
+    while a coil nobody can place means applicability is unknown and the
+    determination must say so rather than pass over an empty set. Treating
+    both as indeterminate failed buildings the Code does not reach (Fable,
+    `219`).
+    """
+    cooled = set()
+    unresolved = []
+
+    # An air TERMINAL serves exactly one block, and the SDK gives that
+    # relationship only in this direction. Without it, a terminal's own
+    # cooling coil falls through to `airLoopHVAC()` and claims every block on
+    # the loop — so a four-pipe induction unit or cooled beam in ONE zone of
+    # an otherwise heating-only loop marked all of them cooled (Fable, `219`
+    # and `223`; my narrowest-first reorder did NOT fix this, because an air
+    # terminal is not a `ZoneHVACComponent`, and I wrongly said it had).
+    terminal_zone = {}
+    for zone in model.getThermalZones():
+        terminal = zone.airLoopHVACTerminal()
+        if terminal.is_initialized():
+            terminal_zone[terminal.get().handle()] = zone.nameString().upper()
+
+    def zone_of(obj, depth=0):
+        """Did this object's blocks get attributed? Narrowest scope first."""
+        if depth > 6:                # these chains are shallow; this bounds a cycle
+            return False
+        # OA-SYSTEM MEMBERSHIP FIRST, before any rung that places this
+        # object by proximity or by its water side. Two defects made this
+        # the right position, both found by running it:
+        #
+        # On a PLAIN loop a relief-stream coil answers
+        # `component.airLoopHVAC()` with that loop — it IS on the loop — so
+        # the loop rung attributed it to every zone the loop serves before
+        # the stream was consulted (Fable, `229` NB-1).
+        #
+        # And a CHILLED-WATER DOAS coil answers `plantLoop()`, which sat
+        # above the containment rung and won: the outward walk returned
+        # False, the inward True, and the oracle had to rescue the run. So
+        # the containment fix did not reach the coil type a running DOAS
+        # actually uses, and my own test fixture used a PLANT-LESS water
+        # coil — the single shape that skips the rung (Fable, `236`).
+        holder, stream = _oa_system_holding(obj)
+        if holder is not None:
+            if stream == "relief":
+                # EXHAUST-ONLY relief. `relief_through_exchanger` is NOT
+                # handled here: it falls through to the OA attribution
+                # below, which is precisely "attribute it as an OA-stream
+                # component" (Fable, `236`).
+                # See `relief_through_exchanger` above
+                # for the case where an exchanger makes this false.
+                #
+                # RELIEF AIR IS EXHAUSTED. A cooling coil on the relief
+                # stream conditions air leaving the building, so it cools no
+                # thermal block — PLACED, with nothing to attribute, like a
+                # plant loop carrying only process demand.
+                #
+                # Both walks used to attribute it to every zone of the loop
+                # and AGREE, because the inward walk seeded
+                # `reliefComponents()` too: independence had been traded for
+                # agreement in exactly one place (Fable, `229` NB-1).
+                return True
+            loop = holder.airLoopHVAC()
+            if loop.is_initialized():
+                for zone in loop.get().thermalZones():
+                    cooled.add(zone.nameString().upper())
+                return True
+            dedicated = holder.airLoopHVACDedicatedOutdoorAirSystem()
+            if dedicated.is_initialized():
+                for served in dedicated.get().airLoops():
+                    for zone in served.thermalZones():
+                        cooled.add(zone.nameString().upper())
+                return True
+            # In an OA stream that feeds no loop: PLACED, with nothing to
+            # attribute — not the same as unresolved.
+            return True
+
+        # A zone component, but ONLY if it actually has a zone.
+        # `AirLoopHVACUnitarySystem` and a VRF terminal unit are
+        # `ZoneHVACComponent` subclasses that can sit on an AIR LOOP, where
+        # `thermalZone()` is empty. Returning "placed" for those made a
+        # fully cooled PSZ building — which `modeling/hvac/psz.py` builds —
+        # report no cooled block at all, so (4)(a) went vacuous and 500 h of
+        # unmet cooling per block passed (Fable, `223`). That is a regression
+        # I introduced; the previous ordering got it right.
+        zone_component = obj.to_ZoneHVACComponent()
+        if zone_component.is_initialized():
+            zone = zone_component.get().thermalZone()
+            if zone.is_initialized():
+                cooled.add(zone.get().nameString().upper())
+                return True
+            # else fall through: it is on a loop, not in a zone.
+        if obj.handle() in terminal_zone:
+            cooled.add(terminal_zone[obj.handle()])
+            return True
+        component = obj.to_HVACComponent()
+        if component.is_initialized():
+            component = component.get()
+            held_by = component.containingZoneHVACComponent()
+            if held_by.is_initialized():
+                zone = held_by.get().thermalZone()
+                if zone.is_initialized():
+                    cooled.add(zone.get().nameString().upper())
+                    return True
+            containing = component.containingHVACComponent()
+            if containing.is_initialized():
+                return zone_of(containing.get(), depth + 1)
+            loop = component.airLoopHVAC()
+            if loop.is_initialized():
+                for zone in loop.get().thermalZones():
+                    cooled.add(zone.nameString().upper())
+                return True          # a loop serving no zone is still placed
+            if component.plantLoop().is_initialized():
+                # A plant-side coil: the demand it serves is on that loop, and
+                # a loop carrying only process or service-water demand reaches
+                # no thermal block. Placed, with nothing to attribute.
+                return True
+        # A DEDICATED OUTDOOR-AIR SYSTEM serves every block of every air loop
+        # it feeds, and its coil reaches none of the rungs above: a DOAS
+        # cooling coil answered `airLoopHVAC`, `containingZoneHVACComponent`,
+        # `containingHVACComponent` AND `plantLoop` all empty, so it came back
+        # unplaceable while genuinely cooling both blocks (Sol, `224`).
+        doas = _as_doas(obj)
+        if doas is not None:
+            for loop in doas.airLoops():
+                for zone in loop.thermalZones():
+                    cooled.add(zone.nameString().upper())
+            return True
+        # A plain outdoor-air system belongs to one loop, or sits inside a
+        # DOAS, which its own sources reach.
+        oa_system = _as_oa_system(obj)
+        if oa_system is not None:
+            loop = oa_system.airLoopHVAC()
+            if loop.is_initialized():
+                for zone in loop.get().thermalZones():
+                    cooled.add(zone.nameString().upper())
+                return True
+
+        # An OA-STREAM component, by membership. This runs before the
+        # bounded walk below because it does not depend on distance: a
+        # cooling coil with a fan and a heating coil inboard of it sits
+        # twelve hops from its own outdoor-air system (Fable, `228`).
+        # Containment is silent: ask what POINTS AT this object.
+        for source in obj.sources():
+            as_model_object = source.to_ModelObject()
+            if not as_model_object.is_initialized():
+                continue
+            if zone_of(as_model_object.get(), depth + 1):
+                return True
+        return False
+
+    for obj in model.modelObjects():
+        type_name = obj.iddObjectType().valueName()
+        if not _COOLING_PATTERN.search(type_name):
+            continue
+        # A chiller or district-cooling node is UPSTREAM of whatever serves a
+        # block: the coil drawing on that loop is itself matched here and
+        # resolves to its own blocks, so attributing the plant as well would
+        # mark every block on the loop's demand side as cooled, including
+        # blocks served only for process or service-water demand.
+        if _UPSTREAM_COOLING_PATTERN.search(type_name):
+            continue
+        if zone_of(obj):
+            continue
+        # DETACHED is not UNRESOLVED. An object connected to no HVAC
+        # topology at all provides cooling to no thermal block, so (4)(a)'s
+        # scope is known: this object is not in it. Calling it unplaceable
+        # made the sentence's applicability unknown for a model whose only
+        # fault is a stray object (Sol, `224`) — it may deserve an
+        # input-model warning, which is a different concern from this one.
+        #
+        # The test is whether the object's reference graph reaches any
+        # topology at all. A detached coil's graph holds nothing but its own
+        # connections and nodes; a DOAS coil's reaches the outdoor-air
+        # system at depth four and the DOAS at depth five.
+        if _reaches_no_topology(obj):
+            continue
+        unresolved.append(obj.nameString())
+
+    # An ideal-loads block is cooled by definition, and the flag lives on the
+    # zone rather than on any object the walk above would reach.
+    for zone in model.getThermalZones():
+        if zone.useIdealAirLoads():
+            cooled.add(zone.nameString().upper())
+
+    return ({zone.nameString().upper():
+             zone.nameString().upper() in cooled
+             for zone in model.getThermalZones()},
+            sorted(unresolved))
 
 
 def _mechanical_cooling(model):

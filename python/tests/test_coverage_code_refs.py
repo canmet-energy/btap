@@ -18,6 +18,8 @@ MAPPING_PATH_R7 = (Path(__file__).with_name("data")
 #: References retired because the coverage CLAIM that carried them was deleted,
 #: not because the code moved. The third term that keeps R6's 313 provable
 #: instead of edited — see test_r7_ledger_chains_from_r6_to_the_live_manifests.
+ADDITIONS_PATH = (Path(__file__).with_name("data")
+                  / "coverage_code_ref_additions.json")
 RETIREMENTS_PATH = (Path(__file__).with_name("data")
                     / "coverage_code_ref_retirements.json")
 SIZING_TIME = re.compile(
@@ -74,11 +76,23 @@ def test_manifest_inventory_and_every_code_ref_resolves():
     # coverage rows cited articles that do not exist and were DELETED rather
     # than renumbered. One carried a code pointer, hence the ref count. The
     # 2025 claims for the same provisions stay: they exist there.
+    #
+    # Sol's `215` re-declared NECB 2025's 8.4.1.2 from `implemented` to
+    # `partial` — sentence (5)'s capacity iteration is applied on the 8.4.5
+    # reference path and NOT on the 8.4.4 archetype-EUI path (AHJ-21), and
+    # the row claimed both. The ARTICLE count is unchanged at 239: it was
+    # re-declared at its true depth, not split.
+    #
+    # 312 -> 313 on his `220`: the row gained
+    # `path.py#evaluate_unmet_8_4_4`, because its two inherited pointers are
+    # reference-path forwarding surfaces and the EUI path executes neither.
+    # Recorded in `coverage_code_ref_additions.json` rather than by editing a
+    # historical ledger.
     assert sum(len(articles) for _path, articles in manifests) == 239
 
     refs = code_refs(manifests)
     assert len(refs) > 60
-    assert len(refs) == 312
+    assert len(refs) == 313
     assert all(not re.match(r"^btap-[^/]+/lib/", ref) for ref in refs)
 
     definitions_by_path = {}
@@ -181,9 +195,30 @@ def test_r7_ledger_chains_from_r6_to_the_live_manifests():
         assert entry["reason"], "a retirement must say why"
         retired[entry["ref"]] += entry["uses"]
 
+    # A FOURTH term, for the opposite event. A coverage claim can acquire a
+    # surface that did not exist when these ledgers were written, and the
+    # ledgers record RENAMES — they assert R-B "moved paths, it did not add,
+    # drop or merge an owner". So an addition is recorded beside them, by the
+    # same reasoning that put deletions in their own file rather than in a
+    # ledger edit.
+    #
+    # I first read the ledger's total as a rule that no pointer may ever be
+    # added, and removed one that a claim needed. Sol (`220`) ruled that the
+    # ledger is a historical migration record, not that prohibition: the
+    # claim that NECB 2025's 8.4.1.2 applies (3) and (4)(a) on the EUI path
+    # has to point at code the EUI path EXECUTES, and its two inherited
+    # pointers are reference-path forwarding surfaces.
+    additions = json.loads(ADDITIONS_PATH.read_text(encoding="utf-8"))
+    assert additions["schema_version"] == 1
+    added = Counter()
+    for entry in additions["additions"]:
+        assert entry["authority"], "an addition without an authority is a silent edit"
+        assert entry["reason"], "an addition must say why"
+        added[entry["ref"]] += entry["uses"]
+
     assert Counter(code_refs(coverage_manifests())) + retired == Counter(
         {row["new"]: row["uses"] for row in rows}
-    )
+    ) + added
 
     # --- link 3: the total survived both hops ------------------------------
     assert sum(row["uses"] for row in rows) == sum(row["uses"] for row in r6)

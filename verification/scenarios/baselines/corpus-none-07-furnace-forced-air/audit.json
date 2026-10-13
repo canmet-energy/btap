@@ -2922,9 +2922,9 @@
  },
  {
   "step": "coverage",
-  "action": "Determination of Compliance \u2014 implemented: The pipeline computes the (2) annual-energy verdict (proposed vs reference building energy target), the (3)/(4) unmet-hours verdicts (with the vacuous-cooling determination when the proposed has no mechanical cooling), and the sentence-(5) capacity auto-iteration \u2014 per-thermal-block: each failing zone\u2019s Sizing:Zone factors are raised, secant-targeted from that zone\u2019s own (factor, unmet-hours) history across rounds, with a global SizingParameters fallback when per-zone data cannot attribute the failure, and hard-sized-equipment stall detection \u2014 compliance.rb; asserted by test_compliance.rb.",
+  "action": "Determination of Compliance \u2014 partial. Applied: The pipeline computes the (2) annual-energy verdict (proposed vs reference building). On the reference-building path, the (3)/(4) verdicts read each building\u2019s Facility unmet_occupied_hours row; that path does not yet evaluate the zone rows per thermal block, and (4) is vacuous when the proposed building has no mechanical cooling. The sentence-(5) capacity auto-iteration raises each failing zone\u2019s Sizing:Zone factors where zone data attributes the Facility failure, secant-targeted from that zone\u2019s own (factor, unmet-hours) history across rounds, with a global SizingParameters fallback when it cannot, and hard-sized-equipment stall detection.. Gaps: On the reference-building path, sentences (3) and (4) read each building\u2019s Facility row instead of evaluating every thermal block, so a block that exceeds its own limit can pass when the Facility-level comparison passes.",
   "inputs": {
-   "status": "implemented",
+   "status": "partial",
    "decisions_citing": 1,
    "code": [
     "python/btap/codes/compliance.py#_evaluate",
@@ -2932,7 +2932,7 @@
    ]
   },
   "article": "8.4.1.2.",
-  "level": "info"
+  "level": "warning"
  },
  {
   "step": "coverage",

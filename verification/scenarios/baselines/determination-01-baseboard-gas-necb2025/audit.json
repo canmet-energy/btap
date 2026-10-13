@@ -3797,17 +3797,18 @@
  },
  {
   "step": "coverage",
-  "action": "Determination of Compliance \u2014 implemented: The pipeline computes the (2) annual-energy verdict (against the 8.4.4 EUI target or the 8.4.5 reference building), the (3)/(4) unmet-hours verdicts (with the vacuous-cooling determination when the proposed has no mechanical cooling), and the sentence-(5) capacity auto-iteration \u2014 per-thermal-block: each failing zone\u2019s Sizing:Zone factors are raised, secant-targeted from that zone\u2019s own (factor, unmet-hours) history across rounds, with a global SizingParameters fallback when per-zone data cannot attribute the failure, and hard-sized-equipment stall detection \u2014 compliance.rb; asserted by test_compliance.rb.",
+  "action": "Determination of Compliance \u2014 partial. Applied: The pipeline computes the (2) annual-energy verdict against the 8.4.4 EUI target or the 8.4.5 reference building. On the 8.4.5 reference-building path, the (3)/(4)(b) verdicts read each building\u2019s Facility unmet_occupied_hours row; that path does not yet evaluate the zone rows per thermal block, and (4)(b) is vacuous when the proposed building has no mechanical cooling. On the 8.4.4 archetype-EUI path, the (3)/(4)(a) verdicts read the proposed zone rows per thermal block, do not read the Facility union, and scope cooling only to blocks with mechanical cooling. On the reference path, the sentence-(5) capacity auto-iteration raises each failing zone\u2019s Sizing:Zone factors where zone data attributes the Facility failure, secant-targeted from that zone\u2019s own (factor, unmet-hours) history across rounds, with a global SizingParameters fallback when it cannot, and hard-sized-equipment stall detection. On the archetype-EUI path, sentence (5) is NOT applied: iterating the capacities of the user\u2019s own design is a different act from iterating a reference\u2019s and its mechanics are unadjudicated, so a failure is reported NOT COMPLIANT with a warning naming (5).. Gaps: On the 8.4.5 reference-building path, sentences (3) and (4)(b) read each building\u2019s Facility row instead of evaluating every thermal block, so a block that exceeds its own limit can pass when the Facility-level comparison passes; sentence (5)\u2019s incremental capacity increase is applied on the 8.4.5 reference path only, while on the 8.4.4 archetype-EUI path it is not applied and the run says so (AHJ-21).",
   "inputs": {
-   "status": "implemented",
+   "status": "partial",
    "decisions_citing": 5,
    "code": [
     "python/btap/codes/compliance.py#_evaluate",
-    "python/btap/codes/compliance.py#_evaluate_unmet"
+    "python/btap/codes/compliance.py#_evaluate_unmet",
+    "python/btap/codes/necb/path.py#evaluate_unmet_8_4_4"
    ]
   },
   "article": "8.4.1.2.",
-  "level": "info"
+  "level": "warning"
  },
  {
   "step": "coverage",

@@ -101,7 +101,7 @@ nonconformity with 8.4.x.9.(6)(e).
 | AHJ-18 | the two-pipe fan-coil surrogate has no plant-side changeover | tool-gap | necb2020, necb2025 | no |
 | AHJ-19 | real refrigeration is invisible to classification, teardown and end-use reporting | tool-gap | necb2020, necb2025 | no |
 | AHJ-20 | System 5's chilled-water loop is a 7 °C comfort loop | tool-gap | necb2020, necb2025 | no |
-| AHJ-21 | the archetype-EUI path applies no unmet-load criteria at all | tool-gap | necb2025 | no |
+| AHJ-21 | the archetype-EUI path applies no capacity increase under sentence (5) | tool-gap | necb2025 | no |
 
 ---
 
@@ -1027,40 +1027,72 @@ water-chiller reference that can actually serve a refrigerated block — an
 appropriate low-temperature fluid and equipment representation — is an
 implementable modelling problem, not an interpretation an authority must bless.
 
-## AHJ-21 — the archetype-EUI path applies no unmet-load criteria at all
+## AHJ-21 — the archetype-EUI path applies no CAPACITY INCREASE under sentence (5)
 
 **Article.** 8.4.1.2.(3), 8.4.1.2.(4)(a) and 8.4.1.2.(5), NECB 2025, as they
 apply to a building complying under Subsection 8.4.4.
 
 **Status: `tool-gap`, NOT a referral.** The Code decides this plainly and we
-do not do it. Nothing needs an authority, and the run is NOT conditional:
-calling an unimplemented criterion an ambiguity would launder a defect as an
-interpretation, which is what the register's four statuses exist to prevent.
+do not do all of it. Nothing needs an authority, and the run is NOT
+conditional: calling an unimplemented criterion an ambiguity would launder a
+defect as an interpretation, which is what the register's four statuses exist
+to prevent.
+
+**NARROWED on 2026-10-11.** Sentences (3) and (4)(a) are now APPLIED on this
+path and compose into its verdict — `_eui_compliance` calls
+`evaluate_unmet_8_4_4` and returns `energy_ok and unmet_ok`, so a model with
+unmet thermal-block hours over 100 h is no longer declared compliant. What
+remains is sentence (5).
 
 **What is missing.** `performance_compliance(..., path="eui")` reaches
 `_eui_compliance`, the NECB 2025 Subsection 8.4.4 archetype-EUI path, which
 generates and simulates **no reference building** — the target comes from
-Table 8.4.4.1. That function never calls `_unmet_status`,
-`_iterate_capacities` or `evaluate_unmet`, so on that path:
+Table 8.4.4.1.
 
 ```text
-8.4.1.2.(3)      the 100 h per-thermal-block heating limit   NOT applied
-8.4.1.2.(4)(a)   the 100 h cooling limit for a building
-                 complying under Subsection 8.4.4            NOT applied
+8.4.1.2.(3)      100 h per THERMAL BLOCK, heating             APPLIED
+8.4.1.2.(4)(a)   100 h per MECHANICALLY COOLED thermal
+                 block, for a building complying under
+                 Subsection 8.4.4                             APPLIED
 8.4.1.2.(5)      incremental capacity increase until the
-                 loads are met                               NOT applied
+                 loads are met                                NOT applied
 ```
 
-Sentence (4)(a) is the sharp one. It is written FOR this path — "when
-complying with Subsection 8.4.4." — and it is the branch the reference path
-never uses. So the tool implements (4)(b), the reference comparison, and
-leaves the only branch that governs its own EUI path unimplemented.
+Both limits are evaluated per block and every applicable block must be within
+them. The Facility row is NOT read: facility time is a union over blocks, so
+it exceeds 100 h with no block near it — 150 h of facility time over two
+blocks at 75 h each is a conforming building, and reading the union called it
+non-compliant (Sol, `212`).
 
-**Why it matters.** A model may be declared compliant on the EUI path while
-leaving thermal-block heating or cooling loads unmet for any number of hours.
-On the reference path the same model would fail 8.4.1.2.(3) at 101 hours. The
-determination does not say which criteria were applied, so the omission is
-invisible in the report.
+**Cooling applicability is per block too**, because 2025 scopes (4) to "each
+thermal block ... for which mechanical cooling is provided". An uncooled
+block's passive-overheating hours are not a capacity shortfall and never enter
+the determination, however the rest of the building is served. A building with
+no mechanical cooling ANYWHERE still takes the building-wide fast path — it
+has no block the sentence reaches — but a mixed cooled/uncooled building does
+not, and the first version of this change used that flag for both cases.
+
+(5) is what remains, and it is not a calculation gap: `_iterate_capacities`
+exists and works, but it is written over a proposed/reference PAIR — it loops
+both models, re-applies the reference's capacity-binned efficiencies, and
+reads `report["reference"]["unmet_occupied_hours"]`. On this path there is no
+reference to iterate. More importantly, the subject here is the USER'S OWN
+DESIGN: raising its capacities changes the building being assessed, which is
+a different act from raising a reference's, and the mechanics of doing that
+inside a determination are unadjudicated.
+
+Sentence (4)(a) was the sharp one, and it is why this entry existed: it is
+written FOR this path — "when complying with Subsection 8.4.4." — and is the
+branch the reference path never uses, so the tool implemented (4)(b)'s
+reference comparison and left the only branch governing its own EUI path
+unimplemented. That is closed; (4)(a)'s absolute limit is applied here now.
+
+**Why it mattered.** A model could be declared compliant on the EUI path while
+leaving thermal-block heating or cooling loads unmet for any number of hours;
+on the reference path the same model failed 8.4.1.2.(3) at 101 hours. That is
+closed. What matters now is narrower: a failing building is correctly reported
+NOT COMPLIANT instead of being remediated the way (5) directs, so the verdict
+is conservative rather than wrong.
 
 **Established by.** Sol's `189` on PR #98, 2026-10-11, reviewing a claim of
 mine that branch (a) "never applies to this tool because it builds a reference
@@ -1069,9 +1101,10 @@ and D-91's first establishment account was wrong on both counts. Confirmed by
 reading `_eui_compliance` for calls to the unmet-hour machinery: there are
 none.
 
-**What the tool does meanwhile.** It reaches an EUI determination with no
-unmet-load check and no warning that none was made. Closing this means
-applying (3), (4)(a) and (5) to the proposed building on the EUI path.
+**What the tool does meanwhile.** It applies (3) and (4)(a), composes them
+into the verdict, and emits a WARNING naming (5) on every run where the limits
+are not met, so no reader is left to infer that a remediation step was taken.
+Closing the rest means implementing (5) for a single model.
 
 **Sentence (5)'s APPLICABILITY is not open, and an earlier version of this
 entry said it was.** It said closing the gap meant "deciding whether (5)'s

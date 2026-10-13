@@ -52,7 +52,7 @@
       "method": "transcribed",
       "source_verification": "manual",
       "note": "The umbrella carries only article_coverage: what the pipeline itself determines. This edition carries the reference building at Subsection 8.4.5 and the Energy Use Intensity path at 8.4.4. The status/how/code fields are the pipeline's self-declaration and have no external source to re-fetch. The 20 h floor under 8.4.1.2.(4)'s cooling unmet-hours allowance moved from a code literal in compliance.py into this file (unmet_cooling.minimum_allowance_h) on 2026-09-08, multi-edition plan Stage 5; the value is unchanged and the source is unchanged.",
-      "result_sha256": "24571e9b18bc0ef8ff4a4a98409801c12cf8f382c130051af5d420c5c94c6e2e"
+      "result_sha256": "1ac7b37701fd541d162351e3ee3b46ac69b6df761b658fc45bbad8b17f9a8ef6"
     },
     "envelope_rules.json": {
       "source": "mcp:necb:2025",
