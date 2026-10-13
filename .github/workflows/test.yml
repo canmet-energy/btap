@@ -381,7 +381,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       # See the same step in verify: git refuses a workspace owned by another
-      # UID, and the manifest-ancestry check needs git.
+      # UID. oracle_prep's `git rev-parse HEAD` and the self-containment
+      # scanner's `git ls-files` still need trust; neither proves ancestry.
       - name: Trust the workspace (container UID != workspace owner)
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Frozen scenarios (parity lane)
@@ -392,10 +393,11 @@ jobs:
           BTAP_SCENARIO_LANES=parity BTAP_SCENARIOS_REQUIRED=1 \
             /opt/btap-ci/pytest/bin/python -m pytest -q tests/necb/test_frozen_scenarios.py -p no:cacheprovider
 
-  # D-94's stop condition requires the merged-main run to be green, and D-95
-  # exists because a squash-merged freeze breaks it. Neither rule enforces
-  # itself: main was red for three days across two merges because the only
-  # signal was a failed-run email to the merging actor, which nobody acted on.
+  # D-94's stop condition requires the merged-main run to be green. D-103
+  # retired D-95's ancestry-specific failure, but kept this incident lifecycle
+  # for the broader reasons main can go red. Before it existed, main stayed
+  # red for three days because the only signal was a failed-run email to the
+  # merging actor, which nobody acted on.
   #
   # This is an INCIDENT LIFECYCLE, not a failure alarm. It evaluates on every
   # push run on main: a failure opens or updates an assigned issue, and a
@@ -406,8 +408,8 @@ jobs:
   # Scope, stated so a reader does not assume more: it watches the three jobs
   # that run on a push. parity and parity-scenarios are dispatch-only and are
   # NOT in needs, so a parity-red main is invisible here. A docs-only merge
-  # triggers no run at all (paths-ignore), so nothing reports — freeze-carrying
-  # PRs always touch verification/, so D-95 breakages are covered.
+  # triggers no test.yml run at all (paths-ignore), so this job reports
+  # nothing; the path-unfiltered decisions workflow is a separate gate.
   main-red:
     needs: [lint, python, verify]
     # !cancelled() rather than always(): always() still schedules this on a

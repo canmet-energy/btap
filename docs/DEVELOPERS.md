@@ -466,13 +466,14 @@ ran at and `test_manifest_integrity` required that commit to be an ancestor of
 stopped being an ancestor and `main` went red *after* the merge while every
 branch check was green. That happened twice, for three days across two merges.
 
-The ancestry assertion is gone, with the recorded pointer and the machinery
-hashes, because none of them was ever recorded first discovering a wrong
-compliance behaviour — they discovered facts about Git. What the manifest
-pins is content: every baseline's sha256, the comparison spec's sha256, and
-the authored scenario definitions compared against the records CI executes.
-A squash does not move any of those, so it can no longer produce that
-failure.
+The ancestry assertion and the machinery hashes are gone because none of
+them was ever recorded first discovering a wrong compliance behaviour — they
+discovered facts about Git. The recorded `provenance.commit` pointer remains
+as informational history; nothing requires it to be reachable from a later
+`HEAD`. What the manifest enforces is content: every baseline's sha256, the
+comparison spec's sha256, and the authored scenario definitions compared
+against the records CI executes. A squash does not move any of those, so it
+can no longer produce that failure.
 
 Squash freely. Rebase merging is still disabled on this repository, which is
 incidental now rather than load-bearing.

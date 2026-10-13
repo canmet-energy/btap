@@ -836,8 +836,9 @@ def main(environment=None):
         # `freeze.py --scenario B` after editing A froze B and silently kept
         # A's stale contract (Sol, `228`).
         #
-        # `baseline_sha256` is the only key the freeze adds, so the
-        # comparison is exact. A changed definition is ADDED to the selected
+        # `baseline_sha256` and `produced_by` are the two keys the freeze
+        # adds. Removing `GENERATED_SCENARIO_KEYS` therefore leaves the exact
+        # authored definition. A changed definition is ADDED to the selected
         # set rather than refused: the author's intent is unambiguous, and
         # re-running it is what makes the manifest true.
         authored = {sc["id"]: sc for sc in every_scenario}
