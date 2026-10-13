@@ -190,8 +190,10 @@ learns *why* we read the article that way.
   `label` and one list per code id, never a flat list: the same number names a
   different requirement in each edition. Edit
   that file, then run `python3 python/scripts/generate_decisions.py`, which
-  rewrites this registry and `docs/necb_decisions.md` together in numeric id
-  order. `--check` is the drift gate.
+  rewrites this registry, `docs/necb_decisions.md` (both in numeric id order)
+  and the Codes Committee view `docs/CODE_DECISIONS_BY_PROVISION.md` (ordered
+  by code, edition and provision) together. `--check` is the drift gate for
+  all three.
 - **The registry is schema 2**, and `decisions.py` refuses any other
   number. Every entry keeps `id`, `title`, `kind` and `summary`, which are all
   the loader and the rulings appendix read.
@@ -202,7 +204,9 @@ learns *why* we read the article that way.
   `articles`, and its `editions` is derived from `governing` records only.
   Requirements, sources and `decided` are committee metadata and never reach
   the compliance report. `tests/necb/test_report_units.py` holds the HTML
-  byte-identical under any rewrite of them.
+  byte-identical under any rewrite of them. They reach the Codes Committee
+  view instead, where only a `governing` record makes a primary row and a
+  decision that cites no provision is omitted.
 - **A source file is a registry entry**, and a
   `kind: runtime` entry must be cited by ≥1 `ruling=` tag.
   `tests/necb/test_decisions_registry.py` enforces both directions with an

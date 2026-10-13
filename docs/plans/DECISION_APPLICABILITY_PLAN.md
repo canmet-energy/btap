@@ -221,6 +221,20 @@ migration, unconverted `articles.unverified` records appear in a final
 "Edition not yet attributed" table; they are never guessed into an edition's
 index.
 
+Until a decision is converted its requirements have no `decided` text. A row
+for such a requirement carries a **Transitional** marker in "What was decided"
+and links to the decision-wide registry summary, which the document prints once
+per decision under "Transitional decision summaries". A summary runs to
+thousands of characters, so repeating it on every row and edition would
+multiply it past the size GitHub renders. The marker and the section go away
+with the last unconverted decision.
+
+Within an edition, rows sort by the first provision they cite: division, then
+the provision number read numerically (8.4.4.9 before 8.4.4.10), then Article
+before Table before Appendix note, so that an Article and a Table that share a
+number stay adjacent and distinct. Ties break on decision number and then
+requirement key.
+
 ## Normative evidence
 
 The hbix Codes MCP is the authority for NECB 2020 and NECB 2025. The

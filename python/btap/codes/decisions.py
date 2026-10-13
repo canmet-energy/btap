@@ -29,10 +29,11 @@ them, so they cannot change a compliance report.
 
 This package's data/decisions.json is GENERATED and must not be edited.
 The canonical source is one file per decision, docs/decisions/D-NN.md, from
-which python/scripts/generate_decisions.py emits both this registry and
-docs/necb_decisions.md in numeric id order (D-81, amended 2026-09-29).
+which python/scripts/generate_decisions.py emits this registry,
+docs/necb_decisions.md (both in numeric id order, D-81, amended 2026-09-29) and
+the Codes Committee view docs/CODE_DECISIONS_BY_PROVISION.md.
 tests/necb/test_decisions_registry.py enforces the citation invariants,
-test_decisions_registry_sync.py the drift gate on both outputs.
+test_decisions_registry_sync.py the drift gate on all three outputs.
 """
 
 from __future__ import annotations

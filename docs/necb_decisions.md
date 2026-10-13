@@ -23,10 +23,11 @@ Format per entry: **what was decided / who / when / why / evidence & commit**.
 `docs/decisions/D-NN.md`, and that file is CANONICAL. It carries TOML front
 matter — `id`, `title`, `kind`, `articles`, `summary` — followed by the
 authored Markdown body, whose first line is the section's own `## D-NN —`
-heading. Two artifacts are generated from those sources and are never
-hand-edited: this document, and the runtime registry
-`python/btap/codes/data/decisions.json`. The full editing workflow for a
-decision: (1) add or edit the one source file; (2) run `python3
+heading. Three artifacts are generated from those sources and are never
+hand-edited: this document, the runtime registry
+`python/btap/codes/data/decisions.json`, and the Codes Committee view by
+provision, `docs/CODE_DECISIONS_BY_PROVISION.md`. The full editing workflow
+for a decision: (1) add or edit the one source file; (2) run `python3
 python/scripts/generate_decisions.py`; (3) run the Python registry/citation
 tests. `python3 python/scripts/generate_decisions.py --check` is the drift gate
 and runs in CI. The front-matter `title` is the compact title this index and

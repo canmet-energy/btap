@@ -169,12 +169,15 @@ One decision is one file, `docs/decisions/D-NN.md`: TOML front matter
 (`id`, `title`, `kind`, `articles`, `editions`, `summary`) followed by the
 authored Markdown
 body, whose first line is its own `## D-NN —` heading. Those files are
-canonical. Both [necb_decisions.md](necb_decisions.md) and
-`python/btap/codes/data/decisions.json` are generated from them, in numeric id
-order, by `python3 python/scripts/generate_decisions.py`; use `--check` in
-gates. To add or change a decision, edit the one source file and regenerate --
-never the two outputs. The registry tests enforce the source schema, both
-generated outputs, short-link resolution and runtime citations.
+canonical. [necb_decisions.md](necb_decisions.md),
+`python/btap/codes/data/decisions.json` and
+[CODE_DECISIONS_BY_PROVISION.md](CODE_DECISIONS_BY_PROVISION.md), the Codes
+Committee view by code, edition and provision, are generated from them by
+`python3 python/scripts/generate_decisions.py`; use `--check` in gates. The
+registry and the log are in numeric id order. To add or change a decision, edit
+the one source file and regenerate -- never the three outputs. The registry
+tests enforce the source schema, all three generated outputs, short-link
+resolution and runtime citations.
 
 A requirement may also take the structured source form planned in
 [DECISION_APPLICABILITY_PLAN.md](plans/DECISION_APPLICABILITY_PLAN.md). It
@@ -194,6 +197,19 @@ on a `decisions: note` line.
 `requirements` instead of `articles`.
 
 No decision has been converted yet; the tests exercise the form on fixtures.
+
+[CODE_DECISIONS_BY_PROVISION.md](CODE_DECISIONS_BY_PROVISION.md) lists only a
+decision that cites a provision. A decision that cites none, because it is
+`not_applicable` or has an empty `unverified` list, is omitted and counted. A
+structured requirement makes one row per `governing` record and prints its
+`decided` text; its other-edition governing records appear under Other
+editions, and its `incorporated-reference` and `related` records under Other
+sources, never as rows. A legacy requirement makes one row per edition and
+carries the decision-wide `summary`, marked **Transitional** and printed once
+per decision, until it is converted. A decision with a non-empty `unverified`
+list appears only in the last section, "Edition not yet attributed". The
+document is a pure function of the sources, so a conversion moves a decision
+between sections on regeneration and needs no code change.
 
 The two generated coverage documents are
 [NECB_COVERAGE.md](NECB_COVERAGE.md) and

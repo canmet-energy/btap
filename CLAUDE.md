@@ -105,9 +105,11 @@ One decision is one file: `docs/decisions/D-NN.md`, TOML front matter
 (`id`, `title`, `kind`, `articles`, `editions`, `summary`) plus the authored
 Markdown body,
 whose first line is its own `## D-NN —` heading. That file is CANONICAL.
-Both `docs/necb_decisions.md` and `python/btap/codes/data/decisions.json` are
-GENERATED from the sources by `generate_decisions.py`, in numeric id order, and
-are never hand-edited. Anchors and the index are inserted by the generator; by
+Three outputs are GENERATED from the sources by `generate_decisions.py` and are
+never hand-edited: `docs/necb_decisions.md` and
+`python/btap/codes/data/decisions.json`, in numeric id order, and
+`docs/CODE_DECISIONS_BY_PROVISION.md`, the Codes Committee view by code,
+edition and provision. Anchors and the index are inserted by the generator; by
 convention a body does not declare its own `d-NN` anchor. The front-matter
 `title` is the
 compact index title and the body's heading is authored prose, which differ on
@@ -218,6 +220,30 @@ and the report's rulings appendix read. A structured entry carries
 `requirements` (`id`, `label`, `decided`, `sources`) instead of `articles`.
 The loader refuses any other schema number.
 
+**The Codes Committee view** is `docs/CODE_DECISIONS_BY_PROVISION.md`, the third
+generated output. It answers a committee member who starts from a code, an
+edition and a provision. A decision appears in it only if it cites a provision:
+`not_applicable` and an empty `unverified` list are omitted and counted, never
+listed. Its rows come from the decision's own requirements:
+
+- a structured requirement makes one row per `governing` record, with its
+  `decided` text. Same-family governing records of other editions appear under
+  Other editions, and `incorporated-reference` and `related` records appear
+  under Other sources. Neither ever makes a row;
+- a legacy requirement with a citation list per code id makes one row per
+  edition. It has no `decided` text yet, so the decision-wide `summary` stands
+  in, marked **Transitional** and printed once per decision rather than on
+  every row;
+- a non-empty legacy `unverified` list appears only in the last section,
+  "Edition not yet attributed", with its recorded citations. It is never placed
+  under an edition.
+
+Rows sort by code, edition, the row's first provision (division, then the
+number read numerically, then Article before Table before Appendix note),
+decision number and requirement key. The counts are computed from the sources
+and never hardcoded, so a conversion moves a decision between sections without
+a code change.
+
 **The id grammar is `^D-\d+$`, unbounded.** `^D-\d{2}$` allowed exactly 100
 ids and D-01 through D-99 all existed, so the registry had run out (D-100
 through D-103 exist today); a fixed three
@@ -230,7 +256,7 @@ The test files `test_decisions_registry*.py` carry the same grammar and must
 move with it.
 
 ```bash
-python3 python/scripts/generate_decisions.py        # regenerate both outputs
+python3 python/scripts/generate_decisions.py        # regenerate all three outputs
 python3 python/scripts/generate_decisions.py --check
 cd python && python3 -m unittest \
   tests.necb.test_decisions_registry_sync \

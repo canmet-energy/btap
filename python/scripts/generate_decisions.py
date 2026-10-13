@@ -1,24 +1,29 @@
 #!/usr/bin/env python3
-"""Generate the decision registry and the authored decision log from the
-per-decision sources in ``docs/decisions/``.
+"""Generate the decision registry, the authored decision log and the Codes
+Committee provision view from the per-decision sources in ``docs/decisions/``.
 
 The sources are canonical (D-81). Each ``docs/decisions/D-NN.md`` carries TOML
 front matter -- the registry fields -- followed by the authored Markdown body,
-whose first line is the section's own ``## D-NN -- <heading>``. Two outputs are
-generated from them and are never hand-edited:
+whose first line is the section's own ``## D-NN -- <heading>``. Three outputs
+are generated from them and are never hand-edited:
 
 * ``python/btap/codes/data/decisions.json`` -- the runtime registry projection;
 * ``docs/necb_decisions.md`` -- the authored log, with its short anchors and
-  its index inserted mechanically.
+  its index inserted mechanically;
+* ``docs/CODE_DECISIONS_BY_PROVISION.md`` -- the Codes Committee view, ordered
+  by code, edition and provision, which lists only the decisions that cite a
+  provision (docs/plans/DECISION_APPLICABILITY_PLAN.md, Phase B).
 
-Both outputs are emitted in numeric decision-id order. That is the only
-ordering invariant a generator can hold: a decision has an initial ruling,
-later amendments, and occasionally an id reserved while another decision lands,
-so the order entries were authored in is not durable and is not claimed.
+The registry and the log are emitted in numeric decision-id order. That is the
+only ordering invariant a generator can hold for them: a decision has an
+initial ruling, later amendments, and occasionally an id reserved while another
+decision lands, so the order entries were authored in is not durable and is not
+claimed. The provision view is ordered by code, edition and provision instead,
+with the decision id as the tiebreak.
 
-``--check`` regenerates into memory and fails when either output has drifted.
-``--split`` is the one-time migration that built the sources from the two files
-that used to be maintained by hand. It is kept so the migration stays
+``--check`` regenerates into memory and fails when ANY of the three outputs has
+drifted. ``--split`` is the one-time migration that built the sources from the
+two files that used to be maintained by hand. It is kept so the migration stays
 reproducible and fails closed once the sources exist.
 
 A requirement under ``articles`` takes one of two forms, never both in one
@@ -43,12 +48,16 @@ reads.
 from __future__ import annotations
 
 import argparse
+import itertools
 import json
 import pathlib
+import posixpath
 import re
 import sys
 import tomllib
+import urllib.parse
 from pathlib import Path
+from typing import NamedTuple
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 PYTHON_DIR = REPO_ROOT / "python"
@@ -73,6 +82,7 @@ if not Path(btap_codes.__file__).resolve().is_relative_to(PYTHON_DIR / "btap"):
 SOURCE_DIR = REPO_ROOT / "docs" / "decisions"
 DOC = REPO_ROOT / "docs" / "necb_decisions.md"
 REGISTRY = REPO_ROOT / "python" / "btap" / "codes" / "data" / "decisions.json"
+PROVISION_VIEW = REPO_ROOT / "docs" / "CODE_DECISIONS_BY_PROVISION.md"
 
 PREAMBLE_FILE = "_preamble.md"
 META_FILE = "_meta.json"
@@ -1236,10 +1246,11 @@ DECISION_SHAPED_NAME_RE = re.compile(r"^d[-_ ]?\d", re.IGNORECASE)
 
 
 def stray_files(source_dir: Path = SOURCE_DIR):
-    """Entries in the canonical directory that reach NEITHER generated output.
+    """Entries in the canonical directory that reach NONE of the generated
+    outputs.
 
     A decision whose filename the `D-*.md` glob misses — `d-98.md`, `D-98.MD`,
-    `D98.md`, `D-98.markdown`, `sub/D-98.md` — is invisible to both outputs
+    `D98.md`, `D-98.markdown`, `sub/D-98.md` — is invisible to every output
     while `--check` reports up to date, so a whole decision can go missing with
     a green gate (Fable, PR #64).
 
@@ -1251,7 +1262,7 @@ def stray_files(source_dir: Path = SOURCE_DIR):
 
     Narrow by design: only `.md`/`.markdown` entries count, and dotfiles and
     editor backups never do. A `.DS_Store` is not a lost decision, and saying it
-    "would be silently omitted from both generated outputs" was false.
+    "would be silently omitted from the generated outputs" was false.
     """
     keep = {PREAMBLE_FILE, META_FILE} | {
         path.name for path in source_dir.glob("D-*.md")}
@@ -1341,13 +1352,13 @@ def read_sources(source_dir: Path = SOURCE_DIR):
     if unreached:
         raise ValueError(
             "{}: the canonical directory holds only {}, {} and D-NN.md; these "
-            "would reach NEITHER generated output: {}".format(
+            "would reach NONE of the generated outputs: {}".format(
                 source_dir, PREAMBLE_FILE, META_FILE, unreached))
     return preamble, entries, meta
 
 
 # --------------------------------------------------------------------------
-# Rendering the two outputs
+# Rendering the generated outputs
 # --------------------------------------------------------------------------
 
 def render_toc(entries: dict) -> str:
@@ -1378,14 +1389,515 @@ def render_registry(entries: dict, meta: dict) -> str:
     return json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
 
 
-def _generate(source_dir: Path):
+#: How a validated decision reaches the provision view. Only a recorded
+#: citation puts a decision in it, so the last class never appears.
+VIEW_STRUCTURED = "structured"      # its governing source records create rows
+VIEW_ESTABLISHED = "established"    # its legacy per-code-id lists create rows
+VIEW_UNATTRIBUTED = "unattributed"  # a non-empty legacy `unverified` list
+VIEW_OMITTED = "omitted"            # no citation at all
+
+#: Opens a "What was decided" cell that carries the decision-wide summary
+#: because the requirement has no decided text of its own yet.
+TRANSITIONAL_MARKER = "**Transitional**"
+
+
+def view_class(meta: dict) -> str:
+    """Where a validated decision belongs in the provision view.
+
+    ``not_applicable`` and an empty ``unverified`` list record no citation, so
+    the decision is omitted. A non-empty ``unverified`` list records citations
+    with no edition, so it is held in the last section and never attributed.
+    """
+    articles = meta["articles"]
+    if is_structured(articles):
+        return VIEW_STRUCTURED
+    if ARTICLES_NOT_APPLICABLE in articles:
+        return VIEW_OMITTED
+    if ARTICLES_UNVERIFIED in articles:
+        return VIEW_UNATTRIBUTED if articles[ARTICLES_UNVERIFIED] else VIEW_OMITTED
+    return VIEW_ESTABLISHED
+
+
+def provision_view_census(entries: dict) -> dict:
+    """How many decisions fall in each `view_class`."""
+    census = dict.fromkeys((VIEW_STRUCTURED, VIEW_ESTABLISHED,
+                            VIEW_UNATTRIBUTED, VIEW_OMITTED), 0)
+    for meta, _body in entries.values():
+        census[view_class(meta)] += 1
+    return census
+
+
+_NUMBER_PREFIX_RE = re.compile(r"\d+(?:\.\d+)*")
+
+
+def _natural(text: str) -> tuple:
+    """A sort key that reads digit runs as numbers, so ``8.4.4.9`` precedes
+    ``8.4.4.10``. Every element is ``(kind, number, text)``, so a number and a
+    piece of text are never compared with each other."""
+    pieces = re.split(r"(\d+)", text)
+    return tuple((0, int(piece), "") if index % 2 else (1, 0, piece)
+                 for index, piece in enumerate(pieces) if piece)
+
+
+def _parse_provision(value: str, family: str):
+    """The family's canonical `Citation` for an authored spelling, or None.
+
+    The established legacy lists predate the canonical grammar and spell two
+    shapes the parser refuses: a Table number with a trailing dot and an
+    Appendix note without its ``Note`` word. They are retried in canonical
+    form so that they ORDER correctly. The view always prints the authored
+    spelling.
+    """
+    text = " ".join(str(value).split())
+    attempts = [text]
+    if text.endswith("."):
+        attempts.append(text.rstrip("."))
+    if text.startswith("A-"):
+        attempts.append("Note " + text)
+    for attempt in attempts:
+        try:
+            return provisions.parse_citation(attempt, family=family)
+        except provisions.ProvisionError:
+            continue
+    return None
+
+
+def provision_key(value: str, family: str) -> tuple:
+    """Where one authored citation sorts within its code and edition.
+
+    Division A first, then the provision NUMBER read numerically, then its
+    kind: an Article with its Sentences, Clauses and Subclauses, then a Table
+    with its notes, then an Appendix note. An Article and a Table that share a
+    number are different provisions, so they stay adjacent and in that order.
+    A citation the family's grammar does not accept sorts last, by its text.
+    """
+    citation = _parse_provision(value, family)
+    if citation is None:
+        return (9, (1, _natural(value)), 9, (), value)
+    canonical = citation.canonical
+    if citation.kind in ("table", "table-note"):
+        group, rest = 1, canonical[len("Table "):]
+    elif citation.kind == "appendix-note":
+        group, rest = 2, canonical[len("Note A-"):]
+    else:
+        group, rest = 0, (canonical[len("Division A "):]
+                          if citation.division == "A" else canonical)
+    number = _NUMBER_PREFIX_RE.match(rest)
+    if number is None:
+        located, tail = (1, _natural(rest)), ()
+    else:
+        located = (0, _natural(number.group()))
+        tail = _natural(rest[number.end():])
+    return (0 if citation.division == "A" else 1, located, group, tail,
+            canonical)
+
+
+def _in_provision_order(citations, family: str) -> tuple:
+    return tuple(sorted(citations,
+                        key=lambda value: (provision_key(value, family), value)))
+
+
+def _edition_order(pair: tuple) -> tuple:
+    family, edition = pair
+    return (family, _natural(edition), edition)
+
+
+class ProvisionRow(NamedTuple):
+    """One requirement in one edition, as the provision view prints it.
+
+    A NamedTuple rather than a dataclass: the tests load this script by path
+    without registering the module, and a dataclass resolves its string
+    annotations through ``sys.modules`` and fails on such a load."""
+
+    family: str
+    edition: str
+    decision: str
+    requirement: str
+    label: str
+    citations: tuple          # authored spelling, in provision order
+    decided: str | None       # None: the legacy form has no decided text yet
+    other_editions: tuple     # ((edition, citations), ...), governing only
+    other_sources: tuple      # ((role, code, edition, references), ...)
+
+
+def _counterparts(governing: dict, family: str, edition: str) -> tuple:
+    """The same requirement's governing citations in the family's OTHER
+    editions. A governing record of another code family is its own row, so it
+    is not a counterpart."""
+    others = sorted((pair for pair in governing
+                     if pair[0] == family and pair[1] != edition),
+                    key=_edition_order)
+    return tuple((pair[1], _in_provision_order(governing[pair], family))
+                 for pair in others)
+
+
+def _established_rows(decision_id: str, meta: dict) -> list:
+    rows = []
+    for key, block in sorted(meta["articles"].items()):
+        governing = {}
+        for code_id, citations in block.items():
+            if code_id == "label":
+                continue
+            try:
+                ruleset = btap_codes.resolve(code_id)
+            except ValueError as exc:
+                raise ValueError(
+                    "{}: articles[{!r}] names {!r}, which is not a registered "
+                    "ruleset".format(decision_id, key, code_id)) from exc
+            governing[(ruleset.family, ruleset.edition)] = tuple(citations)
+        for (family, edition), citations in governing.items():
+            rows.append(ProvisionRow(
+                family, edition, decision_id, key, block["label"],
+                _in_provision_order(citations, family), None,
+                _counterparts(governing, family, edition), ()))
+    return rows
+
+
+def _structured_rows(decision_id: str, meta: dict) -> list:
+    """Only a ``governing`` record creates a row. Every other record of the
+    requirement is a cross-reference, printed under Other sources on each
+    row and never as a row of its own."""
+    rows = []
+    for key, block in sorted(meta["articles"].items()):
+        records = block["sources"]
+        governing = {(record["code"], record["edition"]):
+                     tuple(record["references"])
+                     for record in records if record["role"] == ROLE_GOVERNING}
+        cross_references = tuple(sorted(
+            ((record["role"], record["code"], record["edition"],
+              _in_provision_order(record["references"], record["code"]))
+             for record in records if record["role"] != ROLE_GOVERNING),
+            key=lambda item: (ROLES.index(item[0]), item[1],
+                              _natural(item[2]), item[2])))
+        for (family, edition), citations in governing.items():
+            rows.append(ProvisionRow(
+                family, edition, decision_id, key, block["label"],
+                _in_provision_order(citations, family), block["decided"],
+                _counterparts(governing, family, edition), cross_references))
+    return rows
+
+
+def _row_order(row: ProvisionRow) -> tuple:
+    """Code, edition, the row's first provision, decision number, then
+    requirement key. ``(decision, requirement, family, edition)`` is unique,
+    so the order is total."""
+    return (row.family, _natural(row.edition), row.edition,
+            min(provision_key(value, row.family) for value in row.citations),
+            int(row.decision.split("-")[1]), row.requirement)
+
+
+def provision_view_rows(entries: dict):
+    """``(rows, held)``: every primary row in view order, and the decisions
+    held under "Edition not yet attributed" as ``(id, title, kind,
+    citations)`` in numeric id order, citations as recorded."""
+    rows, held = [], []
+    for decision_id in numeric_order(entries):
+        meta = entries[decision_id][0]
+        kind = view_class(meta)
+        if kind == VIEW_STRUCTURED:
+            rows.extend(_structured_rows(decision_id, meta))
+        elif kind == VIEW_ESTABLISHED:
+            rows.extend(_established_rows(decision_id, meta))
+        elif kind == VIEW_UNATTRIBUTED:
+            held.append((decision_id, meta["title"], meta["kind"],
+                         tuple(meta["articles"][ARTICLES_UNVERIFIED])))
+    rows.sort(key=_row_order)
+    return rows, held
+
+
+_MARKUP_RE = re.compile(r"([\\`*_\[\]<>|~$&])")
+_ATX_OR_BULLET_RE = re.compile(r"^(?:#{1,6}|[+-])(?=\s|$)")
+_ORDERED_LIST_RE = re.compile(r"^\d{1,9}(?P<delimiter>[.)])(?=\s|$)")
+_HYPHEN_RULE_RE = re.compile(r"^-(?: *-){2,}$")
+
+
+def _literal(text) -> str:
+    """Authored prose as inert one-line Markdown in a cell or paragraph.
+
+    Flattening removes embedded block boundaries. Inline markup and HTML are
+    escaped everywhere; the remaining CommonMark prefixes that can act only
+    at line start are neutralized without escaping ordinary punctuation in
+    prose.
+    """
+    escaped = _MARKUP_RE.sub(r"\\\1", " ".join(str(text).split()))
+    if (_ATX_OR_BULLET_RE.match(escaped)
+            or _HYPHEN_RULE_RE.fullmatch(escaped)):
+        return "\\" + escaped
+    ordered = _ORDERED_LIST_RE.match(escaped)
+    if ordered is not None:
+        delimiter = ordered.start("delimiter")
+        return escaped[:delimiter] + "\\" + escaped[delimiter:]
+    return escaped
+
+
+def _code(text) -> str:
+    """An inline code span for a table cell, which its own content can neither
+    close nor split: the fence is longer than any backtick run inside it and
+    the pipe is escaped."""
+    flat = " ".join(str(text).split()).replace("|", "\\|")
+    longest = max((len(run) for run in re.findall(r"`+", flat)), default=0)
+    fence = "`" * (longest + 1)
+    pad = " " if flat.startswith("`") or flat.endswith("`") else ""
+    return fence + pad + flat + pad + fence
+
+
+def _document_url(doc_path: Path, provision_view_path: Path) -> str:
+    """POSIX relative URL from the provision view to the generated log."""
+    document = Path(doc_path).absolute().as_posix()
+    view_parent = Path(provision_view_path).absolute().parent.as_posix()
+    relative = posixpath.relpath(document, start=view_parent)
+    return urllib.parse.quote(relative, safe="/")
+
+
+def _decision_link(decision_id: str, document_url: str) -> str:
+    # The file name and the fragment are joined here, at runtime, so this
+    # source does not itself read as an inbound link to the decision log that
+    # the tree-wide short-link scan would then report as unresolved.
+    return "[{}]({}#{})".format(
+        decision_id, document_url, decision_id.lower())
+
+
+def _summary_anchor(decision_id: str) -> str:
+    return "transitional-summary-" + decision_id.lower()
+
+
+def _edition_label(family: str, edition: str, runtime: dict) -> str:
+    code_id = runtime.get((family, edition))
+    if code_id is not None:
+        try:
+            return btap_codes.resolve(code_id).label
+        except ValueError:
+            pass
+    return "{} {}".format(family, edition)
+
+
+def _code_name(family: str, runtime: dict) -> str:
+    """The family's display name: its first registered edition's label without
+    the edition, such as ``NECB``."""
+    for pair in sorted((pair for pair in runtime if pair[0] == family),
+                       key=_edition_order):
+        try:
+            label = btap_codes.resolve(runtime[pair]).label
+        except ValueError:
+            break
+        suffix = " " + pair[1]
+        return label[:-len(suffix)] if label.endswith(suffix) else label
+    return family.upper()
+
+
+_VIEW_HEAD = """\
+# Codes Committee view: decisions by code, edition and provision
+
+> **This file is GENERATED. Do not edit it.** It is written by
+> `python3 python/scripts/generate_decisions.py` from the front matter of the
+> canonical decision files, `docs/decisions/D-NN.md`. The same command with
+> `--check` is the drift gate, and the path-unfiltered `decisions` workflow
+> runs it on every push and pull request.
+
+Start with a code, an edition and a provision. A row names the decision that
+interprets or implements it, what that decision decided, the counterpart in
+the code's other editions, and the other codes and standards the requirement
+touches. Every decision id links to its authored narrative in
+[necb_decisions.md]({document_url}).
+
+Citations are identifiers and every decision is a paraphrase. This file
+reproduces no Code text.
+
+## Scope
+
+Only a decision that cites at least one provision appears here. A decision
+that cites none is omitted rather than listed empty; it stays in the registry
+and in [necb_decisions.md]({document_url}).
+"""
+
+_VIEW_DEFINITIONS = """\
+## Definitions
+
+### Source
+
+Every row is generated from the front matter of one canonical decision file,
+`docs/decisions/D-NN.md`: its requirement keys and labels, its citations or
+source records, and its decided text. Nothing is authored in this file. To
+change a row, edit that decision file and regenerate.
+
+### Provenance
+
+How a citation reached this file, and what was checked:
+
+- **Structured source records.** Each NECB reference is validated offline
+  against its edition's provision index,
+  `python/btap/codes/necb/data/<code id>/coverage/provisions.json`, which is
+  built from authorized Codes-service payloads retained under the same
+  edition's `provenance/` directory. A source that no registered index covers
+  is carried as authored.
+- **Established legacy mappings.** Each citation must match the citation
+  grammar, and a Section 8.4 citation must also exist in its edition's
+  `coverage/articles_8_4.json`. A citation outside Section 8.4 is carried as
+  authored.
+- **Not yet attributed.** Citations are recorded as authored and checked
+  against nothing.
+
+### Status
+
+| Status | Where it appears | Meaning |
+|---|---|---|
+| Governing | A primary row under its code and edition | The source record that establishes the provision for that edition. Only this role creates a primary row. |
+| Incorporated reference, related | Other sources | A cross-reference to a code or standard. It never establishes where a decision applies and never creates a primary row. |
+| Transitional | A primary row whose decided text is marked Transitional | The edition and the exact citations are an established mapping, but the requirement has no decided text of its own yet. The decision-wide summary stands in for it, printed once under Transitional decision summaries, until the decision is converted to the structured form. |
+| Not yet attributed | Edition not yet attributed, the last section | The decision records citations but no edition has been established for them. It is never placed under an edition. |
+
+### Reading a row
+
+A row is one requirement in one edition. **Provision** lists that
+requirement's citations in the spelling the decision records. **Other
+editions** lists the governing citations of the same requirement in the
+code's other editions. **Other sources** lists incorporated and related
+references.
+
+Rows are ordered by code, then edition, then the row's first provision, then
+decision number, then requirement key. A provision orders by division, then its
+number read numerically (8.4.4.9 before 8.4.4.10), then its kind: an Article
+with its Sentences, Clauses and Subclauses, then a Table with its notes, then
+an Appendix note. An Article and a Table that share a number are different
+provisions and stay adjacent.
+"""
+
+_ROW_HEADER = ("| Provision | Decision | Requirement | What was decided | "
+               "Other editions | Other sources |")
+_ROW_RULE = "|---|---|---|---|---|---|"
+
+
+def _scope_lines(census: dict) -> list:
+    included = (census[VIEW_STRUCTURED] + census[VIEW_ESTABLISHED]
+                + census[VIEW_UNATTRIBUTED])
+    table = (
+        ("Decisions with concrete rows from structured source records",
+         census[VIEW_STRUCTURED]),
+        ("Decisions with concrete rows from an established legacy mapping",
+         census[VIEW_ESTABLISHED]),
+        ("Decisions held under Edition not yet attributed",
+         census[VIEW_UNATTRIBUTED]),
+        ("Decisions included in this view", included),
+        ("Decisions omitted because they cite no provision",
+         census[VIEW_OMITTED]),
+        ("All decisions", included + census[VIEW_OMITTED]),
+    )
+    return ["", "| Group of decisions | Decisions |", "|---|---:|",
+            *("| {} | {} |".format(name, count) for name, count in table)]
+
+
+def _row_line(row: ProvisionRow, titles: dict, runtime: dict,
+              document_url: str) -> str:
+    if row.decided is None:
+        decided = ("{}: decision-wide summary, not this requirement's own "
+                   "decision. [Summary](#{})".format(
+                       TRANSITIONAL_MARKER, _summary_anchor(row.decision)))
+    else:
+        decided = _literal(row.decided)
+    editions = "<br>".join(
+        "{}: {}".format(_literal(_edition_label(row.family, edition, runtime)),
+                        ", ".join(_code(value) for value in citations))
+        for edition, citations in row.other_editions) or EM_DASH
+    sources = "<br>".join(
+        "*{}* {}: {}".format(
+            role, _literal(_edition_label(code, edition, runtime)),
+            ", ".join(_code(value) for value in references))
+        for role, code, edition, references in row.other_sources) or EM_DASH
+    cells = ("<br>".join(_code(value) for value in row.citations),
+             "{} {}".format(_decision_link(row.decision, document_url),
+                            _literal(titles[row.decision])),
+             "{}<br>{}".format(_literal(row.label), _code(row.requirement)),
+             decided, editions, sources)
+    return "| " + " | ".join(cells) + " |"
+
+
+def render_provision_view(entries: dict, document_url: str | None = None) -> str:
+    """`CODE_DECISIONS_BY_PROVISION.md`, a pure function of the validated
+    entries so that `--check` can compare it byte for byte.
+
+    The registry `summary` of a legacy decision covers the WHOLE decision and
+    runs to thousands of characters, so it is printed once per decision under
+    "Transitional decision summaries" and each of that decision's rows points
+    there, rather than repeating it on every row.
+    """
+    if document_url is None:
+        document_url = _document_url(DOC, PROVISION_VIEW)
+    rows, held = provision_view_rows(entries)
+    runtime = runtime_editions()
+    titles = {decision_id: meta["title"]
+              for decision_id, (meta, _body) in entries.items()}
+    lines = [*_VIEW_HEAD.format(document_url=document_url).splitlines(),
+             *_scope_lines(provision_view_census(entries)), "",
+             *_VIEW_DEFINITIONS.splitlines(), ""]
+
+    if not rows:
+        lines += ["No decision has a concrete provision row yet.", ""]
+    for family, family_rows in itertools.groupby(rows, key=lambda r: r.family):
+        lines += ["## " + _literal(_code_name(family, runtime)), ""]
+        for edition, edition_rows in itertools.groupby(
+                family_rows, key=lambda r: r.edition):
+            code_id = runtime.get((family, edition))
+            heading = _literal(_edition_label(family, edition, runtime))
+            if code_id is not None:
+                heading += " (code id {})".format(_code(code_id))
+            lines += ["### " + heading, "", _ROW_HEADER, _ROW_RULE]
+            lines += [_row_line(row, titles, runtime, document_url)
+                      for row in edition_rows]
+            lines.append("")
+
+    transitional = [decision_id for decision_id in numeric_order(entries)
+                    if view_class(entries[decision_id][0]) == VIEW_ESTABLISHED]
+    if transitional:
+        lines += [
+            "## Transitional decision summaries", "",
+            "A row marked **Transitional** has no decided text of its own yet, "
+            "so it points here.",
+            "Each summary below is the decision-wide paraphrase from the "
+            "registry, printed once because it covers the whole decision and "
+            "would otherwise repeat on every row. It is not a per-requirement "
+            "decision.", ""]
+        for decision_id in transitional:
+            meta = entries[decision_id][0]
+            lines += ['<a id="{}"></a>'.format(_summary_anchor(decision_id)),
+                      "", "**{}** {} {}".format(
+                          _decision_link(decision_id, document_url), EM_DASH,
+                          _literal(meta["title"])),
+                      "", _literal(meta["summary"]), ""]
+
+    lines += [
+        "## Edition not yet attributed", "",
+        "These decisions record citations, but no edition has been "
+        "established for them, so none is guessed: they appear here and "
+        "under no code or edition. The citations are listed as recorded and "
+        "are checked against nothing. A decision leaves this table when it "
+        "is converted to the structured form, with an edition and a role for "
+        "every source.", ""]
+    if held:
+        lines += ["| Decision | Title | Kind | Recorded citations |",
+                  "|---|---|---|---|"]
+        lines += ["| {} | {} | {} | {} |".format(
+                      _decision_link(decision_id, document_url), _literal(title),
+                      _code(kind), ", ".join(_code(value) for value in values))
+                  for decision_id, title, kind, values in held]
+    else:
+        lines.append("No decision is waiting for an edition attribution.")
+    return "\n".join(lines).rstrip("\n") + "\n"
+
+
+def _generate(source_dir: Path, doc_path: Path = DOC,
+              provision_view_path: Path = PROVISION_VIEW):
     preamble, entries, meta = read_sources(source_dir)
-    return render_doc(preamble, entries), render_registry(entries, meta), entries
+    document_url = _document_url(doc_path, provision_view_path)
+    return (render_doc(preamble, entries), render_registry(entries, meta),
+            render_provision_view(entries, document_url), entries)
 
 
-def generate(source_dir: Path = SOURCE_DIR):
-    doc, registry, _ = _generate(source_dir)
-    return doc, registry
+def generate(source_dir: Path = SOURCE_DIR, *, doc_path: Path = DOC,
+             provision_view_path: Path = PROVISION_VIEW):
+    """``(document, registry, provision view)``, in memory."""
+    doc, registry, provision_view, _ = _generate(
+        source_dir, doc_path, provision_view_path)
+    return doc, registry, provision_view
 
 
 def print_notes(entries: dict) -> None:
@@ -1485,20 +1997,23 @@ def run_split(args) -> int:
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true",
-                        help="fail when either generated output has drifted")
+                        help="fail when any generated output has drifted")
     parser.add_argument("--split", action="store_true",
                         help="one-time migration: build the sources from the "
                              "hand-maintained document and registry")
     parser.add_argument("--source-dir", type=Path, default=SOURCE_DIR)
     parser.add_argument("--doc", type=Path, default=DOC)
     parser.add_argument("--registry", type=Path, default=REGISTRY)
+    parser.add_argument("--provision-view", type=Path, default=PROVISION_VIEW)
     args = parser.parse_args(argv)
 
     if args.split:
         return run_split(args)
 
-    doc, registry, entries = _generate(args.source_dir)
-    outputs = ((args.doc, doc), (args.registry, registry))
+    doc, registry, provision_view, entries = _generate(
+        args.source_dir, args.doc, args.provision_view)
+    outputs = ((args.doc, doc), (args.registry, registry),
+               (args.provision_view, provision_view))
     if args.check:
         stale = [path.name for path, fresh in outputs
                  if path.read_text(encoding="utf-8") != fresh]
@@ -1506,12 +2021,13 @@ def main(argv=None) -> int:
             print("decisions: STALE {} - run python3 python/scripts/"
                   "generate_decisions.py".format(", ".join(stale)), file=sys.stderr)
             return 1
-        print("decisions: both generated outputs are up to date")
+        print("decisions: all three generated outputs are up to date")
         print_notes(entries)
         return 0
     for path, fresh in outputs:
         path.write_text(fresh, encoding="utf-8")
-    print("decisions: wrote {} and {}".format(args.doc.name, args.registry.name))
+    print("decisions: wrote {}, {} and {}".format(
+        args.doc.name, args.registry.name, args.provision_view.name))
     print_notes(entries)
     return 0
 

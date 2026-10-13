@@ -1,4 +1,5 @@
-"""The decision generator's own behaviour: parser, TOML writer, validation.
+"""The decision generator's own behaviour: parser, TOML writer, validation
+and the Codes Committee provision view.
 
 ``test_decisions_registry_sync.py`` gates the repository's committed state.
 This module attacks the machinery instead, on synthetic sources, so that each
@@ -13,11 +14,13 @@ import copy
 import importlib.util
 import io
 import json
+import re
 import sys
 import tempfile
 import tomllib
 import types
 import unittest
+import urllib.parse
 from pathlib import Path
 from unittest import mock
 
@@ -581,7 +584,7 @@ class TestRendering(unittest.TestCase):
 
     def test_sources_are_emitted_in_id_order_whatever_order_they_are_read_in(self):
         directory = self.build(["D-09", "D-10", "D-02"])
-        doc, registry = G.generate(directory)
+        doc, registry, _ = G.generate(directory)
         self.assertEqual(["D-02", "D-09", "D-10"],
                          [e["id"] for e in json.loads(registry)["decisions"]])
         self.assertLess(doc.index("## D-02"), doc.index("## D-09"))
@@ -601,13 +604,13 @@ class TestRendering(unittest.TestCase):
 
     def test_each_section_is_its_anchor_then_its_untouched_body(self):
         directory = self.build(["D-02", "D-09"])
-        doc, _ = G.generate(directory)
+        doc, _, _ = G.generate(directory)
         self.assertIn('<a id="d-02"></a>\n\n## D-02 {} Heading for D-02\n\n'
                       'Body of D-02.\n'.format(EM), doc)
 
     def test_the_index_lists_the_front_matter_title_not_the_heading(self):
         directory = self.build(["D-02"])
-        doc, _ = G.generate(directory)
+        doc, _, _ = G.generate(directory)
         index = doc.split(G.BEGIN_MARK)[1].split(G.END_MARK)[0]
         self.assertIn("Title for D-02", index)
         self.assertNotIn("Heading for D-02", index)
@@ -777,6 +780,11 @@ class TestCheckReportsStaleWithoutWriting(unittest.TestCase):
     It matters because `--check` is documented in CLAUDE.md, DEVELOPERS.md and
     the multi-edition plan as a standalone local gate, run as a one-liner
     WITHOUT the pytest modules that redundantly cover the same invariant.
+
+    There are three outputs: the registry, the decision log and the Codes
+    Committee provision view. Every one of them must be in the check set, so
+    each is tampered with on its own below; dropping any one from `--check`
+    fails a test.
     """
 
     def scratch(self):
@@ -786,6 +794,10 @@ class TestCheckReportsStaleWithoutWriting(unittest.TestCase):
         guard refuses anything in the canonical directory that the `D-*.md`
         glob does not reach, and it caught this test's first draft writing
         `doc.md` and `registry.json` in there. Production keeps them apart too.
+
+        All three output paths are passed. A run that omits `--provision-view`
+        writes the REAL `docs/CODE_DECISIONS_BY_PROVISION.md` from a synthetic
+        source set, so no helper here may leave it to its default.
         """
         root = Path(tempfile.mkdtemp())
         directory, outputs = root / "sources", root / "outputs"
@@ -797,55 +809,183 @@ class TestCheckReportsStaleWithoutWriting(unittest.TestCase):
         (directory / G.META_FILE).write_text(
             json.dumps({"registry_comment": ["generated"]}) + "\n",
             encoding="utf-8")
-        doc, registry = outputs / "doc.md", outputs / "registry.json"
+        doc, registry, view = (outputs / "doc.md", outputs / "registry.json",
+                               outputs / "view.md")
         with contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(0, G.main(["--source-dir", str(directory),
                                         "--doc", str(doc),
-                                        "--registry", str(registry)]))
-        return directory, doc, registry
+                                        "--registry", str(registry),
+                                        "--provision-view", str(view)]))
+        return directory, doc, registry, view
 
-    def check(self, directory, doc, registry):
-        """``--check``'s exit code, with its reporting captured."""
+    def check_report(self, directory, doc, registry, view):
+        """``(exit code, stderr)`` of ``--check``, with stdout discarded."""
+        stderr = io.StringIO()
         with contextlib.redirect_stdout(io.StringIO()), \
-                contextlib.redirect_stderr(io.StringIO()):
-            return G.main(self.args(directory, doc, registry))
+                contextlib.redirect_stderr(stderr):
+            code = G.main(self.args(directory, doc, registry, view))
+        return code, stderr.getvalue()
 
-    def args(self, directory, doc, registry):
+    def check(self, directory, doc, registry, view):
+        """``--check``'s exit code, with its reporting captured."""
+        return self.check_report(directory, doc, registry, view)[0]
+
+    def args(self, directory, doc, registry, view):
         return ["--check", "--source-dir", str(directory),
-                "--doc", str(doc), "--registry", str(registry)]
+                "--doc", str(doc), "--registry", str(registry),
+                "--provision-view", str(view)]
 
     def test_check_passes_when_in_step(self):
-        directory, doc, registry = self.scratch()
-        self.assertEqual(0, self.check(directory, doc, registry))
+        directory, doc, registry, view = self.scratch()
+        self.assertEqual(0, self.check(directory, doc, registry, view))
+
+    def test_write_mode_writes_all_three_outputs_from_one_generation(self):
+        directory, doc, registry, view = self.scratch()
+        fresh_doc, fresh_registry, fresh_view = G.generate(
+            directory, doc_path=doc, provision_view_path=view)
+        self.assertEqual(fresh_doc, doc.read_text(encoding="utf-8"))
+        self.assertEqual(fresh_registry, registry.read_text(encoding="utf-8"))
+        self.assertEqual(fresh_view, view.read_text(encoding="utf-8"))
+
+    def test_a_scratch_run_leaves_the_committed_view_alone(self):
+        before = G.PROVISION_VIEW.read_bytes()
+        self.scratch()
+        self.assertEqual(before, G.PROVISION_VIEW.read_bytes(),
+                         "a scratch run must not write the committed "
+                         "docs/CODE_DECISIONS_BY_PROVISION.md")
 
     def test_a_hand_edited_document_reports_stale_and_is_not_rewritten(self):
-        directory, doc, registry = self.scratch()
+        directory, doc, registry, view = self.scratch()
         tampered = doc.read_text(encoding="utf-8") + "a hand edit\n"
         doc.write_text(tampered, encoding="utf-8")
         before = doc.read_bytes()
 
-        self.assertEqual(1, self.check(directory, doc, registry),
+        self.assertEqual(1, self.check(directory, doc, registry, view),
                          "--check must return 1 on drift")
         self.assertEqual(before, doc.read_bytes(),
                          "--check must not rewrite the file it is checking")
 
     def test_a_hand_edited_registry_reports_stale_and_is_not_rewritten(self):
-        directory, doc, registry = self.scratch()
+        directory, doc, registry, view = self.scratch()
         data = json.loads(registry.read_text(encoding="utf-8"))
         data["decisions"][0]["title"] = "tampered"
         registry.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
         before = registry.read_bytes()
 
-        self.assertEqual(1, self.check(directory, doc, registry))
+        self.assertEqual(1, self.check(directory, doc, registry, view))
         self.assertEqual(before, registry.read_bytes())
+
+    def test_a_hand_edited_provision_view_reports_stale_and_is_not_rewritten(self):
+        directory, doc, registry, view = self.scratch()
+        view.write_text(view.read_text(encoding="utf-8") + "a hand edit\n",
+                        encoding="utf-8")
+        before = view.read_bytes()
+
+        self.assertEqual(1, self.check(directory, doc, registry, view),
+                         "--check must compare the provision view too")
+        self.assertEqual(before, view.read_bytes(),
+                         "--check must not rewrite the file it is checking")
+
+    def test_every_output_is_in_the_check_set_and_is_named_when_stale(self):
+        """Tamper with ONE output at a time. Removing any output from the set
+        `--check` compares turns its case into a pass, so this fails; and the
+        report must name that output and no other."""
+        for index, name in enumerate(("doc", "registry", "provision view")):
+            with self.subTest(output=name):
+                directory, *outputs = self.scratch()
+                target = outputs[index]
+                target.write_text(target.read_text(encoding="utf-8") + " \n",
+                                  encoding="utf-8")
+                code, report = self.check_report(directory, *outputs)
+                self.assertEqual(1, code)
+                self.assertIn("STALE " + target.name, report)
+                for other in outputs:
+                    if other is not target:
+                        self.assertNotIn(other.name, report)
+
+    def test_every_stale_output_is_reported_together(self):
+        directory, *outputs = self.scratch()
+        for path in outputs:
+            path.write_text(path.read_text(encoding="utf-8") + " \n",
+                            encoding="utf-8")
+        code, report = self.check_report(directory, *outputs)
+        self.assertEqual(1, code)
+        for path in outputs:
+            self.assertIn(path.name, report)
 
     def test_a_missing_output_fails_closed(self):
         """It raises rather than reporting stale. Documented, not relied upon:
         the exit is non-zero either way, but a reader should know which."""
-        directory, doc, registry = self.scratch()
+        directory, doc, registry, view = self.scratch()
         doc.unlink()
         with self.assertRaises(FileNotFoundError):
-            self.check(directory, doc, registry)
+            self.check(directory, doc, registry, view)
+
+    def test_a_missing_provision_view_fails_closed(self):
+        directory, doc, registry, view = self.scratch()
+        view.unlink()
+        with self.assertRaises(FileNotFoundError):
+            self.check(directory, doc, registry, view)
+
+
+class TestOutputOverrideLinks(unittest.TestCase):
+    """The provision view links to the actual ``--doc`` output."""
+
+    LINK = re.compile(r"\[[^\]\n]+\]\(([^)\n]+)\)")
+
+    def render(self, doc_relative, view_relative):
+        scratch = tempfile.TemporaryDirectory()
+        self.addCleanup(scratch.cleanup)
+        root = Path(scratch.name)
+        sources = root / "sources"
+        sources.mkdir()
+        write(sources)
+        (sources / G.PREAMBLE_FILE).write_text("# Log\n", encoding="utf-8")
+        (sources / G.META_FILE).write_text(
+            '{"registry_comment": []}\n', encoding="utf-8")
+
+        doc = root / doc_relative
+        registry = root / "registry" / "decisions.json"
+        view = root / view_relative
+        for output in (doc, registry, view):
+            output.parent.mkdir(parents=True, exist_ok=True)
+        with contextlib.redirect_stdout(io.StringIO()):
+            code = G.main([
+                "--source-dir", str(sources),
+                "--doc", str(doc),
+                "--registry", str(registry),
+                "--provision-view", str(view),
+            ])
+        self.assertEqual(0, code)
+        return doc, view, view.read_text(encoding="utf-8")
+
+    def assert_document_targets(self, doc, view, rendered, expected_url):
+        destinations = [
+            destination for destination in self.LINK.findall(rendered)
+            if not destination.startswith("#")
+        ]
+        self.assertEqual(
+            {expected_url, expected_url + "#d-01"}, set(destinations))
+        self.assertNotIn("\\", expected_url)
+        for destination in destinations:
+            relative = urllib.parse.unquote(destination.split("#", 1)[0])
+            self.assertEqual(
+                doc.resolve(), (view.parent / relative).resolve(),
+                destination)
+
+    def test_same_directory_overrides_use_the_doc_file_name(self):
+        doc, view, rendered = self.render(
+            Path("same") / "decision-log.md",
+            Path("same") / "by-provision.md")
+        self.assert_document_targets(
+            doc, view, rendered, "decision-log.md")
+
+    def test_different_directory_overrides_use_a_posix_relative_url(self):
+        doc, view, rendered = self.render(
+            Path("documents") / "decision log.md",
+            Path("views") / "committee" / "by-provision.md")
+        self.assert_document_targets(
+            doc, view, rendered, "../../documents/decision%20log.md")
 
 
 class TestSplitIsNotAWriter(unittest.TestCase):
@@ -1530,7 +1670,7 @@ class TestSchemaTwoRegistry(unittest.TestCase):
         (cls.directory / G.META_FILE).write_text(
             json.dumps({"registry_comment": ["generated"]}) + "\n",
             encoding="utf-8")
-        _, registry = G.generate(cls.directory)
+        _, registry, _ = G.generate(cls.directory)
         cls.payload = json.loads(registry)
         cls.by_id = {entry["id"]: entry for entry in cls.payload["decisions"]}
 
@@ -1701,7 +1841,8 @@ class TestUnvalidatedSourcesAreNamed(unittest.TestCase):
         (sources / G.META_FILE).write_text('{"registry_comment": []}\n',
                                            encoding="utf-8")
         argv = ["--source-dir", str(sources), "--doc", str(outputs / "doc.md"),
-                "--registry", str(outputs / "registry.json")]
+                "--registry", str(outputs / "registry.json"),
+                "--provision-view", str(outputs / "view.md")]
         for args in (argv, ["--check", *argv]):
             out = io.StringIO()
             with contextlib.redirect_stdout(out), \
@@ -1761,6 +1902,778 @@ class TestTheProvisionIndexIsThisCheckouts(unittest.TestCase):
             with self.assertRaises(ImportError) as caught:
                 self.load("generate_decisions_other_tree")
         self.assertIn("must validate against", str(caught.exception))
+
+
+# --------------------------------------------------------------------------
+# The Codes Committee provision view, docs/CODE_DECISIONS_BY_PROVISION.md.
+#
+# Each test writes its own decision sources, reads them back through the
+# generator's reader (so the TOML writer, the parser and every validation
+# run) and renders the view from the result. What a row must say is written
+# out here by hand. It is never computed with the code under test, or a test
+# would agree with a mistake in it.
+# --------------------------------------------------------------------------
+
+#: A table cell separator: a pipe the generator did not escape.
+CELL_SPLIT = re.compile(r"(?<!\\)\|")
+DECISION_ID = re.compile(r"\bD-\d+\b")
+#: A link into the decision log. The file name and the fragment are joined at
+#: RUNTIME, so this module does not itself read as an inbound link for the
+#: tree-wide short-link scan.
+LOG_LINK = re.compile(r"\]\(" + re.escape(G.DOC.name) + r"#(d-\d+)\)")
+SUMMARY_ANCHOR = re.compile(
+    r'^<a id="transitional-summary-(d-\d+)"></a>$', re.MULTILINE)
+NOT_ATTRIBUTED = "Edition not yet attributed"
+TRANSITIONAL_HEADING = "Transitional decision summaries"
+#: The `##` sections that are not a code family.
+VIEW_SECTIONS = ("Scope", "Definitions", TRANSITIONAL_HEADING, NOT_ATTRIBUTED)
+NECB_2020 = "NECB 2020 (code id `necb2020`)"
+NECB_2025 = "NECB 2025 (code id `necb2025`)"
+TRANSITIONAL = ("**Transitional**: decision-wide summary, not this "
+                "requirement's own decision. [Summary](#transitional-summary-{})")
+NO_ROWS = "No decision has a concrete provision row yet."
+NO_HELD = "No decision is waiting for an edition attribution."
+
+
+def log_link(decision_id):
+    return "[{}]({}#{})".format(decision_id, G.DOC.name, decision_id.lower())
+
+
+def view_rows(view):
+    """``(section, heading, cells)`` for every table body row, where
+    ``section`` is the `##` heading and ``heading`` the `###` one."""
+    section = heading = ""
+    rows = []
+    for line in view.splitlines():
+        if line.startswith("### "):
+            heading = line[4:]
+        elif line.startswith("## "):
+            section, heading = line[3:], ""
+        elif line.startswith("|---"):
+            rows.pop()          # the header row this rule underlines
+        elif line.startswith("|"):
+            rows.append((section, heading,
+                         [cell.strip() for cell in CELL_SPLIT.split(line)[1:-1]]))
+    return rows
+
+
+def code_spans(cell):
+    return re.findall(r"`([^`]+)`", cell)
+
+
+def unescape(text):
+    """The text a Markdown reader sees once backslash escapes are applied."""
+    return re.sub(r"\\(.)", r"\1", text)
+
+
+#: Requirement blocks in the legacy form. Every citation validates against
+#: its edition's committed Section 8.4 text, so the validated path runs.
+PUMP = {"label": "Hydronic pump power", "necb2020": ["8.4.4.14."]}
+MULTI = {"label": "Multi-energy heating allocation",
+         "necb2020": ["8.4.4.9.(6)", "8.4.4.9.(4)", "8.4.4.9.(5)"],
+         "necb2025": ["8.4.5.9.(6)", "8.4.5.9.(4)", "8.4.5.9.(5)"]}
+
+
+def legacy(decision_id, blocks, title, summary=None, kind="runtime"):
+    """A decision in the legacy form: requirement key -> {label, code id ->
+    citations}. `editions` is the code ids its blocks cite."""
+    return {"id": decision_id, "title": title, "kind": kind,
+            "articles": copy.deepcopy(blocks),
+            "editions": sorted({code for block in blocks.values()
+                                for code in block if code != "label"}),
+            "summary": summary or "Summary of " + title}
+
+
+def held(decision_id, title, citations, kind="runtime"):
+    """Citations recorded with no edition: the `unverified` holding list."""
+    return {"id": decision_id, "title": title, "kind": kind,
+            "articles": {"unverified": list(citations)},
+            "editions": ["unverified"], "summary": "Held summary: " + title}
+
+
+def omitted(decision_id, title, how, kind="process"):
+    """A decision that cites nothing: `not_applicable`, or an empty
+    `unverified` list."""
+    return {"id": decision_id, "title": title, "kind": kind,
+            "articles": {how: []}, "editions": [how],
+            "summary": "Omitted summary: " + title}
+
+
+def governing_2020_only(meta):
+    """Governing in NECB 2020 alone: NECB 2025 is only related and
+    incorporated, and neither role makes it an edition of the requirement."""
+    requirement(meta)["sources"] = [
+        {"code": "necb", "edition": "2020", "role": "governing",
+         "references": ["8.4.4.13.(1)"]},
+        {"code": "necb", "edition": "2025", "role": "related",
+         "references": ["Table 8.4.5.7.-B"]},
+        {"code": "necb", "edition": "2025", "role": "incorporated-reference",
+         "references": ["8.4.5.13.(1)"]},
+        {"code": "ashrae-62.1", "edition": "2016",
+         "role": "incorporated-reference", "references": ["6.2.2.1"]},
+    ]
+
+
+def second_requirement(meta):
+    """A second requirement, earlier in the Code than the default one and
+    with its own decided text."""
+    meta["articles"]["second_requirement"] = {
+        "label": "Second requirement",
+        "decided": "The second requirement's own decided text.",
+        "sources": [
+            {"code": "necb", "edition": "2020", "role": "governing",
+             "references": ["8.4.4.7.(2)"]},
+            {"code": "necb", "edition": "2025", "role": "governing",
+             "references": ["8.4.5.7.(2)"]}]}
+
+
+class ProvisionViewCase(unittest.TestCase):
+    """Scratch decision sources in, the rendered provision view out."""
+
+    def entries(self, *metas):
+        scratch = tempfile.TemporaryDirectory()
+        self.addCleanup(scratch.cleanup)
+        root = Path(scratch.name)
+        (root / G.PREAMBLE_FILE).write_text("# Log\n", encoding="utf-8")
+        (root / G.META_FILE).write_text('{"registry_comment": []}\n',
+                                        encoding="utf-8")
+        for meta in metas:
+            write(root, meta=meta, body=GOOD_BODY.replace("D-01", meta["id"]))
+        return G.read_sources(root)[1]
+
+    def view(self, *metas):
+        return G.render_provision_view(self.entries(*metas))
+
+    @staticmethod
+    def edition_rows(view):
+        """``(heading, cells)`` for each row under a code's edition heading."""
+        return [(heading, cells) for section, heading, cells in view_rows(view)
+                if section not in VIEW_SECTIONS]
+
+    @staticmethod
+    def held_rows(view):
+        return [cells for section, _heading, cells in view_rows(view)
+                if section == NOT_ATTRIBUTED]
+
+    @staticmethod
+    def scope_counts(view):
+        """The Scope table's counts in its order: structured, established,
+        held, included, omitted, all."""
+        return [int(cells[1]) for section, _heading, cells in view_rows(view)
+                if section == "Scope"]
+
+    @staticmethod
+    def sections(view):
+        return [line[3:] for line in view.splitlines() if line.startswith("## ")]
+
+    def row(self, view, heading, decision_id, key=None):
+        found = [cells for found_heading, cells in self.edition_rows(view)
+                 if found_heading == heading
+                 and LOG_LINK.search(cells[1]).group(1) == decision_id.lower()
+                 and (key is None or code_spans(cells[2])[-1] == key)]
+        self.assertEqual(1, len(found), (heading, decision_id, key))
+        return found[0]
+
+    def order(self, view, heading):
+        """``(decision, requirement key)`` of each row under `heading`, in the
+        order the view prints them."""
+        return [(LOG_LINK.search(cells[1]).group(1), code_spans(cells[2])[-1])
+                for found_heading, cells in self.edition_rows(view)
+                if found_heading == heading]
+
+
+class TestWhichDecisionsReachTheView(ProvisionViewCase):
+    """A decision that records no citation is left out, whichever way it
+    records none. One that records citations but no edition is held apart and
+    never placed under an edition. The ids are chosen so that numeric order
+    and text order differ."""
+
+    INCLUDED = {"D-1", "D-2", "D-9", "D-20", "D-30", "D-100"}
+    OMITTED = ("D-4", "D-5", "D-6", "D-7")
+
+    def tree(self):
+        return (
+            legacy("D-1", {"multi_energy_heating": MULTI}, "Multi-energy title",
+                   "Multi-energy summary."),
+            legacy("D-20", {"hydronic_pumps": PUMP}, "Pump title", "Pump summary."),
+            structured(id="D-2", title="Structured title",
+                       summary="Structured summary."),
+            held("D-100", "Held hundred", ["8.4.5.9.(4)", "Table 8.4.4.7.-A"],
+                 kind="data"),
+            held("D-30", "Held thirty", ["4.2.1.6."]),
+            held("D-9", "Held nine", ["8.4.4.9.(1)"], kind="runtime_unwired"),
+            omitted("D-4", "Omitted four", "not_applicable"),
+            omitted("D-5", "Omitted five", "not_applicable"),
+            omitted("D-6", "Omitted six", "unverified", kind="runtime"),
+            omitted("D-7", "Omitted seven", "unverified", kind="data"),
+        )
+
+    def test_the_scope_table_counts_each_group(self):
+        self.assertEqual([1, 2, 3, 6, 4, 10],
+                         self.scope_counts(self.view(*self.tree())))
+
+    def test_the_counts_follow_the_sources(self):
+        view = self.view(
+            legacy("D-20", {"hydronic_pumps": PUMP}, "Pump title", "Pump summary."),
+            omitted("D-4", "Omitted four", "not_applicable"))
+        self.assertEqual([0, 1, 0, 1, 1, 2], self.scope_counts(view))
+
+    def test_exactly_the_decisions_that_cite_a_provision_are_shown(self):
+        view = self.view(*self.tree())
+        self.assertEqual(self.INCLUDED, set(DECISION_ID.findall(view)))
+        self.assertEqual(self.INCLUDED,
+                         {fragment.upper() for fragment in LOG_LINK.findall(view)})
+
+    def test_a_decision_that_cites_nothing_leaves_no_trace(self):
+        view = self.view(*self.tree())
+        for meta in self.tree():
+            if meta["id"] in self.OMITTED:
+                with self.subTest(meta["id"]):
+                    self.assertNotIn(meta["title"], view)
+                    self.assertNotIn(meta["summary"], view)
+        self.assertEqual(["d-1", "d-20"], SUMMARY_ANCHOR.findall(view))
+
+    def test_held_decisions_are_only_ever_in_the_unattributed_table(self):
+        view = self.view(*self.tree())
+        placed = {LOG_LINK.search(cells[1]).group(1)
+                  for _heading, cells in self.edition_rows(view)}
+        self.assertEqual({"d-1", "d-2", "d-20"}, placed)
+        # Numeric id order, and the citations exactly as recorded: sorted into
+        # provision order the Table would lead D-100's.
+        self.assertEqual([
+            [log_link("D-9"), "Held nine", "`runtime_unwired`", "`8.4.4.9.(1)`"],
+            [log_link("D-30"), "Held thirty", "`runtime`", "`4.2.1.6.`"],
+            [log_link("D-100"), "Held hundred", "`data`",
+             "`8.4.5.9.(4)`, `Table 8.4.4.7.-A`"],
+        ], self.held_rows(view))
+        self.assertNotIn("Held summary", view)
+
+    def test_the_unattributed_table_is_last_and_no_edition_follows_it(self):
+        view = self.view(*self.tree())
+        self.assertEqual(
+            ["Scope", "Definitions", "NECB", TRANSITIONAL_HEADING, NOT_ATTRIBUTED],
+            self.sections(view))
+        self.assertNotIn("\n### ", view.split("\n## " + NOT_ATTRIBUTED)[1])
+
+    def test_a_tree_that_cites_nothing_shows_no_decision(self):
+        view = self.view(omitted("D-4", "Omitted four", "not_applicable"),
+                         omitted("D-6", "Omitted six", "unverified", kind="runtime"))
+        self.assertEqual([0, 0, 0, 0, 2, 2], self.scope_counts(view))
+        self.assertIn(NO_ROWS, view)
+        self.assertIn(NO_HELD, view)
+        self.assertEqual([], DECISION_ID.findall(view))
+        self.assertEqual(["Scope", "Definitions", NOT_ATTRIBUTED],
+                         self.sections(view))
+
+    def test_each_empty_notice_stands_alone(self):
+        only_held = self.view(held("D-9", "Held nine", ["8.4.4.9.(1)"]))
+        self.assertIn(NO_ROWS, only_held)
+        self.assertNotIn(NO_HELD, only_held)
+        only_rows = self.view(
+            legacy("D-20", {"hydronic_pumps": PUMP}, "Pump title", "Pump summary."))
+        self.assertIn(NO_HELD, only_rows)
+        self.assertNotIn(NO_ROWS, only_rows)
+        both = self.view(*self.tree())
+        self.assertNotIn(NO_ROWS, both)
+        self.assertNotIn(NO_HELD, both)
+
+
+class TestEstablishedLegacyRows(ProvisionViewCase):
+    """A legacy decision's per-code-id lists are an established mapping: one
+    row per requirement and edition, with every citation of that requirement
+    in one cell. It has no decided text of its own, and its row says so."""
+
+    def setUp(self):
+        self.multi = legacy("D-1", {"multi_energy_heating": MULTI},
+                            "Multi-energy title", "MULTISUMMARY words.")
+        self.pump = legacy("D-20", {"hydronic_pumps": PUMP}, "Pump title",
+                           "PUMPSUMMARY words.")
+        self.rendered = self.view(self.multi, self.pump)
+
+    def test_a_requirement_has_one_row_in_each_edition_it_cites(self):
+        self.assertEqual(
+            [(NECB_2020, "d-1"), (NECB_2020, "d-20"), (NECB_2025, "d-1")],
+            [(heading, LOG_LINK.search(cells[1]).group(1))
+             for heading, cells in self.edition_rows(self.rendered)])
+        self.assertEqual(["Scope", "Definitions", "NECB", TRANSITIONAL_HEADING,
+                          NOT_ATTRIBUTED], self.sections(self.rendered))
+
+    def test_a_requirements_citations_share_one_cell_in_provision_order(self):
+        # Authored as (6), (4), (5): one cell per requirement, not one row per
+        # citation, and in provision order rather than authored order.
+        self.assertEqual("`8.4.4.9.(4)`<br>`8.4.4.9.(5)`<br>`8.4.4.9.(6)`",
+                         self.row(self.rendered, NECB_2020, "D-1")[0])
+        self.assertEqual("`8.4.5.9.(4)`<br>`8.4.5.9.(5)`<br>`8.4.5.9.(6)`",
+                         self.row(self.rendered, NECB_2025, "D-1")[0])
+        self.assertEqual("`8.4.4.14.`", self.row(self.rendered, NECB_2020, "D-20")[0])
+
+    def test_other_editions_names_the_same_requirement_elsewhere(self):
+        self.assertEqual(
+            "NECB 2025: `8.4.5.9.(4)`, `8.4.5.9.(5)`, `8.4.5.9.(6)`",
+            self.row(self.rendered, NECB_2020, "D-1")[4])
+        self.assertEqual(
+            "NECB 2020: `8.4.4.9.(4)`, `8.4.4.9.(5)`, `8.4.4.9.(6)`",
+            self.row(self.rendered, NECB_2025, "D-1")[4])
+        self.assertEqual(EM, self.row(self.rendered, NECB_2020, "D-20")[4])
+
+    def test_a_legacy_row_has_no_other_sources(self):
+        for _heading, cells in self.edition_rows(self.rendered):
+            self.assertEqual(EM, cells[5])
+
+    def test_the_decision_and_requirement_cells(self):
+        cells = self.row(self.rendered, NECB_2020, "D-1")
+        self.assertEqual(log_link("D-1") + " Multi-energy title", cells[1])
+        self.assertEqual("Multi-energy heating allocation<br>`multi_energy_heating`",
+                         cells[2])
+
+    def test_a_legacy_row_is_marked_transitional_and_carries_no_summary(self):
+        for heading, decision in ((NECB_2020, "D-1"), (NECB_2025, "D-1"),
+                                  (NECB_2020, "D-20")):
+            with self.subTest(heading=heading, decision=decision):
+                self.assertEqual(
+                    TRANSITIONAL.format(decision.lower()),
+                    self.row(self.rendered, heading, decision)[3])
+        rows = " ".join(" ".join(cells)
+                        for _heading, cells in self.edition_rows(self.rendered))
+        for meta in (self.multi, self.pump):
+            self.assertNotIn(meta["summary"], rows)
+
+    def test_each_summary_is_printed_once_and_after_its_anchor(self):
+        self.assertEqual(["d-1", "d-20"], SUMMARY_ANCHOR.findall(self.rendered))
+        for meta in (self.multi, self.pump):
+            with self.subTest(meta["id"]):
+                self.assertEqual(1, self.rendered.count(meta["summary"]))
+        section = self.rendered.split("\n## " + TRANSITIONAL_HEADING + "\n")[1]
+        section = section.split("\n## ")[0]
+        self.assertIn("\n".join([
+            '<a id="transitional-summary-d-1"></a>', "",
+            "**" + log_link("D-1") + "** " + EM + " Multi-energy title", "",
+            "MULTISUMMARY words.", ""]), section)
+        self.assertIn("\n".join([
+            '<a id="transitional-summary-d-20"></a>', "",
+            "**" + log_link("D-20") + "** " + EM + " Pump title", "",
+            "PUMPSUMMARY words.", ""]), section)
+
+    def test_every_transitional_link_lands_on_a_printed_anchor(self):
+        links = re.findall(r"\[Summary\]\(#([^)]+)\)", self.rendered)
+        self.assertEqual(3, len(links))
+        anchors = {"transitional-summary-" + fragment
+                   for fragment in SUMMARY_ANCHOR.findall(self.rendered)}
+        self.assertEqual(anchors, set(links))
+
+
+class TestProvisionOrder(ProvisionViewCase):
+    """Rows sort by code, edition, provision, decision number, requirement
+    key. A provision orders by division, then its number read as a number, then
+    its kind, so no text order of a citation, key or id can stand in for it."""
+
+    ORDERED = {
+        "a_table": {"label": "A table", "necb2020": ["Table 8.4.4.7.-A"]},
+        "b_article": {"label": "An article", "necb2020": ["8.4.4.7.(1)"]},
+        "c_later": {"label": "A later article", "necb2020": ["8.4.4.9.(1)"]},
+        "d_earlier": {"label": "An earlier article", "necb2020": ["4.2.1.6."]},
+        "e_tenth": {"label": "A tenth article", "necb2020": ["8.4.4.10.(1)"]},
+    }
+
+    def ordered_view(self):
+        return self.view(legacy("D-1", self.ORDERED, "Ordered title"))
+
+    def test_provisions_order_by_number_then_kind_not_by_text(self):
+        # By requirement key it would read a, b, c, d, e. By citation text it
+        # would read d, e, b, c, a, with 8.4.4.10 before 8.4.4.7. Ordering all
+        # tables after all articles reads d, b, c, e, a.
+        self.assertEqual(
+            [("d-1", key) for key in ("d_earlier", "b_article", "a_table",
+                                      "c_later", "e_tenth")],
+            self.order(self.ordered_view(), NECB_2020))
+
+    def test_an_article_and_a_table_with_one_number_stay_adjacent_article_first(self):
+        # `b_article` is the Article 8.4.4.7 and `a_table` is Table 8.4.4.7.-A:
+        # different provisions that share a number. The Table's requirement key
+        # sorts first alphabetically, so the key cannot be what orders them.
+        keys = [key for _decision, key in self.order(self.ordered_view(), NECB_2020)]
+        self.assertEqual(1, keys.index("a_table") - keys.index("b_article"))
+        self.assertEqual("c_later", keys[keys.index("a_table") + 1])
+
+    def test_one_number_orders_article_then_table_then_appendix_note(self):
+        # Each citation's remainder after the number is EMPTY for the Table and
+        # the Note, which would put them ahead of the Article's `.(1)` if the
+        # remainder were all that ordered them, and the Note's requirement key
+        # sorts first, so only the provision kind can give this order.
+        view = self.view(legacy("D-1", {
+            "a_note": {"label": "An appendix note", "necb2020": ["A-8.4.4.7"]},
+            "b_table": {"label": "A table", "necb2020": ["Table 8.4.4.7."]},
+            "c_article": {"label": "An article", "necb2020": ["8.4.4.7.(1)"]},
+        }, "One number title"))
+        self.assertEqual([("d-1", "c_article"), ("d-1", "b_table"), ("d-1", "a_note")],
+                         self.order(view, NECB_2020))
+
+    def test_citations_inside_a_cell_order_the_same_way(self):
+        view = self.view(legacy("D-1", {
+            "q_sentences": {"label": "Sentences",
+                            "necb2020": ["4.2.2.1.(10)", "4.2.2.1.(2)"]},
+            "r_same_number": {"label": "One number, two kinds",
+                              "necb2020": ["Table 8.4.4.7.-A", "8.4.4.7.(1)"]},
+        }, "Cell order title"))
+        self.assertEqual("`4.2.2.1.(2)`<br>`4.2.2.1.(10)`",
+                         self.row(view, NECB_2020, "D-1", "q_sentences")[0])
+        self.assertEqual("`8.4.4.7.(1)`<br>`Table 8.4.4.7.-A`",
+                         self.row(view, NECB_2020, "D-1", "r_same_number")[0])
+
+    def test_the_decision_number_breaks_a_tie_numerically(self):
+        view = self.view(*(legacy(decision, {"hydronic_pumps": PUMP}, "Pump",
+                                  "Summary " + decision.lower())
+                           for decision in ("D-100", "D-9", "D-10")))
+        self.assertEqual([("d-9", "hydronic_pumps"), ("d-10", "hydronic_pumps"),
+                          ("d-100", "hydronic_pumps")], self.order(view, NECB_2020))
+
+    def test_the_requirement_key_breaks_a_tie_within_a_decision(self):
+        same = {"label": "Same provision", "necb2020": ["8.4.4.14."]}
+        view = self.view(legacy("D-1", {"b_second": same, "a_first": same},
+                                "Tied title"))
+        self.assertEqual([("d-1", "a_first"), ("d-1", "b_second")],
+                         self.order(view, NECB_2020))
+
+    def test_the_view_does_not_depend_on_the_order_the_sources_arrive_in(self):
+        entries = self.entries(
+            legacy("D-1", self.ORDERED, "Ordered title"),
+            legacy("D-20", {"hydronic_pumps": PUMP}, "Pump title"),
+            legacy("D-9", {"multi_energy_heating": MULTI}, "Multi title"),
+            structured(second_requirement, id="D-2"),
+            held("D-100", "Held hundred", ["8.4.4.14."]),
+            held("D-30", "Held thirty", ["4.2.1.6."]))
+        before = copy.deepcopy(entries)
+        expected = G.render_provision_view(entries)
+        self.assertEqual(before, entries, "rendering must not edit its input")
+        items = list(entries.items())
+        for shift in range(len(items)):
+            rotated = items[shift:] + items[:shift]
+            for name, arrival in (("rotated", rotated), ("reversed", rotated[::-1])):
+                with self.subTest(shift=shift, arrival=name):
+                    self.assertEqual(expected, G.render_provision_view(dict(arrival)))
+
+    def test_a_provision_key_orders_division_then_number_then_kind(self):
+        in_order = [
+            "Division A 9.9.9.9.(1)", "1.1.1.1.(1)", "4.2.2.1.(2)",
+            "4.2.2.1.(10)", "Table 5.2.6.3.", "8.4.4.7.(1)", "8.4.4.7.(2)",
+            "Table 8.4.4.7.-A", "Table 8.4.4.7.-B", "Table 8.4.4.7.-B Note (1)",
+            "Table 8.4.4.7.-B Note (2)", "Table 8.4.4.7.-B Note (10)",
+            "Note A-8.4.4.7", "8.4.4.8.", "8.4.4.9.", "8.4.4.9.(6)",
+            "8.4.4.9.(6)(a)", "8.4.4.9.(6)(f)", "8.4.4.13.(2)", "A-8.4.4.13",
+            "not a citation"]
+
+        def key(value):
+            return G.provision_key(value, "necb")
+
+        for name, arrival in (("reversed", in_order[::-1]),
+                              ("rotated", in_order[7:] + in_order[:7])):
+            with self.subTest(arrival=name):
+                self.assertEqual(in_order, sorted(arrival, key=key))
+        # An Article and the Table that shares its number sit at one number and
+        # differ only in kind, so that neither is mistaken for the other.
+        self.assertEqual(key("8.4.4.7.(1)")[:2], key("Table 8.4.4.7.-A")[:2])
+        self.assertLess(key("8.4.4.7.(1)"), key("Table 8.4.4.7.-A"))
+        self.assertLess(key("Table 8.4.4.7.-A"), key("Note A-8.4.4.7"))
+        self.assertLess(key("Note A-8.4.4.7"), key("8.4.4.8."))
+        self.assertEqual(key("Table 5.2.6.3."), key("Table 5.2.6.3"))
+
+    def test_a_citation_no_grammar_accepts_sorts_last_by_its_text(self):
+        # A family with no registered provision index cannot read a citation.
+        self.assertEqual(
+            ["B.1", "Z.1", "not parsed"],
+            sorted(["Z.1", "not parsed", "B.1"],
+                   key=lambda value: G.provision_key(value, "no-such-family")))
+        self.assertGreater(G.provision_key("x", "no-such-family"),
+                           G.provision_key("8.4.4.14.", "necb"))
+
+
+class TestStructuredRows(ProvisionViewCase):
+    """A source record's role decides what it can do. Only `governing` makes a
+    primary row; same-family editions are Other editions, and incorporated or
+    related records are Other sources that establish no applicability."""
+
+    GOVERNING_2020 = "`8.4.4.13.(1)`<br>`8.4.4.13.(2)`<br>`Note A-8.4.4.13`"
+    GOVERNING_2025 = "`8.4.5.13.(1)`<br>`8.4.5.13.(2)`<br>`Note A-8.4.5.13`"
+    OTHER_SOURCES = (
+        "*incorporated-reference* ashrae-62.1 2016: `6.2.2.1`<br>"
+        "*related* NECB 2020: `Division A 1.1.1.1.(1)`, `Table 8.4.4.7.-B`, "
+        "`Table 8.4.4.7.-B Note (1)`")
+    DECIDED = ("Water-loop and other heat pumps follow different "
+               "reference-system selection branches.")
+    SUMMARY = "The decision-wide paraphrase that must stay out of a structured row."
+
+    def setUp(self):
+        self.rendered = self.view(structured(id="D-2", summary=self.SUMMARY))
+
+    def test_only_governing_records_make_rows(self):
+        rows = self.edition_rows(self.rendered)
+        self.assertEqual([NECB_2020, NECB_2025], [heading for heading, _ in rows])
+        self.assertEqual([self.GOVERNING_2020, self.GOVERNING_2025],
+                         [cells[0] for _, cells in rows])
+        for _heading, cells in rows:
+            for reference in ("Division A 1.1.1.1.(1)", "Table 8.4.4.7.-B", "6.2.2.1"):
+                self.assertNotIn(reference, cells[0])
+
+    def test_other_editions_lists_the_governing_counterparts_only(self):
+        self.assertEqual(
+            "NECB 2025: `8.4.5.13.(1)`, `8.4.5.13.(2)`, `Note A-8.4.5.13`",
+            self.row(self.rendered, NECB_2020, "D-2")[4])
+        self.assertEqual(
+            "NECB 2020: `8.4.4.13.(1)`, `8.4.4.13.(2)`, `Note A-8.4.4.13`",
+            self.row(self.rendered, NECB_2025, "D-2")[4])
+
+    def test_other_sources_lists_incorporated_then_related_references(self):
+        for heading in (NECB_2020, NECB_2025):
+            with self.subTest(heading):
+                self.assertEqual(self.OTHER_SOURCES,
+                                 self.row(self.rendered, heading, "D-2")[5])
+
+    def test_a_related_or_incorporated_edition_is_never_an_edition_of_the_requirement(self):
+        view = self.view(structured(governing_2020_only, id="D-2",
+                                    summary=self.SUMMARY))
+        rows = self.edition_rows(view)
+        self.assertEqual([NECB_2020], [heading for heading, _ in rows])
+        cells = rows[0][1]
+        self.assertEqual("`8.4.4.13.(1)`", cells[0])
+        self.assertEqual(EM, cells[4])
+        self.assertEqual(
+            "*incorporated-reference* ashrae-62.1 2016: `6.2.2.1`<br>"
+            "*incorporated-reference* NECB 2025: `8.4.5.13.(1)`<br>"
+            "*related* NECB 2025: `Table 8.4.5.7.-B`", cells[5])
+        self.assertNotIn("### NECB 2025", view)
+        self.assertEqual([1, 0, 0, 1, 0, 1], self.scope_counts(view))
+
+    def test_a_structured_row_carries_the_requirements_own_decided_text(self):
+        for heading in (NECB_2020, NECB_2025):
+            with self.subTest(heading):
+                self.assertEqual(self.DECIDED,
+                                 self.row(self.rendered, heading, "D-2")[3])
+        rows = " ".join(" ".join(cells)
+                        for _heading, cells in self.edition_rows(self.rendered))
+        self.assertNotIn("Transitional", rows)
+        self.assertNotIn(self.SUMMARY, self.rendered)
+        self.assertEqual([], SUMMARY_ANCHOR.findall(self.rendered))
+        self.assertNotIn("\n## " + TRANSITIONAL_HEADING, self.rendered)
+
+    def test_each_requirement_keeps_its_own_decided_text(self):
+        view = self.view(structured(second_requirement, id="D-2",
+                                    summary=self.SUMMARY))
+        self.assertEqual([("d-2", "second_requirement"), ("d-2", KEY)],
+                         self.order(view, NECB_2020))
+        self.assertEqual([("d-2", "second_requirement"), ("d-2", KEY)],
+                         self.order(view, NECB_2025))
+        for heading in (NECB_2020, NECB_2025):
+            with self.subTest(heading):
+                self.assertEqual(
+                    "The second requirement's own decided text.",
+                    self.row(view, heading, "D-2", "second_requirement")[3])
+                self.assertEqual(self.DECIDED,
+                                 self.row(view, heading, "D-2", KEY)[3])
+
+    def test_structured_and_legacy_rows_share_one_provision_order(self):
+        view = self.view(
+            structured(second_requirement, id="D-2", summary=self.SUMMARY),
+            legacy("D-3", {"ninth_article": {
+                "label": "Ninth article", "necb2020": ["8.4.4.9.(1)"]}},
+                "Ninth title", "NINTHSUMMARY words."),
+            legacy("D-4", {"hydronic_pumps": PUMP}, "Pump title",
+                   "PUMPSUMMARY words."))
+        self.assertEqual(
+            [("d-2", "second_requirement"), ("d-3", "ninth_article"),
+             ("d-2", KEY), ("d-4", "hydronic_pumps")],
+            self.order(view, NECB_2020))
+        self.assertEqual([("d-2", "second_requirement"), ("d-2", KEY)],
+                         self.order(view, NECB_2025))
+        for decision, key in (("D-3", "ninth_article"), ("D-4", "hydronic_pumps")):
+            self.assertEqual(TRANSITIONAL.format(decision.lower()),
+                             self.row(view, NECB_2020, decision, key)[3])
+        for key in ("second_requirement", KEY):
+            self.assertNotIn("Transitional",
+                             self.row(view, NECB_2020, "D-2", key)[3])
+        self.assertEqual(["d-3", "d-4"], SUMMARY_ANCHOR.findall(view))
+
+    def test_authored_order_does_not_decide_what_a_cell_prints(self):
+        def scramble(meta):
+            record(meta, 0)["references"] = [
+                "Note A-8.4.4.13", "8.4.4.13.(2)", "8.4.4.13.(1)"]
+            record(meta, 2)["references"] = [
+                "Table 8.4.4.7.-B Note (1)", "Table 8.4.4.7.-B",
+                "Division A 1.1.1.1.(1)"]
+            requirement(meta)["sources"].reverse()
+
+        cells = self.row(self.view(structured(scramble, id="D-2")),
+                         NECB_2020, "D-2")
+        self.assertEqual(self.GOVERNING_2020, cells[0])
+        self.assertEqual(self.OTHER_SOURCES, cells[5])
+
+    def test_a_governing_record_of_another_code_is_its_own_section(self):
+        def governing(code, edition, reference):
+            return {"code": code, "edition": edition, "role": "governing",
+                    "references": [reference]}
+
+        meta = structured(lambda m: requirement(m)["sources"].extend([
+            governing("zzz", "10", "Z.1"), governing("zzz", "9", "Z.1"),
+            governing("aaa", "1", "A.1")]), id="D-2", summary=self.SUMMARY)
+        runtime = {("necb", "2020"): "necb2020", ("necb", "2025"): "necb2025",
+                   ("aaa", "1"): "aaa1", ("zzz", "9"): "zzz9", ("zzz", "10"): "zzz10"}
+        with mock.patch.object(G, "runtime_editions", return_value=runtime):
+            view = G.render_provision_view({"D-2": (meta, GOOD_BODY)})
+        self.assertEqual(["Scope", "Definitions", "AAA", "NECB", "ZZZ", NOT_ATTRIBUTED],
+                         self.sections(view))
+        rows = self.edition_rows(view)
+        # Codes by name, and an edition by its number: 9 before 10.
+        self.assertEqual(
+            ["aaa 1 (code id `aaa1`)", NECB_2020, NECB_2025,
+             "zzz 9 (code id `zzz9`)", "zzz 10 (code id `zzz10`)"],
+            [heading for heading, _ in rows])
+        by_heading = {heading: cells for heading, cells in rows}
+        self.assertEqual("`A.1`", by_heading["aaa 1 (code id `aaa1`)"][0])
+        # Another code's governing record is not an edition of the NECB
+        # requirement, and an unregistered code still counts its own editions.
+        self.assertEqual(EM, by_heading["aaa 1 (code id `aaa1`)"][4])
+        self.assertEqual("zzz 10: `Z.1`", by_heading["zzz 9 (code id `zzz9`)"][4])
+        self.assertEqual("zzz 9: `Z.1`", by_heading["zzz 10 (code id `zzz10`)"][4])
+        for heading in (NECB_2020, NECB_2025):
+            self.assertNotIn("zzz", by_heading[heading][4])
+            self.assertNotIn("aaa", by_heading[heading][4])
+        self.assertEqual({self.OTHER_SOURCES}, {cells[5] for _, cells in rows})
+
+
+class TestTheViewIsInert(ProvisionViewCase):
+    """Authored prose is text. Whatever a title, label, summary, decided text
+    or recorded citation holds, it can neither split a table row nor act as
+    Markdown or HTML."""
+
+    HOSTILE = ("pipe | tick ` html <script>alert(1)</script> br <br> link [x](y) "
+               "star *b* under _i_ tilde ~~s~~ money $x$ amp &amp; back \\ \n newline")
+    FLAT = " ".join(HOSTILE.split())
+    BLOCK_START = re.compile(
+        r"^(?:#{1,6}(?=\s|$)|[-+*](?=\s|$)|\d{1,9}[.)](?=\s|$)|"
+        r">(?=\s|$)|(?:-{3,}|\*{3,}|_{3,})$|`{3,}|~{3,}|<)")
+    BLOCK_SUMMARIES = (
+        ("# Counterfeit heading", r"\# Counterfeit heading"),
+        ("## Counterfeit section", r"\## Counterfeit section"),
+        ("- counterfeit unordered item", r"\- counterfeit unordered item"),
+        ("+ counterfeit unordered item", r"\+ counterfeit unordered item"),
+        ("* counterfeit unordered item", r"\* counterfeit unordered item"),
+        ("1. counterfeit ordered item", r"1\. counterfeit ordered item"),
+        ("1) counterfeit ordered item", r"1\) counterfeit ordered item"),
+        ("> counterfeit blockquote", r"\> counterfeit blockquote"),
+        ("---", r"\---"),
+        ("- - -", r"\- - -"),
+        ("***", r"\*\*\*"),
+        ("___", r"\_\_\_"),
+        ("```python", r"\`\`\`python"),
+        ("~~~python", r"\~\~\~python"),
+        ("<section>counterfeit</section>",
+         r"\<section\>counterfeit\</section\>"),
+        ("Counterfeit setext heading\n===",
+         "Counterfeit setext heading ==="),
+    )
+
+    def setUp(self):
+        hostile = self.HOSTILE
+
+        def edit(meta):
+            requirement(meta)["label"] = hostile
+            requirement(meta)["decided"] = hostile
+
+        self.rendered = self.view(
+            legacy("D-1", {"hydronic_pumps": {
+                "label": hostile, "necb2020": ["8.4.4.14."]}}, hostile, hostile),
+            structured(edit, id="D-2", title=hostile),
+            held("D-3", hostile, ["weird | `tick` <b>", "`x`"]))
+
+    def test_no_row_is_split_or_joined(self):
+        rows = self.edition_rows(self.rendered)
+        self.assertEqual(3, len(rows))
+        self.assertEqual({6}, {len(cells) for _heading, cells in rows})
+        held_rows = self.held_rows(self.rendered)
+        self.assertEqual(1, len(held_rows))
+        self.assertEqual(4, len(held_rows[0]))
+
+    def test_prose_survives_as_flat_text(self):
+        cells = self.row(self.rendered, NECB_2020, "D-2")
+        self.assertEqual(log_link("D-2") + " " + self.FLAT, unescape(cells[1]))
+        # The one raw break in the cell is the generator's own.
+        label, key = cells[2].split("<br>")
+        self.assertEqual(self.FLAT, unescape(label))
+        self.assertEqual("`" + KEY + "`", key)
+        self.assertEqual(self.FLAT, unescape(cells[3]))
+
+    def test_nothing_in_it_can_act_as_markup(self):
+        # A backslash before the first character is what makes it literal: the
+        # escaped `\&amp;` reads as the text "&amp;", not as an entity.
+        for raw in ("<script>", "br <br> link", "[x](y)", "star *b*", "under _i_",
+                    "~~s~~", "$x$", "&amp;"):
+            with self.subTest(raw):
+                self.assertIsNone(
+                    re.search(r"(?<!\\)" + re.escape(raw), self.rendered))
+        self.assertIn("\\<script\\>alert(1)\\</script\\>", self.rendered)
+
+    def test_the_summary_section_is_inert_too(self):
+        lines = self.rendered.splitlines()
+        at = lines.index('<a id="transitional-summary-d-1"></a>')
+        self.assertEqual("**" + log_link("D-1") + "** " + EM + " " + self.FLAT,
+                         unescape(lines[at + 2]))
+        self.assertEqual(self.FLAT, unescape(lines[at + 4]))
+
+    def test_block_level_summaries_cannot_create_sections_or_blocks(self):
+        expected_sections = [
+            "Scope", "Definitions", "NECB", TRANSITIONAL_HEADING,
+            NOT_ATTRIBUTED]
+        for summary, escaped in self.BLOCK_SUMMARIES:
+            with self.subTest(summary=summary):
+                view = self.view(legacy(
+                    "D-1", {"hydronic_pumps": PUMP}, "Plain title", summary))
+                lines = view.splitlines()
+                at = lines.index('<a id="transitional-summary-d-1"></a>')
+                rendered = lines[at + 4]
+                self.assertEqual(escaped, rendered)
+                self.assertEqual(" ".join(summary.split()), unescape(rendered))
+                self.assertNotRegex(rendered, self.BLOCK_START)
+                self.assertEqual(expected_sections, self.sections(view))
+
+    def test_ordinary_summary_prose_is_not_overescaped(self):
+        summary = ("Ordinary prose: version 1.2, C++, #tag, and "
+                   "well-formed text.")
+        view = self.view(legacy(
+            "D-1", {"hydronic_pumps": PUMP}, "Plain title", summary))
+        lines = view.splitlines()
+        at = lines.index('<a id="transitional-summary-d-1"></a>')
+        self.assertEqual(summary, lines[at + 4])
+
+    def test_a_recorded_citation_cannot_close_its_own_code_span(self):
+        held_row = self.held_rows(self.rendered)[0]
+        self.assertEqual(self.FLAT, unescape(held_row[1]))
+        self.assertEqual("`runtime`", held_row[2])
+        self.assertEqual("``weird \\| `tick` <b>``, `` `x` ``", held_row[3])
+
+
+class TestTheViewStatesItsDefinitions(ProvisionViewCase):
+    """What Source, Provenance and Status mean is part of the view whether or
+    not any row exists, and the view says it reproduces no Code text."""
+
+    STATUSES = ["Governing", "Incorporated reference, related", "Transitional",
+                "Not yet attributed"]
+
+    def test_the_definitions_stand_with_or_without_rows(self):
+        empty = self.view(omitted("D-4", "Omitted four", "not_applicable"))
+        full = self.view(
+            legacy("D-20", {"hydronic_pumps": PUMP}, "Pump title", "Pump summary."))
+        for name, view in (("empty", empty), ("full", full)):
+            with self.subTest(name):
+                headings = [line[4:] for line in view.splitlines()
+                            if line.startswith("### ")]
+                self.assertEqual(["Source", "Provenance", "Status", "Reading a row"],
+                                 headings[:4])
+                self.assertEqual(
+                    self.STATUSES,
+                    [cells[0] for _section, heading, cells in view_rows(view)
+                     if heading == "Status"])
+                self.assertIn("reproduces no Code text", view)
+                self.assertIn("This file is GENERATED. Do not edit it.", view)
+                self.assertIn("[{0}]({0})".format(G.DOC.name), view)
 
 
 if __name__ == "__main__":
