@@ -83,6 +83,11 @@ python3 python/scripts/generate_necb_edition_delta.py --check
 python3 python/scripts/generate_necb_vintage_match.py --check
 python3 python/scripts/generate_decisions.py --check
 python3 python/scripts/legacy_whatsnew.py
+
+# The HVAC catalogue sizing sweep (needs the SDK and EnergyPlus). It writes
+# python/tests/fixtures/system_simulation_status.json, which GATES which
+# catalogue systems ship as samples; --check re-derives it without writing.
+python3 python/scripts/simulate_all_systems.py --check
 ```
 
 The zero-install serial fallback is `cd python && python3 -m unittest discover
@@ -109,11 +114,12 @@ against the editions DISCOVERED under `btap/codes/necb/data/`, so registering a
 new edition does not leave the check stale, and it never takes a collective
 word: "both" stops meaning anything once a third edition exists, and `vintage`
 is retired vocabulary. `unverified` may not be mixed with a code id — either a
-decision has been checked against that edition or it has not. Of the 99
-decisions, 98 are `unverified`: they were authored before the field existed,
+decision has been checked against that edition or it has not. Of the 103
+decisions, 57 are `unverified`: they were authored before the field existed,
 mostly against one edition's text, and asserting a list for them would be a
 guess. That is a DECLARED gap where it used to be a silent one; establishing
-them is open work.
+them is open work, and the remaining count moves as decisions are checked —
+re-read the registry rather than trusting this number.
 
 `articles` groups citations by an AUTHORED REQUIREMENT IDENTITY, then by code
 id inside it. A flat list was ambiguous — the same number can name a DIFFERENT
@@ -155,7 +161,8 @@ one are not structurally distinguishable, and Sol ruled that case out of
 scope rather than admitting another heuristic.
 
 **The id grammar is `^D-\d+$`, unbounded.** `^D-\d{2}$` allowed exactly 100
-ids and D-01 through D-99 all exist, so the registry had run out; a fixed three
+ids and D-01 through D-99 all existed, so the registry had run out (D-100
+through D-103 exist today); a fixed three
 digits would only move the wall, and thousands are expected as other code
 families arrive. Widening means FOUR patterns, and the one that matters most is
 `btap/codes/decisions.py`'s `ID_PATTERN`: `\bD-\d{2}\b` does not match
@@ -263,7 +270,7 @@ Add the entry in the same change as the condition that cites it.
 
 The post-R6 verification model has two independent parts:
 
-- `verification/scenarios/` holds 47 frozen Python pipeline scenarios across
+- `verification/scenarios/` holds 54 frozen Python pipeline scenarios across
   `python`, `verify`, and `parity` lanes. Intentional output changes use
   `verification/scenarios/freeze.py` on a clean tree and commit the baseline
   changes with the code.
@@ -297,7 +304,10 @@ boundary; post-R6 freezes do not recreate cross-language evidence.
   sizing-lane frozen scenarios, in one parallel pytest run. It measures line
   coverage of `btap` (summary on the job page, HTML/XML artifact) and fails
   below `--cov-fail-under=84`; the baseline is in
-  `docs/necb_rule_verification.md`.
+  `docs/necb_rule_verification.md`. It also re-runs the HVAC catalogue
+  sizing sweep SERIALLY and diffs it against the committed verdict, so a
+  system that stops sizing cleanly fails the job instead of shipping as a
+  sample.
 - **`parity`**: dispatch-only live-oracle checks and the whole-building
   archetype gate. It is also where oracle goldens are exported.
 - **`parity-scenarios`**: dispatch-only annual frozen scenarios, beside `parity`.
