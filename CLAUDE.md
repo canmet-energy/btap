@@ -33,9 +33,11 @@ unless a moved link itself is wrong.
   `btap/codes/necb/editions/necb2025/` for what exists in one edition only.
   Every edition is an independent, complete snapshot under
   `btap/codes/necb/data/<code id>/` (rule files, `tables/`,
-  `coverage/articles_8_4.json`, and the `manifest.json` that drives
-  discovery). Nothing at runtime reads another edition's files — no `extends`,
-  no alias, no fallback. Loaders resolve through
+  `coverage/articles_8_4.json`, the bounded structural
+  `coverage/provisions.json`, and the `manifest.json` that drives discovery).
+  Authorized raw provision payloads stay in that edition's `provenance/`;
+  runtime citation validation is offline. Nothing at runtime reads another
+  edition's files — no `extends`, no alias, no fallback. Loaders resolve through
   `btap.codes.necb._data_root()`; `_set_data_root(..., _testing=True)` is a
   test-only hook, never an environment variable. Code-family-neutral data —
   `decisions.json`, the Section 8.4 disposition and `ATTRIBUTION.md` — stays
@@ -83,6 +85,9 @@ python3 python/scripts/generate_necb_edition_delta.py --check
 python3 python/scripts/generate_necb_vintage_match.py --check
 python3 python/scripts/generate_decisions.py --check
 python3 python/scripts/legacy_whatsnew.py
+
+# Authenticated maintainer refreshes; ordinary runtime and CI stay offline
+python3 python/scripts/fetch_necb_provisions.py
 
 # The HVAC catalogue sizing sweep (needs the SDK and EnergyPlus). It writes
 # python/tests/fixtures/system_simulation_status.json, which GATES which
@@ -191,6 +196,16 @@ The Section 8.4 article caches live in each edition's snapshot at
 `python/btap/codes/necb/data/necb<edition>/coverage/articles_8_4.json` and ship
 in the wheel. Refresh them with `python3 python/scripts/fetch_necb_8_4_text.py`;
 ordinary runtime remains offline.
+
+The first decision-by-provision evidence slice lives beside them at
+`coverage/provisions.json`. It is a normalized structural index only:
+Articles, Sentences, Clauses, Tables, table notes, Appendix notes, and
+explicitly qualified Division A provisions. Exact authorized hbix results are
+retained at `provenance/provisions.result.json`; the index pins both that
+archive and the reused Section 8.4 cache by hash. Refresh both editions with
+`python3 python/scripts/fetch_necb_provisions.py`. An absent record is positive
+authority evidence; a citation missing from the bounded cache is merely
+`not-indexed`, and a source-hash mismatch is `stale`.
 
 ## Two references for any NECB behaviour
 

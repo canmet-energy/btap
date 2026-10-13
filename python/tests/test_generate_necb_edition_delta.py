@@ -47,8 +47,8 @@ def _build_fixture_tree(root: Path) -> None:
     """A synthetic two-edition NECB data tree exercising every
     classification the generator makes:
 
-    - ``tables/only_old.json`` / ``tables/only_new.json`` / ``eui_targets``:
-      an edition-only file on each side -- (a) added, (b) removed.
+    - ``tables/only_old.json`` / ``tables/only_new.json`` / ``eui_targets`` /
+      ``provision_index``: edition-only files -- (a) added, (b) removed.
     - ``envelope``'s rule file is renamed (``envelope_rules.json`` ->
       ``envelope_rules_v2.json``) under the SAME manifest key -- (c) a
       whole-file rename, matched by key, not dropped.
@@ -86,6 +86,7 @@ def _build_fixture_tree(root: Path) -> None:
         "label": "NECB 2025 (fixture)",
         "rules": {"envelope": "envelope_rules_v2.json"},
         "tables": ["tables/foo.json", "tables/only_new.json"],
+        "provision_index": "coverage/provisions.json",
         "eui_targets": "eui_targets.json",
     })
     _write_json(data_root / "necb2025" / "envelope_rules_v2.json", {
@@ -94,6 +95,7 @@ def _build_fixture_tree(root: Path) -> None:
     })
     _write_json(data_root / "necb2025" / "tables" / "foo.json", {"a": 1})
     _write_json(data_root / "necb2025" / "tables" / "only_new.json", {"y": 1})
+    _write_json(data_root / "necb2025" / "coverage" / "provisions.json", {"p": 1})
     _write_json(data_root / "necb2025" / "eui_targets.json", {"z": 1})
 
 
@@ -120,6 +122,7 @@ class TestWholeFileDiff(unittest.TestCase):
     def test_edition_only_singular_key_is_added(self):
         added = {path for _, path in self.whole_file_delta.added}
         self.assertIn("eui_targets.json", added)
+        self.assertIn("coverage/provisions.json", added)
 
     def test_removed_table_is_removed(self):
         removed = {path for _, path in self.whole_file_delta.removed}
@@ -150,6 +153,7 @@ class TestWholeFileDiff(unittest.TestCase):
         matched_new = {new for _, _, new in self.pairs}
         self.assertNotIn("tables/only_old.json", matched_old)
         self.assertNotIn("tables/only_new.json", matched_new)
+        self.assertNotIn("coverage/provisions.json", matched_new)
         self.assertNotIn("eui_targets.json", matched_new)
 
 

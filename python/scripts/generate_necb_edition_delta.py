@@ -12,10 +12,10 @@ just necb2020 -> necb2025), this first reports WHOLE-FILE additions,
 removals and renames over the UNION of manifest-declared outputs (the same
 coverage set ``python/tests/necb/test_edition_provenance.py`` uses for its
 provenance gate: every ``rules`` value, every ``tables`` entry, and the
-singular file keys ``coverage_text``/``eui_targets``/``ghg_factors``) --
-an output declared by only one edition's manifest, or declared by both under
-different filenames, would otherwise vanish silently from a diff keyed on
-"present in both, same path".
+singular file keys ``coverage_text``/``provision_index``/``eui_targets``/
+``ghg_factors``) -- an output declared by only one edition's manifest, or
+declared by both under different filenames, would otherwise vanish silently
+from a diff keyed on "present in both, same path".
 
 For every output that DOES survive matching (same path in both editions, or
 matched-but-renamed), it then produces a leaf-level diff of the JSON with
@@ -32,12 +32,13 @@ Everything else at a matched path is added / removed / changed (old -> new).
 are excluded at any level, and so is any leaf whose value is prose longer
 than 200 characters (a "how"/"notes" description, not a rule value).
 
-``coverage_text`` (the Section 8.4 article-text cache) is matched at the
-whole-file level (so an edition-only or renamed coverage-text file is still
-reported) but is NOT leaf-diffed here: its keys are themselves bare article
-numbers and its renumbering churn is already what the provenance/coverage
-machinery accounts for; diffing it would just restate the citation-
-renumbering table with worse signal.
+``coverage_text`` (the Section 8.4 article-text cache) and
+``provision_index`` (the bounded normalized normative-evidence index) are
+matched at the whole-file level (so an edition-only or renamed file is still
+reported) but are NOT leaf-diffed here: their keys are provision identities,
+and their renumbering churn is already what the evidence/coverage machinery
+accounts for; diffing them would just restate the citation-renumbering table
+with worse signal.
 
 Regenerated in the ``lint`` job next to ``generate_necb_coverage.py`` and
 ``generate_necb_8_4_coverage.py``; ``--check`` fails on drift (the
@@ -79,11 +80,16 @@ CITATION_PATTERN = re.compile(r"\d+(?:\.\d+){2,}\.?(?:-[A-Z])?(?:\([0-9a-zA-Z]+\
 #: uses (duplicated, not imported: this generator stays off ``btap.codes``
 #: on purpose -- see the module docstring -- and that test module imports
 #: it).
-SINGULAR_FILE_KEYS = ("coverage_text", "eui_targets", "ghg_factors")
+SINGULAR_FILE_KEYS = (
+    "coverage_text",
+    "provision_index",
+    "eui_targets",
+    "ghg_factors",
+)
 #: Of those, the ones also leaf-diffed when a matched pair survives.
-#: ``coverage_text`` is matched (so an edition-only/renamed coverage-text
-#: file is still reported as added/removed/renamed) but never leaf-diffed --
-#: see the module docstring.
+#: ``coverage_text`` and ``provision_index`` are matched (so an edition-only
+#: or renamed file is still reported as added/removed/renamed) but never
+#: leaf-diffed -- see the module docstring.
 LEAF_DIFFABLE_SINGULAR_KEYS = ("eui_targets", "ghg_factors")
 
 #: A trailing 4-digit edition year immediately before the extension --

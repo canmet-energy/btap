@@ -3,8 +3,9 @@ the checked provenance of every packaged rule file and table.
 
 Each edition's ``manifest.json`` carries a ``provenance`` block covering exactly
 its declared outputs; ``verify-source`` re-checks one of them against the
-artifact its entry pins (a retained MCP payload, the pinned oracle at a
-revision, or neither, which the entry says out loud).
+artifact or canonical source-artifact set its entry pins (a retained MCP
+payload, the pinned oracle at a revision, or neither, which the entry says out
+loud).
 """
 
 from __future__ import annotations
@@ -14,11 +15,12 @@ import copy
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 from functools import cache
 from importlib import resources
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any, TextIO
 
 #: Inside an edition's snapshot: the packaged Section 8.4 article text. Each
@@ -34,6 +36,8 @@ _ATTRIBUTION_FILE = "ATTRIBUTION.md"
 #: manifest's ``provenance`` block hashes. Deliberately NOT covered by that
 #: block itself — an archived artifact needing its own provenance recurses.
 _PROVENANCE_DIR = "provenance"
+_SOURCE_ARTIFACT_KEYS = {"path", "sha256"}
+_SHA256_RE = re.compile(r"[0-9a-f]{64}")
 
 
 def _resource(name: str):
@@ -177,8 +181,9 @@ def source_provenance(code_id: str) -> dict[str, Any]:
     """The checked ``provenance`` block of one edition's manifest.
 
     Keyed by the edition-relative path of every manifest-DECLARED output. The
-    archived payload for an entry, when it has one, sits beside the manifest at
-    ``provenance/<basename>.result.json``.
+    A single archived payload sits at ``provenance/<basename>.result.json``.
+    Multi-input generated outputs carry a canonical ``source_artifacts``
+    descriptor naming every retained input instead.
     """
     return copy.deepcopy(_manifest(code_id).get("provenance") or {})
 
@@ -242,7 +247,92 @@ def _oracle_checkout() -> Path | None:
 
 
 def _verify_archived(root: Path, relative: str, entry: dict, out: TextIO) -> int:
-    """Re-hash the retained payload against the recorded source hash."""
+    """Re-hash retained source artifacts against the recorded source hash."""
+    source_artifacts = entry.get("source_artifacts")
+    if source_artifacts is not None:
+        if not isinstance(source_artifacts, list) or not source_artifacts:
+            print(
+                "  MISMATCH    source_artifacts is not a non-empty list",
+                file=out,
+            )
+            return 1
+        status = 0
+        paths: list[str] = []
+        for position, artifact in enumerate(source_artifacts):
+            if not isinstance(artifact, dict) or set(artifact) != _SOURCE_ARTIFACT_KEYS:
+                print(
+                    f"  MISMATCH    source_artifacts[{position}] must have exactly "
+                    "'path' and 'sha256'",
+                    file=out,
+                )
+                status = 1
+                continue
+            relative_path = artifact["path"]
+            digest = artifact["sha256"]
+            path = (
+                PurePosixPath(relative_path)
+                if isinstance(relative_path, str)
+                else PurePosixPath()
+            )
+            if (
+                not isinstance(relative_path, str)
+                or not relative_path
+                or path.is_absolute()
+                or ".." in path.parts
+                or not isinstance(digest, str)
+                or _SHA256_RE.fullmatch(digest) is None
+            ):
+                print(
+                    f"  MISMATCH    source_artifacts[{position}] has an invalid "
+                    "relative path or SHA-256",
+                    file=out,
+                )
+                status = 1
+                continue
+            paths.append(relative_path)
+            source_path = root.joinpath(*path.parts)
+            if not source_path.is_file():
+                print(
+                    f"  MISMATCH    source artifact {source_path} is missing",
+                    file=out,
+                )
+                status = 1
+                continue
+            actual = _digest(source_path)
+            if actual != digest:
+                print(
+                    f"  MISMATCH    {relative_path} hashes {actual}, recorded {digest}",
+                    file=out,
+                )
+                status = 1
+                continue
+            print(
+                f"  archived    {relative_path} matches its source artifact hash",
+                file=out,
+            )
+        if paths != sorted(paths) or len(paths) != len(set(paths)):
+            print(
+                "  MISMATCH    source_artifacts paths must be unique and sorted",
+                file=out,
+            )
+            status = 1
+        descriptor = _canonical(source_artifacts)
+        descriptor_sha256 = hashlib.sha256(descriptor.encode("utf-8")).hexdigest()
+        if descriptor_sha256 != entry["source_sha256"]:
+            print(
+                f"  MISMATCH    source_artifacts hashes {descriptor_sha256}, "
+                f"recorded {entry['source_sha256']}",
+                file=out,
+            )
+            status = 1
+        elif status == 0:
+            print(
+                f"  source set  {len(source_artifacts)} artifacts match "
+                "source_sha256",
+                file=out,
+            )
+        return status
+
     payload = root / _PROVENANCE_DIR / (Path(relative).name.removesuffix(".json")
                                         + ".result.json")
     if not payload.is_file():

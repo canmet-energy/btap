@@ -24,6 +24,8 @@ them. Removing an edition is ``git rm -r`` of one directory.
         efficiencies.json  lighting_rules.json  loads_rules.json  shw_rules.json
         tables/                     the transcribed code tables
         coverage/articles_8_4.json  the packaged Section 8.4 article text
+        coverage/provisions.json    bounded structural normative evidence
+        provenance/                 retained authorized source payloads
 
 Every loader in the family resolves its path through :func:`_data_root` **at
 call time**, and every cache is keyed by the root it was filled from, so a test

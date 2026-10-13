@@ -209,6 +209,10 @@ learns *why* we read the article that way.
 - **`btap/codes/necb/data/<code id>/`** ships in the wheel: ONE INDEPENDENT
   SNAPSHOT PER EDITION (`necb2020/`, `necb2025/`) — that edition's manifest,
   its seven rule files, its `tables/` and its `coverage/articles_8_4.json`.
+  Each snapshot also carries the bounded offline normative-evidence index at
+  `coverage/provisions.json`; exact authorized hbix payloads stay in that
+  edition's `provenance/provisions.result.json`. The index reuses the existing
+  Section 8.4 cache by hash instead of copying its text.
   Multi-edition Stage 3 moved data here from the domain directories: code
   lives by domain, data by edition. **Nothing at runtime reads another
   edition's files** — no `extends`, no alias, no fallback rung; a missing file
@@ -233,8 +237,16 @@ learns *why* we read the article that way.
   packaged read API (`btap.codes.coverage`) and a console entry point
   (`btap-necb-coverage`). The Crown NECB text is attributed and explicitly
   outside the GPL that covers the code.
+- `btap.codes.provisions` is the code-family-neutral offline citation API.
+  NECB is the only registered citation grammar today. Its checks distinguish
+  `present`, authority-confirmed `absent`, bounded-cache `not-indexed`, and
+  source-hash `stale`; silence is never converted into absence. Division A
+  citations require the literal `Division A` qualification, while `A-...`
+  identifies an Appendix note.
 - The HBIX fetch that refreshes those caches stays an explicit **maintainer**
-  operation. Ordinary runtime is offline.
+  operation. Refresh the bounded provision corpus with
+  `python3 python/scripts/fetch_necb_provisions.py`. Ordinary runtime is
+  offline.
 - **Every loader resolves through `btap.codes.necb._data_root()` at CALL
   time**, and every cache is keyed by that root. `_set_data_root(path,
   _testing=True)` is the TEST-ONLY hook; it is deliberately not an environment

@@ -30,8 +30,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import unittest
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import btap.codes as codes
 import btap.codes.necb as necb_pkg
@@ -47,8 +48,13 @@ REQUIRED_ENTRY_KEYS = {
 # `inherited_reason` and `verified_against` are the Phase B step 2 pair that
 # rule (h) below requires of every entry whose `source` is not this edition's
 # own text (see the multi-edition plan's Phase B and the data README).
-OPTIONAL_ENTRY_KEYS = {"byte_identical_to", "note",
-                       "inherited_reason", "verified_against"}
+OPTIONAL_ENTRY_KEYS = {
+    "byte_identical_to",
+    "note",
+    "inherited_reason",
+    "verified_against",
+    "source_artifacts",
+}
 ALLOWED_ENTRY_KEYS = REQUIRED_ENTRY_KEYS | OPTIONAL_ENTRY_KEYS
 
 METHODS = {"transcribed", "copied", "generated"}
@@ -57,25 +63,32 @@ SOURCE_VERIFICATIONS = {"archived", "revision_addressable", "current_only", "man
 #: Keys every ``verified_against`` item MUST carry, and the verdict vocabulary.
 VERIFIED_AGAINST_KEYS = {"table", "edition", "payload", "sha256", "verdict", "detail"}
 VERDICTS = {"identical", "differs", "partial"}
+SOURCE_ARTIFACT_KEYS = {"path", "sha256"}
+SHA256_RE = re.compile(r"[0-9a-f]{64}")
 
 #: Manifest top-level keys, besides `rules`/`tables`/`coverage_text`, that
-#: name a declared OUTPUT file rather than metadata. Today only the 2025
-#: Part 11 files; a manifest without them contributes nothing here.
-EXTRA_MANIFEST_FILE_KEYS = ("eui_targets", "ghg_factors")
+#: name a declared OUTPUT file rather than metadata. ``provision_index`` is
+#: present in every edition; the remaining keys are 2025-only Part 11 files.
+EXTRA_MANIFEST_FILE_KEYS = ("provision_index", "eui_targets", "ghg_factors")
 
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _canonical(value) -> str:
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+
 def declared_outputs(manifest: dict) -> set[str]:
     """Every file this manifest declares as an output.
 
     The provenance coverage set is EXACTLY this (Stage 4 spec): every
-    ``rules`` value, every ``tables`` entry, ``coverage_text``, plus the 2025
-    eui/ghg files. Neither ``manifest.json`` itself (self-hash is recursive)
-    nor anything under ``provenance/`` (the archived artifacts would
-    otherwise need their own provenance) is ever a member.
+    ``rules`` value, every ``tables`` entry, ``coverage_text``, the normalized
+    ``provision_index``, plus the 2025 eui/ghg files. Neither ``manifest.json``
+    itself (self-hash is recursive) nor anything under ``provenance/`` (the
+    archived artifacts would otherwise need their own provenance) is ever a
+    member.
     """
     outputs = set((manifest.get("rules") or {}).values())
     outputs.update(manifest.get("tables") or [])
@@ -152,6 +165,53 @@ def _check_entry_shape(code_id: str, name: str, entry) -> list[str]:
             f"{code_id}: provenance[{name!r}].source_verification "
             f"{entry['source_verification']!r} not in {sorted(SOURCE_VERIFICATIONS)}"
         )
+    artifacts = entry.get("source_artifacts")
+    if artifacts is not None:
+        where = f"{code_id}: provenance[{name!r}].source_artifacts"
+        if entry.get("source_verification") != "archived":
+            problems.append(f"{where} is only valid for an archived source")
+        if not isinstance(artifacts, list) or not artifacts:
+            problems.append(f"{where} must be a non-empty list")
+        else:
+            paths = []
+            for index, artifact in enumerate(artifacts):
+                item_where = f"{where}[{index}]"
+                if not isinstance(artifact, dict):
+                    problems.append(f"{item_where} is not an object")
+                    continue
+                if set(artifact) != SOURCE_ARTIFACT_KEYS:
+                    problems.append(
+                        f"{item_where} must have exactly "
+                        f"{sorted(SOURCE_ARTIFACT_KEYS)!r}"
+                    )
+                    continue
+                path = artifact["path"]
+                relative = (
+                    PurePosixPath(path)
+                    if isinstance(path, str)
+                    else PurePosixPath()
+                )
+                if (
+                    not isinstance(path, str)
+                    or not path
+                    or relative.is_absolute()
+                    or ".." in relative.parts
+                ):
+                    problems.append(
+                        f"{item_where}.path {path!r} is not a safe relative path"
+                    )
+                else:
+                    paths.append(path)
+                sha256 = artifact["sha256"]
+                if (
+                    not isinstance(sha256, str)
+                    or SHA256_RE.fullmatch(sha256) is None
+                ):
+                    problems.append(
+                        f"{item_where}.sha256 is not a lowercase SHA-256"
+                    )
+            if paths != sorted(paths) or len(paths) != len(set(paths)):
+                problems.append(f"{where} paths must be unique and sorted")
     return problems
 
 
@@ -174,6 +234,46 @@ def _check_archived_payload(code_id: str, manifest_dir: Path, name: str, entry: 
     """(d) every archived entry's payload exists and matches source_sha256."""
     if entry.get("source_verification") != "archived":
         return []
+    artifacts = entry.get("source_artifacts")
+    if artifacts is not None:
+        if not isinstance(artifacts, list) or not artifacts:
+            return []
+        problems = []
+        descriptor_sha256 = hashlib.sha256(
+            _canonical(artifacts).encode("utf-8")
+        ).hexdigest()
+        if descriptor_sha256 != entry.get("source_sha256"):
+            problems.append(
+                f"{code_id}: provenance[{name!r}] source_artifacts sha256 "
+                f"{descriptor_sha256!r} != source_sha256 "
+                f"{entry.get('source_sha256')!r}"
+            )
+        for index, artifact in enumerate(artifacts):
+            if (
+                not isinstance(artifact, dict)
+                or set(artifact) != SOURCE_ARTIFACT_KEYS
+                or not isinstance(artifact.get("path"), str)
+                or not isinstance(artifact.get("sha256"), str)
+            ):
+                continue
+            relative = PurePosixPath(artifact["path"])
+            if relative.is_absolute() or ".." in relative.parts:
+                continue
+            path = manifest_dir.joinpath(*relative.parts)
+            if not path.is_file():
+                problems.append(
+                    f"{code_id}: provenance[{name!r}].source_artifacts[{index}] "
+                    f"is missing at {path}"
+                )
+                continue
+            actual = _sha256(path)
+            if actual != artifact["sha256"]:
+                problems.append(
+                    f"{code_id}: provenance[{name!r}].source_artifacts[{index}] "
+                    f"hashes {actual!r}, recorded {artifact['sha256']!r}"
+                )
+        return problems
+
     archive_path = manifest_dir / "provenance" / _archive_name(name)
     expected = entry.get("source_sha256")
     if not archive_path.exists():
@@ -443,6 +543,28 @@ class TestEditionProvenance(unittest.TestCase):
                     if isinstance(entry, dict):
                         problems.extend(_check_archived_payload(code_id, manifest_dir, name, entry))
                 self.assertEqual([], problems, "\n".join(problems))
+
+    def test_provision_index_descriptor_pins_both_normalization_inputs(self):
+        expected_paths = {
+            "coverage/articles_8_4.json",
+            "provenance/provisions.result.json",
+        }
+        for code_id in codes.code_ids():
+            with self.subTest(code_id=code_id):
+                manifest_dir = necb_pkg._data_root() / code_id
+                manifest = _load_manifest(manifest_dir)
+                entry = manifest["provenance"][manifest["provision_index"]]
+                artifacts = entry.get("source_artifacts")
+                self.assertIsInstance(artifacts, list)
+                self.assertEqual(
+                    expected_paths,
+                    {artifact["path"] for artifact in artifacts},
+                )
+                for artifact in artifacts:
+                    self.assertEqual(
+                        _sha256(manifest_dir / artifact["path"]),
+                        artifact["sha256"],
+                    )
 
     def test_e_revision_addressable_entries_have_a_source_revision(self):
         for code_id in codes.code_ids():

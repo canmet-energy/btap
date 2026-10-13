@@ -84,6 +84,7 @@ native-tool config, unrelated to the Python client below):
 
 ```bash
 python3 python/scripts/fetch_necb_8_4_text.py
+python3 python/scripts/fetch_necb_provisions.py
 python3 python/scripts/building_stock.py --help
 ```
 
@@ -188,6 +189,15 @@ disposition stay code-family-neutral in `python/btap/codes/data/coverage/`.
 Refresh them only as a maintainer operation with
 `python3 python/scripts/fetch_necb_8_4_text.py` and review the generated-doc
 diff.
+
+The bounded decision-by-provision evidence indexes ship beside those caches at
+`coverage/provisions.json`. They contain identities and hierarchy, not copied
+requirement text; exact authorized hbix results are retained under each
+edition's `provenance/provisions.result.json`. Refresh both editions with
+`python3 python/scripts/fetch_necb_provisions.py`, then review the index,
+archive, manifest provenance, and targeted tests. Runtime and CI never call
+hbix. A missing entry means `not-indexed`; only an explicit authority-backed
+record or a complete parent inventory establishes `absent`.
 
 ## The AHJ register
 

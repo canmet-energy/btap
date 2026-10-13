@@ -41,6 +41,7 @@
   "coverage_text": "coverage/articles_8_4.json",
   "eui_targets": "eui_targets.json",
   "ghg_factors": "ghg_factors.json",
+  "provision_index": "coverage/provisions.json",
   "provenance": {
     "necb_rules.json": {
       "source": "self:btap.codes.compliance Part 8 Section 8.4 coverage declaration",
@@ -1097,6 +1098,68 @@
       "source_verification": "archived",
       "note": "NECB 2025 Part 11 operational GHG emissions: performance levels A-F and the provincial electricity / utility gas / fuel emission factors. Re-verified 2026-08-02 against the post-hbix-fix extraction (D-61).",
       "result_sha256": "feb064c470bd394e8b2e253f9822a0baa2e46676e76bbd0829aa9ff5a444fe00"
+    },
+    "coverage/provisions.json": {
+      "source": "mcp:necb:2025",
+      "request": [
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "A",
+          "section_number": "1.1.1.1",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "1.1.1.1",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.5.7.-B"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "A-8.4.5.13",
+          "include_sentences": false
+        },
+        {
+          "tool": "query_sections",
+          "code": "necb",
+          "edition": "2025",
+          "hierarchy_level": "article",
+          "section_pattern": "8.4.1.%",
+          "limit": 100
+        }
+      ],
+      "source_revision": null,
+      "source_sha256": "b14f3efd82b29630c22dbcb42b27049e0ebecfc4df4aaf3fba0589e381b01846",
+      "source_artifacts": [
+        {
+          "path": "coverage/articles_8_4.json",
+          "sha256": "6b9ca8c71c6ace55c85f5b4a7e2b4bd9c2fc01711d0dcbde0678c95056bfd904"
+        },
+        {
+          "path": "provenance/provisions.result.json",
+          "sha256": "90b08db89b0456324167b840621a614dbfb04cd7054a2337865b8a7709ab21ce"
+        }
+      ],
+      "extractor": "python/scripts/fetch_necb_provisions.py",
+      "retrieved": "2026-10-13",
+      "method": "generated",
+      "source_verification": "archived",
+      "note": "The retained provisions.result.json is the exact bounded set of authorized MCP tool results. source_artifacts is the canonical two-input descriptor and also pins coverage/articles_8_4.json, which supplies Section 8.4 structure and table-note identities without duplicating that cache.",
+      "result_sha256": "d6e211127fb7c8a4d1928e4da6aabdae9bc9afddf8c55a66c3dc400e4970bed3"
     }
   }
 }

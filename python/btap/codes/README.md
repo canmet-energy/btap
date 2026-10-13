@@ -219,6 +219,15 @@ Each edition's article text lives in that edition's own snapshot
 attributed in `data/coverage/ATTRIBUTION.md` — one notice covering all cached
 text — and is explicitly outside the GPL that covers the code.
 
+`btap.codes.provisions` validates exact offline provision identities from each
+ruleset's manifest-declared `coverage/provisions.json`. The bounded NECB corpus
+distinguishes Articles, Sentences, Clauses, Tables, table notes, Appendix
+notes, and qualified Division A provisions. `check_citation(code, citation)`
+returns `present`, authority-confirmed `absent`, `not-indexed`, `stale`, or
+`unsupported`; `validate_citation` raises the corresponding specific error for
+every non-present state. Exact authorized hbix payloads remain under the same
+edition's `provenance/`, and neither API performs network access.
+
 ## Tests
 
 ```bash

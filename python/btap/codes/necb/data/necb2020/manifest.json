@@ -32,6 +32,7 @@
     "tables/daylighting_controls_4_2_1_6.json"
   ],
   "coverage_text": "coverage/articles_8_4.json",
+  "provision_index": "coverage/provisions.json",
   "provenance": {
     "necb_rules.json": {
       "source": "self:btap.codes.compliance Part 8 Section 8.4 coverage declaration",
@@ -1045,6 +1046,68 @@
       "source_verification": "archived",
       "note": "THE CACHE IS THE RETAINED ARTIFACT, so source_sha256 == result_sha256 and no separate payload is stored: this document is the canonicalised output of one get_section call per Section 8.4 article, with page furniture stripped and each article parsed into a sentence/clause tree under strict sanity checks (an article that fails any check keeps parse_ok:false and its raw text). What is NOT retained is the raw per-article JSON-RPC result; re-fetching reproduces the cache, not a byte-identical payload set. Written by the Ruby fetcher at c7b0bf7 (2026-08-20), which the current python/scripts/fetch_necb_8_4_text.py ports with cache-schema parity; the Ruby original retired with the gems under D-84 and is reachable at that commit.",
       "result_sha256": "b6dd39c335524b8b2fd643328afa3745dfdfd6be7439fe5cefb3686759339c1d"
+    },
+    "coverage/provisions.json": {
+      "source": "mcp:necb:2020",
+      "request": [
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2020",
+          "division": "A",
+          "section_number": "1.1.1.1",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2020",
+          "division": "B",
+          "section_number": "1.1.1.1",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2020",
+          "division": "B",
+          "table_number": "8.4.4.7.-B"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2020",
+          "division": "B",
+          "section_number": "A-8.4.4.13",
+          "include_sentences": false
+        },
+        {
+          "tool": "query_sections",
+          "code": "necb",
+          "edition": "2020",
+          "hierarchy_level": "article",
+          "section_pattern": "8.4.1.%",
+          "limit": 100
+        }
+      ],
+      "source_revision": null,
+      "source_sha256": "e138b5bf4f5c135a4f9554bf8566c9259c8a49108ff1ff111c64e8bd8ab18ae6",
+      "source_artifacts": [
+        {
+          "path": "coverage/articles_8_4.json",
+          "sha256": "b6dd39c335524b8b2fd643328afa3745dfdfd6be7439fe5cefb3686759339c1d"
+        },
+        {
+          "path": "provenance/provisions.result.json",
+          "sha256": "81b8fdc2b410161a8fe1569a791ab50f0dbe6d0c1ceaf275ea121eda42f6179c"
+        }
+      ],
+      "extractor": "python/scripts/fetch_necb_provisions.py",
+      "retrieved": "2026-10-13",
+      "method": "generated",
+      "source_verification": "archived",
+      "note": "The retained provisions.result.json is the exact bounded set of authorized MCP tool results. source_artifacts is the canonical two-input descriptor and also pins coverage/articles_8_4.json, which supplies Section 8.4 structure and table-note identities without duplicating that cache.",
+      "result_sha256": "da28be5560f11da037c0737b478efaa7b1ed37a9eddd52295ad8723e09e00b3d"
     }
   }
 }

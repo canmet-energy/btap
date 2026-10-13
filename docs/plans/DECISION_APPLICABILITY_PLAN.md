@@ -1,0 +1,429 @@
+# Plan: decisions by code, edition and provision
+
+**Baseline at `fa8dbd3` (2026-10-13): 103 decisions exist. Of those, 68
+cite at least one code provision and 35 cite none. This plan covers only the
+68 citation-bearing decisions.**
+
+The audience is the Codes Committee. A committee member must be able to start
+with a code, edition and provision and answer:
+
+1. which D-NN decisions interpret or implement this provision;
+2. what each decision decided;
+3. which provision carries the same requirement in another edition; and
+4. which other codes or standards are governing, incorporated or related.
+
+The 35 decisions with no citations are deliberately out of scope. They remain
+in the decision registry because runtime rulings may cite them, but they do not
+appear in the committee provision view and this plan does not reclassify them.
+
+## One authored source, two generated views
+
+The canonical source remains one Markdown file per decision:
+`docs/decisions/D-NN.md`.
+
+Two generated projections serve different consumers:
+
+- `python/btap/codes/data/decisions.json` is the single machine-readable,
+  cross-code registry. Schema 2 adds requirement-level source records to the
+  existing decision data; it is not a second authored registry.
+- `docs/CODE_DECISIONS_BY_PROVISION.md` is the committee view, organized by
+  code, edition and provision.
+
+`docs/necb_decisions.md` remains the generated decision-first narrative.
+Nothing hand-edits any generated projection.
+
+## Canonical requirement and source shape
+
+A D-NN decision may contain several independent requirement identities. Each
+identity keeps its authored key and label, adds a short `decided` paraphrase,
+and carries one source record per relevant code and edition.
+
+```toml
+[articles.heat_pump_reference_by_source]
+label = "Reference system for a proposed heat pump, by heat source"
+decided = "Water-loop and other heat pumps follow different reference-system selection branches."
+
+[[articles.heat_pump_reference_by_source.sources]]
+code = "necb"
+edition = "2020"
+role = "governing"
+references = [
+  "8.4.4.13.(1)",
+  "8.4.4.13.(2)",
+  "Note A-8.4.4.13.",
+]
+
+[[articles.heat_pump_reference_by_source.sources]]
+code = "necb"
+edition = "2025"
+role = "governing"
+references = [
+  "8.4.5.13.(1)",
+  "8.4.5.13.(2)",
+  "Note A-8.4.5.13.",
+]
+
+[[articles.heat_pump_reference_by_source.sources]]
+code = "ashrae-62.1"
+edition = "2016"
+role = "incorporated-reference"
+references = [
+  "...",
+]
+```
+
+Rules:
+
+- `code` is a stable lower-case family id, not display text.
+- `edition` is a string. This permits years, addenda and future identifiers
+  without changing the schema.
+- `role` is one of:
+  - `governing`: the provision whose requirement this decision interprets or
+    implements;
+  - `incorporated-reference`: another code or standard invoked normatively by
+    the governing provision;
+  - `related`: useful cross-reference that does not govern compliance.
+- Only `governing` records determine decision applicability and primary
+  committee index placement.
+- `references` contains canonical provision identifiers. Articles, sentences,
+  clauses, tables, table notes and Appendix notes may remain together when
+  they jointly support one authored requirement.
+- `decided` is a committee-facing paraphrase, not copied Code text. It states
+  the result for this requirement rather than repeating a decision-wide
+  summary.
+- A requirement key and label remain the authored correspondence assertion.
+  Matching numbers or vocabulary never establish correspondence.
+- Every relevant edition is written explicitly, even when its provision
+  number is unchanged.
+- A structured source record is added only after its edition has been read
+  against the decision. Candidate numbering is not a source.
+
+The current top-level `editions` field becomes a compatibility projection for
+structured citation-bearing decisions: the generator derives its code ids
+from `governing` source records and refuses a conflicting authored value.
+Once all consumers read the derived projection, structured decisions stop
+authoring `editions` entirely. Citation-free decisions are outside this
+migration and retain their existing literals.
+
+## Generated JSON schema
+
+The existing `decisions.json` becomes schema 2. It keeps all decisions needed
+by runtime ruling resolution, while citation-bearing decisions gain
+requirement-level source records:
+
+```json
+{
+  "schema": 2,
+  "decisions": [
+    {
+      "id": "D-37",
+      "title": "Example title",
+      "summary": "Decision-wide summary",
+      "requirements": [
+        {
+          "id": "heat_pump_reference_by_source",
+          "label": "Reference system for a proposed heat pump, by heat source",
+          "decided": "Water-loop and other heat pumps follow different reference-system selection branches.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "8.4.4.13.(1)",
+                "8.4.4.13.(2)",
+                "Note A-8.4.4.13."
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "8.4.5.13.(1)",
+                "8.4.5.13.(2)",
+                "Note A-8.4.5.13."
+              ]
+            },
+            {
+              "code": "ashrae-62.1",
+              "edition": "2016",
+              "role": "incorporated-reference",
+              "references": [
+                "..."
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+There is no independently maintained JSON crosswalk. The generator parses the
+D-NN front matter, validates every source record and writes this projection.
+
+## Compliance-report compatibility
+
+This migration is report-neutral. The compliance HTML rulings appendix
+resolves the D-NN ids that fired and reads only each registry entry's `title`
+and `summary`; schema 2 preserves those top-level fields unchanged.
+Requirement `sources`, `decided` text and the committee provision index are
+not rendered in the compliance report.
+
+Therefore a metadata-only conversion must not change audit entries, verdicts,
+HTML appendix rows or frozen reports. Showing requirement-level source records
+inside the compliance HTML would be a separate product change with its own
+report tests and frozen-scenario review.
+
+## Committee view
+
+`docs/CODE_DECISIONS_BY_PROVISION.md` is generated from schema 2 and the
+validated provision indexes.
+
+Its order is:
+
+1. code;
+2. edition;
+3. division, part and section where those concepts exist;
+4. parent article or table; and
+5. decision id and requirement key.
+
+Each row contains:
+
+| Column | Meaning |
+|---|---|
+| Provision | Exact article, sentence, clause, table or note citations |
+| Decision | Link to the canonical D-NN narrative |
+| Requirement | Authored requirement label |
+| What was decided | The `decided` paraphrase |
+| Other editions | Governing counterparts in the same code family |
+| Other sources | Incorporated and related code or standard references |
+
+Only `governing` records create primary provision rows. Incorporated and
+related sources appear as cross-references so they cannot be mistaken for the
+provision that establishes NECB compliance.
+
+The document states that 35 citation-free decisions are omitted. During the
+migration, unconverted `articles.unverified` records appear in a final
+"Edition not yet attributed" table; they are never guessed into an edition's
+index.
+
+## Normative evidence
+
+The hbix Codes MCP is the authority for NECB 2020 and NECB 2025. The
+repository client is `btap._mcp.MCPClient("codes")`; retrieval uses
+`HBIX_API_KEY` from `.env` without printing it.
+
+The current `coverage/articles_8_4.json` files are insufficient because the
+68 decisions also cite:
+
+- tables and table notes;
+- Appendix notes;
+- Parts 1 through 6; and
+- Division A definitions.
+
+Add an edition-scoped normalized provision index, for example
+`coverage/provisions.json`, and retain the exact authorized MCP responses
+under that edition's `provenance/` directory. The normalized index preserves:
+
+- code and edition;
+- division;
+- provision kind;
+- canonical identifier;
+- parent provision;
+- title where redistribution is permitted;
+- available sentence, clause and note identifiers;
+- source retrieval metadata and payload hash; and
+- an explicit absent marker when the authority confirms no counterpart.
+
+The generator remains offline. It validates citations from committed indexes
+and never calls hbix during CI.
+
+For a related standard whose authoritative text is not available through an
+authorized repository source, retain only citation identifiers, provenance
+and hashes permitted by that source. Do not vendor or reproduce proprietary
+text merely to populate this registry.
+
+## Establishing an edition mapping
+
+A concrete source record means more than "this number exists." For each
+requirement:
+
+1. Read the governing provision in the claimed edition.
+2. Read all tables, notes and cross-referenced provisions on which the
+   decision depends.
+3. Compare the decision body and implementation with that edition's
+   requirement.
+4. Record the exact governing citations.
+5. Repeat independently for every other claimed edition.
+6. Add incorporated or related sources only with their role made explicit.
+
+Commit dates and numeric similarity are discovery aids, not proof. They are
+especially unsafe where the same number names different requirements in two
+editions. Runtime call sites, edition-specific modules and frozen audit
+records are evidence of where the implementation currently runs, but they do
+not replace reading the governing text.
+
+Text identity is likewise neither required nor sufficient. If two editions
+word a requirement differently but support the same decision, document the
+independent reading and map both. If the decisions differ by edition, split
+the requirement or the D-NN decision rather than hide the difference.
+
+## Current migration inventory
+
+The 68 citation-bearing decisions divide into:
+
+- 23 decisions already carrying concrete NECB 2020 and NECB 2025 mappings;
+  these migrate first to the generic `sources` representation and receive
+  `decided` text without changing their adjudication.
+- 45 decisions still carrying `articles.unverified`; these require edition
+  attribution and normative review.
+
+The 45 held decisions group by evidence work, not presumed edition:
+
+### Section 8.4-centered decisions (24)
+
+`D-03, D-04, D-05, D-07, D-09, D-11, D-12, D-13, D-14, D-16, D-18,
+D-19, D-28, D-34, D-35, D-37, D-41, D-42, D-43, D-45, D-53, D-55,
+D-58, D-64`
+
+D-37, D-41 and D-58 also depend on Appendix notes and therefore require the
+expanded provision evidence, not only the existing Section 8.4 article cache.
+
+### Mixed Section 8.4 and other provisions (10)
+
+`D-02, D-20, D-21, D-22, D-26, D-59, D-60, D-61, D-62, D-65`
+
+Do not split one semantic requirement merely because its citation chain
+crosses sections. A governing Article, the table it invokes and a Part 5
+minimum may belong to the same requirement identity and may share one source
+record.
+
+### Outside Section 8.4 (11)
+
+`D-06, D-15, D-17, D-23, D-24, D-31, D-32, D-63, D-74, D-76, D-85`
+
+These are ordinary migration work once the provision index covers their
+parts and divisions. They are not permanently unestablishable.
+
+## Implementation phases
+
+### Phase A - generic source schema and evidence
+
+1. Add the `sources` array-of-tables schema and role validation.
+2. Add `decided` validation.
+3. Add the normalized provision indexes and authenticated fetch tooling.
+4. Make the generator distinguish Articles, Tables, table notes, Appendix
+   notes and Division A provisions.
+5. Preserve legacy `articles.unverified` records during migration.
+
+### Phase B - generated projections
+
+1. Upgrade `decisions.json` to schema 2.
+2. Generate `docs/CODE_DECISIONS_BY_PROVISION.md`.
+3. Include unconverted decisions only in "Edition not yet attributed."
+4. Add the committee document to `generate_decisions.py --check` and the
+   path-unfiltered decisions workflow.
+
+### Phase C - convert the 23 established decisions
+
+Convert their existing requirement mappings to `sources`, author concise
+`decided` text and prove the generated JSON and committee rows preserve the
+current citations exactly.
+
+Convert every user of a shared requirement key together so correspondence
+cannot drift between decisions.
+
+### Phase D - establish the 45 held decisions
+
+Work in small batches sharing the same normative payloads:
+
+1. retrieve and archive both editions' governing provisions;
+2. identify the requirement identities;
+3. adjudicate each edition independently;
+4. author governing, incorporated and related source records;
+5. regenerate all projections; and
+6. leave the whole legacy holding record unchanged if the evidence is not
+   sufficient.
+
+The first useful batches are the decisions whose bodies already name their
+edition-specific provisions, followed by single-requirement Section 8.4
+decisions, Appendix-note cases, mixed citation chains and finally the broad
+multi-part decisions such as D-61.
+
+### Phase E - cross-check the implementation
+
+Compare the canonical source records against:
+
+- product Python `ruling=` and `article=` audit sites;
+- edition-specific modules and call sites;
+- each edition's coverage manifest; and
+- frozen audit baselines.
+
+These are checks against the canonical decision registry, never alternative
+inputs to it. A disagreement becomes an explicit defect or ledger item rather
+than silently changing the committee view.
+
+## Validation rules
+
+The generator must reject:
+
+- an unknown code, role or malformed edition;
+- an empty source record or references list;
+- duplicate `(code, edition, role, reference)` tuples;
+- a citation that does not exist in the claimed edition's provision index;
+- an Article presented as a Table, or the reverse;
+- a missing Appendix or table note;
+- an unqualified Division A citation;
+- an authored requirement with no `decided` text;
+- a governing source whose code and edition conflict with the derived
+  compatibility `editions` projection;
+- mixed legacy `unverified` and structured `sources` forms; and
+- a generated committee row for a citation-free decision.
+
+Tests must independently prove:
+
+- all 68 citation-bearing decisions appear exactly once in either a concrete
+  provision section or the temporary unattributed section;
+- all 35 citation-free decisions are absent from the committee view;
+- every primary row comes from a `governing` source;
+- incorporated and related sources never establish applicability;
+- every generated JSON source equals its canonical TOML source;
+- every committee row links to the correct D-NN decision and requirement;
+- same-number Article and Table citations remain distinct;
+- shared requirement keys carry consistent labels and governing mappings;
+  and
+- removing any output from the generator's `--check` set fails a test.
+
+## Gates on every decision change
+
+Regenerate all outputs in the same commit:
+
+```bash
+python3 python/scripts/generate_decisions.py
+python3 python/scripts/generate_decisions.py --check
+cd python && python3 -m unittest \
+  tests.necb.test_decisions_registry_sync \
+  tests.necb.test_decisions_registry \
+  tests.necb.test_decisions_generator
+```
+
+The path-unfiltered `.github/workflows/decisions.yml` gate must cover the
+committee document as well as both existing generated outputs.
+
+Metadata-only migrations do not require EnergyPlus, SDK simulations or
+scenario re-freezes. If adjudication changes runtime behavior, audit text,
+titles or summaries, that behavior change is separate and carries its normal
+tests and frozen-scenario update.
+
+Stage named paths only. Never hand-edit a generated output.
+
+## Stopping rule
+
+**A declared gap beats a plausible guess.** If the governing text, dependency
+closure, edition attribution or source role cannot be established, leave the
+decision in its legacy `articles.unverified` form and record the blocker in
+its body. The committee view will show it as not yet attributed rather than
+launder a candidate mapping into an authored assertion.
