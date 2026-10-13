@@ -618,9 +618,14 @@ def verify_baselines(scenario, manifest):
             problems.append(f"{scenario['id']}: baseline {name} does not "
                             "match its manifest sha256 — hand-edited?")
     if base.is_dir():
-        extras = {p.name for p in base.iterdir() if p.is_file()} - set(declared)
+        # EVERY entry, not just files. `is_file()` meant an undeclared
+        # SUBDIRECTORY was published with exit 0, blind to both the freeze
+        # and this gate (Fable, `231` R1). It cannot change a comparison —
+        # nothing reads it — but "a frozen directory is an exact set" was
+        # the claim, and it was false for anything that is not a file.
+        extras = {entry.name for entry in base.iterdir()} - set(declared)
         if extras:
-            problems.append(f"{scenario['id']}: undeclared file(s) in the "
+            problems.append(f"{scenario['id']}: undeclared entr(ies) in the "
                             f"baseline dir: {sorted(extras)} — frozen "
                             "directories are exact sets, like live run dirs")
     return problems

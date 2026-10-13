@@ -38,10 +38,15 @@ import sys
 import tempfile
 from pathlib import Path
 
+#: Keys this script ADDS to an authored scenario definition. The gate in
+#: `python/tests/necb/test_frozen_scenarios.py` carries the same set, and a
+#: new generated key has to be added to both.
+GENERATED_SCENARIO_KEYS = frozenset({"baseline_sha256", "produced_by"})
+
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-import runner  # noqa: E402
-import scenario_defs  # noqa: E402
+import runner
+import scenario_defs
 
 REPO_ROOT = runner.REPO_ROOT
 RUBY_CLI = REPO_ROOT / "btap-necb" / "exe" / "btap-compliance.rb"
@@ -183,7 +188,6 @@ def check_required_python_engines(scenarios):
         return
     try:
         import tbd
-
         from btap.codes.necb.envelope import thermal_bridging
     except ImportError as error:
         raise ValueError(
@@ -329,43 +333,264 @@ def tb_non_vacuity(run_dir, side):
     return problems
 
 
+#: IMMUTABLE records, guarded on EVERY path. D-84's final cross-language
+#: attestation names a specific commit and CI run, and D-103 keeps it:
+#: neither may be reduced nor recreated. A full freeze does not get to
+#: invent one.
+#:
+#: My first version guarded these only when a scope carried baselines
+#: forward, which left the full path unwired — mutating what `main()` passes
+#: as `final_attestation` to `{"commit": "1"*40, "run_id": 2}` passed 30
+#: tests, across every scoped-freeze test, the seal-transition suite and
+#: manifest integrity (Sol, `237`). And my "full freeze may move all of
+#: them" control ASSERTED that a fabricated attestation is accepted, which
+#: contradicts the decision it was meant to respect.
+IMMUTABLE_PROVENANCE = ("final_cross_language_attestation",
+                        "attestation_note")
+
+#: Fields a FULL freeze may legitimately move — it owns the whole corpus, so
+#: a changed seal tally is a real result — and a SCOPE may not, because it
+#: re-ran a subset and cannot speak for the rest.
+SCOPE_ONLY_PROVENANCE = ("active_seals", "retired_seals")
+
+#: Declared as data so `python/tests/test_scoped_freeze.py` can drop one
+#: field at a time and prove each is guarded.
+CORPUS_WIDE_PROVENANCE = SCOPE_ONLY_PROVENANCE + IMMUTABLE_PROVENANCE
+
+
+def assemble_scope(frozen, carried, baselines, previous, all_ids, runner,
+                   fail):
+    """Carry the unselected baselines in, verify everything, return the set.
+
+    Extracted from `main()` so the POSITIVE scoped-freeze path can be tested
+    without an engine. `228` asked for a successful synthetic scope proving
+    both the selected and carried sides, and `231` recorded that the
+    refusals were still only strings grepped out of this file. Neither is
+    testable while the logic lives inside the function that runs
+    EnergyPlus; `python/tests/test_scoped_freeze.py` now drives this.
+
+    `fail` is the caller's abort — `die` in production — so a test can
+    observe a refusal as an exception instead of a process exit.
+    """
+    for sc in carried:
+        source = runner.BASELINES / sc["id"]
+        if not source.is_dir():
+            # A scenario with no baseline FILES has no directory: Git does
+            # not store an empty one, so `internal-dead-remote` is absent on
+            # every fresh clone and in every new worktree — which is where
+            # DEVELOPERS.md says to freeze. Refusing there made `--scenario`
+            # unusable in its documented setting (Fable, `228`).
+            if sc.get("baseline_sha256"):
+                fail(f"{sc['id']} declares baselines but {source} is "
+                     "missing; a scoped freeze cannot carry forward a "
+                     "baseline that is not there.")
+            (baselines / sc["id"]).mkdir(parents=True)
+            continue
+        shutil.copytree(source, baselines / sc["id"])
+    frozen = frozen + carried
+    frozen.sort(key=lambda sc: all_ids.index(sc["id"]))
+
+    # The guard that makes a scoped freeze safe: the manifest it is about to
+    # write must describe EVERY defined scenario, and the staged tree must
+    # hold a directory for each. Anything less and the promotion deletes
+    # baselines while publishing a manifest that agrees with the deletion.
+    written = [sc["id"] for sc in frozen]
+    if written != all_ids:
+        fail("refusing to promote: the manifest would describe "
+             f"{len(written)} scenarios and {len(all_ids)} are defined. "
+             f"Missing {sorted(set(all_ids) - set(written))}, "
+             f"unexpected {sorted(set(written) - set(all_ids))}.")
+    absent = [i for i in all_ids if not (baselines / i).is_dir()]
+    if absent:
+        fail(f"refusing to promote: no staged baseline directory for "
+             f"{absent}")
+    # THE verification, for every entry — carried and re-run alike. A scope
+    # published a corrupted baseline under its stale hash and an undeclared
+    # extra file and reported success, because nothing compared the staged
+    # tree against the manifest about to describe it (Fable, `228`).
+    #
+    # I first wrote this as two checks, one at carry time against the
+    # committed hashes and this one at promotion time. The mutation matrix
+    # said the carry-time half caught nothing the staged half did not:
+    # disabling it killed no test, because for a carried entry the two
+    # manifests hold the same hashes. One check, in the place that covers
+    # every entry, is the whole property —
+    # `test_a_RE_RUN_scenario_whose_hash_is_wrong_refuses` is the case the
+    # carry-time version could never have caught.
+    staged_problems = []
+    previous_baselines = runner.BASELINES
+    runner.BASELINES = baselines
+    try:
+        for sc in frozen:
+            staged_problems.extend(
+                runner.verify_baselines(sc, {"scenarios": frozen}))
+    finally:
+        runner.BASELINES = previous_baselines
+    if staged_problems:
+        fail("refusing to promote: the staged tree does not match the "
+             "manifest about to describe it:\n  "
+             + "\n  ".join(staged_problems))
+    return frozen
+
+
+def assemble_manifest(frozen, previous, carried, this_producer,
+                      active_seals, retired_seals, final_attestation,
+                      dirty, commit, runner, fail, spec_sha256=None,
+                      sample_manifest_sha256=None):
+    """Build the manifest and GUARD the corpus-wide fields a scope must keep.
+
+    Extracted from `main()` for the same reason as `assemble_scope()`: the
+    property could not be executed while it lived inside the function that
+    runs EnergyPlus. `231` required a witness for the seal, attestation and
+    `spec_sha256` half specifically, and `233` measured the gap — removing
+    `final_cross_language_attestation` from the guarded tuple left all
+    sixteen scoped-freeze tests green, because the only thing watching it
+    was a source-substring assertion.
+
+    `fail` is the caller's abort, so a test sees a refusal as an exception
+    rather than a process exit.
+    """
+    counts = {}
+    for sc in frozen:
+        counts[sc["lane"]] = counts.get(sc["lane"], 0) + 1
+    if spec_sha256 is None:
+        spec_sha256 = runner.sha256(
+            REPO_ROOT / "verification" / "spec.json")
+    if sample_manifest_sha256 is None:
+        sample_manifest_sha256 = runner.sha256(
+            runner.PYTHON_ROOT / "scripts" / "sample_manifest.json")
+
+    manifest = {
+        "version": 2,
+        "spec_sha256": spec_sha256,
+        "provenance": {
+            # `commit` is INFORMATIONAL history: which commit produced this
+            # freeze. Nothing requires it to be reachable from a later HEAD
+            # (Sol, `227`) — that assertion proved only that a freeze commit
+            # remained in one Git lineage, and its two firings were
+            # self-created outages after squash merges rewrote the history it
+            # read.
+            "commit": commit, "dirty": dirty,
+            # The seven machinery hashes are GONE. A hash of `runner.py`
+            # proved that `runner.py` changed, not whether the change
+            # weakened comparison, and it made every file it covered
+            # expensive to touch: 28 of 89 manifest commits here touched no
+            # baseline file. The comparator's behaviour is tested directly in
+            # `python/tests/test_comparator_contract.py`.
+            #
+            # `spec_sha256` above is deliberately kept: it pins the
+            # adjudicated comparison RULES, which is a different claim from
+            # pinning the source of the code that applies them.
+            # WHO ran THIS freeze invocation. Per-scenario identity lives
+            # on each scenario entry as `produced_by`, because a scoped
+            # freeze leaves most baselines untouched and this block cannot
+            # describe them (Sol, `228`). A record, never a gate — no test
+            # compares either against the running machine, because a
+            # baseline frozen on one host must stay verifiable on another.
+            "openstudio_cli": this_producer["openstudio_cli"],
+            "producer": this_producer["producer"],
+            "producer_scope": ("this invocation only; see each scenario's "
+                               "`produced_by` for the baseline that bears "
+                               "it"),
+            "active_seals": active_seals,
+            "retired_seals": retired_seals,
+            "final_cross_language_attestation": final_attestation,
+            "attestation_note": "the final cross-language CI run validates "
+                                "its own ancestor commit; its immutable run "
+                                "identity is retained after product-Ruby retirement",
+        },
+        "corpus": {"generator": "python",
+                   "sample_manifest_sha256": sample_manifest_sha256},
+        "counts": counts,
+        "scenarios": frozen,
+        "uncovered": scenario_defs.UNCOVERED,
+    }
+    # A SCOPED freeze may change only what it re-ran. These fields describe
+    # the whole corpus or are immutable records, so a scope that moves one has
+    # a bug — and the count guard in `assemble_scope` cannot see it, because
+    # the scenario count stays right while the content is destroyed.
+    previous_provenance = previous.get("provenance") or {}
+    # THE IMMUTABLE HALF, on every path. A full freeze may re-seal; it may
+    # not mint a new D-84 attestation.
+    for field in IMMUTABLE_PROVENANCE:
+        if field in previous_provenance and (
+                manifest["provenance"].get(field)
+                != previous_provenance.get(field)):
+            fail("refusing to promote: provenance." + field + " is "
+                 "IMMUTABLE — D-84's final cross-language attestation names "
+                 "a specific commit and CI run, and D-103 keeps it: it may "
+                 "be neither reduced nor recreated.\n"
+                 f"  was: {json.dumps(previous_provenance.get(field))}\n"
+                 f"  now: {json.dumps(manifest['provenance'].get(field))}")
+    if carried:
+        for field in SCOPE_ONLY_PROVENANCE:
+            if manifest["provenance"].get(field) != previous_provenance.get(field):
+                fail("refusing to promote: a scoped freeze changed "
+                     f"provenance.{field}, which describes the whole corpus "
+                     "rather than the scenarios re-run.\n"
+                     f"  was: {json.dumps(previous_provenance.get(field))}\n"
+                     f"  now: {json.dumps(manifest['provenance'].get(field))}\n"
+                     "D-84's attestation in particular is immutable (Sol, "
+                     "`227`).")
+        if manifest["spec_sha256"] != previous.get("spec_sha256"):
+            fail("refusing to promote: a scoped freeze changed spec_sha256. "
+                 "The comparison rules moved, so every baseline needs "
+                 "re-verifying — run a full freeze.")
+    return manifest
+
+
 def promote(staged_baselines, staged_manifest, dest_baselines,
             dest_manifest, mover=shutil.move):
     """Backup-swap promotion (the export_goldens pattern): the previous
-    valid baselines+manifest survive ANY failed step — verified by a
-    negative control that injects a mover failure mid-promotion.
-    ``mover`` is injectable for exactly that control; production always
-    uses shutil.move."""
+    valid baselines+manifest survive failures injected before each move and
+    during either cross-device publication move, and a failed first
+    publication leaves neither newcomer standing. The two backup moves are
+    same-filesystem atomic renames in production. ``mover`` is injectable for
+    the negative controls; production always uses shutil.move."""
     backup_b = Path(str(dest_baselines) + f".backup.{os.getpid()}")
     backup_m = Path(str(dest_manifest) + f".backup.{os.getpid()}")
     moved_b = moved_m = False
+    existed_b = dest_baselines.exists()
+    existed_m = dest_manifest.exists()
     try:
-        if dest_baselines.exists():
+        if existed_b:
             mover(str(dest_baselines), str(backup_b))
             moved_b = True
-        if dest_manifest.exists():
+        if existed_m:
             mover(str(dest_manifest), str(backup_m))
             moved_m = True
         mover(str(staged_baselines), str(dest_baselines))
         mover(str(staged_manifest), str(dest_manifest))
     except BaseException:
-        # FULL rollback to the previous consistent state: a partial
-        # promotion (new baselines in, old manifest still current — the
-        # torn state the negative control reproduces) is rolled BACK, not
-        # left standing. Whatever now occupies a dest that has a backup is
-        # the unpromoted newcomer; remove it and restore the backup.
+        # A cross-device move may raise after copying some or all of the
+        # newcomer. Remove whatever occupies a vacated or formerly absent
+        # destination before restoring the previous pair.
+        if (moved_b or not existed_b) and dest_baselines.exists():
+            shutil.rmtree(str(dest_baselines))
+        if (moved_m or not existed_m) and dest_manifest.exists():
+            os.remove(str(dest_manifest))
         if moved_b and backup_b.exists():
-            if dest_baselines.exists():
-                shutil.rmtree(str(dest_baselines))
             shutil.move(str(backup_b), str(dest_baselines))
         if moved_m and backup_m.exists():
-            if dest_manifest.exists():
-                os.remove(str(dest_manifest))
             shutil.move(str(backup_m), str(dest_manifest))
         raise
     for backup in (backup_b, backup_m):
         if backup.exists():
             (shutil.rmtree if backup.is_dir() else os.remove)(str(backup))
+
+
+def publish_freeze(manifest, baselines):
+    """Write and atomically promote one fully assembled freeze."""
+    if baselines is None:
+        staging = Path(tempfile.mkdtemp(prefix="freeze-out-"))
+        baselines = staging / "baselines"
+        baselines.mkdir()
+    else:
+        staging = baselines.parent
+    staged_manifest = staging / "manifest.json"
+    staged_manifest.write_text(
+        json.dumps(manifest, indent=1) + "\n", encoding="utf-8")
+    promote(baselines, staged_manifest, runner.BASELINES, runner.MANIFEST)
 
 
 def producer_identity():
@@ -491,10 +716,49 @@ def producer_identity():
     return identity
 
 
-def main():
+def invocation_producer():
+    """The producer record for this invocation, with a soft CLI probe."""
+    openstudio_cli = None
+    try:
+        out = subprocess.run(
+            ["openstudio", "openstudio_version"], capture_output=True,
+            text=True, check=False, timeout=120)
+        if out.returncode == 0:
+            openstudio_cli = out.stdout.strip() or None
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return {"producer": producer_identity(),
+            "openstudio_cli": openstudio_cli}
+
+
+def load_freeze_environment():
+    """Load external state once; tests may supply the same data in memory."""
+    sample_manifest = runner.PYTHON_ROOT / "scripts" / "sample_manifest.json"
+    previous = {"scenarios": [], "provenance": {}}
+    if runner.MANIFEST.is_file():
+        previous = json.loads(runner.MANIFEST.read_text(encoding="utf-8"))
+    return {
+        "dirty": bool(git("status", "--porcelain")),
+        "commit": git("rev-parse", "HEAD"),
+        "slugs": json.loads(sample_manifest.read_text(
+            encoding="utf-8"))["samples"],
+        "previous": previous,
+        "producer": invocation_producer,
+        "spec_sha256": runner.sha256(
+            REPO_ROOT / "verification" / "spec.json"),
+        "sample_manifest_sha256": runner.sha256(sample_manifest),
+        "publish": publish_freeze,
+    }
+
+
+def main(environment=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--allow-dirty", action="store_true",
                     help="dev override, recorded in provenance")
+    ap.add_argument("--scenario", action="append", metavar="ID", default=None,
+                    help="re-freeze only these scenario ids, carrying every "
+                         "other baseline forward unchanged. Repeatable. "
+                         "Without it, every scenario is re-frozen.")
     args = ap.parse_args()
 
     # A FREEZE MAY ONLY RUN LOCALLY. Verifying against existing baselines on the
@@ -512,33 +776,122 @@ def main():
             "stack instead. Unset it to freeze; `remote` is for verifying "
             "against baselines that already exist.")
 
-    dirty = bool(git("status", "--porcelain"))
+    environment = environment or load_freeze_environment()
+    dirty = environment["dirty"]
     if dirty and not args.allow_dirty:
         die("dirty source tree — baselines must be reproducible from a "
             "commit SHA. Commit first (PR-1 commit 1), then freeze.")
 
-    slugs = json.loads((runner.PYTHON_ROOT / "scripts" / "sample_manifest.json")
-                       .read_text(encoding="utf-8"))["samples"]
+    slugs = environment["slugs"]
     scenarios = scenario_defs.all_scenarios(slugs)
+
+    # SCOPED re-freeze (Sol, `227`). A full 54-scenario freeze for one moved
+    # output is what made the machinery hashes expensive enough to defer a
+    # correctness fix; 28 of 89 manifest commits here were hash-only.
+    #
+    # The selected ids are re-run and every other baseline is carried
+    # forward verbatim, including its recorded hashes. That is only safe with
+    # the guard below: `promote` MOVES the whole baselines directory, so a
+    # scope that forgets to carry the rest would delete 53 baselines and
+    # write a manifest that agrees with the deletion.
+    every_scenario = list(scenarios)
+    all_ids = [sc["id"] for sc in every_scenario]
+    carried = []
+    # `previous` is the committed manifest, and BOTH paths pass it on: the
+    # scope needs it to carry baselines forward, and the manifest assembly
+    # needs it to guard the corpus-wide fields. It used to be assigned only
+    # inside the `--scenario` branch below, so an ordinary FULL freeze
+    # reached promotion assembly and died with
+    #
+    #     UnboundLocalError: cannot access local variable 'previous'
+    #
+    # after every expensive run (Sol, `237`). My full-freeze test called
+    # `assemble_manifest()` directly with a synthetic `previous`, so it
+    # never executed the branch it claimed to control — a helper test
+    # standing in for a call-site test.
+    #
+    # A full freeze owns the whole corpus, so an absent manifest is not an
+    # error here: the guards keyed on `carried` do not run, and an empty
+    # prior state is the honest description of "there was nothing before".
+    previous = environment["previous"]
+    if args.scenario:
+        wanted = list(dict.fromkeys(args.scenario))
+        unknown = [i for i in wanted if i not in all_ids]
+        if unknown:
+            die(f"--scenario: no such scenario(s) {unknown}. Ids come from "
+                "verification/scenarios/scenario_defs.py.")
+        if not runner.MANIFEST.exists():
+            die("--scenario needs an existing manifest to carry the "
+                "unselected baselines forward; there is none, so run a full "
+                "freeze first.")
+        known = {s["id"]: s for s in previous["scenarios"]}
+        missing = [i for i in all_ids if i not in known and i not in wanted]
+        if missing:
+            die(f"--scenario cannot carry {missing} forward: they are "
+                "defined but absent from the current manifest, so only a "
+                "full freeze can establish them.")
+        # A scope may only carry forward a definition that has NOT changed.
+        # Copying every unselected entry by id published the old contract for
+        # any scenario edited since the last freeze and reported success:
+        # `freeze.py --scenario B` after editing A froze B and silently kept
+        # A's stale contract (Sol, `228`).
+        #
+        # `baseline_sha256` is the only key the freeze adds, so the
+        # comparison is exact. A changed definition is ADDED to the selected
+        # set rather than refused: the author's intent is unambiguous, and
+        # re-running it is what makes the manifest true.
+        authored = {sc["id"]: sc for sc in every_scenario}
+        drifted = []
+        for scenario_id in all_ids:
+            if scenario_id in wanted:
+                continue
+            stored = {k: v for k, v in known[scenario_id].items()
+                      if k not in GENERATED_SCENARIO_KEYS}
+            if stored != authored[scenario_id]:
+                drifted.append(scenario_id)
+        if drifted:
+            print(f"scoped freeze: {len(drifted)} unselected definition(s) "
+                  f"changed since the last freeze, adding them: {drifted}",
+                  flush=True)
+            wanted = list(dict.fromkeys(wanted + drifted))
+        carried = [known[i] for i in all_ids if i not in wanted]
+        scenarios = [sc for sc in scenarios if sc["id"] in wanted]
+        print(f"scoped freeze: re-running {len(scenarios)}, carrying "
+              f"{len(carried)} forward", flush=True)
     check_env_hygiene(scenarios)
     try:
-        active_seals, retired_seals, final_attestation = seal_accounting(scenarios)
+        # From EVERY defined scenario, never the scoped subset. The manifest
+        # describes the whole corpus whichever scenarios were re-run, and
+        # these three fields are corpus-wide facts: the seal tallies and
+        # D-84's final cross-language attestation.
+        #
+        # Computing them from the subset is what my first `--scenario`
+        # implementation did, and it wrote `active_seals` 31/23 -> 0/1,
+        # `retired_seals` 29/2 -> 0/0, and
+        # `final_cross_language_attestation` -> null. Sol's `227` rules that
+        # attestation IMMUTABLE and says in terms not to reduce or recreate
+        # it. The count guard before the promotion did not see it, because
+        # the scenario COUNT was right; only the diff did.
+        active_seals, retired_seals, final_attestation = seal_accounting(
+            every_scenario)
         check_required_python_engines(scenarios)
     except ValueError as error:
         die(str(error))
     check_required_energyplus(scenarios)
 
-    cr = runner.load_compare_runs()
-    spec = cr.load_spec(REPO_ROOT / "verification" / "spec.json")
-
-    global CTX_CORPUS, CTX_LONE
-    work = Path(tempfile.mkdtemp(prefix="freeze-"))
-    CTX_CORPUS = runner.ensure_corpus(work)
-    CTX_LONE = runner.lone_epw(work)
-
-    staging = Path(tempfile.mkdtemp(prefix="freeze-out-"))
-    baselines = staging / "baselines"
+    cr = spec = work = None
+    baselines = None
+    if scenarios:
+        cr = runner.load_compare_runs()
+        spec = cr.load_spec(REPO_ROOT / "verification" / "spec.json")
+        global CTX_CORPUS, CTX_LONE
+        work = Path(tempfile.mkdtemp(prefix="freeze-"))
+        CTX_CORPUS = runner.ensure_corpus(work)
+        CTX_LONE = runner.lone_epw(work)
+        staging = Path(tempfile.mkdtemp(prefix="freeze-out-"))
+        baselines = staging / "baselines"
     frozen = []
+    this_producer = environment["producer"]()
 
     for sc in scenarios:
         print(f"== {sc['id']} ({sc['lane']}, seal={sc['seal'].split(':')[0]})",
@@ -622,60 +975,32 @@ def main():
                                                     encoding="utf-8")
         for f in sorted(dest.iterdir()):
             hashes[f.name] = runner.sha256(f)
-        frozen.append({**sc, "baseline_sha256": hashes})
+        # Producer identity PER SCENARIO (Sol, `228`). The manifest used to
+        # carry one global block describing "the engine stack that produced
+        # the baselines", and a scoped freeze recomputed it: running one
+        # scenario on host P1 rewrote the record for 53 baselines produced on
+        # P0, making it true for one and false for the rest. Preserving the
+        # old block globally would have been wrong the other way.
+        #
+        # This is evidence provenance, not a host gate: no test compares it
+        # against the running machine, because a baseline frozen on one host
+        # must stay verifiable on another.
+        frozen.append({**sc, "baseline_sha256": hashes,
+                       "produced_by": this_producer})
 
-    counts = {}
-    for sc in frozen:
-        counts[sc["lane"]] = counts.get(sc["lane"], 0) + 1
-    manifest = {
-        "version": 2,
-        "spec_sha256": runner.sha256(REPO_ROOT / "verification" / "spec.json"),
-        "provenance": {
-            "commit": git("rev-parse", "HEAD"), "dirty": dirty,
-            # The INTERPRETER MACHINERY is pinned too (post-merge review
-            # High): a change to what executes/normalizes/compares frozen
-            # baselines is a behaviour change and demands a re-freeze.
-            "freezer_sha256": runner.sha256(__file__),
-            "defs_sha256": runner.sha256(HERE / "scenario_defs.py"),
-            "runner_sha256": runner.sha256(HERE / "runner.py"),
-            # The API worker, the comparison semantics and the audit-scenario
-            # constructor execute or shape frozen runs too (post-9a review
-            # High): pinned with the rest of the machinery.
-            "api_worker_sha256": runner.sha256(HERE / "api_worker.py"),
-            "compare_runs_sha256": runner.sha256(
-                REPO_ROOT / "verification" / "compare_runs.py"),
-            "audit_scenario_sha256": runner.sha256(HERE / "audit_scenario.py"),
-            "gate_sha256": runner.sha256(
-                runner.PYTHON_ROOT / "tests" / "necb"
-                / "test_frozen_scenarios.py"),
-            "openstudio_cli": subprocess.run(
-                ["openstudio", "openstudio_version"], capture_output=True,
-                text=True, check=False).stdout.strip(),
-                # WHO produced this freeze. A record, never a gate — no
-            # test compares these against the running machine, because a
-            # baseline frozen on one host must stay verifiable on another.
-            "producer": producer_identity(),
-            "active_seals": active_seals,
-            "retired_seals": retired_seals,
-            "final_cross_language_attestation": final_attestation,
-            "attestation_note": "the final cross-language CI run validates "
-                                "its own ancestor commit; its immutable run "
-                                "identity is retained after product-Ruby retirement",
-        },
-        "corpus": {"generator": "python",
-                   "sample_manifest_sha256": runner.sha256(
-                       runner.PYTHON_ROOT / "scripts" / "sample_manifest.json")},
-        "counts": counts,
-        "scenarios": frozen,
-        "uncovered": scenario_defs.UNCOVERED,
-    }
-    (staging / "manifest.json").write_text(
-        json.dumps(manifest, indent=1) + "\n", encoding="utf-8")
+    scope_baselines = baselines if baselines is not None else Path()
+    frozen = assemble_scope(frozen, carried, scope_baselines, previous, all_ids,
+                            runner, die)
 
-    promote(baselines, staging / "manifest.json",
-            runner.BASELINES, runner.MANIFEST)
+    manifest = assemble_manifest(
+        frozen, previous, carried, this_producer, active_seals,
+        retired_seals, final_attestation, dirty, environment["commit"],
+        runner, die, spec_sha256=environment["spec_sha256"],
+        sample_manifest_sha256=environment["sample_manifest_sha256"])
+
+    environment["publish"](manifest, baselines)
     print(f"frozen {len(frozen)} scenarios "
-            f"({counts}), active seals {active_seals}, "
+            f"({manifest['counts']}), active seals {active_seals}, "
             f"retired seals {retired_seals}; manifest written")
 
 
