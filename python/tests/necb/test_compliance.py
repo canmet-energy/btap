@@ -181,9 +181,14 @@ class TestComplianceNoEngine(unittest.TestCase):
                          "(1) weather attach is implemented")
         determination = next((e for e in umbrella_coverage
                               if e.get("article") == "8.4.1.2."), None)
-        self.assertEqual("info",
-                         determination and determination.get("level"),
-                         "umbrella 8.4.1.2 implemented — info")
+        self.assertEqual("partial",
+                         determination and determination["inputs"]["status"],
+                         "umbrella 8.4.1.2 declares the per-block gap")
+        self.assertEqual("warning", determination.get("level"),
+                         "umbrella 8.4.1.2 partial coverage warns")
+        self.assertIn("Facility row", determination.get("action", ""),
+                      "warning names the aggregate reading that can hide a "
+                      "failing thermal block")
 
         report = json.loads(Path(result.run_dir,
                                  "report.json").read_text(encoding="utf-8"))
