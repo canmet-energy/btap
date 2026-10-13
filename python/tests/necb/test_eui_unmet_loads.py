@@ -851,6 +851,52 @@ class TestTheVerdictActuallyComposesIt(unittest.TestCase):
             self.assertIsInstance(
                 cooled, bool, f"{name}: a real boolean, not None")
 
+    def test_the_path_CONSULTS_the_cooling_attribution_comparison(self):
+        """A disagreement must reach the report, audit and (4)(a) verdict.
+
+        Direct tests of `cooling_attribution_disagreement` do not prove the
+        EUI path calls it. The shared engine fixture is heating-only, so the
+        building-wide presence flag is forced true solely to reach (4)(a)'s
+        non-vacuous branch; the real per-block map remains in place.
+        """
+        block = "THERMAL ZONE 1"
+        mismatch = {block: (False, True)}
+        with mock.patch.object(path, "_mechanical_cooling",
+                               return_value=True):
+            with mock.patch.object(
+                    path, "cooling_attribution_disagreement",
+                    return_value=mismatch) as compared:
+                result = self.run_eui()
+
+        compared.assert_called_once()
+        section = result.report["proposed"]
+        self.assertIn(block, section["unplaceable_cooling"])
+        self.assertEqual(
+            {block: [False, True]},
+            section["cooling_attribution_disagreement"])
+
+        attribution_warnings = [
+            entry for entry in result.audit.entries
+            if "COOLING ATTRIBUTION DISAGREES" in entry["action"]]
+        self.assertEqual(1, len(attribution_warnings))
+        self.assertEqual("warning", attribution_warnings[0]["level"])
+        self.assertEqual(block, attribution_warnings[0]["target"])
+
+        article = "8.4.1.2.(4)(a)"
+        unknown = [
+            entry for entry in result.audit.entries
+            if entry.get("article") == article
+            and entry["action"].startswith(
+                "which thermal blocks (4)(a) APPLIES to cannot be established")]
+        self.assertEqual(1, len(unknown))
+        self.assertEqual("warning", unknown[0]["level"])
+        self.assertFalse(
+            [entry for entry in result.audit.entries
+             if entry.get("article") == article
+             and entry["level"] == "decision"],
+            "an unresolved block must not receive the ordinary (4)(a) "
+            "decision")
+
     def test_the_criteria_reach_the_audit_on_a_real_run(self):
         result = self.run_eui()
         articles = [e.get("article") for e in result.audit.entries]

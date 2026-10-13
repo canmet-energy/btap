@@ -16,7 +16,7 @@ the shared five-zone fixture, 97 entries at the time of writing.
 
 ## The invariant
 
-Two independent traversals of the same object graph must agree:
+Two opposite-direction traversals of the same object graph must agree:
 
     OUTWARD   `_zone_mechanical_cooling` starts at each cooling object and
               resolves to the blocks it serves, via `sources()` and the
@@ -25,11 +25,14 @@ Two independent traversals of the same object graph must agree:
               serves it, via `targets()` from its equipment, terminal and
               air loop.
 
-They use OPPOSITE edges, so a bug in either surfaces as a disagreement rather
-than as a quiet wrong answer. Each of the three defects above is a
-disagreement: the VRF coil resolves inward and not outward; the unitary
-resolves inward and not outward; the terminal's coil resolves outward too
-widely.
+They use OPPOSITE edges, so a bug in either traversal usually surfaces as a
+disagreement rather than as a quiet wrong answer. Each of the three defects
+above is a disagreement: the VRF coil resolves inward and not outward; the
+unitary resolves inward and not outward; the terminal's coil resolves outward
+too widely. One dependency is intentionally shared: both traversals use
+`_has_downstream_relief_exchanger` to decide whether relief-side cooling is
+coupled back to supply. Their agreement cannot detect a direction error in
+that helper, so the dedicated relief-topology cases below guard it directly.
 
 `cooling_attribution_disagreement` is product code, not test code, so the
 invariant travels into every run rather than living only here (Sol's `227`).
@@ -429,7 +432,7 @@ class TestTheUnresolvedBranchAndTheOracle(unittest.TestCase):
                 self.assertEqual([], unplaceable)
 
     def test_the_two_walks_AGREE_on_every_DOAS_distance(self):
-        """The oracle is the independent witness, so it must be consulted.
+        """The opposite-direction walk witnesses this DOAS-distance class.
 
         `cooling_attribution_disagreement` compares an outward walk from
         cooling objects against an inward walk from blocks. It reported

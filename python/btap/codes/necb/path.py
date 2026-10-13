@@ -815,13 +815,12 @@ def _eui_compliance(model, *, ruleset, weather, hdd, run_dir, simulate,
             # mechanical cooling is provided" — one building-wide flag marks a
             # mixed building's uncooled blocks as cooled.
             cooling_map, unplaceable = _zone_mechanical_cooling(proposed)
-            # TWO INDEPENDENT WALKS, COMPARED IN EVERY RUN. The outward walk
-            # starts at cooling objects and asks which block each serves; the
-            # inward walk starts at blocks and asks what cools them. They
-            # consult different accessors, so a defect in one is visible as
-            # disagreement with the other — and a block the two disagree
-            # about is one whose cooling status this tool does not know,
-            # which is NOT the same as a block that is not cooled.
+            # TWO OPPOSITE-DIRECTION WALKS, COMPARED IN EVERY RUN. They are
+            # independent for object-to-block traversal, but both deliberately
+            # share `_has_downstream_relief_exchanger`; dedicated topology
+            # tests, not this comparison, guard that one direction judgement.
+            # A block they disagree about is one whose cooling status this
+            # tool does not know, not a block that is uncooled.
             #
             # Sol's `227 §G` asked for this in product rather than in a
             # test, "because every real run benefits from it". It earns that
@@ -836,9 +835,9 @@ def _eui_compliance(model, *, ruleset, weather, hdd, run_dir, simulate,
                     unplaceable.append(block)
                 audit.warn(
                     "proposed cooling attribution",
-                    "COOLING ATTRIBUTION DISAGREES BETWEEN TWO INDEPENDENT "
-                    "WALKS, so this block's cooling status is UNKNOWN and "
-                    "sentence (4) cannot be scoped to it",
+                    "COOLING ATTRIBUTION DISAGREES BETWEEN THE OUTWARD AND "
+                    "INWARD WALKS, so this block's cooling status is UNKNOWN "
+                    "and sentence (4) cannot be scoped to it",
                     target=block,
                     inputs={"outward_from_cooling_objects": outward,
                             "inward_from_the_block": inward},
@@ -1618,13 +1617,16 @@ def _relief_reaching_supply(oa_system):
 def _zone_cooling_inward(model) -> dict:
     """Which blocks have cooling, walked INWARD from each block.
 
-    The independent half of the attribution invariant. `_zone_mechanical_
-    cooling` starts at every cooling object and resolves OUTWARD to the
-    blocks it serves; this starts at every block and asks what serves IT.
-    The two use opposite edges of the same object graph — outward follows
-    `sources()` and the containment accessors, inward follows `targets()`
-    from a block's own equipment, terminal and air loop — so a bug in either
-    direction surfaces as a DISAGREEMENT rather than as a quiet wrong answer.
+    The opposite-direction half of the attribution invariant. `_zone_
+    mechanical_cooling` starts at every cooling object and resolves OUTWARD
+    to the blocks it serves; this starts at every block and asks what serves
+    IT. The two use opposite edges of the same object graph — outward follows
+    `sources()` and the containment accessors, inward follows `targets()` from
+    a block's own equipment, terminal and air loop — so a bug in either
+    traversal usually surfaces as a DISAGREEMENT rather than as a quiet wrong
+    answer. Both traversals share `_has_downstream_relief_exchanger`, however,
+    so only the dedicated relief-topology tests can detect a direction error
+    in that helper.
 
     That is the point. Every cooling-attribution defect in this file was
     found by a reviewer hand-building one topology at a time: a VRF coil the
@@ -1701,7 +1703,9 @@ def cooling_attribution_disagreement(model) -> dict:
 
     Empty is the expected answer. A non-empty result means one direction has
     a bug for this topology, and a caller must SAY so rather than pick a
-    side: which side is wrong is exactly what is not known.
+    side: which side is wrong is exactly what is not known. This is not an
+    oracle for their shared relief/exchanger direction helper; dedicated
+    topology tests guard that common dependency.
     """
     outward, _unplaceable = _zone_mechanical_cooling(model)
     inward = _zone_cooling_inward(model)

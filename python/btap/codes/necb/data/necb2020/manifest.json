@@ -43,7 +43,7 @@
       "method": "transcribed",
       "source_verification": "manual",
       "note": "The umbrella carries only article_coverage: what the pipeline itself determines. Article numbers and titles were transcribed from NECB 2020 Division B Section 8.4 and cross-checked against the building-codes MCP; the status/how/code fields are the pipeline's self-declaration and have no external source to re-fetch. The code pointers are checked by tests/test_coverage_code_refs.py, the article text by the packaged coverage/articles_8_4.json. The 20 h floor under 8.4.1.2.(4)'s cooling unmet-hours allowance moved from a code literal in compliance.py into this file (unmet_cooling.minimum_allowance_h) on 2026-09-08, multi-edition plan Stage 5; the value is unchanged and the source is unchanged.",
-      "result_sha256": "7fd84c3c6e905c804933e89c792901b2315874f247eed1f0277d4c8601999663"
+      "result_sha256": "0d39d5517418e3f9142963a3ffc4843904e5f3d5191e2d9b99c3d15a34593cd1"
     },
     "envelope_rules.json": {
       "source": "mcp:necb:2020",

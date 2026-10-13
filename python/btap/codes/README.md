@@ -24,8 +24,11 @@ The 8.4.1.2 determination:
   target of the reference
 - **(3)** unmet heating hours ≤ 100 h/year per THERMAL BLOCK, for both
   buildings where applicable — on the 8.4.4 path there is no reference
-  building, which is what "where applicable" admits. The Facility row is a
-  union over blocks and is not read for either sentence.
+  building, which is what "where applicable" admits. The implementation is
+  path-specific: the reference-building path currently reads each building's
+  Facility `unmet_occupied_hours` row, while the 8.4.4 archetype-EUI path
+  reads the proposed zone rows per thermal block and does not read the
+  Facility union.
 - **(4)** unmet cooling hours, and 2025 writes TWO branches with different
   subjects:
   - **(4)(b)**, "when complying with Subsection 8.4.5" — the proposed within
@@ -37,10 +40,11 @@ The 8.4.1.2 determination:
     (4)(b)'s allowance.
 
   Either branch applies to thermal blocks *"for which mechanical cooling is
-  provided"*, so the limit is evaluated per block and an uncooled block's
-  passive-overheating hours never enter it. A proposed building with no
-  mechanical cooling at all passes (4) vacuously, with the determination
-  audited.
+  provided"*. The reference-building path currently evaluates the proposed
+  and reference Facility rows and uses the proposed building-wide cooling flag
+  only to make (4)(b) vacuous when no mechanical cooling exists. The
+  archetype-EUI path evaluates (4)(a) per block, so an uncooled block's
+  passive-overheating hours never enter it.
 - **(5)** where (3)/(4) fail: capacities are **incrementally increased until
   the loads are met** — sizing factors bumped by `capacity_step` (default
   1.25, per failing thermal block where the data supports it), the building
