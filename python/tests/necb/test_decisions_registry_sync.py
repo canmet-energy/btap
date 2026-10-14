@@ -59,12 +59,12 @@ STRUCTURED_FIELDS = ("id", "title", "kind", "editions", "summary", "requirements
 #: What `btap.codes.decisions` and the report's rulings appendix read.
 RUNTIME_FIELDS = ("id", "title", "kind", "summary")
 MIGRATED_IDS = (
-    "D-03", "D-04", "D-07", "D-09", "D-11", "D-12", "D-13", "D-14",
-    "D-18", "D-19", "D-27", "D-28", "D-34", "D-35", "D-37", "D-38",
-    "D-39", "D-41", "D-42", "D-43", "D-45", "D-46", "D-47", "D-48",
-    "D-49", "D-50", "D-51", "D-52", "D-53", "D-54", "D-55", "D-56",
-    "D-57", "D-89", "D-90", "D-91", "D-92", "D-93", "D-97", "D-99",
-    "D-100", "D-101", "D-102",
+    "D-02", "D-03", "D-04", "D-07", "D-09", "D-11", "D-12", "D-13",
+    "D-14", "D-18", "D-19", "D-21", "D-26", "D-27", "D-28", "D-34",
+    "D-35", "D-37", "D-38", "D-39", "D-41", "D-42", "D-43", "D-45",
+    "D-46", "D-47", "D-48", "D-49", "D-50", "D-51", "D-52", "D-53",
+    "D-54", "D-55", "D-56", "D-57", "D-62", "D-89", "D-90", "D-91",
+    "D-92", "D-93", "D-97", "D-99", "D-100", "D-101", "D-102",
 )
 #: Phase D decisions moved from `unverified` to the structured form; the other
 #: 23 are Phase C's. Every digest below is of the decision's title and summary
@@ -75,7 +75,9 @@ PHASE_D_BATCH_1_IDS = (
 PHASE_D_BATCH_2_IDS = ("D-07", "D-09", "D-12", "D-14", "D-19", "D-53")
 PHASE_D_BATCH_3_IDS = ("D-03", "D-11", "D-13", "D-35", "D-41")
 PHASE_D_BATCH_4_IDS = ("D-04",)
+PHASE_D_BATCH_5_IDS = ("D-02", "D-21", "D-26", "D-62")
 MIGRATED_RUNTIME_SHA256 = {
+    "D-02": "0f39e8bb648ff77f85c91a14e7bf3376a5f82ff9b861f93c362d0c55b18d5a89",
     "D-03": "b8bd6e32d1b448ca31e1454ee7f4645ad65a867be66725c16d37523f584e27f5",
     "D-04": "1f72d5d11097cf5af4c7686e4905b19cb932978e25bfc4d585064c05d7807c5a",
     "D-07": "c2498de315ccb63d8596852486d32b39f4cc50a9ec1701d4360efceab333cbb0",
@@ -86,6 +88,8 @@ MIGRATED_RUNTIME_SHA256 = {
     "D-14": "ea8a906fde03b1f38f59a0b35d5c103a9bd603797b9aa569851cf5dac7d72d27",
     "D-18": "c3e6a182bad6cdbd8a2eb5256e4505bbddb370426272ae2773709f3f0ae4cc50",
     "D-19": "70f4908b849ef031140c3375b324a573dd6a0552d25305faffef1e04b0af0fae",
+    "D-21": "c6b4efee96b41c1a81152c437f1faa7005e737d2e35bae603dfdab5fa808545f",
+    "D-26": "1d9dbe8ca506598d0b9c4ffac8a68337ddc7ce5b98b325a7ada6457fee9bfb8e",
     "D-27": "25dfea7660112851261febd2cfe2c44eb2a54014d372a636afae08def6c58d07",
     "D-28": "39659f04a161b019ad9b4982ba1ef651d093661e469816ff410a2ef42571badc",
     "D-34": "9635c9859756a364f52688cf44de2f9f3e4b1103c73143881d4f883721ea9c05",
@@ -109,6 +113,7 @@ MIGRATED_RUNTIME_SHA256 = {
     "D-55": "16821c6af91a1f57e8b6ed249371c9584ae1c49088bd53c90d68dc5da0bd10d1",
     "D-56": "45fde852ece1c7fda7a6c634d82def8a24300d56b80e50fb8191ec30ff94e372",
     "D-57": "9aa89dd9b6f154800c5458b15442030ca5dc0c138bf94df932280fce2d7676da",
+    "D-62": "035f4d4416907045e6ef365017983fde8c92094f9338cc9a9530cf6601bf271c",
     "D-89": "d2d60bfd9baff780388a68fac64f41ded05363c1390e9a8457d2bb6fefa2dff5",
     "D-90": "80996e2dde0fa7797f6341bcdf7885a4358f96df2347c0f0695c2844dd536e59",
     "D-91": "e411f246aeb43f8c0d608b547a31e5668cdc5219983fe9ca5ac4381cee569efc",
@@ -122,8 +127,9 @@ MIGRATED_RUNTIME_SHA256 = {
 }
 #: Each migrated decision's requirement keys in AUTHORED order, as the
 #: sources record them. Phase C's 23 had them in the legacy front matter;
-#: Phase D's first twenty were authored with their structured form.
+#: Phase D's first twenty-four were authored with their structured form.
 MIGRATED_KEYS = {
+    "D-02": ("resolvable_space_type_inputs",),
     "D-03": ("water_cooled_chiller_eir_temperature_erratum",),
     "D-04": (
         "archetype_eui_applicability_and_target",
@@ -144,6 +150,11 @@ MIGRATED_KEYS = {
     "D-14": ("reference_operating_schedules",),
     "D-18": ("multizone_thermal_block_grouping",),
     "D-19": ("reference_default_air_leakage",),
+    "D-21": ("air_leakage_conditioned_enclosure_area",),
+    "D-26": (
+        "cooling_tower_capacity_and_cells",
+        "cooling_tower_fan_power",
+    ),
     "D-27": ("reference_hydronic_pump_power",),
     "D-28": (
         "common_ventilation_note_2",
@@ -185,6 +196,7 @@ MIGRATED_KEYS = {
         "daylighted_area_geometry",
         "reference_photocontrol_evaluation",
     ),
+    "D-62": ("economizer_cooling_stage_floor",),
     "D-89": (
         "boiler_part_load_fuel_curve",
         "furnace_part_load_fuel_curve",
@@ -240,6 +252,11 @@ MIGRATED_KEYS = {
 #: provision grammar would otherwise refuse as an alias. A key shared by
 #: several decisions appears once: it is one requirement.
 MIGRATED_REQUIREMENTS = {
+    "air_leakage_conditioned_enclosure_area": (
+        "Building-envelope area used to normalize modeled air leakage",
+        ("3.2.4.2.(1)(c)", "8.4.2.9.(2)"),
+        ("3.2.4.2.(1)(c)", "8.4.2.9.(2)"),
+    ),
     "annual_energy_end_use_accounting": (
         "Annual end uses accounted for by the energy model",
         ("8.4.2.2.(1)",),
@@ -270,6 +287,16 @@ MIGRATED_REQUIREMENTS = {
         "Common ventilation system permitted for Systems 1, 2 and 5",
         ("Table 8.4.4.7.-B Note (2)",),
         ("Table 8.4.5.7.-B Note (2)",),
+    ),
+    "cooling_tower_capacity_and_cells": (
+        "Cooling-tower capacity and cell count from nominal heat rejection",
+        ("8.4.4.11.(1)(a)", "8.4.4.11.(2)", "8.4.4.11.(3)"),
+        ("8.4.5.11.(1)(a)", "8.4.5.11.(2)", "8.4.5.11.(3)"),
+    ),
+    "cooling_tower_fan_power": (
+        "Cooling-tower fan power limit",
+        ("Table 5.2.12.2",),
+        ("Table 5.2.12.2",),
     ),
     "cooling_tower_part_load_capacity": (
         "Part-load cooling capacity of the reference cooling tower",
@@ -313,6 +340,21 @@ MIGRATED_REQUIREMENTS = {
          "part-load ratio"),
         ("8.4.5.4.(4)", "8.4.5.4.(5)", "8.4.5.4.(6)"),
         ("8.4.6.4.(4)", "8.4.6.4.(5)", "8.4.6.4.(6)"),
+    ),
+    "economizer_cooling_stage_floor": (
+        "Lowest cooling-stage capacity for a system with an air economizer",
+        (
+            "5.2.2.8.(4)",
+            "5.2.2.8.(5)",
+            "8.4.4.12.(1)",
+            "Table 8.4.4.12",
+        ),
+        (
+            "5.2.2.8.(4)",
+            "5.2.2.8.(5)",
+            "8.4.5.12.(1)",
+            "Table 8.4.5.12",
+        ),
     ),
     "fuel_fired_swh_part_load": (
         "Part-load fuel curve of the reference fuel-fired service water heater",
@@ -541,6 +583,11 @@ MIGRATED_REQUIREMENTS = {
         "Climatic data set that best represents the building site",
         ("8.4.2.3.(2)",),
         ("8.4.2.3.(2)",),
+    ),
+    "resolvable_space_type_inputs": (
+        "Resolvable space types for proposed-building systems and allowances",
+        ("4.2.1.6.(1)(b)", "8.4.3.1.(2)"),
+        ("4.2.1.6.(1)(b)", "8.4.3.1.(2)"),
     ),
     "selection_table_museum_rows": (
         ("Selection-table rows that can apply to a museum, gallery or "
@@ -1237,15 +1284,15 @@ class TestTheCommittedProvisionView(unittest.TestCase):
     """
 
     #: Phase C converted every established mapping (23 structured), then Phase
-    #: D's first four batches moved twenty held decisions to the structured
-    #: form (43), 45 held down to 25. Neither moves the 68 citation-bearing or
+    #: D's first five batches moved twenty-four held decisions to the structured
+    #: form (47), 45 held down to 21. Neither moves the 68 citation-bearing or
     #: the 35 citation-free totals. SOURCE_ROWS counts governing source records:
     #: D-04's two requirements and D-42's one have one source each; the other
-    #: 75 requirements have two. REQUIREMENTS counts requirement instances, a
+    #: 80 requirements have two. REQUIREMENTS counts requirement instances, a
     #: shared key once per decision that uses it.
-    STRUCTURED, ESTABLISHED, HELD, INCLUDED, OMITTED = 43, 0, 25, 68, 35
-    SOURCE_ROWS = 153
-    REQUIREMENTS = 78
+    STRUCTURED, ESTABLISHED, HELD, INCLUDED, OMITTED = 47, 0, 21, 68, 35
+    SOURCE_ROWS = 163
+    REQUIREMENTS = 83
 
     @classmethod
     def setUpClass(cls):
@@ -1317,20 +1364,22 @@ class TestTheCommittedProvisionView(unittest.TestCase):
             ),
         )
 
-    def test_phase_d_batches_are_twenty_of_the_structured_decisions(self):
-        """The twenty decisions these batches moved out of `unverified`,
-        beside Phase C's 23, and none of the 25 still held."""
+    def test_phase_d_batches_are_twenty_four_of_the_structured_decisions(self):
+        """The 24 decisions these batches moved out of `unverified`,
+        beside Phase C's 23, and none of the 21 still held."""
         phase_d = (
             set(PHASE_D_BATCH_1_IDS)
             | set(PHASE_D_BATCH_2_IDS)
             | set(PHASE_D_BATCH_3_IDS)
             | set(PHASE_D_BATCH_4_IDS)
+            | set(PHASE_D_BATCH_5_IDS)
         )
         self.assertEqual(8, len(set(PHASE_D_BATCH_1_IDS)))
         self.assertEqual(6, len(set(PHASE_D_BATCH_2_IDS)))
         self.assertEqual(5, len(set(PHASE_D_BATCH_3_IDS)))
         self.assertEqual(1, len(set(PHASE_D_BATCH_4_IDS)))
-        self.assertEqual(20, len(phase_d))
+        self.assertEqual(4, len(set(PHASE_D_BATCH_5_IDS)))
+        self.assertEqual(24, len(phase_d))
         self.assertLessEqual(phase_d, set(self.structured))
         self.assertEqual(23, len(set(self.structured) - phase_d))
         self.assertEqual(set(), phase_d & set(self.held))
@@ -1718,7 +1767,7 @@ HOLDING_KEYS = ("unverified", "not_applicable")
 
 
 class TestThePhaseCMigration(unittest.TestCase):
-    """Phase C converted every established mapping and Phase D's first twenty
+    """Phase C converted every established mapping and Phase D's first 24
     held decisions, read straight from the committed files: no legacy
     per-code-id shape survives in a converted source or registry entry, the
     registry projects each migrated requirement exactly as the literal tables

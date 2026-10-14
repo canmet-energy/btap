@@ -50,16 +50,38 @@
       "id": "D-02",
       "title": "Unresolvable space types are a hard error",
       "kind": "runtime",
-      "articles": {
-        "unverified": [
-          "8.4.3.1.(2)",
-          "4.2.1.6."
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "Before running a performance-path determination the pipeline checks every floor-area space type against the NECB catalog and raises an error (with did-you-mean suggestions) when one cannot be resolved. The earlier behaviour silently waived the lighting allowance for unmatched types, producing a compliance result that looked complete but was not. This is deliberately breaking for untagged models."
+      "summary": "Before running a performance-path determination the pipeline checks every floor-area space type against the NECB catalog and raises an error (with did-you-mean suggestions) when one cannot be resolved. The earlier behaviour silently waived the lighting allowance for unmatched types, producing a compliance result that looked complete but was not. This is deliberately breaking for untagged models.",
+      "requirements": [
+        {
+          "id": "resolvable_space_type_inputs",
+          "label": "Resolvable space types for proposed-building systems and allowances",
+          "decided": "A floor-area space whose NECB catalog entry cannot be resolved stops the determination with suggested matches instead of silently receiving no applicable allowance.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "4.2.1.6.(1)(b)",
+                "8.4.3.1.(2)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "4.2.1.6.(1)(b)",
+                "8.4.3.1.(2)"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-03",
@@ -629,16 +651,38 @@
       "id": "D-21",
       "title": "Envelope area for air leakage computed as the conditioned-space enclosure",
       "kind": "runtime",
-      "articles": {
-        "unverified": [
-          "3.2.4.2.(1)(c)",
-          "8.4.2.9.(2)"
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "The normalization area for default air leakage is the set of surfaces separating conditioned from unconditioned space. For an unconditioned attic that means the ceiling below it counts and the attic roof does not — both our implementation and the legacy library had been computing a roof-inclusive area, a shared conservative bias. The area is now built as the enclosure of the conditioned volume, and unconditioned spaces receive no infiltration object at all."
+      "summary": "The normalization area for default air leakage is the set of surfaces separating conditioned from unconditioned space. For an unconditioned attic that means the ceiling below it counts and the attic roof does not — both our implementation and the legacy library had been computing a roof-inclusive area, a shared conservative bias. The area is now built as the enclosure of the conditioned volume, and unconditioned spaces receive no infiltration object at all.",
+      "requirements": [
+        {
+          "id": "air_leakage_conditioned_enclosure_area",
+          "label": "Building-envelope area used to normalize modeled air leakage",
+          "decided": "The normalization area encloses conditioned space: include boundaries to outdoors, ground and unconditioned spaces, exclude an unconditioned attic's own surfaces, and install no infiltration object in that attic.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "3.2.4.2.(1)(c)",
+                "8.4.2.9.(2)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "3.2.4.2.(1)(c)",
+                "8.4.2.9.(2)"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-22",
@@ -706,16 +750,63 @@
       "id": "D-26",
       "title": "Heat-rejection fan power sums the condenser loop; sized tower hydraulics hardened",
       "kind": "runtime",
-      "articles": {
-        "unverified": [
-          "8.4.4.11.(2)-(3)",
-          "Table 5.2.12.2"
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "Tower fan power had been computed from a single chiller, so a two-chiller plant produced half the required value; heat rejection is now summed across all chillers on the loop after their capacities are final. Separately, re-running sizing with a hard-set code fan power can make the engine's tower heat-transfer solve fail, so the pass first freezes the previously solved flow and heat-transfer values — the code governs fan power, not the tower's heat-transfer sizing."
+      "summary": "Tower fan power had been computed from a single chiller, so a two-chiller plant produced half the required value; heat rejection is now summed across all chillers on the loop after their capacities are final. Separately, re-running sizing with a hard-set code fan power can make the engine's tower heat-transfer solve fail, so the pass first freezes the previously solved flow and heat-transfer values — the code governs fan power, not the tower's heat-transfer sizing.",
+      "requirements": [
+        {
+          "id": "cooling_tower_capacity_and_cells",
+          "label": "Cooling-tower capacity and cell count from nominal heat rejection",
+          "decided": "Nominal heat rejection is summed over every chiller on the condenser loop after capacities are final, and the resulting tower capacity determines the required cell count.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "8.4.4.11.(1)(a)",
+                "8.4.4.11.(2)",
+                "8.4.4.11.(3)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "8.4.5.11.(1)(a)",
+                "8.4.5.11.(2)",
+                "8.4.5.11.(3)"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cooling_tower_fan_power",
+          "label": "Cooling-tower fan power limit",
+          "decided": "Fan power is set from the final total heat rejection while preserving the engine's previously solved tower flow and heat-transfer values, which the table does not replace.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "Table 5.2.12.2"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "Table 5.2.12.2"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-27",
@@ -1965,17 +2056,42 @@
       "id": "D-62",
       "title": "Economizer systems' staged cooling gets the prescribed lowest-stage capacity floor",
       "kind": "runtime",
-      "articles": {
-        "unverified": [
-          "5.2.2.8.(4)-(5)",
-          "8.4.4.12.",
-          "8.4.5.12."
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "Air-economizer systems must incorporate cooling equipment that can operate below full capacity, with the lowest stage no more than a quarter of full capacity on systems of seventy kilowatts or more and no more than half on systems between twenty-five and seventy kilowatts. The reference building's staged rooftop units previously followed only the equal-increment staging rule, whose increment can leave a two- or three-stage unit in the seventy-to-two-hundred-kilowatt range with a lowest stage above the prescribed fraction. Staged cooling coils on loops that carry an air economizer now take a stage-count floor equal to the reciprocal of the prescribed fraction, raised above the incremental count when necessary and audited whenever the floor governs; every loop the floor can reach is above the economizer retention threshold, so the build-time economizer state is decisive and no reordering of the pipeline was needed. The sentence permitting outdoor-air reduction at the lowest stage is a permission rather than a requirement and is not exercised, because the staged supply-flow ratios are already floored at the minimum outdoor-air fraction. A four-stage unit with an economizer was gated through a clean simulation before the change landed, and the economizer coverage entry graduates from partial to implemented, its last declared gap closed."
+      "summary": "Air-economizer systems must incorporate cooling equipment that can operate below full capacity, with the lowest stage no more than a quarter of full capacity on systems of seventy kilowatts or more and no more than half on systems between twenty-five and seventy kilowatts. The reference building's staged rooftop units previously followed only the equal-increment staging rule, whose increment can leave a two- or three-stage unit in the seventy-to-two-hundred-kilowatt range with a lowest stage above the prescribed fraction. Staged cooling coils on loops that carry an air economizer now take a stage-count floor equal to the reciprocal of the prescribed fraction, raised above the incremental count when necessary and audited whenever the floor governs; every loop the floor can reach is above the economizer retention threshold, so the build-time economizer state is decisive and no reordering of the pipeline was needed. The sentence permitting outdoor-air reduction at the lowest stage is a permission rather than a requirement and is not exercised, because the staged supply-flow ratios are already floored at the minimum outdoor-air fraction. A four-stage unit with an economizer was gated through a clean simulation before the change landed, and the economizer coverage entry graduates from partial to implemented, its last declared gap closed.",
+      "requirements": [
+        {
+          "id": "economizer_cooling_stage_floor",
+          "label": "Lowest cooling-stage capacity for a system with an air economizer",
+          "decided": "A reference cooling coil on an air-economizer loop receives at least four equal stages at 70 kW or more and at least two above 25 kW; the optional lowest-stage outdoor-air reduction is not used.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "5.2.2.8.(4)",
+                "5.2.2.8.(5)",
+                "8.4.4.12.(1)",
+                "Table 8.4.4.12"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "5.2.2.8.(4)",
+                "5.2.2.8.(5)",
+                "8.4.5.12.(1)",
+                "Table 8.4.5.12"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-63",

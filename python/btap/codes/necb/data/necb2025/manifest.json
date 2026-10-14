@@ -1142,6 +1142,14 @@
           "limit": 100
         },
         {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "4.2.1.6",
+          "include_sentences": false
+        },
+        {
           "tool": "get_table",
           "code": "necb",
           "edition": "2025",
@@ -1182,6 +1190,29 @@
           "edition": "2025",
           "division": "B",
           "table_number": "8.4.6.5.-B"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "3.2.4.2",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.2"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "5.2.12.2",
+          "include_sentences": false
         },
         {
           "tool": "get_section",
@@ -1282,12 +1313,27 @@
           "code": "necb",
           "edition": "2025",
           "division": "B",
+          "section_number": "5.2.2.8",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.5.12"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
           "section_number": "A-8.4.5.14.(2)",
           "include_sentences": false
         }
       ],
       "source_revision": null,
-      "source_sha256": "267bd74e56c90a2cc6ad383264f647c57bdeaca074997eb7aad84592e9ac2e57",
+      "source_sha256": "a1dcc61027c04eb9217bf79b9cb1794891f2713fbc2eaef82f266956e7bcbbd5",
       "source_artifacts": [
         {
           "path": "coverage/articles_8_4.json",
@@ -1295,7 +1341,7 @@
         },
         {
           "path": "provenance/provisions.result.json",
-          "sha256": "5a19c0535f189c860478fca1edf0bcc166b83c35c9bc27ce33b918299c2ea480"
+          "sha256": "4b9511606718df72600ab041930d1f5d5b8e00fa9c1b420e25497d95bd8c7181"
         }
       ],
       "extractor": "python/scripts/fetch_necb_provisions.py",
@@ -1303,7 +1349,7 @@
       "method": "generated",
       "source_verification": "archived",
       "note": "The retained provisions.result.json is the exact bounded set of authorized MCP tool results. source_artifacts is the canonical two-input descriptor and also pins coverage/articles_8_4.json, which supplies Section 8.4 structure and table-note identities without duplicating that cache.",
-      "result_sha256": "01d1649215c515e96cd9f8d9cd901ecc97b28a7cea26845ac1d32f8f13ce4ac1"
+      "result_sha256": "416c31620d9b3928c7a5cb548a21859269db8fca4c84c1e7ffc2e76f1863c00c"
     }
   }
 }

@@ -390,8 +390,9 @@ multi-part decisions such as D-61.
 Status: in progress. Batch 1 established D-18, D-28, D-34, D-37, D-42,
 D-43, D-45 and D-55. Batch 2 established D-07, D-09, D-12, D-14, D-19 and
 D-53. Batch 3 established D-03, D-11, D-13, D-35 and D-41. Batch 4 established
-D-04. The committee view has moved from 23 structured and 45 held decisions to
-43 and 25, with the 68
+D-04. Batch 5 established the mixed-section decisions D-02, D-21, D-26 and
+D-62. The committee view has moved from 23 structured and 45 held decisions to
+47 and 21, with the 68
 citation-bearing and 35 citation-free totals unchanged. The compliance report
 is byte-identical because titles and summaries stayed unchanged. D-28 and D-34
 gained body notes that record later applicability corrections; D-14's body now
@@ -458,6 +459,19 @@ provision indexes and against the implementation.
   proposed-building inputs in 8.4.4.2.(1) and Table 8.4.4.2. The latter
   requirement governs the check-then-reuse-or-rerun decision; the needed
   article and table payloads were retained in the 2025 provision archive.
+- D-02 keeps 4.2.1.6.(1)(b)'s space-type allowance lookup and
+  8.4.3.1.(2)'s model-accounting requirement together. An unresolved catalog
+  entry therefore stops the determination instead of silently waiving an
+  allowance.
+- D-21 follows the explicit chain from the leakage equation in 8.4.2.9.(2)
+  to 3.2.4.2.(1)(c), so the normalization area is the enclosure of conditioned
+  space rather than every roof and wall on an unconditioned attic.
+- D-26 separates the cooling-tower capacity and cell-count rules in
+  8.4.x.11.(1)(a), (2) and (3) from the fan-power limit in Table 5.2.12.2.
+  Both decisions use the final aggregate heat rejection of the loop.
+- D-62 keeps the Part 5 lowest-stage fractions and the performance-path
+  outside-air-cooling article/table in one requirement. That chain establishes
+  the stage-count floor only for reference systems assigned an air economizer.
 
 Runtime citation defects found while reading the implementation are Phase E
 items. Nothing was moved in the audit output here:
@@ -475,6 +489,16 @@ items. Nothing was moved in the audit output here:
   mapping.
 - D-41: `shw/reference.py` still describes the old unverified gap rather than
   the current clone treatment and D-53 closure.
+- D-02: the hard-error audit site cites broad `4.2.1.6.` in a compound string
+  rather than the exact space-type clause 4.2.1.6.(1)(b).
+- D-21: both leakage audit sites omit 3.2.4.2.(1)(c), and the proposed-model
+  warning also uses the non-canonical range `8.4.3.3.(3)-(4)`.
+- D-26: the tower cell audit hard-codes the 2020 article and a non-canonical
+  range on every edition. The fan-power audit cites D-22 instead of D-26 even
+  though D-26 owns the aggregate-loop correction and hydraulic hardening.
+- D-62: the staging audit receives the combined range
+  `5.2.2.8.(4)-(5)` from the rules data rather than an exact applicable
+  sentence.
 - D-19: the warning at `envelope/reference.py` uses the non-canonical range
   `8.4.3.3.(3)-(4)` and all audit strings need edition-correct canonical
   citations.

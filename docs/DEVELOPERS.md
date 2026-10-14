@@ -197,10 +197,11 @@ on a `decisions: note` line.
 `requirements` instead of `articles`.
 
 Phase C converted the 23 decisions that carried an established per-code-id
-mapping, so the view prints no Transitional summaries. Phase D's first four
-batches then established twenty held decisions directly in the structured
-form (D-03, D-04, D-07, D-09, D-11, D-12, D-13, D-14, D-18, D-19, D-28,
-D-34, D-35, D-37, D-41, D-42, D-43, D-45, D-53 and D-55), for 43 in all. Every
+mapping, so the view prints no Transitional summaries. Phase D's first five
+batches then established 24 held decisions directly in the structured form
+(D-02, D-03, D-04, D-07, D-09, D-11, D-12, D-13, D-14, D-18, D-19, D-21,
+D-26, D-28, D-34, D-35, D-37, D-41, D-42, D-43, D-45, D-53, D-55 and D-62),
+for 47 in all. Every
 other decision still holds `unverified` or `not_applicable`.
 `tests/necb/test_decisions_registry_sync.py` pins the converted ids and each
 converted mapping and fails if any other decision takes a per-code-id mapping;
