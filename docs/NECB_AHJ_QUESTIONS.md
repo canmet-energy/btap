@@ -108,18 +108,18 @@ nonconformity with 8.4.x.9.(6)(e).
 
 ## How often a run is conditional, measured
 
-**76% of the frozen corpus — 29 of the 38 scenarios carrying an audit — would
-return a CONDITIONAL determination if run annually.** Re-measured 2026-10-09
-after D-101 by resolving every `ahj` citation in every frozen audit against
-this register's own statuses. By id: AHJ-15 on 14 scenarios, AHJ-1 on 13,
-AHJ-14 on 12, AHJ-3 on 4, AHJ-5 on 3, AHJ-16 on 2.
+**74% of the frozen corpus — 32 of the 43 scenarios carrying an audit — would
+return a CONDITIONAL determination if run annually.** Re-measured 2026-10-14
+after the Phase E re-freeze by resolving every `ahj` citation in every frozen
+audit against this register's own statuses. Conditional-id counts are by unique scenario:
+AHJ-15 on 16, AHJ-14 on 15, AHJ-1 on 11, AHJ-3 on 4, AHJ-22 on 3, AHJ-10,
+AHJ-12 and AHJ-16 on 2 each, and AHJ-2 and AHJ-7 on 1 each.
 
-It was 69% (25 of 36) on 2026-10-08, and the rise is a consequence of D-101
-rather than a new question. Five scenarios NEWLY cite AHJ-15 — samples 02, 03
-and 04 across their tiers — because AHJ-15 is about the one-unit-per-thermal-
-block topology, and that topology is now what a reference System 3 or 4 is.
-Two scenarios were added: the full-year determination witnesses for AHJ-1/AHJ-3
-and for AHJ-16.
+The earlier measurements remain historical: 69% (25 of 36) on 2026-10-08 and
+76% (29 of 38) on 2026-10-09. The current corpus has five more audit-bearing
+scenarios. Phase E's new AHJ-7 and AHJ-22 disclosures add one newly conditional
+scenario, `corpus-none-15-general-3storey`; their other frozen witnesses were
+already conditional for independent choices.
 
 One caveat on the comparison, since the number is cited elsewhere: re-running
 this method over the PRE-D-101 baselines gives 24 of 36 (67%), not the recorded

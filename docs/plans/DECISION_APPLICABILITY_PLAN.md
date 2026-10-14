@@ -631,6 +631,42 @@ These are checks against the canonical decision registry, never alternative
 inputs to it. A disagreement becomes an explicit defect or ledger item rather
 than silently changing the committee view.
 
+Status: done on 2026-10-14. The cross-check closed every Phase E item above:
+
+- Runtime audit sites now use exact, edition-correct citations for D-02, D-06,
+  D-15, D-18, D-19, D-21, D-22, D-23, D-26, D-32, D-34, D-37, D-45, D-62,
+  D-76 and D-85. Independent requirements emit independent records instead of
+  semicolon-delimited citation bundles.
+- D-05 now retains each proposed outdoor-air specification under
+  8.4.4.2.(2). D-24 withholds the enclosed-space credit when the model cannot
+  prove the adjacent attic, roof or crawl space is unvented, applies the
+  exterior table requirement conservatively, and discloses each paired
+  conditioned-to-conditioned boundary once where the greater-than-10 C limb
+  cannot be established.
+- D-03 and D-07 are runtime decisions. Corrected water-cooled Scroll and
+  Reciprocating chiller curves cite AHJ-7, and every reached reference
+  cooling-tower loop cites the new AHJ-22. Both are
+  `alternative-solution` dispositions and make affected determinations
+  conditional rather than calling a non-literal substitute compliant. D-20's
+  System 1 economizer omission now warns as an unestablished implementation
+  choice instead of presenting a held exception as settled.
+- D-11's rules metadata now describes D-93 one-to-one pump correspondence;
+  D-41 recognizes D-53's part-load closure; and the report-visible metadata
+  for D-03, D-05, D-07, D-11, D-24, D-41, D-59, D-60, D-61, D-65 and D-76
+  states the current behavior without the prior overclaims. D-58's service
+  scopes and D-101 block multiplicity were checked and required no code
+  change.
+- Generated decision, AHJ and edition-delta projections are current. The rule
+  manifests have no orphan keys, import contracts and Ruff pass, and the
+  focused archetype, envelope, HVAC, determination, report, decision-registry
+  and AHJ suites pass.
+- The clean-tree freeze at source commit `4501aaa` ran all 54 scenarios twice
+  (36 `python`, 6 `verify`, 12 `parity`) and passed determinism and
+  non-vacuity checks. No proposed/reference energy result, compliance result
+  or tier moved. `determination-05-19-corner-block-annual` gained AHJ-7 and
+  AHJ-22 beside its existing AHJ-10/AHJ-14 conditions, and the exact scenario
+  contract pins that list.
+
 ## Validation rules
 
 The generator must reject:

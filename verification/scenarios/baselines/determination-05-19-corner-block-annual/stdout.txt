@@ -23,18 +23,29 @@ Unmet hours  heating 0.0 / 23.5 h    cooling 0.0 / 0.0 h
 ------------------------------------------------------------------
 
   *** NOT A CODE-COMPLIANT DETERMINATION ***
-  2 question(s) in the AHJ register (AHJ-10, AHJ-14) were raised by this
+  4 question(s) in the AHJ register (AHJ-7, AHJ-10, AHJ-14, AHJ-22) were raised by this
   run's modelling choices and require approval before the comparison above
   can support compliance. It is INFORMATIONAL only and is not evidence of
   compliance.
-  Governing: 8.4.5.2.; NECB 2020 Table 5.2.12.1.-N; Table 8.4.4.7.-B Note (3)
+  Governing: 8.4.5.2.; 8.4.5.6.(1); NECB 2020 Table 5.2.12.1.-N; Table 8.4.4.7.-B Note (3); Table 8.4.5.5.-C
     - Thermal Zone 1
     - Primary Boiler
+    - Primary Chiller WaterCooled Scroll
+    - Secondary Chiller WaterCooled Scroll
+    - Cooling Tower Single Speed 1
 
   CONDITIONAL: the authority having jurisdiction must accept the conditions
   below. Each says whether it is an ALTERNATIVE SOLUTION — the text decides
   the requirement and this tool does not meet it — or an INTERPRETATION the
   text does not settle.
+    - AHJ-7 (alternative-solution): three published chiller EIR_FT
+      rows are arithmetically wrong — an ALTERNATIVE SOLUTION, which
+      the text DECIDES and this tool does not meet — accepting it
+      means accepting an explicitly identified non-conforming
+      substitution. Applies to: Primary Chiller WaterCooled Scroll,
+      Secondary Chiller WaterCooled Scroll — each of the 2 choices
+      above makes this same departure; the conditions list carries
+      what was established at each one
     - AHJ-10 (referral): how corner thermal blocks are grouped — an
       INTERPRETATION the acceptable-solution text does not settle.
       Applies to: Thermal Zone 1 — corner thermal blocks assigned to
@@ -46,6 +57,14 @@ Unmet hours  heating 0.0 / 23.5 h    cooling 0.0 / 0.0 h
       furnace takes — an INTERPRETATION the acceptable-solution text
       does not settle. Applies to: Primary Boiler — boiler
       efficiency applied
+    - AHJ-22 (alternative-solution): cooling-tower capacity
+      equations replaced by the engine Merkel model — an ALTERNATIVE
+      SOLUTION, which the text DECIDES and this tool does not meet —
+      accepting it means accepting an explicitly identified non-
+      conforming substitution. Applies to: Cooling Tower Single
+      Speed 1 — prescribed cooling-tower capacity equations are NOT
+      installed — the engine Merkel effectiveness-NTU model is
+      retained as an alternative solution
 
   VERDICT: COMPLIANT - INFORMATIONAL, AND CONDITIONAL ON APPROVAL BY THE
            AUTHORITY HAVING JURISDICTION
@@ -54,4 +73,4 @@ Unmet hours  heating 0.0 / 23.5 h    cooling 0.0 / 0.0 h
 
   Audit    <RUN_DIR>/audit.txt
   Data     <RUN_DIR>/report.json
-  41 warning(s) recorded - see audit.txt
+  55 warning(s) recorded - see audit.txt

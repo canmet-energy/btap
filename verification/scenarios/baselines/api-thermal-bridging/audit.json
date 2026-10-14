@@ -48,6 +48,7 @@
   "inputs": {
    "storeys": 1
   },
+  "article": "Table 8.4.4.7.-B Note (3)",
   "ruling": "D-18",
   "building": "reference building",
   "level": "info"
@@ -310,7 +311,7 @@
   "action": "HVAC System Selection (Tables -A/-B) \u2014 implemented: Category election per Table -A (space type + storeys + cooling-kW threshold), closest-type fallback per sentence (3), residential special rules (D-34: heat-pump blocks take the sentence-(4) ASHP redirect before the compatible-cooling copy; water-loop HPs fall back to the Table -A rules per D-37), HP redirect per sentence (4), and the D-39 System 5 conditional (Table -B heating 'None' honoured for cooled-but-unheated blocks; 8.4.4.1.(5) presence override keeps the changeover heating when the proposed block heats).",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 0,
+   "decisions_citing": 1,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#select_reference_systems",
     "python/btap/codes/necb/hvac/reference.py#_assign"
@@ -721,7 +722,7 @@
  },
  {
   "step": "coverage",
-  "action": "Hydronic Pumps \u2014 implemented: Table 8.4.4.14. riding-curve coefficients + below-D minimum-flow clamp on every reference PumpVariableSpeed ((4)-(5)), applied POST-SIZING by the efficiency pass; proposed combined peak W/(L/s) per plant-loop type transferred to reference pump rated power ((1)-(3), needs the sized proposed via apply_efficiencies proposed:) \u2014 unknown proposed pumps or unsized flows warn loudly. D-38: the transferred power is then clamped min-wins at the Table 5.2.6.3 combined-pump maximum (W per kW of loop peak thermal demand; 8.4.4.1.(2) makes Part 5 a ceiling for the reference).",
+  "action": "Hydronic Pumps \u2014 implemented: Table 8.4.4.14 riding-curve coefficients + below-D minimum-flow clamp on every reference PumpVariableSpeed ((4)-(5)), applied POST-SIZING by the efficiency pass. D-93 transfers pump power only where one-to-one proposed/reference correspondence is established and declines unmatched loops loudly. D-38 then applies the Table 5.2.6.3 combined-pump maximum.",
   "inputs": {
    "status": "implemented",
    "decisions_citing": 0,
@@ -957,7 +958,7 @@
   "step": "prescriptive",
   "action": "film convention",
   "value": "code-literal: table U treated as overall transmittance incl. air films (1.4.1.2 definition; films subtracted from construction)",
-  "article": "1.4.1.2.",
+  "article": "Division A 1.4.1.2.(1)",
   "ruling": "D-23",
   "building": "reference building",
   "level": "info"
@@ -966,8 +967,26 @@
   "step": "prescriptive",
   "target": "Surface 1",
   "action": "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
-  "article": "Table 3.2.3.1.; 3.2.3.3.(3)",
+  "article": "3.2.3.3.(3)",
   "ruling": "D-32",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "prescriptive",
+  "target": "Surface 10 / Surface 27",
+  "action": "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
+  "article": "Division A 1.4.1.2.(1)",
+  "ruling": "D-24",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "prescriptive",
+  "target": "Surface 11 / Surface 3",
+  "action": "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
+  "article": "Division A 1.4.1.2.(1)",
+  "ruling": "D-24",
   "building": "reference building",
   "level": "warning"
  },
@@ -988,7 +1007,7 @@
   "step": "prescriptive",
   "target": "Surface 13",
   "action": "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
-  "article": "Table 3.2.3.1.; 3.2.3.3.(3)",
+  "article": "3.2.3.3.(3)",
   "ruling": "D-32",
   "building": "reference building",
   "level": "warning"
@@ -1021,10 +1040,55 @@
  },
  {
   "step": "prescriptive",
+  "target": "Surface 15 / Surface 23",
+  "action": "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
+  "article": "Division A 1.4.1.2.(1)",
+  "ruling": "D-24",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "prescriptive",
+  "target": "Surface 16 / Surface 28",
+  "action": "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
+  "article": "Division A 1.4.1.2.(1)",
+  "ruling": "D-24",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "prescriptive",
+  "target": "Surface 17 / Surface 9",
+  "action": "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
+  "article": "Division A 1.4.1.2.(1)",
+  "ruling": "D-24",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "prescriptive",
   "target": "Surface 19",
   "action": "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
-  "article": "Table 3.2.3.1.; 3.2.3.3.(3)",
+  "article": "3.2.3.3.(3)",
   "ruling": "D-32",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "prescriptive",
+  "target": "Surface 21 / Surface 5",
+  "action": "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
+  "article": "Division A 1.4.1.2.(1)",
+  "ruling": "D-24",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "prescriptive",
+  "target": "Surface 22 / Surface 29",
+  "action": "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
+  "article": "Division A 1.4.1.2.(1)",
+  "ruling": "D-24",
   "building": "reference building",
   "level": "warning"
  },
@@ -1032,8 +1096,17 @@
   "step": "prescriptive",
   "target": "Surface 25",
   "action": "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
-  "article": "Table 3.2.3.1.; 3.2.3.3.(3)",
+  "article": "3.2.3.3.(3)",
   "ruling": "D-32",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "prescriptive",
+  "target": "Surface 26 / Surface 4",
+  "action": "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
+  "article": "Division A 1.4.1.2.(1)",
+  "ruling": "D-24",
   "building": "reference building",
   "level": "warning"
  },
@@ -1041,7 +1114,7 @@
   "step": "prescriptive",
   "target": "Surface 7",
   "action": "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
-  "article": "Table 3.2.3.1.; 3.2.3.3.(3)",
+  "article": "3.2.3.3.(3)",
   "ruling": "D-32",
   "building": "reference building",
   "level": "warning"
@@ -1244,8 +1317,8 @@
  {
   "step": "reference",
   "action": "proposed infiltration total 0 L/s DEVIATES from the untested 8.4.3.3.(3) default 607 L/s by -100% \u2014 only a 3.2.4.2 airtightness test justifies a different value",
-  "article": "8.4.3.3.(3)-(4)",
-  "ruling": "D-19 D-21",
+  "article": "8.4.3.3.(3)",
+  "ruling": "D-19",
   "building": "reference building",
   "level": "warning"
  },
@@ -1258,8 +1331,32 @@
    "pressure_pa": 75,
    "verified": false
   },
-  "article": "3.2.4.2.",
+  "article": "3.2.4.2.(1)",
   "ruling": "D-76",
+  "building": "reference building",
+  "level": "info"
+ },
+ {
+  "step": "reference",
+  "action": "conditioned building-enclosure area used to normalize whole-building air leakage",
+  "inputs": {
+   "envelope_area_m2": 2056.0
+  },
+  "article": "3.2.4.2.(1)(c)",
+  "ruling": "D-21",
+  "building": "reference building",
+  "level": "info"
+ },
+ {
+  "step": "reference",
+  "action": "air leakage converted from 75 Pa to the 5 Pa model pressure",
+  "inputs": {
+   "from_pressure_pa": 75,
+   "to_pressure_pa": 5,
+   "flow_exponent": 0.6
+  },
+  "article": "8.4.2.9.(2)",
+  "ruling": "D-19",
   "building": "reference building",
   "level": "info"
  },
@@ -1285,8 +1382,8 @@
    }
   },
   "value": "I_AGW = (5/75)^0.6 x 1.5 x 2056.0/456.0 = 1.332 L/(s.m2 AG wall), per space as flow-per-exterior-wall-area",
-  "article": "8.4.4.3.(6); 8.4.3.3.(3); 8.4.2.9.(2)",
-  "ruling": "D-19 D-21",
+  "article": "8.4.4.3.(6)",
+  "ruling": "D-19",
   "building": "reference building",
   "level": "decision"
  },
@@ -1412,7 +1509,7 @@
   "action": "Building assemblies in contact with the ground \u2014 implemented: ground-contact wall/roof U-values applied full-area; floors follow the zone-conditional extent (zone 8 full-area retarget; zones 4-7B keep the slab field and get a 1.2 m Kiva perimeter strip per 3.2.3.3.(3) \u2014 warns when no Kiva foundation to carry it)",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 5,
+   "decisions_citing": 0,
    "code": [
     "python/btap/codes/necb/envelope/prescriptive.py#apply"
    ]
@@ -1438,7 +1535,7 @@
   "action": "Air barrier system \u2014 1.50 L/(s.m2) @ 75 Pa tested rate \u2014 not implemented, modeller scope. Modeller's responsibility: the 1.50 L/(s.m2) @ 75 Pa normalized rate is ASSUMED by the model as the untested default and drives the infiltration coefficients, but the sentence is a TEST requirement (ASTM E3158, pressurized and depressurized, averaged) on the finished building. The model states the assumed rate and flags it as pending field verification; a measured rate should be substituted once tested. Previously undeclared in any gem despite being the article the deviation warning cites.",
   "inputs": {
    "status": "not_implemented",
-   "decisions_citing": 1,
+   "decisions_citing": 2,
    "gap_owner": "modeller"
   },
   "article": "3.2.4.2.",
