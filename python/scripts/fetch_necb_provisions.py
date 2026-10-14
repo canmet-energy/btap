@@ -140,7 +140,7 @@ def concrete_references(
     *,
     source_dir: Path = DECISIONS_DIR,
 ) -> tuple[str, ...]:
-    """Return every concrete governing NECB citation in canonical source order."""
+    """Return every concrete NECB citation in canonical source order."""
     references: list[str] = []
     code_id = f"necb{edition}"
     for path in sorted(
@@ -171,7 +171,6 @@ def concrete_references(
                     if (
                         source.get("code") == "necb"
                         and source.get("edition") == edition
-                        and source.get("role") == "governing"
                     ):
                         values = source.get("references")
                         if not isinstance(values, list):
@@ -273,23 +272,24 @@ def call_specs(
         citation = parse_citation(reference, family="necb")
         article = _article_citation(citation)
         if article is not None:
-            if article.startswith("8.4."):
-                if not _cache_article_is_usable(edition, article):
-                    call_id = _section_call_id("B", article)
+            number = article.removeprefix("Division A ")
+            if number.startswith("8.4."):
+                if not _cache_article_is_usable(edition, number):
+                    call_id = _section_call_id("B", number)
                     calls.setdefault(
                         call_id,
                         {
                             "tool": "get_section",
-                            "arguments": _section_arguments(edition, "B", article),
+                            "arguments": _section_arguments(edition, "B", number),
                         },
                     )
                 continue
-            call_id = _section_call_id(citation.division, article)
+            call_id = _section_call_id(citation.division, number)
             calls.setdefault(
                 call_id,
                 {
                     "tool": "get_section",
-                    "arguments": _section_arguments(edition, citation.division, article),
+                    "arguments": _section_arguments(edition, citation.division, number),
                 },
             )
             continue

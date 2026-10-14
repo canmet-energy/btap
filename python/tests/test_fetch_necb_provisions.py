@@ -6,6 +6,7 @@ import copy
 import hashlib
 import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -271,6 +272,56 @@ class TestStructureExtraction(unittest.TestCase):
 
 
 class TestProvisionDocumentBuilder(unittest.TestCase):
+    def test_related_necb_sources_expand_the_authorized_request_set(self):
+        with tempfile.TemporaryDirectory() as raw:
+            source_dir = Path(raw)
+            (source_dir / "D-104.md").write_text(
+                """+++
+id = "D-104"
+title = "Fixture"
+kind = "runtime"
+editions = ["necb2020"]
+summary = "Fixture."
+
+[articles.fixture]
+label = "Fixture"
+decided = "Fixture."
+
+[[articles.fixture.sources]]
+code = "necb"
+edition = "2020"
+role = "governing"
+references = ["8.4.4.13.(1)"]
+
+[[articles.fixture.sources]]
+code = "necb"
+edition = "2020"
+role = "related"
+references = ["5.2.10.1.(3)"]
++++
+
+## Fixture
+""",
+                encoding="utf-8",
+            )
+
+            self.assertEqual(
+                ("8.4.4.13.(1)", "5.2.10.1.(3)"),
+                script.concrete_references("2020", source_dir=source_dir),
+            )
+
+    def test_division_a_reference_uses_an_unqualified_hbix_section_number(self):
+        calls = script.call_specs(
+            "2020",
+            script.EDITION_SPECS["2020"],
+            references=("Division A 1.4.1.2.(1)",),
+        )
+
+        self.assertEqual(
+            script._section_arguments("2020", "A", "1.4.1.2"),
+            calls["section_A_1_4_1_2"]["arguments"],
+        )
+
     def test_real_structured_sources_expand_the_authorized_request_set(self):
         references = script.concrete_references("2020")
         self.assertIn("4.2.2.1.(10)", references)
