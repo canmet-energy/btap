@@ -389,8 +389,9 @@ multi-part decisions such as D-61.
 
 Status: in progress. Batch 1 established D-18, D-28, D-34, D-37, D-42,
 D-43, D-45 and D-55. Batch 2 established D-07, D-09, D-12, D-14, D-19 and
-D-53. Batch 3 established D-03, D-11, D-13, D-35 and D-41. The committee view
-has moved from 23 structured and 45 held decisions to 42 and 26, with the 68
+D-53. Batch 3 established D-03, D-11, D-13, D-35 and D-41. Batch 4 established
+D-04. The committee view has moved from 23 structured and 45 held decisions to
+43 and 25, with the 68
 citation-bearing and 35 citation-free totals unchanged. The compliance report
 is byte-identical because titles and summaries stayed unchanged. D-28 and D-34
 gained body notes that record later applicability corrections; D-14's body now
@@ -452,6 +453,11 @@ provision indexes and against the implementation.
   preserves the Sentence (9) topology caveat. The required table and Appendix
   payloads were fetched live from hbix and retained in each edition's bounded
   provision archive.
+- D-04 is NECB 2025-only. It separates the archetype-EUI applicability and
+  target provisions in 8.4.4.1.(1)-(3) and Table 8.4.4.1 from the normalized
+  proposed-building inputs in 8.4.4.2.(1) and Table 8.4.4.2. The latter
+  requirement governs the check-then-reuse-or-rerun decision; the needed
+  article and table payloads were retained in the 2025 provision archive.
 
 Runtime citation defects found while reading the implementation are Phase E
 items. Nothing was moved in the audit output here:

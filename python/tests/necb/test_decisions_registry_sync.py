@@ -59,12 +59,12 @@ STRUCTURED_FIELDS = ("id", "title", "kind", "editions", "summary", "requirements
 #: What `btap.codes.decisions` and the report's rulings appendix read.
 RUNTIME_FIELDS = ("id", "title", "kind", "summary")
 MIGRATED_IDS = (
-    "D-03", "D-07", "D-09", "D-11", "D-12", "D-13", "D-14", "D-18",
-    "D-19", "D-27", "D-28", "D-34", "D-35", "D-37", "D-38", "D-39",
-    "D-41", "D-42", "D-43", "D-45", "D-46", "D-47", "D-48", "D-49",
-    "D-50", "D-51", "D-52", "D-53", "D-54", "D-55", "D-56", "D-57",
-    "D-89", "D-90", "D-91", "D-92", "D-93", "D-97", "D-99", "D-100",
-    "D-101", "D-102",
+    "D-03", "D-04", "D-07", "D-09", "D-11", "D-12", "D-13", "D-14",
+    "D-18", "D-19", "D-27", "D-28", "D-34", "D-35", "D-37", "D-38",
+    "D-39", "D-41", "D-42", "D-43", "D-45", "D-46", "D-47", "D-48",
+    "D-49", "D-50", "D-51", "D-52", "D-53", "D-54", "D-55", "D-56",
+    "D-57", "D-89", "D-90", "D-91", "D-92", "D-93", "D-97", "D-99",
+    "D-100", "D-101", "D-102",
 )
 #: Phase D decisions moved from `unverified` to the structured form; the other
 #: 23 are Phase C's. Every digest below is of the decision's title and summary
@@ -74,8 +74,10 @@ PHASE_D_BATCH_1_IDS = (
 )
 PHASE_D_BATCH_2_IDS = ("D-07", "D-09", "D-12", "D-14", "D-19", "D-53")
 PHASE_D_BATCH_3_IDS = ("D-03", "D-11", "D-13", "D-35", "D-41")
+PHASE_D_BATCH_4_IDS = ("D-04",)
 MIGRATED_RUNTIME_SHA256 = {
     "D-03": "b8bd6e32d1b448ca31e1454ee7f4645ad65a867be66725c16d37523f584e27f5",
+    "D-04": "1f72d5d11097cf5af4c7686e4905b19cb932978e25bfc4d585064c05d7807c5a",
     "D-07": "c2498de315ccb63d8596852486d32b39f4cc50a9ec1701d4360efceab333cbb0",
     "D-09": "1d05111e9ff257b0129755af265220aa8d48a8aa5e35aeaae75e45a9a38529b5",
     "D-11": "15a6bfa3dd40463a4138c59e860f65fcfaab7c38292a25ba94fb81a036c79467",
@@ -120,9 +122,13 @@ MIGRATED_RUNTIME_SHA256 = {
 }
 #: Each migrated decision's requirement keys in AUTHORED order, as the
 #: sources record them. Phase C's 23 had them in the legacy front matter;
-#: Phase D's first nineteen were authored with their structured form.
+#: Phase D's first twenty were authored with their structured form.
 MIGRATED_KEYS = {
     "D-03": ("water_cooled_chiller_eir_temperature_erratum",),
+    "D-04": (
+        "archetype_eui_applicability_and_target",
+        "archetype_eui_operating_inputs",
+    ),
     "D-07": ("cooling_tower_part_load_capacity",),
     "D-09": (
         "annual_energy_end_use_accounting",
@@ -238,6 +244,16 @@ MIGRATED_REQUIREMENTS = {
         "Annual end uses accounted for by the energy model",
         ("8.4.2.2.(1)",),
         ("8.4.2.2.(1)",),
+    ),
+    "archetype_eui_applicability_and_target": (
+        "Applicability and building energy target for the archetype-EUI path",
+        None,
+        ("8.4.4.1.(1)", "8.4.4.1.(2)", "8.4.4.1.(3)", "Table 8.4.4.1"),
+    ),
+    "archetype_eui_operating_inputs": (
+        "Operating inputs used for the archetype-EUI proposed model",
+        None,
+        ("8.4.4.2.(1)", "Table 8.4.4.2"),
     ),
     "boiler_part_load_fuel_curve": (
         "Reference boiler part-load fuel consumption and its efficiency curve",
@@ -1221,14 +1237,15 @@ class TestTheCommittedProvisionView(unittest.TestCase):
     """
 
     #: Phase C converted every established mapping (23 structured), then Phase
-    #: D's first three batches moved nineteen held decisions to the structured
-    #: form (42), 45 held down to 26. Neither moves the 68 citation-bearing or the
-    #: 35 citation-free totals. SOURCE_ROWS counts governing source records
-    #: (D-42 has one, the other 75 requirements two each); REQUIREMENTS counts
-    #: requirement instances, a shared key once per decision that uses it.
-    STRUCTURED, ESTABLISHED, HELD, INCLUDED, OMITTED = 42, 0, 26, 68, 35
-    SOURCE_ROWS = 151
-    REQUIREMENTS = 76
+    #: D's first four batches moved twenty held decisions to the structured
+    #: form (43), 45 held down to 25. Neither moves the 68 citation-bearing or
+    #: the 35 citation-free totals. SOURCE_ROWS counts governing source records:
+    #: D-04's two requirements and D-42's one have one source each; the other
+    #: 75 requirements have two. REQUIREMENTS counts requirement instances, a
+    #: shared key once per decision that uses it.
+    STRUCTURED, ESTABLISHED, HELD, INCLUDED, OMITTED = 43, 0, 25, 68, 35
+    SOURCE_ROWS = 153
+    REQUIREMENTS = 78
 
     @classmethod
     def setUpClass(cls):
@@ -1300,33 +1317,49 @@ class TestTheCommittedProvisionView(unittest.TestCase):
             ),
         )
 
-    def test_phase_d_batches_are_nineteen_of_the_structured_decisions(self):
-        """The nineteen decisions these batches moved out of `unverified`,
-        beside Phase C's 23, and none of the 26 still held."""
+    def test_phase_d_batches_are_twenty_of_the_structured_decisions(self):
+        """The twenty decisions these batches moved out of `unverified`,
+        beside Phase C's 23, and none of the 25 still held."""
         phase_d = (
             set(PHASE_D_BATCH_1_IDS)
             | set(PHASE_D_BATCH_2_IDS)
             | set(PHASE_D_BATCH_3_IDS)
+            | set(PHASE_D_BATCH_4_IDS)
         )
         self.assertEqual(8, len(set(PHASE_D_BATCH_1_IDS)))
         self.assertEqual(6, len(set(PHASE_D_BATCH_2_IDS)))
         self.assertEqual(5, len(set(PHASE_D_BATCH_3_IDS)))
-        self.assertEqual(19, len(phase_d))
+        self.assertEqual(1, len(set(PHASE_D_BATCH_4_IDS)))
+        self.assertEqual(20, len(phase_d))
         self.assertLessEqual(phase_d, set(self.structured))
         self.assertEqual(23, len(set(self.structured) - phase_d))
         self.assertEqual(set(), phase_d & set(self.held))
         self.assertEqual(set(), phase_d & set(self.omitted))
 
     def test_a_requirement_established_for_one_edition_asserts_no_other(self):
-        """D-42 is NECB 2020 only. NECB 2025 8.4.1.2.(4) states a different
-        criterion -- a ceiling of 100 h under Subsection 8.4.4, +10 % or 20 h
-        under 8.4.5 -- so the 2020 mapping must not be claimed for it."""
+        """D-04 is 2025-only, while D-42's criterion is 2020-only."""
         single = {
             decision_id for decision_id in self.structured
             if any(len(block["sources"]) == 1
                    for block in self.front[decision_id]["articles"].values())
         }
-        self.assertEqual({"D-42"}, single)
+        self.assertEqual({"D-04", "D-42"}, single)
+        d04 = self.front["D-04"]
+        self.assertEqual(["necb2025"], d04["editions"])
+        self.assertEqual(
+            {("necb", "2025", "governing")},
+            {
+                (source["code"], source["edition"], source["role"])
+                for block in d04["articles"].values()
+                for source in block["sources"]
+            },
+        )
+        self.assertEqual(
+            ["necb2025", "necb2025"],
+            [code_id for code_id, cells in self.edition_rows
+             if self.linked(cells[1]) == "D-04"],
+        )
+
         meta = self.front["D-42"]
         self.assertEqual(["necb2020"], meta["editions"])
         (block,) = meta["articles"].values()
@@ -1685,7 +1718,7 @@ HOLDING_KEYS = ("unverified", "not_applicable")
 
 
 class TestThePhaseCMigration(unittest.TestCase):
-    """Phase C converted every established mapping and Phase D's first nineteen
+    """Phase C converted every established mapping and Phase D's first twenty
     held decisions, read straight from the committed files: no legacy
     per-code-id shape survives in a converted source or registry entry, the
     registry projects each migrated requirement exactly as the literal tables

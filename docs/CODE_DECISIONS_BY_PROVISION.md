@@ -23,9 +23,9 @@ and in [necb_decisions.md](necb_decisions.md).
 
 | Group of decisions | Decisions |
 |---|---:|
-| Decisions with concrete rows from structured source records | 42 |
+| Decisions with concrete rows from structured source records | 43 |
 | Decisions with concrete rows from an established legacy mapping | 0 |
-| Decisions held under Edition not yet attributed | 26 |
+| Decisions held under Edition not yet attributed | 25 |
 | Decisions included in this view | 68 |
 | Decisions omitted because they cite no provision | 35 |
 | All decisions | 103 |
@@ -186,6 +186,8 @@ provisions and stay adjacent.
 | `8.4.2.9.(2)`<br>`8.4.3.3.(3)`<br>`8.4.5.3.(6)` | [D-19](necb_decisions.md#d-19) Infiltration lineage reconciled; reference inherits proposed leakage coefficients | Reference air leakage equal to the proposed-building default<br>`reference_default_air_leakage` | For an untested building, the reference copies the proposed leakage coefficients and schedule as well as the default total; a proposed total differing by more than ten percent draws a warning. | NECB 2020: `8.4.2.9.(2)`, `8.4.3.3.(3)`, `8.4.4.3.(6)` | — |
 | `8.4.2.10.(2)` | [D-91](necb_decisions.md#d-91) Reference zone dispatch for one-unit-per-block Systems 3 and 4: the rooftop air terminal runs first | The basis on which reference HVAC systems are calculated<br>`hvac_systems_calculation_basis` | In-zone dispatch is left to the modeller, so the reference sets it explicitly and simulates the resulting limited-capacity effects. | NECB 2020: `8.4.2.10.(2)` | — |
 | `8.4.3.2.(1)`<br>`8.4.5.2.(1)` | [D-14](necb_decisions.md#d-14) Reference air systems inherit the proposed operating schedule | Reference operating schedules identical to those determined for the proposed building<br>`reference_operating_schedules` | Each zone's proposed air-system availability is captured before replacement and assigned to its serving reference loop; an absent schedule keeps the builder default, while conflicts select the most common schedule and warn. | NECB 2020: `8.4.3.2.(1)`, `8.4.4.2.(1)` | — |
+| `8.4.4.1.(1)`<br>`8.4.4.1.(2)`<br>`8.4.4.1.(3)`<br>`Table 8.4.4.1` | [D-04](necb_decisions.md#d-04) EUI path: two-run design with check-then-normalize | Applicability and building energy target for the archetype-EUI path<br>`archetype_eui_applicability_and_target` | The NECB 2025-only path verifies its archetype-coverage threshold, derives archetype floor areas from the modeled spaces, and calculates the building energy target from the published archetype EUIs. | — | — |
+| `8.4.4.2.(1)`<br>`Table 8.4.4.2` | [D-04](necb_decisions.md#d-04) EUI path: two-run design with check-then-normalize | Operating inputs used for the archetype-EUI proposed model<br>`archetype_eui_operating_inputs` | The EUI verdict uses the proposed model normalized to Table 8.4.4.2; an already conforming model reuses its annual run, while a nonconforming model requires an explicitly requested second run and otherwise yields NOT COMPUTED. | — | — |
 | `8.4.5.1.(2)` | [D-38](necb_decisions.md#d-38) Prescriptive pump-power caps applied min-wins over the intensity transfer | The reference building's systems meet the Part 5 prescriptive requirements<br>`reference_meets_prescriptive_requirements` | Part 5 pump-power maxima constrain the performance-path reference building. | NECB 2020: `8.4.4.1.(2)` | — |
 | `8.4.5.1.(4)` | [D-101](necb_decisions.md#d-101) The thermal block is the selection unit; plant, election and disclosure scopes stay larger | The reference retains the proposed building's thermal blocks<br>`thermal_block_identity` | Selection iterates the retained proposed thermal blocks, not the zone sets that share one proposed air loop. | NECB 2020: `8.4.4.1.(4)` | — |
 | `8.4.5.1.(5)`<br>`Table 8.4.5.7.-A`<br>`Table 8.4.5.7.-B` | [D-39](necb_decisions.md#d-39) Two-pipe fan-coil reference heating honoured conditionally | Heating presence where the general reference rule and the System 5 row conflict<br>`system_5_heating_presence` | System 5 remains cooling-only for unheated blocks; a heated block receives modeled heating under the presence override. | NECB 2020: `8.4.4.1.(5)`, `Table 8.4.4.7.-A`, `Table 8.4.4.7.-B` | — |
@@ -250,7 +252,6 @@ These decisions record citations, but no edition has been established for them, 
 | Decision | Title | Kind | Recorded citations |
 |---|---|---|---|
 | [D-02](necb_decisions.md#d-02) | Unresolvable space types are a hard error | `runtime` | `8.4.3.1.(2)`, `4.2.1.6.` |
-| [D-04](necb_decisions.md#d-04) | EUI path: two-run design with check-then-normalize | `runtime` | `8.4.4.1.(1)`, `8.4.4.1.(2)`, `8.4.4.1.(3)`, `8.4.4.2.(1)`, `Table 8.4.4.1.` |
 | [D-05](necb_decisions.md#d-05) | Two archetype-normalization interpretations adopted | `runtime` | `8.4.4.2.(1)`, `8.4.3.6.(1)(a)` |
 | [D-06](necb_decisions.md#d-06) | Energy-recovery trigger uses the current-vintage airflow tables, post-sizing | `runtime` | `5.2.10.1.` |
 | [D-15](necb_decisions.md#d-15) | Energy-recovery effectiveness and frost values verified against the code text | `runtime` | `5.2.10.1.(4)`, `5.2.10.1.(6)` |
