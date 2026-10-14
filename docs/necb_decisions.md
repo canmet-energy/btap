@@ -227,6 +227,17 @@ audit are drained and archived — see `docs/README.md`.
   place would leak proposed-design behaviour into the normalized run.
 - **Evidence:** commit `f42f19533`.
 
+### Applicability correction
+
+The lighting-schedule decision is established by Sentence 8.4.4.2.(1) and
+its table. The earlier outdoor-air reading is not: Sentence 8.4.4.2.(2)
+expressly retains the rates in the proposed building specifications, and
+8.4.3.6.(1)(a) points to that Article. The structured record above therefore
+records the Code-backed replacement. The old interpretation remains a
+runtime and report-wording defect until Phase E changes the implementation
+and the summary; it is not carried into the committee mapping as if it were
+established.
+
 <a id="d-06"></a>
 
 ## D-06 — ERV trigger: NECB 2020 Tables 5.2.10.1.-A/-B, post-sizing
@@ -484,6 +495,17 @@ and reference energy; deferred to its own work session).*
 - **Evidence:** sweep verdict tables (before/after); ERV+pump suites and
   rake necb:verify green post-fix.
 
+### Applicability hold
+
+No retained NECB 2020 or 2025 provision establishes a blanket rule that every
+proposed EMS program must be removed from the reference. The broad
+`8.4.4.1.` citation neither identifies the proposed controls that the
+reference rules require to transfer nor distinguishes invalid dangling
+programs from still-applicable proposed strategies. The crash-prevention
+cleanup remains an implementation safeguard, but this decision stays
+`unverified` until it is decomposed against the governing transfer provisions
+or narrowed to non-normative model sanitation.
+
 <a id="d-17"></a>
 
 ## D-17 — Legacy ERV diagnosis filed upstream (issue #2123)
@@ -663,6 +685,17 @@ within the documented residual ledger (legacy over-equipped ERVs per
 upstream #2123, DX COP bins, infiltration normalization remainder). All
 gates green: full hvac suite, necb:verify, 5/5 sweep PASS.
 
+### Applicability hold
+
+The retained selection and system-description tables do not define System 1
+as inherently 100% outdoor air, while Article 8.4.x.12 routes a selected
+reference system to the Part 5 economizer requirement when its trigger
+applies. No queried sentence or note establishes an unconditional System 1
+exception. The engine interaction with heat-recovery lockout is real
+implementation evidence, not normative authority. D-20 therefore remains
+`unverified` pending a governing exception or an explicit AHJ disposition;
+D-22's general economizer mapping deliberately does not absorb this branch.
+
 <a id="d-21"></a>
 
 ## D-21 — Residual infiltration asymmetry on low-rise buildings (OPEN, two new findings)
@@ -775,6 +808,18 @@ counter-direction T6/T10 (wheel power, zone-fan spec) — the fleet now sits
 
 - Who/when: Claude under D-10 delegation, 2026-07-25.
 
+### Applicability split
+
+The batch history contains more implementation observations than its original
+seven citations establish. The structured record separates the eight
+Code-backed outcomes: oversizing, economizer applicability, heat-pump
+capacity, outdoor air, fan specification, tower capacity/cells, tower fan
+power and direct-expansion staging. Night cycling, minimum-outdoor-air
+scheduling, recovery-wheel parasitics, humidification, mixed-group warnings
+and the VAV cap remain implementation evidence until separately authored
+requirements and sources exist. The System 1 economizer exception is not
+smuggled into the general threshold: D-20 remains held.
+
 <a id="d-23"></a>
 
 ## D-23 — Film convention: table U is OVERALL transmittance (default flipped)
@@ -857,6 +902,17 @@ slightly, % of target DOWN) — full-fleet re-sweep queued behind the
 17-archetype run.
 
 - Who/when: Claude under D-10 delegation, 2026-07-25.
+
+### Applicability correction
+
+The decision bundles three independent questions. The envelope boundary and
+inclination classification are established for both editions. The blanket
+enclosed-space credit is not: each edition's Appendix note excludes vented
+attic, roof and crawl spaces, while the current transform credits every
+unconditioned enclosure. The structured record replaces that claim with the
+Code-backed exclusion and records the implementation as a tool gap. The
+report-visible summary and runtime behavior remain Phase E corrections rather
+than being laundered into the committee mapping.
 
 <a id="d-25"></a>
 
@@ -3385,6 +3441,15 @@ stand.
   derivation.
 - **Who/when:** Fable under D-10, 2026-08-02.
 
+### Applicability split
+
+The matrix establishes three independent requirements in both editions:
+the residential identity row, Article 13 heat-pump classification and the
+primary-system boundary for purchased energy. D-101 later changed matrix
+multiplicity to one row per thermal block but did not change these three
+outcomes. The structured sources therefore preserve the adjudicated content
+without treating the old deduplicated golden schema as normative evidence.
+
 <a id="d-59"></a>
 
 ## D-59 — Equipment-efficiency minimums verified against the printed NECB 2020 tables
@@ -3435,6 +3500,14 @@ so data drift fails with the printed number in the message.
   the new test.
 - **Who/when:** Fable under D-10, 2026-08-02.
 
+### Applicability split
+
+This decision is the bounded 2020 data verification that was actually run.
+It no longer claims ownership of every family the current path applies:
+VRF Table-I is D-85, part-load curves are D-89, and tower fan/cell treatment
+is D-26. The unused historical heat-rejection block is implementation
+provenance, not a governing D-59 source.
+
 <a id="d-60"></a>
 
 ## D-60 — The same verification pass, run for the NECB 2025 edition
@@ -3465,6 +3538,14 @@ with the corrected letter map and today's verification.
 
 - **Files:** `efficiencies_2025.json` (provenance), the test.
 - **Who/when:** Fable under D-10, 2026-08-02.
+
+### Applicability split
+
+The 2025 minimums and the 2025 selection dataset are independent
+requirements. The 2020 selection records are retained only as related
+comparison evidence. Cross-edition identity is not generalized to
+Table 5.2.12.2 or to efficiency families whose rows or metrics differ; every
+2025 minimum is established from the 2025 table itself.
 
 <a id="d-61"></a>
 
@@ -3651,6 +3732,16 @@ SWEEP_MODE=full ruby openstudio-necb/scripts/necb_archetype_sweep.rb <types>`
 (Hospital+Outpatient need a ~12 h window — see the runtime finding above).
 
 - Who/when: consolidated by Fable under D-10, 2026-08-03.
+
+### Applicability split
+
+This decision now records the 2025 extraction-backed datasets as separate
+requirements instead of one cross-edition zero-defect claim. The
+exterior-lighting comparison remains incomplete at 88 of 91 values, so its
+three discrepancies are explicit. Part-load curves are owned by D-03, D-13
+and D-89 rather than being inferred from this table audit. Table 6.2.2.1's
+lost rows are owned by D-63. The report-visible zero-defect summary remains a
+Phase E correction.
 
 ### D-52 amendment (2026-08-03): the election exercised on real HP buildings — Phase 2 of the close-out plan
 
@@ -3843,6 +3934,16 @@ project turns on it.
 
 - **Who/when:** Fable under D-10, 2026-08-03.
 
+### Applicability hold
+
+Sentences 8.4.1.2.(3) and (5) establish the unmet-heating criterion and the
+capacity-increase response; they do not establish that morning recovery in
+micro-zones may be dispositioned as an inherent characteristic or that a
+stall detector may end the prescribed response while the reference still
+fails. The diagnosis is useful implementation evidence, but the proposed
+remedies and the decision to leave the failure standing need a separate
+Code-backed or AHJ ruling. D-64 therefore remains `unverified`.
+
 <a id="d-65"></a>
 
 ## D-65 — Hospital reference runtime root-caused: the OA floor × the flow-per-watt band, plus 30 required ERVs (Phase 4a)
@@ -3869,6 +3970,15 @@ when that subsystem is next touched.
 sweeps get a ~12 h window.
 
 - **Who/when:** Fable under D-10, 2026-08-03.
+
+### Applicability split
+
+The Code-backed slice is the reference energy-recovery obligation and the
+Part 5 trigger and performance provisions it invokes. Article 8.4.x.10.(8)
+sets cooling-capacity staging; it does not establish the asserted
+per-stage ventilation-flow floor or disposition simulator warnings. That
+floor is D-46 implementation evidence and remains a separate engineering
+follow-up rather than a governing D-65 source.
 
 <a id="d-66"></a>
 

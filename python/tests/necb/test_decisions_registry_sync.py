@@ -59,12 +59,13 @@ STRUCTURED_FIELDS = ("id", "title", "kind", "editions", "summary", "requirements
 #: What `btap.codes.decisions` and the report's rulings appendix read.
 RUNTIME_FIELDS = ("id", "title", "kind", "summary")
 MIGRATED_IDS = (
-    "D-02", "D-03", "D-04", "D-06", "D-07", "D-09", "D-11", "D-12",
-    "D-13", "D-14", "D-15", "D-17", "D-18", "D-19", "D-21", "D-23",
-    "D-26", "D-27", "D-28", "D-31", "D-32", "D-34", "D-35", "D-37",
-    "D-38", "D-39", "D-41", "D-42", "D-43", "D-45", "D-46", "D-47",
-    "D-48", "D-49", "D-50", "D-51", "D-52", "D-53", "D-54", "D-55",
-    "D-56", "D-57", "D-62", "D-63", "D-74", "D-76", "D-85", "D-89",
+    "D-02", "D-03", "D-04", "D-05", "D-06", "D-07", "D-09", "D-11",
+    "D-12", "D-13", "D-14", "D-15", "D-17", "D-18", "D-19", "D-21",
+    "D-22", "D-23", "D-24", "D-26", "D-27", "D-28", "D-31", "D-32",
+    "D-34", "D-35", "D-37", "D-38", "D-39", "D-41", "D-42", "D-43",
+    "D-45", "D-46", "D-47", "D-48", "D-49", "D-50", "D-51", "D-52",
+    "D-53", "D-54", "D-55", "D-56", "D-57", "D-58", "D-59", "D-60",
+    "D-61", "D-62", "D-63", "D-65", "D-74", "D-76", "D-85", "D-89",
     "D-90", "D-91", "D-92", "D-93", "D-97", "D-99", "D-100", "D-101",
     "D-102",
 )
@@ -82,10 +83,15 @@ PHASE_D_BATCH_6_IDS = (
     "D-06", "D-15", "D-17", "D-23", "D-31",
     "D-32", "D-63", "D-74", "D-76", "D-85",
 )
+PHASE_D_BATCH_7_IDS = (
+    "D-05", "D-22", "D-24", "D-58",
+    "D-59", "D-60", "D-61", "D-65",
+)
 MIGRATED_RUNTIME_SHA256 = {
     "D-02": "0f39e8bb648ff77f85c91a14e7bf3376a5f82ff9b861f93c362d0c55b18d5a89",
     "D-03": "b8bd6e32d1b448ca31e1454ee7f4645ad65a867be66725c16d37523f584e27f5",
     "D-04": "1f72d5d11097cf5af4c7686e4905b19cb932978e25bfc4d585064c05d7807c5a",
+    "D-05": "d49055de239286943b47d5f339f9ffd410017359cdbebedfe8e17732cfc1f4b0",
     "D-06": "2f67a5c962fd68abe2102f941ada33719fae13228a557dbadef888b617e2ae86",
     "D-07": "c2498de315ccb63d8596852486d32b39f4cc50a9ec1701d4360efceab333cbb0",
     "D-09": "1d05111e9ff257b0129755af265220aa8d48a8aa5e35aeaae75e45a9a38529b5",
@@ -98,7 +104,9 @@ MIGRATED_RUNTIME_SHA256 = {
     "D-18": "c3e6a182bad6cdbd8a2eb5256e4505bbddb370426272ae2773709f3f0ae4cc50",
     "D-19": "70f4908b849ef031140c3375b324a573dd6a0552d25305faffef1e04b0af0fae",
     "D-21": "c6b4efee96b41c1a81152c437f1faa7005e737d2e35bae603dfdab5fa808545f",
+    "D-22": "43e01f3c0d89e9c83957bcdf5bfe50d342776222ea663b7f06d6a59ab59b634d",
     "D-23": "a368c72aeb01da6cb4176dbee61dc97bdeb6255f9731cd1c971ef9c45eccc933",
+    "D-24": "bb66ea95ac090cd5f25e7e6ef8aac3a8bbd5fc8d455e6aebcfe5616c8d0907e7",
     "D-26": "1d9dbe8ca506598d0b9c4ffac8a68337ddc7ce5b98b325a7ada6457fee9bfb8e",
     "D-27": "25dfea7660112851261febd2cfe2c44eb2a54014d372a636afae08def6c58d07",
     "D-28": "39659f04a161b019ad9b4982ba1ef651d093661e469816ff410a2ef42571badc",
@@ -125,8 +133,13 @@ MIGRATED_RUNTIME_SHA256 = {
     "D-55": "16821c6af91a1f57e8b6ed249371c9584ae1c49088bd53c90d68dc5da0bd10d1",
     "D-56": "45fde852ece1c7fda7a6c634d82def8a24300d56b80e50fb8191ec30ff94e372",
     "D-57": "9aa89dd9b6f154800c5458b15442030ca5dc0c138bf94df932280fce2d7676da",
+    "D-58": "ce427b6aec78543c7a26655f1884a15802a1419b43fc224546da56738a458cec",
+    "D-59": "ac00d039d443996ab8561272560865145c8b2b9abab8dbf73def67d7746588bf",
+    "D-60": "ddb5dfa482c92fb05a25d8aaeff92a1babb5f2f976223129f9a354ad665878d1",
+    "D-61": "d63d9a3718dde95d8fac29272bdf7469111a08e1b37cb4bc55117c17d95c0195",
     "D-62": "035f4d4416907045e6ef365017983fde8c92094f9338cc9a9530cf6601bf271c",
     "D-63": "db7b854dc1bbf32b204d71058101ee475fc7ec9cc861fe5d0e92c34ae12b8a75",
+    "D-65": "ab426e0786cb606dd86765793ec821c518ecaeb87e501687f81cf5abc2d0a623",
     "D-74": "b2438c36fd9a9713ea76a1b9c4dc2bd0511a508239544ccd1451adb3cecc7b39",
     "D-76": "ac98a7eb1fd4881a043efce0681108ee33aa3149f406edc0626ca736d4bedfc7",
     "D-85": "1be2a15512d2ec06a24e57128d02a8fe1b5a73682f5399aedf66a640d33a2da0",
@@ -143,13 +156,17 @@ MIGRATED_RUNTIME_SHA256 = {
 }
 #: Each migrated decision's requirement keys in AUTHORED order, as the
 #: sources record them. Phase C's 23 had them in the legacy front matter;
-#: Phase D's first 34 were authored with their structured form.
+#: Phase D's 42 converted decisions were authored with their structured form.
 MIGRATED_KEYS = {
     "D-02": ("resolvable_space_type_inputs",),
     "D-03": ("water_cooled_chiller_eir_temperature_erratum",),
     "D-04": (
         "archetype_eui_applicability_and_target",
         "archetype_eui_operating_inputs",
+    ),
+    "D-05": (
+        "archetype_lighting_operating_schedules",
+        "archetype_outdoor_air_from_specifications",
     ),
     "D-06": ("energy_recovery_trigger",),
     "D-07": ("cooling_tower_part_load_capacity",),
@@ -173,7 +190,22 @@ MIGRATED_KEYS = {
     "D-18": ("multizone_thermal_block_grouping",),
     "D-19": ("reference_default_air_leakage",),
     "D-21": ("air_leakage_conditioned_enclosure_area",),
+    "D-22": (
+        "cooling_tower_capacity_and_cells",
+        "cooling_tower_fan_power",
+        "heat_pump_capacity_alignment",
+        "reference_dx_incremental_staging",
+        "reference_economizer_threshold",
+        "reference_oversizing_caps",
+        "reference_peak_outdoor_air",
+        "reference_supply_fan_specification",
+    ),
     "D-23": ("overall_thermal_transmittance_air_films",),
+    "D-24": (
+        "assembly_class_by_inclination",
+        "building_envelope_scope",
+        "enclosed_unconditioned_space_thermal_credit",
+    ),
     "D-26": (
         "cooling_tower_capacity_and_cells",
         "cooling_tower_fan_power",
@@ -221,8 +253,28 @@ MIGRATED_KEYS = {
         "daylighted_area_geometry",
         "reference_photocontrol_evaluation",
     ),
+    "D-58": (
+        "heat_pump_reference_by_source",
+        "purchased_energy_service_scope",
+        "residential_compatible_cooling_identity",
+    ),
+    "D-59": ("necb2020_equipment_efficiency_minima",),
+    "D-60": (
+        "necb2025_equipment_efficiency_minima",
+        "reference_system_selection_2025",
+    ),
+    "D-61": (
+        "archetype_eui_target_data_2025",
+        "energy_recovery_threshold_data_2025",
+        "envelope_transmittance_data_2025",
+        "exterior_lighting_allowance_data_2025",
+        "greenhouse_gas_data_2025",
+        "interior_lighting_power_density_data_2025",
+        "pump_limit_and_curve_data_2025",
+    ),
     "D-62": ("economizer_cooling_stage_floor",),
     "D-63": ("solar_pool_service_water_minimums",),
+    "D-65": ("reference_energy_recovery_requirement",),
     "D-74": ("maximum_fenestration_and_door_area",),
     "D-76": (
         "continuous_air_barrier_system",
@@ -304,10 +356,35 @@ MIGRATED_REQUIREMENTS = {
         None,
         ("8.4.4.2.(1)", "Table 8.4.4.2"),
     ),
+    "archetype_eui_target_data_2025": (
+        "NECB 2025 archetype energy-use-intensity targets",
+        None,
+        ("Table 8.4.4.1",),
+    ),
+    "archetype_lighting_operating_schedules": (
+        "Lighting schedules in archetype-EUI operating inputs",
+        None,
+        ("8.4.4.2.(1)", "Table 8.4.4.2"),
+    ),
+    "archetype_outdoor_air_from_specifications": (
+        "Peak outdoor-air rates in archetype-EUI modeling",
+        None,
+        ("8.4.3.6.(1)(a)", "8.4.4.2.(2)"),
+    ),
+    "assembly_class_by_inclination": (
+        "Wall-or-roof classification by assembly inclination",
+        ("3.1.1.7.(6)", "Table 3.2.2.2"),
+        ("3.1.1.7.(4)", "Table 3.2.2.2"),
+    ),
     "boiler_part_load_fuel_curve": (
         "Reference boiler part-load fuel consumption and its efficiency curve",
         ("8.4.5.2.(1)", "8.4.5.2.(2)"),
         ("8.4.6.2.(1)", "8.4.6.2.(2)"),
+    ),
+    "building_envelope_scope": (
+        "Building-envelope boundary around conditioned space",
+        ("Division A 1.4.1.2.(1)",),
+        ("Division A 1.4.1.2.(1)",),
     ),
     "capacity_iteration_on_unmet_loads": (
         ("Incrementally increasing capacity until the unmet-load criteria "
@@ -393,6 +470,11 @@ MIGRATED_REQUIREMENTS = {
             "Table 8.4.5.12",
         ),
     ),
+    "enclosed_unconditioned_space_thermal_credit": (
+        "Thermal credit for enclosed unconditioned space",
+        ("3.1.1.7.(4)", "Note A-3.1.1.7.(4)"),
+        ("3.1.1.7.(3)", "Note A-3.1.1.7.(3)"),
+    ),
     "energy_recovery_minimum_effectiveness": (
         "Minimum enthalpy effectiveness of ventilation-air heat recovery",
         ("5.2.10.1.(4)",),
@@ -402,6 +484,11 @@ MIGRATED_REQUIREMENTS = {
         "Control of heat-recovery supply-air temperature overshoot",
         ("5.2.10.1.(6)",),
         ("5.2.10.1.(6)",),
+    ),
+    "energy_recovery_threshold_data_2025": (
+        "NECB 2025 ventilation-air heat-recovery thresholds",
+        None,
+        ("5.2.10.1.(1)", "Table 5.2.10.1.-A", "Table 5.2.10.1.-B"),
     ),
     "energy_recovery_trigger": (
         ("Ventilation-air heat-recovery applicability by airflow and "
@@ -415,6 +502,22 @@ MIGRATED_REQUIREMENTS = {
             "5.2.10.1.(1)",
             "Table 5.2.10.1.-A",
             "Table 5.2.10.1.-B",
+        ),
+    ),
+    "envelope_transmittance_data_2025": (
+        "NECB 2025 envelope thermal-transmittance datasets",
+        None,
+        ("Table 3.2.2.2", "Table 3.2.2.3", "Table 3.2.3.1"),
+    ),
+    "exterior_lighting_allowance_data_2025": (
+        "NECB 2025 exterior-lighting allowance datasets",
+        None,
+        (
+            "Table 4.2.3.1.-A",
+            "Table 4.2.3.1.-B",
+            "Table 4.2.3.1.-C",
+            "Table 4.2.3.1.-D",
+            "Table 4.2.3.1.-E",
         ),
     ),
     "fan_inclusive_dx_efficiency_ratings": (
@@ -438,10 +541,20 @@ MIGRATED_REQUIREMENTS = {
         ("8.4.4.9.(7)",),
         ("8.4.5.9.(7)",),
     ),
+    "greenhouse_gas_data_2025": (
+        "NECB 2025 greenhouse-gas levels and emission factors",
+        None,
+        ("Table 11.4.1.1", "Table 11.4.2.1.-A", "Table 11.4.2.1.-B"),
+    ),
     "ground_floor_insulation_extent": (
         "Ground-floor insulation extent by climate zone",
         ("Table 3.2.3.1", "3.2.3.3.(3)"),
         ("Table 3.2.3.1", "3.2.3.3.(3)"),
+    ),
+    "heat_pump_capacity_alignment": (
+        "Reference heat-pump heating capacity aligned to cooling capacity",
+        ("8.4.4.13.(2)(c)",),
+        ("8.4.5.13.(2)(c)",),
     ),
     "heat_pump_auxiliary_heating_energy_type": (
         "Auxiliary-heating energy type elected for a reference heat pump",
@@ -487,6 +600,11 @@ MIGRATED_REQUIREMENTS = {
         ("Note A-8.4.4.14.(2)",),
         ("Note A-8.4.5.14.(2)",),
     ),
+    "interior_lighting_power_density_data_2025": (
+        "NECB 2025 interior lighting power-density dataset",
+        None,
+        ("Table 4.2.1.6",),
+    ),
     "modulating_boiler_part_load": (
         "Reference modulating boiler part-load fuel curve",
         ("8.4.5.2.(3)",),
@@ -514,6 +632,32 @@ MIGRATED_REQUIREMENTS = {
         ("Table 8.4.4.7.-B Note (3)",),
         ("Table 8.4.5.7.-B Note (3)",),
     ),
+    "necb2020_equipment_efficiency_minima": (
+        ("NECB 2020 minimum-efficiency datasets used by the original "
+         "reference families"),
+        (
+            "5.2.12.1.(1)",
+            "Table 5.2.12.1.-A",
+            "Table 5.2.12.1.-G",
+            "Table 5.2.12.1.-K",
+            "Table 5.2.12.1.-N",
+            "Table 5.2.12.1.-O",
+        ),
+        None,
+    ),
+    "necb2025_equipment_efficiency_minima": (
+        "NECB 2025 equipment minimum-efficiency dataset",
+        None,
+        (
+            "5.2.12.1.(1)",
+            "Table 5.2.12.1.-A",
+            "Table 5.2.12.1.-G",
+            "Table 5.2.12.1.-I",
+            "Table 5.2.12.1.-K",
+            "Table 5.2.12.1.-N",
+            "Table 5.2.12.1.-O",
+        ),
+    ),
     "overall_thermal_transmittance_air_films": (
         "Air films included in overall thermal transmittance",
         ("Division A 1.4.1.2.(1)",),
@@ -540,6 +684,16 @@ MIGRATED_REQUIREMENTS = {
          "that supplies it"),
         ("5.2.6.3.(1)", "Table 5.2.6.3"),
         ("5.2.6.3.(1)", "Table 5.2.6.3"),
+    ),
+    "pump_limit_and_curve_data_2025": (
+        "NECB 2025 hydronic pump limits and reference curves",
+        None,
+        ("Table 5.2.6.3", "Table 8.4.5.14"),
+    ),
+    "purchased_energy_service_scope": (
+        "Purchased energy identified at the proposed primary-system service",
+        ("8.4.4.6.(1)", "8.4.4.6.(2)"),
+        ("8.4.5.6.(1)", "8.4.5.6.(2)"),
     ),
     "purchased_heating_energy": (
         ("How purchased heating energy is represented in the reference "
@@ -571,6 +725,37 @@ MIGRATED_REQUIREMENTS = {
         "Reference air leakage equal to the proposed-building default",
         ("8.4.2.9.(2)", "8.4.3.3.(3)", "8.4.4.3.(6)"),
         ("8.4.2.9.(2)", "8.4.3.3.(3)", "8.4.5.3.(6)"),
+    ),
+    "reference_dx_incremental_staging": (
+        "Reference direct-expansion cooling stages by capacity",
+        ("8.4.4.10.(8)",),
+        ("8.4.5.10.(8)",),
+    ),
+    "reference_economizer_threshold": (
+        "Reference air-economizer applicability threshold",
+        ("5.2.2.7.(1)", "8.4.4.12.(1)", "Table 8.4.4.12"),
+        ("5.2.2.7.(1)", "8.4.5.12.(1)", "Table 8.4.5.12"),
+    ),
+    "reference_energy_recovery_requirement": (
+        "Reference energy recovery where the Part 5 trigger applies",
+        (
+            "5.2.10.1.(1)",
+            "5.2.10.1.(4)",
+            "5.2.10.1.(6)",
+            "Table 5.2.10.1.-A",
+            "Table 5.2.10.1.-B",
+            "8.4.4.19.(1)",
+            "8.4.4.19.(2)",
+        ),
+        (
+            "5.2.10.1.(1)",
+            "5.2.10.1.(4)",
+            "5.2.10.1.(6)",
+            "Table 5.2.10.1.-A",
+            "Table 5.2.10.1.-B",
+            "8.4.5.19.(1)",
+            "8.4.5.19.(2)",
+        ),
     ),
     "reference_envelope_lightweight_mass": (
         "Thermal mass of the reference building's envelope assemblies",
@@ -622,6 +807,16 @@ MIGRATED_REQUIREMENTS = {
         ("8.4.3.2.(1)", "8.4.4.2.(1)"),
         ("8.4.3.2.(1)", "8.4.5.2.(1)"),
     ),
+    "reference_oversizing_caps": (
+        "Reference heating and cooling oversizing limits",
+        ("8.4.4.8.(1)", "8.4.4.8.(2)"),
+        ("8.4.5.8.(1)", "8.4.5.8.(2)"),
+    ),
+    "reference_peak_outdoor_air": (
+        "Reference peak outdoor-air flow",
+        ("8.4.4.15.(1)",),
+        ("8.4.5.15.(1)",),
+    ),
     "reference_photocontrol_evaluation": (
         ("How the reference building evaluates the effect of required "
          "photocontrols"),
@@ -632,6 +827,16 @@ MIGRATED_REQUIREMENTS = {
         "Reference HVAC system assigned to each thermal block",
         ("8.4.4.7.(1)", "8.4.4.9.(1)", "8.4.4.10.(1)"),
         ("8.4.5.7.(1)", "8.4.5.9.(1)", "8.4.5.10.(1)"),
+    ),
+    "reference_supply_fan_specification": (
+        "Reference supply-fan specification",
+        ("8.4.4.18.(3)",),
+        ("8.4.5.18.(3)",),
+    ),
+    "reference_system_selection_2025": (
+        "NECB 2025 reference-system selection dataset",
+        None,
+        ("8.4.5.7.(1)", "Table 8.4.5.7.-A", "Table 8.4.5.7.-B"),
     ),
     "reference_swh_from_proposed": (
         "Reference service water heating derived from the proposed system",
@@ -670,6 +875,11 @@ MIGRATED_REQUIREMENTS = {
         "Resolvable space types for proposed-building systems and allowances",
         ("4.2.1.6.(1)(b)", "8.4.3.1.(2)"),
         ("4.2.1.6.(1)(b)", "8.4.3.1.(2)"),
+    ),
+    "residential_compatible_cooling_identity": (
+        "Residential reference identity for compatible proposed cooling",
+        ("Table 8.4.4.7.-A",),
+        ("Table 8.4.5.7.-A",),
     ),
     "selection_table_museum_rows": (
         ("Selection-table rows that can apply to a museum, gallery or "
@@ -752,7 +962,10 @@ MIGRATED_REQUIREMENTS = {
 SHARED_KEY_USERS = {
     "capacity_iteration_on_unmet_loads": ("D-43", "D-90"),
     "common_ventilation_note_2": ("D-28", "D-101"),
+    "cooling_tower_capacity_and_cells": ("D-22", "D-26"),
+    "cooling_tower_fan_power": ("D-22", "D-26"),
     "energy_recovery_trigger": ("D-06", "D-17"),
+    "heat_pump_reference_by_source": ("D-37", "D-58"),
     "hydronic_pump_appendix_method": ("D-92", "D-93", "D-97"),
     "multizone_thermal_block_grouping": ("D-18", "D-28"),
     "plant_peak_pumping_flow": ("D-92", "D-93"),
@@ -763,23 +976,41 @@ SHARED_KEY_USERS = {
     "reference_photocontrol_evaluation": ("D-51", "D-57"),
     "unitary_equipment_staging": ("D-46", "D-47", "D-48"),
 }
+#: Non-governing records cannot fit the two-edition governing tuple above.
+RELATED_SOURCES = {
+    "reference_system_selection_2025": [{
+        "code": "necb",
+        "edition": "2020",
+        "role": "related",
+        "references": [
+            "8.4.4.7.(1)",
+            "Table 8.4.4.7.-A",
+            "Table 8.4.4.7.-B",
+        ],
+    }],
+}
 
 
 def migrated_sources(key):
-    """The governing records a migrated requirement carries: NECB 2020, then
-    NECB 2025 where the requirement is established for it."""
+    """The literal source records a migrated requirement carries."""
     _label, *citations = MIGRATED_REQUIREMENTS[key]
-    return [{"code": "necb", "edition": edition, "role": "governing",
-             "references": list(references)}
-            for edition, references in zip(("2020", "2025"), citations)
-            if references is not None]
+    sources = [
+        {"code": "necb", "edition": edition, "role": "governing",
+         "references": list(references)}
+        for edition, references in zip(("2020", "2025"), citations)
+        if references is not None
+    ]
+    sources += RELATED_SOURCES.get(key, [])
+    return sorted(sources, key=lambda source: (
+        source["code"], source["edition"], source["role"]))
 
 
 def migrated_editions(decision_id):
     """The code ids a migrated decision governs, read off the literal table."""
     return sorted({"necb" + source["edition"]
                    for key in MIGRATED_KEYS[decision_id]
-                   for source in migrated_sources(key)})
+                   for source in migrated_sources(key)
+                   if source["role"] == "governing"})
 
 
 def runtime_editions():
@@ -1382,15 +1613,16 @@ class TestTheCommittedProvisionView(unittest.TestCase):
     """
 
     #: Phase C converted every established mapping (23 structured), then Phase
-    #: D's first six batches moved 34 held decisions to the structured form
-    #: (57), 45 held down to 11. Neither moves the 68 citation-bearing or
-    #: the 35 citation-free totals. SOURCE_ROWS counts governing source records:
-    #: D-04's two requirements and D-42's one have one source each; the other
-    #: 92 requirements have two. REQUIREMENTS counts requirement instances, a
-    #: shared key once per decision that uses it.
-    STRUCTURED, ESTABLISHED, HELD, INCLUDED, OMITTED = 57, 0, 11, 68, 35
-    SOURCE_ROWS = 187
-    REQUIREMENTS = 95
+    #: D's seven batches moved 42 held decisions to the structured form (65),
+    #: leaving 3 held. Neither moves the 68 citation-bearing or 35
+    #: citation-free totals. Fourteen requirements have one source and the
+    #: other 108 have two; one of those records is D-60's related 2020
+    #: comparison. REQUIREMENTS counts instances, including a shared key once
+    #: per decision that uses it.
+    STRUCTURED, ESTABLISHED, HELD, INCLUDED, OMITTED = 65, 0, 3, 68, 35
+    SOURCE_ROWS = 230
+    GOVERNING_ROWS = 229
+    REQUIREMENTS = 122
 
     @classmethod
     def setUpClass(cls):
@@ -1462,9 +1694,9 @@ class TestTheCommittedProvisionView(unittest.TestCase):
             ),
         )
 
-    def test_phase_d_batches_are_thirty_four_of_the_structured_decisions(self):
-        """The 34 decisions these batches moved out of `unverified`,
-        beside Phase C's 23, and none of the 11 still held."""
+    def test_phase_d_batches_are_forty_two_of_the_structured_decisions(self):
+        """The 42 decisions these batches moved out of `unverified`,
+        beside Phase C's 23, and none of the 3 still held."""
         phase_d = (
             set(PHASE_D_BATCH_1_IDS)
             | set(PHASE_D_BATCH_2_IDS)
@@ -1472,6 +1704,7 @@ class TestTheCommittedProvisionView(unittest.TestCase):
             | set(PHASE_D_BATCH_4_IDS)
             | set(PHASE_D_BATCH_5_IDS)
             | set(PHASE_D_BATCH_6_IDS)
+            | set(PHASE_D_BATCH_7_IDS)
         )
         self.assertEqual(8, len(set(PHASE_D_BATCH_1_IDS)))
         self.assertEqual(6, len(set(PHASE_D_BATCH_2_IDS)))
@@ -1479,20 +1712,24 @@ class TestTheCommittedProvisionView(unittest.TestCase):
         self.assertEqual(1, len(set(PHASE_D_BATCH_4_IDS)))
         self.assertEqual(4, len(set(PHASE_D_BATCH_5_IDS)))
         self.assertEqual(10, len(set(PHASE_D_BATCH_6_IDS)))
-        self.assertEqual(34, len(phase_d))
+        self.assertEqual(8, len(set(PHASE_D_BATCH_7_IDS)))
+        self.assertEqual(42, len(phase_d))
         self.assertLessEqual(phase_d, set(self.structured))
         self.assertEqual(23, len(set(self.structured) - phase_d))
         self.assertEqual(set(), phase_d & set(self.held))
         self.assertEqual(set(), phase_d & set(self.omitted))
 
     def test_a_requirement_established_for_one_edition_asserts_no_other(self):
-        """D-04 is 2025-only, while D-42's criterion is 2020-only."""
+        """One-edition requirements assert only their governing edition."""
         single = {
             decision_id for decision_id in self.structured
             if any(len(block["sources"]) == 1
                    for block in self.front[decision_id]["articles"].values())
         }
-        self.assertEqual({"D-04", "D-42"}, single)
+        self.assertEqual(
+            {"D-04", "D-05", "D-42", "D-59", "D-60", "D-61"},
+            single,
+        )
         d04 = self.front["D-04"]
         self.assertEqual(["necb2025"], d04["editions"])
         self.assertEqual(
@@ -1507,6 +1744,20 @@ class TestTheCommittedProvisionView(unittest.TestCase):
             ["necb2025", "necb2025"],
             [code_id for code_id, cells in self.edition_rows
              if self.linked(cells[1]) == "D-04"],
+        )
+
+        d60 = self.front["D-60"]
+        self.assertEqual(["necb2025"], d60["editions"])
+        self.assertEqual(
+            [
+                ("necb", "2020", "related"),
+                ("necb", "2025", "governing"),
+            ],
+            [
+                (source["code"], source["edition"], source["role"])
+                for source in
+                d60["articles"]["reference_system_selection_2025"]["sources"]
+            ],
         )
 
         meta = self.front["D-42"]
@@ -1692,8 +1943,24 @@ class TestTheCommittedProvisionView(unittest.TestCase):
             for key in keys:
                 label = MIGRATED_REQUIREMENTS[key][0]
                 decided = self.front[decision_id]["articles"][key]["decided"]
-                mine = {"necb" + source["edition"]: source["references"]
-                        for source in migrated_sources(key)}
+                sources = migrated_sources(key)
+                mine = {
+                    "necb" + source["edition"]: source["references"]
+                    for source in sources
+                    if source["role"] == "governing"
+                }
+                extra = [
+                    "*{}* {}: {}".format(
+                        source["role"].replace("-", " "),
+                        label_of["necb" + source["edition"]],
+                        ", ".join(
+                            "`{}`".format(citation)
+                            for citation in source["references"]
+                        ),
+                    )
+                    for source in sources
+                    if source["role"] != "governing"
+                ]
                 for code_id, references in mine.items():
                     others = [
                         "{}: {}".format(label_of[other_id], ", ".join(
@@ -1702,7 +1969,8 @@ class TestTheCommittedProvisionView(unittest.TestCase):
                         if other_id != code_id]
                     expected[(code_id, decision_id, key)] = (
                         list(references), label, decided,
-                        "<br>".join(others) or "—", "—")
+                        "<br>".join(others) or "—",
+                        "<br>".join(extra) or "—")
         actual = {}
         for code_id, cells in self.edition_rows:
             identity = (code_id, self.linked(cells[1]), code_spans(cells[2])[-1])
@@ -1711,7 +1979,7 @@ class TestTheCommittedProvisionView(unittest.TestCase):
                 actual[identity] = (code_spans(cells[0]),
                                     unescape(cells[2].split("<br>")[0]),
                                     unescape(cells[3]), cells[4], cells[5])
-        self.assertEqual(self.SOURCE_ROWS, len(expected))
+        self.assertEqual(self.GOVERNING_ROWS, len(expected))
         self.assertEqual(expected, actual)
 
     def test_other_editions_are_same_requirement_governing_sources(self):
@@ -1762,10 +2030,18 @@ class TestTheCommittedProvisionView(unittest.TestCase):
                     self.assertTrue(
                         all(
                             source["code"] == "necb"
-                            and source["role"] == "governing"
+                            and source["role"] in {
+                                "governing",
+                                "incorporated-reference",
+                                "related",
+                            }
                             for source in block["sources"]
                         )
                     )
+                    self.assertTrue(any(
+                        source["role"] == "governing"
+                        for source in block["sources"]
+                    ))
 
     def test_shared_requirement_keys_keep_one_label_and_mapping(self):
         shared = {}
@@ -1867,7 +2143,7 @@ HOLDING_KEYS = ("unverified", "not_applicable")
 
 
 class TestThePhaseCMigration(unittest.TestCase):
-    """Phase C converted every established mapping and Phase D's first 34
+    """Phase C converted every established mapping and Phase D's 42
     held decisions, read straight from the committed files: no legacy
     per-code-id shape survives in a converted source or registry entry, the
     registry projects each migrated requirement exactly as the literal tables

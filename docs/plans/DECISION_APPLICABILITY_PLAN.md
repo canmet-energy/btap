@@ -387,13 +387,14 @@ edition-specific provisions, followed by single-requirement Section 8.4
 decisions, Appendix-note cases, mixed citation chains and finally the broad
 multi-part decisions such as D-61.
 
-Status: in progress. Batch 1 established D-18, D-28, D-34, D-37, D-42,
+Status: done. Batch 1 established D-18, D-28, D-34, D-37, D-42,
 D-43, D-45 and D-55. Batch 2 established D-07, D-09, D-12, D-14, D-19 and
 D-53. Batch 3 established D-03, D-11, D-13, D-35 and D-41. Batch 4 established
 D-04. Batch 5 established the mixed-section decisions D-02, D-21, D-26 and
 D-62. Batch 6 established the outside-Section-8.4 decisions D-06, D-15, D-17,
-D-23, D-31, D-32, D-63, D-74, D-76 and D-85. The committee view has moved
-from 23 structured and 45 held decisions to 57 and 11, with the 68
+D-23, D-31, D-32, D-63, D-74, D-76 and D-85. Batch 7 split and re-authored
+D-05, D-22, D-24, D-58, D-59, D-60, D-61 and D-65. The committee view has
+moved from 23 structured and 45 held decisions to 65 and 3, with the 68
 citation-bearing and 35 citation-free totals unchanged. The compliance report
 is byte-identical because titles and summaries stayed unchanged. D-28 and D-34
 gained body notes that record later applicability corrections; D-14's body now
@@ -502,6 +503,47 @@ batch. The generator replays every governing reference against those retained
 payloads; the hbix service exposes no revision id, so the exact archived
 payload hashes and retrieval dates remain the evidence boundary.
 
+- D-05 is NECB-2025-only and separates normalized lighting schedules from
+  peak outdoor air. The retained text refutes the old outdoor-air
+  interpretation: 8.4.4.2.(2) keeps the rates in the proposed specifications.
+- D-22 separates eight Code-backed findings from the larger audit batch.
+  Scheduling, recovery parasitics and warning behavior remain implementation
+  evidence, and the unsupported System 1 economizer exception remains D-20.
+- D-24 separates envelope scope, inclination-based assembly class and the
+  enclosed-space credit. The Appendix notes exclude vented attics, roof spaces
+  and crawl spaces, exposing the current blanket credit as a tool gap.
+- D-58 separates the residential identity row, Article 13 heat-pump
+  classification and the primary-system boundary for purchased energy. D-101
+  changed matrix multiplicity, not these three outcomes.
+- D-59 is bounded to the NECB 2020 equipment families it actually verified;
+  D-85 owns VRF, D-89 owns part-load curves and D-26 owns tower treatment.
+- D-60 is bounded to NECB 2025. Its selection-table comparison carries the
+  2020 records as `related`, while every 2025 efficiency family is verified
+  from its own edition rather than presumed identical.
+- D-61 is decomposed into seven NECB 2025 data identities. Exterior lighting
+  records the actual 88-of-91 comparison instead of the former zero-defect
+  claim; curve and service-water findings are rehomed to their owning
+  decisions.
+- D-65 maps only the reference energy-recovery obligation. Cooling-capacity
+  staging does not establish a per-stage ventilation-flow floor, so that
+  warning disposition remains implementation evidence under D-46.
+
+The three remaining citation-bearing decisions are intentionally held, with
+their blockers recorded in the canonical bodies:
+
+- D-16: no provision establishes blanket removal of all proposed EMS; the
+  crash safeguard must be separated from controls the reference must retain.
+- D-20: no retained provision establishes an unconditional System 1
+  economizer exception; the heat-recovery lockout interaction is engine
+  evidence, not an exception in the Code.
+- D-64: the unmet-hours and capacity-increase sentences do not authorize
+  declaring the still-failing reference characteristic or stopping the
+  response on implementation stall.
+
+Phase D attribution is complete: 65 decisions have structured sources, these
+3 remain visibly not attributed, and all 35 citation-free decisions remain
+outside the committee view.
+
 Runtime citation defects found while reading the implementation are Phase E
 items. Nothing was moved in the audit output here:
 
@@ -557,6 +599,24 @@ items. Nothing was moved in the audit output here:
 - D-85: orphan VRF removal hard-codes unrelated NECB 2020 Article 8.4.4.1 on
   every edition; its governing efficiency classification is Table
   5.2.12.1.-I.
+- D-05: runtime still replaces outdoor-air rates using the superseded
+  interpretation, and its title and summary present that result as adopted.
+  Implement 8.4.4.2.(2) and update the report-visible registry fields.
+- D-22: several audit sites hard-code 2020 Article numbers on 2025 runs. The
+  general economizer requirement must not imply that D-20's System 1
+  exception has been established.
+- D-24: remove the blanket unconditioned-enclosure credit for vented attic,
+  roof and crawl spaces, implement or disclose the definition's third limb,
+  and correct the report-visible summary and ambiguous Division A citation.
+- D-58: retain D-101's per-block matrix multiplicity while keeping plant
+  source and purchased-energy classification at their actual service scopes.
+- D-59/D-60: report-visible summaries overstate the current family set and
+  cross-edition table identity; align them with the bounded data decisions.
+- D-61: the title and summary still claim zero stale-data defects despite the
+  recorded 88-of-91 exterior-lighting result.
+- D-65: title and summary still present the per-stage ventilation floor as a
+  Code disposition even though its cited staging sentence establishes only
+  capacity staging.
 
 ### Phase E - cross-check the implementation
 
