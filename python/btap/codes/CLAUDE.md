@@ -203,9 +203,9 @@ learns *why* we read the article that way.
   `role`, `references`). Its entry carries `requirements` instead of
   `articles`, and its `editions` is derived from `governing` records only.
   Phase C converted all 23 decisions that carried an established per-code-id
-  mapping, and Phase D batch 1 established eight held decisions directly in
-  this form (31 structured in all); every other decision holds `unverified` or
-  `not_applicable`.
+  mapping, and Phase D's first two batches established fourteen held decisions
+  directly in this form (37 structured in all); every other decision holds
+  `unverified` or `not_applicable`.
   Requirements, sources and `decided` are committee metadata and never reach
   the compliance report. `tests/necb/test_report_units.py` holds the HTML
   byte-identical under any rewrite of them. They reach the Codes Committee

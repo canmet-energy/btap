@@ -387,14 +387,16 @@ edition-specific provisions, followed by single-requirement Section 8.4
 decisions, Appendix-note cases, mixed citation chains and finally the broad
 multi-part decisions such as D-61.
 
-Status: in progress. Batch 1 is established: D-18, D-28, D-34, D-37, D-42,
-D-43, D-45 and D-55. The committee view moves from 23 structured and 45 held
-decisions to 31 and 37, with the 68 citation-bearing and 35 citation-free
-totals unchanged. The compliance report is byte-identical. Titles and
-summaries stayed unchanged; D-28 and D-34 gained body notes that record later
-applicability corrections. Each mapping was read against the
-governing text in both editions' provision indexes and against the
-implementation.
+Status: in progress. Batch 1 established D-18, D-28, D-34, D-37, D-42,
+D-43, D-45 and D-55. Batch 2 established D-07, D-09, D-12, D-14, D-19 and
+D-53. The committee view has moved from 23 structured and 45 held decisions to
+37 and 31, with the 68 citation-bearing and 35 citation-free totals unchanged.
+The compliance report is byte-identical because titles and summaries stayed
+unchanged. D-28 and D-34 gained body notes that record later applicability
+corrections; D-14's body now names the reference-building transfer sentence
+and D-19's heading records its completed resolution. Each mapping was read
+against the governing text in both editions' provision indexes and against
+the implementation.
 
 - D-18 and D-28 share `multizone_thermal_block_grouping`, Table 8.4.x.7.-B
   Note (3), for System 6. D-28 also shares
@@ -413,10 +415,36 @@ implementation.
   building under Subsection 8.4.4, and +10% or 20 h, whichever is greater,
   under 8.4.5. Nothing is asserted for NECB 2025, and a one-edition mapping
   cannot share D-91's `unmet_load_hour_criteria` key.
+- D-07 maps the complete cooling-tower capacity method, 8.4.5.6.(1)-(6) in
+  2020 and 8.4.6.6.(1)-(6) in 2025. Its `decided` text calls the
+  effectiveness-NTU engine model a disclosed substitute rather than claiming
+  the prescribed equations were installed.
+- D-09 is separated into annual end-use accounting (8.4.2.2.(1)),
+  redundant/back-up equipment scope (8.4.2.2.(5)), and representative
+  climatic-data selection (8.4.2.3.(2)). The 2025-only exceptional-calculation
+  sentence is not folded into a cross-edition decision.
+- D-12 separates the radiant workaround in 8.4.x.16.(1) from identical
+  throttling in (2), so the modeller-scope disposition cannot hide the
+  implemented second sentence.
+- D-14 maps the reference transfer in 8.4.4.2.(1) (2025: 8.4.5.2.(1))
+  together with the proposed-schedule dependency in 8.4.3.2.(1).
+- D-19 maps the full default-leakage chain: the reference equality sentence,
+  the proposed default, and the pressure/area adjustment in 8.4.2.9.(2).
+- D-53 pairs 2020 8.4.5.9.(1)-(2) with 2025 8.4.6.9.(1)-(2), deliberately
+  by requirement rather than by equal numbering. The existing authorized
+  Section 8.4 caches were replayed into the provision indexes; no live payload
+  was needed for this batch.
 
 Runtime citation defects found while reading the implementation are Phase E
 items. Nothing was moved in the audit output here:
 
+- D-07: the engine substitution is not a literal implementation of the six
+  cooling-tower equations. It needs the separately recorded AHJ/tool-gap
+  disposition and a runtime citation rather than the source body's claim that
+  the requirement is simply satisfied.
+- D-19: the warning at `envelope/reference.py` uses the non-canonical range
+  `8.4.3.3.(3)-(4)` and all audit strings need edition-correct canonical
+  citations.
 - D-34: `_residential_assignment` in `hvac/reference.py` hard-codes
   `8.4.4.7.(4)`, NECB 2020 numbering, for every edition, in both the audit
   record and the assignment's articles. NECB 2025's article is `8.4.5.7.(4)`.

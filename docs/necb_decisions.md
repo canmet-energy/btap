@@ -429,8 +429,9 @@ and reference energy; deferred to its own work session).*
 
 - **Decision:** `reference_hvac` captures each zone's proposed air-system
   availability schedule before the strip and applies it to the reference loop
-  serving those zones, per 8.4.3.2.(1) (operating schedules identical in both
-  buildings). No proposed air system → builder default (Always On) retained
+  serving those zones, per 8.4.4.2.(1) (2025: 8.4.5.2.(1)), which requires
+  the reference schedules to match those determined for the proposed under
+  8.4.3.2.(1). No proposed air system → builder default (Always On) retained
   with an info note; conflicting schedules on one loop → most-zones schedule
   wins with a loud warning. This feeds the 5.2.10.1 continuous/non-continuous
   ERV classification: a proposed on a 12 h schedule now classifies
@@ -528,7 +529,7 @@ and reference energy; deferred to its own work session).*
 
 <a id="d-19"></a>
 
-## D-19 — Infiltration lineage reconciliation (OPEN: arithmetic differs, both claim the same code default)
+## D-19 — Infiltration lineage reconciled; reference inherits proposed leakage coefficients
 
 - **Facts pinned (2026-07-24):** 8.4.4.3.(6) sets reference air leakage equal to
   the DEFAULT of 8.4.3.3.(3); 8.4.3.3.(3) = 1.50 L/(s.m2) at 75 Pa, adjusted per

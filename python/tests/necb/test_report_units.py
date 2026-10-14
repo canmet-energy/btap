@@ -568,12 +568,13 @@ class TestTheRulingsAppendixReadsOnlyTitleAndSummary(unittest.TestCase):
 
 
 #: The decisions converted to structured requirements (Phase C's 23 and Phase
-#: D batch 1's eight), in id order.
+#: D's first fourteen), in id order.
 #: tests/necb/test_decisions_registry_sync.py pins the same set as MIGRATED_IDS.
-MIGRATED = ("D-18", "D-27", "D-28", "D-34", "D-37", "D-38", "D-39", "D-42",
-            "D-43", "D-45", "D-46", "D-47", "D-48", "D-49", "D-50", "D-51",
-            "D-52", "D-54", "D-55", "D-56", "D-57", "D-89", "D-90", "D-91",
-            "D-92", "D-93", "D-97", "D-99", "D-100", "D-101", "D-102")
+MIGRATED = ("D-07", "D-09", "D-12", "D-14", "D-18", "D-19", "D-27", "D-28",
+            "D-34", "D-37", "D-38", "D-39", "D-42", "D-43", "D-45", "D-46",
+            "D-47", "D-48", "D-49", "D-50", "D-51", "D-52", "D-53", "D-54",
+            "D-55", "D-56", "D-57", "D-89", "D-90", "D-91", "D-92", "D-93",
+            "D-97", "D-99", "D-100", "D-101", "D-102")
 
 
 def migrated_audit():
@@ -601,8 +602,8 @@ def legacy_shaped(entry):
 
 
 class TestTheMigratedDecisionsRenderAsTheirLegacyShape(unittest.TestCase):
-    """The migrations (Phase C's 23 decisions, then Phase D batch 1's eight)
-    changed how 31 decisions record their provisions and nothing a
+    """The migrations (Phase C's 23 decisions, then Phase D's first fourteen)
+    changed how 37 decisions record their provisions and nothing a
     report reads. A run that fires every one of them renders the same rulings
     appendix and the same report whether the registry holds them structured,
     back in the per-code-id shape they replaced, or reduced to the fields the

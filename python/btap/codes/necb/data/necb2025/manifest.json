@@ -1245,7 +1245,7 @@
       "method": "generated",
       "source_verification": "archived",
       "note": "The retained provisions.result.json is the exact bounded set of authorized MCP tool results. source_artifacts is the canonical two-input descriptor and also pins coverage/articles_8_4.json, which supplies Section 8.4 structure and table-note identities without duplicating that cache.",
-      "result_sha256": "856f419d855572c77df7baf81b66cd912c66fba69973b97dbcba6711c7affdcc"
+      "result_sha256": "6119bf4581664344aab4a8a63164668ed992206d2ae94ca3c09a2568fa1d6846"
     }
   }
 }

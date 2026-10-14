@@ -127,15 +127,46 @@
       "id": "D-07",
       "title": "Cooling-tower part-load behaviour dispositioned to the engine",
       "kind": "process",
-      "articles": {
-        "unverified": [
-          "8.4.6.6."
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "The reference tower's part-load capacity requirement is satisfied by EnergyPlus's effectiveness-NTU tower model, which exposes no curve fields the code's polynomial could be installed into. The disposition is backed by a gated numeric cross-check rather than argument alone: exact agreement at the industry rating point and bounded divergence across the rating slice, in the conservative direction at cold wet-bulbs where capacity never binds."
+      "summary": "The reference tower's part-load capacity requirement is satisfied by EnergyPlus's effectiveness-NTU tower model, which exposes no curve fields the code's polynomial could be installed into. The disposition is backed by a gated numeric cross-check rather than argument alone: exact agreement at the industry rating point and bounded divergence across the rating slice, in the conservative direction at cold wet-bulbs where capacity never binds.",
+      "requirements": [
+        {
+          "id": "cooling_tower_part_load_capacity",
+          "label": "Part-load cooling capacity of the reference cooling tower",
+          "decided": "The engine's single-speed Merkel tower is retained as a disclosed substitute because it exposes no field for the prescribed capacity equations; a numerical probe bounds the difference instead of calling the substitution a literal implementation.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "8.4.5.6.(1)",
+                "8.4.5.6.(2)",
+                "8.4.5.6.(3)",
+                "8.4.5.6.(4)",
+                "8.4.5.6.(5)",
+                "8.4.5.6.(6)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "8.4.6.6.(1)",
+                "8.4.6.6.(2)",
+                "8.4.6.6.(3)",
+                "8.4.6.6.(4)",
+                "8.4.6.6.(5)",
+                "8.4.6.6.(6)"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-08",
@@ -153,16 +184,82 @@
       "id": "D-09",
       "title": "Umbrella coverage manifest emits at runtime; modeller-scope notes split from warnings",
       "kind": "runtime_unwired",
-      "articles": {
-        "unverified": [
-          "8.4.2.2.",
-          "8.4.2.3."
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "The umbrella gem emits its own article-coverage manifest into the audit at the end of every successful run, and all six emitters share one semantic: a partial or unimplemented entry whose remaining gap is wholly the modeller's responsibility emits as an informational scope note rather than a warning. A warning no model change can ever clear trains readers to ignore warnings altogether. Its audit calls are the coverage emitters, which are deliberately left untagged so the report's fired-rulings counts reflect real code paths rather than manifest boilerplate."
+      "summary": "The umbrella gem emits its own article-coverage manifest into the audit at the end of every successful run, and all six emitters share one semantic: a partial or unimplemented entry whose remaining gap is wholly the modeller's responsibility emits as an informational scope note rather than a warning. A warning no model change can ever clear trains readers to ignore warnings altogether. Its audit calls are the coverage emitters, which are deliberately left untagged so the report's fired-rulings counts reflect real code paths rather than manifest boilerplate.",
+      "requirements": [
+        {
+          "id": "annual_energy_end_use_accounting",
+          "label": "Annual end uses accounted for by the energy model",
+          "decided": "A required end use missing from the supplied model remains a tool warning; manifest emission reports the omission but does not invent elevators, escalators or other absent loads.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "8.4.2.2.(1)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "8.4.2.2.(1)"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "redundant_backup_equipment_scope",
+          "label": "Exclusion of redundant or backup equipment from the energy model",
+          "decided": "Identifying equipment as controlled backup is a modeller decision about model contents; the declared limitation is therefore scope information rather than a tool warning.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "8.4.2.2.(5)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "8.4.2.2.(5)"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "representative_climatic_dataset",
+          "label": "Climatic data set that best represents the building site",
+          "decided": "Selecting among several urban data sets, or choosing a proxy where local observations are unavailable, remains modeller evidence and is rendered as a scope note.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "8.4.2.3.(2)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "8.4.2.3.(2)"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-10",
@@ -194,15 +291,59 @@
       "id": "D-12",
       "title": "Space temperature control re-manifested as modeller scope",
       "kind": "data",
-      "articles": {
-        "unverified": [
-          "8.4.4.16."
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "Claiming this article unimplemented was factually wrong. Identical throttling between the two buildings is satisfied by construction, because both use ideal thermostat control on cloned schedules with no throttling knob that could differ. The remaining sentence only binds when a modeller approximates a radiant design convectively, which is the modeller's responsibility, so the entry is now a scope note rather than a permanent warning."
+      "summary": "Claiming this article unimplemented was factually wrong. Identical throttling between the two buildings is satisfied by construction, because both use ideal thermostat control on cloned schedules with no throttling knob that could differ. The remaining sentence only binds when a modeller approximates a radiant design convectively, which is the modeller's responsibility, so the entry is now a scope note rather than a permanent warning.",
+      "requirements": [
+        {
+          "id": "radiant_effect_temperature_adjustment",
+          "label": "Reference temperature adjustment when radiant effects cannot be modeled",
+          "decided": "The engine can represent radiant systems directly; if a modeller instead approximates one convectively, applying the prescribed schedule adjustment remains modeller scope.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "8.4.4.16.(1)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "8.4.5.16.(1)"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "reference_throttling_range",
+          "label": "Reference heating and cooling throttling range",
+          "decided": "Both buildings use ideal thermostat control on cloned schedules and expose no separate throttling parameter, so their modeled throttling is identical by construction.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "8.4.4.16.(2)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "8.4.5.16.(2)"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-13",
@@ -222,15 +363,38 @@
       "id": "D-14",
       "title": "Reference air systems inherit the proposed operating schedule",
       "kind": "runtime",
-      "articles": {
-        "unverified": [
-          "8.4.3.2.(1)"
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "Each zone's proposed air-system availability schedule is captured before the HVAC strip and applied to the reference loop serving those zones, since operating schedules must be identical in both buildings. With no proposed air system the builder default is retained with an informational note; when one reference loop's zones carried conflicting schedules the most-common one wins with a loud warning. This also feeds the energy-recovery continuous-versus-intermittent classification."
+      "summary": "Each zone's proposed air-system availability schedule is captured before the HVAC strip and applied to the reference loop serving those zones, since operating schedules must be identical in both buildings. With no proposed air system the builder default is retained with an informational note; when one reference loop's zones carried conflicting schedules the most-common one wins with a loud warning. This also feeds the energy-recovery continuous-versus-intermittent classification.",
+      "requirements": [
+        {
+          "id": "reference_operating_schedules",
+          "label": "Reference operating schedules identical to those determined for the proposed building",
+          "decided": "Each zone's proposed air-system availability is captured before replacement and assigned to its serving reference loop; an absent schedule keeps the builder default, while conflicts select the most common schedule and warn.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "8.4.3.2.(1)",
+                "8.4.4.2.(1)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "8.4.3.2.(1)",
+                "8.4.5.2.(1)"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-15",
@@ -314,17 +478,40 @@
       "id": "D-19",
       "title": "Infiltration lineage reconciled; reference inherits proposed leakage coefficients",
       "kind": "runtime",
-      "articles": {
-        "unverified": [
-          "8.4.3.3.(3)",
-          "8.4.2.9.(2)",
-          "8.4.4.3.(6)"
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "For an untested building the proposed and reference must carry identical air leakage, so an observed large difference was not code-intended. The real defect was ours and temporal: the reference wrote a constant-coefficient infiltration convention while the cloned proposed carried wind-driven coefficients, giving identical design totals but very different delivered air changes. The reference now inherits the proposed's coefficients and schedule, and a proposed whose installed total deviates materially from the code default draws a loud warning."
+      "summary": "For an untested building the proposed and reference must carry identical air leakage, so an observed large difference was not code-intended. The real defect was ours and temporal: the reference wrote a constant-coefficient infiltration convention while the cloned proposed carried wind-driven coefficients, giving identical design totals but very different delivered air changes. The reference now inherits the proposed's coefficients and schedule, and a proposed whose installed total deviates materially from the code default draws a loud warning.",
+      "requirements": [
+        {
+          "id": "reference_default_air_leakage",
+          "label": "Reference air leakage equal to the proposed-building default",
+          "decided": "For an untested building, the reference copies the proposed leakage coefficients and schedule as well as the default total; a proposed total differing by more than ten percent draws a warning.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "8.4.2.9.(2)",
+                "8.4.3.3.(3)",
+                "8.4.4.3.(6)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "8.4.2.9.(2)",
+                "8.4.3.3.(3)",
+                "8.4.5.3.(6)"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-20",
@@ -1266,16 +1453,38 @@
       "id": "D-53",
       "title": "Service water heater part-load curve carries the code fuel-ratio curve transformed into the EnergyPlus part-load-factor domain",
       "kind": "runtime",
-      "articles": {
-        "unverified": [
-          "8.4.5.9.(2)",
-          "8.4.6.9.(2)"
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "The code states the reference fuel-fired water heater's part-load behaviour as a quadratic ratio of design fuel consumption, whereas the simulation engine's part-load-factor field is an efficiency divisor, so the two express the same requirement in different domains and cannot be compared coefficient by coefficient. The vendored cubic is the polynomial image of that transform and is verified functionally against the code curve on a sampled part-load range rather than by its coefficients; entering the code's own quadratic into the engine field would invert the relation, roughly double part-load fuel at half load, and double-count standby the engine already models separately. The curve is applied to gas- and oil-fired heaters, storage and instantaneous alike, and is withheld from electric heaters because the governing article covers only fuel-fired equipment, a scope limit that is audited rather than left as a silent skip."
+      "summary": "The code states the reference fuel-fired water heater's part-load behaviour as a quadratic ratio of design fuel consumption, whereas the simulation engine's part-load-factor field is an efficiency divisor, so the two express the same requirement in different domains and cannot be compared coefficient by coefficient. The vendored cubic is the polynomial image of that transform and is verified functionally against the code curve on a sampled part-load range rather than by its coefficients; entering the code's own quadratic into the engine field would invert the relation, roughly double part-load fuel at half load, and double-count standby the engine already models separately. The curve is applied to gas- and oil-fired heaters, storage and instantaneous alike, and is withheld from electric heaters because the governing article covers only fuel-fired equipment, a scope limit that is audited rather than left as a silent skip.",
+      "requirements": [
+        {
+          "id": "fuel_fired_swh_part_load",
+          "label": "Part-load fuel curve of the reference fuel-fired service water heater",
+          "decided": "The prescribed fuel-ratio quadratic is transformed into the engine's part-load-factor domain as a cubic and checked functionally; it applies to gas- and oil-fired heaters but not electric equipment.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "8.4.5.9.(1)",
+                "8.4.5.9.(2)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "8.4.6.9.(1)",
+                "8.4.6.9.(2)"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-54",
