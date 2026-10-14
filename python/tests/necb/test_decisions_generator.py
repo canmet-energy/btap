@@ -472,18 +472,30 @@ class TestSourceValidation(unittest.TestCase):
         A bare whitespace key is a TOML syntax error, so the dict path used by
         `rejects` cannot express this case — the first version of this test
         asserted the wrong refusal and passed for the wrong reason.
+
+        It once edited the real D-99, which Phase C converted to the
+        structured form; a legacy fixture keeps the legacy refusal under test
+        and the structured fixture shows the other branch refuses it too.
         """
-        with tempfile.TemporaryDirectory() as directory:
-            path = Path(directory) / "D-99.md"
-            real = (Path(G.__file__).resolve().parents[2] / "docs"
-                    / "decisions" / "D-99.md").read_text(encoding="utf-8")
-            path.write_text(
-                real.replace("[articles.multi_energy_heating]",
-                             '[articles.""]'),
-                encoding="utf-8")
-            with self.assertRaises(ValueError) as caught:
-                G.parse_source(path)
-            self.assertIn("blank requirement key", str(caught.exception))
+        cases = (
+            (GOOD_META, "hydronic_pumps", "blank requirement key"),
+            (STRUCTURED_META, KEY,
+             "a structured requirement key must match '[a-z][a-z0-9_]*'"),
+        )
+        for meta, key, message in cases:
+            with self.subTest(key=key), \
+                    tempfile.TemporaryDirectory() as directory:
+                path = write(directory, meta=meta)
+                text = path.read_text(encoding="utf-8")
+                self.assertIn("[articles.{}]".format(key), text)
+                blank = text.replace("articles.{}".format(key), 'articles.""')
+                path.write_text(blank, encoding="utf-8")
+                front = blank.split(G.FENCE + "\n")[1]
+                self.assertEqual([""], list(tomllib.loads(front)["articles"]),
+                                 "the blank key is what reaches the validator")
+                with self.assertRaises(ValueError) as caught:
+                    G.parse_source(path)
+                self.assertIn(message, str(caught.exception))
 
     def test_an_edition_may_not_be_listed_TWICE(self):
         """`check_articles` reduces editions to a set, so a duplicate was
@@ -1408,7 +1420,11 @@ class TestStructuredSources(unittest.TestCase):
              "8.4.4.13.(3) is absent from the complete child inventory of "
              "8.4.4.13 in necb2020"),
             (0, "8.4.1.5", "8.4.1.5 is authority-confirmed absent from necb2020"),
-            (0, "8.4.4.9.(5)", "8.4.4.9.(5) has no committed evidence in necb2020"),
+            # A real 2020 sentence that NO decision cites, so the archive --
+            # whose calls follow the decisions' citations -- does not reach
+            # it. It was 8.4.4.9.(5) until Phase C's evidence expansion
+            # indexed that article for D-99.
+            (0, "8.4.3.4.(1)", "8.4.3.4.(1) has no committed evidence in necb2020"),
             (0, "8.4.5.13.(1)", "8.4.5.13.(1) has no committed evidence in necb2020"),
             (1, "8.4.4.13.(1)", "8.4.4.13.(1) has no committed evidence in necb2025"),
             (2, "Table 8.4.4.7.-B Note (9)",

@@ -196,7 +196,13 @@ on a `decisions: note` line.
 `summary`, which are all the runtime reads. A structured entry carries
 `requirements` instead of `articles`.
 
-No decision has been converted yet; the tests exercise the form on fixtures.
+Phase C converted the 23 decisions that carried an established per-code-id
+mapping, so the view prints no Transitional summaries. Every other decision
+still holds `unverified` or `not_applicable`.
+`tests/necb/test_decisions_registry_sync.py` pins the converted ids and each
+converted mapping and fails if any other decision takes a per-code-id mapping;
+`tests/necb/test_report_units.py` holds the compliance report byte-identical
+across the conversion.
 
 [CODE_DECISIONS_BY_PROVISION.md](CODE_DECISIONS_BY_PROVISION.md) lists only a
 decision that cites a provision. A decision that cites none, because it is

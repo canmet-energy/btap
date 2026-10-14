@@ -169,7 +169,12 @@ scope rather than admitting another heuristic.
 
 **The structured source form** is the migration target of
 `docs/plans/DECISION_APPLICABILITY_PLAN.md`. The generator accepts it beside the
-legacy form, but no decision has been converted yet. A requirement keeps its
+legacy form. Phase C converted all 23 decisions that carried an established
+per-code-id mapping, so no committed decision still uses the per-code-id lists
+above: every other decision holds `unverified` or `not_applicable`.
+`python/tests/necb/test_decisions_registry_sync.py` pins the converted ids and
+each converted mapping, and fails if any other decision takes a per-code-id
+mapping. A requirement keeps its
 key and `label`, adds a committee-facing `decided` paraphrase, and carries one
 `[[articles.<key>.sources]]` record per `code` family, `edition` STRING and
 `role`:
@@ -233,7 +238,7 @@ listed. Its rows come from the decision's own requirements:
 - a legacy requirement with a citation list per code id makes one row per
   edition. It has no `decided` text yet, so the decision-wide `summary` stands
   in, marked **Transitional** and printed once per decision rather than on
-  every row;
+  every row. No committed decision has taken this form since Phase C;
 - a non-empty legacy `unverified` list appears only in the last section,
   "Edition not yet attributed", with its recorded citations. It is never placed
   under an edition.

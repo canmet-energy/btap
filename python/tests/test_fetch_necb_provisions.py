@@ -186,6 +186,54 @@ class TestStructureExtraction(unittest.TestCase):
                 {"full_text": "1) Sentence:\na) Clause:\ni) First.\niii) Third."}
             )
 
+    def test_a_flattened_roman_sequence_after_clause_h_is_not_clause_i(self):
+        structure = script.structure_from_text(
+            {
+                "full_text": (
+                    "1) Sentence:\n"
+                    "a) Clause.\n"
+                    "b) Clause.\n"
+                    "c) Clause.\n"
+                    "d) Clause.\n"
+                    "e) Clause.\n"
+                    "f) Clause.\n"
+                    "g) Clause.\n"
+                    "h) Clause.\n"
+                    "i) First subclause.\n"
+                    "ii) Second subclause.\n"
+                )
+            }
+        )
+        self.assertEqual(
+            {"a": [], "b": [], "c": [], "d": [], "e": [], "f": [], "g": [],
+             "h": ["i", "ii"]},
+            structure["1"]["clauses"],
+        )
+
+    def test_a_flattened_clause_i_without_roman_continuation_stays_a_clause(self):
+        structure = script.structure_from_text(
+            {
+                "full_text": (
+                    "1) Sentence:\n"
+                    "a) Clause.\n"
+                    "b) Clause.\n"
+                    "c) Clause.\n"
+                    "d) Clause.\n"
+                    "e) Clause.\n"
+                    "f) Clause.\n"
+                    "g) Clause.\n"
+                    "h) Clause.\n"
+                    "i) Clause.\n"
+                    "2) Next sentence.\n"
+                )
+            }
+        )
+        self.assertEqual(
+            {"a": [], "b": [], "c": [], "d": [], "e": [], "f": [], "g": [],
+             "h": [], "i": []},
+            structure["1"]["clauses"],
+        )
+
     def test_non_contiguous_cached_clauses_are_rejected(self):
         with self.assertRaisesRegex(ValueError, "expected Clause"):
             script.structure_from_cache(
@@ -223,6 +271,64 @@ class TestStructureExtraction(unittest.TestCase):
 
 
 class TestProvisionDocumentBuilder(unittest.TestCase):
+    def test_real_structured_sources_expand_the_authorized_request_set(self):
+        references = script.concrete_references("2020")
+        self.assertIn("4.2.2.1.(10)", references)
+        self.assertIn("5.2.6.3.(1)", references)
+        self.assertIn("Table 5.2.6.3", references)
+        self.assertIn("Table 8.4.4.7.-A", references)
+        self.assertIn("Note A-8.4.4.14.(2)", references)
+
+        calls = script.call_specs(
+            "2020",
+            script.EDITION_SPECS["2020"],
+            references=references,
+        )
+        requested = {
+            (call["tool"], tuple(sorted(call["arguments"].items())))
+            for call in calls.values()
+        }
+        self.assertIn(
+            (
+                "get_section",
+                tuple(
+                    sorted(
+                        script._section_arguments("2020", "B", "5.2.6.3").items()
+                    )
+                ),
+            ),
+            requested,
+        )
+        self.assertIn(
+            (
+                "get_table",
+                tuple(
+                    sorted(
+                        {
+                            "code": "necb",
+                            "edition": "2020",
+                            "division": "B",
+                            "table_number": "5.2.6.3",
+                        }.items()
+                    )
+                ),
+            ),
+            requested,
+        )
+        self.assertIn(
+            (
+                "get_section",
+                tuple(
+                    sorted(
+                        script._section_arguments(
+                            "2020", "B", "A-8.4.4.14.(2)"
+                        ).items()
+                    )
+                ),
+            ),
+            requested,
+        )
+
     def test_2020_build_marks_real_inventory_gap_absent(self):
         client = FakeClient("2020")
         archive, index = script.build_documents(
@@ -230,6 +336,7 @@ class TestProvisionDocumentBuilder(unittest.TestCase):
             "2020",
             section_cache("2020"),
             retrieved="2026-10-13",
+            references=(),
         )
         self.assertEqual(5, len(archive))
         self.assertEqual(
@@ -248,6 +355,7 @@ class TestProvisionDocumentBuilder(unittest.TestCase):
             "2025",
             section_cache("2025"),
             retrieved="2026-10-13",
+            references=(),
         )
         probe = index["provisions"]["8.4.1.5"]
         self.assertEqual("present", probe["status"])
@@ -269,6 +377,7 @@ class TestProvisionDocumentBuilder(unittest.TestCase):
             "2020",
             section_cache("2020"),
             retrieved="2026-10-13",
+            references=(),
         )
         expected = [
             {
@@ -293,6 +402,7 @@ class TestProvisionDocumentBuilder(unittest.TestCase):
             "2020",
             section_cache("2020"),
             retrieved="2026-10-13",
+            references=(),
         )
         serialized = json.dumps(index)
         self.assertNotIn("first clause", serialized)
@@ -315,6 +425,7 @@ class TestProvisionDocumentBuilder(unittest.TestCase):
                 "2020",
                 section_cache("2020"),
                 retrieved="2026-10-13",
+                references=(),
             )
 
     def test_division_identity_mutation_is_rejected(self):
@@ -336,6 +447,7 @@ class TestProvisionDocumentBuilder(unittest.TestCase):
                 "2020",
                 section_cache("2020"),
                 retrieved="2026-10-13",
+                references=(),
             )
 
     def test_incomplete_inventory_cannot_establish_absence(self):
@@ -353,6 +465,7 @@ class TestProvisionDocumentBuilder(unittest.TestCase):
                 "2020",
                 section_cache("2020"),
                 retrieved="2026-10-13",
+                references=(),
             )
 
 

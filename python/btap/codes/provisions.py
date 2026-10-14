@@ -273,7 +273,8 @@ def structure_from_text(record: dict[str, Any]) -> dict[str, dict[str, Any]]:
     current_clause: list[str] | None = None
     expected_letter = "a"
 
-    for raw_line in raw.splitlines():
+    lines = raw.splitlines()
+    for position, raw_line in enumerate(lines):
         line = raw_line.strip()
         if not line:
             continue
@@ -292,10 +293,25 @@ def structure_from_text(record: dict[str, Any]) -> dict[str, dict[str, Any]]:
         clause = _CLAUSE_LINE_RE.match(line)
         if clause is not None and current_sentence is not None:
             letter = clause.group(1)
+            next_marker = None
+            for following in lines[position + 1 :]:
+                following = following.strip()
+                if not following:
+                    continue
+                roman = _ROMAN_LINE_RE.match(following)
+                if roman is not None:
+                    next_marker = roman.group(1)
+                break
             roman_context = (
                 letter in {"i", "v", "x"}
                 and letter != expected_letter
                 and current_clause is not None
+            )
+            roman_context |= (
+                letter == "i"
+                and letter == expected_letter
+                and current_clause is not None
+                and next_marker == "ii"
             )
             if not roman_context:
                 if letter != expected_letter:
@@ -983,13 +999,18 @@ def _validate_document(
                     f"{context}.parent {parent!r} is an alias; use canonical "
                     f"{parsed_parent.canonical!r}"
                 )
-            if (
-                parsed_parent.kind != "article"
-                or parsed_parent.division != citation.division
+            appendix_parent = (
+                citation.kind == "appendix-note"
+                and parsed_parent.kind
+                in {"article", "sentence", "clause", "subclause"}
+            )
+            if (not appendix_parent and parsed_parent.kind != "article") or (
+                parsed_parent.division != citation.division
             ):
                 raise ProvisionIndexError(
-                    f"{context}.parent {parent!r} must be an Article in Division "
-                    f"{citation.division}"
+                    f"{context}.parent {parent!r} must be an "
+                    f"{'Article, Sentence, Clause, or Subclause' if citation.kind == 'appendix-note' else 'Article'} "
+                    f"in Division {citation.division}"
                 )
         if not isinstance(record["evidence"], list) or not record["evidence"]:
             raise ProvisionIndexError(f"{context}.evidence must be a non-empty list")

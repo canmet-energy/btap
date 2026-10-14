@@ -202,6 +202,8 @@ learns *why* we read the article that way.
   paraphrase and `[[articles.<key>.sources]]` records (`code`, `edition`,
   `role`, `references`). Its entry carries `requirements` instead of
   `articles`, and its `editions` is derived from `governing` records only.
+  Phase C converted all 23 decisions that carried an established per-code-id
+  mapping; every other decision holds `unverified` or `not_applicable`.
   Requirements, sources and `decided` are committee metadata and never reach
   the compliance report. `tests/necb/test_report_units.py` holds the HTML
   byte-identical under any rewrite of them. They reach the Codes Committee

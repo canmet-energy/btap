@@ -28,6 +28,7 @@ import hashlib
 import json
 import re
 import sys
+import tomllib
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -44,6 +45,7 @@ from btap.codes.provisions import (  # noqa: E402
 )
 
 DATA_ROOT = PYTHON_ROOT / "btap" / "codes" / "necb" / "data"
+DECISIONS_DIR = PYTHON_ROOT.parent / "docs" / "decisions"
 INDEX_PATH = Path("coverage/provisions.json")
 ARCHIVE_PATH = Path("provenance/provisions.result.json")
 SECTION_CACHE_PATH = Path("coverage/articles_8_4.json")
@@ -123,9 +125,118 @@ def _section_arguments(edition: str, division: str, number: str) -> dict[str, An
     }
 
 
-def call_specs(edition: str, spec: dict[str, str]) -> dict[str, dict[str, Any]]:
-    """The fixed bounded request set, keyed by its normalized evidence role."""
-    return {
+def _canonical_reference(value: str) -> str:
+    """Normalize legacy spelling before inspecting the canonical source set."""
+    if re.fullmatch(r"A-\d+(?:\.\d+){3,}\.\(\d+\)", value):
+        return f"Note {value}"
+    table_with_period = re.fullmatch(r"(Table\s+.+)\.", value)
+    if table_with_period:
+        return table_with_period.group(1)
+    return parse_citation(value, family="necb").canonical
+
+
+def concrete_references(
+    edition: str,
+    *,
+    source_dir: Path = DECISIONS_DIR,
+) -> tuple[str, ...]:
+    """Return every concrete governing NECB citation in canonical source order."""
+    references: list[str] = []
+    code_id = f"necb{edition}"
+    for path in sorted(
+        source_dir.glob("D-*.md"),
+        key=lambda item: int(item.stem.removeprefix("D-")),
+    ):
+        raw = path.read_text(encoding="utf-8")
+        try:
+            front = raw.split("+++\n", 2)[1]
+        except IndexError:
+            raise ValueError(f"{path} has no TOML front matter") from None
+        meta = tomllib.loads(front)
+        articles = meta.get("articles", {})
+        if not isinstance(articles, dict):
+            raise ValueError(f"{path} articles must be a table")
+        for key, requirement in articles.items():
+            if not isinstance(requirement, dict):
+                if key in {"unverified", "not_applicable"} and isinstance(
+                    requirement, list
+                ):
+                    continue
+                raise ValueError(f"{path} articles.{key} must be a table")
+            sources = requirement.get("sources")
+            if isinstance(sources, list):
+                for source in sources:
+                    if not isinstance(source, dict):
+                        raise ValueError(f"{path} articles.{key}.sources has a non-table")
+                    if (
+                        source.get("code") == "necb"
+                        and source.get("edition") == edition
+                        and source.get("role") == "governing"
+                    ):
+                        values = source.get("references")
+                        if not isinstance(values, list):
+                            raise ValueError(
+                                f"{path} articles.{key}.sources references must be a list"
+                            )
+                        references.extend(_canonical_reference(value) for value in values)
+            elif code_id in requirement:
+                values = requirement[code_id]
+                if not isinstance(values, list):
+                    raise ValueError(f"{path} articles.{key}.{code_id} must be a list")
+                references.extend(_canonical_reference(value) for value in values)
+    return tuple(dict.fromkeys(references))
+
+
+def _section_call_id(division: str, number: str) -> str:
+    return f"section_{division}_{number.replace('.', '_').replace('-', '_')}"
+
+
+def _table_call_id(number: str) -> str:
+    return f"table_{number.replace('.', '_').replace('-', '_')}"
+
+
+def _article_citation(citation: Any) -> str | None:
+    if citation.kind not in {"article", "sentence", "clause", "subclause"}:
+        return None
+    return citation.canonical.split(".(", 1)[0]
+
+
+def _table_parent(number: str) -> str | None:
+    match = re.fullmatch(r"(\d+(?:\.\d+){3,})(?:\.-[A-Z])?", number)
+    return match.group(1) if match else None
+
+
+def _appendix_parent(number: str) -> str:
+    """Return the Article explained by an Appendix note or note sentence."""
+    return number.removeprefix("A-").split(".(", 1)[0]
+
+
+def _cache_article_is_usable(edition: str, number: str) -> bool:
+    """Whether the committed cache can witness the article's full hierarchy."""
+    cache_path = DATA_ROOT / f"necb{edition}" / SECTION_CACHE_PATH
+    try:
+        cache = json.loads(cache_path.read_text(encoding="utf-8"))
+        article = cache["articles"][number]
+        structure_from_cache(article)
+    except (KeyError, TypeError, ValueError):
+        return False
+    return True
+
+
+def call_specs(
+    edition: str,
+    spec: dict[str, str],
+    *,
+    references: tuple[str, ...] | None = None,
+) -> dict[str, dict[str, Any]]:
+    """The bounded, reproducible MCP request set for one edition.
+
+    The committed decision sources declare the additional evidence required by
+    concrete mappings.  Section 8.4 articles reuse their retained cache; every
+    other governing Article, Table, and Appendix note has an exact MCP payload
+    in the archive.
+    """
+    calls = {
         "division_a_1_1_1_1": {
             "tool": "get_section",
             "arguments": _section_arguments(edition, "A", "1.1.1.1"),
@@ -158,11 +269,99 @@ def call_specs(edition: str, spec: dict[str, str]) -> dict[str, dict[str, Any]]:
             },
         },
     }
+    for reference in references if references is not None else concrete_references(edition):
+        citation = parse_citation(reference, family="necb")
+        article = _article_citation(citation)
+        if article is not None:
+            if article.startswith("8.4."):
+                if not _cache_article_is_usable(edition, article):
+                    call_id = _section_call_id("B", article)
+                    calls.setdefault(
+                        call_id,
+                        {
+                            "tool": "get_section",
+                            "arguments": _section_arguments(edition, "B", article),
+                        },
+                    )
+                continue
+            call_id = _section_call_id(citation.division, article)
+            calls.setdefault(
+                call_id,
+                {
+                    "tool": "get_section",
+                    "arguments": _section_arguments(edition, citation.division, article),
+                },
+            )
+            continue
+        if citation.kind in {"table", "table-note"}:
+            table_number = citation.canonical.removeprefix("Table ").split(" Note ", 1)[0]
+            if table_number == spec["table"]:
+                continue
+            call_id = _table_call_id(table_number)
+            calls.setdefault(
+                call_id,
+                {
+                    "tool": "get_table",
+                    "arguments": {
+                        "code": "necb",
+                        "edition": edition,
+                        "division": "B",
+                        "table_number": table_number,
+                    },
+                },
+            )
+            article = _table_parent(table_number)
+            if article is not None and (
+                not article.startswith("8.4.")
+                or not _cache_article_is_usable(edition, article)
+            ):
+                article_call_id = _section_call_id("B", article)
+                calls.setdefault(
+                    article_call_id,
+                    {
+                        "tool": "get_section",
+                        "arguments": _section_arguments(edition, "B", article),
+                    },
+                )
+            continue
+        if citation.kind == "appendix-note":
+            number = citation.canonical.removeprefix("Note ")
+            if number == spec["appendix_note"]:
+                continue
+            call_id = _section_call_id("B", number)
+            calls.setdefault(
+                call_id,
+                {
+                    "tool": "get_section",
+                    "arguments": _section_arguments(edition, "B", number),
+                },
+            )
+            article = _appendix_parent(number)
+            if not article.startswith("8.4.") or not _cache_article_is_usable(
+                edition, article
+            ):
+                article_call_id = _section_call_id("B", article)
+                calls.setdefault(
+                    article_call_id,
+                    {
+                        "tool": "get_section",
+                        "arguments": _section_arguments(edition, "B", article),
+                    },
+                )
+            continue
+        raise ValueError(f"unsupported concrete citation {reference!r}")
+    return calls
 
 
-def fetch_calls(client: MCPClient, edition: str, spec: dict[str, str]) -> dict[str, Any]:
+def fetch_calls(
+    client: MCPClient,
+    edition: str,
+    spec: dict[str, str],
+    *,
+    references: tuple[str, ...] | None = None,
+) -> dict[str, Any]:
     """Make the bounded live calls whose exact results are retained."""
-    calls = call_specs(edition, spec)
+    calls = call_specs(edition, spec, references=references)
     for call in calls.values():
         call["result"] = client.call(call["tool"], call["arguments"])
     return calls
@@ -391,9 +590,12 @@ def _build_index(
     *,
     retrieved: str,
     section_cache_sha256: str | None = None,
+    references: tuple[str, ...] | None = None,
 ) -> dict[str, Any]:
     """Normalize one already-retained bounded source set."""
     spec = EDITION_SPECS[edition]
+    references = references if references is not None else concrete_references(edition)
+    citations = [parse_citation(reference, family="necb") for reference in references]
     archive_bytes = _archive_bytes(archive)
 
     provenance = section_cache.get("provenance") or {}
@@ -427,10 +629,60 @@ def _build_index(
             evidence=[_call_evidence(calls, call_id)],
         )
 
-    for number in (spec["reference_article"], spec["structured_article"]):
+    cache_articles = {spec["reference_article"], spec["structured_article"]}
+    external_articles: set[tuple[str, str]] = set()
+    table_numbers = {spec["table"]}
+    appendix_numbers = {spec["appendix_note"]}
+    for citation in citations:
+        article = _article_citation(citation)
+        if article is not None:
+            number = article.removeprefix("Division A ")
+            if number.startswith("8.4."):
+                try:
+                    structure_from_cache(articles[number])
+                except (KeyError, TypeError, ValueError):
+                    external_articles.add(("B", number))
+                else:
+                    cache_articles.add(number)
+            else:
+                external_articles.add((citation.division, number))
+            continue
+        if citation.kind in {"table", "table-note"}:
+            number = citation.canonical.removeprefix("Table ").split(" Note ", 1)[0]
+            table_numbers.add(number)
+            parent = _table_parent(number)
+            if parent is not None:
+                if parent.startswith("8.4."):
+                    try:
+                        structure_from_cache(articles[parent])
+                    except (KeyError, TypeError, ValueError):
+                        external_articles.add(("B", parent))
+                    else:
+                        cache_articles.add(parent)
+                else:
+                    external_articles.add(("B", parent))
+            continue
+        if citation.kind == "appendix-note":
+            number = citation.canonical.removeprefix("Note ")
+            appendix_numbers.add(number)
+            article = _appendix_parent(number)
+            if article.startswith("8.4."):
+                try:
+                    structure_from_cache(articles[article])
+                except (KeyError, TypeError, ValueError):
+                    external_articles.add(("B", article))
+                else:
+                    cache_articles.add(article)
+            else:
+                external_articles.add(("B", article))
+
+    for number in sorted(cache_articles):
         article = articles.get(number)
         if not isinstance(article, dict):
-            raise ValueError(f"Section 8.4 cache is missing representative article {number}")
+            raise ValueError(
+                f"Section 8.4 cache is missing cited article {number}; "
+                "refresh its authorized cache before indexing the citation"
+            )
         _add_article_tree(
             provisions,
             division="B",
@@ -440,58 +692,85 @@ def _build_index(
             evidence=[_evidence("section-8.4", f"articles.{number}")],
         )
 
-    table = _expect_table(
-        calls["reference_system_table"]["result"],
-        edition=edition,
-        number=spec["table"],
-    )
-    table_citation = f"Table {spec['table']}"
-    table_evidence = [
-        _call_evidence(calls, "reference_system_table"),
-        _evidence("section-8.4", f"articles.{spec['reference_article']}"),
-    ]
-    _add(
-        provisions,
-        table_citation,
-        status="present",
-        title=str(table.get("title") or ""),
-        children_complete=True,
-        evidence=table_evidence,
-        parent=spec["reference_article"],
-    )
-    for note in table_note_ids(articles[spec["reference_article"]], spec["table"]):
-        _add(
+    for division, number in sorted(external_articles):
+        call_id = _section_call_id(division, number)
+        section = _expect_section(
+            calls[call_id]["result"],
+            edition=edition,
+            division=division,
+            number=number,
+            hierarchy_level="article",
+        )
+        _add_article_tree(
             provisions,
-            f"{table_citation} Note ({note})",
-            status="present",
-            title=None,
-            children_complete=False,
-            evidence=table_evidence,
+            division=division,
+            number=number,
+            title=str(section.get("title") or ""),
+            structure=structure_from_text(section),
+            evidence=[_call_evidence(calls, call_id)],
         )
 
-    appendix = _expect_section(
-        calls["heat_pump_appendix_note"]["result"],
-        edition=edition,
-        division="B",
-        number=spec["appendix_note"],
-        hierarchy_level="note",
-    )
-    if appendix.get("normative") is not False:
-        raise ValueError(f"{spec['appendix_note']} is not identified as an explanatory note")
-    if appendix.get("explains") != spec["structured_article"]:
-        raise ValueError(
-            f"{spec['appendix_note']} explains {appendix.get('explains')!r}, "
-            f"expected {spec['structured_article']!r}"
+    for number in sorted(table_numbers):
+        call_id = "reference_system_table" if number == spec["table"] else _table_call_id(number)
+        table = _expect_table(
+            calls[call_id]["result"],
+            edition=edition,
+            number=number,
         )
-    _add(
-        provisions,
-        f"Note {spec['appendix_note']}",
-        status="present",
-        title=str(appendix.get("title") or ""),
-        children_complete=False,
-        evidence=[_call_evidence(calls, "heat_pump_appendix_note")],
-        parent=spec["structured_article"],
-    )
+        parent = _table_parent(number)
+        table_evidence = [_call_evidence(calls, call_id)]
+        if number == spec["table"] and parent in cache_articles:
+            table_evidence.append(_evidence("section-8.4", f"articles.{parent}"))
+        _add(
+            provisions,
+            f"Table {number}",
+            status="present",
+            title=str(table.get("title") or ""),
+            children_complete=number == spec["table"],
+            evidence=table_evidence,
+            parent=parent,
+        )
+        if number == spec["table"]:
+            for note in table_note_ids(articles[spec["reference_article"]], number):
+                _add(
+                    provisions,
+                    f"Table {number} Note ({note})",
+                    status="present",
+                    title=None,
+                    children_complete=False,
+                    evidence=table_evidence,
+                )
+
+    for number in sorted(appendix_numbers):
+        call_id = (
+            "heat_pump_appendix_note"
+            if number == spec["appendix_note"]
+            else _section_call_id("B", number)
+        )
+        appendix = _expect_section(
+            calls[call_id]["result"],
+            edition=edition,
+            division="B",
+            number=number,
+            hierarchy_level="note",
+        )
+        if appendix.get("normative") is not False:
+            raise ValueError(f"{number} is not identified as an explanatory note")
+        explained = number.removeprefix("A-")
+        if appendix.get("explains") != explained:
+            raise ValueError(
+                f"{number} explains {appendix.get('explains')!r}, "
+                f"expected {explained!r}"
+            )
+        _add(
+            provisions,
+            f"Note {number}",
+            status="present",
+            title=str(appendix.get("title") or ""),
+            children_complete=False,
+            evidence=[_call_evidence(calls, call_id)],
+            parent=explained,
+        )
 
     inventory_call = calls["subsection_8_4_1_inventory"]
     inventory = _inventory_numbers(
@@ -526,6 +805,12 @@ def _build_index(
             children_complete=False,
             evidence=[_call_evidence(calls, "subsection_8_4_1_inventory")],
         )
+
+    for reference in references:
+        if reference not in provisions:
+            raise ValueError(
+                f"provision index did not retain cited NECB reference {reference!r}"
+            )
 
     cache_retrieved = provenance.get("retrieved")
     if not isinstance(cache_retrieved, str) or not re.fullmatch(
@@ -562,9 +847,15 @@ def build_documents(
     *,
     retrieved: str,
     section_cache_sha256: str | None = None,
+    references: tuple[str, ...] | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """Fetch and normalize one edition without writing it."""
-    calls = fetch_calls(client, edition, EDITION_SPECS[edition])
+    calls = fetch_calls(
+        client,
+        edition,
+        EDITION_SPECS[edition],
+        references=references,
+    )
     archive = {
         _archive_key(call["tool"], call["arguments"]): call["result"]
         for call in calls.values()
@@ -576,6 +867,7 @@ def build_documents(
         section_cache,
         retrieved=retrieved,
         section_cache_sha256=section_cache_sha256,
+        references=references,
     )
 
 
@@ -586,9 +878,10 @@ def build_index_from_archive(
     *,
     retrieved: str,
     section_cache_sha256: str | None = None,
+    references: tuple[str, ...] | None = None,
 ) -> dict[str, Any]:
     """Replay a committed MCP archive into its normalized provision index."""
-    specs = call_specs(edition, EDITION_SPECS[edition])
+    specs = call_specs(edition, EDITION_SPECS[edition], references=references)
     expected = {
         _archive_key(call["tool"], call["arguments"]): call_id
         for call_id, call in specs.items()
@@ -615,6 +908,7 @@ def build_index_from_archive(
         section_cache,
         retrieved=retrieved,
         section_cache_sha256=section_cache_sha256,
+        references=references,
     )
 
 

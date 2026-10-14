@@ -361,6 +361,15 @@ current citations exactly.
 Convert every user of a shared requirement key together so correspondence
 cannot drift between decisions.
 
+Status: done. All 23 are converted, each keeping its requirement keys, labels
+and both editions' citations in authored order; the only citation change is
+canonical spelling (`Note A-…`, no trailing dot). Every cited provision is
+recorded present in its edition's provision index, on evidence from the
+archived hbix results or the edition's authorized Section 8.4 cache. The
+compliance report is byte-identical, and the 45 held and 35 citation-free
+decisions are unchanged. `python/tests/necb/test_decisions_registry_sync.py`
+and `python/tests/necb/test_report_units.py` pin these properties.
+
 ### Phase D - establish the 45 held decisions
 
 Work in small batches sharing the same normative payloads:

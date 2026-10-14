@@ -36,6 +36,1701 @@
       "status": "present",
       "title": null
     },
+    "4.2.2.1": {
+      "children_complete": true,
+      "citation": "4.2.2.1",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Interior Lighting Controls"
+    },
+    "4.2.2.1.(1)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.1",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(10)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(10)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.1",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(10)(a)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(10)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(10)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(10)(b)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(10)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(10)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(11)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(11)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.1",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(11)(a)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(11)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(11)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(11)(a)(i)": {
+      "children_complete": false,
+      "citation": "4.2.2.1.(11)(a)(i)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "subclause",
+      "parent": "4.2.2.1.(11)(a)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(11)(a)(ii)": {
+      "children_complete": false,
+      "citation": "4.2.2.1.(11)(a)(ii)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "subclause",
+      "parent": "4.2.2.1.(11)(a)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(11)(b)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(11)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(11)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(11)(c)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(11)(c)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(11)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(12)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(12)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.1",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(12)(a)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(12)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(12)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(12)(b)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(12)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(12)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(12)(c)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(12)(c)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(12)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(13)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(13)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.1",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(14)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(14)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.1",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(14)(a)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(14)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(14)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(14)(a)(i)": {
+      "children_complete": false,
+      "citation": "4.2.2.1.(14)(a)(i)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "subclause",
+      "parent": "4.2.2.1.(14)(a)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(14)(a)(ii)": {
+      "children_complete": false,
+      "citation": "4.2.2.1.(14)(a)(ii)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "subclause",
+      "parent": "4.2.2.1.(14)(a)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(14)(b)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(14)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(14)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(14)(c)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(14)(c)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(14)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(15)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(15)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.1",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(15)(a)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(15)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(15)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(15)(b)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(15)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(15)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(15)(c)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(15)(c)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(15)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(16)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(16)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.1",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(17)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(17)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.1",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(17)(a)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(17)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(17)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(17)(b)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(17)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(17)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(17)(c)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(17)(c)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(17)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(18)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(18)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.1",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(19)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(19)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.1",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(19)(a)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(19)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(19)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(19)(b)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(19)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(19)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(19)(c)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(19)(c)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(19)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(2)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.1",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(20)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(20)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.1",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(20)(a)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(20)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(20)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(20)(b)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(20)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(20)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(21)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(21)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.1",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(22)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(22)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.1",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(22)(a)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(22)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(22)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(22)(b)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(22)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(22)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(23)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(23)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.1",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(23)(a)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(23)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(23)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(23)(b)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(23)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(23)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(23)(c)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(23)(c)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(23)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(3)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(3)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.1",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(3)(a)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(3)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(3)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(3)(b)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(3)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(3)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(4)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(4)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.1",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(5)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(5)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.1",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(5)(a)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(5)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(5)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(5)(b)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(5)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.1.(5)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(6)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(6)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.1",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(7)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(7)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.1",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(8)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(8)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.1",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.1.(9)": {
+      "children_complete": true,
+      "citation": "4.2.2.1.(9)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.1",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.3": {
+      "children_complete": true,
+      "citation": "4.2.2.3",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Determination of Primary and Secondary Sidelighted Areas"
+    },
+    "4.2.2.3.(1)": {
+      "children_complete": true,
+      "citation": "4.2.2.3.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.3",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.3.(2)": {
+      "children_complete": true,
+      "citation": "4.2.2.3.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.3",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.3.(3)": {
+      "children_complete": true,
+      "citation": "4.2.2.3.(3)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.3",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.3.(3)(a)": {
+      "children_complete": true,
+      "citation": "4.2.2.3.(3)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.3.(3)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.3.(3)(b)": {
+      "children_complete": true,
+      "citation": "4.2.2.3.(3)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.3.(3)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.3.(4)": {
+      "children_complete": true,
+      "citation": "4.2.2.3.(4)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.3",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.3.(4)(a)": {
+      "children_complete": true,
+      "citation": "4.2.2.3.(4)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.3.(4)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.3.(4)(b)": {
+      "children_complete": true,
+      "citation": "4.2.2.3.(4)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.3.(4)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.3.(5)": {
+      "children_complete": true,
+      "citation": "4.2.2.3.(5)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.3",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.3.(6)": {
+      "children_complete": true,
+      "citation": "4.2.2.3.(6)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.3",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.3.(7)": {
+      "children_complete": true,
+      "citation": "4.2.2.3.(7)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.3",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.3.(7)(a)": {
+      "children_complete": true,
+      "citation": "4.2.2.3.(7)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.3.(7)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.3.(7)(b)": {
+      "children_complete": true,
+      "citation": "4.2.2.3.(7)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.3.(7)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.3.(8)": {
+      "children_complete": true,
+      "citation": "4.2.2.3.(8)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.3",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.3.(8)(a)": {
+      "children_complete": true,
+      "citation": "4.2.2.3.(8)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.3.(8)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.3.(8)(b)": {
+      "children_complete": true,
+      "citation": "4.2.2.3.(8)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.3.(8)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.3.(9)": {
+      "children_complete": true,
+      "citation": "4.2.2.3.(9)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.3",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.4": {
+      "children_complete": true,
+      "citation": "4.2.2.4",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.4",
+          "source": "mcp"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": ""
+    },
+    "4.2.2.4.(1)": {
+      "children_complete": true,
+      "citation": "4.2.2.4.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.4",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.4",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.4.(2)": {
+      "children_complete": true,
+      "citation": "4.2.2.4.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.4",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.4",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.4.(2)(a)": {
+      "children_complete": true,
+      "citation": "4.2.2.4.(2)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.4",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.4.(2)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.4.(2)(a)(i)": {
+      "children_complete": false,
+      "citation": "4.2.2.4.(2)(a)(i)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.4",
+          "source": "mcp"
+        }
+      ],
+      "kind": "subclause",
+      "parent": "4.2.2.4.(2)(a)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.4.(2)(a)(ii)": {
+      "children_complete": false,
+      "citation": "4.2.2.4.(2)(a)(ii)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.4",
+          "source": "mcp"
+        }
+      ],
+      "kind": "subclause",
+      "parent": "4.2.2.4.(2)(a)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.4.(2)(a)(iii)": {
+      "children_complete": false,
+      "citation": "4.2.2.4.(2)(a)(iii)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.4",
+          "source": "mcp"
+        }
+      ],
+      "kind": "subclause",
+      "parent": "4.2.2.4.(2)(a)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.4.(2)(b)": {
+      "children_complete": true,
+      "citation": "4.2.2.4.(2)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.4",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.4.(2)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.4.(2)(b)(i)": {
+      "children_complete": false,
+      "citation": "4.2.2.4.(2)(b)(i)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.4",
+          "source": "mcp"
+        }
+      ],
+      "kind": "subclause",
+      "parent": "4.2.2.4.(2)(b)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.4.(2)(b)(ii)": {
+      "children_complete": false,
+      "citation": "4.2.2.4.(2)(b)(ii)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.4",
+          "source": "mcp"
+        }
+      ],
+      "kind": "subclause",
+      "parent": "4.2.2.4.(2)(b)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.5": {
+      "children_complete": true,
+      "citation": "4.2.2.5",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.5",
+          "source": "mcp"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Determination of Daylighted Area Under Skylights"
+    },
+    "4.2.2.5.(1)": {
+      "children_complete": true,
+      "citation": "4.2.2.5.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.5",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.5",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.5.(2)": {
+      "children_complete": true,
+      "citation": "4.2.2.5.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.5",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "4.2.2.5",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.5.(2)(a)": {
+      "children_complete": true,
+      "citation": "4.2.2.5.(2)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.5",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.5.(2)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.5.(2)(b)": {
+      "children_complete": true,
+      "citation": "4.2.2.5.(2)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.5",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.5.(2)",
+      "status": "present",
+      "title": null
+    },
+    "4.2.2.5.(2)(c)": {
+      "children_complete": true,
+      "citation": "4.2.2.5.(2)(c)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:4.2.2.5",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "4.2.2.5.(2)",
+      "status": "present",
+      "title": null
+    },
+    "5.2.2.9": {
+      "children_complete": true,
+      "citation": "5.2.2.9",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:5.2.2.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Cooling by Indirect Use of Outdoor Air (Water Economizer System)"
+    },
+    "5.2.2.9.(1)": {
+      "children_complete": true,
+      "citation": "5.2.2.9.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:5.2.2.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "5.2.2.9",
+      "status": "present",
+      "title": null
+    },
+    "5.2.2.9.(2)": {
+      "children_complete": true,
+      "citation": "5.2.2.9.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:5.2.2.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "5.2.2.9",
+      "status": "present",
+      "title": null
+    },
+    "5.2.3.4": {
+      "children_complete": true,
+      "citation": "5.2.3.4",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:5.2.3.4",
+          "source": "mcp"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Demand Control Ventilation Systems"
+    },
+    "5.2.3.4.(1)": {
+      "children_complete": true,
+      "citation": "5.2.3.4.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:5.2.3.4",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "5.2.3.4",
+      "status": "present",
+      "title": null
+    },
+    "5.2.3.4.(1)(a)": {
+      "children_complete": true,
+      "citation": "5.2.3.4.(1)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:5.2.3.4",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "5.2.3.4.(1)",
+      "status": "present",
+      "title": null
+    },
+    "5.2.3.4.(1)(b)": {
+      "children_complete": true,
+      "citation": "5.2.3.4.(1)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:5.2.3.4",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "5.2.3.4.(1)",
+      "status": "present",
+      "title": null
+    },
+    "5.2.3.4.(2)": {
+      "children_complete": true,
+      "citation": "5.2.3.4.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:5.2.3.4",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "5.2.3.4",
+      "status": "present",
+      "title": null
+    },
+    "5.2.6.3": {
+      "children_complete": true,
+      "citation": "5.2.6.3",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:5.2.6.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Pumping Power Demand"
+    },
+    "5.2.6.3.(1)": {
+      "children_complete": true,
+      "citation": "5.2.6.3.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:5.2.6.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "5.2.6.3",
+      "status": "present",
+      "title": null
+    },
+    "8.4.1.2": {
+      "children_complete": true,
+      "citation": "8.4.1.2",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.1.2",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Determination of Compliance"
+    },
+    "8.4.1.2.(1)": {
+      "children_complete": true,
+      "citation": "8.4.1.2.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.1.2",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.1.2",
+      "status": "present",
+      "title": null
+    },
+    "8.4.1.2.(2)": {
+      "children_complete": true,
+      "citation": "8.4.1.2.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.1.2",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.1.2",
+      "status": "present",
+      "title": null
+    },
+    "8.4.1.2.(2)(a)": {
+      "children_complete": true,
+      "citation": "8.4.1.2.(2)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.1.2",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.1.2.(2)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.1.2.(2)(b)": {
+      "children_complete": true,
+      "citation": "8.4.1.2.(2)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.1.2",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.1.2.(2)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.1.2.(3)": {
+      "children_complete": true,
+      "citation": "8.4.1.2.(3)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.1.2",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.1.2",
+      "status": "present",
+      "title": null
+    },
+    "8.4.1.2.(4)": {
+      "children_complete": true,
+      "citation": "8.4.1.2.(4)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.1.2",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.1.2",
+      "status": "present",
+      "title": null
+    },
+    "8.4.1.2.(4)(a)": {
+      "children_complete": true,
+      "citation": "8.4.1.2.(4)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.1.2",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.1.2.(4)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.1.2.(4)(b)": {
+      "children_complete": true,
+      "citation": "8.4.1.2.(4)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.1.2",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.1.2.(4)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.1.2.(5)": {
+      "children_complete": true,
+      "citation": "8.4.1.2.(5)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.1.2",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.1.2",
+      "status": "present",
+      "title": null
+    },
     "8.4.1.5": {
       "children_complete": true,
       "citation": "8.4.1.5",
@@ -90,6 +1785,846 @@
       ],
       "kind": "sentence",
       "parent": "8.4.1.5",
+      "status": "present",
+      "title": null
+    },
+    "8.4.2.10": {
+      "children_complete": true,
+      "citation": "8.4.2.10",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.2.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "HVAC Systems"
+    },
+    "8.4.2.10.(1)": {
+      "children_complete": true,
+      "citation": "8.4.2.10.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.2.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.2.10",
+      "status": "present",
+      "title": null
+    },
+    "8.4.2.10.(2)": {
+      "children_complete": true,
+      "citation": "8.4.2.10.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.2.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.2.10",
+      "status": "present",
+      "title": null
+    },
+    "8.4.2.10.(3)": {
+      "children_complete": true,
+      "citation": "8.4.2.10.(3)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.2.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.2.10",
+      "status": "present",
+      "title": null
+    },
+    "8.4.2.10.(3)(a)": {
+      "children_complete": true,
+      "citation": "8.4.2.10.(3)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.2.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.2.10.(3)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.2.10.(3)(b)": {
+      "children_complete": true,
+      "citation": "8.4.2.10.(3)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.2.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.2.10.(3)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.2.10.(3)(c)": {
+      "children_complete": true,
+      "citation": "8.4.2.10.(3)(c)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.2.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.2.10.(3)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.2.10.(3)(d)": {
+      "children_complete": true,
+      "citation": "8.4.2.10.(3)(d)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.2.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.2.10.(3)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.2.10.(3)(e)": {
+      "children_complete": true,
+      "citation": "8.4.2.10.(3)(e)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.2.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.2.10.(3)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.2.10.(3)(f)": {
+      "children_complete": true,
+      "citation": "8.4.2.10.(3)(f)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.2.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.2.10.(3)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.2.10.(4)": {
+      "children_complete": true,
+      "citation": "8.4.2.10.(4)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.2.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.2.10",
+      "status": "present",
+      "title": null
+    },
+    "8.4.2.10.(5)": {
+      "children_complete": true,
+      "citation": "8.4.2.10.(5)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.2.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.2.10",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.1": {
+      "children_complete": true,
+      "citation": "8.4.5.1",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.1",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "General"
+    },
+    "8.4.5.1.(1)": {
+      "children_complete": true,
+      "citation": "8.4.5.1.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.1",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.1",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.1.(2)": {
+      "children_complete": true,
+      "citation": "8.4.5.1.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.1",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.1",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.1.(3)": {
+      "children_complete": true,
+      "citation": "8.4.5.1.(3)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.1",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.1",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.1.(4)": {
+      "children_complete": true,
+      "citation": "8.4.5.1.(4)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.1",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.1",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.1.(4)(a)": {
+      "children_complete": true,
+      "citation": "8.4.5.1.(4)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.1",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.1.(4)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.1.(4)(b)": {
+      "children_complete": true,
+      "citation": "8.4.5.1.(4)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.1",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.1.(4)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.1.(4)(c)": {
+      "children_complete": true,
+      "citation": "8.4.5.1.(4)(c)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.1",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.1.(4)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.1.(4)(d)": {
+      "children_complete": true,
+      "citation": "8.4.5.1.(4)(d)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.1",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.1.(4)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.1.(4)(e)": {
+      "children_complete": true,
+      "citation": "8.4.5.1.(4)(e)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.1",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.1.(4)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.1.(5)": {
+      "children_complete": true,
+      "citation": "8.4.5.1.(5)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.1",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.1",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.1.(6)": {
+      "children_complete": true,
+      "citation": "8.4.5.1.(6)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.1",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.1",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.1.(7)": {
+      "children_complete": true,
+      "citation": "8.4.5.1.(7)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.1",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.1",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10": {
+      "children_complete": true,
+      "citation": "8.4.5.10",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Cooling Systems"
+    },
+    "8.4.5.10.(1)": {
+      "children_complete": true,
+      "citation": "8.4.5.10.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.10",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10.(2)": {
+      "children_complete": true,
+      "citation": "8.4.5.10.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.10",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10.(3)": {
+      "children_complete": true,
+      "citation": "8.4.5.10.(3)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.10",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10.(4)": {
+      "children_complete": true,
+      "citation": "8.4.5.10.(4)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.10",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10.(4)(a)": {
+      "children_complete": true,
+      "citation": "8.4.5.10.(4)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.10.(4)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10.(4)(b)": {
+      "children_complete": true,
+      "citation": "8.4.5.10.(4)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.10.(4)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10.(5)": {
+      "children_complete": true,
+      "citation": "8.4.5.10.(5)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.10",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10.(6)": {
+      "children_complete": true,
+      "citation": "8.4.5.10.(6)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.10",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10.(6)(a)": {
+      "children_complete": true,
+      "citation": "8.4.5.10.(6)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.10.(6)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10.(6)(b)": {
+      "children_complete": true,
+      "citation": "8.4.5.10.(6)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.10.(6)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10.(6)(c)": {
+      "children_complete": true,
+      "citation": "8.4.5.10.(6)(c)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.10.(6)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10.(6)(d)": {
+      "children_complete": true,
+      "citation": "8.4.5.10.(6)(d)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.10.(6)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10.(6)(e)": {
+      "children_complete": true,
+      "citation": "8.4.5.10.(6)(e)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.10.(6)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10.(6)(e)(i)": {
+      "children_complete": false,
+      "citation": "8.4.5.10.(6)(e)(i)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "subclause",
+      "parent": "8.4.5.10.(6)(e)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10.(6)(e)(ii)": {
+      "children_complete": false,
+      "citation": "8.4.5.10.(6)(e)(ii)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "subclause",
+      "parent": "8.4.5.10.(6)(e)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10.(6)(e)(iii)": {
+      "children_complete": false,
+      "citation": "8.4.5.10.(6)(e)(iii)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "subclause",
+      "parent": "8.4.5.10.(6)(e)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10.(6)(f)": {
+      "children_complete": true,
+      "citation": "8.4.5.10.(6)(f)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.10.(6)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10.(6)(g)": {
+      "children_complete": true,
+      "citation": "8.4.5.10.(6)(g)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.10.(6)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10.(6)(h)": {
+      "children_complete": true,
+      "citation": "8.4.5.10.(6)(h)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.10.(6)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10.(7)": {
+      "children_complete": true,
+      "citation": "8.4.5.10.(7)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.10",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10.(7)(a)": {
+      "children_complete": true,
+      "citation": "8.4.5.10.(7)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.10.(7)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10.(7)(b)": {
+      "children_complete": true,
+      "citation": "8.4.5.10.(7)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.10.(7)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10.(7)(c)": {
+      "children_complete": true,
+      "citation": "8.4.5.10.(7)(c)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.10.(7)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10.(8)": {
+      "children_complete": true,
+      "citation": "8.4.5.10.(8)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.10",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10.(8)(a)": {
+      "children_complete": true,
+      "citation": "8.4.5.10.(8)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.10.(8)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10.(8)(b)": {
+      "children_complete": true,
+      "citation": "8.4.5.10.(8)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.10.(8)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10.(8)(c)": {
+      "children_complete": true,
+      "citation": "8.4.5.10.(8)(c)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.10.(8)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.10.(9)": {
+      "children_complete": true,
+      "citation": "8.4.5.10.(9)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.10",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.10",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.12": {
+      "children_complete": true,
+      "citation": "8.4.5.12",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.12",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Cooling with Outside Air"
+    },
+    "8.4.5.12.(1)": {
+      "children_complete": true,
+      "citation": "8.4.5.12.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.12",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.12",
       "status": "present",
       "title": null
     },
@@ -288,6 +2823,726 @@
       "status": "present",
       "title": null
     },
+    "8.4.5.14": {
+      "children_complete": true,
+      "citation": "8.4.5.14",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.14",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Hydronic Pumps"
+    },
+    "8.4.5.14.(1)": {
+      "children_complete": true,
+      "citation": "8.4.5.14.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.14",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.14",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.14.(2)": {
+      "children_complete": true,
+      "citation": "8.4.5.14.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.14",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.14",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.14.(3)": {
+      "children_complete": true,
+      "citation": "8.4.5.14.(3)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.14",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.14",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.14.(4)": {
+      "children_complete": true,
+      "citation": "8.4.5.14.(4)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.14",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.14",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.14.(5)": {
+      "children_complete": true,
+      "citation": "8.4.5.14.(5)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.14",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.14",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.14.(6)": {
+      "children_complete": true,
+      "citation": "8.4.5.14.(6)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.14",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.14",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.15": {
+      "children_complete": true,
+      "citation": "8.4.5.15",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.15",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Outdoor Air"
+    },
+    "8.4.5.15.(1)": {
+      "children_complete": true,
+      "citation": "8.4.5.15.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.15",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.15",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.15.(2)": {
+      "children_complete": true,
+      "citation": "8.4.5.15.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.15",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.15",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5": {
+      "children_complete": true,
+      "citation": "8.4.5.5",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Lighting"
+    },
+    "8.4.5.5.(1)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.5",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(10)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(10)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.5",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(10)(a)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(10)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.5.(10)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(10)(b)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(10)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.5.(10)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(10)(c)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(10)(c)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.5.(10)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(10)(d)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(10)(d)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.5.(10)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(10)(d)(i)": {
+      "children_complete": false,
+      "citation": "8.4.5.5.(10)(d)(i)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "subclause",
+      "parent": "8.4.5.5.(10)(d)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(10)(d)(ii)": {
+      "children_complete": false,
+      "citation": "8.4.5.5.(10)(d)(ii)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "subclause",
+      "parent": "8.4.5.5.(10)(d)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(11)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(11)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.5",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(11)(a)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(11)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.5.(11)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(11)(b)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(11)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.5.(11)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(12)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(12)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.5",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(2)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.5",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(3)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(3)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.5",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(4)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(4)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.5",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(5)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(5)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.5",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(5)(a)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(5)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.5.(5)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(5)(b)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(5)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.5.(5)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(5)(c)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(5)(c)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.5.(5)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(6)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(6)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.5",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(7)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(7)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.5",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(7)(a)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(7)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.5.(7)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(7)(b)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(7)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.5.(7)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(8)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(8)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.5",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(9)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(9)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.5",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.6": {
+      "children_complete": true,
+      "citation": "8.4.5.6",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.6",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Purchased Energy"
+    },
+    "8.4.5.6.(1)": {
+      "children_complete": true,
+      "citation": "8.4.5.6.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.6",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.6",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.6.(1)(a)": {
+      "children_complete": true,
+      "citation": "8.4.5.6.(1)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.6",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.6.(1)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.6.(1)(b)": {
+      "children_complete": true,
+      "citation": "8.4.5.6.(1)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.6",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.6.(1)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.6.(2)": {
+      "children_complete": true,
+      "citation": "8.4.5.6.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.6",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.6",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.6.(2)(a)": {
+      "children_complete": true,
+      "citation": "8.4.5.6.(2)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.6",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.6.(2)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.6.(2)(b)": {
+      "children_complete": true,
+      "citation": "8.4.5.6.(2)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.6",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.6.(2)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.6.(3)": {
+      "children_complete": true,
+      "citation": "8.4.5.6.(3)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.6",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.6",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.6.(3)(a)": {
+      "children_complete": true,
+      "citation": "8.4.5.6.(3)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.6",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.6.(3)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.6.(3)(b)": {
+      "children_complete": true,
+      "citation": "8.4.5.6.(3)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.6",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.6.(3)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.6.(3)(c)": {
+      "children_complete": true,
+      "citation": "8.4.5.6.(3)(c)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.6",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.6.(3)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.6.(4)": {
+      "children_complete": true,
+      "citation": "8.4.5.6.(4)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.6",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.6",
+      "status": "present",
+      "title": null
+    },
     "8.4.5.7": {
       "children_complete": true,
       "citation": "8.4.5.7",
@@ -360,6 +3615,831 @@
       ],
       "kind": "sentence",
       "parent": "8.4.5.7",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9": {
+      "children_complete": true,
+      "citation": "8.4.5.9",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Heating System"
+    },
+    "8.4.5.9.(1)": {
+      "children_complete": true,
+      "citation": "8.4.5.9.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.9",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(2)": {
+      "children_complete": true,
+      "citation": "8.4.5.9.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.9",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(3)": {
+      "children_complete": true,
+      "citation": "8.4.5.9.(3)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.9",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(3)(a)": {
+      "children_complete": true,
+      "citation": "8.4.5.9.(3)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.9.(3)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(3)(b)": {
+      "children_complete": true,
+      "citation": "8.4.5.9.(3)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.9.(3)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(3)(c)": {
+      "children_complete": true,
+      "citation": "8.4.5.9.(3)(c)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.9.(3)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(4)": {
+      "children_complete": true,
+      "citation": "8.4.5.9.(4)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.9",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(5)": {
+      "children_complete": true,
+      "citation": "8.4.5.9.(5)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.9",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(5)(a)": {
+      "children_complete": true,
+      "citation": "8.4.5.9.(5)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.9.(5)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(5)(b)": {
+      "children_complete": true,
+      "citation": "8.4.5.9.(5)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.9.(5)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(6)": {
+      "children_complete": true,
+      "citation": "8.4.5.9.(6)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.9",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(6)(a)": {
+      "children_complete": true,
+      "citation": "8.4.5.9.(6)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.9.(6)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(6)(b)": {
+      "children_complete": true,
+      "citation": "8.4.5.9.(6)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.9.(6)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(6)(c)": {
+      "children_complete": true,
+      "citation": "8.4.5.9.(6)(c)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.9.(6)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(6)(c)(i)": {
+      "children_complete": false,
+      "citation": "8.4.5.9.(6)(c)(i)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "subclause",
+      "parent": "8.4.5.9.(6)(c)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(6)(c)(ii)": {
+      "children_complete": false,
+      "citation": "8.4.5.9.(6)(c)(ii)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "subclause",
+      "parent": "8.4.5.9.(6)(c)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(6)(d)": {
+      "children_complete": true,
+      "citation": "8.4.5.9.(6)(d)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.9.(6)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(6)(e)": {
+      "children_complete": true,
+      "citation": "8.4.5.9.(6)(e)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.9.(6)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(6)(f)": {
+      "children_complete": true,
+      "citation": "8.4.5.9.(6)(f)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.9.(6)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(6)(f)(i)": {
+      "children_complete": false,
+      "citation": "8.4.5.9.(6)(f)(i)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "subclause",
+      "parent": "8.4.5.9.(6)(f)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(6)(f)(ii)": {
+      "children_complete": false,
+      "citation": "8.4.5.9.(6)(f)(ii)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "subclause",
+      "parent": "8.4.5.9.(6)(f)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(6)(f)(iii)": {
+      "children_complete": false,
+      "citation": "8.4.5.9.(6)(f)(iii)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "subclause",
+      "parent": "8.4.5.9.(6)(f)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(6)(g)": {
+      "children_complete": true,
+      "citation": "8.4.5.9.(6)(g)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.9.(6)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(6)(h)": {
+      "children_complete": true,
+      "citation": "8.4.5.9.(6)(h)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.9.(6)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(6)(h)(i)": {
+      "children_complete": false,
+      "citation": "8.4.5.9.(6)(h)(i)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "subclause",
+      "parent": "8.4.5.9.(6)(h)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(6)(h)(ii)": {
+      "children_complete": false,
+      "citation": "8.4.5.9.(6)(h)(ii)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "subclause",
+      "parent": "8.4.5.9.(6)(h)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(7)": {
+      "children_complete": true,
+      "citation": "8.4.5.9.(7)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.9",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(7)(a)": {
+      "children_complete": true,
+      "citation": "8.4.5.9.(7)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.9.(7)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(7)(b)": {
+      "children_complete": true,
+      "citation": "8.4.5.9.(7)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.9.(7)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(7)(c)": {
+      "children_complete": true,
+      "citation": "8.4.5.9.(7)(c)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.5.9.(7)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.9.(8)": {
+      "children_complete": true,
+      "citation": "8.4.5.9.(8)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:8.4.5.9",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.9",
+      "status": "present",
+      "title": null
+    },
+    "8.4.6.2": {
+      "children_complete": true,
+      "citation": "8.4.6.2",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.6.2",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Boiler"
+    },
+    "8.4.6.2.(1)": {
+      "children_complete": true,
+      "citation": "8.4.6.2.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.6.2",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.6.2",
+      "status": "present",
+      "title": null
+    },
+    "8.4.6.2.(2)": {
+      "children_complete": true,
+      "citation": "8.4.6.2.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.6.2",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.6.2",
+      "status": "present",
+      "title": null
+    },
+    "8.4.6.3": {
+      "children_complete": true,
+      "citation": "8.4.6.3",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.6.3",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Furnace"
+    },
+    "8.4.6.3.(1)": {
+      "children_complete": true,
+      "citation": "8.4.6.3.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.6.3",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.6.3",
+      "status": "present",
+      "title": null
+    },
+    "8.4.6.3.(2)": {
+      "children_complete": true,
+      "citation": "8.4.6.3.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.6.3",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.6.3",
+      "status": "present",
+      "title": null
+    },
+    "8.4.6.4": {
+      "children_complete": true,
+      "citation": "8.4.6.4",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.6.4",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Direct-Expansion Cooling Equipment"
+    },
+    "8.4.6.4.(1)": {
+      "children_complete": true,
+      "citation": "8.4.6.4.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.6.4",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.6.4",
+      "status": "present",
+      "title": null
+    },
+    "8.4.6.4.(2)": {
+      "children_complete": true,
+      "citation": "8.4.6.4.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.6.4",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.6.4",
+      "status": "present",
+      "title": null
+    },
+    "8.4.6.4.(3)": {
+      "children_complete": true,
+      "citation": "8.4.6.4.(3)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.6.4",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.6.4",
+      "status": "present",
+      "title": null
+    },
+    "8.4.6.4.(4)": {
+      "children_complete": true,
+      "citation": "8.4.6.4.(4)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.6.4",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.6.4",
+      "status": "present",
+      "title": null
+    },
+    "8.4.6.4.(5)": {
+      "children_complete": true,
+      "citation": "8.4.6.4.(5)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.6.4",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.6.4",
+      "status": "present",
+      "title": null
+    },
+    "8.4.6.4.(6)": {
+      "children_complete": true,
+      "citation": "8.4.6.4.(6)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.6.4",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.6.4",
+      "status": "present",
+      "title": null
+    },
+    "8.4.6.4.(7)": {
+      "children_complete": true,
+      "citation": "8.4.6.4.(7)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.6.4",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.6.4",
+      "status": "present",
+      "title": null
+    },
+    "8.4.6.4.(8)": {
+      "children_complete": true,
+      "citation": "8.4.6.4.(8)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.6.4",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.6.4",
+      "status": "present",
+      "title": null
+    },
+    "8.4.6.7": {
+      "children_complete": true,
+      "citation": "8.4.6.7",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.6.7",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": ""
+    },
+    "8.4.6.7.(1)": {
+      "children_complete": true,
+      "citation": "8.4.6.7.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.6.7",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.6.7",
+      "status": "present",
+      "title": null
+    },
+    "8.4.6.7.(2)": {
+      "children_complete": true,
+      "citation": "8.4.6.7.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.6.7",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.6.7",
+      "status": "present",
+      "title": null
+    },
+    "8.4.6.7.(3)": {
+      "children_complete": true,
+      "citation": "8.4.6.7.(3)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.6.7",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.6.7",
+      "status": "present",
+      "title": null
+    },
+    "8.4.6.7.(4)": {
+      "children_complete": true,
+      "citation": "8.4.6.7.(4)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.6.7",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.6.7",
+      "status": "present",
+      "title": null
+    },
+    "8.4.6.7.(5)": {
+      "children_complete": true,
+      "citation": "8.4.6.7.(5)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.6.7",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.6.7",
+      "status": "present",
+      "title": null
+    },
+    "8.4.6.7.(6)": {
+      "children_complete": true,
+      "citation": "8.4.6.7.(6)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.6.7",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.6.7",
+      "status": "present",
+      "title": null
+    },
+    "8.4.6.7.(7)": {
+      "children_complete": true,
+      "citation": "8.4.6.7.(7)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.6.7",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.6.7",
       "status": "present",
       "title": null
     },
@@ -483,6 +4563,51 @@
       "status": "present",
       "title": "Heat Pump Definitions"
     },
+    "Note A-8.4.5.14.(2)": {
+      "children_complete": false,
+      "citation": "Note A-8.4.5.14.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:A-8.4.5.14.(2)",
+          "source": "mcp"
+        }
+      ],
+      "kind": "appendix-note",
+      "parent": "8.4.5.14.(2)",
+      "status": "present",
+      "title": "Hydronic Systems with Multiple Pumps"
+    },
+    "Table 5.2.6.3": {
+      "children_complete": false,
+      "citation": "Table 5.2.6.3",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_table:necb:2025:B:5.2.6.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "table",
+      "parent": "5.2.6.3",
+      "status": "present",
+      "title": "Maximum Pumping Power Demand of Pump Motors"
+    },
+    "Table 8.4.5.7.-A": {
+      "children_complete": false,
+      "citation": "Table 8.4.5.7.-A",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_table:necb:2025:B:8.4.5.7.-A",
+          "source": "mcp"
+        }
+      ],
+      "kind": "table",
+      "parent": "8.4.5.7",
+      "status": "present",
+      "title": "HVAC System Selection for the Reference Building"
+    },
     "Table 8.4.5.7.-B": {
       "children_complete": true,
       "citation": "Table 8.4.5.7.-B",
@@ -566,7 +4691,7 @@
       "kind": "authorized-mcp-payload",
       "path": "provenance/provisions.result.json",
       "retrieved": "2026-10-13",
-      "sha256": "90b08db89b0456324167b840621a614dbfb04cd7054a2337865b8a7709ab21ce"
+      "sha256": "417bb8501e0057a17a75e8550307f5c55d1f75d2c4b49252114e1e95621fe129"
     },
     "section-8.4": {
       "kind": "existing-authorized-cache",

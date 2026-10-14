@@ -469,6 +469,35 @@ class TestOfflineProvisionEvidence(unittest.TestCase):
         with self.assertRaisesRegex(ProvisionIndexError, "must be null for an article"):
             check_citation("necb2020", "8.4.1.1")
 
+    def test_only_an_appendix_note_may_have_a_parent_below_an_article(self):
+        """An Appendix A note may explain a Sentence, so its parent may sit
+        below an Article; a Table's may not, neither may leave the note's
+        Division, and the parent is still the one the authority's payload
+        names in `explains`."""
+        refused_kind = "must be an Article, Sentence, Clause, or Subclause in Division B"
+        cases = (
+            ("Table 8.4.1.1.-A", "8.4.1.1.(1)", "must be an Article in Division B"),
+            ("Note A-8.4.1.1", "Table 8.4.1.1.-A", refused_kind),
+            ("Note A-8.4.1.1", "Division A 1.1.1.1.(1)", refused_kind),
+            ("Note A-8.4.1.1", "8.4.1.1.(1)",
+             "does not semantically witness the indexed provision: the "
+             "explanatory note identifies 'Note A-8.4.1.1' with parent "
+             "'8.4.1.1'"),
+        )
+        provisions = self.fixture.index["provisions"]
+        for citation, parent, message in cases:
+            with self.subTest(citation=citation, parent=parent):
+                original = provisions[citation]["parent"]
+                provisions[citation]["parent"] = parent
+                self.fixture.write_index(update_manifest=True)
+                with self.assertRaises(ProvisionIndexError) as caught:
+                    check_citation("necb2020", citation)
+                self.assertIn(message, str(caught.exception))
+                provisions[citation]["parent"] = original
+        self.fixture.write_index(update_manifest=True)
+        self.assertEqual("8.4.1.1", validate_citation(
+            "necb2020", "Note A-8.4.1.1")["parent"])
+
     def test_present_alias_is_rejected_before_canonical_absence_can_be_inferred(self):
         record = self.fixture.index["provisions"].pop("8.4.1.1.(1)")
         alias = "Sentence 8.4.1.1.(1)"
@@ -583,6 +612,35 @@ class TestCommittedNecbProvisionCorpus(unittest.TestCase):
                         "absent",
                         check_citation(code, cases["absent"]).status,
                     )
+
+    def test_committed_corpus_reads_subclauses_and_sentence_notes(self):
+        """The evidence Phase C added for its structured decisions: Clause
+        (h) of Sentence (6) carries Subclauses (i) and (ii), which flattened
+        text could misread as a ninth Clause (i), and an Appendix A note that
+        explains a Sentence is parented by that Sentence."""
+        for code, article, pump in (
+            ("necb2020", "8.4.4.9", "8.4.4.14"),
+            ("necb2025", "8.4.5.9", "8.4.5.14"),
+        ):
+            with self.subTest(code=code):
+                for subclause in ("(i)", "(ii)"):
+                    record = validate_citation(
+                        code, f"{article}.(6)(h){subclause}"
+                    )
+                    self.assertEqual(f"{article}.(6)(h)", record["parent"])
+                self.assertTrue(
+                    validate_citation(code, f"{article}.(6)")["children_complete"]
+                )
+                self.assertEqual(
+                    "absent", check_citation(code, f"{article}.(6)(i)").status
+                )
+                note = validate_citation(code, f"Note A-{pump}.(2)")
+                self.assertEqual("appendix-note", note["kind"])
+                self.assertEqual(f"{pump}.(2)", note["parent"])
+                self.assertEqual(
+                    [f"get_section:necb:{code[-4:]}:B:A-{pump}.(2)"],
+                    [evidence["record"] for evidence in note["evidence"]],
+                )
 
 
 if __name__ == "__main__":

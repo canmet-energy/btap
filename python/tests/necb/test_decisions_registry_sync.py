@@ -19,6 +19,7 @@ to end beside the committed tree.
 from __future__ import annotations
 
 import contextlib
+import hashlib
 import io
 import json
 import re
@@ -57,6 +58,348 @@ LEGACY_FIELDS = ("id", "title", "kind", "articles", "editions", "summary")
 STRUCTURED_FIELDS = ("id", "title", "kind", "editions", "summary", "requirements")
 #: What `btap.codes.decisions` and the report's rulings appendix read.
 RUNTIME_FIELDS = ("id", "title", "kind", "summary")
+MIGRATED_IDS = (
+    "D-27", "D-38", "D-39", "D-46", "D-47", "D-48", "D-49", "D-50",
+    "D-51", "D-52", "D-54", "D-56", "D-57", "D-89", "D-90", "D-91",
+    "D-92", "D-93", "D-97", "D-99", "D-100", "D-101", "D-102",
+)
+MIGRATED_RUNTIME_SHA256 = {
+    "D-27": "25dfea7660112851261febd2cfe2c44eb2a54014d372a636afae08def6c58d07",
+    "D-38": "7ed399a46526a764811be1971bc332aea224e6a4066ae38e8069ffb7e29c3582",
+    "D-39": "d44813de15ff044f44a9e642fbc76ddc3a305c6bda6aa8af38d7e779e198594a",
+    "D-46": "254d3857a5100162c4663e7998e0fbf6721d040f9a33b1011ea81c77196d3f95",
+    "D-47": "eddeb9120b00fad72ff10bbfebbf7954837cee368e5b763bdf53a13b8c964a8d",
+    "D-48": "4fdb6f4e2faf227b7f9d3abc37771392d06a9a577b48b6d04f5b931876304c67",
+    "D-49": "78298ddeb4c1622ed05049f08a3c82160088b833822dd13c9869ea70678057ec",
+    "D-50": "9f2aaead931daf6e81b6be8637a7504e76892c30dc3301fae8ca165d0c9b5d65",
+    "D-51": "a382a728f6c53296c69aaf251fdc577e6bcc8c2de4c56f0b9dd4eaa197c33391",
+    "D-52": "cb4e9283b3b0d9459272bca55d557263d2c6c0e7eb4cce11453d5a67ca28f416",
+    "D-54": "fab7db18575726291ebe8909298cabcc50199ea6718e1e865c7b2f3213dc4d6b",
+    "D-56": "45fde852ece1c7fda7a6c634d82def8a24300d56b80e50fb8191ec30ff94e372",
+    "D-57": "9aa89dd9b6f154800c5458b15442030ca5dc0c138bf94df932280fce2d7676da",
+    "D-89": "d2d60bfd9baff780388a68fac64f41ded05363c1390e9a8457d2bb6fefa2dff5",
+    "D-90": "80996e2dde0fa7797f6341bcdf7885a4358f96df2347c0f0695c2844dd536e59",
+    "D-91": "e411f246aeb43f8c0d608b547a31e5668cdc5219983fe9ca5ac4381cee569efc",
+    "D-92": "9c1f0b55ef949707c2ef6dad0f4f09dce379efa97ac36416394daea867fabbf0",
+    "D-93": "a1c69a04699af898d68a4348748138841070138b11e790325167165ea21dc8ad",
+    "D-97": "f48c06be02a58654d97dbd360e9aea8eb73ad04a16918bc09ce46742062dbd2e",
+    "D-99": "ff82fa03293657350d157766d04ae2d7760f2636cb2983b500bfee31c4afcc17",
+    "D-100": "15aa0d6080200fea28ec3e04400c89faa7a1d0292815e2ac009a17500ada9c5f",
+    "D-101": "fe8c03c393dcfbf4677febbcd0452be8aedfe2799495963945a51b2156fe7ab0",
+    "D-102": "c1db1f4f6c220c0ee04cf3bcd7df1debdbf7e6c2a2f97807a4e44084242a2368",
+}
+#: Each migrated decision's requirement keys in AUTHORED order, as the
+#: legacy front matter recorded them before Phase C.
+MIGRATED_KEYS = {
+    "D-27": ("reference_hydronic_pump_power",),
+    "D-38": (
+        "prescriptive_pump_power_ceiling",
+        "reference_hydronic_pump_power",
+        "reference_meets_prescriptive_requirements",
+    ),
+    "D-39": ("system_5_heating_presence",),
+    "D-46": ("unitary_equipment_staging",),
+    "D-47": ("unitary_equipment_staging",),
+    "D-48": ("unitary_equipment_staging",),
+    "D-49": ("furnace_staging",),
+    "D-50": ("terminal_secondary_split",),
+    "D-51": ("reference_photocontrol_evaluation",),
+    "D-52": (
+        "heat_pump_auxiliary_heating_energy_type",
+        "heat_pump_cooling_capacity",
+        "heating_energy_type_inheritance",
+    ),
+    "D-54": (
+        "demand_control_ventilation_requirement",
+        "reference_demand_control_ventilation",
+    ),
+    "D-56": ("reference_outside_air_cooling", "water_economizer_definition"),
+    "D-57": (
+        "daylight_responsive_photocontrols",
+        "daylighted_area_geometry",
+        "reference_photocontrol_evaluation",
+    ),
+    "D-89": (
+        "boiler_part_load_fuel_curve",
+        "furnace_part_load_fuel_curve",
+        "modulating_boiler_part_load",
+        "modulating_furnace_part_load",
+        "purchased_heating_energy",
+    ),
+    "D-90": (
+        "capacity_iteration_on_unmet_loads",
+        "reference_cooling_capacity",
+        "reference_heating_capacity",
+    ),
+    "D-91": (
+        "hvac_systems_calculation_basis",
+        "reference_heating_system_dispatch",
+        "unmet_load_hour_criteria",
+    ),
+    "D-92": (
+        "hydronic_pump_appendix_method",
+        "plant_peak_pumping_flow",
+        "prescriptive_pump_power_ceiling",
+        "reference_hydronic_pump_power",
+    ),
+    "D-93": (
+        "hydronic_pump_appendix_method",
+        "plant_peak_pumping_flow",
+        "prescriptive_pump_power_ceiling",
+        "reference_hydronic_pump_power",
+    ),
+    "D-97": (
+        "hydronic_pump_appendix_method",
+        "plant_capacity_basis",
+        "prescriptive_pump_power_ceiling",
+        "reference_hydronic_pump_power",
+    ),
+    "D-99": ("multi_energy_heating", "reference_conformity"),
+    "D-100": ("reference_conformity",),
+    "D-101": (
+        "common_ventilation_note_2",
+        "plant_sizing_scope",
+        "reference_system_selection",
+        "thermal_block_identity",
+    ),
+    "D-102": ("dx_cooling_part_load", "heat_pump_part_load"),
+}
+#: Each migrated requirement as that legacy front matter recorded it: its
+#: label, then its NECB 2020 and NECB 2025 citations in authored order.
+#: Written out rather than hashed, so a reviewer can read the preserved
+#: mapping. The only change Phase C made is canonical spelling -- a
+#: trailing period dropped (`Table 5.2.6.3.`, `8.4.1.2.`) and `Note`
+#: prefixed to an Appendix A note (`A-8.4.4.14.(2)`) -- which the
+#: provision grammar would otherwise refuse as an alias. A key shared by
+#: several decisions appears once: it is one requirement.
+MIGRATED_REQUIREMENTS = {
+    "boiler_part_load_fuel_curve": (
+        "Reference boiler part-load fuel consumption and its efficiency curve",
+        ("8.4.5.2.(1)", "8.4.5.2.(2)"),
+        ("8.4.6.2.(1)", "8.4.6.2.(2)"),
+    ),
+    "capacity_iteration_on_unmet_loads": (
+        ("Incrementally increasing capacity until the unmet-load criteria "
+         "are met"),
+        ("8.4.1.2.(5)",),
+        ("8.4.1.2.(5)",),
+    ),
+    "common_ventilation_note_2": (
+        "Common ventilation system permitted for Systems 1, 2 and 5",
+        ("Table 8.4.4.7.-B",),
+        ("Table 8.4.5.7.-B",),
+    ),
+    "daylight_responsive_photocontrols": (
+        ("Where daylight-responsive photocontrols are required, and the "
+         "areas exempt from them"),
+        ("4.2.2.1.(10)", "4.2.2.1.(12)", "4.2.2.1.(13)", "4.2.2.1.(15)"),
+        ("4.2.2.1.(10)", "4.2.2.1.(12)", "4.2.2.1.(13)", "4.2.2.1.(15)"),
+    ),
+    "daylighted_area_geometry": (
+        ("How the sidelighted and toplighted areas a photocontrol serves "
+         "are determined"),
+        ("4.2.2.3", "4.2.2.4", "4.2.2.5"),
+        ("4.2.2.3", "4.2.2.4", "4.2.2.5"),
+    ),
+    "demand_control_ventilation_requirement": (
+        ("The prescriptive requirement that determines which DCV "
+         "strategies are required"),
+        ("5.2.3.4",),
+        ("5.2.3.4",),
+    ),
+    "dx_cooling_part_load": (
+        ("Reference direct-expansion cooling part-load power and its "
+         "part-load ratio"),
+        ("8.4.5.4.(4)", "8.4.5.4.(5)", "8.4.5.4.(6)"),
+        ("8.4.6.4.(4)", "8.4.6.4.(5)", "8.4.6.4.(6)"),
+    ),
+    "furnace_part_load_fuel_curve": (
+        ("Reference furnace part-load fuel consumption and its efficiency "
+         "curve"),
+        ("8.4.5.3.(1)", "8.4.5.3.(2)"),
+        ("8.4.6.3.(1)", "8.4.6.3.(2)"),
+    ),
+    "furnace_staging": (
+        "Reference furnace staging by capacity",
+        ("8.4.4.9.(7)",),
+        ("8.4.5.9.(7)",),
+    ),
+    "heat_pump_auxiliary_heating_energy_type": (
+        "Auxiliary-heating energy type elected for a reference heat pump",
+        ("8.4.4.13.(2)(g)", "8.4.4.13.(2)(h)"),
+        ("8.4.5.13.(2)(g)", "8.4.5.13.(2)(h)"),
+    ),
+    "heat_pump_cooling_capacity": (
+        ("Reference heat-pump cooling capacity set from peak load without "
+         "oversizing"),
+        ("8.4.4.13.(2)(b)",),
+        ("8.4.5.13.(2)(b)",),
+    ),
+    "heat_pump_part_load": (
+        ("Reference air-source heat-pump part-load power and its part-load "
+         "ratio"),
+        ("8.4.5.7.(4)", "8.4.5.7.(5)", "8.4.5.7.(6)"),
+        ("8.4.6.7.(4)", "8.4.6.7.(5)", "8.4.6.7.(6)"),
+    ),
+    "heating_energy_type_inheritance": (
+        "Reference heating-system energy type follows the proposed building",
+        ("8.4.4.9.(4)",),
+        ("8.4.5.9.(4)",),
+    ),
+    "hvac_systems_calculation_basis": (
+        "The basis on which reference HVAC systems are calculated",
+        ("8.4.2.10.(2)",),
+        ("8.4.2.10.(2)",),
+    ),
+    "hydronic_pump_appendix_method": (
+        ("The Appendix A note's pump-power method and its one "
+         "primary-secondary example"),
+        ("Note A-8.4.4.14.(2)",),
+        ("Note A-8.4.5.14.(2)",),
+    ),
+    "modulating_boiler_part_load": (
+        "Reference modulating boiler part-load fuel curve",
+        ("8.4.5.2.(3)",),
+        ("8.4.6.2.(2)",),
+    ),
+    "modulating_furnace_part_load": (
+        "Reference modulating furnace part-load fuel curve",
+        ("8.4.5.3.(3)",),
+        ("8.4.6.3.(2)",),
+    ),
+    "multi_energy_heating": (
+        "Multi-energy heating capacity allocation and operating priority",
+        ("8.4.4.9.(4)", "8.4.4.9.(5)", "8.4.4.9.(6)"),
+        ("8.4.5.9.(4)", "8.4.5.9.(5)", "8.4.5.9.(6)"),
+    ),
+    "plant_capacity_basis": (
+        ("Plant capacity as the sum of the systems it serves, heating and "
+         "cooling"),
+        ("8.4.4.9.(6)(a)", "8.4.4.10.(6)(a)"),
+        ("8.4.5.9.(6)(a)", "8.4.5.10.(6)(a)"),
+    ),
+    "plant_peak_pumping_flow": (
+        "Plant peak pumping flow rate, heating and cooling",
+        ("8.4.4.9.(6)(f)", "8.4.4.10.(6)(e)"),
+        ("8.4.5.9.(6)(f)", "8.4.5.10.(6)(e)"),
+    ),
+    "plant_sizing_scope": (
+        "A hydronic plant is sized from the systems it serves",
+        ("8.4.4.9.(6)", "8.4.4.10.(6)"),
+        ("8.4.5.9.(6)", "8.4.5.10.(6)"),
+    ),
+    "prescriptive_pump_power_ceiling": (
+        ("Prescriptive ceiling on combined pump-motor power, and the table "
+         "that supplies it"),
+        ("5.2.6.3.(1)", "Table 5.2.6.3"),
+        ("5.2.6.3.(1)", "Table 5.2.6.3"),
+    ),
+    "purchased_heating_energy": (
+        ("How purchased heating energy is represented in the reference "
+         "building"),
+        ("8.4.4.6.(1)",),
+        ("8.4.5.6.(1)",),
+    ),
+    "reference_conformity": (
+        "Performance-compliance reference conformity",
+        ("8.4.1.2", "8.4.2.10"),
+        ("8.4.1.2", "8.4.2.10"),
+    ),
+    "reference_cooling_capacity": (
+        "The reference cooling system's capacity basis",
+        ("8.4.4.10.(6)",),
+        ("8.4.5.10.(6)",),
+    ),
+    "reference_demand_control_ventilation": (
+        ("Reference building inherits the proposed demand-control "
+         "ventilation strategies"),
+        ("8.4.4.15.(2)",),
+        ("8.4.5.15.(2)",),
+    ),
+    "reference_heating_capacity": (
+        "The reference heating system's capacity basis",
+        ("8.4.4.9.(6)",),
+        ("8.4.5.9.(6)",),
+    ),
+    "reference_heating_system_dispatch": (
+        "How the reference heating system serves a thermal block",
+        ("8.4.4.9.(3)",),
+        ("8.4.5.9.(3)",),
+    ),
+    "reference_hydronic_pump_power": (
+        ("Reference hydronic pump power: the sentences that state it and "
+         "its scope"),
+        ("8.4.4.14.(1)", "8.4.4.14.(2)", "8.4.4.14.(3)"),
+        ("8.4.5.14.(1)", "8.4.5.14.(2)", "8.4.5.14.(3)"),
+    ),
+    "reference_meets_prescriptive_requirements": (
+        ("The reference building's systems meet the Part 5 prescriptive "
+         "requirements"),
+        ("8.4.4.1.(2)",),
+        ("8.4.5.1.(2)",),
+    ),
+    "reference_outside_air_cooling": (
+        ("Whether the reference building cools with outside air, and by "
+         "which system"),
+        ("8.4.4.12",),
+        ("8.4.5.12",),
+    ),
+    "reference_photocontrol_evaluation": (
+        ("How the reference building evaluates the effect of required "
+         "photocontrols"),
+        ("8.4.4.5.(9)", "8.4.4.5.(10)", "8.4.4.5.(11)", "8.4.4.5.(12)"),
+        ("8.4.5.5.(9)", "8.4.5.5.(10)", "8.4.5.5.(11)", "8.4.5.5.(12)"),
+    ),
+    "reference_system_selection": (
+        "Reference HVAC system assigned to each thermal block",
+        ("8.4.4.7.(1)", "8.4.4.9.(1)", "8.4.4.10.(1)"),
+        ("8.4.5.7.(1)", "8.4.5.9.(1)", "8.4.5.10.(1)"),
+    ),
+    "system_5_heating_presence": (
+        ("Heating presence where the general reference rule and the System "
+         "5 row conflict"),
+        ("8.4.4.1.(5)", "Table 8.4.4.7.-A", "Table 8.4.4.7.-B"),
+        ("8.4.5.1.(5)", "Table 8.4.5.7.-A", "Table 8.4.5.7.-B"),
+    ),
+    "terminal_secondary_split": (
+        "Reference terminal and secondary heating/cooling capacity split",
+        ("8.4.4.9.(3)", "8.4.4.10.(7)"),
+        ("8.4.5.9.(3)", "8.4.5.10.(7)"),
+    ),
+    "thermal_block_identity": (
+        "The reference retains the proposed building's thermal blocks",
+        ("8.4.4.1.(4)",),
+        ("8.4.5.1.(4)",),
+    ),
+    "unitary_equipment_staging": (
+        "Reference unitary heating and cooling equipment staging by capacity",
+        ("8.4.4.9.(7)", "8.4.4.10.(8)"),
+        ("8.4.5.9.(7)", "8.4.5.10.(8)"),
+    ),
+    "unmet_load_hour_criteria": (
+        ("The unmet heating and cooling hour criteria a compliant model "
+         "must meet"),
+        ("8.4.1.2.(3)", "8.4.1.2.(4)"),
+        ("8.4.1.2.(3)", "8.4.1.2.(4)"),
+    ),
+    "water_economizer_definition": (
+        "What qualifies as cooling by indirect use of outdoor air",
+        ("5.2.2.9",),
+        ("5.2.2.9",),
+    ),
+}
+#: The requirement keys several migrated decisions share, and who shares
+#: them. Each is ONE requirement with one label and one mapping.
+SHARED_KEY_USERS = {
+    "hydronic_pump_appendix_method": ("D-92", "D-93", "D-97"),
+    "plant_peak_pumping_flow": ("D-92", "D-93"),
+    "prescriptive_pump_power_ceiling": ("D-38", "D-92", "D-93", "D-97"),
+    "reference_conformity": ("D-99", "D-100"),
+    "reference_hydronic_pump_power": (
+        "D-27", "D-38", "D-92", "D-93", "D-97"),
+    "reference_photocontrol_evaluation": ("D-51", "D-57"),
+    "unitary_equipment_staging": ("D-46", "D-47", "D-48"),
+}
 
 
 def runtime_editions():
@@ -120,6 +463,47 @@ def raw_front_matter():
     return {path.stem: tomllib.loads(
                 path.read_text(encoding="utf-8").split("+++\n")[1])
             for path in paths}
+
+
+def raw_body(decision_id):
+    """A decision's authored body: everything after its front matter."""
+    text = (SOURCE_DIR / (decision_id + ".md")).read_text(encoding="utf-8")
+    return text.split("+++\n", 2)[2]
+
+
+#: A run of this many words shared with the recorded Code text is a copy.
+AUTHORITY_RUN = 8
+NECB_DATA = PYTHON_ROOT / "btap" / "codes" / "necb" / "data"
+
+
+def word_runs(text, length):
+    words = re.findall(r"[a-z0-9]+(?:[.'-][a-z0-9]+)*",
+                       text.casefold().replace("\u2019", "'"))
+    return [tuple(words[i:i + length]) for i in range(len(words) - length + 1)]
+
+
+def authority_runs(length):
+    """Every `length`-word run of Code text an edition snapshot records as
+    evidence: the archived hbix payloads and the Section 8.4 cache."""
+    runs = set()
+
+    def walk(value):
+        if isinstance(value, str):
+            runs.update(word_runs(value, length))
+        elif isinstance(value, dict):
+            for item in value.values():
+                walk(item)
+        elif isinstance(value, list):
+            for item in value:
+                walk(item)
+
+    snapshots = sorted(NECB_DATA.glob("necb*/manifest.json"))
+    assert len(snapshots) >= 2, snapshots
+    for manifest in snapshots:
+        for name in ("provenance/provisions.result.json",
+                     "coverage/articles_8_4.json"):
+            walk(json.loads((manifest.parent / name).read_text(encoding="utf-8")))
+    return runs
 
 
 def recorded_citations(articles):
@@ -617,11 +1001,10 @@ class TestTheCommittedProvisionView(unittest.TestCase):
     which row each requirement owes each edition, and where it may not appear.
     """
 
-    #: A SNAPSHOT of this tree at Phase B, taken from the plan's census: 68
-    #: decisions cite a provision and 35 cite none. A change to the decision
-    #: set moves it legitimately; re-read `docs/decisions/` and update it
-    #: together with the sentence in `docs/DEVELOPERS.md` that quotes it.
-    INCLUDED, OMITTED = 68, 35
+    #: Phase C converts every established mapping without changing the 68
+    #: citation-bearing or 35 citation-free decision totals.
+    STRUCTURED, ESTABLISHED, HELD, INCLUDED, OMITTED = 23, 0, 45, 68, 35
+    SOURCE_ROWS = 106
 
     @classmethod
     def setUpClass(cls):
@@ -659,14 +1042,115 @@ class TestTheCommittedProvisionView(unittest.TestCase):
                 len(self.omitted),
             "All decisions": len(self.front)}, scope)
 
-    def test_the_snapshot_census_of_this_tree(self):
-        """68 included and 35 omitted: the numbers the plan states for the tree
-        Phase B was built on. Independent of the scope table, which is only
-        compared with the raw sources above."""
-        self.assertEqual((self.INCLUDED, self.OMITTED),
-                         (len(self.included), len(self.omitted)),
-                         "the decision set changed: re-read docs/decisions/ and "
-                         "update this snapshot and its documentation together")
+    def test_the_phase_c_migration_census_and_ids_are_exact(self):
+        self.assertEqual(
+            (
+                self.STRUCTURED,
+                self.ESTABLISHED,
+                self.HELD,
+                self.INCLUDED,
+                self.OMITTED,
+            ),
+            (
+                len(self.structured),
+                len(self.established),
+                len(self.held),
+                len(self.included),
+                len(self.omitted),
+            ),
+        )
+        self.assertEqual(MIGRATED_IDS, tuple(self.structured))
+        self.assertEqual(
+            self.SOURCE_ROWS,
+            sum(
+                len(block["sources"])
+                for decision_id in self.structured
+                for block in self.front[decision_id]["articles"].values()
+            ),
+        )
+
+    def test_migration_keeps_each_title_and_summary_byte_stable(self):
+        """A report reads these fields, so representation-only work may not
+        amend them while adding its committee metadata."""
+        actual = {
+            decision_id: hashlib.sha256(
+                json.dumps(
+                    [
+                        self.front[decision_id]["title"],
+                        self.front[decision_id]["summary"],
+                    ],
+                    ensure_ascii=False,
+                    separators=(",", ":"),
+                ).encode("utf-8")
+            ).hexdigest()
+            for decision_id in self.structured
+        }
+        self.assertEqual(MIGRATED_RUNTIME_SHA256, actual)
+
+    def test_each_migrated_requirement_is_its_legacy_mapping_verbatim(self):
+        """Keys in authored order, labels, and both editions' citations in
+        authored order, against the literal tables -- and nothing else in a
+        requirement but its new `decided`."""
+        self.assertEqual(MIGRATED_IDS, tuple(MIGRATED_KEYS))
+        self.assertEqual(
+            sorted(MIGRATED_REQUIREMENTS),
+            sorted({key for keys in MIGRATED_KEYS.values() for key in keys}),
+            "the literal table names exactly the requirements in use")
+        for decision_id, keys in MIGRATED_KEYS.items():
+            meta = self.front[decision_id]
+            self.assertEqual(keys, tuple(meta["articles"]), decision_id)
+            # Top-level editions are kept as authored; the generator holds
+            # them equal to what the governing records derive.
+            self.assertEqual(["necb2020", "necb2025"], meta["editions"])
+            for key in keys:
+                label, necb2020, necb2025 = MIGRATED_REQUIREMENTS[key]
+                block = meta["articles"][key]
+                with self.subTest(decision=decision_id, requirement=key):
+                    self.assertEqual(("label", "decided", "sources"),
+                                     tuple(block))
+                    self.assertEqual(label, block["label"])
+                    self.assertEqual(
+                        [{"code": "necb", "edition": "2020",
+                          "role": "governing", "references": list(necb2020)},
+                         {"code": "necb", "edition": "2025",
+                          "role": "governing", "references": list(necb2025)}],
+                        block["sources"])
+                    self.assertEqual(
+                        [("code", "edition", "role", "references")] * 2,
+                        [tuple(source) for source in block["sources"]])
+
+    def test_each_requirement_has_its_own_committee_paraphrase(self):
+        """`decided` says what was decided about THIS requirement in THIS
+        decision. It is not the summary, the label, the title or a passage of
+        the body cut to fit; no two requirement instances share one, not even
+        the users of a shared key; and it reproduces no run of the Code's own
+        text recorded as evidence for either edition."""
+        corpus = authority_runs(AUTHORITY_RUN)
+        seen = {}
+        for decision_id in self.structured:
+            meta = self.front[decision_id]
+            body = raw_body(decision_id)
+            for key, block in meta["articles"].items():
+                decided = block["decided"]
+                with self.subTest(decision=decision_id, requirement=key):
+                    self.assertEqual(decided.strip(), decided)
+                    self.assertNotIn("\n", decided)
+                    self.assertGreaterEqual(len(decided.split()), 8)
+                    for name, text in (("summary", meta["summary"]),
+                                       ("title", meta["title"]),
+                                       ("label", block["label"]),
+                                       ("body", body)):
+                        self.assertNotIn(decided.casefold(), text.casefold(),
+                                         "decided is copied from the " + name)
+                    self.assertNotIn(block["label"].casefold(),
+                                     decided.casefold())
+                    self.assertNotIn(decided, seen,
+                                     "already used by {}".format(seen.get(decided)))
+                    seen[decided] = (decision_id, key)
+                    copied = sorted(set(word_runs(decided, AUTHORITY_RUN)) & corpus)
+                    self.assertEqual([], copied,
+                                     "decided reproduces recorded Code text")
+        self.assertEqual(self.SOURCE_ROWS // 2, len(seen))
 
     def test_every_citation_free_decision_is_omitted(self):
         """Not a row, not a link, not a summary anchor, not a held entry."""
@@ -715,15 +1199,17 @@ class TestTheCommittedProvisionView(unittest.TestCase):
                                  code_spans(cells[3]),
                                  "citations are listed as recorded, in order")
 
-    def test_each_established_requirement_is_one_row_per_edition(self):
-        """One row per (decision, requirement, code id) the raw lists name,
-        carrying exactly the citations recorded for that edition."""
+    def test_each_structured_requirement_is_one_row_per_edition(self):
+        """One row per governing source record, with its exact source order."""
         expected = {}
-        for decision_id in self.established:
+        for decision_id in self.structured:
             for key, block in self.front[decision_id]["articles"].items():
-                for code_id, citations in block.items():
-                    if code_id != "label":
-                        expected[(code_id, decision_id, key)] = (block, citations)
+                for source in block["sources"]:
+                    if source["role"] == "governing":
+                        code_id = codes.resolve(
+                            "{}{}".format(source["code"], source["edition"])
+                        ).id
+                        expected[(code_id, decision_id, key)] = (block, source)
         actual = {}
         for code_id, cells in self.edition_rows:
             identity = (code_id, self.linked(cells[1]), code_spans(cells[2])[-1])
@@ -731,62 +1217,149 @@ class TestTheCommittedProvisionView(unittest.TestCase):
             actual[identity] = cells
         self.assertEqual(set(expected), set(actual))
         self.assertEqual(len(self.edition_rows), len(expected))
-        for identity, (block, citations) in expected.items():
+        for identity, (block, source) in expected.items():
             cells = actual[identity]
             with self.subTest(row=identity):
-                self.assertEqual(sorted(citations), sorted(code_spans(cells[0])),
-                                 "every citation of the requirement, in ONE row")
-                self.assertEqual(len(citations), len(code_spans(cells[0])))
+                self.assertEqual(source["references"], code_spans(cells[0]))
                 self.assertEqual(self.front[identity[1]]["title"],
                                  unescape(cells[1].split(") ", 1)[1]))
                 self.assertEqual(block["label"],
                                  unescape(cells[2].split("<br>")[0]))
+                self.assertEqual(block["decided"], unescape(cells[3]))
 
-    def test_other_editions_are_the_same_requirements_other_citations(self):
+    def test_each_migrated_requirement_owns_exactly_its_literal_rows(self):
+        """Read off the view against the literal tables, not the sources: two
+        rows per migrated requirement instance, each with that edition's
+        citations in authored order, the label, the decision's own `decided`,
+        the other edition's citations and no other source."""
+        label_of = {code_id: codes.resolve(code_id).label
+                    for code_id in ("necb2020", "necb2025")}
+        expected = {}
+        for decision_id, keys in MIGRATED_KEYS.items():
+            for key in keys:
+                label, necb2020, necb2025 = MIGRATED_REQUIREMENTS[key]
+                decided = self.front[decision_id]["articles"][key]["decided"]
+                for code_id, mine, other_id, other in (
+                        ("necb2020", necb2020, "necb2025", necb2025),
+                        ("necb2025", necb2025, "necb2020", necb2020)):
+                    expected[(code_id, decision_id, key)] = (
+                        list(mine), label, decided,
+                        "{}: {}".format(label_of[other_id], ", ".join(
+                            "`{}`".format(citation) for citation in other)),
+                        "—")
+        actual = {}
+        for code_id, cells in self.edition_rows:
+            identity = (code_id, self.linked(cells[1]), code_spans(cells[2])[-1])
+            if identity[1] in MIGRATED_KEYS:
+                self.assertNotIn(identity, actual)
+                actual[identity] = (code_spans(cells[0]),
+                                    unescape(cells[2].split("<br>")[0]),
+                                    unescape(cells[3]), cells[4], cells[5])
+        self.assertEqual(self.SOURCE_ROWS, len(expected))
+        self.assertEqual(expected, actual)
+
+    def test_other_editions_are_same_requirement_governing_sources(self):
         for code_id, cells in self.edition_rows:
             decision_id, key = self.linked(cells[1]), code_spans(cells[2])[-1]
             block = self.front[decision_id]["articles"][key]
-            others = {other: citations for other, citations in block.items()
-                      if other not in ("label", code_id)}
+            others = [
+                source for source in block["sources"]
+                if source["role"] == "governing"
+                and codes.resolve(
+                    "{}{}".format(source["code"], source["edition"])
+                ).id != code_id
+            ]
             with self.subTest(code=code_id, decision=decision_id, key=key):
                 if not others:
                     self.assertEqual("—", cells[4])
                     continue
                 self.assertEqual(
-                    sorted(c for citations in others.values() for c in citations),
-                    sorted(code_spans(cells[4])))
-                for other in others:
-                    self.assertIn(codes.resolve(other).label + ": ", cells[4])
+                    [
+                        reference
+                        for source in others
+                        for reference in source["references"]
+                    ],
+                    code_spans(cells[4]),
+                )
+                for source in others:
+                    other = codes.resolve(
+                        "{}{}".format(source["code"], source["edition"])
+                    )
+                    self.assertIn(other.label + ": ", cells[4])
                 self.assertNotIn(codes.resolve(code_id).label + ": ", cells[4])
-                self.assertEqual("—", cells[5], "a legacy row has no other sources")
+                self.assertEqual("—", cells[5])
 
-    def test_a_legacy_row_says_its_decided_text_is_transitional(self):
-        for code_id, cells in self.edition_rows:
-            decision_id = self.linked(cells[1])
-            with self.subTest(code=code_id, decision=decision_id):
-                self.assertTrue(cells[3].startswith("**Transitional**"), cells[3])
-                self.assertIn("(#transitional-summary-{})".format(
-                    decision_id.lower()), cells[3])
-                self.assertNotIn(self.front[decision_id]["summary"][:60], cells[3])
+    def test_no_concrete_legacy_or_transitional_form_remains(self):
+        self.assertEqual([], self.established)
+        self.assertNotIn("## Transitional decision summaries\n", self.view)
+        self.assertEqual([], SUMMARY_ANCHOR.findall(self.view))
+        for decision_id in self.structured:
+            for key, block in self.front[decision_id]["articles"].items():
+                with self.subTest(decision=decision_id, requirement=key):
+                    self.assertEqual(
+                        {"label", "decided", "sources"}, set(block),
+                    )
+                    self.assertEqual(
+                        ["2020", "2025"],
+                        [source["edition"] for source in block["sources"]],
+                    )
+                    self.assertTrue(
+                        all(
+                            source["code"] == "necb"
+                            and source["role"] == "governing"
+                            for source in block["sources"]
+                        )
+                    )
 
-    def test_each_transitional_summary_is_the_registry_summary_printed_once(self):
-        anchors = SUMMARY_ANCHOR.findall(self.view)
-        self.assertEqual([i.lower() for i in self.established], anchors)
-        section = self.view.split("## Transitional decision summaries\n", 1)[1]
-        section = section.split("\n## ", 1)[0]
-        chunks = re.split(r'^<a id="transitional-summary-d-\d+"></a>$', section,
-                          flags=re.MULTILINE)[1:]
-        self.assertEqual(len(self.established), len(chunks))
-        for decision_id, chunk in zip(self.established, chunks):
-            meta = self.front[decision_id]
-            paragraphs = [part for part in chunk.strip().split("\n\n") if part]
-            with self.subTest(decision=decision_id):
-                self.assertEqual(2, len(paragraphs))
-                self.assertIn(self.linked(paragraphs[0]), (decision_id,))
-                self.assertEqual(" ".join(meta["summary"].split()),
-                                 unescape(paragraphs[1]))
-                self.assertEqual(1, self.view.count(paragraphs[1]),
-                                 "the summary is printed once, not on every row")
+    def test_shared_requirement_keys_keep_one_label_and_mapping(self):
+        shared = {}
+        for decision_id in self.structured:
+            for key, block in self.front[decision_id]["articles"].items():
+                shared.setdefault(key, []).append((decision_id, block))
+        shared = {key: records for key, records in shared.items()
+                  if len(records) > 1}
+        self.assertEqual(
+            SHARED_KEY_USERS,
+            {key: tuple(decision_id for decision_id, _block in records)
+             for key, records in shared.items()},
+        )
+        # No unconverted decision uses a migrated key: a key is one
+        # requirement, so it may not be structured in one place and legacy
+        # or held in another.
+        for decision_id, meta in self.front.items():
+            if decision_id not in MIGRATED_KEYS:
+                self.assertEqual(set(), set(meta["articles"]) & set(MIGRATED_REQUIREMENTS),
+                                 decision_id)
+        for key, records in shared.items():
+            with self.subTest(requirement=key):
+                expected = (
+                    records[0][1]["label"],
+                    [
+                        (
+                            source["code"],
+                            source["edition"],
+                            source["role"],
+                            source["references"],
+                        )
+                        for source in records[0][1]["sources"]
+                    ],
+                )
+                for _decision_id, block in records[1:]:
+                    self.assertEqual(
+                        expected,
+                        (
+                            block["label"],
+                            [
+                                (
+                                    source["code"],
+                                    source["edition"],
+                                    source["role"],
+                                    source["references"],
+                                )
+                                for source in block["sources"]
+                            ],
+                        ),
+                    )
 
     def test_rows_read_the_provision_number_numerically(self):
         """8.4.4.9 before 8.4.4.10 -- a string sort puts them the other way."""
@@ -828,6 +1401,96 @@ class TestTheCommittedProvisionView(unittest.TestCase):
         self.assertEqual(self.view, G.render_provision_view(entries))
         self.assertEqual(self.view, G.render_provision_view(reversed_entries))
         self.assertEqual(self.view, G.generate(SOURCE_DIR)[2])
+
+
+#: A legacy per-edition citation list, `necb2020 = [`, at the start of a
+#: front-matter line. The structured form never writes one.
+LEGACY_LIST_LINE = re.compile(r"^necb\d{4}\s*=", re.MULTILINE)
+#: The two legacy holding keys an unconverted decision may still use.
+HOLDING_KEYS = ("unverified", "not_applicable")
+
+
+class TestThePhaseCMigration(unittest.TestCase):
+    """Phase C converted every established mapping, read straight from the
+    committed files: no legacy per-code-id shape survives in a source or in
+    the registry, the registry projects each migrated requirement exactly as
+    the literal tables say, and the decision log carries none of the new
+    committee metadata."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.front = raw_front_matter()
+        cls.fronts = {path.stem: path.read_text(encoding="utf-8").split("+++\n")[1]
+                      for path in SOURCE_DIR.glob("D-*.md")}
+        cls.registry = json.loads(
+            PYTHON_REGISTRY.read_text(encoding="utf-8"))["decisions"]
+        cls.by_id = {entry["id"]: entry for entry in cls.registry}
+
+    def test_no_source_keeps_a_per_code_id_mapping(self):
+        self.assertEqual(set(self.front), set(self.fronts))
+        for decision_id, meta in self.front.items():
+            articles = meta["articles"]
+            with self.subTest(decision=decision_id):
+                self.assertIsNone(LEGACY_LIST_LINE.search(self.fronts[decision_id]))
+                if decision_id in MIGRATED_KEYS:
+                    for block in articles.values():
+                        self.assertIsInstance(block, dict)
+                        self.assertEqual(("label", "decided", "sources"),
+                                         tuple(block))
+                    continue
+                # Every other decision is held or omitted under ONE holding
+                # key, which its `editions` repeats.
+                (holding,) = articles
+                self.assertIn(holding, HOLDING_KEYS)
+                self.assertIsInstance(articles[holding], list)
+                self.assertEqual([holding], meta["editions"])
+                if holding == "not_applicable":
+                    self.assertEqual([], articles[holding])
+
+    def test_no_registry_entry_keeps_a_per_code_id_mapping(self):
+        self.assertEqual(list(self.front), [entry["id"] for entry in self.registry])
+        for entry in self.registry:
+            with self.subTest(decision=entry["id"]):
+                if entry["id"] in MIGRATED_KEYS:
+                    self.assertEqual(STRUCTURED_FIELDS, tuple(entry))
+                    continue
+                self.assertEqual(LEGACY_FIELDS, tuple(entry))
+                self.assertEqual(entry["editions"], list(entry["articles"]))
+                self.assertIn(entry["editions"][0], HOLDING_KEYS)
+                self.assertIsInstance(entry["articles"][entry["editions"][0]], list)
+
+    def test_the_registry_projects_each_migrated_requirement_exactly(self):
+        """Requirements sorted by key, each the literal mapping plus its own
+        `decided`; the runtime fields and `editions` as authored."""
+        for decision_id, keys in MIGRATED_KEYS.items():
+            entry, meta = self.by_id[decision_id], self.front[decision_id]
+            with self.subTest(decision=decision_id):
+                self.assertEqual({field: meta[field] for field in RUNTIME_FIELDS},
+                                 {field: entry[field] for field in RUNTIME_FIELDS})
+                self.assertEqual(["necb2020", "necb2025"], entry["editions"])
+                expected = []
+                for key in sorted(keys):
+                    label, necb2020, necb2025 = MIGRATED_REQUIREMENTS[key]
+                    expected.append({
+                        "id": key, "label": label,
+                        "decided": meta["articles"][key]["decided"],
+                        "sources": [
+                            {"code": "necb", "edition": "2020",
+                             "role": "governing", "references": list(necb2020)},
+                            {"code": "necb", "edition": "2025",
+                             "role": "governing", "references": list(necb2025)},
+                        ]})
+                self.assertEqual(ordered(expected), ordered(entry["requirements"]))
+
+    def test_the_decision_log_carries_no_committee_metadata(self):
+        """The log renders titles, kinds and bodies. A `decided` reaching it
+        would mean the representation change moved a document it may not."""
+        doc = DECISIONS_DOC.read_text(encoding="utf-8")
+        for decision_id, keys in MIGRATED_KEYS.items():
+            for key in keys:
+                with self.subTest(decision=decision_id, requirement=key):
+                    self.assertNotIn(
+                        self.front[decision_id]["articles"][key]["decided"], doc)
 
 
 class TestTheMigrationCannotRunAgain(unittest.TestCase):
