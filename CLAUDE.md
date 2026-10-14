@@ -122,7 +122,7 @@ new edition does not leave the check stale, and it never takes a collective
 word: "both" stops meaning anything once a third edition exists, and `vintage`
 is retired vocabulary. `unverified` may not be mixed with a code id — either a
 decision has been checked against that edition or it has not. Of the 103
-decisions, 57 are `unverified`: they were authored before the field existed,
+decisions, 49 are `unverified`: they were authored before the field existed,
 mostly against one edition's text, and asserting a list for them would be a
 guess. That is a DECLARED gap where it used to be a silent one; establishing
 them is open work, and the remaining count moves as decisions are checked —
@@ -170,7 +170,9 @@ scope rather than admitting another heuristic.
 **The structured source form** is the migration target of
 `docs/plans/DECISION_APPLICABILITY_PLAN.md`. The generator accepts it beside the
 legacy form. Phase C converted all 23 decisions that carried an established
-per-code-id mapping, so no committed decision still uses the per-code-id lists
+per-code-id mapping, and Phase D batch 1 established eight held decisions
+directly in this form (D-18, D-28, D-34, D-37, D-42, D-43, D-45 and D-55; 31
+structured in all), so no committed decision still uses the per-code-id lists
 above: every other decision holds `unverified` or `not_applicable`.
 `python/tests/necb/test_decisions_registry_sync.py` pins the converted ids and
 each converted mapping, and fails if any other decision takes a per-code-id

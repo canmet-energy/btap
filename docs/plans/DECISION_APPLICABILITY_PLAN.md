@@ -387,6 +387,49 @@ edition-specific provisions, followed by single-requirement Section 8.4
 decisions, Appendix-note cases, mixed citation chains and finally the broad
 multi-part decisions such as D-61.
 
+Status: in progress. Batch 1 is established: D-18, D-28, D-34, D-37, D-42,
+D-43, D-45 and D-55. The committee view moves from 23 structured and 45 held
+decisions to 31 and 37, with the 68 citation-bearing and 35 citation-free
+totals unchanged. The compliance report is byte-identical. Titles and
+summaries stayed unchanged; D-28 and D-34 gained body notes that record later
+applicability corrections. Each mapping was read against the
+governing text in both editions' provision indexes and against the
+implementation.
+
+- D-18 and D-28 share `multizone_thermal_block_grouping`, Table 8.4.x.7.-B
+  Note (3), for System 6. D-28 also shares
+  `common_ventilation_note_2` with D-101 for Systems 2 and 5; D-101's broad
+  Table citations were narrowed to the exact Note (2) identity in the same
+  correction.
+- D-34 maps to 8.4.x.7.(4), with Article 13 classification preceding its
+  residential branch so only Sentence (2) heat pumps redirect; D-45 maps to
+  Table 8.4.x.7.-A, D-37
+  (`heat_pump_reference_by_source`) to 8.4.x.13.(1), (2)(a) and Note
+  A-8.4.x.13, and D-55 to Table 8.4.x.7.-B Note (1).
+- D-43 reuses D-90's `capacity_iteration_on_unmet_loads` key, label and
+  references (8.4.1.2.(5)) exactly; only its `decided` text differs.
+- D-42 is established for NECB 2020 only, under 8.4.1.2.(4). NECB 2025
+  8.4.1.2.(4) is a different requirement: a 100 h ceiling for the proposed
+  building under Subsection 8.4.4, and +10% or 20 h, whichever is greater,
+  under 8.4.5. Nothing is asserted for NECB 2025, and a one-edition mapping
+  cannot share D-91's `unmet_load_hour_criteria` key.
+
+Runtime citation defects found while reading the implementation are Phase E
+items. Nothing was moved in the audit output here:
+
+- D-34: `_residential_assignment` in `hvac/reference.py` hard-codes
+  `8.4.4.7.(4)`, NECB 2020 numbering, for every edition, in both the audit
+  record and the assignment's articles. NECB 2025's article is `8.4.5.7.(4)`.
+- D-45: `_audit_museum_row` hard-codes `8.4.4.7.(1)`, also NECB 2020
+  numbering, and cites the sentence rather than `Table 8.4.x.7.-A`.
+- D-37: the redirect cites `special_rules.heat_pump.article` from each
+  edition's `reference_rules.json`, the compound `8.4.4.13.(1)-(2) + Table
+  8.4.4.13` (NECB 2025: `8.4.5.13...`). The water-loop retention cites
+  `8.4.4.13.(1); Note A-8.4.4.13`. Neither is one canonical citation, and
+  neither names `(2)(a)`.
+- D-18: the two records in `_reconcile_declared_storeys` carry
+  `ruling='D-18'` with no `article`.
+
 ### Phase E - cross-check the implementation
 
 Compare the canonical source records against:

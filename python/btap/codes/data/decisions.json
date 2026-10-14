@@ -279,15 +279,36 @@
       "id": "D-18",
       "title": "Multizone system zone grouping rewritten to the table note",
       "kind": "runtime",
-      "articles": {
-        "unverified": [
-          "Table 8.4.4.7.-B Note (3)"
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "The builder's one-air-handler-per-storey convention had no code basis and was caught by an archetype comparison in which our reference built ten corridor systems where the legacy library built one. Grouping now follows the table note literally: one system for all storeys up to four above grade, and above that external thermal blocks grouped by facade orientation with internal and underground blocks in their own groups. Corner blocks bin by largest exterior wall area with a deterministic tie-break."
+      "summary": "The builder's one-air-handler-per-storey convention had no code basis and was caught by an archetype comparison in which our reference built ten corridor systems where the legacy library built one. Grouping now follows the table note literally: one system for all storeys up to four above grade, and above that external thermal blocks grouped by facade orientation with internal and underground blocks in their own groups. Corner blocks bin by largest exterior wall area with a deterministic tie-break.",
+      "requirements": [
+        {
+          "id": "multizone_thermal_block_grouping",
+          "label": "Grouping of thermal blocks onto a multizone reference system by storey count and facade orientation",
+          "decided": "The note's storey threshold and facade split replace the per-storey air-handler convention; corner blocks go to the facade of their largest exterior wall area.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "Table 8.4.4.7.-B Note (3)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "Table 8.4.5.7.-B Note (3)"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-19",
@@ -455,15 +476,59 @@
       "id": "D-28",
       "title": "Multizone selection groups merge into whole-building systems",
       "kind": "runtime",
-      "articles": {
-        "unverified": [
-          "Table 8.4.4.7.-B Note (3)"
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "Because a proposed archetype may partition its zones per storey, building one reference system per selection group leaked that partition into the reference and produced far more systems than the table note prescribes. The fragmentation had real consequences: small per-loop flows fell below the economizer and energy-recovery thresholds. Multizone build assignments of the same catalog family now merge before building, with the facade and internal split happening inside the builder; single-zone families keep their selection grouping."
+      "summary": "Because a proposed archetype may partition its zones per storey, building one reference system per selection group leaked that partition into the reference and produced far more systems than the table note prescribes. The fragmentation had real consequences: small per-loop flows fell below the economizer and energy-recovery thresholds. Multizone build assignments of the same catalog family now merge before building, with the facade and internal split happening inside the builder; single-zone families keep their selection grouping.",
+      "requirements": [
+        {
+          "id": "common_ventilation_note_2",
+          "label": "Common ventilation system permitted for Systems 1, 2 and 5",
+          "decided": "For Systems 2 and 5, the build merge removes proposed storey partitions while retaining block-level heating and cooling under the common ventilation system authorized by Note (2).",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "Table 8.4.4.7.-B Note (2)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "Table 8.4.5.7.-B Note (2)"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "multizone_thermal_block_grouping",
+          "label": "Grouping of thermal blocks onto a multizone reference system by storey count and facade orientation",
+          "decided": "System 6 assignments of one catalog family are merged before construction according to the table note's storey and facade grouping; single-zone systems stay in their selection groups.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "Table 8.4.4.7.-B Note (3)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "Table 8.4.5.7.-B Note (3)"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-29",
@@ -534,15 +599,36 @@
       "id": "D-34",
       "title": "Residential blocks with heat pumps take the air-source redirect",
       "kind": "runtime",
-      "articles": {
-        "unverified": [
-          "8.4.4.7.(4)"
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "A residential or accommodation block whose proposed system includes a heat pump takes the air-source heat-pump reference redirect rather than the selection table's identical-to-proposed parenthetical. The ruling was to follow the legacy library's effective behaviour, which has no per-block heat-pump detection and redirects whenever heat pumps are present anywhere. The heat-pump check therefore runs before the other residential branches."
+      "summary": "A residential or accommodation block whose proposed system includes a heat pump takes the air-source heat-pump reference redirect rather than the selection table's identical-to-proposed parenthetical. The ruling was to follow the legacy library's effective behaviour, which has no per-block heat-pump detection and redirects whenever heat pumps are present anywhere. The heat-pump check therefore runs before the other residential branches.",
+      "requirements": [
+        {
+          "id": "heat_pump_block_redirect",
+          "label": "Article 13 heat-pump classification precedes the residential selection-table branches",
+          "decided": "A residential or accommodation block is classified under Article 13 before the other residential branches: heat pumps falling under Sentence (2) redirect, while water-loop heat pumps retained by Sentence (1) continue through the selection table and may be copied.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "8.4.4.7.(4)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "8.4.5.7.(4)"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-35",
@@ -574,17 +660,40 @@
       "id": "D-37",
       "title": "Heat-pump reference split by source, boundary per the explanatory note",
       "kind": "runtime",
-      "articles": {
-        "unverified": [
-          "8.4.4.13.(1)",
-          "8.4.4.13.(2)",
-          "Note A-8.4.4.13"
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "Heat pumps on an internal water loop — the configuration the explanatory note describes, where an auxiliary boiler and heat-rejection device are expressly allowed — keep their ordinary selection-table reference. Air-, water- and ground-source heat pumps redirect to the air-source heat-pump reference instead. Each group's heat-pump sources are classified from the source plant loop, and a detected heat pump with no source evidence keeps the conservative redirect."
+      "summary": "Heat pumps on an internal water loop — the configuration the explanatory note describes, where an auxiliary boiler and heat-rejection device are expressly allowed — keep their ordinary selection-table reference. Air-, water- and ground-source heat pumps redirect to the air-source heat-pump reference instead. Each group's heat-pump sources are classified from the source plant loop, and a detected heat pump with no source evidence keeps the conservative redirect.",
+      "requirements": [
+        {
+          "id": "heat_pump_reference_by_source",
+          "label": "Reference system for a proposed heat pump, by heat source",
+          "decided": "Water-loop heat pumps, as the explanatory note describes them, keep the selection-table reference; heat pumps drawing from air, water or ground are redirected to the air-source reference, and an unclassified source is redirected too.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "8.4.4.13.(1)",
+                "8.4.4.13.(2)(a)",
+                "Note A-8.4.4.13"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "8.4.5.13.(1)",
+                "8.4.5.13.(2)(a)",
+                "Note A-8.4.5.13"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-38",
@@ -742,29 +851,62 @@
       "id": "D-42",
       "title": "First full-annual fleet sweep validates reference generation",
       "kind": "process",
-      "articles": {
-        "unverified": [
-          "8.4.1.2.(4)"
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020"
       ],
-      "summary": "The first code-compliant-duration sweep across fifteen archetypes put thirteen of them within a narrow band of the fixed-point expectation, and showed reference conditioning is sound through a full year with essentially no unmet heating hours. The non-compliance wave came from the proposed side: the legacy archetypes' hard-sized cooling produces far more unmet cooling hours than the reference, and hard-sized equipment does not respond to sizing-factor iteration. The reference pipeline itself behaved correctly end to end."
+      "summary": "The first code-compliant-duration sweep across fifteen archetypes put thirteen of them within a narrow band of the fixed-point expectation, and showed reference conditioning is sound through a full year with essentially no unmet heating hours. The non-compliance wave came from the proposed side: the legacy archetypes' hard-sized cooling produces far more unmet cooling hours than the reference, and hard-sized equipment does not respond to sizing-factor iteration. The reference pipeline itself behaved correctly end to end.",
+      "requirements": [
+        {
+          "id": "unmet_cooling_hours_vs_reference",
+          "label": "Proposed-building unmet cooling hours compared with the reference building's",
+          "decided": "The fleet's failures of the relative unmet-cooling test are attributed to the proposed archetypes' hard-sized cooling, because the reference's right-sized cooling behaved correctly throughout.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "8.4.1.2.(4)"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-43",
       "title": "Capacity iteration made per thermal block, secant-targeted from run history",
       "kind": "runtime",
-      "articles": {
-        "unverified": [
-          "8.4.1.2.(5)"
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "The capacity auto-iteration no longer bumps only the building's global sizing factors. Each round reads the previous annual run's per-zone unmet-hours and raises sizing factors on the failing thermal blocks only, which is the code-literal reading since the governing sentences are written per thermal block. The first bump per zone is geometric and later bumps are extrapolated from that zone's own history, clamped so the increase stays incremental; global and mixed fallbacks are audited by name."
+      "summary": "The capacity auto-iteration no longer bumps only the building's global sizing factors. Each round reads the previous annual run's per-zone unmet-hours and raises sizing factors on the failing thermal blocks only, which is the code-literal reading since the governing sentences are written per thermal block. The first bump per zone is geometric and later bumps are extrapolated from that zone's own history, clamped so the increase stays incremental; global and mixed fallbacks are audited by name.",
+      "requirements": [
+        {
+          "id": "capacity_iteration_on_unmet_loads",
+          "label": "Incrementally increasing capacity until the unmet-load criteria are met",
+          "decided": "Sizing factors are raised only on the thermal blocks that failed, with a geometric first step and then secant extrapolation from each block's own run history, kept incremental.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "8.4.1.2.(5)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "8.4.1.2.(5)"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-44",
@@ -782,15 +924,36 @@
       "id": "D-45",
       "title": "Museum exhibition galleries take the assembly row; museum archives and restoration rooms take the collections row",
       "kind": "runtime",
-      "articles": {
-        "unverified": [
-          "Table 8.4.4.7.-A"
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "A museum space can match two rows of the reference-system selection table, and the matcher takes the first keyword hit, so the answer depended on the order the categories sat in the data file. The collections row names the archives of museums and galleries rather than museums generally, and the assembly row explicitly lists exhibit space, so a public exhibition gallery takes the assembly row while archives and restoration rooms take the collections row. The over-broad museum keyword was narrowed so each space matches on intent rather than scan position."
+      "summary": "A museum space can match two rows of the reference-system selection table, and the matcher takes the first keyword hit, so the answer depended on the order the categories sat in the data file. The collections row names the archives of museums and galleries rather than museums generally, and the assembly row explicitly lists exhibit space, so a public exhibition gallery takes the assembly row while archives and restoration rooms take the collections row. The over-broad museum keyword was narrowed so each space matches on intent rather than scan position.",
+      "requirements": [
+        {
+          "id": "selection_table_museum_rows",
+          "label": "Selection-table rows that can apply to a museum, gallery or exhibit space",
+          "decided": "Public exhibition galleries select the assembly row, since it names exhibit space; museum archives and restoration rooms select the collections row instead. Narrowing the museum keyword ends dependence on file order.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "Table 8.4.4.7.-A"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "Table 8.4.5.7.-A"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-46",
@@ -1176,16 +1339,36 @@
       "id": "D-55",
       "title": "Reference humidification is rebuilt on the proposed's energy source with a control taken from the proposed, or it is not built at all",
       "kind": "runtime",
-      "articles": {
-        "unverified": [
-          "Table 8.4.4.7.-B Note (1)",
-          "Table 8.4.5.7.-B Note (1)"
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "The reference building's humidification is required to use the same energy source as the corresponding humidification in the proposed building, which presupposes the reference carries humidification wherever the proposed does. Previously the humidifiers were merely counted before the old systems were torn out and one warning was issued, which both misreported systems that were never replaced and let the rest be destroyed as an unintended side effect. Each thermal block's humidification is now recorded before the teardown and re-created on the serving reference air system as the same steam-humidifier type — electric resistance or gas-fired — with its capacity left to the sizing run. The humidity control is taken from the proposed building rather than invented: the zone humidistat that survives on the thermal zone, or failing that the proposed system's own scheduled minimum-humidity setpoint; where neither exists no humidifier is built, because a humidifier without a setpoint never operates and would falsely present the reference as humidified."
+      "summary": "The reference building's humidification is required to use the same energy source as the corresponding humidification in the proposed building, which presupposes the reference carries humidification wherever the proposed does. Previously the humidifiers were merely counted before the old systems were torn out and one warning was issued, which both misreported systems that were never replaced and let the rest be destroyed as an unintended side effect. Each thermal block's humidification is now recorded before the teardown and re-created on the serving reference air system as the same steam-humidifier type — electric resistance or gas-fired — with its capacity left to the sizing run. The humidity control is taken from the proposed building rather than invented: the zone humidistat that survives on the thermal zone, or failing that the proposed system's own scheduled minimum-humidity setpoint; where neither exists no humidifier is built, because a humidifier without a setpoint never operates and would falsely present the reference as humidified.",
+      "requirements": [
+        {
+          "id": "reference_humidification_energy_source",
+          "label": "Energy source of humidification in the reference building",
+          "decided": "Humidification is captured before the teardown and rebuilt on the serving reference system with the proposed's fuel and control; with no control to copy, nothing is built.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "Table 8.4.4.7.-B Note (1)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "Table 8.4.5.7.-B Note (1)"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-56",
@@ -2558,7 +2741,7 @@
               "edition": "2020",
               "role": "governing",
               "references": [
-                "Table 8.4.4.7.-B"
+                "Table 8.4.4.7.-B Note (2)"
               ]
             },
             {
@@ -2566,7 +2749,7 @@
               "edition": "2025",
               "role": "governing",
               "references": [
-                "Table 8.4.5.7.-B"
+                "Table 8.4.5.7.-B Note (2)"
               ]
             }
           ]

@@ -1003,6 +1003,12 @@ zone_groups). Single-zone families (1/3/4/hp) keep their selection
 grouping (sys-3 school/retail loop counts stay at legacy parity). Audited
 as 'multizone selection groups merged into whole-building systems'.
 
+Applicability correction (2026-10-14): D-101 established that the Code uses
+two authorities for this construction step. System 6 uses Table
+8.4.x.7.-B Note (3), while Systems 2 and 5 use the common ventilation system
+authorized by Note (2). The implementation still merges all three families,
+but they no longer share one requirement identity in this registry.
+
 Effect: LargeOffice 17 -> 6 loops, cooling 2.1 -> 0.2 GJ, pumps 10.4 ->
 6.6 GJ; MediumOffice 3 -> 1 loop. Both references DROPPED (better), moving
 % of target 107 -> 110 / 103 -> 110 — the residual is the FAN gap (legacy
@@ -1232,6 +1238,10 @@ copy rule keeps its own end-to-end pin. All green (selector 18, reference
 - Who/when: ruling phylroy 2026-07-27; implementation Claude under D-10.
 - Evidence: [READ] legacy autozone.rb necb_reference_hp branches (e.g.
   :1082), fuel_type_set plumbing necb_2011.rb:409/708; [RAN] test batteries.
+
+Applicability correction (2026-10-14): D-37 subsequently narrowed this
+branch. A water-loop heat pump retained by Article 13 Sentence (1) does not
+take this redirect; it continues to the residential selection-table branches.
 
 <a id="d-35"></a>
 
