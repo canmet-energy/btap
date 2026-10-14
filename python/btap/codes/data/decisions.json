@@ -182,15 +182,40 @@
       "id": "D-06",
       "title": "Energy-recovery trigger uses the current-vintage airflow tables, post-sizing",
       "kind": "runtime",
-      "articles": {
-        "unverified": [
-          "5.2.10.1."
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "The inherited energy-recovery trigger was a much older vintage's exhaust-heat-content formula, which is permissive for small high-outdoor-air systems. It was replaced with the current editions' airflow-threshold tables — heating-degree-day row by percent-outdoor-air band, split by whether the system operates continuously — evaluated after sizing, since the thresholds cannot be known before flows exist. Sizing-only and no-simulation modes skip the determination loudly rather than guessing."
+      "summary": "The inherited energy-recovery trigger was a much older vintage's exhaust-heat-content formula, which is permissive for small high-outdoor-air systems. It was replaced with the current editions' airflow-threshold tables — heating-degree-day row by percent-outdoor-air band, split by whether the system operates continuously — evaluated after sizing, since the thresholds cannot be known before flows exist. Sizing-only and no-simulation modes skip the determination loudly rather than guessing.",
+      "requirements": [
+        {
+          "id": "energy_recovery_trigger",
+          "label": "Ventilation-air heat-recovery applicability by airflow and operating mode",
+          "decided": "The trigger uses the current edition's airflow threshold for the applicable heating-degree-day, outdoor-air fraction and continuous or non-continuous schedule class, evaluated only after sizing provides the flows.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "5.2.10.1.(1)",
+                "Table 5.2.10.1.-A",
+                "Table 5.2.10.1.-B"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "5.2.10.1.(1)",
+                "Table 5.2.10.1.-A",
+                "Table 5.2.10.1.-B"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-07",
@@ -519,16 +544,59 @@
       "id": "D-15",
       "title": "Energy-recovery effectiveness and frost values verified against the code text",
       "kind": "runtime",
-      "articles": {
-        "unverified": [
-          "5.2.10.1.(4)",
-          "5.2.10.1.(6)"
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "The minimum effectiveness requirement is enthalpy-based, and setting both sensible and latent effectiveness to the minimum yields exactly that enthalpy effectiveness by identity — minimum-compliant for a reference build, verified on every heat-exchanger field. The overshoot-control requirement is met by supply-air outlet temperature control plus a pretreat setpoint manager. The frost-control values are simulation-engine modelling assumptions, not code values, and are now labelled as such so they cannot be mistaken for code transcriptions."
+      "summary": "The minimum effectiveness requirement is enthalpy-based, and setting both sensible and latent effectiveness to the minimum yields exactly that enthalpy effectiveness by identity — minimum-compliant for a reference build, verified on every heat-exchanger field. The overshoot-control requirement is met by supply-air outlet temperature control plus a pretreat setpoint manager. The frost-control values are simulation-engine modelling assumptions, not code values, and are now labelled as such so they cannot be mistaken for code transcriptions.",
+      "requirements": [
+        {
+          "id": "energy_recovery_minimum_effectiveness",
+          "label": "Minimum enthalpy effectiveness of ventilation-air heat recovery",
+          "decided": "Setting both sensible and latent effectiveness to 0.50 at every rating point produces the required minimum enthalpy effectiveness; frost settings remain disclosed engine assumptions.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "5.2.10.1.(4)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "5.2.10.1.(4)"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "energy_recovery_overshoot_control",
+          "label": "Control of heat-recovery supply-air temperature overshoot",
+          "decided": "Supply-air outlet temperature control together with an outdoor-air pretreat setpoint manager provides the required overshoot control.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "5.2.10.1.(6)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "5.2.10.1.(6)"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-16",
@@ -548,15 +616,40 @@
       "id": "D-17",
       "title": "Legacy energy-recovery diagnosis filed upstream",
       "kind": "process",
-      "articles": {
-        "unverified": [
-          "5.2.10.1."
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "The legacy library's energy-recovery determination was diagnosed to file and line and reported upstream: its newest applicable vintage inherits an older data-driven formula that transcribes only the continuous-operation table, so it never consults operating hours and has no low-outdoor-air exemption. The result is over-equipping recovery devices above the heating-degree-day threshold, observed on several archetypes. The issue includes a full solution draft and regression tests."
+      "summary": "The legacy library's energy-recovery determination was diagnosed to file and line and reported upstream: its newest applicable vintage inherits an older data-driven formula that transcribes only the continuous-operation table, so it never consults operating hours and has no low-outdoor-air exemption. The result is over-equipping recovery devices above the heating-degree-day threshold, observed on several archetypes. The issue includes a full solution draft and regression tests.",
+      "requirements": [
+        {
+          "id": "energy_recovery_trigger",
+          "label": "Ventilation-air heat-recovery applicability by airflow and operating mode",
+          "decided": "The pinned legacy trigger was reported upstream because it uses only the continuous-operation table, ignores annual operating hours and omits the low-outdoor-air exemption.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "5.2.10.1.(1)",
+                "Table 5.2.10.1.-A",
+                "Table 5.2.10.1.-B"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "5.2.10.1.(1)",
+                "Table 5.2.10.1.-A",
+                "Table 5.2.10.1.-B"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-18",
@@ -708,15 +801,36 @@
       "id": "D-23",
       "title": "Table transmittance values treated as overall, air films included",
       "kind": "runtime",
-      "articles": {
-        "unverified": [
-          "1.4.1.2."
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "An object-level comparison against legacy archetypes showed every wall differing by about four percent. The code's own definition settles it: overall thermal transmittance accounts for the air films on both faces, so the prescriptive table values include films and the construction-only conductance must be derived by subtracting them. The film-inclusive convention is now the default, with simple-glazing fenestration exempt because its rated factor is already the film-inclusive value."
+      "summary": "An object-level comparison against legacy archetypes showed every wall differing by about four percent. The code's own definition settles it: overall thermal transmittance accounts for the air films on both faces, so the prescriptive table values include films and the construction-only conductance must be derived by subtracting them. The film-inclusive convention is now the default, with simple-glazing fenestration exempt because its rated factor is already the film-inclusive value.",
+      "requirements": [
+        {
+          "id": "overall_thermal_transmittance_air_films",
+          "label": "Air films included in overall thermal transmittance",
+          "decided": "Prescriptive overall transmittance values include the interior and exterior air films, so opaque construction conductance is derived after removing their resistance; simple-glazing rated U-factors are used directly.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "Division A 1.4.1.2.(1)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "Division A 1.4.1.2.(1)"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-24",
@@ -933,30 +1047,73 @@
       "id": "D-31",
       "title": "Two legacy findings root-caused and closed with no defect",
       "kind": "process",
-      "articles": {
-        "unverified": [
-          "5.2.12.1."
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "A suspected cooling-efficiency mismatch turned out to be a false premise: the archetype coil names carry ratings that are exactly the printed minimums, and the observed coefficients follow from the standard fan-stripping conversions, which are identical in both lineages. A suspected wrong-vintage energy-recovery trigger was found to be vintage-correct for that edition. The convention that rated efficiencies are fan-inclusive while engine coil coefficients are coil-only is now pinned."
+      "summary": "A suspected cooling-efficiency mismatch turned out to be a false premise: the archetype coil names carry ratings that are exactly the printed minimums, and the observed coefficients follow from the standard fan-stripping conversions, which are identical in both lineages. A suspected wrong-vintage energy-recovery trigger was found to be vintage-correct for that edition. The convention that rated efficiencies are fan-inclusive while engine coil coefficients are coil-only is now pinned.",
+      "requirements": [
+        {
+          "id": "fan_inclusive_dx_efficiency_ratings",
+          "label": "Fan-inclusive packaged cooling efficiency ratings",
+          "decided": "The published SEER and EER minima are fan-inclusive ratings; converting them to coil-only simulation COP with the same fan-stripping equations explains the observed legacy coefficients and closes the suspected mismatch.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "Table 5.2.12.1.-A"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "Table 5.2.12.1.-A"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-32",
       "title": "Ground-floor insulation extent corrected to a perimeter strip below the coldest zone",
       "kind": "runtime",
-      "articles": {
-        "unverified": [
-          "Table 3.2.3.1.",
-          "3.2.3.3.(3)"
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "A warehouse residual was traced to insulating the full slab area to the table value in climate zones where the printed table prescribes only a perimeter strip and sets no maximum for the slab field. The transform now keeps the modelled slab field in those zones and adds the strip via the foundation model's interior horizontal insulation, sized so the strip assembly meets the table value; the coldest zone keeps its full-area requirement. Ground floors without a foundation object get an audited warning that the strip is not representable."
+      "summary": "A warehouse residual was traced to insulating the full slab area to the table value in climate zones where the printed table prescribes only a perimeter strip and sets no maximum for the slab field. The transform now keeps the modelled slab field in those zones and adds the strip via the foundation model's interior horizontal insulation, sized so the strip assembly meets the table value; the coldest zone keeps its full-area requirement. Ground floors without a foundation object get an audited warning that the strip is not representable.",
+      "requirements": [
+        {
+          "id": "ground_floor_insulation_extent",
+          "label": "Ground-floor insulation extent by climate zone",
+          "decided": "Zones 4 through 7B retain the modeled slab field and apply the table value over a 1.2 m perimeter strip, while zone 8 applies its full-area value; an unrepresentable strip warns.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "Table 3.2.3.1",
+                "3.2.3.3.(3)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "Table 3.2.3.1",
+                "3.2.3.3.(3)"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-33",
@@ -2097,15 +2254,36 @@
       "id": "D-63",
       "title": "Pool-heater and solar-thermal service-water minimums applied when present, from the printed rows the extraction lost",
       "kind": "runtime",
-      "articles": {
-        "unverified": [
-          "Table 6.2.2.1"
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "The service-water-heater performance table's solar-thermal and pool-heater sections were lost from the code extraction in both editions, so the reference pipeline could never have applied them and the gap was declared rather than closed. The printed minimums were recovered by the extraction service's own page-verified audit and are now vendored and applied when the equipment is present: a water heater serving an indoor swimming pool is set to the printed minimum thermal efficiency for its fuel, a heat-pump pool heater is floored at the printed coefficient of performance, and fuels with no printed pool row are left as cloned with a note rather than forced. The solar-thermal minimum is a Solar Energy Factor - an equipment rating with no corresponding simulation input - so detected solar collectors receive an audited determination citing the printed values while their physics remain as cloned, never a silent skip. No archetype carries either equipment class, so the pass is a structural no-op on the fleet, proven by a control run; it exists for foreign proposed buildings."
+      "summary": "The service-water-heater performance table's solar-thermal and pool-heater sections were lost from the code extraction in both editions, so the reference pipeline could never have applied them and the gap was declared rather than closed. The printed minimums were recovered by the extraction service's own page-verified audit and are now vendored and applied when the equipment is present: a water heater serving an indoor swimming pool is set to the printed minimum thermal efficiency for its fuel, a heat-pump pool heater is floored at the printed coefficient of performance, and fuels with no printed pool row are left as cloned with a note rather than forced. The solar-thermal minimum is a Solar Energy Factor - an equipment rating with no corresponding simulation input - so detected solar collectors receive an audited determination citing the printed values while their physics remain as cloned, never a silent skip. No archetype carries either equipment class, so the pass is a structural no-op on the fleet, proven by a control run; it exists for foreign proposed buildings.",
+      "requirements": [
+        {
+          "id": "solar_pool_service_water_minimums",
+          "label": "Solar-thermal and pool-heater minimum performance",
+          "decided": "When present, pool heaters receive the table's fuel-specific thermal-efficiency or heat-pump COP floor; solar collectors retain cloned physics while their non-representable rating minimum is audited.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "Table 6.2.2.1"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "Table 6.2.2.1"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-64",
@@ -2238,15 +2416,36 @@
       "id": "D-74",
       "title": "Window-to-wall ratio is a caller input; the prescriptive limit stays in openstudio-envelope",
       "kind": "process",
-      "articles": {
-        "unverified": [
-          "3.2.1.4."
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "There is no data to set a window-to-wall ratio by building class or vintage: the code gives a maximum driven by heating degree-days alone, vintage in the legacy library is a binary of whether that limit applies at all, the commercial energy survey carries no glazing table, and the footprint records carry no window fields. The geometry gem therefore cuts openings to a ratio the caller chooses, accepting either a single value or per-orientation bins, with no default and no code data in a gem whose contract forbids carrying any. The prescriptive maximum already existed in the envelope gem and was deliberately not rebuilt."
+      "summary": "There is no data to set a window-to-wall ratio by building class or vintage: the code gives a maximum driven by heating degree-days alone, vintage in the legacy library is a binary of whether that limit applies at all, the commercial energy survey carries no glazing table, and the footprint records carry no window fields. The geometry gem therefore cuts openings to a ratio the caller chooses, accepting either a single value or per-orientation bins, with no default and no code data in a gem whose contract forbids carrying any. The prescriptive maximum already existed in the envelope gem and was deliberately not rebuilt.",
+      "requirements": [
+        {
+          "id": "maximum_fenestration_and_door_area",
+          "label": "Maximum fenestration and door area as a function of heating degree-days",
+          "decided": "The Code supplies a heating-degree-day maximum rather than an observed ratio by building class or vintage; geometry therefore requires a caller-selected ratio and the envelope pass separately enforces the maximum.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "3.2.1.4.(1)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "3.2.1.4.(1)"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-75",
@@ -2264,16 +2463,61 @@
       "id": "D-76",
       "title": "Field-test articles are declared modeller scope, and the assumed value is stated",
       "kind": "runtime",
-      "articles": {
-        "unverified": [
-          "3.2.4.1.",
-          "3.2.4.2."
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "Articles whose compliance is established by a field test rather than by a model — 3.2.4.1. and 3.2.4.2. air leakage — are declared not_implemented with gap_owner: modeller, so they render as modeller scope instead of a failure the software could never clear. Where the model assumes the tested value, it now says so at the point of use: the 1.50 L/(s.m2) @ 75 Pa default is audited with the test standard and verified: false. host_scope was rejected because it asserts sibling-gem ownership that does not exist."
+      "summary": "Articles whose compliance is established by a field test rather than by a model — 3.2.4.1. and 3.2.4.2. air leakage — are declared not_implemented with gap_owner: modeller, so they render as modeller scope instead of a failure the software could never clear. Where the model assumes the tested value, it now says so at the point of use: the 1.50 L/(s.m2) @ 75 Pa default is audited with the test standard and verified: false. host_scope was rejected because it asserts sibling-gem ownership that does not exist.",
+      "requirements": [
+        {
+          "id": "continuous_air_barrier_system",
+          "label": "Continuous air-barrier system compliance path",
+          "decided": "Continuity of the constructed air-barrier system is modeller scope because no model change or inspection can establish the field condition.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "3.2.4.1.(1)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "3.2.4.1.(1)"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "whole_building_air_leakage_field_test",
+          "label": "Field measurement of whole-building normalized air leakage",
+          "decided": "The field test is modeller scope; where the energy model uses the untested 1.50 L/(s.m2) at 75 Pa value, the audit labels it as an unverified assumption.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "3.2.4.2.(1)",
+                "3.2.4.2.(2)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "3.2.4.2.(1)",
+                "3.2.4.2.(2)"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-77",
@@ -2375,15 +2619,36 @@
       "id": "D-85",
       "title": "VRF Table-I class selection and exact minimum assignment",
       "kind": "runtime",
-      "articles": {
-        "unverified": [
-          "Table 5.2.12.1.-I"
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "For classic OpenStudio air-cooled variable-refrigerant-flow outdoor units, attached VRF DX heating coils select the Table 5.2.12.1-I air-source heat-pump rows; a terminal with no VRF heating coil selects the air-conditioner rows. An outdoor unit serving NO terminals is INDETERMINATE and warns: the classic VRF object carries no heating/cooling-only field of its own, terminals are the only evidence of class, and the reference transform strips them when it replaces a proposed VRF system — reading that silence as 'air conditioner' would apply the cooling-only rows to a heat pump and drop its heating minimum without an audit line. The reference transform no longer produces that case: replace_system takes the zone terminals but not the outdoor unit, so a proposed VRF used to leave a condenser serving no zones in the reference; the transform now removes it and records the removal, and the indeterminate rule remains the safety net for any other route into the efficiency pass. Cooling and heating capacities are evaluated independently so cooling-only equipment still receives its cooling minimum and an unavailable heating capacity cannot suppress cooling conformance. Selected code minimums are assigned exactly, matching the other equipment-efficiency appliers rather than preserving a better proposed or builder COP. Non-air-cooled units warn because the SDK condenser type cannot distinguish the table's water, groundwater and ground-source classes; unsized applicable modes likewise warn rather than passing silently."
+      "summary": "For classic OpenStudio air-cooled variable-refrigerant-flow outdoor units, attached VRF DX heating coils select the Table 5.2.12.1-I air-source heat-pump rows; a terminal with no VRF heating coil selects the air-conditioner rows. An outdoor unit serving NO terminals is INDETERMINATE and warns: the classic VRF object carries no heating/cooling-only field of its own, terminals are the only evidence of class, and the reference transform strips them when it replaces a proposed VRF system — reading that silence as 'air conditioner' would apply the cooling-only rows to a heat pump and drop its heating minimum without an audit line. The reference transform no longer produces that case: replace_system takes the zone terminals but not the outdoor unit, so a proposed VRF used to leave a condenser serving no zones in the reference; the transform now removes it and records the removal, and the indeterminate rule remains the safety net for any other route into the efficiency pass. Cooling and heating capacities are evaluated independently so cooling-only equipment still receives its cooling minimum and an unavailable heating capacity cannot suppress cooling conformance. Selected code minimums are assigned exactly, matching the other equipment-efficiency appliers rather than preserving a better proposed or builder COP. Non-air-cooled units warn because the SDK condenser type cannot distinguish the table's water, groundwater and ground-source classes; unsized applicable modes likewise warn rather than passing silently.",
+      "requirements": [
+        {
+          "id": "vrf_minimum_efficiency_class",
+          "label": "VRF equipment class and minimum efficiency",
+          "decided": "Attached terminal heating coils distinguish air-source heat pumps from cooling-only units; class or capacity that cannot be established warns, and each applicable cooling or heating minimum is assigned exactly.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "Table 5.2.12.1.-I"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "Table 5.2.12.1.-I"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-86",

@@ -36,6 +36,321 @@
       "status": "present",
       "title": null
     },
+    "3.2.1.4": {
+      "children_complete": true,
+      "citation": "3.2.1.4",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:3.2.1.4",
+          "source": "mcp"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Allowable Fenestration and Door Area"
+    },
+    "3.2.1.4.(1)": {
+      "children_complete": true,
+      "citation": "3.2.1.4.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:3.2.1.4",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "3.2.1.4",
+      "status": "present",
+      "title": null
+    },
+    "3.2.1.4.(2)": {
+      "children_complete": true,
+      "citation": "3.2.1.4.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:3.2.1.4",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "3.2.1.4",
+      "status": "present",
+      "title": null
+    },
+    "3.2.3.1": {
+      "children_complete": true,
+      "citation": "3.2.3.1",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:3.2.3.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Thermal Characteristics of Walls in Contact with the Ground"
+    },
+    "3.2.3.1.(1)": {
+      "children_complete": true,
+      "citation": "3.2.3.1.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:3.2.3.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "3.2.3.1",
+      "status": "present",
+      "title": null
+    },
+    "3.2.3.1.(2)": {
+      "children_complete": true,
+      "citation": "3.2.3.1.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:3.2.3.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "3.2.3.1",
+      "status": "present",
+      "title": null
+    },
+    "3.2.3.1.(3)": {
+      "children_complete": true,
+      "citation": "3.2.3.1.(3)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:3.2.3.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "3.2.3.1",
+      "status": "present",
+      "title": null
+    },
+    "3.2.3.1.(4)": {
+      "children_complete": true,
+      "citation": "3.2.3.1.(4)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:3.2.3.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "3.2.3.1",
+      "status": "present",
+      "title": null
+    },
+    "3.2.3.1.(5)": {
+      "children_complete": true,
+      "citation": "3.2.3.1.(5)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:3.2.3.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "3.2.3.1",
+      "status": "present",
+      "title": null
+    },
+    "3.2.3.3": {
+      "children_complete": true,
+      "citation": "3.2.3.3",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:3.2.3.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Thermal Characteristics of Floors in Contact with the Ground"
+    },
+    "3.2.3.3.(1)": {
+      "children_complete": true,
+      "citation": "3.2.3.3.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:3.2.3.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "3.2.3.3",
+      "status": "present",
+      "title": null
+    },
+    "3.2.3.3.(2)": {
+      "children_complete": true,
+      "citation": "3.2.3.3.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:3.2.3.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "3.2.3.3",
+      "status": "present",
+      "title": null
+    },
+    "3.2.3.3.(3)": {
+      "children_complete": true,
+      "citation": "3.2.3.3.(3)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:3.2.3.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "3.2.3.3",
+      "status": "present",
+      "title": null
+    },
+    "3.2.3.3.(4)": {
+      "children_complete": true,
+      "citation": "3.2.3.3.(4)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:3.2.3.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "3.2.3.3",
+      "status": "present",
+      "title": null
+    },
+    "3.2.3.3.(4)(a)": {
+      "children_complete": true,
+      "citation": "3.2.3.3.(4)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:3.2.3.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "3.2.3.3.(4)",
+      "status": "present",
+      "title": null
+    },
+    "3.2.3.3.(4)(b)": {
+      "children_complete": true,
+      "citation": "3.2.3.3.(4)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:3.2.3.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "3.2.3.3.(4)",
+      "status": "present",
+      "title": null
+    },
+    "3.2.3.3.(5)": {
+      "children_complete": true,
+      "citation": "3.2.3.3.(5)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:3.2.3.3",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "3.2.3.3",
+      "status": "present",
+      "title": null
+    },
+    "3.2.4.1": {
+      "children_complete": true,
+      "citation": "3.2.4.1",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:3.2.4.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "General"
+    },
+    "3.2.4.1.(1)": {
+      "children_complete": true,
+      "citation": "3.2.4.1.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:3.2.4.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "3.2.4.1",
+      "status": "present",
+      "title": null
+    },
+    "3.2.4.1.(1)(a)": {
+      "children_complete": true,
+      "citation": "3.2.4.1.(1)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:3.2.4.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "3.2.4.1.(1)",
+      "status": "present",
+      "title": null
+    },
+    "3.2.4.1.(1)(b)": {
+      "children_complete": true,
+      "citation": "3.2.4.1.(1)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:3.2.4.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "3.2.4.1.(1)",
+      "status": "present",
+      "title": null
+    },
     "3.2.4.2": {
       "children_complete": true,
       "citation": "3.2.4.2",
@@ -1611,6 +1926,186 @@
       "status": "present",
       "title": null
     },
+    "5.2.10.1": {
+      "children_complete": true,
+      "citation": "5.2.10.1",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:5.2.10.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Energy Recovery Systems"
+    },
+    "5.2.10.1.(1)": {
+      "children_complete": true,
+      "citation": "5.2.10.1.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:5.2.10.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "5.2.10.1",
+      "status": "present",
+      "title": null
+    },
+    "5.2.10.1.(2)": {
+      "children_complete": true,
+      "citation": "5.2.10.1.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:5.2.10.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "5.2.10.1",
+      "status": "present",
+      "title": null
+    },
+    "5.2.10.1.(3)": {
+      "children_complete": true,
+      "citation": "5.2.10.1.(3)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:5.2.10.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "5.2.10.1",
+      "status": "present",
+      "title": null
+    },
+    "5.2.10.1.(4)": {
+      "children_complete": true,
+      "citation": "5.2.10.1.(4)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:5.2.10.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "5.2.10.1",
+      "status": "present",
+      "title": null
+    },
+    "5.2.10.1.(5)": {
+      "children_complete": true,
+      "citation": "5.2.10.1.(5)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:5.2.10.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "5.2.10.1",
+      "status": "present",
+      "title": null
+    },
+    "5.2.10.1.(5)(a)": {
+      "children_complete": true,
+      "citation": "5.2.10.1.(5)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:5.2.10.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "5.2.10.1.(5)",
+      "status": "present",
+      "title": null
+    },
+    "5.2.10.1.(5)(b)": {
+      "children_complete": true,
+      "citation": "5.2.10.1.(5)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:5.2.10.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "5.2.10.1.(5)",
+      "status": "present",
+      "title": null
+    },
+    "5.2.10.1.(5)(c)": {
+      "children_complete": true,
+      "citation": "5.2.10.1.(5)(c)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:5.2.10.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "clause",
+      "parent": "5.2.10.1.(5)",
+      "status": "present",
+      "title": null
+    },
+    "5.2.10.1.(6)": {
+      "children_complete": true,
+      "citation": "5.2.10.1.(6)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:5.2.10.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "5.2.10.1",
+      "status": "present",
+      "title": null
+    },
+    "5.2.12.1": {
+      "children_complete": true,
+      "citation": "5.2.12.1",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:5.2.12.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Unitary and Packaged HVAC Equipment"
+    },
+    "5.2.12.1.(1)": {
+      "children_complete": true,
+      "citation": "5.2.12.1.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:5.2.12.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "5.2.12.1",
+      "status": "present",
+      "title": null
+    },
     "5.2.12.2": {
       "children_complete": true,
       "citation": "5.2.12.2",
@@ -1923,6 +2418,36 @@
       ],
       "kind": "sentence",
       "parent": "5.2.6.3",
+      "status": "present",
+      "title": null
+    },
+    "6.2.2.1": {
+      "children_complete": true,
+      "citation": "6.2.2.1",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:6.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Equipment Efficiency"
+    },
+    "6.2.2.1.(1)": {
+      "children_complete": true,
+      "citation": "6.2.2.1.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:6.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "6.2.2.1",
       "status": "present",
       "title": null
     },
@@ -6606,6 +7131,36 @@
       "status": "present",
       "title": null
     },
+    "Division A 1.4.1.2": {
+      "children_complete": true,
+      "citation": "Division A 1.4.1.2",
+      "division": "A",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:A:1.4.1.2",
+          "source": "mcp"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Defined Terms"
+    },
+    "Division A 1.4.1.2.(1)": {
+      "children_complete": true,
+      "citation": "Division A 1.4.1.2.(1)",
+      "division": "A",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:A:1.4.1.2",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "Division A 1.4.1.2",
+      "status": "present",
+      "title": null
+    },
     "Note A-8.4.4.13": {
       "children_complete": false,
       "citation": "Note A-8.4.4.13",
@@ -6666,6 +7221,81 @@
       "status": "present",
       "title": "Thermal Mass"
     },
+    "Table 3.2.3.1": {
+      "children_complete": false,
+      "citation": "Table 3.2.3.1",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_table:necb:2020:B:3.2.3.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "table",
+      "parent": "3.2.3.1",
+      "status": "present",
+      "title": "Overall Thermal Transmittance of Building Assemblies in Contact with the Ground"
+    },
+    "Table 5.2.10.1.-A": {
+      "children_complete": false,
+      "citation": "Table 5.2.10.1.-A",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_table:necb:2020:B:5.2.10.1.-A",
+          "source": "mcp"
+        }
+      ],
+      "kind": "table",
+      "parent": "5.2.10.1",
+      "status": "present",
+      "title": "Supply Fan Airflow Rate Threshold Values at which an Energy Recovery System is Required for the Exhaust Air System:"
+    },
+    "Table 5.2.10.1.-B": {
+      "children_complete": false,
+      "citation": "Table 5.2.10.1.-B",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_table:necb:2020:B:5.2.10.1.-B",
+          "source": "mcp"
+        }
+      ],
+      "kind": "table",
+      "parent": "5.2.10.1",
+      "status": "present",
+      "title": "Supply Fan Airflow Rate Threshold Values at which an Energy Recovery System is Required for the Exhaust Air System:"
+    },
+    "Table 5.2.12.1.-A": {
+      "children_complete": false,
+      "citation": "Table 5.2.12.1.-A",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_table:necb:2020:B:5.2.12.1.-A",
+          "source": "mcp"
+        }
+      ],
+      "kind": "table",
+      "parent": "5.2.12.1",
+      "status": "present",
+      "title": "Performance Requirements for Air-Cooled Unitary Air Conditioners and Heat Pumps - Electrically Operated(1)"
+    },
+    "Table 5.2.12.1.-I": {
+      "children_complete": false,
+      "citation": "Table 5.2.12.1.-I",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_table:necb:2020:B:5.2.12.1.-I",
+          "source": "mcp"
+        }
+      ],
+      "kind": "table",
+      "parent": "5.2.12.1",
+      "status": "present",
+      "title": "Performance Requirements for Variable Refrigerant Flow Systems"
+    },
     "Table 5.2.12.2": {
       "children_complete": false,
       "citation": "Table 5.2.12.2",
@@ -6695,6 +7325,21 @@
       "parent": "5.2.6.3",
       "status": "present",
       "title": "Maximum Pumping Power Demand of Pump Motors"
+    },
+    "Table 6.2.2.1": {
+      "children_complete": false,
+      "citation": "Table 6.2.2.1",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_table:necb:2020:B:6.2.2.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "table",
+      "parent": "6.2.2.1",
+      "status": "present",
+      "title": "Service Water Heating Equipment Performance Requirements"
     },
     "Table 8.4.4.12": {
       "children_complete": false,
@@ -6869,7 +7514,7 @@
       "kind": "authorized-mcp-payload",
       "path": "provenance/provisions.result.json",
       "retrieved": "2026-10-14",
-      "sha256": "242356d10c83877cb2ce6ec252e4e5fe61bfe24a5e3bb84438e7e694640fa038"
+      "sha256": "c4319988b9ef0c60ce4a6a71e9cba86c8811667563b3b6bb4f3f1c5732108d0e"
     },
     "section-8.4": {
       "kind": "existing-authorized-cache",

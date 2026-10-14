@@ -391,8 +391,9 @@ Status: in progress. Batch 1 established D-18, D-28, D-34, D-37, D-42,
 D-43, D-45 and D-55. Batch 2 established D-07, D-09, D-12, D-14, D-19 and
 D-53. Batch 3 established D-03, D-11, D-13, D-35 and D-41. Batch 4 established
 D-04. Batch 5 established the mixed-section decisions D-02, D-21, D-26 and
-D-62. The committee view has moved from 23 structured and 45 held decisions to
-47 and 21, with the 68
+D-62. Batch 6 established the outside-Section-8.4 decisions D-06, D-15, D-17,
+D-23, D-31, D-32, D-63, D-74, D-76 and D-85. The committee view has moved
+from 23 structured and 45 held decisions to 57 and 11, with the 68
 citation-bearing and 35 citation-free totals unchanged. The compliance report
 is byte-identical because titles and summaries stayed unchanged. D-28 and D-34
 gained body notes that record later applicability corrections; D-14's body now
@@ -472,6 +473,34 @@ provision indexes and against the implementation.
 - D-62 keeps the Part 5 lowest-stage fractions and the performance-path
   outside-air-cooling article/table in one requirement. That chain establishes
   the stage-count floor only for reference systems assigned an air economizer.
+- D-06 and D-17 share `energy_recovery_trigger`: 5.2.10.1.(1) and Tables
+  5.2.10.1.-A/-B in both editions. Sentence (2) requires use of recovered heat
+  after the trigger applies; it does not establish the trigger. D-17 records
+  the legacy trigger's missing schedule-hours and low-outdoor-air behavior.
+- D-15 separates the minimum enthalpy effectiveness in 5.2.10.1.(4) from the
+  overshoot control in 5.2.10.1.(6), so either requirement can be reviewed
+  without treating the whole Article as one decision.
+- D-23 maps the Division A 1.4.1.2.(1) definition that explicitly includes
+  air films on both faces in overall thermal transmittance.
+- D-31 maps Table 5.2.12.1.-A, whose SEER and EER minimums are fan-inclusive
+  packaged-equipment ratings that must be converted before assigning a
+  coil-only simulation COP.
+- D-32 maps the climate-zone rows in Table 3.2.3.1 and their explicit
+  insulation-extent rule in 3.2.3.3.(3).
+- D-63 maps the solar-thermal and pool-heater rows in Table 6.2.2.1 in each
+  edition.
+- D-74 maps the complete heating-degree-day fenestration and door area formula
+  in 3.2.1.4.(1).
+- D-76 separates the continuous air-barrier compliance path in 3.2.4.1.(1)
+  from the whole-building field test and averaging rules in 3.2.4.2.(1)-(2).
+- D-85 maps the air-cooled VRF equipment classes and minimum efficiencies in
+  Table 5.2.12.1.-I.
+
+Both editions' bounded provision archives and normalized indexes now retain
+the Part 3, Part 4, Part 5, Part 6 and Division A payloads needed by this
+batch. The generator replays every governing reference against those retained
+payloads; the hbix service exposes no revision id, so the exact archived
+payload hashes and retrieval dates remain the evidence boundary.
 
 Runtime citation defects found while reading the implementation are Phase E
 items. Nothing was moved in the audit output here:
@@ -514,6 +543,20 @@ items. Nothing was moved in the audit output here:
   neither names `(2)(a)`.
 - D-18: the two records in `_reconcile_declared_storeys` carry
   `ruling='D-18'` with no `article`.
+- D-06/D-15: the positive energy-recovery audit combines four provisions in
+  one semicolon-delimited `article` value. D-06's other records inherit a
+  compound trigger citation from rules data. Emit exact canonical citations
+  without losing the fact that both rulings fired.
+- D-23: the prescriptive-envelope audit cites ambiguous `1.4.1.2.` rather than
+  the Division A definition and exact sentence.
+- D-32: all three ground-floor audit paths use the compound, trailing-period
+  string `Table 3.2.3.1.; 3.2.3.3.(3)`.
+- D-76: the runtime record cites broad `3.2.4.2.` and its report-visible
+  summary calls both governing articles field-test articles even though
+  3.2.4.1.(1) establishes the compliance path.
+- D-85: orphan VRF removal hard-codes unrelated NECB 2020 Article 8.4.4.1 on
+  every edition; its governing efficiency classification is Table
+  5.2.12.1.-I.
 
 ### Phase E - cross-check the implementation
 
