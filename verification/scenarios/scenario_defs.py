@@ -494,9 +494,11 @@ DETERMINATION_SCENARIOS = [
           "value": True},
          {"op": "json_equals", "file": "report.json",
           "path": "compliance_determination", "value": "conditional"},
+         # System 6 reaches both retained alternative solutions: corrected
+         # water-cooled chiller coefficients and the Merkel tower model.
          {"op": "json_equals", "file": "report.json",
           "path": "compliance_determination_reason.ahj_ids",
-          "value": ["AHJ-10", "AHJ-14"]},
+          "value": ["AHJ-7", "AHJ-10", "AHJ-14", "AHJ-22"]},
          # The corner election itself, at its DECIDING site — not merely the
          # id appearing somewhere in the audit.
          {"op": "audit_entry", "step": "selection", "level": "decision",
