@@ -4,7 +4,7 @@
     "family": "necb",
     "id": "necb2020"
   },
-  "generated": "2026-10-13",
+  "generated": "2026-10-14",
   "provisions": {
     "1.1.1.1": {
       "children_complete": true,
@@ -3501,6 +3501,261 @@
       "status": "present",
       "title": null
     },
+    "8.4.4.20": {
+      "children_complete": true,
+      "citation": "8.4.4.20",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.4.20",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Service Water Heating Systems"
+    },
+    "8.4.4.20.(1)": {
+      "children_complete": true,
+      "citation": "8.4.4.20.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.4.20",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.4.20",
+      "status": "present",
+      "title": null
+    },
+    "8.4.4.20.(1)(a)": {
+      "children_complete": true,
+      "citation": "8.4.4.20.(1)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.4.20",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.4.20.(1)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.4.20.(1)(b)": {
+      "children_complete": true,
+      "citation": "8.4.4.20.(1)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.4.20",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.4.20.(1)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.4.20.(1)(c)": {
+      "children_complete": true,
+      "citation": "8.4.4.20.(1)(c)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.4.20",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.4.20.(1)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.4.20.(2)": {
+      "children_complete": true,
+      "citation": "8.4.4.20.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.4.20",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.4.20",
+      "status": "present",
+      "title": null
+    },
+    "8.4.4.20.(3)": {
+      "children_complete": true,
+      "citation": "8.4.4.20.(3)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.4.20",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.4.20",
+      "status": "present",
+      "title": null
+    },
+    "8.4.4.20.(4)": {
+      "children_complete": true,
+      "citation": "8.4.4.20.(4)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.4.20",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.4.20",
+      "status": "present",
+      "title": null
+    },
+    "8.4.4.20.(4)(a)": {
+      "children_complete": true,
+      "citation": "8.4.4.20.(4)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.4.20",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.4.20.(4)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.4.20.(4)(b)": {
+      "children_complete": true,
+      "citation": "8.4.4.20.(4)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.4.20",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.4.20.(4)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.4.20.(5)": {
+      "children_complete": true,
+      "citation": "8.4.4.20.(5)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.4.20",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.4.20",
+      "status": "present",
+      "title": null
+    },
+    "8.4.4.20.(6)": {
+      "children_complete": true,
+      "citation": "8.4.4.20.(6)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.4.20",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.4.20",
+      "status": "present",
+      "title": null
+    },
+    "8.4.4.20.(7)": {
+      "children_complete": true,
+      "citation": "8.4.4.20.(7)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.4.20",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.4.20",
+      "status": "present",
+      "title": null
+    },
+    "8.4.4.20.(8)": {
+      "children_complete": true,
+      "citation": "8.4.4.20.(8)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.4.20",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.4.20",
+      "status": "present",
+      "title": null
+    },
+    "8.4.4.20.(9)": {
+      "children_complete": true,
+      "citation": "8.4.4.20.(9)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.4.20",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.4.20",
+      "status": "present",
+      "title": null
+    },
+    "8.4.4.20.(9)(a)": {
+      "children_complete": true,
+      "citation": "8.4.4.20.(9)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.4.20",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.4.20.(9)",
+      "status": "present",
+      "title": null
+    },
+    "8.4.4.20.(9)(b)": {
+      "children_complete": true,
+      "citation": "8.4.4.20.(9)(b)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.4.20",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "clause",
+      "parent": "8.4.4.20.(9)",
+      "status": "present",
+      "title": null
+    },
     "8.4.4.3": {
       "children_complete": true,
       "citation": "8.4.4.3",
@@ -3663,6 +3918,51 @@
       ],
       "kind": "sentence",
       "parent": "8.4.4.3",
+      "status": "present",
+      "title": null
+    },
+    "8.4.4.4": {
+      "children_complete": true,
+      "citation": "8.4.4.4",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.4.4",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Thermal Mass"
+    },
+    "8.4.4.4.(1)": {
+      "children_complete": true,
+      "citation": "8.4.4.4.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.4.4",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.4.4",
+      "status": "present",
+      "title": null
+    },
+    "8.4.4.4.(2)": {
+      "children_complete": true,
+      "citation": "8.4.4.4.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.4.4",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.4.4",
       "status": "present",
       "title": null
     },
@@ -5046,6 +5346,126 @@
       "status": "present",
       "title": null
     },
+    "8.4.5.5": {
+      "children_complete": true,
+      "citation": "8.4.5.5",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Electric Chiller"
+    },
+    "8.4.5.5.(1)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.5",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(2)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.5",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(3)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(3)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.5",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(4)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(4)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.5",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(5)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(5)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.5",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(6)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(6)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.5",
+      "status": "present",
+      "title": null
+    },
+    "8.4.5.5.(7)": {
+      "children_complete": true,
+      "citation": "8.4.5.5.(7)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.5.5",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.5.5",
+      "status": "present",
+      "title": null
+    },
     "8.4.5.6": {
       "children_complete": true,
       "citation": "8.4.5.6",
@@ -5406,6 +5826,36 @@
       "status": "present",
       "title": "Hydronic Systems with Multiple Pumps"
     },
+    "Note A-8.4.4.20.(4)(a)": {
+      "children_complete": false,
+      "citation": "Note A-8.4.4.20.(4)(a)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:A-8.4.4.20.(4)(a)",
+          "source": "mcp"
+        }
+      ],
+      "kind": "appendix-note",
+      "parent": "8.4.4.20.(4)(a)",
+      "status": "present",
+      "title": "Determining the Heat Contribution Ratio"
+    },
+    "Note A-8.4.4.4.(1)": {
+      "children_complete": false,
+      "citation": "Note A-8.4.4.4.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:A-8.4.4.4.(1)",
+          "source": "mcp"
+        }
+      ],
+      "kind": "appendix-note",
+      "parent": "8.4.4.4.(1)",
+      "status": "present",
+      "title": "Thermal Mass"
+    },
     "Table 5.2.6.3": {
       "children_complete": false,
       "citation": "Table 5.2.6.3",
@@ -5420,6 +5870,21 @@
       "parent": "5.2.6.3",
       "status": "present",
       "title": "Maximum Pumping Power Demand of Pump Motors"
+    },
+    "Table 8.4.4.14": {
+      "children_complete": false,
+      "citation": "Table 8.4.4.14",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_table:necb:2020:B:8.4.4.14",
+          "source": "mcp"
+        }
+      ],
+      "kind": "table",
+      "parent": "8.4.4.14",
+      "status": "present",
+      "title": "Coefficients Used in Calculating Pump Power versus Flow Rate"
     },
     "Table 8.4.4.7.-A": {
       "children_complete": false,
@@ -5511,6 +5976,51 @@
       "parent": "Table 8.4.4.7.-B",
       "status": "present",
       "title": null
+    },
+    "Table 8.4.5.5.-A": {
+      "children_complete": false,
+      "citation": "Table 8.4.5.5.-A",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_table:necb:2020:B:8.4.5.5.-A",
+          "source": "mcp"
+        }
+      ],
+      "kind": "table",
+      "parent": "8.4.5.5",
+      "status": "present",
+      "title": "Capacity Coefficients Used in the Calculation of CAP_FTEC"
+    },
+    "Table 8.4.5.5.-B": {
+      "children_complete": false,
+      "citation": "Table 8.4.5.5.-B",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_table:necb:2020:B:8.4.5.5.-B",
+          "source": "mcp"
+        }
+      ],
+      "kind": "table",
+      "parent": "8.4.5.5",
+      "status": "present",
+      "title": "Efficiency Coefficients Used in the Calculation of EIR_FPLR"
+    },
+    "Table 8.4.5.5.-C": {
+      "children_complete": false,
+      "citation": "Table 8.4.5.5.-C",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_table:necb:2020:B:8.4.5.5.-C",
+          "source": "mcp"
+        }
+      ],
+      "kind": "table",
+      "parent": "8.4.5.5",
+      "status": "present",
+      "title": "Efficiency Coefficients Used in the Calculation of EIR_FT"
     }
   },
   "schema": 1,
@@ -5518,8 +6028,8 @@
     "mcp": {
       "kind": "authorized-mcp-payload",
       "path": "provenance/provisions.result.json",
-      "retrieved": "2026-10-13",
-      "sha256": "610b8a27afe1593fb13c9a8e4dace4cd1ce001fd187aa4bbff4c4d9592da3979"
+      "retrieved": "2026-10-14",
+      "sha256": "9e6d0f937f932130826ae32d428a3e84c8f7b8543920071d023cf6479a1cd051"
     },
     "section-8.4": {
       "kind": "existing-authorized-cache",

@@ -65,16 +65,36 @@
       "id": "D-03",
       "title": "Chiller EIR curves verified against the proposed erratum",
       "kind": "data",
-      "articles": {
-        "unverified": [
-          "8.4.5.5.-C",
-          "8.4.6.5.-C"
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "Two water-cooled chiller part-load rows in the printed tables carry misplaced decimals — one yields a physically impossible negative power ratio at the rating point. The verification probe therefore compares against erratum-corrected coefficients, labelled as such pending NRC confirmation, since an independent vendored curve lineage corroborates the corrections to within a few parts per million."
+      "summary": "Two water-cooled chiller part-load rows in the printed tables carry misplaced decimals — one yields a physically impossible negative power ratio at the rating point. The verification probe therefore compares against erratum-corrected coefficients, labelled as such pending NRC confirmation, since an independent vendored curve lineage corroborates the corrections to within a few parts per million.",
+      "requirements": [
+        {
+          "id": "water_cooled_chiller_eir_temperature_erratum",
+          "label": "Water-cooled chiller EIR-versus-temperature coefficients affected by the proposed erratum",
+          "decided": "The printed Scroll and Reciprocating rows contain decimal defects, so verification uses the proposed corrected coefficients, explicitly labelled pending confirmation and independently corroborated by the retained legacy lineage.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "Table 8.4.5.5.-C"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "Table 8.4.6.5.-C"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-04",
@@ -277,15 +297,40 @@
       "id": "D-11",
       "title": "Hydronic pump power implemented as intensity transfer plus table curves",
       "kind": "runtime",
-      "articles": {
-        "unverified": [
-          "8.4.4.14."
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "Reference hydronic pump power is derived from the proposed building's combined pump power intensity in watts per litre per second, matched by loop type rather than pump-to-pump, since the two buildings' topologies legitimately differ. The intensity is multiplied by the reference's own flow rather than transferred as absolute watts, which prevents a consolidation free ride. Variable-speed reference pumps additionally receive the table's riding-curve coefficients with a minimum-flow clamp."
+      "summary": "Reference hydronic pump power is derived from the proposed building's combined pump power intensity in watts per litre per second, matched by loop type rather than pump-to-pump, since the two buildings' topologies legitimately differ. The intensity is multiplied by the reference's own flow rather than transferred as absolute watts, which prevents a consolidation free ride. Variable-speed reference pumps additionally receive the table's riding-curve coefficients with a minimum-flow clamp.",
+      "requirements": [
+        {
+          "id": "variable_flow_pump_part_load_curve",
+          "label": "Part-load power curve for a variable-flow reference pump",
+          "decided": "The published riding-curve coefficients are applied to each variable-speed reference pump, with the below-threshold power floor represented by clamping minimum flow at the table's breakpoint.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "8.4.4.14.(4)",
+                "8.4.4.14.(5)",
+                "Table 8.4.4.14"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "8.4.5.14.(4)",
+                "8.4.5.14.(5)",
+                "Table 8.4.5.14"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-12",
@@ -349,15 +394,40 @@
       "id": "D-13",
       "title": "Screw and centrifugal chiller curves probed; imperfect printed normalization accepted",
       "kind": "process",
-      "articles": {
-        "unverified": [
-          "8.4.6.5."
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "The water-cooled screw and centrifugal curve rows match the printed tables exactly and are not erratum-affected. Three of those printed fits do not normalize to unity at the standard rating point; this is accepted as a genuine property of the published curve fits rather than a transcription error, because an independent vendored curve lineage agrees with the printed rows digit for digit."
+      "summary": "The water-cooled screw and centrifugal curve rows match the printed tables exactly and are not erratum-affected. Three of those printed fits do not normalize to unity at the standard rating point; this is accepted as a genuine property of the published curve fits rather than a transcription error, because an independent vendored curve lineage agrees with the printed rows digit for digit.",
+      "requirements": [
+        {
+          "id": "water_cooled_chiller_performance_curves",
+          "label": "Water-cooled screw and centrifugal chiller performance curves",
+          "decided": "The printed screw and centrifugal fits are retained even where their rating-point values are not unity, because the independent legacy lineage agrees with every published coefficient.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "Table 8.4.5.5.-A",
+                "Table 8.4.5.5.-B",
+                "Table 8.4.5.5.-C"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "Table 8.4.6.5.-A",
+                "Table 8.4.6.5.-B",
+                "Table 8.4.6.5.-C"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-14",
@@ -821,15 +891,38 @@
       "id": "D-35",
       "title": "Lightweight reference rebuild corrected to light-frame mass",
       "kind": "runtime",
-      "articles": {
-        "unverified": [
-          "8.4.4.4.(1)"
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "The explanatory note for the thermal-mass requirement makes clear that lightweight does not mean massless: it directs following the proposed assembly's layer structure with insulation varied to meet the required transmittance, and its example assemblies are light-frame constructions with real areal mass and heat capacity. Opaque reference assemblies are now rebuilt with a single calibrated material carrying the note's wood-frame example properties instead of a massless layer, which also lets one material serve every boundary condition."
+      "summary": "The explanatory note for the thermal-mass requirement makes clear that lightweight does not mean massless: it directs following the proposed assembly's layer structure with insulation varied to meet the required transmittance, and its example assemblies are light-frame constructions with real areal mass and heat capacity. Opaque reference assemblies are now rebuilt with a single calibrated material carrying the note's wood-frame example properties instead of a massless layer, which also lets one material serve every boundary condition.",
+      "requirements": [
+        {
+          "id": "reference_envelope_lightweight_mass",
+          "label": "Thermal mass of the reference building's envelope assemblies",
+          "decided": "Lightweight means light-frame rather than massless; opaque reference assemblies use one calibrated layer with the note's wood-frame example mass, heat capacity and thickness, with the approximation disclosed.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "8.4.4.4.(1)",
+                "Note A-8.4.4.4.(1)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "8.4.5.4.(1)",
+                "Note A-8.4.5.4.(1)"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-36",
@@ -1024,15 +1117,50 @@
       "id": "D-41",
       "title": "Service-water reference article machine-verified; gap refined",
       "kind": "data",
-      "articles": {
-        "unverified": [
-          "8.4.4.20."
-        ]
-      },
       "editions": [
-        "unverified"
+        "necb2020",
+        "necb2025"
       ],
-      "summary": "The service-water manifest's long-standing caveat that the article text was not machine-verifiable is closed now that the full article and its explanatory note retrieve cleanly. The verification showed the clone-based treatment already satisfies most sentences, so the declared gap was narrowed to two genuinely unimplemented items: part-load curves on reference service-water equipment, and consolidation of multiple proposed circulation pumps into one."
+      "summary": "The service-water manifest's long-standing caveat that the article text was not machine-verifiable is closed now that the full article and its explanatory note retrieve cleanly. The verification showed the clone-based treatment already satisfies most sentences, so the declared gap was narrowed to two genuinely unimplemented items: part-load curves on reference service-water equipment, and consolidation of multiple proposed circulation pumps into one.",
+      "requirements": [
+        {
+          "id": "reference_swh_from_proposed",
+          "label": "Reference service water heating derived from the proposed system",
+          "decided": "Cloning the proposed service-water system carries the requirements in Sentences (3), (4), (6), (7) and (8); D-53 closes the part-load curve in (5), while the pump-topology caveat in (9) remains explicit.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "8.4.4.20.(3)",
+                "8.4.4.20.(4)",
+                "8.4.4.20.(5)",
+                "8.4.4.20.(6)",
+                "8.4.4.20.(7)",
+                "8.4.4.20.(8)",
+                "8.4.4.20.(9)",
+                "Note A-8.4.4.20.(4)(a)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "8.4.5.20.(3)",
+                "8.4.5.20.(4)",
+                "8.4.5.20.(5)",
+                "8.4.5.20.(6)",
+                "8.4.5.20.(7)",
+                "8.4.5.20.(8)",
+                "8.4.5.20.(9)",
+                "Note A-8.4.5.20.(4)(a)"
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "D-42",

@@ -330,7 +330,7 @@ audit are drained and archived — see `docs/README.md`.
 
 <a id="d-11"></a>
 
-## D-11 — 8.4.4.14 Hydronic Pumps implemented (intensity transfer + Table curves)
+## D-11 — Variable-flow pump riding curve implemented; transfer superseded
 
 - **Decision:** implement, with these interpretive choices:
   - **Superseded by [D-93](#d-93) (2026-09-19).** The interpretive choices

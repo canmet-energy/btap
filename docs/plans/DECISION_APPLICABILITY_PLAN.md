@@ -389,14 +389,15 @@ multi-part decisions such as D-61.
 
 Status: in progress. Batch 1 established D-18, D-28, D-34, D-37, D-42,
 D-43, D-45 and D-55. Batch 2 established D-07, D-09, D-12, D-14, D-19 and
-D-53. The committee view has moved from 23 structured and 45 held decisions to
-37 and 31, with the 68 citation-bearing and 35 citation-free totals unchanged.
-The compliance report is byte-identical because titles and summaries stayed
-unchanged. D-28 and D-34 gained body notes that record later applicability
-corrections; D-14's body now names the reference-building transfer sentence
-and D-19's heading records its completed resolution. Each mapping was read
-against the governing text in both editions' provision indexes and against
-the implementation.
+D-53. Batch 3 established D-03, D-11, D-13, D-35 and D-41. The committee view
+has moved from 23 structured and 45 held decisions to 42 and 26, with the 68
+citation-bearing and 35 citation-free totals unchanged. The compliance report
+is byte-identical because titles and summaries stayed unchanged. D-28 and D-34
+gained body notes that record later applicability corrections; D-14's body now
+names the reference-building transfer sentence, D-19's heading records its
+completed resolution, and D-11's heading says that D-92/D-93 superseded its
+transfer. Each mapping was read against the governing text in both editions'
+provision indexes and against the implementation.
 
 - D-18 and D-28 share `multizone_thermal_block_grouping`, Table 8.4.x.7.-B
   Note (3), for System 6. D-28 also shares
@@ -434,6 +435,23 @@ the implementation.
   by requirement rather than by equal numbering. The existing authorized
   Section 8.4 caches were replayed into the provision indexes; no live payload
   was needed for this batch.
+- D-03 maps only the erratum-affected EIR-temperature rows in Table
+  8.4.5.5.-C (2020) and Table 8.4.6.5.-C (2025). Its committee paraphrase
+  discloses that proposed corrected coefficients are used pending confirmation.
+- D-13 maps the three water-cooled chiller curve tables in each edition and
+  records the decision to retain the published screw and centrifugal fits
+  despite imperfect rating-point normalization.
+- D-11 maps only its surviving variable-flow pump decision,
+  8.4.x.14.(4)-(5) plus Table 8.4.x.14. D-92 and D-93 own the superseding
+  pump-power mechanism and source, so D-11 does not duplicate Sentences
+  (1)-(3).
+- D-35 maps 8.4.x.4.(1) and Note A-8.4.x.4.(1), which supplies the light-frame
+  thermal-mass examples behind the calibrated-layer approximation.
+- D-41 maps the service-water clone chain in 8.4.x.20.(3)-(9) and Note
+  A-8.4.x.20.(4)(a); its paraphrase names D-53's closure of Sentence (5) and
+  preserves the Sentence (9) topology caveat. The required table and Appendix
+  payloads were fetched live from hbix and retained in each edition's bounded
+  provision archive.
 
 Runtime citation defects found while reading the implementation are Phase E
 items. Nothing was moved in the audit output here:
@@ -442,6 +460,15 @@ items. Nothing was moved in the audit output here:
   cooling-tower equations. It needs the separately recorded AHJ/tool-gap
   disposition and a runtime citation rather than the source body's claim that
   the requirement is simply satisfied.
+- D-03: the erratum substitution site must carry the existing AHJ-7
+  disposition; a proposed correction is not silently equivalent to published
+  text.
+- D-11: its report-visible title and summary still describe the transfer that
+  D-92/D-93 superseded, and the rules manifest still narrates the old
+  whole-building intensity. Correct those separately from this report-neutral
+  mapping.
+- D-41: `shw/reference.py` still describes the old unverified gap rather than
+  the current clone treatment and D-53 closure.
 - D-19: the warning at `envelope/reference.py` uses the non-canonical range
   `8.4.3.3.(3)-(4)` and all audit strings need edition-correct canonical
   citations.

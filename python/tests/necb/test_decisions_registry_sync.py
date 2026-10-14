@@ -59,11 +59,12 @@ STRUCTURED_FIELDS = ("id", "title", "kind", "editions", "summary", "requirements
 #: What `btap.codes.decisions` and the report's rulings appendix read.
 RUNTIME_FIELDS = ("id", "title", "kind", "summary")
 MIGRATED_IDS = (
-    "D-07", "D-09", "D-12", "D-14", "D-18", "D-19", "D-27", "D-28",
-    "D-34", "D-37", "D-38", "D-39", "D-42", "D-43", "D-45", "D-46",
-    "D-47", "D-48", "D-49", "D-50", "D-51", "D-52", "D-53", "D-54",
-    "D-55", "D-56", "D-57", "D-89", "D-90", "D-91", "D-92", "D-93",
-    "D-97", "D-99", "D-100", "D-101", "D-102",
+    "D-03", "D-07", "D-09", "D-11", "D-12", "D-13", "D-14", "D-18",
+    "D-19", "D-27", "D-28", "D-34", "D-35", "D-37", "D-38", "D-39",
+    "D-41", "D-42", "D-43", "D-45", "D-46", "D-47", "D-48", "D-49",
+    "D-50", "D-51", "D-52", "D-53", "D-54", "D-55", "D-56", "D-57",
+    "D-89", "D-90", "D-91", "D-92", "D-93", "D-97", "D-99", "D-100",
+    "D-101", "D-102",
 )
 #: Phase D decisions moved from `unverified` to the structured form; the other
 #: 23 are Phase C's. Every digest below is of the decision's title and summary
@@ -72,19 +73,25 @@ PHASE_D_BATCH_1_IDS = (
     "D-18", "D-28", "D-34", "D-37", "D-42", "D-43", "D-45", "D-55",
 )
 PHASE_D_BATCH_2_IDS = ("D-07", "D-09", "D-12", "D-14", "D-19", "D-53")
+PHASE_D_BATCH_3_IDS = ("D-03", "D-11", "D-13", "D-35", "D-41")
 MIGRATED_RUNTIME_SHA256 = {
+    "D-03": "b8bd6e32d1b448ca31e1454ee7f4645ad65a867be66725c16d37523f584e27f5",
     "D-07": "c2498de315ccb63d8596852486d32b39f4cc50a9ec1701d4360efceab333cbb0",
     "D-09": "1d05111e9ff257b0129755af265220aa8d48a8aa5e35aeaae75e45a9a38529b5",
+    "D-11": "15a6bfa3dd40463a4138c59e860f65fcfaab7c38292a25ba94fb81a036c79467",
     "D-12": "e8e37f30214e28e1ecc4bb535fe636d7dfa914333332269e4374bd71926e0b23",
+    "D-13": "278561f9c548e7ce8124268f7f200b0da35650cf26d9b82630a528bacfcbf07b",
     "D-14": "ea8a906fde03b1f38f59a0b35d5c103a9bd603797b9aa569851cf5dac7d72d27",
     "D-18": "c3e6a182bad6cdbd8a2eb5256e4505bbddb370426272ae2773709f3f0ae4cc50",
     "D-19": "70f4908b849ef031140c3375b324a573dd6a0552d25305faffef1e04b0af0fae",
     "D-27": "25dfea7660112851261febd2cfe2c44eb2a54014d372a636afae08def6c58d07",
     "D-28": "39659f04a161b019ad9b4982ba1ef651d093661e469816ff410a2ef42571badc",
     "D-34": "9635c9859756a364f52688cf44de2f9f3e4b1103c73143881d4f883721ea9c05",
+    "D-35": "a2aa95aa01f059f12d48400a402ad19dc9b638499e49bd145816ca06e7e22ebe",
     "D-37": "2b200a5bafaeb8bd4fcc344cd84762cfe08c5d1c25adac02facef0a680e079bd",
     "D-38": "7ed399a46526a764811be1971bc332aea224e6a4066ae38e8069ffb7e29c3582",
     "D-39": "d44813de15ff044f44a9e642fbc76ddc3a305c6bda6aa8af38d7e779e198594a",
+    "D-41": "2ebcf5ea17b7fdef51a38006d9a680883d91ed02ea88e065bd0b6f407816f600",
     "D-42": "dc20ba3f9759a34f830511b874a1002cd8fcb16b52203ba34459e16aa1c1ab18",
     "D-43": "34a4774f23867fb28e0fa2d1fe52c8a837fc52914990dc1c4ed427ecace4a6e6",
     "D-45": "b5c19aa93ae1c773b31c32708d287f5f1d264e423bc7c0fb5698ffc024bdf602",
@@ -113,18 +120,21 @@ MIGRATED_RUNTIME_SHA256 = {
 }
 #: Each migrated decision's requirement keys in AUTHORED order, as the
 #: sources record them. Phase C's 23 had them in the legacy front matter;
-#: Phase D's first fourteen were authored with their structured form.
+#: Phase D's first nineteen were authored with their structured form.
 MIGRATED_KEYS = {
+    "D-03": ("water_cooled_chiller_eir_temperature_erratum",),
     "D-07": ("cooling_tower_part_load_capacity",),
     "D-09": (
         "annual_energy_end_use_accounting",
         "redundant_backup_equipment_scope",
         "representative_climatic_dataset",
     ),
+    "D-11": ("variable_flow_pump_part_load_curve",),
     "D-12": (
         "radiant_effect_temperature_adjustment",
         "reference_throttling_range",
     ),
+    "D-13": ("water_cooled_chiller_performance_curves",),
     "D-14": ("reference_operating_schedules",),
     "D-18": ("multizone_thermal_block_grouping",),
     "D-19": ("reference_default_air_leakage",),
@@ -134,6 +144,7 @@ MIGRATED_KEYS = {
         "multizone_thermal_block_grouping",
     ),
     "D-34": ("heat_pump_block_redirect",),
+    "D-35": ("reference_envelope_lightweight_mass",),
     "D-37": ("heat_pump_reference_by_source",),
     "D-38": (
         "prescriptive_pump_power_ceiling",
@@ -141,6 +152,7 @@ MIGRATED_KEYS = {
         "reference_meets_prescriptive_requirements",
     ),
     "D-39": ("system_5_heating_presence",),
+    "D-41": ("reference_swh_from_proposed",),
     "D-42": ("unmet_cooling_hours_vs_reference",),
     "D-43": ("capacity_iteration_on_unmet_loads",),
     "D-45": ("selection_table_museum_rows",),
@@ -420,6 +432,11 @@ MIGRATED_REQUIREMENTS = {
         ("8.4.2.9.(2)", "8.4.3.3.(3)", "8.4.4.3.(6)"),
         ("8.4.2.9.(2)", "8.4.3.3.(3)", "8.4.5.3.(6)"),
     ),
+    "reference_envelope_lightweight_mass": (
+        "Thermal mass of the reference building's envelope assemblies",
+        ("8.4.4.4.(1)", "Note A-8.4.4.4.(1)"),
+        ("8.4.5.4.(1)", "Note A-8.4.5.4.(1)"),
+    ),
     "reference_demand_control_ventilation": (
         ("Reference building inherits the proposed demand-control "
          "ventilation strategies"),
@@ -476,6 +493,29 @@ MIGRATED_REQUIREMENTS = {
         ("8.4.4.7.(1)", "8.4.4.9.(1)", "8.4.4.10.(1)"),
         ("8.4.5.7.(1)", "8.4.5.9.(1)", "8.4.5.10.(1)"),
     ),
+    "reference_swh_from_proposed": (
+        "Reference service water heating derived from the proposed system",
+        (
+            "8.4.4.20.(3)",
+            "8.4.4.20.(4)",
+            "8.4.4.20.(5)",
+            "8.4.4.20.(6)",
+            "8.4.4.20.(7)",
+            "8.4.4.20.(8)",
+            "8.4.4.20.(9)",
+            "Note A-8.4.4.20.(4)(a)",
+        ),
+        (
+            "8.4.5.20.(3)",
+            "8.4.5.20.(4)",
+            "8.4.5.20.(5)",
+            "8.4.5.20.(6)",
+            "8.4.5.20.(7)",
+            "8.4.5.20.(8)",
+            "8.4.5.20.(9)",
+            "Note A-8.4.5.20.(4)(a)",
+        ),
+    ),
     "reference_throttling_range": (
         "Reference heating and cooling throttling range",
         ("8.4.4.16.(2)",),
@@ -513,6 +553,11 @@ MIGRATED_REQUIREMENTS = {
         ("8.4.4.9.(7)", "8.4.4.10.(8)"),
         ("8.4.5.9.(7)", "8.4.5.10.(8)"),
     ),
+    "variable_flow_pump_part_load_curve": (
+        "Part-load power curve for a variable-flow reference pump",
+        ("8.4.4.14.(4)", "8.4.4.14.(5)", "Table 8.4.4.14"),
+        ("8.4.5.14.(4)", "8.4.5.14.(5)", "Table 8.4.5.14"),
+    ),
     "unmet_cooling_hours_vs_reference": (
         ("Proposed-building unmet cooling hours compared with the reference "
          "building's"),
@@ -524,6 +569,17 @@ MIGRATED_REQUIREMENTS = {
          "must meet"),
         ("8.4.1.2.(3)", "8.4.1.2.(4)"),
         ("8.4.1.2.(3)", "8.4.1.2.(4)"),
+    ),
+    "water_cooled_chiller_eir_temperature_erratum": (
+        ("Water-cooled chiller EIR-versus-temperature coefficients affected "
+         "by the proposed erratum"),
+        ("Table 8.4.5.5.-C",),
+        ("Table 8.4.6.5.-C",),
+    ),
+    "water_cooled_chiller_performance_curves": (
+        "Water-cooled screw and centrifugal chiller performance curves",
+        ("Table 8.4.5.5.-A", "Table 8.4.5.5.-B", "Table 8.4.5.5.-C"),
+        ("Table 8.4.6.5.-A", "Table 8.4.6.5.-B", "Table 8.4.6.5.-C"),
     ),
     "water_economizer_definition": (
         "What qualifies as cooling by indirect use of outdoor air",
@@ -1165,14 +1221,14 @@ class TestTheCommittedProvisionView(unittest.TestCase):
     """
 
     #: Phase C converted every established mapping (23 structured), then Phase
-    #: D batches 1 and 2 moved fourteen held decisions to the structured form
-    #: (37), 45 held down to 31. Neither moves the 68 citation-bearing or the
+    #: D's first three batches moved nineteen held decisions to the structured
+    #: form (42), 45 held down to 26. Neither moves the 68 citation-bearing or the
     #: 35 citation-free totals. SOURCE_ROWS counts governing source records
-    #: (D-42 has one, the other 70 requirements two each); REQUIREMENTS counts
+    #: (D-42 has one, the other 75 requirements two each); REQUIREMENTS counts
     #: requirement instances, a shared key once per decision that uses it.
-    STRUCTURED, ESTABLISHED, HELD, INCLUDED, OMITTED = 37, 0, 31, 68, 35
-    SOURCE_ROWS = 141
-    REQUIREMENTS = 71
+    STRUCTURED, ESTABLISHED, HELD, INCLUDED, OMITTED = 42, 0, 26, 68, 35
+    SOURCE_ROWS = 151
+    REQUIREMENTS = 76
 
     @classmethod
     def setUpClass(cls):
@@ -1244,13 +1300,18 @@ class TestTheCommittedProvisionView(unittest.TestCase):
             ),
         )
 
-    def test_phase_d_batches_are_fourteen_of_the_structured_decisions(self):
-        """The fourteen decisions these batches moved out of `unverified`,
-        beside Phase C's 23, and none of the 31 still held."""
-        phase_d = set(PHASE_D_BATCH_1_IDS) | set(PHASE_D_BATCH_2_IDS)
+    def test_phase_d_batches_are_nineteen_of_the_structured_decisions(self):
+        """The nineteen decisions these batches moved out of `unverified`,
+        beside Phase C's 23, and none of the 26 still held."""
+        phase_d = (
+            set(PHASE_D_BATCH_1_IDS)
+            | set(PHASE_D_BATCH_2_IDS)
+            | set(PHASE_D_BATCH_3_IDS)
+        )
         self.assertEqual(8, len(set(PHASE_D_BATCH_1_IDS)))
         self.assertEqual(6, len(set(PHASE_D_BATCH_2_IDS)))
-        self.assertEqual(14, len(phase_d))
+        self.assertEqual(5, len(set(PHASE_D_BATCH_3_IDS)))
+        self.assertEqual(19, len(phase_d))
         self.assertLessEqual(phase_d, set(self.structured))
         self.assertEqual(23, len(set(self.structured) - phase_d))
         self.assertEqual(set(), phase_d & set(self.held))
@@ -1624,7 +1685,7 @@ HOLDING_KEYS = ("unverified", "not_applicable")
 
 
 class TestThePhaseCMigration(unittest.TestCase):
-    """Phase C converted every established mapping and Phase D's first fourteen
+    """Phase C converted every established mapping and Phase D's first nineteen
     held decisions, read straight from the committed files: no legacy
     per-code-id shape survives in a converted source or registry entry, the
     registry projects each migrated requirement exactly as the literal tables

@@ -170,11 +170,12 @@ scope rather than admitting another heuristic.
 **The structured source form** is the migration target of
 `docs/plans/DECISION_APPLICABILITY_PLAN.md`. The generator accepts it beside the
 legacy form. Phase C converted all 23 decisions that carried an established
-per-code-id mapping, and Phase D's first two batches established fourteen held
-decisions directly in this form (D-07, D-09, D-12, D-14, D-18, D-19, D-28,
-D-34, D-37, D-42, D-43, D-45, D-53 and D-55; 37 structured in all), so no
-committed decision still uses the per-code-id lists above: every other decision
-holds `unverified` or `not_applicable`.
+per-code-id mapping, and Phase D's first three batches established nineteen
+held decisions directly in this form (D-03, D-07, D-09, D-11, D-12, D-13,
+D-14, D-18, D-19, D-28, D-34, D-35, D-37, D-41, D-42, D-43, D-45, D-53 and
+D-55; 42 structured in all), so no committed decision still uses the
+per-code-id lists above: every other decision holds `unverified` or
+`not_applicable`.
 `python/tests/necb/test_decisions_registry_sync.py` pins the converted ids and
 each converted mapping, and fails if any other decision takes a per-code-id
 mapping. A requirement keeps its
