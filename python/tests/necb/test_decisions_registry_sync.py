@@ -89,13 +89,13 @@ PHASE_D_BATCH_7_IDS = (
 )
 MIGRATED_RUNTIME_SHA256 = {
     "D-02": "0f39e8bb648ff77f85c91a14e7bf3376a5f82ff9b861f93c362d0c55b18d5a89",
-    "D-03": "b8bd6e32d1b448ca31e1454ee7f4645ad65a867be66725c16d37523f584e27f5",
+    "D-03": "30a16c7cc674259ee2eb9320736a0badf51b376f0a9b0344e58f9fdb5f6555fa",
     "D-04": "1f72d5d11097cf5af4c7686e4905b19cb932978e25bfc4d585064c05d7807c5a",
-    "D-05": "d49055de239286943b47d5f339f9ffd410017359cdbebedfe8e17732cfc1f4b0",
+    "D-05": "ad54caa22abc91e9e792dfe6ab9dda16e450e80f3075713c9ce046581a516033",
     "D-06": "2f67a5c962fd68abe2102f941ada33719fae13228a557dbadef888b617e2ae86",
-    "D-07": "c2498de315ccb63d8596852486d32b39f4cc50a9ec1701d4360efceab333cbb0",
+    "D-07": "c780d516bf9706d6382b3e3afc449ba6950b466f3935ce9eb62b4420994e2d53",
     "D-09": "1d05111e9ff257b0129755af265220aa8d48a8aa5e35aeaae75e45a9a38529b5",
-    "D-11": "15a6bfa3dd40463a4138c59e860f65fcfaab7c38292a25ba94fb81a036c79467",
+    "D-11": "c5e58ed1d7b9d8313c28ba64d4938a6739a54c452884b135ae53bd27e9a82a15",
     "D-12": "e8e37f30214e28e1ecc4bb535fe636d7dfa914333332269e4374bd71926e0b23",
     "D-13": "278561f9c548e7ce8124268f7f200b0da35650cf26d9b82630a528bacfcbf07b",
     "D-14": "ea8a906fde03b1f38f59a0b35d5c103a9bd603797b9aa569851cf5dac7d72d27",
@@ -106,7 +106,7 @@ MIGRATED_RUNTIME_SHA256 = {
     "D-21": "c6b4efee96b41c1a81152c437f1faa7005e737d2e35bae603dfdab5fa808545f",
     "D-22": "43e01f3c0d89e9c83957bcdf5bfe50d342776222ea663b7f06d6a59ab59b634d",
     "D-23": "a368c72aeb01da6cb4176dbee61dc97bdeb6255f9731cd1c971ef9c45eccc933",
-    "D-24": "bb66ea95ac090cd5f25e7e6ef8aac3a8bbd5fc8d455e6aebcfe5616c8d0907e7",
+    "D-24": "cca823a54823c999837d1078df8e92af20e316be908fa05ef2c8c01d938becbd",
     "D-26": "1d9dbe8ca506598d0b9c4ffac8a68337ddc7ce5b98b325a7ada6457fee9bfb8e",
     "D-27": "25dfea7660112851261febd2cfe2c44eb2a54014d372a636afae08def6c58d07",
     "D-28": "39659f04a161b019ad9b4982ba1ef651d093661e469816ff410a2ef42571badc",
@@ -117,7 +117,7 @@ MIGRATED_RUNTIME_SHA256 = {
     "D-37": "2b200a5bafaeb8bd4fcc344cd84762cfe08c5d1c25adac02facef0a680e079bd",
     "D-38": "7ed399a46526a764811be1971bc332aea224e6a4066ae38e8069ffb7e29c3582",
     "D-39": "d44813de15ff044f44a9e642fbc76ddc3a305c6bda6aa8af38d7e779e198594a",
-    "D-41": "2ebcf5ea17b7fdef51a38006d9a680883d91ed02ea88e065bd0b6f407816f600",
+    "D-41": "40e786914cad3de44b003dd0a9de7b46b27a9e91b1233870ee62d5152c8a4732",
     "D-42": "dc20ba3f9759a34f830511b874a1002cd8fcb16b52203ba34459e16aa1c1ab18",
     "D-43": "34a4774f23867fb28e0fa2d1fe52c8a837fc52914990dc1c4ed427ecace4a6e6",
     "D-45": "b5c19aa93ae1c773b31c32708d287f5f1d264e423bc7c0fb5698ffc024bdf602",
@@ -134,14 +134,14 @@ MIGRATED_RUNTIME_SHA256 = {
     "D-56": "45fde852ece1c7fda7a6c634d82def8a24300d56b80e50fb8191ec30ff94e372",
     "D-57": "9aa89dd9b6f154800c5458b15442030ca5dc0c138bf94df932280fce2d7676da",
     "D-58": "ce427b6aec78543c7a26655f1884a15802a1419b43fc224546da56738a458cec",
-    "D-59": "ac00d039d443996ab8561272560865145c8b2b9abab8dbf73def67d7746588bf",
-    "D-60": "ddb5dfa482c92fb05a25d8aaeff92a1babb5f2f976223129f9a354ad665878d1",
-    "D-61": "d63d9a3718dde95d8fac29272bdf7469111a08e1b37cb4bc55117c17d95c0195",
+    "D-59": "368fc0645b413c7401904577119461007dfbf361e32af5883fc26b913b674ab6",
+    "D-60": "6e5920afc4398175222a56f79daa8253a32002ebe27f9c50d948b7eecc243e4e",
+    "D-61": "0414b6eacd2e79a2ce00f13ee250eecf5a7645ab0a895cb0e29c5828fdef8437",
     "D-62": "035f4d4416907045e6ef365017983fde8c92094f9338cc9a9530cf6601bf271c",
     "D-63": "db7b854dc1bbf32b204d71058101ee475fc7ec9cc861fe5d0e92c34ae12b8a75",
-    "D-65": "ab426e0786cb606dd86765793ec821c518ecaeb87e501687f81cf5abc2d0a623",
+    "D-65": "f318479ec6eff50833478ce37e8c08cb74af6ac17bbb79236e9b3e03cb0de7bc",
     "D-74": "b2438c36fd9a9713ea76a1b9c4dc2bd0511a508239544ccd1451adb3cecc7b39",
-    "D-76": "ac98a7eb1fd4881a043efce0681108ee33aa3149f406edc0626ca736d4bedfc7",
+    "D-76": "d0488f1809e412e3a2871415d466dfc6a33bbd67ac1800202a667feab3873857",
     "D-85": "1be2a15512d2ec06a24e57128d02a8fe1b5a73682f5399aedf66a640d33a2da0",
     "D-89": "d2d60bfd9baff780388a68fac64f41ded05363c1390e9a8457d2bb6fefa2dff5",
     "D-90": "80996e2dde0fa7797f6341bcdf7885a4358f96df2347c0f0695c2844dd536e59",
@@ -1774,9 +1774,9 @@ class TestTheCommittedProvisionView(unittest.TestCase):
              if self.linked(cells[1]) == "D-42"],
         )
 
-    def test_migration_keeps_each_title_and_summary_byte_stable(self):
-        """A report reads these fields, so representation-only work may not
-        amend them while adding its committee metadata."""
+    def test_each_report_visible_title_and_summary_has_an_explicit_hash(self):
+        """A report reads these fields, so every intentional wording change
+        must update this reviewable contract."""
         actual = {
             decision_id: hashlib.sha256(
                 json.dumps(

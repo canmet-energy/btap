@@ -87,7 +87,7 @@ nonconformity with 8.4.x.9.(6)(e).
 | AHJ-4 | 8.4.2.2.(5) backup exclusion | ruled | necb2020, necb2025 | no |
 | AHJ-5 | WSHP source-loop boiler energy counts for (5) | ruled | necb2020, necb2025 | no — but see the PREDICATE DEFECT in the entry |
 | AHJ-6 | 8.4.x.9.(4) no oil or propane catalog variant | tool-gap | necb2020, necb2025 | no |
-| AHJ-7 | Table 8.4.5.5.-C / 8.4.6.5.-C chiller EIR_FT | alternative-solution | necb2020, necb2025 | not yet — see the entry |
+| AHJ-7 | Table 8.4.5.5.-C / 8.4.6.5.-C chiller EIR_FT | alternative-solution | necb2020, necb2025 | yes, where a corrected affected row is used |
 | AHJ-8 | Table 4.2.1.6 Note (1) A/B control marks | tool-gap | necb2020, necb2025 | no |
 | AHJ-9 | Table A-8.4.3.2.(1)-G and the '12' column heads | ruled | necb2020, necb2025 | no |
 | AHJ-10 | Table 8.4.x.7.-B Note (3) corner-block grouping | referral | necb2020, necb2025 | yes, on a corner block above four storeys |
@@ -102,6 +102,7 @@ nonconformity with 8.4.x.9.(6)(e).
 | AHJ-19 | real refrigeration is invisible to classification, teardown and end-use reporting | tool-gap | necb2020, necb2025 | no |
 | AHJ-20 | System 5's chilled-water loop is a 7 °C comfort loop | tool-gap | necb2020, necb2025 | no |
 | AHJ-21 | the archetype-EUI path applies no capacity increase under sentence (5) | tool-gap | necb2025 | no |
+| AHJ-22 | cooling-tower capacity equations replaced by the engine Merkel model | alternative-solution | necb2020, necb2025 | yes, where a reference cooling tower is present |
 
 ---
 
@@ -483,10 +484,10 @@ absence itself is a separate `tool-gap` and is now **AHJ-17**, because one
 entry cannot carry a referral and a tool gap under one status without making
 the taxonomy untruthful (Sol, clearance review of be2118d).
 
-**STILL OPEN, and phylroy's call.** The deviation sets no run conditional, so a
-building with a water-cooled scroll or reciprocating chiller is modelled on
-corrected coefficients with nothing in its report saying so. Same shape of
-hole as AHJ-5.
+**Runtime disclosure closed in Phase E.** A water-cooled scroll or
+reciprocating chiller now cites this entry when the corrected EIR_FT curve is
+installed. The report therefore names the alternative solution and makes that
+run conditional on acceptance of the corrected coefficient.
 
 ## AHJ-8 — Table 4.2.1.6's A and B control marks are not carried at all
 
@@ -1122,3 +1123,34 @@ user's own design is a different act from raising a reference's, and the
 iteration changes the model the EUI verdict is then computed on. That is an
 implementation question inside a settled requirement, which is why this is not
 a one-line fix and still not an ambiguity.
+
+## AHJ-22 — cooling-tower capacity equations replaced by the engine Merkel model
+
+**Article.** 8.4.5.6.(1)-(6) in NECB 2020; 8.4.6.6.(1)-(6) in NECB 2025.
+
+**Status: `alternative-solution`.** The acceptable-solution text prescribes six
+equations for the reference cooling tower's part-load capacity. The
+`CoolingTowerSingleSpeed` object exposes no field in which those equations can
+be installed, so retaining its Merkel effectiveness-NTU calculation is a
+non-literal modelling substitution, not compliance with the prescribed
+method.
+
+**The requirement, and why we do not meet it.** The six sentences define the
+capacity adjustment as explicit functions of entering wet-bulb temperature,
+range and air-flow ratio. The model instead delegates available capacity to
+EnergyPlus's effectiveness-NTU implementation. D-07's numerical probe provides
+useful evidence: the formulations agree at the CTI rating point and differ by
+no more than 12.7% across that rating wet-bulb slice, with conservative
+divergence at colder wet-bulbs. Numerical proximity does not turn one
+prescribed method into the other.
+
+**Established by.** D-07's retained numeric cross-check and the Phase E review
+of `CoolingTowerSingleSpeed` on 2026-10-14. The earlier `engine` coverage
+disposition described the substitution but incorrectly called the requirement
+satisfied.
+
+**What the tool does meanwhile.** It retains the single-speed Merkel tower,
+cites D-07 and this entry on every affected condenser loop, and makes the run
+conditional on the authority accepting the substitution. Closing the entry
+requires a reference-tower representation that applies the six prescribed
+equations, followed by a new freeze of affected scenarios.

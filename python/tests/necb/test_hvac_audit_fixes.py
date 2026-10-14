@@ -114,6 +114,35 @@ class TestAuditFixes(unittest.TestCase):
         decision = next(e for e in audit.entries
                         if e['action'] == 'cooling tower cells set from heat rejection')
         self.assertEqual(2, decision['inputs']['chillers_on_loop'])
+        self.assertEqual('8.4.4.11.(3)', decision['article'])
+        fan = next(e for e in audit.entries
+                   if e['action'].startswith('cooling tower fan power set'))
+        self.assertEqual('Table 5.2.12.2', fan['article'])
+        self.assertEqual('D-26', fan['ruling'])
+        substitution = next(e for e in audit.warnings
+                            if e.get('ahj') == 'AHJ-22')
+        self.assertEqual('8.4.5.6.(1)', substitution['article'])
+        self.assertEqual('D-07', substitution['ruling'])
+        erratum = next(e for e in audit.warnings if e.get('ahj') == 'AHJ-7')
+        self.assertEqual('Table 8.4.5.5.-C', erratum['article'])
+        self.assertEqual('D-03', erratum['ruling'])
+
+    def test_chiller_erratum_disclosure_is_limited_to_affected_rows(self):
+        model = load_fixture()
+        modeling.build_system(
+            model, 'MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard',
+            sorted_zones(model))
+        for boiler in model.getBoilerHotWaters():
+            boiler.setNominalCapacity(100_000.0)
+        for chiller in model.getChillerElectricEIRs():
+            chiller.setName('Reference Centrifugal Chiller')
+            chiller.setReferenceCapacity(1_000_000.0)
+
+        audit = AuditLog()
+        hvac.apply_efficiencies(model, code='necb2025', audit=audit)
+
+        self.assertFalse(any(e.get('ahj') == 'AHJ-7' for e in audit.entries),
+                         'printed rows that need no correction must not make a run conditional')
 
     # T4: paired DX HP heating capacity pinned to cooling capacity post-sizing.
     def test_hp_heating_capacity_pinned_to_cooling(self):

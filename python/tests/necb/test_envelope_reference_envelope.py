@@ -212,7 +212,16 @@ class TestReferenceEnvelope(unittest.TestCase):
         decision = next(e for e in audit.entries
                         if e['action'] == 'air-leakage default applied')
         self.assertRegex(decision['value'], r'\(5/75\)\^0\.6 x 1\.5')
-        self.assertRegex(decision['article'], r'8\.4\.2\.9\.\(2\)')
+        self.assertEqual('8.4.4.3.(6)', decision['article'])
+        pressure = next(e for e in audit.entries
+                        if e['action'].startswith('air leakage converted'))
+        self.assertEqual('8.4.2.9.(2)', pressure['article'])
+        enclosure = next(e for e in audit.entries
+                         if e.get('ruling') == 'D-21')
+        self.assertEqual('3.2.4.2.(1)(c)', enclosure['article'])
+        assumption = next(e for e in audit.entries
+                          if e.get('ruling') == 'D-76')
+        self.assertEqual('3.2.4.2.(1)', assumption['article'])
         # rate sanity: (5/75)^0.6 = 0.1974; x1.5 = 0.296; xS/A_AGW > 0.296
         rate = infiltration[0].flowperExteriorWallArea().get() * 1000.0
         self.assertGreater(rate, 0.29)

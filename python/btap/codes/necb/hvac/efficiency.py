@@ -67,7 +67,7 @@ def _apply(model, ruleset, audit=None, proposed=None):
     for c in sorted_by_name(model.getChillerElectricEIRs()):
         _apply_chiller(c, tables, cooling_plant, audit)
     # after ALL chiller capacities are final — the tower sees the loop SUM
-    _apply_tower_rules(model, audit)
+    _apply_tower_rules(model, plant_rules, audit)
     # 8.4.4.9.(7)/8.4.4.10.(8) stage COUNTS first: the multispeed appliers bin
     # by TOP-stage capacity, and the top stage is unchanged by re-staging, but
     # the per-stage values must land on the stages the staging pass leaves behind.
@@ -146,7 +146,7 @@ def _apply_vrf(unit, tables, ruleset, audit):
     serving no terminals at all is INDETERMINATE and warns. Code minimums are
     assigned exactly, consistently with the other equipment appliers.
     """
-    article = f'NECB {ruleset.edition} Table 5.2.12.1.-I'
+    article = 'Table 5.2.12.1.-I'
     if unit.condenserType() != 'AirCooled':
         return audit.warn(
             'efficiency',
@@ -317,18 +317,33 @@ def _stage_multispeed_coil(optional_coil, rule, article, label, audit, totals=No
     # the floor reaches (> 25 kW) is above the 5.2.2.7 retention trigger
     # (> 20 kW), so the build-time economizer state is the final state.
     floor = _economizer_stage_floor(unitary, kw, economizer_spec)
-    if floor and floor > wanted:
-        audit.decision('efficiency', 'stage count RAISED to the 5.2.2.8 economizer staging floor — the lowest '
-                                     'stage of an economizer system must not exceed the sentence-(4)/(5) '
-                                     'fraction of full capacity',
-                       target=name,
-                       inputs={'capacity_kw': ruby_round(kw, 1), 'incremental_stages': wanted,
-                               'floor_stages': floor,
-                               'lowest_stage_fraction': ruby_round(1.0 / floor, 3)},
-                       value=f'{floor} stages (lowest {ruby_round(100.0 / floor, 0)}% <= '
-                             f"{'25' if kw >= 70 else '50'}%)",
-                       article=economizer_spec['article'], ruling='D-62')
-        wanted = floor
+    if floor:
+        floor_article = (
+            economizer_spec['article_at_or_above_70_kw']
+            if kw >= 70
+            else economizer_spec['article_above_25_below_70_kw']
+        )
+        if floor > wanted:
+            audit.decision(
+                'efficiency',
+                'stage count RAISED to the 5.2.2.8 economizer staging floor',
+                target=name,
+                inputs={'capacity_kw': ruby_round(kw, 1),
+                        'incremental_stages': wanted, 'floor_stages': floor,
+                        'lowest_stage_fraction': ruby_round(1.0 / floor, 3)},
+                value=f'{floor} stages (lowest {ruby_round(100.0 / floor, 0)}% <= '
+                      f"{'25' if kw >= 70 else '50'}%)",
+                article=floor_article, ruling='D-62')
+            wanted = floor
+        else:
+            audit.info(
+                'efficiency',
+                'stage count already meets the 5.2.2.8 economizer staging floor',
+                target=name,
+                inputs={'capacity_kw': ruby_round(kw, 1),
+                        'incremental_stages': wanted, 'floor_stages': floor,
+                        'lowest_stage_fraction': ruby_round(1.0 / wanted, 3)},
+                article=floor_article, ruling='D-62')
     stages = min(wanted, MAX_STAGES)
     if wanted > MAX_STAGES:
         audit.warn('efficiency', f'{name}: {wanted} equal stages required at {ruby_round(kw, 1)} kW but EnergyPlus '
@@ -2708,6 +2723,20 @@ def _apply_chiller(chiller, tables, plant, audit):
         c = curve(chiller.model(), tables, row.get(key), audit=audit, target=name)
         if c:
             getattr(chiller, setter)(c)
+    if row.get('eirft') in {
+            'WaterCooled_Scroll_EIRFT',
+            'WaterCooled_Reciprocating_EIRFT'}:
+        audit.warn(
+            'efficiency',
+            'published water-cooled chiller EIR_FT coefficients are NOT used '
+            'literally — corrected coefficients applied as an alternative solution',
+            target=name,
+            inputs={'eirft_curve': row['eirft'],
+                    'printed_table_defect': 'misplaced decimal coefficient'},
+            article=plant['chiller_eirft_table'],
+            ruling='D-03',
+            ahj='AHJ-7',
+        )
 
     kw_per_ton = row.get('minimum_full_load_efficiency')
     if kw_per_ton is None:
@@ -2742,7 +2771,7 @@ def _apply_chiller(chiller, tables, plant, audit):
                           article=article, ruling='D-90')
 
 
-def _apply_tower_rules(model, audit):
+def _apply_tower_rules(model, rules, audit):
     """Legacy tower rules: cells per 1750 kW of heat rejection; fan at the
     Table 5.2.12.2 maximum. Runs as its OWN pass after every chiller
     capacity is final: the tower rejects heat for EVERY chiller on its
@@ -2757,6 +2786,19 @@ def _apply_tower_rules(model, audit):
         if not towers:
             continue
 
+        tower_rule = rules['cooling_tower']
+        audit.warn(
+            'efficiency',
+            'prescribed cooling-tower capacity equations are NOT installed — '
+            'the engine Merkel effectiveness-NTU model is retained as an '
+            'alternative solution',
+            target=towers[0].nameString(),
+            inputs={'engine_model': 'CoolingTowerSingleSpeed Merkel effectiveness-NTU',
+                    'prescribed_equations_installed': False},
+            article=tower_rule['part_load_article'],
+            ruling='D-07',
+            ahj='AHJ-22',
+        )
         chillers = [c.to_ChillerElectricEIR().get() for c in loop.demandComponents()
                     if c.to_ChillerElectricEIR().is_initialized()]
         tower_cap = 0.0
@@ -2771,6 +2813,11 @@ def _apply_tower_rules(model, audit):
 
         # 8.4.4.11.(2)-(3): one cell up to 1750 kW; above, capacity/1750 rounded UP
         cells = 1 if tower_cap / 1000.0 <= 1750 else math.ceil(tower_cap / (1000.0 * 1750))
+        cell_article = (
+            tower_rule['one_cell_article']
+            if cells == 1
+            else tower_rule['multiple_cells_article']
+        )
         towers[0].setNumberofCells(cells)
         # Table 5.2.12.2 (NECB 2015+ incl. 2020/2025): axial direct-contact tower
         # fan <= 0.013 kW/kW rejection — NOT the 2011 value 0.015 (T2, audit
@@ -2824,13 +2871,13 @@ def _apply_tower_rules(model, audit):
                        target=towers[0].nameString(),
                        inputs={'tower_cap_kw': ruby_round(tower_cap / 1000.0, 1),
                                'chillers_on_loop': len(chillers)},
-                       value=f'{cells} cell(s)', article='8.4.4.11.(2)-(3)', ruling='D-26')
+                       value=f'{cells} cell(s)', article=cell_article, ruling='D-26')
         if fan_w > 13_000.0:
             audit.decision('efficiency', 'cooling tower fan power set at the Table 5.2.12.2 maximum',
                            target=towers[0].nameString(),
                            inputs={'kw_per_kw': 0.013, 'tower_cap_kw': ruby_round(tower_cap / 1000.0, 1)},
                            value=f'fan {ruby_round(fan_w / 1000.0, 1)} kW',
-                           article='Table 5.2.12.2', ruling='D-22')
+                           article='Table 5.2.12.2', ruling='D-26')
 
 
 def _apply_dx_cooling(coil, tables, audit):

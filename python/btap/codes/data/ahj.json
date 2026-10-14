@@ -198,6 +198,15 @@
       "editions": [
         "necb2025"
       ]
+    },
+    {
+      "id": "AHJ-22",
+      "title": "cooling-tower capacity equations replaced by the engine Merkel model",
+      "status": "alternative-solution",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ]
     }
   ]
 }

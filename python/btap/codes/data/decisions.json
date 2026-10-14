@@ -85,13 +85,13 @@
     },
     {
       "id": "D-03",
-      "title": "Chiller EIR curves verified against the proposed erratum",
-      "kind": "data",
+      "title": "Corrected chiller EIR coefficients are an alternative solution",
+      "kind": "runtime",
       "editions": [
         "necb2020",
         "necb2025"
       ],
-      "summary": "Two water-cooled chiller part-load rows in the printed tables carry misplaced decimals — one yields a physically impossible negative power ratio at the rating point. The verification probe therefore compares against erratum-corrected coefficients, labelled as such pending NRC confirmation, since an independent vendored curve lineage corroborates the corrections to within a few parts per million.",
+      "summary": "The printed water-cooled Scroll and Reciprocating EIR-versus-temperature rows contain misplaced decimals, so the product uses proposed corrected coefficients corroborated by an independent retained lineage. That defensible correction still departs from the published acceptable solution: affected runs disclose AHJ-7 and are conditional on the authority accepting the corrected coefficient.",
       "requirements": [
         {
           "id": "water_cooled_chiller_eir_temperature_erratum",
@@ -165,12 +165,12 @@
     },
     {
       "id": "D-05",
-      "title": "Two archetype-normalization interpretations adopted",
+      "title": "Archetype normalization retains proposed outdoor-air rates",
       "kind": "runtime",
       "editions": [
         "necb2025"
       ],
-      "summary": "Two readings of the archetype operating-conditions table were adopted: lighting operating schedules are normalized (not only lighting power density), and outdoor-air rates are taken as the applicable ventilation standard's rates evaluated at the table's occupant density. Leaving the proposed model's lighting schedules or ventilation rates in place would leak design-specific behaviour into a run whose whole purpose is an apples-to-apples archetype comparison.",
+      "summary": "The archetype-EUI run normalizes lighting operation to the applicable archetype schedule, but Sentence 8.4.4.2.(2) expressly retains the peak outdoor-air rates from the proposed building specifications. Normalizing occupant density therefore does not replace the proposed DesignSpecificationOutdoorAir.",
       "requirements": [
         {
           "id": "archetype_lighting_operating_schedules",
@@ -247,13 +247,13 @@
     },
     {
       "id": "D-07",
-      "title": "Cooling-tower part-load behaviour dispositioned to the engine",
-      "kind": "process",
+      "title": "Cooling-tower equations replaced by a disclosed engine substitution",
+      "kind": "runtime",
       "editions": [
         "necb2020",
         "necb2025"
       ],
-      "summary": "The reference tower's part-load capacity requirement is satisfied by EnergyPlus's effectiveness-NTU tower model, which exposes no curve fields the code's polynomial could be installed into. The disposition is backed by a gated numeric cross-check rather than argument alone: exact agreement at the industry rating point and bounded divergence across the rating slice, in the conservative direction at cold wet-bulbs where capacity never binds.",
+      "summary": "EnergyPlus's single-speed Merkel tower exposes no field for the six prescribed part-load capacity equations, so the effectiveness-NTU model is retained only as a disclosed alternative solution, not called literal compliance. A gated probe shows exact agreement at the rating point and bounded divergence across the rating slice; affected runs cite AHJ-22 and are conditional on acceptance.",
       "requirements": [
         {
           "id": "cooling_tower_part_load_capacity",
@@ -397,13 +397,13 @@
     },
     {
       "id": "D-11",
-      "title": "Hydronic pump power implemented as intensity transfer plus table curves",
+      "title": "Variable-flow pump riding curve retained; transfer superseded",
       "kind": "runtime",
       "editions": [
         "necb2020",
         "necb2025"
       ],
-      "summary": "Reference hydronic pump power is derived from the proposed building's combined pump power intensity in watts per litre per second, matched by loop type rather than pump-to-pump, since the two buildings' topologies legitimately differ. The intensity is multiplied by the reference's own flow rather than transferred as absolute watts, which prevents a consolidation free ride. Variable-speed reference pumps additionally receive the table's riding-curve coefficients with a minimum-flow clamp.",
+      "summary": "D-11 now owns only the published variable-flow pump riding curve and its below-breakpoint clamp. Its former whole-building loop-type watts-per-litre-per-second transfer was superseded: D-92 corrected the arithmetic and D-93 permits transfer only through established one-to-one proposed/reference correspondence, declining unmatched topologies loudly.",
       "requirements": [
         {
           "id": "variable_flow_pump_part_load_curve",
@@ -1048,13 +1048,13 @@
     },
     {
       "id": "D-24",
-      "title": "Envelope scope: unconditioned spaces out, interzone assemblies in",
+      "title": "Envelope scope corrected without a blanket enclosure credit",
       "kind": "runtime",
       "editions": [
         "necb2020",
         "necb2025"
       ],
-      "summary": "Both the prescriptive and reference envelope transforms had been iterating all exterior and ground surfaces while skipping all interzone surfaces, which is backwards relative to the definition of the building envelope as what separates conditioned space from everything else. Surfaces belonging to unconditioned spaces are now left untouched with an audited note, while assemblies separating conditioned from enclosed unconditioned space are treated as envelope, with the table row chosen by inclination and the enclosure credited.",
+      "summary": "Assemblies separating conditioned from unconditioned space are envelope and use the table row selected by inclination, while surfaces belonging only to unconditioned space remain untouched. The enclosed-space credit is not applied blindly: because the model cannot prove that an adjacent attic, roof or crawl space is unvented, the transform conservatively uses the exterior requirement and discloses conditioned-to-conditioned boundaries whose greater-than-10 C limb cannot be established.",
       "requirements": [
         {
           "id": "assembly_class_by_inclination",
@@ -1673,13 +1673,13 @@
     },
     {
       "id": "D-41",
-      "title": "Service-water reference article machine-verified; gap refined",
+      "title": "Service-water clone coverage verified; only pump topology remains",
       "kind": "data",
       "editions": [
         "necb2020",
         "necb2025"
       ],
-      "summary": "The service-water manifest's long-standing caveat that the article text was not machine-verifiable is closed now that the full article and its explanatory note retrieve cleanly. The verification showed the clone-based treatment already satisfies most sentences, so the declared gap was narrowed to two genuinely unimplemented items: part-load curves on reference service-water equipment, and consolidation of multiple proposed circulation pumps into one.",
+      "summary": "The full service-water reference article and explanatory note are now machine-verified. Clone-based treatment carries Sentences (3), (4), (6), (7) and (8), and D-53 closes the fuel-fired part-load requirement in Sentence (5); only Sentence (9)'s circulation-pump topology caveat remains explicit.",
       "requirements": [
         {
           "id": "reference_swh_from_proposed",
@@ -2509,12 +2509,12 @@
     },
     {
       "id": "D-59",
-      "title": "The vendored NECB 2020 equipment-efficiency minimums are verified against the printed tables",
+      "title": "The original NECB 2020 equipment families are verified against their tables",
       "kind": "data",
       "editions": [
         "necb2020"
       ],
-      "summary": "Every equipment-efficiency family the reference path applies was compared value-by-value against the printed minimum-performance tables retrieved from the code service. The unitary air-conditioner ladder, the packaged-terminal formula (whose printed per-kilowatt coefficient reappears exactly as the vendored per-kBtu-per-hour one), the heat-pump heating ladder, the boiler ladder and the furnace rows match their printed cells. The former small-heat-pump cooling choice was a legacy-parity mistake: Table A explicitly places air conditioners and heat pumps below 19 kW in the SEER 15 class, so the four 2020 small rows were corrected from the unrelated Table-B single-package-vertical EER 11 reading and pinned by direct data and model-level tests. The chiller ladder, which carried no provenance at all, turns out to be the printed chiller table's PATH B full-load coefficients of performance converted precisely to kilowatts per ton - the compliance path election is now documented rather than implicit, with the vendored reference part-load curves standing in for the path's integrated part-load requirement since the simulation carries a full-load rating plus curves, not an IPLV. The heat-rejection family cites ASHRAE 90.1 vintages rather than the NECB, but is VESTIGIAL: the reference path never reads it, because the reference cooling tower's fan power is set from the fan-power table and the tower-cell rules instead. Each verified value is pinned by a test that states the printed number and the conversion reaching the vendored one, so a future data regeneration that drifts from the code text fails with the printed value in the message.",
+      "summary": "The bounded set of original NECB 2020 unitary, packaged-terminal, chiller, boiler and furnace families was compared row-by-row with its own printed tables and conversion rules. The work corrected the small heat-pump cooling bin and documented the selected chiller full-load path; later-added VRF and part-load families remain owned by D-85 and D-89 rather than being swept into an unsupported claim that every current family was verified here.",
       "requirements": [
         {
           "id": "necb2020_equipment_efficiency_minima",
@@ -2540,12 +2540,12 @@
     },
     {
       "id": "D-60",
-      "title": "The NECB 2025 edition's tables are verified against the printed code: efficiencies re-checked post-extraction-fix, selection verbatim 2020",
+      "title": "NECB 2025 equipment data verified against its own edition",
       "kind": "data",
       "editions": [
         "necb2025"
       ],
-      "summary": "The same verification pass that checked the 2020 equipment-efficiency data against the printed tables was run for the 2025 edition, whose vendored file had been transcribed before the table-extraction service was fixed and carried a letter map from the corrupted extraction. Re-fetched against the corrected extraction, the 2025 table lettering mirrors 2020 exactly, and the earlier claim that the packaged-terminal table had changed - which had left the carried-over coefficients under suspicion - turns out to have been an artifact of reading the wrong table: the packaged-terminal table is identical in both printed editions, so the applied coefficients are correct. The chiller, boiler and heat-rejection tables are likewise identical across editions and are pinned to stay identical in the vendored data. The genuine 2025 changes include the increased split-system seasonal heating factor and new single-phase rows under the updated testing procedure - vendored but inert, since their subcategory never matches the engine's lookup. The small heat-pump cooling bin is SEER 15 in both editions under the explicit Table-A air-conditioner-and-heat-pump class, after correction of the 2020 legacy-parity reading under D-59. The reference-system selection table of the 2025 edition is verbatim the 2020 table, the vendored selection rules differ only in table-number strings, and the full catalog matrix run under the 2025 vintage produces assignments identical to the adjudicated 2020 golden.",
+      "summary": "The NECB 2025 equipment dataset was re-fetched after the extraction fix and verified against its own edition rows, including genuine metric and classification changes. Individual tables that were directly compared may match 2020, but this decision makes no broad cross-edition identity claim and does not derive 2025 validity from the earlier edition.",
       "requirements": [
         {
           "id": "necb2025_equipment_efficiency_minima",
@@ -2599,12 +2599,12 @@
     },
     {
       "id": "D-61",
-      "title": "Staleness audit after the extraction-service fixes: every pre-fix vendored table re-verified against the corrected source",
+      "title": "Extraction-backed NECB 2025 datasets rechecked with explicit residuals",
       "kind": "data",
       "editions": [
         "necb2025"
       ],
-      "summary": "The table-extraction service behind the code data was fixed in four stages after most of the vendored data had been transcribed, so every vendored artifact whose primary source was the extraction service - rather than the legacy implementation - was re-fetched against the corrected extraction and diffed value by value: the lighting power densities, the energy-recovery thresholds, the pump power-curve coefficients and pumping-power caps, the envelope thermal-transmittance ladders including the perimeter-strip ground-floor nuance, the exterior lighting allowances, the greenhouse-gas performance levels and provincial emission factors, and the archetype energy-use-intensity targets. Every value matches the corrected printed tables exactly, and the part-load-curve probe re-run confirms the curve equations verified during the window when equations could be attached to the wrong article still hold. Zero stale-data defects were found, for structural reasons worth keeping: the corruption was concentrated in complex multi-header tables and in cross-table letter alignment - both already caught and corrected by earlier decisions - while the numeric single-header tables extracted correctly even before the fixes; several files were cross-checked against the legacy implementation at build time; and the name-keyed joins used for the lighting data fail loudly on row misalignment rather than silently shifting values. The re-verified files carry a dated stamp in their provenance blocks so the next extraction-service fix has a clear audit trail of what was checked against which state of the source.",
+      "summary": "Extraction-backed NECB 2025 datasets were re-fetched after the service fixes and checked requirement by requirement rather than treated as one zero-defect bundle. The exterior-lighting comparison established 88 of 91 values and leaves three discrepancies explicit; other retained requirements record their own bounded results, while curve and service-water families remain under their dedicated decisions.",
       "requirements": [
         {
           "id": "archetype_eui_target_data_2025",
@@ -2817,13 +2817,13 @@
     },
     {
       "id": "D-65",
-      "title": "The Hospital reference's slow annual run is the ventilation floor meeting the per-stage flow band, plus thirty required energy-recovery wheels - inherent cost, one small lead left open",
+      "title": "Reference energy recovery remains required despite simulation cost",
       "kind": "process",
       "editions": [
         "necb2020",
         "necb2025"
       ],
-      "summary": "The reference annual run for the largest archetype takes three to four times its proposed's runtime, with tens of millions of recurring warnings. Root-caused on two axes. The warning churn is the staged cooling coils' lowest stages operating above the simulator's flow-per-watt band on high-outdoor-air hospital loops: the staged supply flow is deliberately floored at the minimum outdoor-air fraction so staging can never starve ventilation, and on loops whose ventilation fraction exceeds the lowest stage's capacity fraction that floor sits outside the band, so the simulator warns and clamps at every call - verified by the converse, a low-outdoor-air staged model with an economizer logging zero such warnings. Abandoning the floor would trade a warning for a ventilation violation, so the churn is dispositioned as inherent. The runtime delta is substantially legitimate equipment: the reference carries thirty energy-recovery wheels the legacy proposed lacks because the code requires them, each simulated every timestep. One lead stays open: four input-time severe errors about unbalanced air volume flow on two nurses-station energy-recovery wheels - localized, non-fatal, and worth a targeted flow-balance look when that subsystem is next touched. Practical consequence recorded: the two largest archetypes need a twelve-hour window for full-annual sweeps.",
+      "summary": "Where the Part 5 airflow trigger applies, the reference must include energy recovery even when many heat exchangers materially increase annual simulation time. The Hospital warning volume, staged ventilation-flow-floor behavior and remaining flow-balance lead are implementation evidence recorded in the body; they neither broaden nor qualify the Code-backed energy-recovery obligation.",
       "requirements": [
         {
           "id": "reference_energy_recovery_requirement",
@@ -3007,13 +3007,13 @@
     },
     {
       "id": "D-76",
-      "title": "Field-test articles are declared modeller scope, and the assumed value is stated",
+      "title": "Air-barrier path and field-test assumptions are distinguished",
       "kind": "runtime",
       "editions": [
         "necb2020",
         "necb2025"
       ],
-      "summary": "Articles whose compliance is established by a field test rather than by a model — 3.2.4.1. and 3.2.4.2. air leakage — are declared not_implemented with gap_owner: modeller, so they render as modeller scope instead of a failure the software could never clear. Where the model assumes the tested value, it now says so at the point of use: the 1.50 L/(s.m2) @ 75 Pa default is audited with the test standard and verified: false. host_scope was rejected because it asserts sibling-gem ownership that does not exist.",
+      "summary": "Sentence 3.2.4.1.(1) establishes the continuous-air-barrier compliance path, while 3.2.4.2.(1)-(2) govern whole-building field testing; they are not one generic test requirement. Constructed continuity and measured leakage remain modeller scope, and when the model uses the untested 1.50 L/(s.m2) at 75 Pa default it audits the ASTM E3158 assumption with verified: false.",
       "requirements": [
         {
           "id": "continuous_air_barrier_system",

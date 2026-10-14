@@ -11,7 +11,7 @@ no authority — `ruled` is settled, and `tool-gap` is a defect for us
 to close, not a question for anyone else. This document is the other
 two: **8 `referral`** entries, where the
 Code's text does not decide the question, and
-**2 `alternative-solution`**
+**3 `alternative-solution`**
 entries, where it does decide and this tool does not meet it — which
 an authority can accept only as an explicitly identified
 non-conforming substitution.
@@ -245,7 +245,7 @@ but it is not an outcome of the question this entry asks.
 
 - **Editions:** necb2020, necb2025
 - **Article:** Table 8.4.5.5.-C (NECB 2020); Table 8.4.6.5.-C (NECB 2025).
-- **Makes a run conditional:** not yet — see the entry
+- **Makes a run conditional:** yes, where a corrected affected row is used
 
 **The question.** THE DEFECT IS IN THE PUBLISHED
 CODE, not in our extraction.
@@ -311,10 +311,36 @@ absence itself is a separate `tool-gap` and is now **AHJ-17**, because one
 entry cannot carry a referral and a tool gap under one status without making
 the taxonomy untruthful (Sol, clearance review of be2118d).
 
-**STILL OPEN, and phylroy's call.** The deviation sets no run conditional, so a
-building with a water-cooled scroll or reciprocating chiller is modelled on
-corrected coefficients with nothing in its report saying so. Same shape of
-hole as AHJ-5.
+**Runtime disclosure closed in Phase E.** A water-cooled scroll or
+reciprocating chiller now cites this entry when the corrected EIR_FT curve is
+installed. The report therefore names the alternative solution and makes that
+run conditional on acceptance of the corrected coefficient.
+
+### AHJ-22 — cooling-tower capacity equations replaced by the engine Merkel model
+
+- **Editions:** necb2020, necb2025
+- **Article:** 8.4.5.6.(1)-(6) in NECB 2020; 8.4.6.6.(1)-(6) in NECB 2025.
+- **Makes a run conditional:** yes, where a reference cooling tower is present
+
+**The question.** The six sentences define the
+capacity adjustment as explicit functions of entering wet-bulb temperature,
+range and air-flow ratio. The model instead delegates available capacity to
+EnergyPlus's effectiveness-NTU implementation. D-07's numerical probe provides
+useful evidence: the formulations agree at the CTI rating point and differ by
+no more than 12.7% across that rating wet-bulb slice, with conservative
+divergence at colder wet-bulbs. Numerical proximity does not turn one
+prescribed method into the other.
+
+**Established by.** D-07's retained numeric cross-check and the Phase E review
+of `CoolingTowerSingleSpeed` on 2026-10-14. The earlier `engine` coverage
+disposition described the substitution but incorrectly called the requirement
+satisfied.
+
+**What the tool does meanwhile.** It retains the single-speed Merkel tower,
+cites D-07 and this entry on every affected condenser loop, and makes the run
+conditional on the authority accepting the substitution. Closing the entry
+requires a reference-tower representation that applies the six prescribed
+equations, followed by a new freeze of affected scenarios.
 
 ---
 

@@ -888,6 +888,8 @@ class TestTheStoreysOverrideReachesTheBUILDER(unittest.TestCase):
         self.assertIn(9, warnings[0]["inputs"].values())
         self.assertIn(3, warnings[0]["inputs"].values(),
                       "the warning must name BOTH numbers")
+        self.assertEqual("Table 8.4.4.7.-B Note (3)",
+                         warnings[0]["article"])
 
     def test_an_AGREEING_declared_count_warns_about_nothing(self):
         import openstudio

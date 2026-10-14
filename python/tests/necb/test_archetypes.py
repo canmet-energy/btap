@@ -109,6 +109,14 @@ class TestArchetypes(unittest.TestCase):
             equipment = openstudio.model.WaterUseEquipment(definition)
             equipment.setName(f"{space.nameString()} SWH")
             equipment.setSpace(space)
+        space = model.getSpaces()[0]
+        proposed_oa = openstudio.model.DesignSpecificationOutdoorAir(model)
+        proposed_oa.setName("Hostile proposed OA specification")
+        proposed_oa.setOutdoorAirMethod("Maximum")
+        proposed_oa.setOutdoorAirFlowperPerson(0.0123)
+        proposed_oa.setOutdoorAirFlowperFloorArea(0.00456)
+        proposed_oa.setOutdoorAirFlowRate(0.0789)
+        space.setDesignSpecificationOutdoorAir(proposed_oa)
         audit = quiet()
         resolved = A.resolve(model, {"Office": "all"}, audit=audit)
         A.normalize(model, resolved, code="necb2025", audit=audit)
@@ -122,7 +130,6 @@ class TestArchetypes(unittest.TestCase):
             + " | ".join(check["mismatches"][:5]))
 
         # spot-check the physical values against Table 8.4.4.2 (Office row)
-        space = model.getSpaces()[0]
         self.assertAlmostEqual(1.0 / 25.0,
                                space.numberOfPeople() / space.floorArea(),
                                delta=1e-4, msg="Office: 25 m2/person")
@@ -132,6 +139,14 @@ class TestArchetypes(unittest.TestCase):
         zone = space.thermalZone().get()
         self.assertTrue(zone.thermostatSetpointDualSetpoint().is_initialized(),
                         "zone thermostat forced to the letter-A setpoints")
+        normalized_oa = space.designSpecificationOutdoorAir().get()
+        self.assertEqual(proposed_oa.handle(), normalized_oa.handle(),
+                         "8.4.4.2.(2): keep the proposed OA specification")
+        self.assertEqual("Maximum", normalized_oa.outdoorAirMethod())
+        self.assertAlmostEqual(0.0123, normalized_oa.outdoorAirFlowperPerson())
+        self.assertAlmostEqual(0.00456,
+                               normalized_oa.outdoorAirFlowperFloorArea())
+        self.assertAlmostEqual(0.0789, normalized_oa.outdoorAirFlowRate())
 
     def test_lighting_power_is_never_touched(self):
         import openstudio

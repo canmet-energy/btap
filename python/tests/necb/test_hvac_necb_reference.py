@@ -74,14 +74,18 @@ class TestNecbReference(unittest.TestCase):
     # identical-to-proposed parenthetical.
     def test_residential_pthp_redirects_to_ashp_reference(self):
         model = self.proposed('PTHP')
+        audit = AuditLog()
         result = hvac.reference_hvac(
-            model, building={'storeys': 1, 'zone_types': types(model, 'Multi-unit residential')})
+            model, code='necb2025', audit=audit,
+            building={'storeys': 1, 'zone_types': types(model, 'Multi-unit residential')})
 
         self.assertEqual(['hp'], sorted({a.reference_system for a in result.assignments}))
         self.assertEqual(['build'], sorted({a.action for a in result.assignments}))
         self.assertEqual(0, len(result.model.getZoneHVACPackagedTerminalHeatPumps()),
                          'proposed PTHPs replaced by the ASHP reference')
         self.assertTrue(len(result.model.getAirLoopHVACs()), 'ASHP RTU reference built')
+        redirect = next(e for e in audit.entries if e.get('ruling') == 'D-34')
+        self.assertEqual('8.4.5.7.(4)', redirect['article'])
 
     # D-37 (A2 ruled: printed 8.4.4.13 split per Note A-8.4.4.13): the catalog
     # 'Water source heat pumps' system is by the note's definitions a
@@ -97,9 +101,8 @@ class TestNecbReference(unittest.TestCase):
             building={'storeys': 1, 'zone_types': types(model, 'Office - enclosed')})
         self.assertEqual([3], sorted({a.reference_system for a in result.assignments}),
                          'internal boiler+fluid-cooler loop = water-loop HP -> Table -A selection retained')
-        self.assertTrue(any('Note A-8.4.4.13' in str(e.get('article') or '')
-                            for e in audit.entries),
-                        'retention decision cites the note')
+        retention = next(e for e in audit.entries if e.get('ruling') == 'D-37')
+        self.assertEqual('8.4.4.13.(1)', retention['article'])
 
         ground = self.proposed('Water source heat pumps')
         loop_ = next(loop for loop in ground.getPlantLoops()
@@ -111,10 +114,15 @@ class TestNecbReference(unittest.TestCase):
                 c.to_EvaporativeFluidCoolerSingleSpeed().get().remove()
         ghx = openstudio.model.GroundHeatExchangerVertical(ground)
         loop_.addSupplyBranchForComponent(ghx)
+        ground_audit = AuditLog()
         result = hvac.reference_hvac(
-            ground, building={'storeys': 1, 'zone_types': types(ground, 'Office - enclosed')})
+            ground, audit=ground_audit,
+            building={'storeys': 1, 'zone_types': types(ground, 'Office - enclosed')})
         self.assertEqual(['hp'], sorted({a.reference_system for a in result.assignments}),
                          'ground HX on the source loop = ground-source HP -> ASHP redirect')
+        redirect = next(e for e in ground_audit.entries
+                        if e.get('ruling') == 'D-37')
+        self.assertEqual('8.4.4.13.(2)(a)', redirect['article'])
 
     # D-39 (A4 ruled conditional): an UNHEATED refrigerated proposed block gets
     # the Table -B literal — a cooling-only TPFC reference (no boiler, no MAU

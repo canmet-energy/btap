@@ -182,8 +182,8 @@ class TestTheReferralPackage(unittest.TestCase):
                         1, section.count(f"**{label}.** "),
                         f"{ident}: exactly one {label} block")
 
-    def test_the_two_ALTERNATIVE_SOLUTIONS_are_named_explicitly(self):
-        """AHJ-1 and AHJ-7 by id, not by count.
+    def test_the_ALTERNATIVE_SOLUTIONS_are_named_explicitly(self):
+        """AHJ-1, AHJ-7 and AHJ-22 by id, not by count.
 
         Both shipped with no requirement text at all and the counts still
         matched, because eight referrals satisfied every aggregate assertion.
@@ -198,7 +198,7 @@ class TestTheReferralPackage(unittest.TestCase):
             (i for i, s in by_status.items() if s == "alternative-solution"),
             key=lambda v: int(v.split("-")[1]))
         self.assertEqual(
-            ["AHJ-1", "AHJ-7"], alternatives,
+            ["AHJ-1", "AHJ-7", "AHJ-22"], alternatives,
             "the register's alternative solutions have changed — this test "
             "names them deliberately, so update it with the register")
         for ident in alternatives:
@@ -338,23 +338,15 @@ class TestTheReferralPackage(unittest.TestCase):
         self.assertIn(
             "|", section,
             "as must the table of the three wrong published rows")
-        # And the DISPOSITION, which the grammar cannot protect: both the
-        # generator and this file's reader consume `FIELD_HEADINGS`, so
-        # adding "STILL OPEN" to it truncates both sides identically and the
-        # whole module stays green while the package loses the five lines
-        # that say the question is undecided (Sol, `221`). A declared grammar
-        # removes guessing; it does not make the content checkable, and only
-        # a content fact can.
+        # And the Phase E runtime disposition, which the grammar cannot
+        # protect: a declared grammar removes guessing but does not make the
+        # content checkable, so pin the substantive closure.
         self.assertIn(
-            "STILL OPEN", section,
-            "AHJ-7's final disposition must survive. It is what tells an "
-            "authority the question is open: the deviation sets no run "
-            "conditional, so a building with a water-cooled scroll or "
-            "reciprocating chiller is modelled on corrected coefficients "
-            "with nothing in its report saying so")
+            "Runtime disclosure closed in Phase E", section,
+            "AHJ-7 must say that affected curves now reach the report")
         self.assertIn(
-            "nothing in its report saying so", section,
-            "including the sentence naming what the reader will NOT see")
+            "conditional on acceptance of the corrected coefficient", section,
+            "including the consequence of the alternative solution")
 
     def test_AHJ_16_does_NOT_publish_the_review_loop_history(self):
         """The other direction, also by content.

@@ -291,8 +291,8 @@
         }
       },
       "heat_pump": {
-        "article": "8.4.5.13.(1)-(2) + Table 8.4.5.13",
-        "text": "Where the proposed ... includes an air-source, water-source or ground-source heat pump ..., the reference building's HVAC system for that thermal block shall be an air-source heat pump described in Table 8.4.5.13 (packaged unitary rooftop heat pump, CV, furnace + baseboards auxiliary). System 2 selections keep Table 8.4.5.7.-B.",
+        "article": "8.4.5.13.(2)(a)",
+        "text": "A proposed source heat pump within Sentence (2) redirects to the air-source heat pump described in Table 8.4.5.13; a water-loop heat pump remains under Sentence (1) and keeps its Table 8.4.5.7.-A selection.",
         "applies_to_systems": [
           1,
           3,
@@ -437,6 +437,7 @@
   },
   "cooling_plant": {
     "article": "8.4.5.10.(6)",
+    "chiller_eirft_table": "Table 8.4.6.5.-C",
     "single_chiller_max_kw": 2100,
     "chw_supply_c": 7,
     "delta_t_c": 6,
@@ -449,19 +450,21 @@
     "stage_size_kw": 66
   },
   "economizer_dx_staging": {
-    "article": "5.2.2.8.(4)-(5)",
+    "article_at_or_above_70_kw": "5.2.2.8.(4)",
+    "article_above_25_below_70_kw": "5.2.2.8.(5)",
     "ge_70_kw_lowest_fraction": 0.25,
     "over_25_kw_lowest_fraction": 0.5,
     "note": "Economizer (sentence-(1)) systems: cooling equipment must operate below full capacity with the LOWEST stage <= 25% of full capacity at >= 70 kW ((4)) and <= 50% at > 25 kW and < 70 kW ((5)); equal-increment staging => stage-count floor ceil(1/fraction). Sentence (6) (OA reduction at lowest stage) is a PERMISSION, not exercised: stage flow ratios are already floored at the minimum-OA fraction (D-46)."
   },
   "fans": {
-    "article": "8.4.5.18.(3)-(4)",
     "systems_1_3_4_5": {
+      "article": "8.4.5.18.(3)",
       "supply_pa": 640,
       "supply_efficiency": 0.4,
       "return_fan": false
     },
     "system_6": {
+      "article": "8.4.5.18.(4)",
       "supply_air_temp_c": 13,
       "supply_pa": 1000,
       "supply_efficiency": 0.55,
@@ -478,6 +481,11 @@
     "heating_cutoff_oat_c": -10,
     "aux_energy_type_threshold_fraction": 0.33
   },
+  "cooling_tower": {
+    "one_cell_article": "8.4.5.11.(2)",
+    "multiple_cells_article": "8.4.5.11.(3)",
+    "part_load_article": "8.4.6.6.(1)"
+  },
   "hydronic_pumps": {
     "article": "8.4.5.14.(1)-(5)",
     "table_article": "Table 8.4.5.14.",
@@ -489,7 +497,7 @@
       "Heat rejection": 12.0,
       "Water-source heat pump": 22.0
     },
-    "transfer": "sentences (1)-(3) via one mechanism: combined peak W/(L/s) by plant-loop type from the sized proposed model ((2) combined by summing power AND flow); reference pump rated power = intensity x its own sized flow",
+    "correspondence": "D-93 transfers pump power only through established one-to-one proposed/reference loop and pump correspondence; no whole-building or loop-type W/(L/s) allocation is permitted",
     "sentence_5": "variable-flow pumps are modeled as a pump riding its curve -> riding-curve coefficients on every reference PumpVariableSpeed",
     "curves": {
       "riding pump curve": {
@@ -510,8 +518,9 @@
     "floor_note": "below-D floor (P = E x Prated) approximated by the minimum-flow clamp at D x rated flow; polynomial at D equals E within table rounding (0.691 vs 0.68, 0.043 vs 0.04)"
   },
   "energy_recovery": {
-    "article": "8.4.5.19.(1)-(2)",
-    "trigger_article": "5.2.10.1.(1); Tables 5.2.10.1.-A/-B",
+    "article": "8.4.5.19.(1)",
+    "preheat_article": "8.4.5.19.(2)",
+    "trigger_article": "5.2.10.1.(1)",
     "effectiveness": 0.5,
     "hx": {
       "type": "Rotary",
@@ -606,8 +615,8 @@
         }
       ]
     },
-    "effectiveness_article": "5.2.10.1.(4) — >= 50% ENTHALPY effectiveness at design conditions; setting sensible AND latent effectiveness to 0.50 at every rating point gives enthalpy effectiveness exactly 0.50 by identity (both components of delta-h transfer at 50%) — minimum-compliant for the reference",
-    "overshoot_article": "5.2.10.1.(6) — supply-air outlet temperature control + OutdoorAirPretreat setpoint manager are the required bypass/control against setpoint overshoot"
+    "effectiveness_article": "5.2.10.1.(4)",
+    "overshoot_article": "5.2.10.1.(6)"
   },
   "water_economizer": {
     "article": "8.4.5.12.",
@@ -1013,8 +1022,8 @@
         "article": "8.4.5.14.",
         "title": "Hydronic Pumps",
         "status": "implemented",
-        "how": "Table 8.4.5.14. riding-curve coefficients + below-D minimum-flow clamp on every reference PumpVariableSpeed ((4)-(5)), applied POST-SIZING by the efficiency pass; proposed combined peak W/(L/s) per plant-loop type transferred to reference pump rated power ((1)-(3), needs the sized proposed via apply_efficiencies proposed:) — unknown proposed pumps or unsized flows warn loudly. D-38: the transferred power is then clamped min-wins at the Table 5.2.6.3 combined-pump maximum (W per kW of loop peak thermal demand; 8.4.5.1.(2) makes Part 5 a ceiling for the reference).",
-        "gaps": "(6) 5.2.12.1 pump-energy-inclusive secondary-system adjustment is not implemented; (2)'s combined peak transfers as W/(L/s) INTENSITY (x reference flow), not absolute watts — reference flows legitimately differ from proposed.",
+        "how": "Table 8.4.5.14 riding-curve coefficients + below-D minimum-flow clamp on every reference PumpVariableSpeed ((4)-(5)), applied POST-SIZING by the efficiency pass. D-93 transfers pump power only where one-to-one proposed/reference correspondence is established and declines unmatched loops loudly. D-38 then applies the Table 5.2.6.3 combined-pump maximum.",
+        "gaps": "(6) 5.2.12.1 pump-energy-inclusive secondary-system adjustment is not implemented; N:1 or 1:N correspondence is not guessed.",
         "code": [
           "python/btap/codes/necb/hvac/efficiency.py#_apply_pump_rules"
         ]

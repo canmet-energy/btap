@@ -85,8 +85,22 @@ def _apply_energy_recovery(model, ruleset, *, hdd, audit=None):
                                  f'(= {pct}% ENTHALPY effectiveness by identity, '
                                  f'the 5.2.10.1.(4) minimum) with 5.2.10.1.(6) overshoot control '
                                  f'({erv.nameString()})',
-                           article=f"{rule['article']}; {rule['trigger_article']}; 5.2.10.1.(4); 5.2.10.1.(6)",
-                           ruling='D-06 D-15')
+                           article=rule['trigger_article'], ruling='D-06')
+            audit.info(
+                'rules',
+                'energy-recovery sensible and latent effectiveness set to the '
+                'minimum enthalpy effectiveness',
+                target=erv.nameString(),
+                value=f'{pct}% sensible and {pct}% latent at every rating point',
+                article=rule['effectiveness_article'],
+                ruling='D-15')
+            audit.info(
+                'rules',
+                'energy-recovery supply-air temperature overshoot control enabled',
+                target=erv.nameString(),
+                value='supply outlet temperature control with pretreat setpoint manager',
+                article=rule['overshoot_article'],
+                ruling='D-15')
         else:
             audit.decision('rules', 'energy recovery not required (below the Table 5.2.10.1 threshold)',
                            target=air_loop.nameString(), inputs=inputs,
