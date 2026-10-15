@@ -319,9 +319,9 @@ def _stage_multispeed_coil(optional_coil, rule, article, label, audit, totals=No
     floor = _economizer_stage_floor(unitary, kw, economizer_spec)
     if floor:
         floor_article = (
-            economizer_spec['article_at_or_above_70_kw']
+            economizer_spec['at_or_above_70_kw_article']
             if kw >= 70
-            else economizer_spec['article_above_25_below_70_kw']
+            else economizer_spec['above_25_below_70_kw_article']
         )
         if floor > wanted:
             audit.decision(

@@ -450,8 +450,8 @@
     "stage_size_kw": 66
   },
   "economizer_dx_staging": {
-    "article_at_or_above_70_kw": "5.2.2.8.(4)",
-    "article_above_25_below_70_kw": "5.2.2.8.(5)",
+    "at_or_above_70_kw_article": "5.2.2.8.(4)",
+    "above_25_below_70_kw_article": "5.2.2.8.(5)",
     "ge_70_kw_lowest_fraction": 0.25,
     "over_25_kw_lowest_fraction": 0.5,
     "note": "Economizer (sentence-(1)) systems: cooling equipment must operate below full capacity with the LOWEST stage <= 25% of full capacity at >= 70 kW ((4)) and <= 50% at > 25 kW and < 70 kW ((5)); equal-increment staging => stage-count floor ceil(1/fraction). Sentence (6) (OA reduction at lowest stage) is a PERMISSION, not exercised: stage flow ratios are already floored at the minimum-OA fraction (D-46)."

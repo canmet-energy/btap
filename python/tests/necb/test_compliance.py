@@ -530,8 +530,13 @@ class TestComplianceWithEngine(unittest.TestCase):
         # Whatever path elected, the reference hp system was actually built
         # with a concrete variant (the fixture ASHP redirects per Table
         # 8.4.4.13).
-        self.assertTrue(any("air-source heat pump (Table 8.4.4.13)"
-                            in e["action"] for e in result.audit.entries))
+        redirect = next(
+            (e for e in result.audit.entries
+             if "reference is an air-source heat pump" in e["action"]),
+            None)
+        self.assertIsNotNone(redirect)
+        self.assertEqual("8.4.4.13.(2)(a)", redirect["article"])
+        self.assertEqual("hp", redirect["value"])
         self.assertTrue(result.report["proposed"]["clean_run"],
                         "proposed ran clean with the requested variables")
         self.assertTrue(result.report["reference"]["clean_run"])

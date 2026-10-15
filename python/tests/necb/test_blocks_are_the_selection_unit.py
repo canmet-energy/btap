@@ -56,6 +56,14 @@ def selected_systems(audit):
             if entry.get('action') == 'reference system selected']
 
 
+def merged_construction_entries(audit):
+    """Post-selection merges, excluding other decisions that cite a table note."""
+    return [
+        entry for entry in audit.entries
+        if 'selection_assignments_absorbed' in (entry.get('inputs') or {})
+    ]
+
+
 def loop_zones(model):
     """Each reference air loop's served zone names, sorted for comparison."""
     return sorted(
@@ -642,8 +650,7 @@ class TestTheMergeCitesTheNOTEThatApplies(unittest.TestCase):
     MZ = MULTIZONE_PROPOSED
 
     def merge_entries(self, audit):
-        return [e for e in audit.entries
-                if 'Note (' in str(e.get('article') or '')]
+        return merged_construction_entries(audit)
 
     def test_system_6_cites_Note_3_and_D_28(self):
         for code in EDITIONS:
@@ -1049,8 +1056,7 @@ class TestAHETEROGENEOUSMergeAuditsOnlyWhatMerged(unittest.TestCase):
             {name: systems.count(name) for name in sorted(set(systems))},
             'fixture precondition: ONE System 2 block beside four that merge')
 
-        merges = [e for e in audit.entries
-                  if 'Note (' in str(e.get('article') or '')]
+        merges = merged_construction_entries(audit)
         self.assertEqual(
             1, len(merges),
             'only System 6 merged, so only System 6 is audited; got {}'.format(
@@ -1100,8 +1106,7 @@ class TestTWOMergedSystem6ConstructionsStaySEPARATE(unittest.TestCase):
         self.assertEqual(['System 6'] * 5, systems,
                          'fixture precondition: all five select System 6')
 
-        merges = [e for e in audit.entries
-                  if 'Note (' in str(e.get('article') or '')]
+        merges = merged_construction_entries(audit)
         self.assertEqual(
             2, len(merges),
             'two distinct catalogue realisations are two merges, not one')
@@ -1131,8 +1136,7 @@ class TestTWOMergedSystem6ConstructionsStaySEPARATE(unittest.TestCase):
         """
         model, _ = self.two_service_sets()
         _, audit = reference_of(model, storeys=5)
-        for entry in [e for e in audit.entries
-                      if 'Note (' in str(e.get('article') or '')]:
+        for entry in merged_construction_entries(audit):
             inputs = entry['inputs']
             self.assertNotIn('selection_groups', inputs)
             self.assertNotIn('merged_groups', inputs)
@@ -1238,8 +1242,7 @@ class TestSAMECatalOGUEDifferentCONFIGKeepsItsFuel(unittest.TestCase):
         _, audit, blocks = self.build(gas_loop_name='A Gas',
                                       electric_loop_name='Z Electric',
                                       code='necb2020')
-        merges = [e for e in audit.entries
-                  if 'Note (' in str(e.get('article') or '')]
+        merges = merged_construction_entries(audit)
         self.assertEqual(2, len(merges))
         by_blocks = {tuple(e['inputs']['thermal_blocks']): e['inputs']
                      for e in merges}
