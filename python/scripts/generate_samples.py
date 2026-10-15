@@ -52,7 +52,7 @@ REPO_ROOT = PYTHON_ROOT.parent
 MANIFEST = HERE / "sample_manifest.json"
 
 # One per family where the family is distinct enough to be worth a file, chosen
-# to span fuel types and delivery types rather than to be exhaustive: 97 systems
+# to span fuel types and delivery types rather than to be exhaustive: 103 systems
 # would be a test suite, not a sample set.
 SAMPLES = (
     ("01-baseboard-gas",        "Baseboard gas boiler"),
