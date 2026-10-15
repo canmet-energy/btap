@@ -227,8 +227,12 @@ class TestNecbSelector(unittest.TestCase):
         rules = hvac.rules('2020')
         self.assertIn('8.4.4.7', rules['provenance']['articles'])
         for block in ('oversizing', 'heating_plant', 'furnace_staging', 'cooling_plant',
-                      'dx_staging', 'fans', 'hydronic_pumps'):
+                      'dx_staging', 'hydronic_pumps'):
             self.assertTrue(rules[block]['article'], f'{block} missing article citation')
+        for family in ('systems_1_3_4_5', 'system_6'):
+            self.assertTrue(
+                rules['fans'][family]['article'],
+                f'fans/{family} missing article citation')
         for key, defn in rules['system_definitions'].items():
             if key == 'table':
                 continue
@@ -273,7 +277,8 @@ class TestNecbSelector(unittest.TestCase):
         museum_notes = [e for e in audit.entries if e.get('ruling') == 'D-45']
         self.assertEqual(2, len(museum_notes),
                          'each museum election records which row it took')
-        self.assertTrue(all(e.get('article') == '8.4.4.7.(1)' for e in museum_notes))
+        self.assertTrue(
+            all(e.get('article') == 'Table 8.4.4.7.-A' for e in museum_notes))
 
 
 if __name__ == '__main__':

@@ -440,7 +440,7 @@ def apply_air_leakage_default(model, prefix, audit):
                    "test justifies a different value"
                    % (proposed_total_l_s, code_total_l_s,
                       100 * (proposed_total_l_s / code_total_l_s - 1)),
-                   article="8.4.3.3.(3)-(4)", ruling="D-19 D-21")
+                   article="8.4.3.3.(3)", ruling="D-19")
     # State the assumption to the AHJ rather than leaving it implicit. 3.2.4.2
     # is a TEST on the finished building, so this number is an assumption the
     # model makes on the reader's behalf until someone measures it — say so
@@ -451,7 +451,23 @@ def apply_air_leakage_default(model, prefix, audit):
                "substitute the measured rate once tested" % (AIR_LEAKAGE_I75,),
                inputs={"assumed_i75_l_per_s_m2": AIR_LEAKAGE_I75,
                        "test_standard": "ASTM E3158", "pressure_pa": 75, "verified": False},
-               article="3.2.4.2.", ruling="D-76")
+               article="3.2.4.2.(1)", ruling="D-76")
+    audit.info(
+        "reference",
+        "conditioned building-enclosure area used to normalize whole-building "
+        "air leakage",
+        inputs={"envelope_area_m2": ruby_round(envelope_area, 1)},
+        article="3.2.4.2.(1)(c)",
+        ruling="D-21",
+    )
+    audit.info(
+        "reference",
+        "air leakage converted from 75 Pa to the 5 Pa model pressure",
+        inputs={"from_pressure_pa": 75, "to_pressure_pa": 5,
+                "flow_exponent": AIR_LEAKAGE_N},
+        article="8.4.2.9.(2)",
+        ruling="D-19",
+    )
     audit.decision("reference", "air-leakage default applied",
                    inputs={"i75_l_per_s_m2": AIR_LEAKAGE_I75,
                            "flow_exponent": AIR_LEAKAGE_N,
@@ -468,7 +484,7 @@ def apply_air_leakage_default(model, prefix, audit):
                           f"{ruby_str(ruby_round(wall_area, 1))} = "
                           f"{ruby_str(ruby_round(i_agw, 4))} L/(s.m2 AG wall), per space as "
                           "flow-per-exterior-wall-area"),
-                   article=f"{prefix}.3.(6); 8.4.3.3.(3); 8.4.2.9.(2)", ruling="D-19 D-21")
+                   article=f"{prefix}.3.(6)", ruling="D-19")
 
 
 def _emit_article_coverage(ruleset, audit):

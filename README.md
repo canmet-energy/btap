@@ -227,7 +227,7 @@ usefully, for each partial article's specific gap.
 
 Where the code needs interpreting, the interpretation is written down rather than
 buried in the source. **103 decisions** are recorded in
-**[necb_decisions.md](docs/necb_decisions.md)** — 54 of them
+**[necb_decisions.md](docs/necb_decisions.md)** — 56 of them
 active at runtime, tagging the audit entries they govern.
 
 A decision records what the code says, how we read it, what we rejected, and why.
@@ -265,8 +265,8 @@ That distinction is the point of the register. Calling a tool gap an
 ambiguity would launder a defect as a question for someone else, and twelve
 decisions Sol audited were rejected as referrals for exactly that reason.
 
-**Nine of them change what a run reports: AHJ-1, AHJ-2, AHJ-3, AHJ-10,
-AHJ-11, AHJ-12, AHJ-14, AHJ-15 and AHJ-16.** Where they apply,
+**Eleven of them change what a run reports: AHJ-1, AHJ-2, AHJ-3, AHJ-7,
+AHJ-10, AHJ-11, AHJ-12, AHJ-14, AHJ-15, AHJ-16 and AHJ-22.** Where they apply,
 the verdict is still reported, marked as not a determination, and the report
 names what your authority must accept:
 
@@ -309,9 +309,9 @@ being established. Read it rather than assuming a listed question surfaces.
 One caution it states against itself: where an entry says the underlying
 decision is audited, that means the modelling action is recorded — it does NOT
 mean the audit tells you an authority's approval is wanted. AHJ-1, AHJ-2,
-AHJ-3, AHJ-5, AHJ-10, AHJ-11, AHJ-12, AHJ-14, AHJ-15 and AHJ-16 are cited in
-product output today, and AHJ-5 is a settled RULING that explains why a choice
-was made rather than a condition on it.
+AHJ-3, AHJ-5, AHJ-7, AHJ-10, AHJ-11, AHJ-12, AHJ-14, AHJ-15, AHJ-16 and
+AHJ-22 are cited in product output today, and AHJ-5 is a settled RULING that
+explains why a choice was made rather than a condition on it.
 
 The HTML report carries the same thing as a **CONDITIONAL — AHJ APPROVAL
 REQUIRED** badge beside the pass/fail badge, so it travels with the submission.

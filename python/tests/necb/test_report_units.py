@@ -6,9 +6,13 @@ The paired_bars golden is THE RUBY SUITE'S OWN golden file
 (btap-necb/test/goldens/paired_bars.svg) consumed as-is — a cross-language
 byte-equality gate, per the M3 catalog-report precedent."""
 
+import copy
+import json
 import re
+import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from btap.audit import AuditLog
 from btap.codes import decisions as Decisions
@@ -433,6 +437,277 @@ class TestReportUnits(unittest.TestCase):
         html = render_report(result)
         self.assertIn("UNDETERMINED", html)
         self.assertNotIn("PERFORMANCE PATH: PASS", html)
+
+
+#: Text that would show if any part of a registry entry other than its title
+#: and summary reached the report: markup, a link out, ruling-shaped ids and a
+#: sentinel no committed text contains.
+SENTINEL = "SCHEMA-2-METADATA-SENTINEL"
+HOSTILE = ('<script>alert("x")</script> <a href="https://example.invalid">x</a> '
+           "D-01 D-43 D-9999 " + SENTINEL)
+
+
+def registry_variants(committed):
+    """Rewrites of EVERY entry that keep its id, title, kind and summary."""
+    def runtime_fields(entry):
+        return {field: entry[field] for field in ("id", "title", "kind", "summary")}
+
+    def requirements():
+        return [{"id": "hostile_requirement", "label": HOSTILE, "decided": HOSTILE,
+                 "sources": [
+                     {"code": "necb", "edition": "2020", "role": "governing",
+                      "references": [HOSTILE]},
+                     {"code": "ashrae-62.1", "edition": "2016",
+                      "role": "incorporated-reference", "references": [HOSTILE]},
+                     {"code": "necb", "edition": "2030", "role": "related",
+                      "references": [HOSTILE]}]}]
+
+    def structured(entry):
+        return dict(runtime_fields(entry), editions=["necb2025"],
+                    requirements=requirements())
+
+    def mutated(entry):
+        changed = copy.deepcopy(entry)
+        changed["editions"] = (["necb2020"] if entry.get("editions") == ["unverified"]
+                               else ["unverified"])
+        changed["articles"] = {"hostile": {"label": HOSTILE, "necb2020": [HOSTILE]}}
+        changed["requirements"] = requirements()
+        return dict(reversed(list(changed.items())))
+
+    return {"structured": [structured(entry) for entry in committed],
+            "runtime fields only": [runtime_fields(entry) for entry in committed],
+            "mutated editions, articles and requirements":
+                [mutated(entry) for entry in committed]}
+
+
+class TestTheRulingsAppendixReadsOnlyTitleAndSummary(unittest.TestCase):
+    """Schema 2 adds committee metadata -- ``requirements``, their ``sources``
+    and ``decided``, and a derived ``editions`` -- that the compliance report
+    does not render (docs/plans/DECISION_APPLICABILITY_PLAN.md). With the
+    fired ids and their titles and summaries unchanged, no rewrite of that
+    metadata may change one byte of the rulings appendix or of the report."""
+
+    FIRED = ("D-19", "D-21", "D-43")
+
+    @classmethod
+    def setUpClass(cls):
+        cls.committed = copy.deepcopy(Decisions.all_decisions())
+        cls.appendix, cls.report = cls.rendered(cls.committed)
+
+    @staticmethod
+    def rendered(decisions):
+        """``(rulings appendix, full report)`` with the registry read from a
+        schema-2 FILE holding ``decisions``: the loader's own path."""
+        with tempfile.TemporaryDirectory() as scratch:
+            payload = {"_comment": ["fixture"], "schema": Decisions.SCHEMA,
+                       "decisions": decisions}
+            (Path(scratch) / "decisions.json").write_text(
+                json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+            with mock.patch.object(Decisions, "DATA_DIR", Path(scratch)), \
+                    mock.patch.object(Decisions, "_all", None), \
+                    mock.patch.object(Decisions, "_by_id", None):
+                return (Sections.rulings_appendix(
+                            {"audit_entries": canned_audit().entries}),
+                        render_report(canned_result()))
+
+    def with_entry(self, decision_id, **changes):
+        return [dict(entry, **changes) if entry["id"] == decision_id else entry
+                for entry in self.committed]
+
+    def test_the_canned_run_fires_exactly_these_registered_rulings(self):
+        fired = {decision_id for entry in canned_audit().entries
+                 for decision_id in Decisions.ids_in(entry.get("ruling"))}
+        self.assertEqual(set(self.FIRED), fired)
+        registered = {entry["id"] for entry in self.committed}
+        self.assertLessEqual(fired, registered)
+
+    def test_the_file_backed_registry_renders_as_the_committed_one(self):
+        self.assertEqual(
+            Sections.rulings_appendix({"audit_entries": canned_audit().entries}),
+            self.appendix)
+        self.assertEqual(render_report(canned_result()), self.report)
+        self.assertEqual(1, self.report.count(self.appendix))
+        for decision_id in self.FIRED:
+            self.assertIn("<td>{}</td>".format(decision_id), self.appendix)
+
+    def test_requirements_sources_and_decided_never_reach_the_html(self):
+        for name, decisions in registry_variants(self.committed).items():
+            with self.subTest(variant=name):
+                appendix, report = self.rendered(decisions)
+                self.assertEqual(self.appendix, appendix)
+                self.assertEqual(self.report, report)
+                self.assertNotIn(SENTINEL, report)
+
+    def test_a_fired_title_or_summary_does_change_the_html(self):
+        """The control: the comparison above can fail, and the change it
+        detects is confined to the appendix."""
+        by_id = {entry["id"]: entry for entry in self.committed}
+        for decision_id in self.FIRED:
+            for field in ("title", "summary"):
+                with self.subTest(decision=decision_id, field=field):
+                    changed = by_id[decision_id][field] + " (amended)"
+                    appendix, report = self.rendered(
+                        self.with_entry(decision_id, **{field: changed}))
+                    self.assertNotEqual(self.appendix, appendix)
+                    self.assertIn(H.esc(changed), appendix)
+                    self.assertEqual(1, report.count(appendix))
+                    self.assertEqual(self.report, report.replace(appendix, self.appendix))
+
+    def test_an_entry_that_did_not_fire_is_not_rendered(self):
+        quiet = next(entry["id"] for entry in self.committed
+                     if entry["id"] not in self.FIRED)
+        self.assertEqual((self.appendix, self.report),
+                         self.rendered(self.with_entry(quiet, title=HOSTILE,
+                                                       summary=HOSTILE)))
+
+    def test_a_fired_entry_missing_from_the_registry_is_named(self):
+        appendix, _ = self.rendered([entry for entry in self.committed
+                                     if entry["id"] != "D-43"])
+        self.assertIn("not in registry", appendix)
+        self.assertNotEqual(self.appendix, appendix)
+
+
+#: The decisions converted to structured requirements (Phase C's 23 and Phase
+#: D's 42), in id order.
+#: tests/necb/test_decisions_registry_sync.py pins the same set as MIGRATED_IDS.
+MIGRATED = ("D-02", "D-03", "D-04", "D-05", "D-06", "D-07", "D-09", "D-11",
+            "D-12", "D-13", "D-14", "D-15", "D-17", "D-18", "D-19", "D-21",
+            "D-22", "D-23", "D-24", "D-26", "D-27", "D-28", "D-31", "D-32",
+            "D-34", "D-35", "D-37", "D-38", "D-39", "D-41", "D-42", "D-43",
+            "D-45", "D-46", "D-47", "D-48", "D-49", "D-50", "D-51", "D-52",
+            "D-53", "D-54", "D-55", "D-56", "D-57", "D-58", "D-59", "D-60",
+            "D-61", "D-62", "D-63", "D-65", "D-74", "D-76", "D-85", "D-89",
+            "D-90", "D-91", "D-92", "D-93", "D-97", "D-99", "D-100", "D-101",
+            "D-102")
+
+
+def migrated_audit():
+    """The canned run plus one ruled decision for every migrated id."""
+    audit = canned_audit()
+    for decision_id in MIGRATED:
+        audit.decision("reference", "migrated ruling applied",
+                       target=decision_id, ruling=decision_id)
+    return audit
+
+
+def legacy_shaped(entry):
+    """A structured entry put back in the per-code-id ``articles`` form the
+    migrations replaced, keeping its id, title, kind, editions and summary."""
+    if "requirements" not in entry:
+        return entry
+    articles = {}
+    for requirement in entry["requirements"]:
+        block = articles[requirement["id"]] = {"label": requirement["label"]}
+        for source in requirement["sources"]:
+            block[source["code"] + source["edition"]] = list(source["references"])
+    return {"id": entry["id"], "title": entry["title"], "kind": entry["kind"],
+            "articles": articles, "editions": list(entry["editions"]),
+            "summary": entry["summary"]}
+
+
+class TestTheMigratedDecisionsRenderAsTheirLegacyShape(unittest.TestCase):
+    """The migrations (Phase C's 23 decisions, then Phase D's 42)
+    changed how 65 decisions record their provisions and nothing a
+    report reads. A run that fires every one of them renders the same rulings
+    appendix and the same report whether the registry holds them structured,
+    back in the per-code-id shape they replaced, or reduced to the fields the
+    runtime reads."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.committed = copy.deepcopy(Decisions.all_decisions())
+        cls.by_id = {entry["id"]: entry for entry in cls.committed}
+        cls.appendix, cls.report = cls.rendered(cls.committed)
+
+    @staticmethod
+    def rendered(decisions):
+        """``(rulings appendix, full report)`` with the registry read from a
+        schema-2 FILE holding ``decisions``: the loader's own path."""
+        with tempfile.TemporaryDirectory() as scratch:
+            payload = {"_comment": ["fixture"], "schema": Decisions.SCHEMA,
+                       "decisions": decisions}
+            (Path(scratch) / "decisions.json").write_text(
+                json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+            with mock.patch.object(Decisions, "DATA_DIR", Path(scratch)), \
+                    mock.patch.object(Decisions, "_all", None), \
+                    mock.patch.object(Decisions, "_by_id", None):
+                result = ComplianceResult(
+                    proposed_model=None, reference_model=None,
+                    report=canned_report(), audit=migrated_audit(),
+                    compliant=True, run_dir=None)
+                return (Sections.rulings_appendix(
+                            {"audit_entries": migrated_audit().entries}),
+                        render_report(result))
+
+    def test_the_registry_holds_exactly_these_structured_entries(self):
+        structured = [entry["id"] for entry in self.committed
+                      if "requirements" in entry]
+        self.assertEqual(list(MIGRATED), structured)
+        for decision_id in MIGRATED:
+            self.assertNotIn("articles", self.by_id[decision_id])
+
+    def test_the_run_fires_every_migrated_ruling(self):
+        fired = {decision_id for entry in migrated_audit().entries
+                 for decision_id in Decisions.ids_in(entry.get("ruling"))}
+        self.assertEqual(set(MIGRATED) | {"D-19", "D-21", "D-43"}, fired)
+
+    def test_the_file_backed_registry_renders_as_the_committed_one(self):
+        result = ComplianceResult(proposed_model=None, reference_model=None,
+                                  report=canned_report(), audit=migrated_audit(),
+                                  compliant=True, run_dir=None)
+        self.assertEqual(
+            Sections.rulings_appendix({"audit_entries": migrated_audit().entries}),
+            self.appendix)
+        self.assertEqual(render_report(result), self.report)
+        self.assertEqual(1, self.report.count(self.appendix))
+
+    def test_each_migrated_ruling_renders_its_title_and_summary_only(self):
+        self.assertNotIn("not in registry", self.appendix)
+        for decision_id in MIGRATED:
+            entry = self.by_id[decision_id]
+            with self.subTest(decision=decision_id):
+                self.assertEqual(1, self.appendix.count(
+                    "<td>{}</td>".format(decision_id)))
+                self.assertIn(H.esc(entry["title"]), self.appendix)
+                self.assertIn(H.esc(entry["summary"]), self.appendix)
+                for requirement in entry["requirements"]:
+                    self.assertNotIn(H.esc(requirement["decided"]), self.report)
+
+    def test_the_legacy_shape_and_the_runtime_fields_render_byte_identically(self):
+        variants = {
+            "legacy per-code-id articles":
+                [legacy_shaped(entry) for entry in self.committed],
+            "runtime fields only":
+                [{field: entry[field] for field in ("id", "title", "kind", "summary")}
+                 for entry in self.committed],
+        }
+        legacy = variants["legacy per-code-id articles"]
+        self.assertEqual(
+            list(MIGRATED),
+            [entry["id"] for entry, old in zip(self.committed, legacy)
+             if entry != old],
+            "the legacy variant rewrites exactly the migrated entries")
+        for name, decisions in variants.items():
+            with self.subTest(variant=name):
+                self.assertEqual((self.appendix, self.report),
+                                 self.rendered(decisions))
+
+    def test_a_migrated_title_or_summary_does_change_the_html(self):
+        """The control: the comparison above can fail for every migrated id,
+        and the change it detects is confined to the appendix."""
+        for decision_id in MIGRATED:
+            for field in ("title", "summary"):
+                with self.subTest(decision=decision_id, field=field):
+                    changed = self.by_id[decision_id][field] + " (amended)"
+                    appendix, report = self.rendered(
+                        [dict(entry, **{field: changed})
+                         if entry["id"] == decision_id else entry
+                         for entry in self.committed])
+                    self.assertNotEqual(self.appendix, appendix)
+                    self.assertIn(H.esc(changed), appendix)
+                    self.assertEqual(1, report.count(appendix))
+                    self.assertEqual(self.report,
+                                     report.replace(appendix, self.appendix))
 
 
 if __name__ == "__main__":

@@ -32,18 +32,30 @@ expanded keyword dictionary (``**{"ruling": ...}``) on an audit-surface
 call is REFUSED outright: the AST sees it as an anonymous keyword that
 would bypass grammar, resolution, and the inventory.
 
+The runtime loader, ``btap.codes.decisions``, is held here too: it reads
+schema 2 and no other, and it resolves a structured entry exactly as it
+resolves a legacy one.
+
 No SDK import — bare-runner safe, like the sync gate beside it.
 """
 
 import ast
+import contextlib
 import json
 import re
 import subprocess
+import sys
+import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 PYTHON_ROOT = Path(__file__).resolve().parents[2]
 REGISTRY = PYTHON_ROOT / "btap" / "codes" / "data" / "decisions.json"
+
+# This checkout's loader, whatever else is installed: it is stdlib-only.
+sys.path.insert(0, str(PYTHON_ROOT))
+from btap.codes import decisions as Loader  # noqa: E402
 
 ID_TOKEN = re.compile(r"\bD-\d+\b")
 LITERAL_GRAMMAR = re.compile(r"\AD-\d+( D-\d+)*\Z")
@@ -406,6 +418,111 @@ class TestDecisionShortIdsResolve(unittest.TestCase):
         self.assertEqual([], sorted(offenders),
                          "links into the decision log that do not name a declared short id:\n  "
                          + "\n  ".join(sorted(offenders)))
+
+
+def _structured_entry(decision_id="D-9001"):
+    """A schema-2 structured entry, as the generator projects one."""
+    return {
+        "id": decision_id, "title": "A structured title", "kind": "runtime",
+        "editions": ["necb2020"], "summary": "A structured summary.",
+        "requirements": [{
+            "id": "heat_pump_reference_by_source", "label": "A label",
+            "decided": "What was decided for this requirement.",
+            "sources": [
+                {"code": "necb", "edition": "2020", "role": "governing",
+                 "references": ["8.4.4.13.(1)"]},
+                {"code": "ashrae-62.1", "edition": "2016",
+                 "role": "incorporated-reference", "references": ["6.2.2.1"]}]}],
+    }
+
+
+@contextlib.contextmanager
+def _fresh_loader(data_dir=None, decisions=None):
+    """The loader with its caches cleared, reading ``data_dir`` or serving
+    ``decisions``; everything is restored on exit."""
+    with contextlib.ExitStack() as stack:
+        stack.enter_context(mock.patch.object(Loader, "_all", decisions))
+        stack.enter_context(mock.patch.object(Loader, "_by_id", None))
+        if data_dir is not None:
+            stack.enter_context(mock.patch.object(Loader, "DATA_DIR", Path(data_dir)))
+        yield
+
+
+class TestTheRuntimeLoaderReadsSchemaTwo(unittest.TestCase):
+    """`btap.codes.decisions` reads ``id``, ``title``, ``kind`` and
+    ``summary`` from schema 2's root ``decisions`` array, and nothing it does
+    depends on the form an entry takes."""
+
+    MISSING = object()
+
+    def test_it_is_this_checkouts_loader_and_the_committed_schema(self):
+        self.assertTrue(Path(Loader.__file__).resolve().is_relative_to(
+            PYTHON_ROOT / "btap"), Loader.__file__)
+        self.assertEqual(2, Loader.SCHEMA)
+        self.assertEqual(Loader.SCHEMA,
+                         json.loads(REGISTRY.read_text(encoding="utf-8"))["schema"])
+
+    def test_it_serves_the_committed_decisions_array(self):
+        with _fresh_loader():
+            self.assertEqual(_registry(), Loader.all_decisions())
+            self.assertEqual([entry["id"] for entry in _registry()], Loader.ids())
+
+    def test_only_schema_2_is_read(self):
+        """Exact: ``2.0`` equals 2 and is still refused, because JSON wrote
+        a float where the writer emits an int."""
+        decisions = [_structured_entry()]
+        for schema in (self.MISSING, None, 1, 3, "2", 2.0, True, [2]):
+            payload = {"decisions": decisions}
+            if schema is not self.MISSING:
+                payload["schema"] = schema
+            with self.subTest(schema=schema), self.assertRaisesRegex(
+                    ValueError, "this module reads schema 2"):
+                Loader._validated(payload)
+        self.assertIs(decisions, Loader._validated({"schema": 2, "decisions": decisions}))
+
+    def test_a_payload_without_its_root_array_is_refused(self):
+        for payload, message in (
+                ([_structured_entry()], "must be a JSON object"),
+                ("decisions", "must be a JSON object"),
+                ({"schema": 2}, "has no 'decisions' array"),
+                ({"schema": 2, "decisions": None}, "has no 'decisions' array"),
+                ({"schema": 2, "decisions": {"D-01": {}}}, "has no 'decisions' array")):
+            with self.subTest(payload=payload), self.assertRaisesRegex(
+                    ValueError, re.escape(message)):
+                Loader._validated(payload)
+
+    def test_the_file_is_validated_as_it_is_loaded(self):
+        """Through ``all_decisions`` and ``lookup``, not only the helper: a
+        loader that skipped `_validated` would serve a schema-1 file."""
+        with tempfile.TemporaryDirectory() as scratch:
+            path = Path(scratch) / "decisions.json"
+            for schema in (2, 1, self.MISSING):
+                payload = {"_comment": ["fixture"], "decisions": [_structured_entry()]}
+                if schema is not self.MISSING:
+                    payload["schema"] = schema
+                path.write_text(json.dumps(payload), encoding="utf-8")
+                with self.subTest(schema=schema), _fresh_loader(data_dir=scratch):
+                    if schema == 2:
+                        self.assertEqual("A structured title",
+                                         Loader.lookup("D-9001")["title"])
+                        continue
+                    for read in (Loader.all_decisions, Loader.ids,
+                                 lambda: Loader.lookup("D-9001")):
+                        with self.assertRaisesRegex(ValueError, "reads schema 2"):
+                            read()
+
+    def test_a_structured_entry_resolves_like_a_legacy_one(self):
+        legacy = _registry()[0]
+        structured = _structured_entry()
+        with _fresh_loader(decisions=[legacy, structured]):
+            self.assertIs(structured, Loader.lookup("D-9001"))
+            self.assertIs(legacy, Loader.lookup(legacy["id"]))
+            self.assertEqual([legacy["id"], "D-9001"], Loader.ids())
+            self.assertEqual({legacy["id"]: legacy, "D-9001": structured},
+                             Loader.by_id())
+            self.assertIn(structured, Loader.of_kind(structured["kind"]))
+            self.assertNotIn(structured, Loader.of_kind("process"))
+            self.assertIsNone(Loader.lookup("D-9002"))
 
 
 if __name__ == "__main__":

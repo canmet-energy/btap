@@ -351,7 +351,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
     "target": "Primary Boiler",
     "detail": "boiler efficiency applied",
-    "entry_index": 235
+    "entry_index": 245
    },
    {
     "id": "AHJ-14",
@@ -360,7 +360,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "CoilHeatingGasMultiStage_gas",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 257
+    "entry_index": 267
    },
    {
     "id": "AHJ-14",
@@ -369,7 +369,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "CoilHeatingGasMultiStage_gas 1",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 258
+    "entry_index": 268
    },
    {
     "id": "AHJ-14",
@@ -378,7 +378,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "CoilHeatingGasMultiStage_gas 2",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 259
+    "entry_index": 269
    },
    {
     "id": "AHJ-14",
@@ -387,7 +387,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "CoilHeatingGasMultiStage_gas 3",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 260
+    "entry_index": 270
    },
    {
     "id": "AHJ-14",
@@ -396,7 +396,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "CoilHeatingGasMultiStage_gas 4",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 261
+    "entry_index": 271
    }
   ]
  },
@@ -449,9 +449,17 @@
   "Supply Air Systems (airflow rates, fan specs) \u2014 not implemented. Gaps: the identical-fan-power fallback for secondaries failing 5.2.3.1.(1)(b) is not modeled",
   "Supply Air Systems (airflow rates, fan specs) \u2014 not implemented. Gaps: the exemption for equipment whose fan energy is included in the Tables 5.2.12.1 minimum performance is not modeled",
   "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
+  "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
+  "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
   "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
+  "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
+  "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
+  "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
   "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
+  "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
+  "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
   "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
+  "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
   "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
   "thermal bridging not requested \u2014 applied U-values are clear-field; NECB 3.1.1.7 requires EFFECTIVE transmittance (pass thermal_bridging:)",
   "proposed infiltration total 0 L/s DEVIATES from the untested 8.4.3.3.(3) default 607 L/s by -100% \u2014 only a 3.2.4.2 airtightness test justifies a different value",

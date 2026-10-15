@@ -54,11 +54,6 @@ SUBSURFACE_CLASS = {
 
 SURFACE_CLASS = {"Wall": "wall", "RoofCeiling": "roofceiling", "Floor": "floor"}
 
-# The enclosed-unconditioned credit (2020 3.1.1.7.(4), 2025 3.1.1.7.(3) —
-# cite through ruleset.article): an enclosed unconditioned space protecting an envelope
-# component may be considered to have an overall U of 6.25 W/(m2.K).
-ENCLOSURE_R = 1.0 / 6.25
-
 
 def apply(model, *, code, hdd=None, apply_fdwr=False, apply_srr=False,
           include_films=True, thermal_bridging=None, audit=None):
@@ -87,7 +82,7 @@ def _apply(model, ruleset, *, hdd=None, apply_fdwr=False, apply_srr=False,
                       if include_films else
                       "legacy-BTAP-compatible: table U applied as construction-only "
                       "conductance"),
-               article="1.4.1.2.", ruling="D-23")
+               article="Division A 1.4.1.2.(1)", ruling="D-23")
 
     cache = {}
     window_construction = None
@@ -139,7 +134,9 @@ def _apply(model, ruleset, *, hdd=None, apply_fdwr=False, apply_srr=False,
         audit.info("prescriptive",
                    "exterior/ground surfaces of unconditioned spaces left untouched — "
                    "not part of the building envelope",
-                   inputs={"surfaces": outside_envelope}, article="1.4.1.2.", ruling="D-24")
+                   inputs={"surfaces": outside_envelope},
+                   article="Division A 1.4.1.2.(1)",
+                   ruling="D-24")
 
     if apply_fdwr:
         limit = _max_fdwr(ruleset=ruleset, hdd=hdd, audit=audit)
@@ -200,16 +197,7 @@ def inside_envelope(space) -> bool:
 
 def _assign_interzone_envelope(model, surface, surface_class, ruleset, hdd,
                                include_films, cache, audit):
-    """Assemblies separating conditioned space from ENCLOSED UNCONDITIONED
-    space (attic ceilings, walls to unheated storage, floors over crawlspaces)
-    are building envelope per 1.4.1.2 and must meet the Table 3.2.2.2 row for
-    their inclination (the edition's inclination sentence — surfaceType
-    already encodes it). The
-    unconditioned enclosure is credited at U 6.25 per the edition's
-    enclosed-unconditioned sentence; both faces see interior air films. The paired surface gets the same construction so
-    the pair stays consistent. (Legacy OSut instead applies the exposed-FLOOR
-    row to attic ceilings — floor 0.175 vs roof 0.156 at HDD 3890 — a more
-    lenient reading with no inclination-rule basis; divergence logged.)"""
+    """Apply the envelope row to an interzone assembly where its scope is known."""
     if surface.outsideBoundaryCondition() != "Surface":
         return
 
@@ -218,7 +206,21 @@ def _assign_interzone_envelope(model, surface, surface_class, ruleset, hdd,
         return
 
     adj_space = opt(adj.space())
-    if adj_space is None or inside_envelope(adj_space):
+    if adj_space is None:
+        return
+
+    if inside_envelope(adj_space):
+        pair = sorted((surface.nameString(), adj.nameString()))
+        if surface.nameString() == pair[0]:
+            audit.warn(
+                "prescriptive",
+                "conditioned-to-conditioned interzone assembly left unchanged "
+                "because an intended temperature difference greater than 10 C "
+                "is NOT established from the model",
+                target=" / ".join(pair),
+                article="Division A 1.4.1.2.(1)",
+                ruling="D-24",
+            )
         return
 
     construction = opt(surface.construction())
@@ -226,30 +228,38 @@ def _assign_interzone_envelope(model, surface, surface_class, ruleset, hdd,
     if layered is None:
         audit.warn("prescriptive",
                    "envelope surface to unconditioned space has no layered construction — skipped",
-                   target=surface.nameString(), ruling="D-24")
+                   target=surface.nameString(),
+                   article="Division A 1.4.1.2.(1)",
+                   ruling="D-24")
         return
 
     u = _max_u(ruleset=ruleset, surface=surface_class, boundary="outdoors", hdd=hdd)
-    r = (1.0 / u) - ENCLOSURE_R
-    if include_films:
-        r -= Constructions.film_r_interzone(surface_class)
-    target = 1.0 / r
-    key = (str(construction.handle()), surface_class, "interzone", target)
+    target = _target_conductance(
+        ruleset, surface_class, "outdoors", hdd, include_films, audit)
+    key = (str(construction.handle()), surface_class, "interzone-conservative", target)
     if key not in cache:
         c = Constructions.opaque_at_conductance(model, layered, target)
         audit.decision("prescriptive",
-                       f"envelope {surface_class} to enclosed unconditioned space set to "
-                       "maximum U (row by inclination; enclosure credited at U 6.25)",
+                       f"envelope {surface_class} to unconditioned space set to "
+                       "the exterior maximum U without the enclosed-space credit",
                        target=c.nameString(),
                        inputs={"hdd": hdd, "table_u": ruby_round(u, 4),
-                               "target_u_construction": ruby_round(target, 4)},
+                               "target_u_construction": ruby_round(target, 4),
+                               "adjacent_space": adj_space.nameString(),
+                               "vented_status": "not represented by the model"},
                        value=("conductance "
                               f"{ruby_str(ruby_round(opt_or(c.thermalConductance(), 0.0), 4))}"
                               " W/m2K"),
-                       article="Table 3.2.2.2.; {}; {}".format(
-                           ruleset.article("enclosed_unconditioned_credit"),
-                           ruleset.article("assembly_inclination")),
+                       article="Note A-{}".format(
+                           ruleset.article("enclosed_unconditioned_credit")),
                        ruling="D-24")
+        audit.info(
+            "prescriptive",
+            "interzone envelope table class selected by assembly inclination",
+            target=surface.nameString(),
+            value=surface_class,
+            article=ruleset.article("assembly_inclination"),
+            ruling="D-24")
         cache[key] = c
     surface.setConstruction(cache[key])
     adj.setConstruction(cache[key])
@@ -318,7 +328,7 @@ def _apply_ground_strip(model, surface, ruleset, hdd, include_films, width_m,
                    "ground floor without a Kiva foundation in a perimeter-strip zone — "
                    "the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
                    target=surface.nameString(),
-                   article="Table 3.2.3.1.; 3.2.3.3.(3)", ruling="D-32")
+                   article="3.2.3.3.(3)", ruling="D-32")
         return
 
     u = _max_u(ruleset=ruleset, surface="floor", boundary="ground", hdd=hdd)
@@ -357,7 +367,7 @@ def _apply_ground_strip(model, surface, ruleset, hdd, include_films, width_m,
                                    "width_m": width_m},
                            value=(f"insulation R {ruby_str(ruby_round(r_add, 3))} m2K/W x "
                                   f"{ruby_str(width_m)} m from perimeter"),
-                           article="Table 3.2.3.1.; 3.2.3.3.(3)", ruling="D-32")
+                           article="3.2.3.3.(3)", ruling="D-32")
         else:
             audit.info("prescriptive",
                        "slab construction already meets the perimeter-strip U — no strip "
@@ -366,7 +376,7 @@ def _apply_ground_strip(model, surface, ruleset, hdd, include_films, width_m,
                        inputs={"hdd": hdd,
                                "strip_target_u_construction": ruby_round(target, 4),
                                "slab_r": ruby_round(slab_r, 4)},
-                       article="Table 3.2.3.1.; 3.2.3.3.(3)", ruling="D-32")
+                       article="3.2.3.3.(3)", ruling="D-32")
         cache[key] = True
 
 

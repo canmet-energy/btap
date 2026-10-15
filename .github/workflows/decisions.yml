@@ -83,8 +83,10 @@ jobs:
       - name: generate_ahj_referrals.py --check
         run: python3 python/scripts/generate_ahj_referrals.py --check
 
-      # Source schema, both generated outputs, runtime citations, short-link
-      # resolution. stdlib unittest, so no dependency install is needed.
+      # Source schema, all three generated outputs (the registry, the decision
+      # log and the Codes Committee view by provision), runtime citations,
+      # short-link resolution. stdlib unittest, so no dependency install is
+      # needed.
       - name: decision source and registry gates
         working-directory: python
         run: |

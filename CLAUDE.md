@@ -33,9 +33,11 @@ unless a moved link itself is wrong.
   `btap/codes/necb/editions/necb2025/` for what exists in one edition only.
   Every edition is an independent, complete snapshot under
   `btap/codes/necb/data/<code id>/` (rule files, `tables/`,
-  `coverage/articles_8_4.json`, and the `manifest.json` that drives
-  discovery). Nothing at runtime reads another edition's files — no `extends`,
-  no alias, no fallback. Loaders resolve through
+  `coverage/articles_8_4.json`, the bounded structural
+  `coverage/provisions.json`, and the `manifest.json` that drives discovery).
+  Authorized raw provision payloads stay in that edition's `provenance/`;
+  runtime citation validation is offline. Nothing at runtime reads another
+  edition's files — no `extends`, no alias, no fallback. Loaders resolve through
   `btap.codes.necb._data_root()`; `_set_data_root(..., _testing=True)` is a
   test-only hook, never an environment variable. Code-family-neutral data —
   `decisions.json`, the Section 8.4 disposition and `ATTRIBUTION.md` — stays
@@ -84,6 +86,9 @@ python3 python/scripts/generate_necb_vintage_match.py --check
 python3 python/scripts/generate_decisions.py --check
 python3 python/scripts/legacy_whatsnew.py
 
+# Authenticated maintainer refreshes; ordinary runtime and CI stay offline
+python3 python/scripts/fetch_necb_provisions.py
+
 # The HVAC catalogue sizing sweep (needs the SDK and EnergyPlus). It writes
 # python/tests/fixtures/system_simulation_status.json, which GATES which
 # catalogue systems ship as samples; --check re-derives it without writing.
@@ -100,9 +105,11 @@ One decision is one file: `docs/decisions/D-NN.md`, TOML front matter
 (`id`, `title`, `kind`, `articles`, `editions`, `summary`) plus the authored
 Markdown body,
 whose first line is its own `## D-NN —` heading. That file is CANONICAL.
-Both `docs/necb_decisions.md` and `python/btap/codes/data/decisions.json` are
-GENERATED from the sources by `generate_decisions.py`, in numeric id order, and
-are never hand-edited. Anchors and the index are inserted by the generator; by
+Three outputs are GENERATED from the sources by `generate_decisions.py` and are
+never hand-edited: `docs/necb_decisions.md` and
+`python/btap/codes/data/decisions.json`, in numeric id order, and
+`docs/CODE_DECISIONS_BY_PROVISION.md`, the Codes Committee view by code,
+edition and provision. Anchors and the index are inserted by the generator; by
 convention a body does not declare its own `d-NN` anchor. The front-matter
 `title` is the
 compact index title and the body's heading is authored prose, which differ on
@@ -115,7 +122,7 @@ new edition does not leave the check stale, and it never takes a collective
 word: "both" stops meaning anything once a third edition exists, and `vintage`
 is retired vocabulary. `unverified` may not be mixed with a code id — either a
 decision has been checked against that edition or it has not. Of the 103
-decisions, 57 are `unverified`: they were authored before the field existed,
+decisions, 49 are `unverified`: they were authored before the field existed,
 mostly against one edition's text, and asserting a list for them would be a
 guess. That is a DECLARED gap where it used to be a silent one; establishing
 them is open work, and the remaining count moves as decisions are checked —
@@ -160,6 +167,95 @@ carried by the key and label; a second correct citation and a wrong existing
 one are not structurally distinguishable, and Sol ruled that case out of
 scope rather than admitting another heuristic.
 
+**The structured source form** is the migration target of
+`docs/plans/DECISION_APPLICABILITY_PLAN.md`. The generator accepts it beside the
+legacy form. Phase C converted all 23 decisions that carried an established
+per-code-id mapping, and Phase D's seven batches established 42 held
+decisions directly in this form (D-02, D-03, D-04, D-05, D-06, D-07, D-09,
+D-11, D-12, D-13, D-14, D-15, D-17, D-18, D-19, D-21, D-22, D-23, D-24,
+D-26, D-28, D-31, D-32, D-34, D-35, D-37, D-41, D-42, D-43, D-45, D-53,
+D-55, D-58, D-59, D-60, D-61, D-62, D-63, D-65, D-74, D-76 and D-85; 65
+structured in all), so no committed
+decision still uses the
+per-code-id lists above: every other decision holds `unverified` or
+`not_applicable`.
+`python/tests/necb/test_decisions_registry_sync.py` pins the converted ids and
+each converted mapping, and fails if any other decision takes a per-code-id
+mapping. A requirement keeps its
+key and `label`, adds a committee-facing `decided` paraphrase, and carries one
+`[[articles.<key>.sources]]` record per `code` family, `edition` STRING and
+`role`:
+
+```toml
+[articles.heat_pump_reference_by_source]
+label = "Reference system for a proposed heat pump, by heat source"
+decided = "Water-loop and other heat pumps follow different reference-system selection branches."
+
+[[articles.heat_pump_reference_by_source.sources]]
+code = "necb"
+edition = "2020"
+role = "governing"
+references = [
+  "8.4.4.13.(1)",
+  "Note A-8.4.4.13",
+]
+```
+
+Only `governing` records establish applicability. Each one must name a
+registered runtime edition, and every requirement of the decision must govern
+the same editions; a decision that differs by edition is split, as in the
+legacy form. The decision's `editions` is DERIVED from those records. Either
+omit `editions`, or, during the transition, author exactly the derived list.
+
+`incorporated-reference` and `related` records may name future editions and
+other standards, but they never establish an edition.
+
+NECB references in a registered edition must meet three conditions:
+
+- they use the CANONICAL spelling, such as `Note A-8.4.4.13` or
+  `Division A 1.1.1.1.(1)`;
+- that edition's `coverage/provisions.json` records the provision as present;
+- the recorded provision is of the cited kind.
+
+An unregistered NECB edition is held to the citation grammar only. Any other
+standard is carried as authored and is named on a `decisions: note` line.
+
+A decision is converted whole: no structured requirement may sit beside a
+legacy one or beside the reserved `unverified` or `not_applicable` key. A
+requirement key shared by several decisions names ONE requirement in either
+form, so it carries one label and the same governing citations everywhere.
+Converting it means converting it in every decision that uses it, together.
+
+`decisions.json` is schema 2. Its root `decisions` array keeps every entry's
+`id`, `title`, `kind` and `summary`, which are all that `btap.codes.decisions`
+and the report's rulings appendix read. A structured entry carries
+`requirements` (`id`, `label`, `decided`, `sources`) instead of `articles`.
+The loader refuses any other schema number.
+
+**The Codes Committee view** is `docs/CODE_DECISIONS_BY_PROVISION.md`, the third
+generated output. It answers a committee member who starts from a code, an
+edition and a provision. A decision appears in it only if it cites a provision:
+`not_applicable` and an empty `unverified` list are omitted and counted, never
+listed. Its rows come from the decision's own requirements:
+
+- a structured requirement makes one row per `governing` record, with its
+  `decided` text. Same-family governing records of other editions appear under
+  Other editions, and `incorporated-reference` and `related` records appear
+  under Other sources. Neither ever makes a row;
+- a legacy requirement with a citation list per code id makes one row per
+  edition. It has no `decided` text yet, so the decision-wide `summary` stands
+  in, marked **Transitional** and printed once per decision rather than on
+  every row. No committed decision has taken this form since Phase C;
+- a non-empty legacy `unverified` list appears only in the last section,
+  "Edition not yet attributed", with its recorded citations. It is never placed
+  under an edition.
+
+Rows sort by code, edition, the row's first provision (division, then the
+number read numerically, then Article before Table before Appendix note),
+decision number and requirement key. The counts are computed from the sources
+and never hardcoded, so a conversion moves a decision between sections without
+a code change.
+
 **The id grammar is `^D-\d+$`, unbounded.** `^D-\d{2}$` allowed exactly 100
 ids and D-01 through D-99 all existed, so the registry had run out (D-100
 through D-103 exist today); a fixed three
@@ -172,7 +268,7 @@ The test files `test_decisions_registry*.py` carry the same grammar and must
 move with it.
 
 ```bash
-python3 python/scripts/generate_decisions.py        # regenerate both outputs
+python3 python/scripts/generate_decisions.py        # regenerate all three outputs
 python3 python/scripts/generate_decisions.py --check
 cd python && python3 -m unittest \
   tests.necb.test_decisions_registry_sync \
@@ -191,6 +287,16 @@ The Section 8.4 article caches live in each edition's snapshot at
 `python/btap/codes/necb/data/necb<edition>/coverage/articles_8_4.json` and ship
 in the wheel. Refresh them with `python3 python/scripts/fetch_necb_8_4_text.py`;
 ordinary runtime remains offline.
+
+The first decision-by-provision evidence slice lives beside them at
+`coverage/provisions.json`. It is a normalized structural index only:
+Articles, Sentences, Clauses, Tables, table notes, Appendix notes, and
+explicitly qualified Division A provisions. Exact authorized hbix results are
+retained at `provenance/provisions.result.json`; the index pins both that
+archive and the reused Section 8.4 cache by hash. Refresh both editions with
+`python3 python/scripts/fetch_necb_provisions.py`. An absent record is positive
+authority evidence; a citation missing from the bounded cache is merely
+`not-indexed`, and a source-hash mismatch is `stale`.
 
 ## Two references for any NECB behaviour
 

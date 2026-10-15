@@ -74,10 +74,11 @@ jobs:
       # MCP operation (--fetch) and never runs in CI.
       - name: NECB vintage-match doc matches the archived payloads
         run: python3 python/scripts/generate_necb_vintage_match.py --check
-      # docs/decisions/D-NN.md is canonical; docs/necb_decisions.md and
-      # python/btap/codes/data/decisions.json are both generated from it by the
-      # one writer. --check is the drift gate for both outputs at once, so a
-      # hand-edit of either is caught here (D-81, amended 2026-09-29).
+      # docs/decisions/D-NN.md is canonical; docs/necb_decisions.md,
+      # python/btap/codes/data/decisions.json and
+      # docs/CODE_DECISIONS_BY_PROVISION.md are all generated from it by the
+      # one writer. --check is the drift gate for all three outputs at once, so
+      # a hand-edit of any of them is caught here (D-81, amended 2026-09-29).
       - name: "Decisions: generated outputs + sources + runtime citations"
         run: |
           python3 python/scripts/generate_decisions.py --check

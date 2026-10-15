@@ -79,4 +79,4 @@ Unmet hours  heating 322.0 / 0.0 h    cooling 170.8 / 4.8 h
 
   Audit    <RUN_DIR>/audit.txt
   Data     <RUN_DIR>/report.json
-  70 warning(s) recorded - see audit.txt
+  78 warning(s) recorded - see audit.txt

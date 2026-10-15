@@ -23,10 +23,11 @@ Format per entry: **what was decided / who / when / why / evidence & commit**.
 `docs/decisions/D-NN.md`, and that file is CANONICAL. It carries TOML front
 matter — `id`, `title`, `kind`, `articles`, `summary` — followed by the
 authored Markdown body, whose first line is the section's own `## D-NN —`
-heading. Two artifacts are generated from those sources and are never
-hand-edited: this document, and the runtime registry
-`python/btap/codes/data/decisions.json`. The full editing workflow for a
-decision: (1) add or edit the one source file; (2) run `python3
+heading. Three artifacts are generated from those sources and are never
+hand-edited: this document, the runtime registry
+`python/btap/codes/data/decisions.json`, and the Codes Committee view by
+provision, `docs/CODE_DECISIONS_BY_PROVISION.md`. The full editing workflow
+for a decision: (1) add or edit the one source file; (2) run `python3
 python/scripts/generate_decisions.py`; (3) run the Python registry/citation
 tests. `python3 python/scripts/generate_decisions.py --check` is the drift gate
 and runs in CI. The front-matter `title` is the compact title this index and
@@ -50,15 +51,15 @@ audit are drained and archived — see `docs/README.md`.
 
 - **D-01** — NECB text reproduction (Crown copyright) _(process)_
 - **D-02** — Unresolvable space types are a hard error _(runtime)_
-- **D-03** — Chiller EIR curves verified against the proposed erratum _(data)_
+- **D-03** — Corrected chiller EIR coefficients are an alternative solution _(runtime)_
 - **D-04** — EUI path: two-run design with check-then-normalize _(runtime)_
-- **D-05** — Two archetype-normalization interpretations adopted _(runtime)_
+- **D-05** — Archetype normalization retains proposed outdoor-air rates _(runtime)_
 - **D-06** — Energy-recovery trigger uses the current-vintage airflow tables, post-sizing _(runtime)_
-- **D-07** — Cooling-tower part-load behaviour dispositioned to the engine _(process)_
+- **D-07** — Cooling-tower equations replaced by a disclosed engine substitution _(runtime)_
 - **D-08** — Batch sign-off of the remaining article dispositions _(process)_
 - **D-09** — Umbrella coverage manifest emits at runtime; modeller-scope notes split from warnings _(runtime_unwired)_
 - **D-10** — Remaining adjudications delegated, with mandatory logging _(process)_
-- **D-11** — Hydronic pump power implemented as intensity transfer plus table curves _(runtime)_
+- **D-11** — Variable-flow pump riding curve retained; transfer superseded _(runtime)_
 - **D-12** — Space temperature control re-manifested as modeller scope _(data)_
 - **D-13** — Screw and centrifugal chiller curves probed; imperfect printed normalization accepted _(process)_
 - **D-14** — Reference air systems inherit the proposed operating schedule _(runtime)_
@@ -71,7 +72,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-21** — Envelope area for air leakage computed as the conditioned-space enclosure _(runtime)_
 - **D-22** — Reference-systems audit findings implemented as one batch _(runtime)_
 - **D-23** — Table transmittance values treated as overall, air films included _(runtime)_
-- **D-24** — Envelope scope: unconditioned spaces out, interzone assemblies in _(runtime)_
+- **D-24** — Envelope scope corrected without a blanket enclosure credit _(runtime)_
 - **D-25** — Design-day attach replaces rather than appends, filtered to annual extremes _(runtime)_
 - **D-26** — Heat-rejection fan power sums the condenser loop; sized tower hydraulics hardened _(runtime)_
 - **D-27** — Service-water circulators are outside the hydronic pump article; transfer head reconciled _(runtime)_
@@ -88,7 +89,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-38** — Prescriptive pump-power caps applied min-wins over the intensity transfer _(runtime)_
 - **D-39** — Two-pipe fan-coil reference heating honoured conditionally _(runtime)_
 - **D-40** — Reheat-coil autosizing trusted; legacy hard-size workaround rejected _(process)_
-- **D-41** — Service-water reference article machine-verified; gap refined _(data)_
+- **D-41** — Service-water clone coverage verified; only pump topology remains _(data)_
 - **D-42** — First full-annual fleet sweep validates reference generation _(process)_
 - **D-43** — Capacity iteration made per thermal block, secant-targeted from run history _(runtime)_
 - **D-44** — Decision rulings surfaced at runtime in the audit log and AHJ report _(process)_
@@ -106,13 +107,13 @@ audit are drained and archived — see `docs/README.md`.
 - **D-56** — Reference fan-coil systems get a real water-side economizer, and the cooling-tower setpoint reset is what makes it operate _(runtime)_
 - **D-57** — Reference daylighting photocontrols follow the current daylight-responsive control requirement, not the superseded one _(runtime)_
 - **D-58** — Residential compatible-cooling and heat-pump detection are decided from facts, not family names _(runtime)_
-- **D-59** — The vendored NECB 2020 equipment-efficiency minimums are verified against the printed tables _(data)_
-- **D-60** — The NECB 2025 edition's tables are verified against the printed code: efficiencies re-checked post-extraction-fix, selection verbatim 2020 _(data)_
-- **D-61** — Staleness audit after the extraction-service fixes: every pre-fix vendored table re-verified against the corrected source _(data)_
+- **D-59** — The original NECB 2020 equipment families are verified against their tables _(data)_
+- **D-60** — NECB 2025 equipment data verified against its own edition _(data)_
+- **D-61** — Extraction-backed NECB 2025 datasets rechecked with explicit residuals _(data)_
 - **D-62** — Economizer systems' staged cooling gets the prescribed lowest-stage capacity floor _(runtime)_
 - **D-63** — Pool-heater and solar-thermal service-water minimums applied when present, from the printed rows the extraction lost _(runtime)_
 - **D-64** — The SmallHotel reference's unmet-heating gate failure is morning setback-recovery lag in four micro-zones - a characteristic, not a build defect _(process)_
-- **D-65** — The Hospital reference's slow annual run is the ventilation floor meeting the per-stage flow band, plus thirty required energy-recovery wheels - inherent cost, one small lead left open _(process)_
+- **D-65** — Reference energy recovery remains required despite simulation cost _(process)_
 - **D-66** — CBECS evap-cooler values aligned to legacy (two unsourced deviations closed) _(runtime_unwired)_
 - **D-67** — Clarity restructure: aliased public renames + the openstudio-audit gem _(process)_
 - **D-68** — The nrcan merge absorbed: SHW flip, daylighting-port tracking, SHA-keyed caches _(process)_
@@ -123,7 +124,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-73** — Perimeter zones merge by orientation via zone membership _(runtime_unwired)_
 - **D-74** — Window-to-wall ratio is a caller input; the prescriptive limit stays in openstudio-envelope _(process)_
 - **D-75** — Correction to D-74: thermostats gate the envelope pass, not construction seeding _(process)_
-- **D-76** — Field-test articles are declared modeller scope, and the assumed value is stated _(runtime)_
+- **D-76** — Air-barrier path and field-test assumptions are distinguished _(runtime)_
 - **D-77** — The family is sliced by nature: five btap-* gems replace the nine openstudio-* gems _(process)_
 - **D-78** — Three-way verification for the Python migration: gates, run diffs, and direct oracle goldens _(process)_
 - **D-79** — The Ruby to Python port: milestone order, the _compat parity contracts, and two forced divergences _(process)_
@@ -217,14 +218,26 @@ audit are drained and archived — see `docs/README.md`.
 
 - **Decision:** (a) *lighting-operation schedules* are normalized (not just
   LPD): the Table 8.4.4.2 operating schedule replaces the model's lighting
-  schedules for the EUI run. (b) *outdoor air* is read as ASHRAE 62.1-2016
-  rates evaluated at the Table 8.4.4.2 occupant density.
+  schedules for the EUI run. (b) *outdoor air* retains the peak rates from
+  the proposed building specifications under Sentence 8.4.4.2.(2); changing
+  occupant density does not replace the proposed DSOA.
 - **Who/when:** phylroy ("do what you think is correct for both … it makes
   sense"), 2026-07-22.
 - **Why:** 8.4.4.2 normalizes operating conditions so archetype comparison is
   apples-to-apples; leaving proposed lighting schedules or proposed OA rates in
   place would leak proposed-design behaviour into the normalized run.
 - **Evidence:** commit `f42f19533`.
+
+### Applicability correction
+
+The lighting-schedule decision is established by Sentence 8.4.4.2.(1) and
+its table. The earlier outdoor-air reading is not: Sentence 8.4.4.2.(2)
+expressly retains the rates in the proposed building specifications, and
+8.4.3.6.(1)(a) points to that Article. The structured record above therefore
+records the Code-backed replacement. The old interpretation remains a
+runtime and report-wording defect until Phase E changes the implementation
+and the summary; it is not carried into the committee mapping as if it were
+established.
 
 <a id="d-06"></a>
 
@@ -249,11 +262,12 @@ audit are drained and archived — see `docs/README.md`.
 
 ## D-07 — 8.4.6.6 cooling tower: engine disposition with numeric cross-check
 
-- **Decision:** the reference tower's part-load capacity behaviour is satisfied
-  by EnergyPlus's Merkel effectiveness-NTU model (`CoolingTowerSingleSpeed`,
-  which has no curve fields the code's FWB polynomial could be installed into).
-  Dispositioned `engine`, backed by a gated numeric cross-check rather than
-  argument alone.
+- **Decision:** EnergyPlus's Merkel effectiveness-NTU model
+  (`CoolingTowerSingleSpeed`, which has no curve fields the Code equations
+  could be installed into) is retained as a disclosed alternative solution,
+  not called literal satisfaction. The disposition is backed by a gated
+  numeric cross-check rather than argument alone and is surfaced through
+  AHJ-22 wherever a reference cooling tower is present.
 - **Who/when:** phylroy ("do the disposition with the numeric cross-check"),
   2026-07-23.
 - **Why:** the FWB/FRA polynomial (identical in 2020 8.4.5.6 / 2025 8.4.6.6) is
@@ -329,7 +343,7 @@ audit are drained and archived — see `docs/README.md`.
 
 <a id="d-11"></a>
 
-## D-11 — 8.4.4.14 Hydronic Pumps implemented (intensity transfer + Table curves)
+## D-11 — Variable-flow pump riding curve implemented; transfer superseded
 
 - **Decision:** implement, with these interpretive choices:
   - **Superseded by [D-93](#d-93) (2026-09-19).** The interpretive choices
@@ -428,8 +442,9 @@ and reference energy; deferred to its own work session).*
 
 - **Decision:** `reference_hvac` captures each zone's proposed air-system
   availability schedule before the strip and applies it to the reference loop
-  serving those zones, per 8.4.3.2.(1) (operating schedules identical in both
-  buildings). No proposed air system → builder default (Always On) retained
+  serving those zones, per 8.4.4.2.(1) (2025: 8.4.5.2.(1)), which requires
+  the reference schedules to match those determined for the proposed under
+  8.4.3.2.(1). No proposed air system → builder default (Always On) retained
   with an info note; conflicting schedules on one loop → most-zones schedule
   wins with a loud warning. This feeds the 5.2.10.1 continuous/non-continuous
   ERV classification: a proposed on a 12 h schedule now classifies
@@ -482,6 +497,17 @@ and reference energy; deferred to its own work session).*
 - **Evidence:** sweep verdict tables (before/after); ERV+pump suites and
   rake necb:verify green post-fix.
 
+### Applicability hold
+
+No retained NECB 2020 or 2025 provision establishes a blanket rule that every
+proposed EMS program must be removed from the reference. The broad
+`8.4.4.1.` citation neither identifies the proposed controls that the
+reference rules require to transfer nor distinguishes invalid dangling
+programs from still-applicable proposed strategies. The crash-prevention
+cleanup remains an implementation safeguard, but this decision stays
+`unverified` until it is decomposed against the governing transfer provisions
+or narrowed to non-normative model sanitation.
+
 <a id="d-17"></a>
 
 ## D-17 — Legacy ERV diagnosis filed upstream (issue #2123)
@@ -527,7 +553,7 @@ and reference energy; deferred to its own work session).*
 
 <a id="d-19"></a>
 
-## D-19 — Infiltration lineage reconciliation (OPEN: arithmetic differs, both claim the same code default)
+## D-19 — Infiltration lineage reconciled; reference inherits proposed leakage coefficients
 
 - **Facts pinned (2026-07-24):** 8.4.4.3.(6) sets reference air leakage equal to
   the DEFAULT of 8.4.3.3.(3); 8.4.3.3.(3) = 1.50 L/(s.m2) at 75 Pa, adjusted per
@@ -661,6 +687,17 @@ within the documented residual ledger (legacy over-equipped ERVs per
 upstream #2123, DX COP bins, infiltration normalization remainder). All
 gates green: full hvac suite, necb:verify, 5/5 sweep PASS.
 
+### Applicability hold
+
+The retained selection and system-description tables do not define System 1
+as inherently 100% outdoor air, while Article 8.4.x.12 routes a selected
+reference system to the Part 5 economizer requirement when its trigger
+applies. No queried sentence or note establishes an unconditional System 1
+exception. The engine interaction with heat-recovery lockout is real
+implementation evidence, not normative authority. D-20 therefore remains
+`unverified` pending a governing exception or an explicit AHJ disposition;
+D-22's general economizer mapping deliberately does not absorb this branch.
+
 <a id="d-21"></a>
 
 ## D-21 — Residual infiltration asymmetry on low-rise buildings (OPEN, two new findings)
@@ -773,6 +810,18 @@ counter-direction T6/T10 (wheel power, zone-fan spec) — the fleet now sits
 
 - Who/when: Claude under D-10 delegation, 2026-07-25.
 
+### Applicability split
+
+The batch history contains more implementation observations than its original
+seven citations establish. The structured record separates the eight
+Code-backed outcomes: oversizing, economizer applicability, heat-pump
+capacity, outdoor air, fan specification, tower capacity/cells, tower fan
+power and direct-expansion staging. Night cycling, minimum-outdoor-air
+scheduling, recovery-wheel parasitics, humidification, mixed-group warnings
+and the VAV cap remain implementation evidence until separately authored
+requirements and sources exist. The System 1 economizer exception is not
+smuggled into the general threshold: D-20 remains held.
+
 <a id="d-23"></a>
 
 ## D-23 — Film convention: table U is OVERALL transmittance (default flipped)
@@ -831,12 +880,17 @@ Decision (implemented in Prescriptive.apply, shared by the reference
 transform):
 - surfaces of unconditioned spaces (inside_envelope? = partofTotalFloorArea,
   with the legacy space_conditioning_category tag honoured so tagged plenums
-  count as inside) are LEFT UNTOUCHED (audited info, 1.4.1.2.);
-- assemblies separating conditioned from enclosed unconditioned space are
-  envelope: Table 3.2.2.2 row by INCLINATION (3.1.1.7.(6) — surfaceType
-  encodes it), the enclosure credited at U 6.25 per 3.1.1.7.(4), interior
-  films both faces. Attic ceiling target: 1/(1/0.156-0.16-0.215)=0.16569.
-  Paired surface gets the same construction.
+  count as inside) are LEFT UNTOUCHED (audited info, Division A
+  1.4.1.2.(1));
+- assemblies separating conditioned from unconditioned space are envelope:
+  the Table 3.2.2.2 row is selected by INCLINATION. The model carries no
+  explicit fact proving that an adjacent attic, roof or crawl space is
+  unvented, so the Appendix-note exclusion prevents a blanket U=6.25 credit;
+  the exterior requirement is applied conservatively and the reason is
+  audited. The paired surface gets the same construction.
+- conditioned-to-conditioned interzone assemblies are left unchanged, with a
+  warning that the definition's greater-than-10 C intended-temperature limb
+  cannot be established from the model.
 - the same inside_envelope? predicate now drives the 8.4.3.3 air-leakage S
   and the lightweight rebuild (attic decks keep real constructions).
 
@@ -844,17 +898,24 @@ DIVERGENCE from legacy, logged not adopted: legacy OSut applies the
 exposed-FLOOR row (0.175) to attic ceilings ("iAtticFloor" with
 uo=eFloorU). 3.1.1.7.(6) classifies horizontal top-of-conditioned-space
 assemblies as ROOF assemblies; the floor-row reading is more lenient with
-no inclination-rule basis. Ours: roof row + enclosure credit -> overall
-0.1602 effective vs legacy's 0.175-equivalent. Candidate legacy ledger row
-(attic ceiling row choice) — filed as L-18.
+no inclination-rule basis. Candidate legacy ledger row (attic ceiling row
+choice) — filed as L-18.
 
 Pinned by test_attic_scope_deck_untouched_ceiling_retargeted (deck
-construction unchanged; ceiling at 0.16569; pair shares the construction).
-Fleet impact: reference walls ~4% less insulated (reference energy UP
-slightly, % of target DOWN) — full-fleet re-sweep queued behind the
-17-archetype run.
+construction unchanged; ceiling uses the roof row without an unsupported
+enclosure credit; pair shares the construction).
 
 - Who/when: Claude under D-10 delegation, 2026-07-25.
+
+### Applicability correction
+
+The decision bundles three independent questions. The envelope boundary and
+inclination classification are established for both editions. The blanket
+enclosed-space credit is not: each edition's Appendix note excludes vented
+attic, roof and crawl spaces, while the former transform credited every
+unconditioned enclosure. The structured record and Phase E runtime correction
+therefore apply the Code-backed exclusion conservatively rather than
+laundering the old behavior into the committee mapping.
 
 <a id="d-25"></a>
 
@@ -1001,6 +1062,12 @@ facade/internal/underground split happens INSIDE the builder (D-18
 zone_groups). Single-zone families (1/3/4/hp) keep their selection
 grouping (sys-3 school/retail loop counts stay at legacy parity). Audited
 as 'multizone selection groups merged into whole-building systems'.
+
+Applicability correction (2026-10-14): D-101 established that the Code uses
+two authorities for this construction step. System 6 uses Table
+8.4.x.7.-B Note (3), while Systems 2 and 5 use the common ventilation system
+authorized by Note (2). The implementation still merges all three families,
+but they no longer share one requirement identity in this registry.
 
 Effect: LargeOffice 17 -> 6 loops, cooling 2.1 -> 0.2 GJ, pumps 10.4 ->
 6.6 GJ; MediumOffice 3 -> 1 loop. Both references DROPPED (better), moving
@@ -1232,6 +1299,10 @@ copy rule keeps its own end-to-end pin. All green (selector 18, reference
 - Evidence: [READ] legacy autozone.rb necb_reference_hp branches (e.g.
   :1082), fuel_type_set plumbing necb_2011.rb:409/708; [RAN] test batteries.
 
+Applicability correction (2026-10-14): D-37 subsequently narrowed this
+branch. A water-loop heat pump retained by Article 13 Sentence (1) does not
+take this redirect; it continues to the residential selection-table branches.
+
 <a id="d-35"></a>
 
 ## D-35 — Appendix A ingested (hbix#67 fixed): four notes fetched; lightweight rebuild corrected to light-frame mass
@@ -1445,7 +1516,7 @@ residual ever traces to reheat sizing, reopen with data via the ledger.
 
 <a id="d-41"></a>
 
-## D-41 — 8.4.4.20.(3)-(4) machine-verified (appendix-era ingestion); SWH reference gap refined
+## D-41 — service-water reference article machine-verified; one topology caveat remains
 
 The SHW manifest's oldest caveat — "sentence text falls in a PDF-extraction
 chunk gap; not machine-verified" — is closed: the full 8.4.4.20 article
@@ -1454,16 +1525,15 @@ the MCP [READ, 2026-07-28]. Verification outcome: the umbrella's
 clone-based treatment SATISFIES (3) (boiler-fed immersion coil keeps the
 boiler's energy type), (4) (identical capacities/schedules trivially
 match the ratio + operational requirements; the note only describes how
-to determine the ratio), and (6)/(7)/(8). The manifest gap is REFINED to
-the two genuinely unimplemented sentences: (5) 8.4.5 part-load curves on
-reference SWH equipment, and (9) consolidation of multiple proposed
-circulation pumps into one constant-speed pump (clone keeps identical
-W/(L/s) — energy-equivalent, topology differs). No code change; both
-refinements queued behind the staged-heating work in the completion list.
+to determine the ratio), and (6)/(7)/(8). D-53 now applies Sentence (5)'s
+fuel-fired part-load curve. The remaining caveat is Sentence (9):
+consolidation of multiple proposed circulation pumps into one constant-speed
+pump (the clone keeps identical W/(L/s) — energy-equivalent, topology
+differs).
 
 - Who/when: Claude under D-10 delegation, 2026-07-28.
-- Evidence: [READ, MCP] 8.4.4.20 + A-8.4.4.20.(4)(a); [READ] shw
-  reference.rb (no pump/part-load handling — confirming the refined gaps).
+- Evidence: [READ, MCP] 8.4.4.20 + A-8.4.4.20.(4)(a); [READ] SHW reference
+  and efficiency passes (clone treatment plus D-53 part-load handling).
 
 <a id="d-42"></a>
 
@@ -3373,6 +3443,15 @@ stand.
   derivation.
 - **Who/when:** Fable under D-10, 2026-08-02.
 
+### Applicability split
+
+The matrix establishes three independent requirements in both editions:
+the residential identity row, Article 13 heat-pump classification and the
+primary-system boundary for purchased energy. D-101 later changed matrix
+multiplicity to one row per thermal block but did not change these three
+outcomes. The structured sources therefore preserve the adjudicated content
+without treating the old deduplicated golden schema as normative evidence.
+
 <a id="d-59"></a>
 
 ## D-59 — Equipment-efficiency minimums verified against the printed NECB 2020 tables
@@ -3423,6 +3502,14 @@ so data drift fails with the printed number in the message.
   the new test.
 - **Who/when:** Fable under D-10, 2026-08-02.
 
+### Applicability split
+
+This decision is the bounded 2020 data verification that was actually run.
+It no longer claims ownership of every family the current path applies:
+VRF Table-I is D-85, part-load curves are D-89, and tower fan/cell treatment
+is D-26. The unused historical heat-rejection block is implementation
+provenance, not a governing D-59 source.
+
 <a id="d-60"></a>
 
 ## D-60 — The same verification pass, run for the NECB 2025 edition
@@ -3454,9 +3541,17 @@ with the corrected letter map and today's verification.
 - **Files:** `efficiencies_2025.json` (provenance), the test.
 - **Who/when:** Fable under D-10, 2026-08-02.
 
+### Applicability split
+
+The 2025 minimums and the 2025 selection dataset are independent
+requirements. The 2020 selection records are retained only as related
+comparison evidence. Cross-edition identity is not generalized to
+Table 5.2.12.2 or to efficiency families whose rows or metrics differ; every
+2025 minimum is established from the 2025 table itself.
+
 <a id="d-61"></a>
 
-## D-61 — Staleness audit after the hbix extraction fixes: zero stale-data defects
+## D-61 — Staleness audit after the hbix extraction fixes: bounded results with residuals
 
 **What.** phylroy asked (2026-08-02): with hbix#88 fixed, "should you check for
 any other updates to the hbix tables/information that may have impacted our
@@ -3639,6 +3734,16 @@ SWEEP_MODE=full ruby openstudio-necb/scripts/necb_archetype_sweep.rb <types>`
 (Hospital+Outpatient need a ~12 h window — see the runtime finding above).
 
 - Who/when: consolidated by Fable under D-10, 2026-08-03.
+
+### Applicability split
+
+This decision now records the 2025 extraction-backed datasets as separate
+requirements instead of one cross-edition zero-defect claim. The
+exterior-lighting comparison remains incomplete at 88 of 91 values, so its
+three discrepancies are explicit. Part-load curves are owned by D-03, D-13
+and D-89 rather than being inferred from this table audit. Table 6.2.2.1's
+lost rows are owned by D-63. The report-visible zero-defect summary remains a
+Phase E correction.
 
 ### D-52 amendment (2026-08-03): the election exercised on real HP buildings — Phase 2 of the close-out plan
 
@@ -3831,6 +3936,16 @@ project turns on it.
 
 - **Who/when:** Fable under D-10, 2026-08-03.
 
+### Applicability hold
+
+Sentences 8.4.1.2.(3) and (5) establish the unmet-heating criterion and the
+capacity-increase response; they do not establish that morning recovery in
+micro-zones may be dispositioned as an inherent characteristic or that a
+stall detector may end the prescribed response while the reference still
+fails. The diagnosis is useful implementation evidence, but the proposed
+remedies and the decision to leave the failure standing need a separate
+Code-backed or AHJ ruling. D-64 therefore remains `unverified`.
+
 <a id="d-65"></a>
 
 ## D-65 — Hospital reference runtime root-caused: the OA floor × the flow-per-watt band, plus 30 required ERVs (Phase 4a)
@@ -3857,6 +3972,15 @@ when that subsystem is next touched.
 sweeps get a ~12 h window.
 
 - **Who/when:** Fable under D-10, 2026-08-03.
+
+### Applicability split
+
+The Code-backed slice is the reference energy-recovery obligation and the
+Part 5 trigger and performance provisions it invokes. Article 8.4.x.10.(8)
+sets cooling-capacity staging; it does not establish the asserted
+per-stage ventilation-flow floor or disposition simulator warnings. That
+floor is D-46 implementation evidence and remains a separate engineering
+follow-up rather than a governing D-65 source.
 
 <a id="d-66"></a>
 

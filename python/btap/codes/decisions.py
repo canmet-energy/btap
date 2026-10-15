@@ -7,18 +7,33 @@ those ids to a title and a SELF-CONTAINED summary, so the AHJ report can
 explain WHY a ruled code path did what it did without sending the reader
 anywhere — the report carries no external references by contract.
 
-Entry: {'id', 'title', 'kind', 'articles', 'summary'}
+The file is ``{'_comment', 'schema': 2, 'decisions': [entry, ...]}``. This
+module reads only each entry's ``id``, ``title``, ``kind`` and ``summary``,
+and refuses any other schema number rather than guess at a layout. An entry
+is either shape:
+
+  legacy:     {'id', 'title', 'kind', 'articles', 'editions', 'summary'}
+  structured: {'id', 'title', 'kind', 'editions', 'summary', 'requirements'}
+              requirements: [{'id', 'label', 'decided',
+                              'sources': [{'code', 'edition', 'role',
+                                           'references'}]}]
+
   kind: 'runtime'         — has at least one ruling-tagged audit call
         'runtime_unwired' — runtime behaviour, no ruling-tagged call
         'data'            — manifest / vendored-data / verification only
         'process'         — how the project works, not what the code does
 
+A structured entry's ``editions`` is derived from its ``governing`` sources
+only. Requirements and sources are committee metadata: nothing here renders
+them, so they cannot change a compliance report.
+
 This package's data/decisions.json is GENERATED and must not be edited.
 The canonical source is one file per decision, docs/decisions/D-NN.md, from
-which python/scripts/generate_decisions.py emits both this registry and
-docs/necb_decisions.md in numeric id order (D-81, amended 2026-09-29).
+which python/scripts/generate_decisions.py emits this registry,
+docs/necb_decisions.md (both in numeric id order, D-81, amended 2026-09-29) and
+the Codes Committee view docs/CODE_DECISIONS_BY_PROVISION.md.
 tests/necb/test_decisions_registry.py enforces the citation invariants,
-test_decisions_registry_sync.py the drift gate on both outputs.
+test_decisions_registry_sync.py the drift gate on all three outputs.
 """
 
 from __future__ import annotations
@@ -38,6 +53,10 @@ DATA_DIR = Path(__file__).parent / "data"
 #: actually edit this file (Sol, clearance review of be2118d).
 ID_PATTERN = re.compile(r"\bD-\d+\b")
 
+#: The registry layout this module reads. The generator imports it, so the
+#: writer and the reader cannot disagree about the number.
+SCHEMA = 2
+
 _all: list[dict] | None = None
 _by_id: dict[str, dict] | None = None
 
@@ -53,8 +72,28 @@ def all_decisions() -> list[dict]:
     global _all
     if _all is None:
         with open(DATA_DIR / "decisions.json", encoding="utf-8") as handle:
-            _all = json.load(handle)["decisions"]
+            _all = _validated(json.load(handle))
     return _all
+
+
+def _validated(payload) -> list[dict]:
+    """The ``decisions`` array of a schema-2 registry, or ValueError.
+
+    Exact, not "at least": a registry written under another schema may move
+    the fields this module reads, and resolving rulings from a layout it does
+    not know would put wrong text in an AHJ-facing report.
+    """
+    if not isinstance(payload, dict):
+        raise ValueError("decisions.json must be a JSON object")
+    schema = payload.get("schema")
+    if type(schema) is not int or schema != SCHEMA:
+        raise ValueError(
+            f"decisions.json has schema {schema!r}; this module reads schema "
+            f"{SCHEMA} — regenerate it with python/scripts/generate_decisions.py")
+    decisions = payload.get("decisions")
+    if not isinstance(decisions, list):
+        raise ValueError("decisions.json has no 'decisions' array")
+    return decisions
 
 
 def by_id() -> dict[str, dict]:

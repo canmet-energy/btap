@@ -4,9 +4,12 @@
       satisfied by construction in the umbrella (the reference is a clone and
       no transform touches SWH plant sizing or fuel)
   (2) HP-source SWH -> air-source HP: vacuous until HP SWH is modeled
-  (3)-(4) not machine-retrievable (extraction gap) — treated as Part 6
-      minimums by re-applying the Table 6.2.2.1 performance on the
-      reference's (identical) heaters.
+  (3)-(4), (6)-(8) retain the proposed equipment arrangement and operating
+      characteristics through the clone
+  (5) fuel-fired part-load performance is applied by D-53
+  (9) the circulation-pump topology caveat remains disclosed
+
+Part 6 minimums are re-applied to the reference's retained heaters.
 """
 
 from __future__ import annotations

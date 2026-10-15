@@ -41,6 +41,8 @@ output/
 coverage/
 !python/btap/codes/data/coverage/
 !python/btap/codes/data/coverage/**
+!python/btap/codes/necb/data/*/coverage/
+!python/btap/codes/necb/data/*/coverage/**
 /tmp/
 run/
 *.osw

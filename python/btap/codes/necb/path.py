@@ -2392,7 +2392,7 @@ def _validate_space_types(proposed, ruleset, audit):
             f"UNRESOLVABLE against the NECB {ruleset.edition} catalog — "
             "lighting/loads/SHW rules cannot be established for "
             f"{len(spaces)} space(s)",
-            target=", ".join(spaces), article="8.4.3.1.(2); 4.2.1.6.",
+            target=", ".join(spaces), article="4.2.1.6.(1)(b)",
             ruling="D-02")
         if st:
             suggestions = suggest_space_types(st, catalog)

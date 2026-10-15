@@ -128,6 +128,10 @@ from btap.codes import coverage
 article = coverage.get_article({edition!r}, "8.4.1.1")
 result["coverage_article_has_text"] = bool(article.get("raw"))
 result["coverage_editions"] = list(coverage.editions())
+from btap.codes import provisions
+result["division_a_provision_kind"] = provisions.validate_citation(
+    {code_id!r}, "Division A 1.1.1.1.(1)"
+)["kind"]
 from tests.necb.test_edition_provenance import check_provenance
 result["provenance_problems"] = check_provenance(Path({tmp!r}))
 from tests.necb.test_snapshot_self_description import check_self_description
@@ -219,6 +223,7 @@ class TestEditionIndependence(unittest.TestCase):
                     self.assertEqual([ruleset.edition], summary["editions"])
                     self.assertTrue(summary["coverage_article_has_text"])
                     self.assertEqual([ruleset.edition], summary["coverage_editions"])
+                    self.assertEqual("sentence", summary["division_a_provision_kind"])
                     # Stage 4: the provenance contract holds with only this one
                     # edition present -- no cross-edition dependency in validation.
                     self.assertEqual([], summary["provenance_problems"],

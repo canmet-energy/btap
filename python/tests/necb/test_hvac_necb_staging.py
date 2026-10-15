@@ -197,11 +197,13 @@ class TestNecbStaging(unittest.TestCase):
             self.assertEqual(expected, len(coil.stages()),
                              f"{kw} kW economizer system: lowest stage must be <= "
                              f"{25 if kw >= 70 else 50}%")
-            if kw >= 70:
+            if kw > 25:
                 entry = next((e for e in audit.entries
                               if '5.2.2.8 economizer staging floor' in e['action']), None)
                 self.assertIsNotNone(entry, 'the floor decision is audited')
-                self.assertEqual('5.2.2.8.(4)-(5)', entry['article'])
+                self.assertEqual(
+                    '5.2.2.8.(4)' if kw >= 70 else '5.2.2.8.(5)',
+                    entry['article'])
                 self.assertIn('D-62', str(entry.get('ruling') or ''))
 
         # No economizer -> the 8.4.4.10.(8) incremental rule alone (100 kW -> 2).

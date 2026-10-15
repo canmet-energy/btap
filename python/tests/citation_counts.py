@@ -287,24 +287,31 @@ def _data_scope(relative: str) -> str:
 #: four of the twenty-four subscript sites open, which is exactly the
 #: population this gate exists to close (Fable, PR #56).
 #:
-#: Deliberately NOT included, because nothing emits them: ``table_article``,
-#: ``effectiveness_article``, ``overshoot_article``, ``reference_article``,
-#: ``default_category_article``. Guarding documentation would churn this
-#: baseline for edits that cannot change a single audit entry.
-EMITTED_ARTICLE_KEYS = ("article", "trigger_article")
+#: Exact fields added when compound citations were split are listed too:
+#: effectiveness, overshoot, cooling-tower cell count and part-load method,
+#: and the two economizer staging thresholds all reach ``article=``.
+EMITTED_ARTICLE_KEYS = (
+    "article",
+    "trigger_article",
+    "effectiveness_article",
+    "overshoot_article",
+    "one_cell_article",
+    "multiple_cells_article",
+    "part_load_article",
+    "at_or_above_70_kw_article",
+    "above_25_below_70_kw_article",
+)
 
-#: Data keys that LOOK like citations and are not: nothing in product source
-#: reads them, and their values are prose rather than article ids. Excluded
-#: deliberately, because guarding documentation would churn this baseline on
-#: wording edits that cannot move a single audit entry.
+#: Data keys that LOOK like emitted citations but are not read by product
+#: source. Excluded deliberately, because guarding documentary metadata would
+#: churn this baseline on edits that cannot move a single audit entry.
 #:
 #: ``test_the_documentary_key_exclusion_is_still_true`` keeps this list honest.
 #: An unchecked exclusion is precisely how the ``trigger_article`` hole opened:
 #: a key was assumed not to be emitted, and nothing failed when it was.
 DOCUMENTARY_ARTICLE_KEYS = (
     "table_article",
-    "effectiveness_article",
-    "overshoot_article",
+    "preheat_article",
     "reference_article",
     "default_category_article",
 )
@@ -429,7 +436,7 @@ def compute_data_citation_counts(source_root: Path | None = None) -> dict:
 
 
 def article_named_data_keys(source_root: Path | None = None) -> set[str]:
-    """Every key in product DATA that is ``article`` or ends ``_article``.
+    """Every article-valued key in product DATA.
 
     The taxonomy the two fixed tuples are checked against. Listing keys as
     emitted or documentary proves something about the keys ALREADY listed; it

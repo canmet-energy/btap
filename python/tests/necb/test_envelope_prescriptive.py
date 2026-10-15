@@ -72,12 +72,11 @@ class TestPrescriptive(unittest.TestCase):
                              surface.construction().get().nameString(),
                              f'{surface.nameString()}: strip-zone slab field left as modeled')
         self.assertTrue(
-            any('3.2.3.3' in str(w.get('article', '')) for w in audit.warnings),
+            any(w.get('article') == '3.2.3.3.(3)' and w.get('ruling') == 'D-32'
+                for w in audit.warnings),
             'no-Kiva strip zone warns that the strip is not representable')
         self.assertTrue(any(e['step'] == 'prescriptive'
                             and '3.2.2.2' in str(e.get('article', ''))
-                            for e in audit.entries))
-        self.assertTrue(any('3.2.3.1' in str(e.get('article', ''))
                             for e in audit.entries))
 
     # D-32: Table 3.2.3.1 floors row is zone-conditional — zones 4-7B keep the
@@ -127,7 +126,9 @@ class TestPrescriptive(unittest.TestCase):
         self.assertAlmostEqual(expected_r, mat.thickness() / mat.thermalConductivity(),
                                delta=1e-3,
                                msg='strip insulation R brings the strip assembly to the table U')
-        self.assertTrue(any('3.2.3.3' in str(e.get('article', '')) for e in audit.entries))
+        self.assertTrue(any(e.get('article') == '3.2.3.3.(3)'
+                            and e.get('ruling') == 'D-32'
+                            for e in audit.entries))
 
         model8, kiva8, floor8 = build()
         self.n.apply_prescriptive(model8, code='necb2020', hdd=8170)  # zone 8 -> full area
@@ -194,6 +195,7 @@ class TestPrescriptive(unittest.TestCase):
         # opt-out: construction-only conductance equals the table value (old BTAP)
         self.assertAlmostEqual(0.265, btap_c, delta=1e-4)
         self.assertTrue(any(e['action'] == 'film convention'
+                            and e.get('article') == 'Division A 1.4.1.2.(1)'
                             and 'code-literal' in str(e.get('value', ''))
                             for e in audit.entries))
         self.assertTrue(any(e['action'] == 'film convention'
@@ -202,9 +204,11 @@ class TestPrescriptive(unittest.TestCase):
 
     # 1.4.1.2 "building envelope" scope: an unconditioned attic's deck/gables
     # are NOT envelope (constructions untouched); the ceiling below IS — set to
-    # the ROOF row by the inclination rule with the enclosure credited at
-    # U 6.25 and interior films on both faces. BOTH sentence numbers are
-    # edition-owned: NECB 2020 numbers them (6) and (4), NECB 2025 (4) and (3).
+    # the ROOF row by the inclination rule. The model cannot prove that the
+    # attic is unvented, so the Note's exclusion withholds the enclosure credit
+    # and the exterior requirement applies conservatively. BOTH sentence
+    # numbers are edition-owned: NECB 2020 numbers them (6) and (4), NECB 2025
+    # (4) and (3).
     # See test_interzone_citation_is_edition_owned below.
     @needs_sdk
     def test_interzone_citation_is_edition_owned(self):
@@ -262,8 +266,8 @@ class TestPrescriptive(unittest.TestCase):
                          if e.get("ruling") == "D-24" and e.get("article")]
                 self.assertTrue(cited, "D-24 emitted no article citation")
                 joined = " ".join(cited)
-                self.assertIn(credit, joined,
-                              f"{code} must cite its own enclosure-credit sentence")
+                self.assertIn(f"Note A-{credit}", joined,
+                              f"{code} must cite its own enclosure-credit exclusion")
                 self.assertIn(inclination, joined,
                               f"{code} must cite its own inclination sentence")
                 other = expected["necb2025" if code == "necb2020" else "necb2020"]
@@ -275,6 +279,7 @@ class TestPrescriptive(unittest.TestCase):
     def test_attic_scope_deck_untouched_ceiling_retargeted(self):
         import openstudio
 
+        from btap.audit import AuditLog
         from btap.modeling.envelope import constructions as Constructions
 
         model = openstudio.model.Model()
@@ -300,24 +305,64 @@ class TestPrescriptive(unittest.TestCase):
                     and s.outsideBoundaryCondition() == 'Outdoors')
         deck_before = deck.construction().get().nameString()
 
-        self.n.apply_prescriptive(model, code='necb2020', hdd=HDD)
+        audit = AuditLog()
+        self.n.apply_prescriptive(
+            model, code='necb2020', hdd=HDD, audit=audit)
 
         self.assertEqual(deck_before, deck.construction().get().nameString(),
                          'attic deck is not envelope — construction untouched')
         ceiling = next(s for s in cond.surfaces()
                        if s.surfaceType() == 'RoofCeiling'
                        and s.outsideBoundaryCondition() == 'Surface')
-        target = 1.0 / ((1.0 / 0.156) - (1.0 / 6.25)
-                        - Constructions.film_r_interzone('roofceiling'))
+        target = 1.0 / ((1.0 / 0.156)
+                        - Constructions.film_r('roofceiling', 'outdoors'))
         self.assertAlmostEqual(
             target,
             ceiling.construction().get().to_Construction().get().thermalConductance().get(),
             delta=1e-4,
-            msg='ceiling to attic set to roof row with enclosure credit + interzone films')
+            msg='ceiling to attic uses the exterior roof row without an unsupported credit')
         attic_floor = next(s for s in attic.surfaces() if s.surfaceType() == 'Floor')
         self.assertEqual(ceiling.construction().get().nameString(),
                          attic_floor.construction().get().nameString(),
                          'paired surface carries the same construction')
+        scope = next(
+            entry for entry in audit.entries
+            if entry.get('ruling') == 'D-24'
+            and 'not part of the building envelope' in entry['action']
+        )
+        self.assertEqual('Division A 1.4.1.2.(1)', scope['article'])
+
+    def test_conditioned_interzone_temperature_limb_is_disclosed(self):
+        import openstudio
+
+        from btap.audit import AuditLog
+
+        model = openstudio.model.Model()
+        lower = openstudio.model.Space.fromFloorPrint(print_at(0.0), 3.0, model).get()
+        upper = openstudio.model.Space.fromFloorPrint(print_at(3.0), 3.0, model).get()
+        spaces = openstudio.model.SpaceVector()
+        for space in (lower, upper):
+            spaces.append(space)
+        openstudio.model.matchSurfaces(spaces)
+        material = openstudio.model.StandardOpaqueMaterial(
+            model, 'MediumSmooth', 0.2, 0.03, 45, 1000)
+        seed = openstudio.model.Construction(model)
+        seed.setLayers([material])
+        for surface in model.getSurfaces():
+            surface.setConstruction(seed)
+
+        audit = AuditLog()
+        self.n.apply_prescriptive(
+            model, code='necb2020', hdd=HDD, audit=audit)
+
+        disclosures = [
+            entry for entry in audit.warnings
+            if entry.get('ruling') == 'D-24'
+            and entry.get('article') == 'Division A 1.4.1.2.(1)'
+        ]
+        self.assertEqual(1, len(disclosures),
+                         'the paired boundary is disclosed once, not once per face')
+        self.assertIn('greater than 10 C', disclosures[0]['action'])
 
     def test_windows_preserve_shgc(self):
         import openstudio

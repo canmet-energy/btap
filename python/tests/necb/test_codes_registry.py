@@ -313,8 +313,13 @@ class TestCodesRegistry(unittest.TestCase):
                 reference._apply_economizers(model, [], 1, code, {}, audit)
                 entry = find_entry(
                     audit.entries,
-                    lambda e: "economizer not applicable" in e["action"])
-                self.assertIsNotNone(entry, f"{edition}: System 1 economizer-exempt info emitted")
+                    lambda e: "unestablished implementation choice" in e["action"])
+                self.assertIsNotNone(
+                    entry,
+                    f"{edition}: System 1 unestablished economizer omission warns",
+                )
+                self.assertEqual("warning", entry["level"])
+                self.assertEqual("D-20", entry["ruling"])
                 self.assertEqual(EXPECTED[(edition, site)], entry["article"])
 
     # ---- 9. hvac/reference.py:996 prefix (water economizer) ----

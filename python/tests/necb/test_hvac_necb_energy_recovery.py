@@ -101,9 +101,16 @@ class TestNecbEnergyRecovery(unittest.TestCase):
         self.assertAlmostEqual(-23.3, hx.thresholdTemperature(), delta=1e-6)
 
         decision = next(e for e in audit.entries if 'energy recovery added' in e['action'])
-        self.assertRegex(decision['article'], r'8\.4\.4\.19')
-        self.assertRegex(decision['article'], r'5\.2\.10\.1\.\(4\)')
-        self.assertRegex(decision['article'], r'5\.2\.10\.1\.\(6\)')
+        self.assertEqual('5.2.10.1.(1)', decision['article'])
+        self.assertEqual('D-06', decision['ruling'])
+        effectiveness = next(e for e in audit.entries
+                             if e.get('ruling') == 'D-15'
+                             and 'effectiveness' in e['action'])
+        self.assertEqual('5.2.10.1.(4)', effectiveness['article'])
+        overshoot = next(e for e in audit.entries
+                         if e.get('ruling') == 'D-15'
+                         and 'overshoot' in e['action'])
+        self.assertEqual('5.2.10.1.(6)', overshoot['article'])
         self.assertRegex(str(decision['value']), r'ENTHALPY effectiveness by identity')
         self.assertEqual('non_continuous', decision['inputs']['operation'])
         self.assertEqual('R (required at all flow rates)', decision['inputs']['threshold'])
@@ -171,7 +178,7 @@ class TestNecbEnergyRecovery(unittest.TestCase):
         self.size_loops(result.model, supply_m3s=0.25, oa_fraction=0.85)
         audit = hvac.apply_energy_recovery(result.model, code='necb2025', hdd=HDD_TORONTO)
         decision = next(e for e in audit.entries if 'energy recovery added' in e['action'])
-        self.assertRegex(decision['article'], r'8\.4\.5\.19')
+        self.assertEqual('5.2.10.1.(1)', decision['article'])
 
     # ---- the completeness gate the ERV gap motivated ----
 

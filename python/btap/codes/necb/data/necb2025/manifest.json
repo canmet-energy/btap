@@ -41,6 +41,7 @@
   "coverage_text": "coverage/articles_8_4.json",
   "eui_targets": "eui_targets.json",
   "ghg_factors": "ghg_factors.json",
+  "provision_index": "coverage/provisions.json",
   "provenance": {
     "necb_rules.json": {
       "source": "self:btap.codes.compliance Part 8 Section 8.4 coverage declaration",
@@ -225,7 +226,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "This edition carries the reference-building rules at Subsection 8.4.5 and the part-load curves at 8.4.6; the archived set is the three tables this file's provenance names plus the articles in its own `articles` list. The category keywords extending the Table 8.4.5.7.-A space lists with synonyms are a maintainer addition, not code text, and are marked as such in the file.",
-      "result_sha256": "c8e58391d6330724914655d38c2227964efad593aeb142b117775831f76f4928"
+      "result_sha256": "39552fc21c7cee098fb519a8ae7bc3e8aa91ab7b0be507a1112779c57ee9db3e"
     },
     "efficiencies.json": {
       "source": "mcp:necb:2025",
@@ -1097,6 +1098,533 @@
       "source_verification": "archived",
       "note": "NECB 2025 Part 11 operational GHG emissions: performance levels A-F and the provincial electricity / utility gas / fuel emission factors. Re-verified 2026-08-02 against the post-hbix-fix extraction (D-61).",
       "result_sha256": "feb064c470bd394e8b2e253f9822a0baa2e46676e76bbd0829aa9ff5a444fe00"
+    },
+    "coverage/provisions.json": {
+      "source": "mcp:necb:2025",
+      "request": [
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "A",
+          "section_number": "1.1.1.1",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "1.1.1.1",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.5.7.-B"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "A-8.4.5.13",
+          "include_sentences": false
+        },
+        {
+          "tool": "query_sections",
+          "code": "necb",
+          "edition": "2025",
+          "hierarchy_level": "article",
+          "section_pattern": "8.4.1.%",
+          "limit": 100
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "4.2.1.6",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.6.5.-C"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.4.1"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.4.2"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "5.2.10.1",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.10.1.-A"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.10.1.-B"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.5.14"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.6.5.-A"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.6.5.-B"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "3.2.4.2",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.2"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "5.2.12.2",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "5.2.2.7",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.5.12"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "A",
+          "section_number": "1.4.1.2",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "3.1.1.7",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "3.2.2.2"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "3.2.2.2",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "A-3.1.1.7.(3)",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.1.-A"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "5.2.12.1",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "3.2.3.1"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "3.2.3.1",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "3.2.3.3",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "A-8.4.5.4.(1)",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "5.2.6.3",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.6.3"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.5.7.-A"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "A-8.4.5.20.(4)(a)",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.5.9",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "5.2.3.4",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "5.2.2.9",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "4.2.2.1",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "4.2.2.3",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "4.2.2.4",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "4.2.2.5",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.1.-G"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.1.-I"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.1.-K"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.1.-N"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.1.-O"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "3.2.2.3"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "3.2.2.3",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "4.2.3.1.-A"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "4.2.3.1",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "4.2.3.1.-B"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "4.2.3.1.-C"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "4.2.3.1.-D"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "4.2.3.1.-E"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "11.4.1.1"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "11.4.1.1",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "11.4.2.1.-A"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "11.4.2.1",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "11.4.2.1.-B"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "4.2.1.6"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "5.2.2.8",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "6.2.2.1"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "6.2.2.1",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "3.2.1.4",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "3.2.4.1",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "A-8.4.5.14.(2)",
+          "include_sentences": false
+        }
+      ],
+      "source_revision": null,
+      "source_sha256": "83c8396a6bbec62c758543cbd5aada88d7cb217e0ad9fe22fc515122c28cb23a",
+      "source_artifacts": [
+        {
+          "path": "coverage/articles_8_4.json",
+          "sha256": "6b9ca8c71c6ace55c85f5b4a7e2b4bd9c2fc01711d0dcbde0678c95056bfd904"
+        },
+        {
+          "path": "provenance/provisions.result.json",
+          "sha256": "408bf8a8cd73f0cbe617d8f2bccb74070236e47be91a29e46b0c5ca17af047f4"
+        }
+      ],
+      "extractor": "python/scripts/fetch_necb_provisions.py",
+      "retrieved": "2026-10-14",
+      "method": "generated",
+      "source_verification": "archived",
+      "note": "The retained provisions.result.json is the exact bounded set of authorized MCP tool results. source_artifacts is the canonical two-input descriptor and also pins coverage/articles_8_4.json, which supplies Section 8.4 structure and table-note identities without duplicating that cache.",
+      "result_sha256": "618ba539ee4ed412b3a89cb3e7fa1e2923df3407221ccf8a1ab4034dae30bae8"
     }
   }
 }

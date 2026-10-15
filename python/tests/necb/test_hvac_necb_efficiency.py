@@ -154,7 +154,7 @@ class TestNecbEfficiency(unittest.TestCase):
                                unit.grossRatedCoolingCOP(), delta=1e-6)
         self.assertAlmostEqual(3.30, unit.ratedHeatingCOP(), delta=1e-6)
         self.assertTrue(any(entry['action'] == 'VRF minimum efficiency applied'
-                            and entry.get('article') == 'NECB 2020 Table 5.2.12.1.-I'
+                            and entry.get('article') == 'Table 5.2.12.1.-I'
                             and entry.get('ruling') == 'D-85'
                             for entry in audit.entries))
 
@@ -258,11 +258,11 @@ class TestNecbEfficiency(unittest.TestCase):
         hvac.apply_efficiencies(model, code='necb2020', audit=audit)
 
         self.assertTrue(any('VRF cooling capacity unavailable' in warning['action']
-                            and warning.get('article') == 'NECB 2020 Table 5.2.12.1.-I'
+                            and warning.get('article') == 'Table 5.2.12.1.-I'
                     and warning.get('ruling') == 'D-85'
                             for warning in audit.warnings))
         self.assertTrue(any('VRF heating capacity unavailable' in warning['action']
-                    and warning.get('article') == 'NECB 2020 Table 5.2.12.1.-I'
+                    and warning.get('article') == 'Table 5.2.12.1.-I'
                     and warning.get('ruling') == 'D-85'
                     for warning in audit.warnings))
 

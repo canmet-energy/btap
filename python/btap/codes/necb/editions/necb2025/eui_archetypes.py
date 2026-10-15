@@ -18,10 +18,8 @@ Scope (manifest: 8.4.4.2 partial), all audited:
 - lighting POWER is the design being evaluated and is never touched.
   Lighting OPERATION schedules ARE normalized to the archetype letter
   (interpretation ADOPTED, project decision 2026-07-22).
-- outdoor air IS normalized (interpretation ADOPTED, same decision):
-  8.4.3.6.(1)(a) read as the ventilation-standard rates applied AT the
-  Table's occupant density (ASHRAE 62.1-2016 Table 6.2.2.1 rates per
-  archetype, ARCHETYPE_OA_62_1).
+- outdoor-air rates remain those in the proposed specifications, as required
+  by 8.4.4.2.(2); changing occupant density does not replace the DSOA.
 - unmapped spaces keep their modeled loads: Table 8.4.4.2 applies "for the
   applicable building archetype", and unmapped space functions have none —
   only their AREA is distributed per 8.4.4.1.(4).
@@ -48,17 +46,6 @@ from btap.codes.necb import _data_root, edition_file
 VALUE_TOL = 0.01          # 1% on densities/powers/flows
 SCHEDULE_TOL = 0.005      # 0.5% absolute on hourly schedule values
 PEOPLE_PER_1000FT2_PER_M2_PER_PERSON = 92.90304  # 1000 ft2 in m2
-#: ASHRAE 62.1-2016 Table 6.2.2.1 rates (retrieved via the codes server
-#: ashrae_outdoor_air_rate 2026-07-22). Applied at the Table 8.4.4.2 occupant
-#: density per the adopted 8.4.3.6.(1)(a) reading.
-ARCHETYPE_OA_62_1 = {
-    "School (K-12)": {"category": "classroom (age 9 plus)",
-                      "rp_l_s_person": 5.0, "ra_l_s_m2": 0.6},
-    "Multi-unit residential building": {"category": "dwelling unit",
-                                        "rp_l_s_person": 2.5, "ra_l_s_m2": 0.3},
-    "Office": {"category": "office space",
-               "rp_l_s_person": 2.5, "ra_l_s_m2": 0.3},
-}
 
 
 def _is_all(spec):
@@ -282,17 +269,9 @@ def synthetic_record(archetype):
     the NECB standard set the catalog uses throughout."""
     d = defaults_for(archetype)
     letter = d["schedule"]
-    oa_key = next((k for k in ARCHETYPE_OA_62_1 if archetype.startswith(k)), None)
-    if oa_key is None:
-        oa_key = ("Multi-unit residential building"
-                  if "residential" in archetype else archetype)
-    oa = ARCHETYPE_OA_62_1[oa_key]
     return {
         "necb_schedule_type": letter,
         "lighting_schedule": f"NECB-{letter}-Lighting",
-        "oa_category_62_1": oa["category"],
-        "oa_l_s_per_person": oa["rp_l_s_person"],
-        "oa_l_s_per_m2": oa["ra_l_s_m2"],
         "occupancy_per_area": (PEOPLE_PER_1000FT2_PER_M2_PER_PERSON
                                / d["occupant_density_m2_per_person"]),
         "occupancy_schedule": f"NECB-{letter}-Occupancy",
@@ -419,8 +398,6 @@ def normalize(model, resolved, *, code, audit):
             space.setSpaceType(clone)
             for light in space.lights():  # space-level instances inherit the set too
                 light.resetSchedule()
-            space.setDesignSpecificationOutdoorAir(
-                archetype_dsoa(model, archetype, record))
             normalize_swh(model, space, record, code, audit)
         audit.decision(
             "eui", f"spaces normalized to Table 8.4.4.2 ({archetype})",
@@ -436,9 +413,8 @@ def normalize(model, resolved, *, code, audit):
         "eui",
         "lighting POWER (the design under evaluation) and unmapped spaces are "
         "left as modeled; lighting OPERATION follows the archetype letter and "
-        "outdoor air is set to the ASHRAE 62.1 rates at the Table 8.4.4.2 "
-        "occupant density (adopted interpretations, 2026-07-22)",
-        article="8.4.4.2.(1); 8.4.3.6.(1)(a)", ruling="D-05")
+        "outdoor-air rates remain those in the proposed specifications",
+        article="8.4.4.2.(2)", ruling="D-05")
     return model
 
 
@@ -488,31 +464,6 @@ def check_space_values(space, archetype, record, mismatches):
         mismatches.append(
             f"{space.nameString()} ({archetype}): SWH peak flow "
             f"{_fmt(got_flow, 9)} m3/s, requires {_fmt(expect_flow, 9)}")
-
-    check_outdoor_air(space, archetype, record, mismatches)
-
-
-def check_outdoor_air(space, archetype, record, mismatches):
-    """Adopted 8.4.3.6.(1)(a) reading: DSOA must carry the 62.1 rates (Sum
-    method) at the Table density. Absent or differing DSOA is a mismatch."""
-    dsoa = opt(space.designSpecificationOutdoorAir())
-    if dsoa is None:
-        mismatches.append(
-            f"{space.nameString()} ({archetype}): no "
-            "DesignSpecificationOutdoorAir (62.1 rates at Table density required)")
-        return
-    expect_pp = record["oa_l_s_per_person"] / 1000.0
-    expect_pa = record["oa_l_s_per_m2"] / 1000.0
-    if not (dsoa.outdoorAirMethod().lower() == "sum"
-            and within(dsoa.outdoorAirFlowperPerson(), expect_pp, VALUE_TOL)
-            and within(dsoa.outdoorAirFlowperFloorArea(), expect_pa, VALUE_TOL)):
-        mismatches.append(
-            f"{space.nameString()} ({archetype}): OA {dsoa.outdoorAirMethod()} "
-            f"{_fmt(dsoa.outdoorAirFlowperPerson(), 6)}/person + "
-            f"{_fmt(dsoa.outdoorAirFlowperFloorArea(), 6)}/m2, requires Sum "
-            f"{_fmt(expect_pp, 6)} + {_fmt(expect_pa, 6)} "
-            f"(62.1 {record['oa_category_62_1']})")
-
 
 def check_space_schedules(space, archetype, targets, mismatches):
     space_type = opt(space.spaceType())
@@ -655,25 +606,6 @@ def year_days(ruleset):
     return ruleset.getDaySchedules(
         openstudio.Date(openstudio.MonthOfYear(1), 1, y),
         openstudio.Date(openstudio.MonthOfYear(12), 31, y))
-
-
-def archetype_dsoa(model, archetype, record):
-    """One shared DSOA per archetype: 62.1 rates at the Table density (the
-    per-person term therefore rides the NORMALIZED occupancy)."""
-    import openstudio
-
-    name = f"EUI OA {archetype} (62.1 {record['oa_category_62_1']})"
-    existing = next((d for d in model.getDesignSpecificationOutdoorAirs()
-                     if d.nameString() == name), None)
-    if existing is not None:
-        return existing
-
-    dsoa = openstudio.model.DesignSpecificationOutdoorAir(model)
-    dsoa.setName(name)
-    dsoa.setOutdoorAirMethod("Sum")
-    dsoa.setOutdoorAirFlowperPerson(record["oa_l_s_per_person"] / 1000.0)
-    dsoa.setOutdoorAirFlowperFloorArea(record["oa_l_s_per_m2"] / 1000.0)
-    return dsoa
 
 
 def swh_target_m3s(space, record):

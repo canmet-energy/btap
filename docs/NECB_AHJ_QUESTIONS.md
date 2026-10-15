@@ -87,7 +87,7 @@ nonconformity with 8.4.x.9.(6)(e).
 | AHJ-4 | 8.4.2.2.(5) backup exclusion | ruled | necb2020, necb2025 | no |
 | AHJ-5 | WSHP source-loop boiler energy counts for (5) | ruled | necb2020, necb2025 | no — but see the PREDICATE DEFECT in the entry |
 | AHJ-6 | 8.4.x.9.(4) no oil or propane catalog variant | tool-gap | necb2020, necb2025 | no |
-| AHJ-7 | Table 8.4.5.5.-C / 8.4.6.5.-C chiller EIR_FT | alternative-solution | necb2020, necb2025 | not yet — see the entry |
+| AHJ-7 | Table 8.4.5.5.-C / 8.4.6.5.-C chiller EIR_FT | alternative-solution | necb2020, necb2025 | yes, where a corrected affected row is used |
 | AHJ-8 | Table 4.2.1.6 Note (1) A/B control marks | tool-gap | necb2020, necb2025 | no |
 | AHJ-9 | Table A-8.4.3.2.(1)-G and the '12' column heads | ruled | necb2020, necb2025 | no |
 | AHJ-10 | Table 8.4.x.7.-B Note (3) corner-block grouping | referral | necb2020, necb2025 | yes, on a corner block above four storeys |
@@ -102,23 +102,24 @@ nonconformity with 8.4.x.9.(6)(e).
 | AHJ-19 | real refrigeration is invisible to classification, teardown and end-use reporting | tool-gap | necb2020, necb2025 | no |
 | AHJ-20 | System 5's chilled-water loop is a 7 °C comfort loop | tool-gap | necb2020, necb2025 | no |
 | AHJ-21 | the archetype-EUI path applies no capacity increase under sentence (5) | tool-gap | necb2025 | no |
+| AHJ-22 | cooling-tower capacity equations replaced by the engine Merkel model | alternative-solution | necb2020, necb2025 | yes, where a reference cooling tower is present |
 
 ---
 
 ## How often a run is conditional, measured
 
-**76% of the frozen corpus — 29 of the 38 scenarios carrying an audit — would
-return a CONDITIONAL determination if run annually.** Re-measured 2026-10-09
-after D-101 by resolving every `ahj` citation in every frozen audit against
-this register's own statuses. By id: AHJ-15 on 14 scenarios, AHJ-1 on 13,
-AHJ-14 on 12, AHJ-3 on 4, AHJ-5 on 3, AHJ-16 on 2.
+**74% of the frozen corpus — 32 of the 43 scenarios carrying an audit — would
+return a CONDITIONAL determination if run annually.** Re-measured 2026-10-14
+after the Phase E re-freeze by resolving every `ahj` citation in every frozen
+audit against this register's own statuses. Conditional-id counts are by unique scenario:
+AHJ-15 on 16, AHJ-14 on 15, AHJ-1 on 11, AHJ-3 on 4, AHJ-22 on 3, AHJ-10,
+AHJ-12 and AHJ-16 on 2 each, and AHJ-2 and AHJ-7 on 1 each.
 
-It was 69% (25 of 36) on 2026-10-08, and the rise is a consequence of D-101
-rather than a new question. Five scenarios NEWLY cite AHJ-15 — samples 02, 03
-and 04 across their tiers — because AHJ-15 is about the one-unit-per-thermal-
-block topology, and that topology is now what a reference System 3 or 4 is.
-Two scenarios were added: the full-year determination witnesses for AHJ-1/AHJ-3
-and for AHJ-16.
+The earlier measurements remain historical: 69% (25 of 36) on 2026-10-08 and
+76% (29 of 38) on 2026-10-09. The current corpus has five more audit-bearing
+scenarios. Phase E's new AHJ-7 and AHJ-22 disclosures add one newly conditional
+scenario, `corpus-none-15-general-3storey`; their other frozen witnesses were
+already conditional for independent choices.
 
 One caveat on the comparison, since the number is cited elsewhere: re-running
 this method over the PRE-D-101 baselines gives 24 of 36 (67%), not the recorded
@@ -483,10 +484,10 @@ absence itself is a separate `tool-gap` and is now **AHJ-17**, because one
 entry cannot carry a referral and a tool gap under one status without making
 the taxonomy untruthful (Sol, clearance review of be2118d).
 
-**STILL OPEN, and phylroy's call.** The deviation sets no run conditional, so a
-building with a water-cooled scroll or reciprocating chiller is modelled on
-corrected coefficients with nothing in its report saying so. Same shape of
-hole as AHJ-5.
+**Runtime disclosure closed in Phase E.** A water-cooled scroll or
+reciprocating chiller now cites this entry when the corrected EIR_FT curve is
+installed. The report therefore names the alternative solution and makes that
+run conditional on acceptance of the corrected coefficient.
 
 ## AHJ-8 — Table 4.2.1.6's A and B control marks are not carried at all
 
@@ -1122,3 +1123,34 @@ user's own design is a different act from raising a reference's, and the
 iteration changes the model the EUI verdict is then computed on. That is an
 implementation question inside a settled requirement, which is why this is not
 a one-line fix and still not an ambiguity.
+
+## AHJ-22 — cooling-tower capacity equations replaced by the engine Merkel model
+
+**Article.** 8.4.5.6.(1)-(6) in NECB 2020; 8.4.6.6.(1)-(6) in NECB 2025.
+
+**Status: `alternative-solution`.** The acceptable-solution text prescribes six
+equations for the reference cooling tower's part-load capacity. The
+`CoolingTowerSingleSpeed` object exposes no field in which those equations can
+be installed, so retaining its Merkel effectiveness-NTU calculation is a
+non-literal modelling substitution, not compliance with the prescribed
+method.
+
+**The requirement, and why we do not meet it.** The six sentences define the
+capacity adjustment as explicit functions of entering wet-bulb temperature,
+range and air-flow ratio. The model instead delegates available capacity to
+EnergyPlus's effectiveness-NTU implementation. D-07's numerical probe provides
+useful evidence: the formulations agree at the CTI rating point and differ by
+no more than 12.7% across that rating wet-bulb slice, with conservative
+divergence at colder wet-bulbs. Numerical proximity does not turn one
+prescribed method into the other.
+
+**Established by.** D-07's retained numeric cross-check and the Phase E review
+of `CoolingTowerSingleSpeed` on 2026-10-14. The earlier `engine` coverage
+disposition described the substitution but incorrectly called the requirement
+satisfied.
+
+**What the tool does meanwhile.** It retains the single-speed Merkel tower,
+cites D-07 and this entry on every affected condenser loop, and makes the run
+conditional on the authority accepting the substitution. Closing the entry
+requires a reference-tower representation that applies the six prescribed
+equations, followed by a new freeze of affected scenarios.

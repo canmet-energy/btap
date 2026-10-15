@@ -30,7 +30,7 @@ there rather than silently dropped from the comparison.
 | File | Identical | Renumbered | Changed | Added | Removed |
 |---|---|---|---|---|---|
 | envelope (`envelope_rules.json`) | 75 | 2 | 0 | 0 | 0 |
-| hvac (`reference_rules.json`) | 319 | 24 | 1 | 1 | 0 |
+| hvac (`reference_rules.json`) | 322 | 30 | 1 | 1 | 0 |
 | hvac_efficiencies (`efficiencies.json`) | 2704 | 24 | 111 | 427 | 48 |
 | lighting (`lighting_rules.json`) | 6 | 0 | 0 | 0 | 0 |
 | loads (`loads_rules.json`) | 0 | 1 | 0 | 0 | 0 |
@@ -42,7 +42,7 @@ there rather than silently dropped from the comparison.
 | tables/schedules (`tables/schedules.json`) | 7473 | 0 | 0 | 0 | 0 |
 | tables/space_types (`tables/space_types.json`) | 24024 | 0 | 0 | 0 | 0 |
 | tables/table_c1 (`tables/table_c1.json`) | 8827 | 0 | 0 | 0 | 0 |
-| **Total** | **46052** | **52** | **117** | **428** | **48** |
+| **Total** | **46055** | **58** | **117** | **428** | **48** |
 
 ## necb2020 → necb2025
 
@@ -59,16 +59,22 @@ there rather than silently dropped from the comparison.
 </details>
 
 <details>
-<summary><b>hvac</b> (`reference_rules.json`) — 345 leaves: 319 identical, 24 renumbered, 1 changed, 1 added, 0 removed (click to expand)</summary>
+<summary><b>hvac</b> (`reference_rules.json`) — 354 leaves: 322 identical, 30 renumbered, 1 changed, 1 added, 0 removed (click to expand)</summary>
 
 #### Renumbered
 
 | Old path | Old value | New path | New value |
 |---|---|---|---|
 | `cooling_plant.article` | 8.4.4.10.(6) | `cooling_plant.article` | 8.4.5.10.(6) |
+| `cooling_plant.chiller_eirft_table` | Table 8.4.5.5.-C | `cooling_plant.chiller_eirft_table` | Table 8.4.6.5.-C |
+| `cooling_tower.multiple_cells_article` | 8.4.4.11.(3) | `cooling_tower.multiple_cells_article` | 8.4.5.11.(3) |
+| `cooling_tower.one_cell_article` | 8.4.4.11.(2) | `cooling_tower.one_cell_article` | 8.4.5.11.(2) |
+| `cooling_tower.part_load_article` | 8.4.5.6.(1) | `cooling_tower.part_load_article` | 8.4.6.6.(1) |
 | `dx_staging.article` | 8.4.4.10.(8) | `dx_staging.article` | 8.4.5.10.(8) |
-| `energy_recovery.article` | 8.4.4.19.(1)-(2) | `energy_recovery.article` | 8.4.5.19.(1)-(2) |
-| `fans.article` | 8.4.4.18.(3)-(4) | `fans.article` | 8.4.5.18.(3)-(4) |
+| `energy_recovery.article` | 8.4.4.19.(1) | `energy_recovery.article` | 8.4.5.19.(1) |
+| `energy_recovery.preheat_article` | 8.4.4.19.(2) | `energy_recovery.preheat_article` | 8.4.5.19.(2) |
+| `fans.system_6.article` | 8.4.4.18.(4) | `fans.system_6.article` | 8.4.5.18.(4) |
+| `fans.systems_1_3_4_5.article` | 8.4.4.18.(3) | `fans.systems_1_3_4_5.article` | 8.4.5.18.(3) |
 | `furnace_staging.article` | 8.4.4.9.(7) | `furnace_staging.article` | 8.4.5.9.(7) |
 | `heat_pump_reference.article` | 8.4.4.13.(2) | `heat_pump_reference.article` | 8.4.5.13.(2) |
 | `heating_plant.article` | 8.4.4.9.(6) | `heating_plant.article` | 8.4.5.9.(6) |
@@ -81,7 +87,7 @@ there rather than silently dropped from the comparison.
 | `selection.categories.11.rules.0.article` | 8.4.4.7.-A: 'All sizes of refrigerated space -> System 5' | `selection.categories.11.rules.0.article` | 8.4.5.7.-A: 'All sizes of refrigerated space -> System 5' |
 | `selection.categories.2.rules.0.article` | 8.4.4.7.-A: 'Where the proposed building or space has a cooling capacity exceeding 20 kW, the reference building or space shall use System 2' | `selection.categories.2.rules.0.article` | 8.4.5.7.-A: 'Where the proposed building or space has a cooling capacity exceeding 20 kW, the reference building or space shall use System 2' |
 | `selection.default_category_article` | 8.4.4.7.(3): 'If the building or space type ... is not listed in Table 8.4.4.7.-A, the type that most closely corresponds to that thermal block shall be used' | `selection.default_category_article` | 8.4.5.7.(3): 'If the building or space type ... is not listed in Table 8.4.5.7.-A, the type that most closely corresponds to that thermal block shall be used' |
-| `selection.special_rules.heat_pump.article` | 8.4.4.13.(1)-(2) + Table 8.4.4.13 | `selection.special_rules.heat_pump.article` | 8.4.5.13.(1)-(2) + Table 8.4.5.13 |
+| `selection.special_rules.heat_pump.article` | 8.4.4.13.(2)(a) | `selection.special_rules.heat_pump.article` | 8.4.5.13.(2)(a) |
 | `selection.special_rules.purchased_cooling.article` | 8.4.4.6.(2) | `selection.special_rules.purchased_cooling.article` | 8.4.5.6.(2) |
 | `selection.special_rules.purchased_heating.article` | 8.4.4.6.(1) | `selection.special_rules.purchased_heating.article` | 8.4.5.6.(1) |
 | `selection.special_rules.residential.article` | 8.4.4.7.-A (Residential/Accommodation Area) | `selection.special_rules.residential.article` | 8.4.5.7.-A (Residential/Accommodation Area) |

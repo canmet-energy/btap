@@ -251,6 +251,14 @@ def _blocks_of(group, election_key=None):
 
 # ---- category election: majority space-type keyword match over the group's zones ----
 
+def _selection_article_base(selection):
+    return selection["article"].split(".(", 1)[0]
+
+
+def _selection_table_citation(selection):
+    return f"Table {selection['table']}"
+
+
 def _category_for(group, building, selection, audit):
     votes: dict = {}
     for zone_name in group['zones']:
@@ -272,18 +280,14 @@ def _category_for(group, building, selection, audit):
     # the warning should fire rather than a majority being applied silently,
     # which is the defect D-22 recorded (Fable, `167` G5).
     #
-    # Its article stays the 2020 literal because this whole function hardcodes
-    # 2020 articles (see the 8.4.4.7.(3) warning below) and threading the
-    # ruleset through for an unreachable branch would be a bigger change than
-    # the finding. Noted rather than fixed: were it ever to fire under
-    # NECB 2025, both literals would name the wrong subsection.
     if len(named) > 1:  # pragma: no cover - unreachable with per-block views
+        article = f"{_selection_article_base(selection)}.(1)"
         audit.warn('selection',
-                   '8.4.4.7.(1) assigns systems PER THERMAL BLOCK, but this zone group mixes '
+                   f'{article} assigns systems PER THERMAL BLOCK, but this zone group mixes '
                    f"categories {' / '.join(named)} — majority ({category}) applied "
                    'to the whole group',
                    target=','.join(group['zones']),
-                   article='8.4.4.7.(1)', ruling='D-22')
+                   article=article, ruling='D-22')
     if category is None:
         category = selection['default_category']
         seen = []
@@ -295,17 +299,19 @@ def _category_for(group, building, selection, audit):
         # per block while naming the serving system, which is F1's class
         # (Fable, `167` G5); no baseline shows a duplicate yet only because
         # no corpus model has an unlisted space type.
+        article = f"{_selection_article_base(selection)}.(3)"
         audit.warn('selection',
-                   'space type not listed in Table 8.4.4.7.-A — closest-corresponding category assumed',
+                   f"space type not listed in {_selection_table_citation(selection)} "
+                   '— closest-corresponding category assumed',
                    target=','.join(group['zones']),
                    inputs={'zone_types': seen,
                            'serving_system': group['air_loop']},
-                   value=category, article='8.4.4.7.(3)')
-    _audit_museum_row(group, building, category, audit)
+                   value=category, article=article)
+    _audit_museum_row(group, building, category, selection, audit)
     return category
 
 
-def _audit_museum_row(group, building, category, audit):
+def _audit_museum_row(group, building, category, selection, audit):
     """D-45: a museum space can read as two Table 8.4.4.7.-A rows — Assembly Area
     lists "exhibit space", Historical Collections Area lists "archival library,
     museum and gallery archives". The ruling reads the latter as the ARCHIVES of
@@ -326,12 +332,13 @@ def _audit_museum_row(group, building, category, audit):
         return
 
     audit.info('selection',
-               f'museum space classified as {category} — the Table 8.4.4.7.-A collections row '
+               f'museum space classified as {category} — the '
+               f'{_selection_table_citation(selection)} collections row '
                'covers museum and gallery ARCHIVES; a public exhibition gallery is an exhibit '
                'space and takes the assembly row',
                target=group['air_loop'] or group['zones'][0],
                inputs={'space_types': types, 'category': category},
-               article='8.4.4.7.(1)', ruling='D-45')
+               article=_selection_table_citation(selection), ruling='D-45')
 
 
 # ---- rule application per category ----
@@ -362,7 +369,7 @@ def _assign(group, category, building, selection, audit, unsized=None):
             continue
         if rule.get('min_storeys') and storeys < rule['min_storeys']:
             continue
-        if not _condition_met(rule, group, building, audit):
+        if not _condition_met(rule, group, building, selection, audit):
             continue
 
         if rule.get('min_cooling_kw_exclusive'):
@@ -436,7 +443,7 @@ def _assign(group, category, building, selection, audit, unsized=None):
                       action='build', articles=[a for a in articles if a is not None])
 
 
-def _condition_met(rule, group, building, audit):
+def _condition_met(rule, group, building, selection, audit):
     condition = rule.get('condition')
     if condition == 'kitchen_hood':
         # A hood is a condition the MODEL cannot express — only the
@@ -451,7 +458,7 @@ def _condition_met(rule, group, building, audit):
                        'row would select System 4); pass building: {kitchen_hood_zones: [...]} if '
                        'any space has one',
                        target=','.join(group['zones']),
-                       article='Table 8.4.4.7.-A (Supermarket/Food Service)')
+                       article=_selection_table_citation(selection))
         zones = set(group['zones'])
         return any(z in zones for z in (building.get('kitchen_hood_zones') or []))
     if condition == 'refrigerated':
@@ -461,7 +468,7 @@ def _condition_met(rule, group, building, audit):
                        'are ASSUMED non-refrigerated (a refrigerated space would select System 5 '
                        'instead of 4); pass building: {refrigerated_zones: [...]} if any space is',
                        target=','.join(group['zones']),
-                       article='Table 8.4.4.7.-A (Warehouse Area)')
+                       article=_selection_table_citation(selection))
         zones = set(group['zones'])
         return any(z in zones for z in (building.get('refrigerated_zones') or []))
     return True
@@ -470,6 +477,7 @@ def _condition_met(rule, group, building, audit):
 def _residential_assignment(group, category, selection, articles, audit):
     res = selection['special_rules']['residential']
     articles = articles + [res['article']]
+    article = f"{_selection_article_base(selection)}.(4)"
     # D-34 (A1, phylroy 2026-07-27): follow legacy — a residential block whose
     # proposed system includes a heat pump takes the 8.4.4.7.(4) ASHP redirect,
     # NOT the Table -A "(or heat pumps)" identical-to-proposed parenthetical.
@@ -482,9 +490,9 @@ def _residential_assignment(group, category, selection, articles, audit):
     if _heat_pump_redirects(group):
         audit.decision('selection',
                        'residential with heat pump -> ASHP reference redirect (A1/D-34: follow legacy)',
-                       target=','.join(group['zones']), article='8.4.4.7.(4)', ruling='D-34')
+                       target=','.join(group['zones']), article=article, ruling='D-34')
         return Assignment(zones=list(group['zones']), category=category, reference_system=1,
-                          action='build', articles=articles + ['8.4.4.7.(4)'])
+                          action='build', articles=articles + [article])
     if group['heated'] and not group['cooled']:
         audit.decision('selection', 'residential heated-only -> System 1',
                        target=','.join(group['zones']), article=res['article'])
@@ -632,7 +640,7 @@ def _finalize(assignment, group, definitions, selection, facts, audit,
     if _heat_pump_redirects(group) and assignment.reference_system in hp_rule['applies_to_systems']:
         audit.decision('selection',
                        'proposed heat pump -> reference is an air-source heat pump '
-                       f'(Table {hp_article})',
+                       f"({hp_rule['article']})",
                        target=','.join(group['zones']),
                        inputs={'selected_system': assignment.reference_system,
                                'heat_pump_sources': group.get('heat_pump_sources')},
@@ -641,10 +649,13 @@ def _finalize(assignment, group, definitions, selection, facts, audit,
         assignment.articles.append(hp_rule['article'])
     elif group.get('heat_pump') and not _heat_pump_redirects(group):
         audit.decision('selection',
-                       'water-loop heat pump — Table 8.4.4.7.-A selection retained (no ASHP redirect)',
+                       f"water-loop heat pump — "
+                       f"{_selection_table_citation(selection)} selection retained "
+                       "(no ASHP redirect)",
                        target=','.join(group['zones']),
-                       inputs={'selected_system': assignment.reference_system},
-                       article=f'{hp_article}.(1); Note A-{hp_article}', ruling='D-37')
+                       inputs={'selected_system': assignment.reference_system,
+                               'heat_pump_sources': group.get('heat_pump_sources')},
+                       article=f'{hp_article}.(1)', ruling='D-37')
 
     assignment.energy_type = None
     boiler_part_load_curve_class = None
@@ -874,7 +885,7 @@ def reference_hvac(model, code='necb2020', building=None, audit=None, proposed_a
                            audit=audit, proposed_annual=proposed_annual)
 
 
-def _reconcile_declared_storeys(reference, building, audit):
+def _reconcile_declared_storeys(reference, building, audit, ruleset=None):
     """Stamp the storey count the SELECTOR used onto the reference's Building.
 
     The two halves of the System 6 grouping disagreed (Fable's `131` F2). The
@@ -911,6 +922,7 @@ def _reconcile_declared_storeys(reference, building, audit):
     declared = (building or {}).get('storeys')
     if not declared:
         return
+    article = f"Table {_subsection(ruleset)}.7.-B Note (3)"
     declared = int(declared)
     existing = opt(reference.getBuilding().standardsNumberOfAboveGroundStories())
     if existing is not None and int(existing) != declared:
@@ -923,7 +935,7 @@ def _reconcile_declared_storeys(reference, building, audit):
                    'is not intended',
                    inputs={'storeys': declared,
                            'model_declared_storeys': int(existing)},
-                   ruling='D-18')
+                   article=article, ruling='D-18')
     elif existing is not None:
         return
     reference.getBuilding().setStandardsNumberOfAboveGroundStories(declared)
@@ -931,7 +943,7 @@ def _reconcile_declared_storeys(reference, building, audit):
                'declared above-ground storey count stamped on the reference '
                'from the supplied building data — the selector and the system '
                'builder must group on the SAME premise',
-               inputs={'storeys': declared}, ruling='D-18')
+               inputs={'storeys': declared}, article=article, ruling='D-18')
 
 
 def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=None):
@@ -947,7 +959,7 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
 
     audit = audit if audit is not None else AuditLog()
     reference = _clone_model(model)
-    _reconcile_declared_storeys(reference, building, audit)
+    _reconcile_declared_storeys(reference, building, audit, ruleset)
     _clear_proposed_part_load_classes(reference, audit)
     _clear_proposed_capacity_ownership(reference, audit)
 
@@ -986,11 +998,12 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
         if not c.minimumOutdoorAirFlowRate().is_initialized():
             continue
 
+        article = f"{_subsection(ruleset)}.15.(1)"
         audit.warn('build',
                    f"proposed OA controller '{c.nameString()}' carries a HARD-SET minimum OA "
                    f"({ruby_round(c.minimumOutdoorAirFlowRate().get() * 1000, 0)} L/s) — the rebuilt reference "
-                   'autosizes OA from the space DSOA; verify 8.4.4.15.(1) identity',
-                   article='8.4.4.15.(1)', ruling='D-22')
+                   f"autosizes OA from the space DSOA; verify {article} identity",
+                   article=article, ruling='D-22')
     # Table 8.4.4.7.-B note (1) (D-55): record every proposed thermal block's
     # humidification and its energy source BEFORE the teardown destroys the loops
     # that carry it — the rebuild happens once the reference loops exist.
@@ -1529,9 +1542,9 @@ def _apply_zone_fan_rules(zones, reference_system, rules_data, audit):
     if reference_system == 6:
         return
 
-    spec = (rules_data.get('fans') or {}).get('systems_1_3_4_5', {}).get('supply') or {}
-    pressure = spec.get('pressure_rise_pa') or 640.0
-    eff = spec.get('total_efficiency') or 0.40
+    spec = (rules_data.get('fans') or {}).get('systems_1_3_4_5') or {}
+    pressure = spec.get('supply_pa') or 640.0
+    eff = spec.get('supply_efficiency') or 0.40
     touched = 0
     for zone in zones:
         for eq in zone.equipment():
@@ -1556,29 +1569,18 @@ def _apply_zone_fan_rules(zones, reference_system, rules_data, audit):
     audit.decision('build', 'zone-equipment supply fans set to the systems 1-5 spec',
                    inputs={'fans': touched, 'pressure_pa': pressure, 'total_efficiency': eff},
                    value=f'{touched} zone fan(s) at {pressure} Pa / {ruby_round(eff * 100)}%',
-                   article='8.4.4.18.(3)', ruling='D-22')
+                   article=spec['article'], ruling='D-22')
 
 
 def apply_economizer_thresholds(model, audit=None, code=None):
-    """T3 (audit 2026-07-25): 8.4.4.12 economizers apply only where Article
-    5.2.2.7 applies to the proposed system — mechanical cooling AND (sized
-    supply > 1500 L/s OR cooling capacity > 20 kW); dwelling-only/hotel
-    systems exempt (approximated: System 1 already exempt per D-20; zone
-    types are not re-derivable here). POST-SIZING pass, umbrella-called
-    alongside apply_energy_recovery: strips economizers from loops below the
-    trigger, loudly.
+    """Post-sizing 5.2.2.7 economizer threshold check.
 
     :param model: sized reference openstudio.model.Model (modified in place)
     :param audit: AuditLog or None (a new one is created if None)
-    :param code: code id, for the edition's own article prefix. `None` keeps
-        2020's, which is what the hardcoded value already was — the economizer
-        article is 8.4.4.12 in NECB 2020 and 8.4.5.12 in NECB 2025, and both
-        entries here spelled 2020's into the ARTICLE FIELD on every 2025 run
-        (Fable's `133` G3). In NECB 2025 `8.4.4.12` does not exist at all:
-        that subsection stops at `.2`.
+    :param code: retained for the public facade; the Part 5 trigger citation
+        has the same identifier in both supported editions
     :return: AuditLog — the audit carrying every keep/strip decision
     """
-    economizer_article = f'{_subsection(resolve(code) if code else None)}.12.'
     from btap.audit import AuditLog
 
     audit = audit if audit is not None else AuditLog()
@@ -1633,14 +1635,14 @@ def apply_economizer_thresholds(model, audit=None, code=None):
                            inputs={'supply_l_s': ruby_round(supply * 1000, 0),
                                    'cooling_kw': ruby_round(cooling_w / 1000.0, 1)},
                            value=ctrl.getEconomizerControlType(),
-                           article=f'{economizer_article}; 5.2.2.7.(1)', ruling='D-22')
+                           article='5.2.2.7.(1)', ruling='D-22')
         else:
             ctrl.setEconomizerControlType('NoEconomizer')
             audit.decision('rules', 'economizer REMOVED — below the 5.2.2.7 trigger (<=1500 L/s and <=20 kW)',
                            target=air_loop.nameString(),
                            inputs={'supply_l_s': ruby_round(supply * 1000, 0),
                                    'cooling_kw': ruby_round(cooling_w / 1000.0, 1)},
-                           value='NoEconomizer', article=f'{economizer_article}; 5.2.2.7.(1)', ruling='D-22')
+                           value='NoEconomizer', article='5.2.2.7.(1)', ruling='D-22')
     return audit
 
 
@@ -1709,7 +1711,7 @@ def _purge_orphaned_vrf(model, audit):
     for unit in orphans:
         audit.info('build', 'proposed VRF outdoor unit serves no reference zone — removed',
                    target=unit.nameString(), inputs={'terminals': 0},
-                   article='8.4.4.1.', ruling='D-85')
+                   article='Table 5.2.12.1.-I', ruling='D-85')
         unit.remove()
     return orphans
 
@@ -1890,18 +1892,18 @@ def _apply_economizers(model, air_loops, reference_system, code, rules_data, aud
     if reference_system in (2, 5):
         _apply_water_economizer(model, reference_system, code, rules_data, audit)
         return
-    # D-20: NO economizer on System 1 (100%-outdoor-air makeup air). An air
-    # economizer cannot increase OA above a system that is already all
-    # outdoor air, and its winter signal (outdoor enthalpy < return) LOCKS
-    # OUT the 5.2.10.1 energy-recovery wheel through the HX economizer
-    # lockout — disabling mandated heat recovery for the entire heating
-    # season (found by the MURB fixed-point audit: the reference MAU heated
-    # -20 C air unassisted all January; legacy correctly uses NoEconomizer).
+    # D-20 records the current System 1 omission as an implementation choice,
+    # not an established Code exception. An economizer cannot increase OA on
+    # the all-outdoor-air makeup system, and its winter signal would lock out
+    # required energy recovery, but the unconditional exception remains held.
     if reference_system == 1:
-        audit.info('build', 'System 1 (100% OA makeup air): economizer not applicable — an all-outdoor-air '
-                            'system cannot economize, and the economizer signal would lock out the 5.2.10.1 '
-                            'energy-recovery wheel all winter',
-                   article=f'{prefix}.12.', ruling='D-20')
+        audit.warn(
+            'build',
+            'System 1 economizer OMITTED as an unestablished implementation '
+            'choice — the all-outdoor-air system cannot increase OA and an '
+            'economizer signal would lock out required energy recovery',
+            article=f'{prefix}.12.',
+            ruling='D-20')
         return
 
     for air_loop in _array(air_loops):
@@ -1920,7 +1922,7 @@ def _apply_economizers(model, air_loops, reference_system, code, rules_data, aud
         audit.decision('build',
                        'air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)',
                        target=air_loop.nameString(),
-                       article=f'{prefix}.12. (Table -12 -> 5.2.2.8)', ruling='D-20')
+                       article='5.2.2.8.(1)', ruling='D-20')
 
 
 def _array(x):
@@ -2415,7 +2417,7 @@ def _apply_fan_rules(air_loops, reference_system, rules_data, audit):
             audit.decision('rules', f"{'return' if is_return else 'supply'} fan set to reference spec",
                            target=fan.nameString(),
                            value=f'{pa} Pa @ {ruby_round(eff * 100)}% combined fan-motor efficiency',
-                           article=fans['article'])
+                           article=spec['article'])
 
 
 def _set_fan_total_efficiency(fan, efficiency):

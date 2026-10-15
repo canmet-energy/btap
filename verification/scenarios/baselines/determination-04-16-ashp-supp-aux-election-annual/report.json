@@ -274,7 +274,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
     "target": "Primary Boiler",
     "detail": "boiler efficiency applied",
-    "entry_index": 248
+    "entry_index": 258
    },
    {
     "id": "AHJ-14",
@@ -283,7 +283,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "Coil Heating Gas 1",
     "detail": "gas heating coil efficiency applied",
-    "entry_index": 276
+    "entry_index": 286
    },
    {
     "id": "AHJ-14",
@@ -292,7 +292,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "Coil Heating Gas 2",
     "detail": "gas heating coil efficiency applied",
-    "entry_index": 277
+    "entry_index": 287
    },
    {
     "id": "AHJ-14",
@@ -301,7 +301,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "Coil Heating Gas 3",
     "detail": "gas heating coil efficiency applied",
-    "entry_index": 278
+    "entry_index": 288
    },
    {
     "id": "AHJ-14",
@@ -310,7 +310,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "Coil Heating Gas 4",
     "detail": "gas heating coil efficiency applied",
-    "entry_index": 279
+    "entry_index": 289
    },
    {
     "id": "AHJ-14",
@@ -319,7 +319,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "Coil Heating Gas 5",
     "detail": "gas heating coil efficiency applied",
-    "entry_index": 280
+    "entry_index": 290
    }
   ]
  },
@@ -379,9 +379,17 @@
   "Supply Air Systems (airflow rates, fan specs) \u2014 not implemented. Gaps: the identical-fan-power fallback for secondaries failing 5.2.3.1.(1)(b) is not modeled",
   "Supply Air Systems (airflow rates, fan specs) \u2014 not implemented. Gaps: the exemption for equipment whose fan energy is included in the Tables 5.2.12.1 minimum performance is not modeled",
   "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
+  "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
+  "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
   "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
+  "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
+  "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
+  "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
   "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
+  "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
+  "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
   "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
+  "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
   "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
   "thermal bridging not requested \u2014 applied U-values are clear-field; NECB 3.1.1.7 requires EFFECTIVE transmittance (pass thermal_bridging:)",
   "proposed infiltration total 0 L/s DEVIATES from the untested 8.4.3.3.(3) default 607 L/s by -100% \u2014 only a 3.2.4.2 airtightness test justifies a different value",

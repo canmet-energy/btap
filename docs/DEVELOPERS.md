@@ -84,6 +84,7 @@ native-tool config, unrelated to the Python client below):
 
 ```bash
 python3 python/scripts/fetch_necb_8_4_text.py
+python3 python/scripts/fetch_necb_provisions.py
 python3 python/scripts/building_stock.py --help
 ```
 
@@ -168,12 +169,58 @@ One decision is one file, `docs/decisions/D-NN.md`: TOML front matter
 (`id`, `title`, `kind`, `articles`, `editions`, `summary`) followed by the
 authored Markdown
 body, whose first line is its own `## D-NN —` heading. Those files are
-canonical. Both [necb_decisions.md](necb_decisions.md) and
-`python/btap/codes/data/decisions.json` are generated from them, in numeric id
-order, by `python3 python/scripts/generate_decisions.py`; use `--check` in
-gates. To add or change a decision, edit the one source file and regenerate --
-never the two outputs. The registry tests enforce the source schema, both
-generated outputs, short-link resolution and runtime citations.
+canonical. [necb_decisions.md](necb_decisions.md),
+`python/btap/codes/data/decisions.json` and
+[CODE_DECISIONS_BY_PROVISION.md](CODE_DECISIONS_BY_PROVISION.md), the Codes
+Committee view by code, edition and provision, are generated from them by
+`python3 python/scripts/generate_decisions.py`; use `--check` in gates. The
+registry and the log are in numeric id order. To add or change a decision, edit
+the one source file and regenerate -- never the three outputs. The registry
+tests enforce the source schema, all three generated outputs, short-link
+resolution and runtime citations.
+
+A requirement may also take the structured source form planned in
+[DECISION_APPLICABILITY_PLAN.md](plans/DECISION_APPLICABILITY_PLAN.md). It
+keeps its key and `label`, and adds a `decided` paraphrase and one
+`[[articles.<key>.sources]]` record (`code`, `edition`, `role`, `references`)
+per code, edition and role.
+
+The generator checks the references in a registered NECB edition against that
+edition's provision index, which is described below. It then derives the
+decision's `editions` from `governing` records only. `incorporated-reference`
+and `related` records never establish an edition. A reference no index can
+validate, such as one from another standard, is carried as authored and named
+on a `decisions: note` line.
+
+`decisions.json` is schema 2. Every entry keeps `id`, `title`, `kind` and
+`summary`, which are all the runtime reads. A structured entry carries
+`requirements` instead of `articles`.
+
+Phase C converted the 23 decisions that carried an established per-code-id
+mapping, so the view prints no Transitional summaries. Phase D's seven
+batches then established 42 held decisions directly in the structured form
+(D-02, D-03, D-04, D-05, D-06, D-07, D-09, D-11, D-12, D-13, D-14, D-15,
+D-17, D-18, D-19, D-21, D-22, D-23, D-24, D-26, D-28, D-31, D-32, D-34,
+D-35, D-37, D-41, D-42, D-43, D-45, D-53, D-55, D-58, D-59, D-60, D-61,
+D-62, D-63, D-65, D-74, D-76 and D-85), for 65 in all. Every
+other decision still holds `unverified` or `not_applicable`.
+`tests/necb/test_decisions_registry_sync.py` pins the converted ids and each
+converted mapping and fails if any other decision takes a per-code-id mapping;
+`tests/necb/test_report_units.py` holds the compliance report byte-identical
+across the conversion.
+
+[CODE_DECISIONS_BY_PROVISION.md](CODE_DECISIONS_BY_PROVISION.md) lists only a
+decision that cites a provision. A decision that cites none, because it is
+`not_applicable` or has an empty `unverified` list, is omitted and counted. A
+structured requirement makes one row per `governing` record and prints its
+`decided` text; its other-edition governing records appear under Other
+editions, and its `incorporated-reference` and `related` records under Other
+sources, never as rows. A legacy requirement makes one row per edition and
+carries the decision-wide `summary`, marked **Transitional** and printed once
+per decision, until it is converted. A decision with a non-empty `unverified`
+list appears only in the last section, "Edition not yet attributed". The
+document is a pure function of the sources, so a conversion moves a decision
+between sections on regeneration and needs no code change.
 
 The two generated coverage documents are
 [NECB_COVERAGE.md](NECB_COVERAGE.md) and
@@ -188,6 +235,15 @@ disposition stay code-family-neutral in `python/btap/codes/data/coverage/`.
 Refresh them only as a maintainer operation with
 `python3 python/scripts/fetch_necb_8_4_text.py` and review the generated-doc
 diff.
+
+The bounded decision-by-provision evidence indexes ship beside those caches at
+`coverage/provisions.json`. They contain identities and hierarchy, not copied
+requirement text; exact authorized hbix results are retained under each
+edition's `provenance/provisions.result.json`. Refresh both editions with
+`python3 python/scripts/fetch_necb_provisions.py`, then review the index,
+archive, manifest provenance, and targeted tests. Runtime and CI never call
+hbix. A missing entry means `not-indexed`; only an explicit authority-backed
+record or a complete parent inventory establishes `absent`.
 
 ## The AHJ register
 
@@ -228,6 +284,10 @@ Decision front matter carries `editions`: the code ids the decision governs,
 or `unverified`. Validated against the editions discovered under
 `btap/codes/necb/data/`, so a typo or a retired id fails the generator rather
 than quietly misinforming a reader. No collective words — list the ids.
+
+A structured decision may omit the field. The generator derives it from the
+`governing` source records. During the transition the field may still be
+authored, but it must then equal that derived list exactly, order included.
 
 ```bash
 cd python && .venv/bin/python -m unittest tests.necb.test_decisions_generator
