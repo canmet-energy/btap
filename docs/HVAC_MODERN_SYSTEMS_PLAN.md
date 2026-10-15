@@ -19,6 +19,21 @@ EnergyPlus operating tests. Those tests verify nonzero heating and cooling,
 beam/radiant hydronic design values, chilled-water dew-point-reset movement,
 central heat exchange, and simultaneous VRF heat recovery.
 
+The NECB boundary is also release-gated rather than inferred from selection
+alone. The D-58 selector matrix now covers all 103 inputs in both supported
+editions. Every catalog input then passes through full `reference_hvac()`
+construction, OpenStudio Model (`.osm`) save/reload, and EnergyPlus forward
+translation; the nine distinct four-scenario assignment signatures cover the
+remaining office, residential, and data-processing branches. A serial
+24-pipeline EnergyPlus gate covers all six modern inputs plus every remaining
+signature in NECB 2020 and 2025, requiring clean proposed and reference sizing
+runs. It also runs the residential radiant identity-copy reference for a
+January week. The data-processing cases exposed and now regression-pin a
+System 2 sizing edge: an ideal-loads probe rates each four-pipe fan-coil water
+coil at its zone cooling airflow before final reference sizing, rather than
+letting EnergyPlus substitute the larger heating airflow and fail its UA
+inversion.
+
 ## Findings that change the initial outline
 
 | Subject | Verified finding | Consequence |

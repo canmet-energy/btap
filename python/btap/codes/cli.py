@@ -781,6 +781,8 @@ class Progress:
 
     PHASES = (("proposed_sizing", "proposed sizing run"),
               ("proposed_annual", "proposed annual run"),
+              ("reference_fan_coil_load_sizing",
+               "reference fan-coil load sizing run"),
               ("reference_sizing", "reference sizing run"),
               ("reference_annual", "reference annual run"))
 

@@ -270,6 +270,14 @@ def build_reference(run):
             proposed, ruleset, building=opts["building"], audit=audit,
             proposed_annual=run.proposed_annual_data)
         reference = reference_result.model
+        run.state["reference_fan_coil_zones"] = sorted({
+            zone_name
+            for assignment in reference_result.assignments
+            if assignment.reference_system in (2, 5)
+            for zone_name in assignment.zones
+            if assignment.source_actions.get(
+                zone_name, assignment.action) != "copy_proposed"
+        })
         envelope.reference._apply(
             reference, ruleset, hdd=run.hdd,
             actual_roof_absorptance_used=opts["actual_roof_absorptance_used"],
@@ -343,6 +351,11 @@ def _size_reference(run):
         # clean references, and the 8.4.4.14 transfer below re-establishes the
         # proposed-equivalent W/(L/s) on the sized flows (D-27 machinery).
         hvac.prepare_for_resizing(reference, audit=audit, code=run.ruleset.id)
+        _prepare_reference_fan_coil_sizing(
+            reference, run.state.get("reference_fan_coil_zones", ()),
+            run_dir=os.path.join(
+                opts["run_dir"], "reference_fan_coil_load_sizing"),
+            audit=audit)
         runner.run_energyplus(reference,
                               os.path.join(opts["run_dir"], "reference_sizing"),
                               sizing_only=True)
@@ -389,7 +402,9 @@ def _compare_and_iterate(run):
                             ruleset=run.ruleset, run_dir=opts["run_dir"],
                             run_period=opts["run_period"],
                             max_iterations=opts["max_capacity_iterations"],
-                            step=opts["capacity_step"], audit=audit)
+                            step=opts["capacity_step"], audit=audit,
+                            reference_fan_coil_zones=run.state.get(
+                                "reference_fan_coil_zones", ()))
         run.compliant = compliance._evaluate(run.report, run.ruleset,
                                              opts["run_period"], audit)
         _resolve_ahj_conditions(run, audit)
@@ -1945,8 +1960,114 @@ def _mechanical_cooling(model):
                for o in model.modelObjects())
 
 
+def _prepare_reference_fan_coil_sizing(model, zone_names, *, run_dir, audit):
+    """Size reference fan-coil water coils at their cooling design airflow.
+
+    EnergyPlus gives a four-pipe fan coil one maximum airflow, the larger of
+    its heating and cooling design flows. During water-coil sizing it then
+    overwrites the cooling coil's otherwise-correct zone cooling flow with
+    that maximum. Heating-dominated zones can consequently ask the coil UA
+    inversion to reconcile a cooling load with more than twice its cooling
+    design airflow, which terminates the inversion with "Bad starting values
+    for UA".
+
+    A clean ideal-loads probe supplies the load-side cooling airflow without
+    changing the reference's fan or capacity. The final reference sizing run
+    uses that value only as the cooling coil's rating airflow.
+    """
+    zone_names = tuple(sorted(set(zone_names)))
+    if not zone_names:
+        return 0
+
+    import openstudio
+
+    from btap import modeling
+
+    probe = model.clone().to_Model()
+    probe_zones = {zone.nameString(): zone
+                   for zone in probe.getThermalZones()}
+    missing = sorted(set(zone_names) - set(probe_zones))
+    if missing:
+        raise RuntimeError(
+            "reference fan-coil load sizing cannot find thermal block(s): "
+            + ", ".join(missing))
+
+    target_zones = [probe_zones[name] for name in zone_names]
+    modeling.remove_hvac_from_zones(probe, target_zones)
+    # A water-side economizer can retain one plant connection after the other
+    # loop is removed with the target zones. Such a half-connected object has
+    # no role in the load probe and ForwardTranslator otherwise emits it with
+    # missing required nodes.
+    for exchanger in list(probe.getHeatExchangerFluidToFluids()):
+        if (not exchanger.plantLoop().is_initialized()
+                or not exchanger.secondaryPlantLoop().is_initialized()):
+            exchanger.remove()
+    for zone in target_zones:
+        ideal = openstudio.model.ZoneHVACIdealLoadsAirSystem(probe)
+        if not ideal.addToThermalZone(zone):
+            raise RuntimeError(
+                "reference fan-coil load sizing could not attach ideal loads "
+                f"to '{zone.nameString()}'")
+
+    output = runner.run_energyplus(
+        probe, run_dir, sizing_only=True)
+    if not runner.is_clean_run(output):
+        raise RuntimeError(
+            "reference fan-coil load sizing did not complete cleanly; "
+            f"see {output}/eplusout.err")
+
+    cooling_flow = {}
+    for name in zone_names:
+        value = opt(
+            probe_zones[name].autosizedCoolingDesignAirFlowRate())
+        if value is None or value <= 0.0:
+            raise RuntimeError(
+                "reference fan-coil load sizing produced no positive cooling "
+                f"design airflow for '{name}'")
+        cooling_flow[name] = value
+
+    model_zones = {zone.nameString(): zone
+                   for zone in model.getThermalZones()}
+    adjusted = []
+    for name in zone_names:
+        fan_coils = []
+        for equipment in model_zones[name].equipment():
+            fan_coil = opt(equipment.to_ZoneHVACFourPipeFanCoil())
+            if fan_coil is not None:
+                fan_coils.append(fan_coil)
+        if len(fan_coils) != 1:
+            raise RuntimeError(
+                "reference System 2/5 construction expected exactly one "
+                f"four-pipe fan coil in '{name}', found {len(fan_coils)}")
+        coil = opt(fan_coils[0].coolingCoil().to_CoilCoolingWater())
+        if coil is None:
+            raise RuntimeError(
+                "reference System 2/5 fan coil has no water cooling coil in "
+                f"'{name}'")
+        if not coil.setDesignAirFlowRate(cooling_flow[name]):
+            raise RuntimeError(
+                "could not set reference fan-coil cooling design airflow for "
+                f"'{name}'")
+        adjusted.append(coil.nameString())
+
+    audit.info(
+        "simulation",
+        "reference four-pipe fan-coil water coils rated at each thermal "
+        "block's cooling design airflow from a clean ideal-loads sizing "
+        "probe — EnergyPlus otherwise substitutes the unit's larger heating "
+        "airflow and can fail its cooling-coil UA inversion",
+        target="reference",
+        inputs={
+            "fan_coils": len(adjusted),
+            "cooling_airflow_m3_s_min": min(cooling_flow.values()),
+            "cooling_airflow_m3_s_max": max(cooling_flow.values()),
+        })
+    return len(adjusted)
+
+
 def _iterate_capacities(proposed, reference, report, *, ruleset, run_dir,
-                        run_period, max_iterations, step, audit):
+                        run_period, max_iterations, step, audit,
+                        reference_fan_coil_zones=()):
     """8.4.1.2.(5): "the capacities of the primary and secondary systems of
     the proposed building or the reference building, where applicable, shall
     be incrementally increased until those loads are met." Sentences (3)/(4)
@@ -2043,6 +2164,10 @@ def _iterate_capacities(proposed, reference, report, *, ruleset, run_dir,
                     # against a freshly grown autosized flow is an EnergyPlus
                     # input FATAL, not a modeling nuance.
                     hvac.prepare_for_resizing(model, audit=audit, code=ruleset.id)
+                    _prepare_reference_fan_coil_sizing(
+                        model, reference_fan_coil_zones,
+                        run_dir=f"{dir}_fan_coil_load_sizing",
+                        audit=audit)
                     runner.run_energyplus(model, f"{dir}_sizing",
                                           sizing_only=True)
                     hvac.efficiency._apply(model, ruleset,
