@@ -36,6 +36,17 @@ ROUND_TRIP = {
     'ecm_ashp_baseboard': ('hs12_ashp_baseboard', {'heated': True}),
     'ecm_doas_vrf': ('hs08_ccashp_vrf', {'heated': True, 'cooled': True, 'heat_pump': True}),
     'ecm_hp_fancoils': ('hs15_cawhp_fancoils', {'heated': True, 'cooled': True}),
+    'chilled_beams': (
+        'DOAS with active chilled beams and electric baseboards',
+        {'heated': True, 'cooled': True, 'terminal': 'chilled_beam',
+         'air_loop': True}),
+    'radiant': (
+        'DOAS with hydronic radiant floors, gas boiler and air-cooled chiller',
+        {'heated': True, 'cooled': True, 'air_loop': True}),
+    'dual_duct': (
+        'Dual-duct VAV with gas boiler and water-cooled chiller',
+        {'heated': True, 'cooled': True, 'terminal': 'dual_duct_vav',
+         'air_loop': True}),
 }
 
 

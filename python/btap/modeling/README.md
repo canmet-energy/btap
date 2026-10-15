@@ -6,8 +6,8 @@ simulates. Four engines: the footprint wizards and the bar engine (verbatim
 ports from openstudio-standards), a 3D viewer (ported from
 canmet-energy/campus) and a per-storey 2D floor-plan renderer — plus, since
 the by-nature refactor (D-77), the **HVAC authoring machinery**: the
-97-system topology catalog, `build_system` / `replace_system`, twenty system
-builders, the coil/curve/schedule components, `classify.characterize`,
+103-system topology catalog, `build_system` / `replace_system`, the system
+builders, coil/curve/schedule components, `classify.characterize`,
 teardown, and the envelope authoring pieces (constructions, the
 exposed-surface census).
 
@@ -16,12 +16,41 @@ exposed-surface census).
 ```
 btap/modeling/
   geometry/   wizards, bar engine, footprints, plans, 3D render
-  hvac/       97-system catalog + builders (systems/, components/, data/)
+  hvac/       103-system catalog + builders (systems/, components/, data/)
   envelope/   constructions + surface census
 ```
 
 No `lighting/` or `shw/`: their authoring is NECB-table application and
 lives in `btap.codes` — see [CLAUDE.md](CLAUDE.md).
+
+## Modern HVAC systems
+
+Six opt-in catalog rows add modern hydronic and air-system topology without
+changing the existing rows:
+
+- active and passive chilled beams use a dehumidifying/reheating 100% OA DOAS,
+  electric baseboards, and 15/18 C tempered chilled water;
+- hydronic radiant floors use the same latent-control strategy, 40/35 C
+  low-temperature hot water, 15/18 C chilled water, native condensation
+  control, and builder-owned internal-source floor constructions;
+- rotary ERV VAV and sensible-only plate HRV PVAV variants use a central
+  air-to-air exchanger, pretreat setpoint control, explicit frost/bypass
+  inputs, and current-SDK effectiveness curves; and
+- true dual-duct VAV uses independent 35 C hot and 13 C cold decks with one
+  `AirTerminalDualDuctVAV` per zone.
+
+The chilled-beam and radiant rows reset chilled-water setpoints to the warmest
+served-zone dew point plus a 2 K margin. Plant loops are reused only when their
+source and full temperature profile match. Existing VRF and DOAS+VRF systems
+already enable heat recovery; that behavior is tested rather than exposed as
+a duplicate row.
+
+UFAD is not a catalog option. OpenStudio 3.11 can author the required
+EnergyPlus room-air objects in a translated workspace, but has no typed,
+persistent OpenStudio Model (`.osm`) representation. Post-translation
+injection would also be bypassed by ordinary external translation and the
+remote OpenStudio-model workflow, so shipping a UFAD name would overstate
+portable model behavior.
 
 ## Footprint wizards
 

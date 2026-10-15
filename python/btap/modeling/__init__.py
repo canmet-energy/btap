@@ -1,7 +1,7 @@
 """btap.modeling — generic model authoring (port of the btap-modeling gem).
 
 Parametric building geometry (footprint wizards, the bar engine, measured
-footprints), the 97-system HVAC catalog + builders, classify/teardown, the
+footprints), the 103-system HVAC catalog + builders, classify/teardown, the
 envelope constructions machinery, and the plan/render tooling. SDK-only,
 code-agnostic: no NECB anywhere (rule application lives in btap.codes).
 

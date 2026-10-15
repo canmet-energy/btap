@@ -6,6 +6,7 @@ plant is created by the builder (plant_loops.chilled_water) and passed in."""
 
 from __future__ import annotations
 
+import math
 import re
 
 import openstudio
@@ -28,9 +29,164 @@ from btap.modeling.hvac.systems.base_system import BaseSystem
 # Corner blocks (exterior walls on several facades) bin by the LARGEST
 # exterior-wall area among orientations; ties resolve N > E > S > W.
 COMPASS = ('N', 'E', 'S', 'W')
+ERV_TYPES = ('Plate', 'Rotary')
+ERV_FROST_CONTROLS = (
+    'None', 'ExhaustAirRecirculation', 'ExhaustOnly',
+    'MinimumExhaustTemperature',
+)
+ERV_BYPASS_CONTROLS = (
+    'BypassWhenWithinEconomizerLimits',
+    'BypassWhenOAFlowGreaterThanMinimum',
+)
+ENERGY_RECOVERY_SOURCE_FEATURE = 'btap_energy_recovery_source'
+ENERGY_RECOVERY_SOURCE_CATALOG = 'catalog'
+
+
+def _number(config, key, *, minimum=None, maximum=None):
+    value = config.get(key)
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f'{key} must be a finite number')
+    value = float(value)
+    if not math.isfinite(value):
+        raise ValueError(f'{key} must be a finite number')
+    if minimum is not None and value < minimum:
+        raise ValueError(f'{key} must be at least {minimum}')
+    if maximum is not None and value > maximum:
+        raise ValueError(f'{key} must be at most {maximum}')
+    return value
+
+
+def validate_energy_recovery(config):
+    if not config.get('needs_erv'):
+        return
+
+    if config.get('erv_heat_exchanger_type') not in ERV_TYPES:
+        raise ValueError(
+            f"erv_heat_exchanger_type must be one of {ERV_TYPES!r}")
+    if config.get('erv_frost_control_type') not in ERV_FROST_CONTROLS:
+        raise ValueError(
+            f"erv_frost_control_type must be one of {ERV_FROST_CONTROLS!r}")
+    if config.get('erv_bypass_control_type') not in ERV_BYPASS_CONTROLS:
+        raise ValueError(
+            f"erv_bypass_control_type must be one of {ERV_BYPASS_CONTROLS!r}")
+    for key in (
+            'erv_economizer_lockout',
+            'erv_supply_air_outlet_temperature_control'):
+        if not isinstance(config.get(key), bool):
+            raise ValueError(f'{key} must be a boolean')
+
+    _number(config, 'erv_sensible_effectiveness', minimum=0.0, maximum=1.0)
+    _number(config, 'erv_latent_effectiveness', minimum=0.0, maximum=1.0)
+    _number(config, 'erv_frost_threshold_temperature',
+            minimum=-100.0, maximum=100.0)
+    _number(config, 'erv_initial_defrost_time_fraction',
+            minimum=0.0, maximum=1.0)
+    _number(config, 'erv_defrost_time_fraction_increase_rate', minimum=0.0)
+    _number(config, 'erv_nominal_electric_power', minimum=0.0)
+
+
+def _effectiveness_curve(model, name, value):
+    independent = openstudio.model.TableIndependentVariable(model)
+    independent.setName(f'{name} Flow Fraction')
+    independent.setInterpolationMethod('Linear')
+    independent.setExtrapolationMethod('Constant')
+    independent.setMinimumValue(0.0)
+    independent.setMaximumValue(1.0)
+    independent.setUnitType('Dimensionless')
+    independent.addValue(0.75)
+    independent.addValue(1.0)
+    independent.additionalProperties().setFeature(
+        ENERGY_RECOVERY_SOURCE_FEATURE, ENERGY_RECOVERY_SOURCE_CATALOG)
+
+    table = openstudio.model.TableLookup(model)
+    table.setName(name)
+    table.addIndependentVariable(independent)
+    table.setNormalizationMethod('DivisorOnly')
+    table.setNormalizationDivisor(value if value > 0.0 else 1.0)
+    table.setMinimumOutput(0.0)
+    table.setMaximumOutput(1.0)
+    table.setOutputUnitType('Dimensionless')
+    table.addOutputValue(value)
+    table.addOutputValue(value)
+    return table
+
+
+def add_energy_recovery(model, oa_system, config, *, name):
+    """Attach one catalog-selected exchanger across the OA and relief streams."""
+    existing = [
+        component.to_HeatExchangerAirToAirSensibleAndLatent().get()
+        for component in oa_system.oaComponents()
+        if component.to_HeatExchangerAirToAirSensibleAndLatent().is_initialized()
+    ]
+    if existing:
+        return existing[0]
+
+    sensible = float(config['erv_sensible_effectiveness'])
+    latent = float(config['erv_latent_effectiveness'])
+    exchanger = openstudio.model.HeatExchangerAirToAirSensibleAndLatent(model)
+    exchanger.setName(
+        f"{name} {config['erv_heat_exchanger_type']} "
+        f"{'ERV' if latent > 0.0 else 'HRV'}")
+    exchanger.setHeatExchangerType(config['erv_heat_exchanger_type'])
+    exchanger.setEconomizerLockout(config['erv_economizer_lockout'])
+    exchanger.setSupplyAirOutletTemperatureControl(
+        config['erv_supply_air_outlet_temperature_control'])
+    exchanger.setFrostControlType(config['erv_frost_control_type'])
+    exchanger.setThresholdTemperature(
+        float(config['erv_frost_threshold_temperature']))
+    exchanger.setInitialDefrostTimeFraction(
+        float(config['erv_initial_defrost_time_fraction']))
+    exchanger.setRateofDefrostTimeFractionIncrease(
+        float(config['erv_defrost_time_fraction_increase_rate']))
+    exchanger.setNominalElectricPower(
+        float(config['erv_nominal_electric_power']))
+    for load in ('Heating', 'Cooling'):
+        exchanger_method = (
+            f'setSensibleEffectivenessat100{load}AirFlow')
+        getattr(exchanger, exchanger_method)(sensible)
+        getattr(
+            exchanger,
+            f'setSensibleEffectivenessof{load}AirFlowCurve')(
+                _effectiveness_curve(
+                    model, f'{name} Sensible {load} Effectiveness',
+                    sensible))
+        getattr(
+            exchanger, f'setLatentEffectivenessat100{load}AirFlow')(latent)
+        getattr(
+            exchanger,
+            f'setLatentEffectivenessof{load}AirFlowCurve')(
+                _effectiveness_curve(
+                    model, f'{name} Latent {load} Effectiveness',
+                    latent))
+    exchanger.additionalProperties().setFeature(
+        ENERGY_RECOVERY_SOURCE_FEATURE, ENERGY_RECOVERY_SOURCE_CATALOG)
+    exchanger.addToNode(oa_system.outboardOANode().get())
+
+    mixed_air_node = oa_system.mixedAirModelObject().get().to_Node().get()
+    pretreat = openstudio.model.SetpointManagerOutdoorAirPretreat(model)
+    pretreat.setName(f'{name} ERV Pretreat Setpoint Manager')
+    pretreat.setMinimumSetpointTemperature(-99.0)
+    pretreat.setMaximumSetpointTemperature(99.0)
+    pretreat.setMinimumSetpointHumidityRatio(0.00001)
+    pretreat.setMaximumSetpointHumidityRatio(1.0)
+    pretreat.setReferenceSetpointNode(mixed_air_node)
+    pretreat.setMixedAirStreamNode(mixed_air_node)
+    pretreat.setOutdoorAirStreamNode(oa_system.outboardOANode().get())
+    pretreat.setReturnAirStreamNode(
+        oa_system.returnAirModelObject().get().to_Node().get())
+    pretreat.addToNode(
+        exchanger.primaryAirOutletModelObject().get().to_Node().get())
+
+    oa_system.getControllerOutdoorAir().setHeatRecoveryBypassControlType(
+        config['erv_bypass_control_type'])
+    return exchanger
 
 
 class VAVReheat(BaseSystem):
+    def preflight(self, model, zones, control_zone=None, namer='default',
+                  remove_existing=False):
+        validate_energy_recovery(self.config)
+
     def build(self, model, zones, control_zone=None, namer='default',
               hw_loop=None, chw_loop=None):
         """
@@ -172,6 +328,10 @@ class VAVReheat(BaseSystem):
         htg_coil.addToNode(supply_inlet_node)
         clg_coil.addToNode(supply_inlet_node)
         oa_system.addToNode(supply_inlet_node)
+        if self.config.get('needs_erv'):
+            add_energy_recovery(
+                model, oa_system, self.config,
+                name=f"{self.config['name']} | {group[0].nameString()}")
         return_air_node = oa_system.returnAirModelObject().get().to_Node().get()
         return_fan.addToNode(return_air_node)
 
@@ -205,12 +365,17 @@ class VAVReheat(BaseSystem):
             terminal.setMaximumFlowFractionDuringReheat(0.5)
 
         # NOTE parts order: sys6 legacy emits sys_htg BEFORE sys_clg (insertion order).
+        heat_recovery = 'none'
+        if self.config.get('needs_erv'):
+            heat_recovery = (
+                'erv' if self.config['erv_latent_effectiveness'] > 0.0
+                else 'hrv')
         naming.apply(namer, air_loop,
                      system_name=self.config['name'],
                      sys_abbr=self.config['sys_abbr'],
                      sys_oa='mixed',
                      parts={
-                         'sys_hr': 'none',
+                         'sys_hr': heat_recovery,
                          'sys_htg': heating_coil_type,
                          'sys_clg': ('dx'
                                      if self.config.get('cooling_type', 'chilled_water') == 'dx'

@@ -91,6 +91,9 @@ class TestEcmSystems(unittest.TestCase):
         modeling.build_system(model, 'hs13_ashp_vrf', zones)
 
         self.assertEqual(1, len(model.getAirConditionerVariableRefrigerantFlows()))
+        self.assertTrue(
+            model.getAirConditionerVariableRefrigerantFlows()[0]
+            .heatPumpWasteHeatRecovery())
         self.assertEqual(0, len(model.getCoilCoolingDXVariableSpeeds()),
                          'hs13 uses single-speed ASHP on the DOAS')
         self.assertEqual(1, sum(1 for c in model.getCoilCoolingDXSingleSpeeds()

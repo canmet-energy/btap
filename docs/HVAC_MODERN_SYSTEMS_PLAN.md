@@ -1,10 +1,23 @@
-# Modern HVAC catalog expansion: phases 1-3
+# Modern HVAC catalog expansion: phases 1-3 implementation record
 
-**Status:** implementation plan, not a claim of supported systems. The current
-97-row `btap.modeling.hvac` catalog builds topology, not a sized, commissioned,
-code-compliant system. This plan concerns **generic OpenStudio SDK authoring**;
-NECB equipment-selection and efficiency rules stay in `btap.codes`. No product
-dependency on measures or `openstudio-standards` is proposed.
+**Status:** implemented, with UFAD deliberately deferred. The
+`btap.modeling.hvac` catalog now has 103 rows and builds generic OpenStudio SDK
+topology, not a commissioned or code-compliant system. NECB
+equipment-selection and efficiency rules stay in `btap.codes`; no product
+dependency on measures or `openstudio-standards` was added.
+
+## Implemented outcome
+
+| Phase | Result |
+| --- | --- |
+| 1 | Shipped `DOAS with active chilled beams and electric baseboards`, `DOAS with passive chilled beams and electric baseboards`, and `DOAS with hydronic radiant floors, gas boiler and air-cooled chiller`. The systems use a dehumidifying/reheating 100% OA loop, explicit low-temperature plant profiles, dew-point reset, and preflight-before-mutation validation. Radiant teardown restores only builder-owned internal-source constructions. |
+| 2 | Shipped `VAV chiller with gas boiler reheat and rotary ERV` and `PVAV with gas boiler reheat and plate HRV`. Existing VAV rows are unchanged. Existing `VRF`, `DOAS with VRF`, `hs08_ccashp_vrf`, and `hs13_ashp_vrf` retain heat recovery and are regression-pinned rather than duplicated. |
+| 3 | Shipped `Dual-duct VAV with gas boiler and water-cooled chiller` as a true two-deck air loop with dual-duct terminals. UFAD did not ship: OpenStudio 3.11 has workspace/IDF support but no typed, persistent OpenStudio Model (`.osm`) representation, and post-translation augmentation is not enforceable in every supported backend. |
+
+The shipped rows have focused object-graph and translation tests plus annual
+EnergyPlus operating tests. Those tests verify nonzero heating and cooling,
+beam/radiant hydronic design values, chilled-water dew-point-reset movement,
+central heat exchange, and simultaneous VRF heat recovery.
 
 ## Findings that change the initial outline
 
@@ -15,7 +28,7 @@ dependency on measures or `openstudio-standards` is proposed.
 | VRF heat recovery | `ecm_air.add_outdoor_vrf_unit()` already sets `setHeatPumpWasteHeatRecovery(True)`. Standalone `VRF`, `DOAS with VRF`, and the ECM DOAS+VRF builders use it. The canonical VRF name already says "heat recovery system". | **Do not add a duplicate "VRF heat recovery" row** or turn on a flag that is already on. Phase 2 verifies and documents existing support. |
 | Central ERV | The pinned gem adds an air-to-air heat exchanger at the OA system's outboard OA node, with pretreat setpoint control, economizer bypass, and frost protection. | Reuse this *approach* for an opt-in VAV variant; zone ERVs are not a substitute. |
 | Dual duct | OpenStudio 3.11 accepts `AirLoopHVAC(model, True)` (two supply outlet nodes) and `AirTerminalDualDuctVAV`; an SDK simulation fixture constructs both decks. | Use the actual two-deck topology. The published measure named "Dual Duct DOAS" instead uses a single-duct VAV loop and zone fan coils; **it is not a dual-duct implementation to port**. |
-| UFAD | EnergyPlus needs `RoomAirModelType` and UFAD interior/exterior room-air settings to model stratification. The installed OpenStudio 3.11 Python model API exposes no `RoomAir*` classes. | Warmer supply-air sizing or a plenum alone is **not UFAD**. A real catalog row is gated on an SDK-only representation and successful translation/simulation; otherwise explicitly defer it. |
+| UFAD | EnergyPlus needs `RoomAirModelType` and UFAD interior/exterior room-air settings to model stratification. OpenStudio 3.11 exposes those EnergyPlus object types through its IDD and `Workspace` APIs, but not as typed `openstudio.model` classes. Adding them to an OpenStudio Model creates transient generic objects that the forward translator drops; an OpenStudio Model (`.osm`) save/reload turns them into invalid `Catchall` objects. | Warmer supply-air sizing or a plenum alone is **not UFAD**. The available SDK-only path is explicit post-translation workspace injection. A real catalog row remains gated on a first-class, persistent translation contract plus successful stratification simulation. |
 
 **Research pointers (approaches, not code to copy):** [pinned radiant builder][gem-radiant],
 [pinned air-loop ERV][gem-erv], [pinned VRF heat recovery][gem-vrf],
@@ -59,14 +72,21 @@ into Python; design and test the SDK object graph independently.
   EnergyPlus Severe/Fatal errors, connected water/air paths, nonzero
   delivered capacity under design loads, and no newly orphaned equipment.
 - `python/tests/modeling/test_system_simulation_status.py` expects a verdict
-  for **every** catalog name. **This gate is now MET** (2026-10-12):
+  for **every** catalog name. The original gate was met on 2026-10-12:
   `python/scripts/simulate_all_systems.py` exists, and the committed verdict
-  is the output of a real sweep — 97/97 `ok`, 458 s total, sizing only,
-  OpenStudio 3.11.0+241b8abb4d, Toronto CWEC2020, on `5ZoneNoHVAC.osm`.
+  was the output of a real sweep — 97/97 `ok`, 458 s total, sizing only,
+  OpenStudio 3.11.0+241b8abb4d, Toronto CWEC2020, on the
+  `5ZoneNoHVAC.osm` OpenStudio Model.
   Each row carries its severe and fatal counts, its completion flag and its
   elapsed time, and the file carries a `produced_by` block; the test fails on
   a row claiming `ok` without them. So the hand-written claim turned out to
   be TRUE, and it is now evidence rather than an assertion.
+
+  This expansion regenerated the complete verdict on 2026-10-15:
+  **103/103 `ok`**, zero failures, 485.6 s total, using OpenStudio
+  3.11.0+241b8abb4d and EnergyPlus 25.2.0-cf7368216c. The six modern rows are
+  therefore covered by both this sizing sweep and the separate annual
+  operating regression described above.
 
   A new catalogue row means re-running the sweep and committing the moved
   verdict with the row. `--name` and `--limit` give a smoke run and
@@ -96,7 +116,7 @@ cooling configurations only when their moisture-control tests pass.
    profiles in `systems/plant_loops.py`, and thread the selected profile
    through `builder.py` for **new rows only**. A loop may be reused only
    when its source, temperature/setpoint profile, and other relevant reuse
-   keys match. Preserve the 97 existing rows' defaults and selection.
+   keys match. Preserve the pre-expansion rows' defaults and selection.
    Test two differently tempered systems in one model: they must not
    accidentally share or reprogram one plant loop.
 2. Factor the useful DOAS air-loop assembly out of `systems/doas.py` only
@@ -253,7 +273,7 @@ with **no duplicate catalog name**.
    [four-pipe fan-coil zone equipment][measure-dual-fancoil], not
    dual-duct terminals.
 
-### 3.2 UFAD: SDK capability gate before any public row
+### 3.2 UFAD: workspace translation gate before any public row
 
 1. Prototype a **genuine** UFAD model on a small plenum + occupied-zone
    fixture: supply/return connections and EnergyPlus
@@ -263,27 +283,45 @@ with **no duplicate catalog name**.
    occupied-level and return-level temperatures to show stratification;
    a higher `Sizing:Zone` supply temperature or ventilation effectiveness
    alone does **not** pass.
-2. First determine whether the pinned/next supported OpenStudio SDK
-   can persist these objects through OSM -> EnergyPlus translation; 3.11
-   currently exposes no `RoomAir*` model classes. The
-   [displacement-ventilation measure][measure-displacement] adds analogous
-   room-air objects **after** translation as an EnergyPlus workspace
-   measure, which is not permitted as a hidden product dependency here.
-   If there is no SDK-only representation, record the blocker and **do
-   not add a row called "UFAD"**. An independently named *underfloor
-   supply/plenum, well-mixed zones* approximation would need its own
-   scope decision and explicit limitations; it cannot satisfy this gate.
-3. If an SDK-only representation becomes available, implement
+2. Treat the OpenStudio 3.11 capability split as established evidence:
+   `IddObjectType` resolves `RoomAirModelType` and both UFAD settings
+   objects, and a translated EnergyPlus `Workspace` accepts them while
+   remaining Draft-valid. The typed `openstudio.model` API has no
+   `RoomAir*` classes. Generic additions to a `Model` are silently omitted
+   by `ForwardTranslator`; saving and reloading that OSM converts them to
+   invalid `Catchall` objects. Therefore do not wait for a workspace
+   capability that already exists, and do not mistake it for persistent
+   OpenStudio Model (`.osm`) support.
+3. Before adding a catalog row, make the workspace path a deliberate
+   product contract. Either require a self-contained OpenStudio Model
+   (`.osm`) and defer UFAD until typed model support exists, or add a
+   first-class SDK-only
+   post-translation stage that persists inspectable UFAD intent and
+   parameters on the model and injects the EnergyPlus objects in every
+   supported export and simulation path. It must fail visibly when that
+   stage is bypassed, inject each object exactly once, and expose the
+   limitation that an ordinary external OpenStudio Model (`.osm`)
+   translation cannot reproduce UFAD. The remote
+   `workflow_type="openstudio"` backend also uploads the model unchanged
+   and bypasses local workspace augmentation. The
+   [displacement-ventilation measure][measure-displacement]
+   demonstrates the post-translation approach, but an EnergyPlus workspace
+   measure is not permitted as a hidden product dependency here.
+4. Once that contract is approved and implemented, add
    `systems/ufad.py` using explicit plenum/zoning preconditions (no
    silent geometry creation), diffuser and return locations, room-air
    parameters for interior/exterior zones, and purpose-specific sizing.
-   Validate missing plenums, model translation, warm-supply cooling
-   loads, room-air temperature gradient, both zone types, `classify`,
-   subset replacement, and the full catalog/simulation-status gates.
+   Validate missing plenums, persisted intent, injected IDF objects,
+   warm-supply cooling loads, occupied/return temperature gradients, both
+   zone types, `classify`, subset replacement, and the full
+   catalog/simulation-status gates. An independently named *underfloor
+   supply/plenum, well-mixed zones* approximation would need its own scope
+   decision and explicit limitations; it cannot satisfy this gate.
 
 **Phase 3 exit:** a real, simulated two-deck VAV row ships. UFAD ships
-**only** if the room-air capability gate passes; otherwise Phase 3 closes
-with a documented SDK blocker and *no misleading catalog entry*.
+**only** if the workspace translation contract and room-air simulation gates
+pass; otherwise Phase 3 closes with the specific unresolved contract or SDK
+blocker documented and *no misleading catalog entry*.
 
 ## Delivery sequence and boundaries
 
@@ -292,11 +330,11 @@ with a documented SDK blocker and *no misleading catalog entry*.
    plumbing. Phase 2's VAV ERV can proceed independently. Phase 3's
    dual-duct builder can proceed after SDK-fixture verification; UFAD
    feasibility should be investigated before any promised release date.
-2. For each slice, record the proposed catalog rows, modeled plant
+2. For each slice, record the catalog rows, modeled plant
    temperatures, ventilation/latent strategy, construction assumptions
    (where applicable), simulation evidence, and known exclusions in
-   `python/btap/modeling/README.md`. This document is the execution
-   plan, not evidence that these systems are already implemented.
+   `python/btap/modeling/README.md`. This document records the acceptance
+   contract and implemented outcome.
 3. Displacement ventilation, absorption/heat-recovery chillers, and
    CHP/cogeneration remain outside phases 1-3. In particular, a
    heat-recovery **chiller** is not VRF heat recovery, and CHP is a

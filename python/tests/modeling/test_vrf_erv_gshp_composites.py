@@ -17,6 +17,9 @@ class TestVrfErvGshpComposites(unittest.TestCase):
         modeling.build_system(model, 'VRF', zones)
 
         self.assertEqual(1, len(model.getAirConditionerVariableRefrigerantFlows()))
+        self.assertTrue(
+            model.getAirConditionerVariableRefrigerantFlows()[0]
+            .heatPumpWasteHeatRecovery())
         terminals = model.getZoneHVACTerminalUnitVariableRefrigerantFlows()
         self.assertEqual(len(zones), len(terminals))
         self.assertTrue(terminals[0].isOutdoorAirFlowRateDuringCoolingOperationAutosized(),
@@ -31,6 +34,9 @@ class TestVrfErvGshpComposites(unittest.TestCase):
         result = modeling.build_system(model, 'DOAS with VRF', zones)
 
         self.assertEqual(1, len(result.air_loops), 'the DOAS')
+        self.assertTrue(
+            model.getAirConditionerVariableRefrigerantFlows()[0]
+            .heatPumpWasteHeatRecovery())
         terminal = model.getZoneHVACTerminalUnitVariableRefrigerantFlows()[0]
         self.assertAlmostEqual(
             1.0e-6, terminal.outdoorAirFlowRateDuringCoolingOperation().get(), delta=1e-10,

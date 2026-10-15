@@ -12,6 +12,12 @@ def remove_hvac_from_zones(model, zones):
     :return: the model"""
     zone_handles = [str(zone.handle()) for zone in zones]
 
+    from btap.modeling.hvac.systems import plant_loops, radiant, vav_reheat
+
+    for plant_loop in model.getPlantLoops():
+        plant_loops.remove_zones_from_dewpoint_reset(plant_loop, zones)
+    radiant.restore_owned_surface_constructions(model, zones)
+
     # 1. Zone equipment on the given zones (baseboards, PTAC/PTHP, fan coils, VRF
     #    terminals...). Exhaust fans are preserved (they represent code-required
     #    exhaust, not the system).
@@ -75,7 +81,13 @@ def remove_hvac_from_zones(model, zones):
 
         # Water coils stranded by an air-loop removal stay attached as plant demand
         # components; remove them so their loop can empty on the next pass.
-        for coil in (list(model.getCoilCoolingWaters()) + list(model.getCoilHeatingWaters())):
+        water_coils = (
+            list(model.getCoilCoolingWaters())
+            + list(model.getCoilHeatingWaters())
+            + list(model.getCoilCoolingCooledBeams())
+            + list(model.getCoilHeatingLowTempRadiantVarFlows())
+            + list(model.getCoilCoolingLowTempRadiantVarFlows()))
+        for coil in water_coils:
             if coil.airLoopHVAC().is_initialized():
                 continue
             if coil.containingHVACComponent().is_initialized():
@@ -89,9 +101,24 @@ def remove_hvac_from_zones(model, zones):
         if not changed:
             break
 
+    radiant.cleanup_owned_constructions(model)
+
     # 4. Remove now-unused performance curves.
     for curve in model.getCurves():
         if curve.directUseCount() == 0:
             model.removeObject(curve.handle())
+
+    used_independent_variables = {
+        str(variable.handle())
+        for table in model.getTableLookups()
+        for variable in table.independentVariables()
+    }
+    for variable in list(model.getTableIndependentVariables()):
+        source = variable.additionalProperties().getFeatureAsString(
+            vav_reheat.ENERGY_RECOVERY_SOURCE_FEATURE)
+        if (source.is_initialized()
+                and source.get() == vav_reheat.ENERGY_RECOVERY_SOURCE_CATALOG
+                and str(variable.handle()) not in used_independent_variables):
+            variable.remove()
 
     return model

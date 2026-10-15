@@ -11,7 +11,7 @@ codes MCP (all 12 category rules match the printed table) plus the 8.4.4.13
 heat-pump rules; see D-58 in docs/necb_decisions.md.
 
 Default run: a representative subset (every family + every special-rule shape).
-FULL_MATRIX=1 runs all 97. The golden is NEVER regenerated from Python — the
+FULL_MATRIX=1 runs all 103. The golden is NEVER regenerated from Python — the
 Ruby suite's UPDATE_GOLDEN escape hatch is deliberately not ported (D-79: the
 adjudicated matrix is the shared contract both ports read).
 
@@ -71,7 +71,13 @@ SUBSET = [
     'MZ BU RTU Electric Heating Coil Centrifugal Chiller and Electric Baseboard',
     'DOAS with fan coil air-cooled chiller with boiler',
     'DOAS with fan coil air-cooled chiller with district hot water',
+    'DOAS with active chilled beams and electric baseboards',
+    'DOAS with passive chilled beams and electric baseboards',
+    'DOAS with hydronic radiant floors, gas boiler and air-cooled chiller',
     'DOAS with VRF', 'DOAS with water source heat pumps',
+    'Dual-duct VAV with gas boiler and water-cooled chiller',
+    'PVAV with gas boiler reheat and plate HRV',
+    'VAV chiller with gas boiler reheat and rotary ERV',
     'hs09_ccashp_baseboard', 'hs11_ashp_pthp', 'hs14_cgshp_fancoils',
     'hs16_ashp_cawhp_fancoils', 'Direct evap coolers with no heat',
     'Gas unit heaters', 'Window AC with baseboard electric', 'PTHP',

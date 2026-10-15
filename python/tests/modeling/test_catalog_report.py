@@ -1,6 +1,6 @@
-"""Full-coverage render: builds all 97 catalog systems on the fixture, extracts
+"""Full-coverage render: builds all 103 catalog systems on the fixture, extracts
 their real topology, and asserts the self-contained HTML catalog contains every
-system, draws most of them, and makes NO external requests. Building 97 models
+system, draws most of them, and makes NO external requests. Building 103 models
 takes ~30-60s (no CLI needed — topology builds are SDK-only). The whole suite
 renders ONCE (memoized, written to a temp path so the write path is exercised too).
 """
