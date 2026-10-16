@@ -10,14 +10,40 @@ dependency on measures or `openstudio-standards` was added.
 
 | Phase | Result |
 | --- | --- |
-| 1 | Shipped `DOAS with active chilled beams and electric baseboards`, `DOAS with passive chilled beams and electric baseboards`, and `DOAS with hydronic radiant floors, gas boiler and air-cooled chiller`. The systems use a dehumidifying/reheating 100% OA loop, explicit low-temperature plant profiles, dew-point reset, and preflight-before-mutation validation. Radiant teardown restores only builder-owned internal-source constructions. |
-| 2 | Shipped `VAV chiller with gas boiler reheat and rotary ERV` and `PVAV with gas boiler reheat and plate HRV`. Existing VAV rows are unchanged. Existing `VRF`, `DOAS with VRF`, `hs08_ccashp_vrf`, and `hs13_ashp_vrf` retain heat recovery and are regression-pinned rather than duplicated. |
+| 1 | Shipped `DOAS with active chilled beams and electric baseboards`, `DOAS with passive chilled beams and electric baseboards`, and `DOAS with hydronic radiant floors, gas boiler and air-cooled chiller`. The systems use a dehumidifying/reheating 100% OA loop, explicit low-temperature plant profiles, dew-point reset, and preflight-before-mutation validation. The radiant row preserves the input slab and adds zero-outdoor-air DX terminal cooling plus hot-water perimeter trim; teardown restores only builder-owned internal-source constructions. |
+| 2 | Shipped `VAV chiller with gas boiler reheat and rotary ERV` and `PVAV with gas boiler reheat and plate HRV`. The two recovery variants use gas-boiler hydronic perimeter trim; the pre-existing VAV/PVAV rows are unchanged. Existing `VRF`, `DOAS with VRF`, `hs08_ccashp_vrf`, and `hs13_ashp_vrf` retain heat recovery and are regression-pinned rather than duplicated. |
 | 3 | Shipped `Dual-duct VAV with gas boiler and water-cooled chiller` as a true two-deck air loop with dual-duct terminals. UFAD did not ship: OpenStudio 3.11 has workspace/IDF support but no typed, persistent OpenStudio Model (`.osm`) representation, and post-translation augmentation is not enforceable in every supported backend. |
 
 The shipped rows have focused object-graph and translation tests plus annual
-EnergyPlus operating tests. Those tests verify nonzero heating and cooling,
-beam/radiant hydronic design values, chilled-water dew-point-reset movement,
-central heat exchange, and simultaneous VRF heat recovery.
+EnergyPlus operating tests. One criterion applies to every new row: a clean
+annual run, nonzero heating and cooling energy, and no more than 100 occupied
+unmet hours in either mode on the standard five-zone fixture. The gate also
+verifies beam/radiant hydronic design values, chilled-water dew-point-reset
+movement without `PsyTsatFnPb` failures, central heat exchange, and
+simultaneous VRF heat recovery.
+
+That comfort criterion was added after the first implementation exposed an
+important distinction between "the simulation completed" and "the system
+conditioned the building." Before correction, the radiant row had 636.75
+heating and 3449 cooling unmet hours, the two beam rows had 411-420 cooling
+unmet hours, and both recovery rows had 468.5 heating unmet hours. The accepted
+topologies and final annual measurements are:
+
+| Catalog row | Heating unmet h | Cooling unmet h | Conditioning correction |
+| --- | ---: | ---: | --- |
+| DOAS with active chilled beams and electric baseboards | 49.00 | 76.25 | `modern_doas` cooling reserve sized for dew-point-limited terminals |
+| DOAS with passive chilled beams and electric baseboards | 49.00 | 89.00 | `modern_doas` cooling reserve sized for dew-point-limited terminals |
+| DOAS with hydronic radiant floors, gas boiler and air-cooled chiller | 51.00 | 0.00 | zero-outdoor-air DX terminal cooling plus gas-boiler hot-water baseboards |
+| VAV chiller with gas boiler reheat and rotary ERV | 70.00 | 0.75 | gas-boiler hydronic perimeter trim |
+| PVAV with gas boiler reheat and plate HRV | 70.00 | 0.75 | gas-boiler hydronic perimeter trim |
+| Dual-duct VAV with gas boiler and water-cooled chiller | 54.00 | 0.00 | original two-deck topology met the common criterion |
+
+The radiant conversion reuses the input construction's material handles and
+thermal conductance; it does not add envelope insulation. On the annual
+fixture this preserves the concrete-plus-carpet slab at 3.401 W/(m2 K), rather
+than silently changing it to approximately 0.44 W/(m2 K). A direct teardown
+regression also strands beam and radiant coils intentionally, then proves the
+generic sweep removes those coils and their orphaned plant.
 
 The NECB boundary is also release-gated rather than inferred from selection
 alone. The D-58 selector matrix now covers all 103 inputs in both supported
@@ -25,14 +51,15 @@ editions. Every catalog input then passes through full `reference_hvac()`
 construction, OpenStudio Model (`.osm`) save/reload, and EnergyPlus forward
 translation; the nine distinct four-scenario assignment signatures cover the
 remaining office, residential, and data-processing branches. A serial
-24-pipeline EnergyPlus gate covers all six modern inputs plus every remaining
-signature in NECB 2020 and 2025, requiring clean proposed and reference sizing
-runs. It also runs the residential radiant identity-copy reference for a
-January week. The data-processing cases exposed and now regression-pin a
-System 2 sizing edge: an ideal-loads probe rates each four-pipe fan-coil water
-coil at its zone cooling airflow before final reference sizing, rather than
-letting EnergyPlus substitute the larger heating airflow and fail its UA
-inversion.
+24-pipeline EnergyPlus gate covers all six modern inputs plus every stable
+reference-construction path in NECB 2020 and 2025, requiring clean proposed
+and reference sizing runs. It also runs the residential radiant identity-copy
+reference for a January week. A System 2/5 water-coil UA-inversion failure
+found while extending that gate predates this catalog work and is tracked in
+[#113](https://github.com/canmet-energy/btap/issues/113). The attempted
+ideal-loads sizing probe changed code-driven reference sizing without a
+decision record, so it was removed from this modeling change rather than
+silently establishing new NECB behavior.
 
 ## Findings that change the initial outline
 

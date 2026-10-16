@@ -23,6 +23,7 @@ MODERN_ROWS = (
 )
 BEAM_TABLE = 'AirTerminal:SingleDuct:ConstantVolume:CooledBeam'
 RADIANT_TABLE = 'ZoneHVAC:LowTemperatureRadiant:VariableFlow'
+MAX_UNMET_OCCUPIED_HOURS = 100.0
 
 
 def _output(model, name, key='*'):
@@ -89,6 +90,11 @@ class TestModernHVACEnergyPlus(unittest.TestCase):
                 self.assertGreater(
                     result.energy['end_uses_kwh']['cooling'] or 0.0, 0.0,
                     f'{name}: no annual cooling energy')
+                for mode in ('heating', 'cooling'):
+                    self.assertLessEqual(
+                        result.unmet_hours[mode],
+                        MAX_UNMET_OCCUPIED_HOURS,
+                        f'{name}: excessive occupied unmet {mode} hours')
 
                 sql = model.sqlFile().get()
                 if 'chilled beams' in name:
@@ -115,11 +121,13 @@ class TestModernHVACEnergyPlus(unittest.TestCase):
                             sql, 'Coil:Cooling:Water',
                             'Design Size Design Coil Load') or 0.0,
                         0.0, f'{name}: cold-deck capacity did not size')
-                    self.assertLessEqual(
-                        result.unmet_hours['heating'], 100.0,
-                        f'{name}: hot-deck sizing left excessive unmet heat')
-
                 if moisture_controlled:
+                    errors = (
+                        Path(result.run_dir) / 'eplusout.err'
+                    ).read_text(encoding='utf-8', errors='replace')
+                    self.assertNotIn(
+                        'PsyTsatFnPb', errors,
+                        f'{name}: dew-point EMS emitted psychrometric failures')
                     maximum = _sql_double(
                         sql,
                         "SELECT MAX(Value) FROM ReportData "

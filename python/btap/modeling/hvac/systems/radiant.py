@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import openstudio
 
-from btap.modeling.hvac.systems import plant_loops
+from btap.modeling.hvac.components import coils
+from btap.modeling.hvac.systems import baseboards, plant_loops
 from btap.modeling.hvac.systems.base_system import BaseSystem
 from btap.modeling.hvac.systems.doas import (
     build_dehumidifying_doas,
@@ -103,7 +104,11 @@ def _validated_floor_constructions(zones, *, allow_owned, source_layer,
                 raise ValueError(
                     f"radiant floor surface '{surface.nameString()}' has a "
                     'non-opaque construction layer')
-            layer_count = len(construction.layers()) + 1
+            layer_count = len(construction.layers())
+            if layer_count < 2:
+                raise ValueError(
+                    f"radiant floor surface '{surface.nameString()}' needs at "
+                    'least two construction layers to locate the internal source')
             for label, number in (
                     ('radiant_source_after_layer_number', source_layer),
                     ('radiant_temperature_after_layer_number',
@@ -125,21 +130,8 @@ def _install_internal_source_constructions(model, selected, config):
         })['surfaces'].append(surface)
 
     for handle, group in by_original.items():
-        insulation = openstudio.model.StandardOpaqueMaterial(
-            model,
-            config['radiant_insulation_roughness'],
-            config['radiant_insulation_thickness'],
-            config['radiant_insulation_conductivity'],
-            config['radiant_insulation_density'],
-            config['radiant_insulation_specific_heat'])
-        insulation.setName(
-            f'BTAP Radiant Floor Insulation {handle[:8]}')
-        insulation.additionalProperties().setFeature(
-            OWNED_OBJECT_FEATURE, True)
-
         original = group['construction']
         layers = openstudio.model.OpaqueMaterialVector()
-        layers.append(insulation)
         for layer in original.layers():
             layers.append(layer.to_OpaqueMaterial().get())
         construction = openstudio.model.ConstructionWithInternalSource(
@@ -224,12 +216,6 @@ def cleanup_owned_constructions(model):
         if (owned.is_initialized() and owned.get()
                 and construction.directUseCount() <= 1):
             construction.remove()
-    for material in list(model.getStandardOpaqueMaterials()):
-        owned = material.additionalProperties().getFeatureAsBoolean(
-            OWNED_OBJECT_FEATURE)
-        if (owned.is_initialized() and owned.get()
-                and material.directUseCount() <= 1):
-            material.remove()
 
 
 def _constant_schedule(model, name, value):
@@ -256,6 +242,10 @@ class RadiantFloor(BaseSystem):
                 'hydronic radiant floors require explicit hot- and '
                 'chilled-water profiles')
 
+        if self.config.get('radiant_trim_type') != 'DX PTAC':
+            raise ValueError(
+                "radiant_trim_type must be 'DX PTAC'")
+
         heating_control = _numeric(
             self.config, 'radiant_heating_control_temperature', 10.0, 30.0)
         cooling_control = _numeric(
@@ -272,7 +262,6 @@ class RadiantFloor(BaseSystem):
             raise ValueError(
                 'chilled-water setpoint must be below the radiant cooling '
                 'control temperature')
-
         _numeric(self.config, 'radiant_changeover_delay_hours', 0.0, 168.0)
         _numeric(self.config, 'dewpoint_margin', 0.01, 10.0)
         _numeric(self.config, 'radiant_tube_spacing', 0.05, 0.6)
@@ -284,16 +273,6 @@ class RadiantFloor(BaseSystem):
             raise ValueError(
                 'radiant_tubing_outside_diameter must exceed inside diameter')
         _numeric(self.config, 'radiant_circuit_length', 1.0, 1000.0)
-        for key in (
-                'radiant_insulation_thickness',
-                'radiant_insulation_conductivity',
-                'radiant_insulation_density',
-                'radiant_insulation_specific_heat'):
-            _numeric(self.config, key, 0.001, 5000.0)
-        if self.config.get('radiant_insulation_roughness') not in (
-                'VeryRough', 'Rough', 'MediumRough', 'MediumSmooth',
-                'Smooth', 'VerySmooth'):
-            raise ValueError('invalid radiant_insulation_roughness')
         if self.config.get('radiant_number_of_circuits') not in (
                 'CalculateFromCircuitLength', 'OnePerSurface'):
             raise ValueError(
@@ -342,9 +321,10 @@ class RadiantFloor(BaseSystem):
                 'doas_supply_air_temperature'],
             maximum_humidity_ratio=self.config[
                 'doas_maximum_humidity_ratio'],
-            zone_heating='radiant_floor',
-            zone_cooling='radiant_floor')
+            zone_heating='radiant_floor+baseboard',
+            zone_cooling='radiant_floor+ptac')
         always_on = model.alwaysOnDiscreteSchedule()
+        always_off = model.alwaysOffDiscreteSchedule()
         heating_control = _constant_schedule(
             model, f'{system_name} Radiant Heating Control',
             self.config['radiant_heating_control_temperature'])
@@ -401,6 +381,31 @@ class RadiantFloor(BaseSystem):
             radiant.setCircuitLength(
                 self.config['radiant_circuit_length'])
             radiant.addToThermalZone(zone)
+
+            trim_heating_coil = openstudio.model.CoilHeatingElectric(
+                model, always_off)
+            trim_heating_coil.setName(
+                f'Radiant Floor Trim Disabled Heating Coil — '
+                f'{zone.nameString()}')
+            trim_cooling_coil = coils.dx_cooling_single_speed(
+                model, always_on,
+                name=f'Radiant Floor Trim DX Cooling Coil — '
+                     f'{zone.nameString()}')
+            trim_fan = openstudio.model.FanOnOff(model)
+            trim_fan.setName(
+                f'Radiant Floor Trim Fan — {zone.nameString()}')
+            trim_fan.setPressureRise(640.0)
+            trim = openstudio.model.ZoneHVACPackagedTerminalAirConditioner(
+                model, always_on, trim_fan,
+                trim_heating_coil, trim_cooling_coil)
+            trim.setName(
+                f'Radiant Floor DX Trim — {zone.nameString()}')
+            trim.setSupplyAirFanOperatingModeSchedule(always_off)
+            trim.setOutdoorAirFlowRateWhenNoCoolingorHeatingisNeeded(1.0e-5)
+            trim.setOutdoorAirFlowRateDuringCoolingOperation(1.0e-5)
+            trim.setOutdoorAirFlowRateDuringHeatingOperation(1.0e-5)
+            trim.addToThermalZone(zone)
+            baseboards.add(model, zone, 'Hot Water', hw_loop=hw_loop)
 
             terminal = (
                 openstudio.model.AirTerminalSingleDuctConstantVolumeNoReheat(

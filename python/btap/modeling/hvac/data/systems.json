@@ -724,7 +724,7 @@
       "sys_abbr": "sys_6",
       "sizing": "necb_vav",
       "heating_coil_type": "Hot Water",
-      "baseboard_type": "None",
+      "baseboard_type": "Hot Water",
       "chiller_type": "Scroll",
       "boiler_fuel": "NaturalGas",
       "needs_boiler": true,
@@ -742,7 +742,7 @@
       "erv_bypass_control_type": "BypassWhenOAFlowGreaterThanMinimum",
       "erv_nominal_electric_power": 200.0,
       "origin": "generic",
-      "comment": "opt-in central VAV energy recovery with explicit rotary-wheel effectiveness, frost, bypass, pretreat and parasitic-power inputs"
+      "comment": "opt-in central VAV energy recovery with gas-boiler hydronic perimeter trim and explicit rotary-wheel effectiveness, frost, bypass, pretreat and parasitic-power inputs"
     },
     {
       "name": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard",
@@ -953,7 +953,7 @@
       "sys_abbr": "pvav",
       "sizing": "necb_vav",
       "heating_coil_type": "Hot Water",
-      "baseboard_type": "None",
+      "baseboard_type": "Hot Water",
       "cooling_type": "dx",
       "boiler_fuel": "NaturalGas",
       "needs_boiler": true,
@@ -971,7 +971,7 @@
       "erv_bypass_control_type": "BypassWhenOAFlowGreaterThanMinimum",
       "erv_nominal_electric_power": 150.0,
       "origin": "generic",
-      "comment": "opt-in packaged VAV sensible-only plate recovery with explicit effectiveness, frost, bypass, pretreat and parasitic-power inputs"
+      "comment": "opt-in packaged VAV sensible-only plate recovery with gas-boiler hydronic perimeter trim and explicit effectiveness, frost, bypass, pretreat and parasitic-power inputs"
     },
     {
       "name": "Direct evap coolers with baseboard electric",
@@ -1112,13 +1112,9 @@
       "radiant_tubing_outside_diameter": 0.019,
       "radiant_number_of_circuits": "CalculateFromCircuitLength",
       "radiant_circuit_length": 100.0,
-      "radiant_insulation_roughness": "Rough",
-      "radiant_insulation_thickness": 0.05,
-      "radiant_insulation_conductivity": 0.025,
-      "radiant_insulation_density": 50.0,
-      "radiant_insulation_specific_heat": 1000.0,
-      "radiant_source_after_layer_number": 2,
-      "radiant_temperature_after_layer_number": 2,
+      "radiant_source_after_layer_number": 1,
+      "radiant_temperature_after_layer_number": 1,
+      "radiant_trim_type": "DX PTAC",
       "needs_boiler": true,
       "boiler_fuel": "NaturalGas",
       "hot_water_profile": {
@@ -1137,7 +1133,7 @@
         "setpoint_temperature": 15.0
       },
       "origin": "generic",
-      "comment": "100% OA dehumidifying DOAS with variable-flow radiant floors, explicit slab insulation, low-temperature hot water, and dew-point-safe tempered chilled water"
+      "comment": "100% OA dehumidifying DOAS with variable-flow radiant floors, preserved slab layers, hot-water perimeter trim, low-temperature hot water, dew-point-safe tempered radiant water, and zero-outdoor-air DX terminal cooling trim"
     },
     {
       "name": "Dual-duct VAV with gas boiler and water-cooled chiller",

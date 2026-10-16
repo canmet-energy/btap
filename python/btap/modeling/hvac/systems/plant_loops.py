@@ -200,6 +200,7 @@ def _stamp_dewpoint_margins(loop, margins):
 def _set_dewpoint_program_lines(program, sensors, pressure_sensor, actuator,
                                 prefix, margin, base_setpoint):
     maximum = f'{prefix}_Maximum'
+    candidate = f'{prefix}_Candidate'
 
     def dewpoint(sensor):
         return f'@TdpFnWPb {sensor.nameString()} {pressure_sensor.nameString()}'
@@ -207,8 +208,9 @@ def _set_dewpoint_program_lines(program, sensors, pressure_sensor, actuator,
     lines = [f'SET {maximum} = {dewpoint(sensors[0])}']
     for sensor in sensors[1:]:
         lines.extend([
-            f'IF {dewpoint(sensor)} > {maximum}',
-            f'  SET {maximum} = {dewpoint(sensor)}',
+            f'SET {candidate} = {dewpoint(sensor)}',
+            f'IF {candidate} > {maximum}',
+            f'  SET {maximum} = {candidate}',
             'ENDIF',
         ])
     lines.extend([

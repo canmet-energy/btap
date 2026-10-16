@@ -132,6 +132,8 @@ class TestVAVReheat(unittest.TestCase):
             [len(loop.thermalZones()) for loop in result.air_loops])
         self.assertEqual(0, len(original.getHeatExchangerAirToAirSensibleAndLatents()))
         self.assertEqual(1, len(model.getHeatExchangerAirToAirSensibleAndLatents()))
+        self.assertEqual(
+            len(zones), len(model.getZoneHVACBaseboardConvectiveWaters()))
 
         exchanger = model.getHeatExchangerAirToAirSensibleAndLatents()[0]
         self.assertEqual('Rotary', exchanger.heatExchangerType())
@@ -202,6 +204,8 @@ class TestVAVReheat(unittest.TestCase):
         self.assertEqual('Plate', exchanger.heatExchangerType())
         self.assertEqual(0.0, exchanger.latentEffectivenessat100HeatingAirFlow())
         self.assertIn('shr>hrv', result.air_loops[0].nameString())
+        self.assertEqual(
+            len(zones), len(model.getZoneHVACBaseboardConvectiveWaters()))
         self.assertEqual(4, len(model.getTableLookups()))
         self.assertEqual(4, len(model.getTableIndependentVariables()))
 

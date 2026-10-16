@@ -128,7 +128,18 @@ class TestPlantTemperatureProfiles(unittest.TestCase):
         self.assertEqual(
             1, len(self.model.getEnergyManagementSystemProgramCallingManagers()))
         lines = self.model.getEnergyManagementSystemPrograms()[0].lines()
-        self.assertTrue(any('@TdpFnWPb' in line for line in lines))
+        dewpoint_lines = [
+            line for line in lines if '@TdpFnWPb' in line
+        ]
+        self.assertEqual(
+            len(zones), len(dewpoint_lines),
+            'each zone dew point is evaluated exactly once per timestep')
+        self.assertTrue(all(
+            line.startswith('SET ') for line in dewpoint_lines),
+            'EnergyPlus 25.2 reverses function operands when an Erl built-in '
+            'is evaluated inline in an IF expression')
+        self.assertFalse(any(
+            line.startswith('IF @TdpFnWPb') for line in lines))
         self.assertTrue(any('+ 2' in line for line in lines))
         self.assertTrue(any('< 15' in line for line in lines))
 

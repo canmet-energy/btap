@@ -131,6 +131,32 @@ class TestChilledBeams(unittest.TestCase):
         self.assertEqual(0, len(model.getEnergyManagementSystemPrograms()))
         self.assertEqual(0, len(model.getChillerElectricEIRs()))
 
+    def test_teardown_removes_stranded_modern_hydronic_coils(self):
+        import openstudio
+
+        from btap.modeling.hvac import teardown
+
+        model, zones = self.fixture(limit=1)
+        loop = openstudio.model.PlantLoop(model)
+        control = openstudio.model.ScheduleConstant(model)
+        control.setValue(22.0)
+        beam = openstudio.model.CoilCoolingCooledBeam(model)
+        radiant_heating = openstudio.model.CoilHeatingLowTempRadiantVarFlow(
+            model, control)
+        radiant_cooling = openstudio.model.CoilCoolingLowTempRadiantVarFlow(
+            model, control)
+        for coil in (beam, radiant_heating, radiant_cooling):
+            loop.addDemandBranchForComponent(coil)
+
+        teardown.remove_hvac_from_zones(model, zones)
+
+        self.assertEqual([], list(model.getCoilCoolingCooledBeams()))
+        self.assertEqual(
+            [], list(model.getCoilHeatingLowTempRadiantVarFlows()))
+        self.assertEqual(
+            [], list(model.getCoilCoolingLowTempRadiantVarFlows()))
+        self.assertEqual([], list(model.getPlantLoops()))
+
     def test_foreign_beam_topology_is_classified_structurally(self):
         model, zones = self.fixture(limit=2)
         result = modeling.build_system(model, ACTIVE, zones)

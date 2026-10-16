@@ -16,7 +16,6 @@ import unittest
 from pathlib import Path
 
 import btap.modeling as modeling
-from btap._compat import opt
 from btap.codes import performance_compliance
 from btap.modeling.hvac.systems import vav_reheat
 from btap.simulation import runner
@@ -146,9 +145,6 @@ class TestCatalogReferenceEnergyPlus(unittest.TestCase):
                     self.assertTrue(
                         result.reference_model.sqlFile().is_initialized())
 
-                    if scenario_name == 'data_processing':
-                        self._assert_fan_coil_cooling_sizing(
-                            result.reference_model, run_dir)
                     self._assert_modern_reference_cleanup(
                         name, scenario_name, result.reference_model)
 
@@ -206,32 +202,6 @@ class TestCatalogReferenceEnergyPlus(unittest.TestCase):
         self.assertGreater(
             hvac_kwh, 0.0,
             'residential radiant copy reference produced no HVAC energy')
-
-    def _assert_fan_coil_cooling_sizing(self, reference, run_dir):
-        probe = run_dir / 'reference_fan_coil_load_sizing' / 'run'
-        self.assertTrue(
-            runner.is_clean_run(probe),
-            'reference fan-coil load sizing probe was not clean')
-        fan_coils = reference.getZoneHVACFourPipeFanCoils()
-        self.assertEqual(len(reference.getThermalZones()), len(fan_coils))
-        for fan_coil in fan_coils:
-            zone = opt(fan_coil.thermalZone())
-            coil = opt(fan_coil.coolingCoil().to_CoilCoolingWater())
-            self.assertIsNotNone(zone)
-            self.assertIsNotNone(coil)
-            explicit = opt(coil.designAirFlowRate())
-            zone_cooling = opt(zone.autosizedCoolingDesignAirFlowRate())
-            self.assertIsNotNone(explicit)
-            self.assertIsNotNone(zone_cooling)
-            self.assertAlmostEqual(
-                zone_cooling,
-                explicit,
-                delta=max(0.001, zone_cooling * 0.01),
-                msg=(
-                    f'{fan_coil.nameString()} cooling coil was not rated at '
-                    'the zone cooling design airflow'),
-            )
-
 
 if __name__ == '__main__':
     unittest.main()

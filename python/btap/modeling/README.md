@@ -32,18 +32,47 @@ changing the existing rows:
   electric baseboards, and 15/18 C tempered chilled water;
 - hydronic radiant floors use the same latent-control strategy, 40/35 C
   low-temperature hot water, 15/18 C chilled water, native condensation
-  control, and builder-owned internal-source floor constructions;
+  control, and builder-owned internal-source floor constructions that preserve
+  the input slab's layers and conductance. Zero-outdoor-air DX terminal units
+  provide cooling trim and gas-boiler hot-water baseboards provide perimeter
+  heat;
 - rotary ERV VAV and sensible-only plate HRV PVAV variants use a central
   air-to-air exchanger, pretreat setpoint control, explicit frost/bypass
-  inputs, and current-SDK effectiveness curves; and
+  inputs, current-SDK effectiveness curves, and gas-boiler hydronic perimeter
+  trim; and
 - true dual-duct VAV uses independent 35 C hot and 13 C cold decks with one
   `AirTerminalDualDuctVAV` per zone.
 
 The chilled-beam and radiant rows reset chilled-water setpoints to the warmest
-served-zone dew point plus a 2 K margin. Plant loops are reused only when their
-source and full temperature profile match. Existing VRF and DOAS+VRF systems
-already enable heat recovery; that behavior is tested rather than exposed as
-a duplicate row.
+served-zone dew point plus a 2 K margin. Each zone dew point is evaluated once
+into an EMS variable before comparison; inline `@TdpFnWPb` evaluation in an
+Erl `IF` produced 2265 psychrometric failures per annual run in EnergyPlus
+25.2. Plant loops are reused only when their source and full temperature
+profile match. Existing VRF and DOAS+VRF systems already enable heat recovery;
+that behavior is tested rather than exposed as a duplicate row.
+
+All six rows must complete the standard five-zone annual simulation cleanly,
+consume both heating and cooling energy, and remain at or below 100 occupied
+unmet hours in each mode. This common gate was introduced after completed runs
+left the original radiant topology at 636.75 heating / 3449 cooling unmet
+hours, both beam rows at 411-420 cooling unmet hours, and both recovery rows at
+468.5 heating unmet hours. The corrected annual results are:
+
+| System | Heating h | Cooling h |
+| --- | ---: | ---: |
+| Active chilled beam | 49.00 | 76.25 |
+| Passive chilled beam | 49.00 | 89.00 |
+| Hydronic radiant floor | 51.00 | 0.00 |
+| Rotary ERV VAV | 70.00 | 0.75 |
+| Plate HRV PVAV | 70.00 | 0.75 |
+| Dual-duct VAV | 54.00 | 0.00 |
+
+On that fixture the radiant conversion retains the original concrete and
+carpet material handles and 3.401 W/(m2 K) slab conductance; HVAC authoring
+does not insert insulation. The unrelated pre-existing NECB System 2/5
+water-coil sizing failure discovered by the reference-generation gate is
+tracked in [#113](https://github.com/canmet-energy/btap/issues/113); no
+code-driven sizing workaround is part of this modeling feature.
 
 UFAD is not a catalog option. OpenStudio 3.11 can author the required
 EnergyPlus room-air objects in a translated workspace, but has no typed,

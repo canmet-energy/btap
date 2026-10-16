@@ -36,6 +36,14 @@ class TestRadiantFloor(unittest.TestCase):
             model.getThermalZones(), key=lambda zone: zone.nameString())[2]
         untouched_floor = self.floors([untouched_zone])[0]
         untouched_construction = untouched_floor.construction().get().handle()
+        original_floor = self.floors(zones)[0]
+        original_construction = (
+            original_floor.construction().get().to_Construction().get())
+        original_layers = [
+            layer.handle() for layer in original_construction.layers()
+        ]
+        original_conductance = (
+            original_construction.thermalConductance().get())
 
         result = modeling.build_system(model, RADIANT, zones)
 
@@ -48,6 +56,14 @@ class TestRadiantFloor(unittest.TestCase):
         self.assertEqual(
             len(zones), len(model.getCoilCoolingLowTempRadiantVarFlows()))
         self.assertEqual(
+            len(zones), len(model.getZoneHVACPackagedTerminalAirConditioners()))
+        self.assertEqual(
+            len(zones) + 1, len(model.getCoilCoolingDXSingleSpeeds()))
+        self.assertEqual(
+            len(zones), len(model.getZoneHVACBaseboardConvectiveWaters()))
+        self.assertEqual(
+            len(zones), len(model.getCoilHeatingWaterBaseboards()))
+        self.assertEqual(
             len(zones),
             len(model.getAirTerminalSingleDuctConstantVolumeNoReheats()))
 
@@ -57,10 +73,19 @@ class TestRadiantFloor(unittest.TestCase):
                 .to_ConstructionWithInternalSource())
             self.assertTrue(internal.is_initialized())
             construction = internal.get()
-            self.assertEqual(2, construction.sourcePresentAfterLayerNumber())
+            self.assertEqual(1, construction.sourcePresentAfterLayerNumber())
             self.assertEqual(
-                2, construction.temperatureCalculationRequestedAfterLayerNumber())
+                1, construction.temperatureCalculationRequestedAfterLayerNumber())
             self.assertAlmostEqual(0.2, construction.tubeSpacing())
+            self.assertEqual(
+                original_layers,
+                [layer.handle() for layer in construction.layers()],
+                'radiant conversion must preserve the slab layer stack')
+            self.assertAlmostEqual(
+                original_conductance,
+                construction.thermalConductance().get(),
+                places=9,
+                msg='radiant conversion must preserve slab conductance')
         self.assertEqual(
             untouched_construction,
             untouched_floor.construction().get().handle(),
@@ -86,6 +111,35 @@ class TestRadiantFloor(unittest.TestCase):
         self.assertEqual(
             ['low_temperature_heating', 'tempered_chilled_water'],
             sorted(profile['name'] for profile in profiles))
+        always_off = model.alwaysOffDiscreteSchedule()
+        for unit in model.getZoneHVACPackagedTerminalAirConditioners():
+            heating = unit.heatingCoil().to_CoilHeatingElectric()
+            self.assertTrue(heating.is_initialized())
+            self.assertEqual(
+                always_off.handle(),
+                heating.get().availabilitySchedule().handle())
+            self.assertEqual(
+                always_off.handle(),
+                unit.supplyAirFanOperatingModeSchedule().handle())
+            self.assertEqual(
+                1.0e-5,
+                unit.outdoorAirFlowRateDuringCoolingOperation().get())
+            self.assertEqual(
+                1.0e-5,
+                unit.outdoorAirFlowRateDuringHeatingOperation().get())
+            self.assertEqual(
+                1.0e-5,
+                unit.outdoorAirFlowRateWhenNoCoolingorHeatingisNeeded().get())
+        hot_loop = next(
+            loop for loop in model.getPlantLoops()
+            if (
+                plant_loops.temperature_profile(loop) or {}
+            ).get('name') == 'low_temperature_heating')
+        self.assertTrue(all(
+            coil.plantLoop().is_initialized()
+            and coil.plantLoop().get().handle() == hot_loop.handle()
+            for coil in model.getCoilHeatingWaterBaseboards()))
+        self.assertEqual(1, len(model.getChillerElectricEIRs()))
 
         workspace = openstudio.energyplus.ForwardTranslator().translateModel(
             model)
@@ -97,6 +151,10 @@ class TestRadiantFloor(unittest.TestCase):
             1,
             len(workspace.getObjectsByType(openstudio.IddObjectType(
                 'ConstructionProperty:InternalHeatSource'))))
+        self.assertEqual(
+            len(zones),
+            len(workspace.getObjectsByType(openstudio.IddObjectType(
+                'ZoneHVAC:PackagedTerminalAirConditioner'))))
 
     def test_invalid_controls_fail_before_existing_hvac_is_removed(self):
         model, zones = self.fixture(limit=2)
@@ -162,6 +220,10 @@ class TestRadiantFloor(unittest.TestCase):
             'a later caller construction edit is not overwritten')
         self.assertEqual(
             1, len(model.getZoneHVACLowTempRadiantVarFlows()))
+        self.assertEqual(1, len(
+            model.getZoneHVACPackagedTerminalAirConditioners()))
+        self.assertEqual(
+            1, len(model.getZoneHVACBaseboardConvectiveWaters()))
         self.assertEqual(
             1, len(model.getConstructionWithInternalSources()))
         self.assertEqual(2, len(model.getEnergyManagementSystemSensors()))
@@ -177,6 +239,12 @@ class TestRadiantFloor(unittest.TestCase):
             0, len(model.getCoilHeatingLowTempRadiantVarFlows()))
         self.assertEqual(
             0, len(model.getCoilCoolingLowTempRadiantVarFlows()))
+        self.assertEqual(
+            0, len(model.getZoneHVACPackagedTerminalAirConditioners()))
+        self.assertEqual(
+            0, len(model.getZoneHVACBaseboardConvectiveWaters()))
+        self.assertEqual(0, len(model.getCoilHeatingWaterBaseboards()))
+        self.assertEqual(0, len(model.getChillerElectricEIRs()))
         self.assertEqual(0, len(model.getConstructionWithInternalSources()))
 
     def test_foreign_radiant_topology_is_classified_structurally(self):
