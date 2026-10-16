@@ -228,6 +228,73 @@ class TestReferenceEnvelope(unittest.TestCase):
         # D-19: no proposed infiltration -> constant convention (A=1)
         self.assertAlmostEqual(1.0, infiltration[0].constantTermCoefficient(), delta=1e-9)
 
+    def test_reference_attic_ceiling_withholds_unproven_enclosure_credit(self):
+        import openstudio
+
+        from btap.modeling.envelope import constructions as Constructions
+
+        def print_at(z):
+            points = openstudio.Point3dVector()
+            for x, y in ((0, 0), (0, 10), (10, 10), (10, 0)):
+                points.append(openstudio.Point3d(x, y, z))
+            return points
+
+        model = openstudio.model.Model()
+        conditioned = openstudio.model.Space.fromFloorPrint(
+            print_at(0.0), 3.0, model).get()
+        attic = openstudio.model.Space.fromFloorPrint(
+            print_at(3.0), 2.0, model).get()
+        conditioned.setName("Conditioned floor")
+        attic.setName("Unconditioned attic")
+        spaces = openstudio.model.SpaceVector()
+        for space in (conditioned, attic):
+            spaces.append(space)
+        openstudio.model.matchSurfaces(spaces)
+        attic.setPartofTotalFloorArea(False)
+
+        material = openstudio.model.StandardOpaqueMaterial(
+            model, "MediumSmooth", 0.2, 0.03, 45, 1000)
+        seed = openstudio.model.Construction(model)
+        seed.setLayers([material])
+        for surface in model.getSurfaces():
+            surface.setConstruction(seed)
+
+        audit = reference(model)
+        ceiling = next(
+            surface for surface in conditioned.surfaces()
+            if surface.surfaceType() == "RoofCeiling"
+            and surface.outsideBoundaryCondition() == "Surface")
+        actual = (
+            ceiling.construction().get().to_Construction().get()
+            .thermalConductance().get()
+        )
+        exterior_target = 1.0 / (
+            (1.0 / 0.156)
+            - Constructions.film_r("roofceiling", "outdoors")
+        )
+        superseded_credit_target = 1.0 / (
+            (1.0 / 0.156)
+            - (1.0 / 6.25)
+            - Constructions.film_r_interzone("roofceiling")
+        )
+
+        self.assertAlmostEqual(
+            exterior_target, actual, delta=1e-4,
+            msg="reference ceiling uses the exterior roof requirement")
+        self.assertGreater(
+            superseded_credit_target - actual, 0.005,
+            "the removed blanket U=6.25 credit must make a measurable "
+            "conductance difference")
+        decision = next(
+            entry for entry in audit.entries
+            if entry.get("ruling") == "D-24"
+            and "without the enclosed-space credit" in entry["action"])
+        self.assertEqual(
+            "Unconditioned attic", decision["inputs"]["adjacent_space"])
+        self.assertEqual(
+            "not represented by the model",
+            decision["inputs"]["vented_status"])
+
     # D-19: the reference inherits the PROPOSED's infiltration modulation
     # (E+ modifier coefficients + schedule) — identical design totals with
     # asymmetric conventions change delivered infiltration ~2x. A proposed
