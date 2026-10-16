@@ -135,11 +135,12 @@ into Python; design and test the SDK object graph independently.
   a row claiming `ok` without them. So the hand-written claim turned out to
   be TRUE, and it is now evidence rather than an assertion.
 
-  This expansion regenerated the complete verdict on 2026-10-16 from clean
-  source revision `b164b9d` (`source_dirty: false`): **103/103 `ok`**, zero
-  failures, 489.8 s total, using OpenStudio 3.11.0+241b8abb4d and EnergyPlus
-  25.2.0-cf7368216c. The six modern rows are therefore covered by both this
-  sizing sweep and the separate annual operating regression described above.
+  After the invalid radiant candidate was retired, the complete verdict was
+  regenerated on 2026-10-16 from clean source revision `8b0e913`
+  (`source_dirty: false`): **102/102 `ok`**, zero failures, 496.0 s total,
+  using OpenStudio 3.11.0+241b8abb4d and EnergyPlus 25.2.0-cf7368216c. The
+  five shipped modern rows are therefore covered by both this sizing sweep
+  and the separate annual operating regression described above.
 
   A new catalogue row means re-running the sweep and committing the moved
   verdict with the row. `--name` and `--limit` give a smoke run and
