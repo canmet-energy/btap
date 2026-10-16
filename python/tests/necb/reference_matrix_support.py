@@ -26,8 +26,8 @@ MODERN_ROWS = (
 )
 
 # One manually selected row from each distinct four-scenario D-58 assignment
-# signature. Modern systems lead the three signatures they inhabit so the
-# broad reference gate also exercises their new teardown paths.
+# signature. The five modern rows lead the two signatures they inhabit; seven
+# legacy representatives complete the nine-signature set.
 SIGNATURE_REPRESENTATIVES = (
     'VAV chiller with gas boiler reheat and rotary ERV',
     'PSZ RTU Gas and DX Coils and Hot Water Baseboard',
@@ -41,9 +41,9 @@ SIGNATURE_REPRESENTATIVES = (
 )
 
 # The EnergyPlus layer covers all five modern inputs plus one row from every
-# remaining D-58 signature. Scenarios span the stable construction paths;
-# the pre-existing System 2/5 water-coil UA failure is tracked separately in
-# #113 rather than masked by a sizing workaround in this modeling change.
+# remaining D-58 signature. Scenarios span every adjudicated action, including
+# copy_proposed through the residential PSZ case. The data-processing System
+# 2/5 water-coil UA failure remains tracked separately in #113.
 ENGINE_CASES = (
     ('DOAS with active chilled beams and electric baseboards',
      'general_2storey'),
@@ -56,7 +56,7 @@ ENGINE_CASES = (
     ('Dual-duct VAV with gas boiler and water-cooled chiller',
      'residential'),
     ('PSZ RTU Gas and DX Coils and Hot Water Baseboard',
-     'general_2storey'),
+     'residential'),
     ('DOAS with VRF', 'general_2storey'),
     ('DOAS with water source heat pumps cooling tower with boiler',
      'general_2storey'),

@@ -60,8 +60,8 @@ left both beam rows at 411-420 cooling unmet hours and both recovery rows at
 | Dual-duct VAV | 54.00 | 0.00 |
 
 The chilled-beam sizing block retains an explicitly empirical 2.2 cooling
-reserve: 2.0 produced 103 occupied cooling unmet hours for the passive row,
-while 2.2 produced 89. This is fixture-tested catalog sizing, not a code
+reserve: 2.0 produced 116.0 occupied cooling unmet hours for the passive row,
+while 2.2 produced 89.0. This is fixture-tested catalog sizing, not a code
 requirement or a general design rule. Likewise, the legacy non-recovery VAV
 comparator records 468.75 heating unmet hours while the recovery rows include
 new perimeter baseboards. The rows prove that their heat exchangers operate

@@ -37,8 +37,8 @@ accepted topologies and final annual measurements are:
 | Dual-duct VAV with gas boiler and water-cooled chiller | 54.00 | 0.00 | original two-deck topology met the common criterion |
 
 The 2.2 chilled-beam cooling reserve is explicitly empirical rather than a
-design rule: 2.0 produced 103 occupied cooling unmet hours for the passive row,
-while 2.2 produced 89. The recovery rows are likewise not an isolated A/B
+design rule: 2.0 produced 116.0 occupied cooling unmet hours for the passive
+row, while 2.2 produced 89.0. The recovery rows are likewise not an isolated A/B
 experiment: their untouched non-recovery comparator records 468.75 heating
 unmet hours, but the recovery variants also add hydronic perimeter baseboards.
 The tests therefore claim only that each complete topology conditions the

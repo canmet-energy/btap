@@ -73,6 +73,20 @@ class TestReferenceEngineCaseManifest(unittest.TestCase):
             },
         )
 
+    def test_cases_exercise_every_reference_action(self):
+        selected_actions = {
+            assignment['action']
+            for name, scenario in ENGINE_CASES
+            for assignment in self.expected[name][f'catalog_{scenario}']
+        }
+        all_actions = {
+            assignment['action']
+            for row in self.golden
+            for scenario in SCENARIOS
+            for assignment in row[f'catalog_{scenario}']
+        }
+        self.assertEqual(all_actions, selected_actions)
+
     def test_case_names_and_scenarios_are_registered(self):
         self.assertEqual(len(ENGINE_CASES), len(set(ENGINE_CASES)))
         self.assertEqual(

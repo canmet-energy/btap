@@ -82,7 +82,7 @@
       "zone_heating_sizing_factor": 1.3
     },
     "modern_doas": {
-      "comment": "Neutral 100% outdoor-air sizing with an empirical 2.2 cooling reserve for the dew-point-limited chilled-beam rows; this is fixture-tested catalog sizing, not a general design rule.",
+      "comment": "Neutral 100% outdoor-air sizing with an empirical 2.2 cooling reserve for the dew-point-limited chilled-beam rows (2.0: 116.0 passive-row occupied cooling unmet hours; 2.2: 89.0); this is fixture-tested catalog sizing, not a general design rule.",
       "account_for_dedicated_outdoor_air_system": true,
       "dedicated_outdoor_air_system_control_strategy": "NeutralSupplyAir",
       "dedicated_outdoor_air_low_setpoint_temperature_for_design": 20.0,
