@@ -20,7 +20,6 @@ ASSIGNMENT_KEYS = ('system', 'action', 'energy_type', 'catalog', 'blocks')
 MODERN_ROWS = (
     'DOAS with active chilled beams and electric baseboards',
     'DOAS with passive chilled beams and electric baseboards',
-    'DOAS with hydronic radiant floors, gas boiler and air-cooled chiller',
     'VAV chiller with gas boiler reheat and rotary ERV',
     'PVAV with gas boiler reheat and plate HRV',
     'Dual-duct VAV with gas boiler and water-cooled chiller',
@@ -30,8 +29,8 @@ MODERN_ROWS = (
 # signature. Modern systems lead the three signatures they inhabit so the
 # broad reference gate also exercises their new teardown paths.
 SIGNATURE_REPRESENTATIVES = (
-    'DOAS with hydronic radiant floors, gas boiler and air-cooled chiller',
     'VAV chiller with gas boiler reheat and rotary ERV',
+    'PSZ RTU Gas and DX Coils and Hot Water Baseboard',
     'DOAS with VRF',
     'DOAS with water source heat pumps cooling tower with boiler',
     'PSZ RTU ASHP with Electric and ASHP Coils and Hot Water Baseboard with Electric Reheat',
@@ -41,7 +40,7 @@ SIGNATURE_REPRESENTATIVES = (
     'Zone ERVs',
 )
 
-# The EnergyPlus layer covers all six modern inputs plus one row from every
+# The EnergyPlus layer covers all five modern inputs plus one row from every
 # remaining D-58 signature. Scenarios span the stable construction paths;
 # the pre-existing System 2/5 water-coil UA failure is tracked separately in
 # #113 rather than masked by a sizing workaround in this modeling change.
@@ -50,14 +49,14 @@ ENGINE_CASES = (
      'general_2storey'),
     ('DOAS with passive chilled beams and electric baseboards',
      'general_3storey'),
-    ('DOAS with hydronic radiant floors, gas boiler and air-cooled chiller',
-     'residential'),
     ('VAV chiller with gas boiler reheat and rotary ERV',
      'general_3storey'),
     ('PVAV with gas boiler reheat and plate HRV',
      'general_3storey'),
     ('Dual-duct VAV with gas boiler and water-cooled chiller',
      'residential'),
+    ('PSZ RTU Gas and DX Coils and Hot Water Baseboard',
+     'general_2storey'),
     ('DOAS with VRF', 'general_2storey'),
     ('DOAS with water source heat pumps cooling tower with boiler',
      'general_2storey'),

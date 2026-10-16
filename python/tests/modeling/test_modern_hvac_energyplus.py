@@ -16,13 +16,11 @@ from tests.support import DDY, EPW, load_fixture, needs_engine
 MODERN_ROWS = (
     'DOAS with active chilled beams and electric baseboards',
     'DOAS with passive chilled beams and electric baseboards',
-    'DOAS with hydronic radiant floors, gas boiler and air-cooled chiller',
     'VAV chiller with gas boiler reheat and rotary ERV',
     'PVAV with gas boiler reheat and plate HRV',
     'Dual-duct VAV with gas boiler and water-cooled chiller',
 )
 BEAM_TABLE = 'AirTerminal:SingleDuct:ConstantVolume:CooledBeam'
-RADIANT_TABLE = 'ZoneHVAC:LowTemperatureRadiant:VariableFlow'
 MAX_UNMET_OCCUPIED_HOURS = 100.0
 
 
@@ -68,8 +66,7 @@ class TestModernHVACEnergyPlus(unittest.TestCase):
                 modeling.build_system(
                     model, name, sorted_by_name(model.getThermalZones()))
 
-                moisture_controlled = (
-                    'chilled beams' in name or 'radiant floors' in name)
+                moisture_controlled = 'chilled beams' in name
                 if moisture_controlled:
                     _output(
                         model, 'Schedule Value',
@@ -103,13 +100,6 @@ class TestModernHVACEnergyPlus(unittest.TestCase):
                             sql, BEAM_TABLE,
                             'Maximum Total Chilled Water Flow Rate') or 0.0,
                         0.0, f'{name}: beam water flow did not size')
-                elif 'radiant floors' in name:
-                    for column in (
-                            'Design Size Heating Design Capacity',
-                            'Design Size Cooling Design Capacity'):
-                        self.assertGreater(
-                            _sizing_sum(sql, RADIANT_TABLE, column) or 0.0,
-                            0.0, f'{name}: {column} did not size')
                 elif name.startswith('Dual-duct'):
                     self.assertGreater(
                         _sizing_sum(

@@ -5,7 +5,7 @@
     "energyplus": "EnergyPlus, Version 25.2.0-cf7368216c",
     "mode": "sizing-only (design days from the DDY; no run period)",
     "catalogue": "systems.json",
-    "catalogue_sha256": "f49e8f0bcce5f756f3450e568a2bc45833c9d67ce0d68151a6197bd44cacf27c",
+    "catalogue_sha256": "0890fbe8d9c66c14e747f14ee702b49a9650ddf4bc4782a46f88c0316f4755d5",
     "fixture": "5ZoneNoHVAC.osm",
     "fixture_sha256": "532d43e6fedb08425f4bb0450c7f2bb1219d53f1db74d4ba09f8db6d39c38aed",
     "epw": "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw",
@@ -124,15 +124,6 @@
       "fatal": 0,
       "completed": true,
       "seconds": 4.8
-    },
-    {
-      "name": "DOAS with hydronic radiant floors, gas boiler and air-cooled chiller",
-      "family": "radiant",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 5.0
     },
     {
       "name": "DOAS with passive chilled beams and electric baseboards",

@@ -1,6 +1,6 @@
 """Serial EnergyPlus gate for catalog proposed-to-reference generation.
 
-The proposed catalog sweep already runs all 103 inputs. This module exercises
+The proposed catalog sweep already runs all 102 inputs. This module exercises
 the other side of the boundary: full compliance sizing of every modern input
 and one representative of each remaining D-58 assignment signature, in both
 supported editions. All 24 pipelines stay in one test method so this module
@@ -31,8 +31,6 @@ from tests.necb.reference_matrix_support import (
 )
 from tests.support import DDY, EPW, needs_engine
 
-RADIANT = (
-    'DOAS with hydronic radiant floors, gas boiler and air-cooled chiller')
 MODERN_ERV_ROWS = {
     'VAV chiller with gas boiler reheat and rotary ERV',
     'PVAV with gas boiler reheat and plate HRV',
@@ -146,13 +144,9 @@ class TestCatalogReferenceEnergyPlus(unittest.TestCase):
                         result.reference_model.sqlFile().is_initialized())
 
                     self._assert_modern_reference_cleanup(
-                        name, scenario_name, result.reference_model)
+                        name, result.reference_model)
 
-                    if name == RADIANT and code == 'necb2025':
-                        self._run_identity_copy_week(
-                            result.reference_model, run_dir / 'reference_week')
-
-    def _assert_modern_reference_cleanup(self, name, scenario, reference):
+    def _assert_modern_reference_cleanup(self, name, reference):
         if 'chilled beams' in name:
             self.assertEqual(
                 0,
@@ -160,14 +154,6 @@ class TestCatalogReferenceEnergyPlus(unittest.TestCase):
                     .getAirTerminalSingleDuctConstantVolumeCooledBeams()))
         elif name.startswith('Dual-duct VAV'):
             self.assertEqual(0, len(reference.getAirTerminalDualDuctVAVs()))
-        elif name == RADIANT:
-            expected = (
-                len(reference.getThermalZones())
-                if scenario == 'residential'
-                else 0
-            )
-            self.assertEqual(
-                expected, len(reference.getZoneHVACLowTempRadiantVarFlows()))
         elif name in MODERN_ERV_ROWS:
             self.assertEqual(
                 [],
@@ -178,30 +164,6 @@ class TestCatalogReferenceEnergyPlus(unittest.TestCase):
                 [], _catalog_owned(reference.getTableLookups()))
             self.assertEqual(
                 [], _catalog_owned(reference.getTableIndependentVariables()))
-
-    def _run_identity_copy_week(self, reference, run_dir):
-        output = runner.run_energyplus(
-            reference,
-            str(run_dir),
-            sizing_only=False,
-            run_period={
-                'begin_month': 1,
-                'begin_day': 1,
-                'end_month': 1,
-                'end_day': 7,
-            },
-        )
-        self.assertTrue(
-            runner.is_clean_run(output),
-            'residential radiant copy reference did not run cleanly')
-        end_uses = runner.energy_results(reference)['end_uses_kwh']
-        hvac_kwh = sum(
-            float(end_uses.get(key) or 0.0)
-            for key in ('fans', 'cooling', 'heating', 'pumps')
-        )
-        self.assertGreater(
-            hvac_kwh, 0.0,
-            'residential radiant copy reference produced no HVAC energy')
 
 if __name__ == '__main__':
     unittest.main()

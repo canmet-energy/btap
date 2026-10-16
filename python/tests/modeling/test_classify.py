@@ -40,9 +40,6 @@ ROUND_TRIP = {
         'DOAS with active chilled beams and electric baseboards',
         {'heated': True, 'cooled': True, 'terminal': 'chilled_beam',
          'air_loop': True}),
-    'radiant': (
-        'DOAS with hydronic radiant floors, gas boiler and air-cooled chiller',
-        {'heated': True, 'cooled': True, 'air_loop': True}),
     'dual_duct': (
         'Dual-duct VAV with gas boiler and water-cooled chiller',
         {'heated': True, 'cooled': True, 'terminal': 'dual_duct_vav',

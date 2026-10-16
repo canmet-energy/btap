@@ -33,10 +33,10 @@ class TestCostingE2E(unittest.TestCase):
 
     def test_modern_families_use_their_serving_air_system_type(self):
         self.assertEqual(
-            {'chilled_beams': 1, 'radiant': 1, 'dual_duct': 6},
+            {'chilled_beams': 1, 'dual_duct': 6},
             {
                 family: VentilationQuantifier.FAMILY_SYS_TYPE[family]
-                for family in ('chilled_beams', 'radiant', 'dual_duct')
+                for family in ('chilled_beams', 'dual_duct')
             },
         )
 

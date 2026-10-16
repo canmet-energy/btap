@@ -12,11 +12,10 @@ def remove_hvac_from_zones(model, zones):
     :return: the model"""
     zone_handles = [str(zone.handle()) for zone in zones]
 
-    from btap.modeling.hvac.systems import plant_loops, radiant, vav_reheat
+    from btap.modeling.hvac.systems import plant_loops, vav_reheat
 
     for plant_loop in model.getPlantLoops():
         plant_loops.remove_zones_from_dewpoint_reset(plant_loop, zones)
-    radiant.restore_owned_surface_constructions(model, zones)
 
     # 1. Zone equipment on the given zones (baseboards, PTAC/PTHP, fan coils, VRF
     #    terminals...). Exhaust fans are preserved (they represent code-required
@@ -100,8 +99,6 @@ def remove_hvac_from_zones(model, zones):
 
         if not changed:
             break
-
-    radiant.cleanup_owned_constructions(model)
 
     # 4. Remove now-unused performance curves.
     for curve in model.getCurves():

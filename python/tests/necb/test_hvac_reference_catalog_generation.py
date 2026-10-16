@@ -183,7 +183,7 @@ class TestCatalogReferenceGeneration(unittest.TestCase):
                     self.assertIsNot(proposed, result.model)
 
                     self._assert_modern_teardown(
-                        name, result.model, result.assignments)
+                        name, result.model)
                     self._assert_round_trip_translates(
                         index, name, code, scenario_name, result.model,
                         len(zone_names))
@@ -193,10 +193,7 @@ class TestCatalogReferenceGeneration(unittest.TestCase):
             before.read_bytes(), after.read_bytes(),
             f'{name}: reference generation mutated the proposed model')
 
-    def _assert_modern_teardown(self, name, reference, assignments):
-        actions = {str(assignment.action) for assignment in assignments}
-        copied = actions == {'copy_proposed'}
-
+    def _assert_modern_teardown(self, name, reference):
         if 'chilled beams' in name:
             self.assertEqual(
                 0,
@@ -205,10 +202,6 @@ class TestCatalogReferenceGeneration(unittest.TestCase):
             self.assertEqual(0, len(reference.getCoilCoolingCooledBeams()))
         elif name.startswith('Dual-duct VAV'):
             self.assertEqual(0, len(reference.getAirTerminalDualDuctVAVs()))
-        elif 'hydronic radiant floors' in name:
-            expected = len(reference.getThermalZones()) if copied else 0
-            self.assertEqual(
-                expected, len(reference.getZoneHVACLowTempRadiantVarFlows()))
         elif name in MODERN_ERV_ROWS:
             self.assertEqual(
                 [],

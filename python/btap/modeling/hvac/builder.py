@@ -29,7 +29,6 @@ FAMILIES = {
     'vrf': ('vrf', 'Vrf'),
     'zone_ervs': ('zone_ervs', 'ZoneErvs'),
     'chilled_beams': ('chilled_beams', 'ChilledBeams'),
-    'radiant': ('radiant', 'RadiantFloor'),
     'dual_duct': ('dual_duct', 'DualDuctVAV'),
 }
 

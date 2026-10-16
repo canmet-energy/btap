@@ -108,8 +108,6 @@ def primary_part(row):
         return 'DOAS ventilation'
     if family == 'chilled_beams':
         return f"DOAS with {row.get('beam_type', '').lower()} chilled beams"
-    if family == 'radiant':
-        return 'DOAS with hydronic radiant floors'
     if family == 'dual_duct':
         return 'dual-duct VAV with hydronic hot and cold decks'
     if family == 'vrf':

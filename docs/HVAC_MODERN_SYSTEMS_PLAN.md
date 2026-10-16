@@ -1,7 +1,7 @@
 # Modern HVAC catalog expansion: phases 1-3 implementation record
 
 **Status:** implemented, with UFAD deliberately deferred. The
-`btap.modeling.hvac` catalog now has 103 rows and builds generic OpenStudio SDK
+`btap.modeling.hvac` catalog now has 102 rows and builds generic OpenStudio SDK
 topology, not a commissioned or code-compliant system. NECB
 equipment-selection and efficiency rules stay in `btap.codes`; no product
 dependency on measures or `openstudio-standards` was added.
@@ -10,7 +10,7 @@ dependency on measures or `openstudio-standards` was added.
 
 | Phase | Result |
 | --- | --- |
-| 1 | Shipped `DOAS with active chilled beams and electric baseboards`, `DOAS with passive chilled beams and electric baseboards`, and `DOAS with hydronic radiant floors, gas boiler and air-cooled chiller`. The systems use a dehumidifying/reheating 100% OA loop, explicit low-temperature plant profiles, dew-point reset, and preflight-before-mutation validation. The radiant row preserves the input slab and adds zero-outdoor-air DX terminal cooling plus hot-water perimeter trim; teardown restores only builder-owned internal-source constructions. |
+| 1 | Shipped `DOAS with active chilled beams and electric baseboards` and `DOAS with passive chilled beams and electric baseboards`. They use a dehumidifying/reheating 100% OA loop, an explicit 15/18 C chilled-water profile, dew-point reset, and preflight-before-mutation validation. The hydronic-radiant candidate was retired after annual energy accounting showed that DX terminals supplied 83% of zone-terminal cooling and its uninsulated ground slab dominated heating consumption. |
 | 2 | Shipped `VAV chiller with gas boiler reheat and rotary ERV` and `PVAV with gas boiler reheat and plate HRV`. The two recovery variants use gas-boiler hydronic perimeter trim; the pre-existing VAV/PVAV rows are unchanged. Existing `VRF`, `DOAS with VRF`, `hs08_ccashp_vrf`, and `hs13_ashp_vrf` retain heat recovery and are regression-pinned rather than duplicated. |
 | 3 | Shipped `Dual-duct VAV with gas boiler and water-cooled chiller` as a true two-deck air loop with dual-duct terminals. UFAD did not ship: OpenStudio 3.11 has workspace/IDF support but no typed, persistent OpenStudio Model (`.osm`) representation, and post-translation augmentation is not enforceable in every supported backend. |
 
@@ -18,43 +18,54 @@ The shipped rows have focused object-graph and translation tests plus annual
 EnergyPlus operating tests. One criterion applies to every new row: a clean
 annual run, nonzero heating and cooling energy, and no more than 100 occupied
 unmet hours in either mode on the standard five-zone fixture. The gate also
-verifies beam/radiant hydronic design values, chilled-water dew-point-reset
-movement without `PsyTsatFnPb` failures, central heat exchange, and
-simultaneous VRF heat recovery.
+verifies beam hydronic design values, chilled-water dew-point-reset movement
+without `PsyTsatFnPb` failures, central heat exchange, and simultaneous VRF
+heat recovery.
 
 That comfort criterion was added after the first implementation exposed an
 important distinction between "the simulation completed" and "the system
-conditioned the building." Before correction, the radiant row had 636.75
-heating and 3449 cooling unmet hours, the two beam rows had 411-420 cooling
-unmet hours, and both recovery rows had 468.5 heating unmet hours. The accepted
-topologies and final annual measurements are:
+conditioned the building." Before correction, the two beam rows had 411-420
+cooling unmet hours and both recovery rows had 468.5 heating unmet hours. The
+accepted topologies and final annual measurements are:
 
 | Catalog row | Heating unmet h | Cooling unmet h | Conditioning correction |
 | --- | ---: | ---: | --- |
 | DOAS with active chilled beams and electric baseboards | 49.00 | 76.25 | `modern_doas` cooling reserve sized for dew-point-limited terminals |
 | DOAS with passive chilled beams and electric baseboards | 49.00 | 89.00 | `modern_doas` cooling reserve sized for dew-point-limited terminals |
-| DOAS with hydronic radiant floors, gas boiler and air-cooled chiller | 51.00 | 0.00 | zero-outdoor-air DX terminal cooling plus gas-boiler hot-water baseboards |
 | VAV chiller with gas boiler reheat and rotary ERV | 70.00 | 0.75 | gas-boiler hydronic perimeter trim |
 | PVAV with gas boiler reheat and plate HRV | 70.00 | 0.75 | gas-boiler hydronic perimeter trim |
 | Dual-duct VAV with gas boiler and water-cooled chiller | 54.00 | 0.00 | original two-deck topology met the common criterion |
 
-The radiant conversion reuses the input construction's material handles and
-thermal conductance; it does not add envelope insulation. On the annual
-fixture this preserves the concrete-plus-carpet slab at 3.401 W/(m2 K), rather
-than silently changing it to approximately 0.44 W/(m2 K). A direct teardown
-regression also strands beam and radiant coils intentionally, then proves the
-generic sweep removes those coils and their orphaned plant.
+The 2.2 chilled-beam cooling reserve is explicitly empirical rather than a
+design rule: 2.0 produced 103 occupied cooling unmet hours for the passive row,
+while 2.2 produced 89. The recovery rows are likewise not an isolated A/B
+experiment: their untouched non-recovery comparator records 468.75 heating
+unmet hours, but the recovery variants also add hydronic perimeter baseboards.
+The tests therefore claim only that each complete topology conditions the
+fixture and that its heat exchanger operates.
+
+The radiant candidate did not earn a catalog name. On the same annual run,
+PTAC DX supplied 18,680 kWh against 3,955 kWh from the slab (83% versus 17% of
+zone-terminal cooling), and the named chiller used 4,077 kWh against
+26,292 kWh of DX cooling. Removing the PTACs left 2,315.5 occupied cooling
+unmet hours. The floor injected about 313 MWh of heat while roughly 271 MWh
+left through the preserved, uninsulated 3.401 W/(m2 K) ground slab; its
+555.6 kWh/m2 heating intensity was far above the accepted rows' 91-156
+kWh/m2. Adding insulation would move the problem into an unrequested envelope
+mutation. The row, builder family, and one-value `radiant_trim_type` option
+were therefore removed. Generic teardown still has a direct regression that
+strands beam and low-temperature radiant coils and proves the orphan sweep
+removes them and their plant.
 
 The NECB boundary is also release-gated rather than inferred from selection
-alone. The D-58 selector matrix now covers all 103 inputs in both supported
+alone. The D-58 selector matrix now covers all 102 inputs in both supported
 editions. Every catalog input then passes through full `reference_hvac()`
 construction, OpenStudio Model (`.osm`) save/reload, and EnergyPlus forward
 translation; the nine distinct four-scenario assignment signatures cover the
 remaining office, residential, and data-processing branches. A serial
-24-pipeline EnergyPlus gate covers all six modern inputs plus every stable
+24-pipeline EnergyPlus gate covers all five modern inputs plus every stable
 reference-construction path in NECB 2020 and 2025, requiring clean proposed
-and reference sizing runs. It also runs the residential radiant identity-copy
-reference for a January week. A System 2/5 water-coil UA-inversion failure
+and reference sizing runs. A System 2/5 water-coil UA-inversion failure
 found while extending that gate predates this catalog work and is tracked in
 [#113](https://github.com/canmet-energy/btap/issues/113). The attempted
 ideal-loads sizing probe changed code-driven reference sizing without a
@@ -143,11 +154,12 @@ into Python; design and test the SDK object graph independently.
   script has **no `--check` flag**. Do not add a baseline for a new system
   unless a scenario actually exercises it.
 
-## Phase 1: chilled beams and low-temperature radiant
+## Phase 1: chilled beams; radiant candidate retired
 
-**Deliverable:** two complete, independently selectable DOAS-based system
-families, not zone equipment mislabeled as a complete HVAC system. Ship
-cooling configurations only when their moisture-control tests pass.
+**Delivered:** one complete DOAS-based chilled-beam family with active and
+passive rows. The hydronic-radiant candidate did not meet the identity and
+energy-accounting contract above and was removed rather than shipped as zone
+equipment mislabeled as a chiller-led system.
 
 ### 1.1 Plant and ventilation foundation
 
@@ -199,7 +211,14 @@ cooling configurations only when their moisture-control tests pass.
    Replacement must clear beam-specific plant demand components; the
    current teardown's orphan-coil pass handles only ordinary water coils.
 
-### 1.3 Hydronic radiant floor, then ceiling if proven
+### 1.3 Hydronic radiant floor candidate — retired
+
+The criteria below governed the attempted implementation. Its object graph,
+surface restoration, condensation control, and comfort result worked, but the
+annual energy split did not: DX carried most cooling and ground conduction
+carried most slab heat. Because the standard fixture has no insulated
+slab-on-grade and HVAC authoring must not alter its envelope, no radiant row
+ships from this phase.
 
 1. Implement `systems/radiant.py`: a DOAS for ventilation/latent control
    plus one `ZoneHVACLowTempRadiantVarFlow` per zone, with
@@ -236,10 +255,11 @@ cooling configurations only when their moisture-control tests pass.
    `remove_existing` on a subset with a shared adjacent surface, plus
    cleanup of radiant coils and prior constructions.
 
-**Phase 1 exit:** at least one active- and one passive-beam row, plus a
-DOAS+hydronic-floor row, with the common gates above. Four-pipe beams and
-ceiling radiant are explicitly conditional additions, not implied by
-shipping the first three rows.
+**Phase 1 exit:** one active- and one passive-beam row pass the common gates
+above. Four-pipe beams remain a conditional addition. A future radiant row
+needs an independently justified insulated-envelope preflight and must show
+that the named hydronic equipment, rather than hidden DX capacity, carries the
+load.
 
 ## Phase 2: central VAV energy recovery; verify existing VRF heat recovery
 

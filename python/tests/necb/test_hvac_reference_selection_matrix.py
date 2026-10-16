@@ -13,7 +13,7 @@ heat-pump rules. D-58 establishes the corresponding 2025 provisions and
 governs both code ids; see docs/necb_decisions.md.
 
 Default run: a representative subset (every family + every special-rule shape).
-FULL_MATRIX=1 runs all 103. The golden is NEVER regenerated from Python — the
+FULL_MATRIX=1 runs all 102. The golden is NEVER regenerated from Python — the
 Ruby suite's UPDATE_GOLDEN escape hatch is deliberately not ported (D-79: the
 adjudicated matrix is the shared contract both ports read).
 
@@ -72,7 +72,6 @@ SUBSET = [
     'DOAS with fan coil air-cooled chiller with district hot water',
     'DOAS with active chilled beams and electric baseboards',
     'DOAS with passive chilled beams and electric baseboards',
-    'DOAS with hydronic radiant floors, gas boiler and air-cooled chiller',
     'DOAS with VRF', 'DOAS with water source heat pumps',
     'Dual-duct VAV with gas boiler and water-cooled chiller',
     'PVAV with gas boiler reheat and plate HRV',

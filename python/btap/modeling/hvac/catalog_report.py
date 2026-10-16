@@ -118,7 +118,6 @@ ZONE_EQUIPMENT = [
     (r'ZoneHVAC_UnitHeater',                           'unit heater'),
     (r'ZoneHVAC_FourPipeFanCoil',                      'fan coil'),
     (r'ZoneHVAC_EnergyRecoveryVentilator',             'ERV'),
-    (r'ZoneHVAC_LowTempRadiant_VarFlow',               'hydronic radiant floor'),
     (r'ZoneHVAC_LowTemp',                              'radiant panel'),
     (r'ZoneHVAC',                                      'zone unit'),
 ]
@@ -158,7 +157,6 @@ FAMILY_BLURB = {
     'furnace': 'Forced-air furnace providing central heating.',
     'mau_ptac': 'Make-up air unit for ventilation plus packaged terminal air conditioners at each zone (NECB system 1 variants).',
     'psz': 'Packaged single-zone rooftop unit — one air handler per zone with DX or heat-pump cooling and a gas/electric heating coil, optionally with perimeter baseboards (NECB systems 3 and 4, and PSZ-AC).',
-    'radiant': 'A dehumidifying 100% outdoor-air system paired with variable-flow hydronic radiant floors on explicit low-temperature plants and internal-source slab constructions.',
     'unit_heaters': 'Standalone gas or electric unit heaters.',
     'vav_reheat': 'Multi-zone variable-air-volume — a central built-up air handler with chilled-water or DX cooling and zone reheat terminals, plus baseboards (NECB system 6 and packaged VAV).',
     'vrf': 'Variable refrigerant flow heat-recovery system serving zone terminals.',
@@ -178,7 +176,6 @@ FAMILY_TITLES = {
     'evap_cooler': 'Evaporative cooling', 'fan_coils': 'Fan coils (NECB sys 2 / 5)',
     'furnace': 'Furnace', 'mau_ptac': 'MAU + PTAC (NECB sys 1)',
     'psz': 'Packaged single-zone (NECB sys 3 / 4, PSZ-AC)',
-    'radiant': 'Hydronic radiant floors',
     'unit_heaters': 'Unit heaters', 'vav_reheat': 'VAV with reheat (NECB sys 6, PVAV)',
     'vrf': 'Variable refrigerant flow', 'wshp': 'Water-source heat pumps',
     'zone_ervs': 'Zone ERVs', 'zone_terminal': 'Zone terminal units',
@@ -536,12 +533,6 @@ def demand_spec(component, idd, name):
     if re.search(r'Coil_Cooling_CooledBeam', idd):
         return zone_or_group(
             component, 'cooling_coil', 'Cooled-beam cooling coil')
-    if re.search(r'Coil_Heating_LowTempRadiant', idd):
-        return zone_or_group(
-            component, 'heating_coil', 'Radiant-floor heating coil')
-    if re.search(r'Coil_Cooling_LowTempRadiant', idd):
-        return zone_or_group(
-            component, 'cooling_coil', 'Radiant-floor cooling coil')
     if re.search(r'WaterUse_Connections', idd):
         return {'kind': 'water_use', 'label': 'Water use'}
     if re.search(r'WaterToAirHeatPump|WaterToWaterHeatPump', idd):
@@ -780,8 +771,6 @@ def component_label(idd, name=''):
     pumps; district heating vs cooling. Falls back to the coarse kind label."""
     if re.search(r'Coil_Heating_DX', idd):
         return 'DX heating coil'
-    if re.search(r'Coil_Heating_LowTempRadiant', idd):
-        return 'Radiant-floor heating coil'
     if re.search(r'Coil_Heating_WaterToAirHeatPump', idd):
         return 'Heat-pump heating coil'
     if re.search(r'Coil_Heating_Water', idd):
@@ -794,8 +783,6 @@ def component_label(idd, name=''):
         return 'DX cooling coil'
     if re.search(r'Coil_Cooling_CooledBeam', idd):
         return 'Cooled-beam cooling coil'
-    if re.search(r'Coil_Cooling_LowTempRadiant', idd):
-        return 'Radiant-floor cooling coil'
     if re.search(r'Coil_Cooling_WaterToAirHeatPump', idd):
         return 'Heat-pump cooling coil'
     if re.search(r'Coil_Cooling_Water', idd):

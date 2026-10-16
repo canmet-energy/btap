@@ -177,7 +177,7 @@ class TestCoolingAttributionOverTheCatalogue(unittest.TestCase):
         because multispeed coils cannot sit bare on a loop. That container is
         a `ZoneHVACComponent` subclass with no `thermalZone()` when it is on
         a loop, which is exactly what my attribution fix mishandled — and no
-        catalogue entry sets the flag, so the 103-system walk above cannot
+        catalogue entry sets the flag, so the 102-system walk above cannot
         reach it.
         """
         import openstudio

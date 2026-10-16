@@ -35,7 +35,7 @@ class VentilationQuantifier:
     FAMILY_SYS_TYPE = {
         'mau_ptac': 1, 'doas': 1, 'doas_pthp': 1,
         'ecm_ashp_baseboard': 1, 'ecm_doas_vrf': 1, 'ecm_hp_fancoils': 1,
-        'chilled_beams': 1, 'radiant': 1,
+        'chilled_beams': 1,
         'psz': 3, 'furnace': 3,
         'vav_reheat': 6, 'dual_duct': 6,
         'fan_coils': None,

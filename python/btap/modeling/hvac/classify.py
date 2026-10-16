@@ -96,13 +96,6 @@ def characterize(model, audit=None):
             groups.append(_zonal_group(zone, plant_by_name, audit))
 
     for group in groups:
-        # Radiant floors are zone equipment attached to a DOAS, so their
-        # structural identity is only visible after zonal equipment is
-        # merged. Keep all other early guesses (especially legacy pipe-name
-        # families) stable.
-        if ('radiant_floor' in group['zonal_units']
-                or group['family_guess'] is None):
-            group['family_guess'] = _structural_family_guess(group)
         if not group['cooled']:
             group['design_cooling_kw'] = 0.0
         elif not group.pop('cooling_capacity_complete'):
@@ -410,10 +403,6 @@ def _zonal_water_heating_coil(unit):
     if (hasattr(coil, 'to_CoilHeatingWaterBaseboard') and
             coil.to_CoilHeatingWaterBaseboard().is_initialized()):
         return coil.to_CoilHeatingWaterBaseboard().get()
-    if (hasattr(coil, 'to_CoilHeatingLowTempRadiantVarFlow') and
-            coil.to_CoilHeatingLowTempRadiantVarFlow().is_initialized()):
-        return coil.to_CoilHeatingLowTempRadiantVarFlow().get()
-
     return None
 
 
@@ -608,7 +597,6 @@ AUX_COIL_FUELS = {
     'to_CoilHeatingGasMultiStage': 'NaturalGas',
     'to_CoilHeatingElectric': 'Electricity',
     'to_CoilHeatingWater': 'hydronic',
-    'to_CoilHeatingLowTempRadiantVarFlow': 'hydronic',
 }
 
 
@@ -702,7 +690,6 @@ ZONAL_HEATING_UNITS = (
     ('to_ZoneHVACWaterToAirHeatPump', ('heatingCoil', 'supplementalHeatingCoil')),
     ('to_ZoneHVACFourPipeFanCoil', ('heatingCoil',)),
     ('to_ZoneHVACUnitHeater', ('heatingCoil',)),
-    ('to_ZoneHVACLowTempRadiantVarFlow', ('heatingCoil',)),
     ('to_AirTerminalSingleDuctVAVReheat', ('reheatCoil',)),
     ('to_AirTerminalSingleDuctConstantVolumeReheat', ('reheatCoil',)),
 )
@@ -777,8 +764,6 @@ ZONAL = (
     ('to_ZoneHVACWaterToAirHeatPump', {'heat': 'Electricity', 'cool': 'Electricity', 'hp': True, 'kind': 'wshp'}),
     ('to_ZoneHVACHighTemperatureRadiant', {'heat': 'Electricity', 'kind': 'radiant'}),
     ('to_ZoneHVACLowTemperatureRadiantElectric', {'heat': 'Electricity', 'kind': 'radiant'}),
-    ('to_ZoneHVACLowTempRadiantVarFlow',
-     {'heat': 'coil', 'cool': 'coil', 'kind': 'radiant_floor'}),
 )
 
 
@@ -867,15 +852,6 @@ def _zonal_fuels(unit, role, side, plant_by_name):
             return _array(_hydronic_fuels(coil.to_CoilHeatingWater().get(), plant_by_name))
         if coil.to_CoilCoolingWater().is_initialized():
             return _array(_hydronic_fuels(coil.to_CoilCoolingWater().get(), plant_by_name))
-        if coil.to_CoilHeatingLowTempRadiantVarFlow().is_initialized():
-            return _array(_hydronic_fuels(
-                coil.to_CoilHeatingLowTempRadiantVarFlow().get(),
-                plant_by_name))
-        if coil.to_CoilCoolingLowTempRadiantVarFlow().is_initialized():
-            return _array(_hydronic_fuels(
-                coil.to_CoilCoolingLowTempRadiantVarFlow().get(),
-                plant_by_name))
-
         return ['Unknown']
     if isinstance(role, str):  # a literal energy type ('Electricity')
         return [role]
@@ -900,13 +876,6 @@ def _add_zonal_cooling_capacity(group, unit):
     elif coil.to_CoilCoolingDXVariableRefrigerantFlow().is_initialized():
         c = coil.to_CoilCoolingDXVariableRefrigerantFlow().get()
         kw = _optional_kw(c.ratedTotalCoolingCapacity(), c.autosizedRatedTotalCoolingCapacity())
-    elif coil.to_CoilCoolingLowTempRadiantVarFlow().is_initialized():
-        c = coil.to_CoilCoolingLowTempRadiantVarFlow().get()
-        autosized = (
-            c.autosizedCoolingDesignCapacity()
-            if c.model().sqlFile().is_initialized() else None)
-        kw = _optional_kw(
-            c.coolingDesignCapacity(), autosized)
     else:
         kw = None
     if kw is None:
@@ -929,8 +898,6 @@ def _zonal_group(zone, plant_by_name, audit):
 
 def _structural_family_guess(group):
     """Coarse structural guess for foreign systems (gem-built groups carry exact 'family')."""
-    if 'radiant_floor' in group['zonal_units']:
-        return 'radiant_floor'
     if group['air_loop'] is not None:
         if group['terminal_type'] == 'chilled_beam':
             return 'chilled_beam'

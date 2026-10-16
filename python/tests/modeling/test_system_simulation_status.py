@@ -8,7 +8,7 @@ The defect class this guards is a required performance-curve field left UNSET
 — the SDK models that as merely absent, so every in-process assertion passes
 and the model looks fine until EnergyPlus reaches it.
 
-Simulating 103 systems takes about nine minutes one at a time, so the sweep
+Simulating 102 systems takes about nine minutes one at a time, so the sweep
 lives in `python/scripts/simulate_all_systems.py` and this test reads the
 verdict it writes. That script is PYTHON and owns the file: the Ruby twin
 this docstring used to name retired at R6 under D-84, which left the verdict
@@ -34,7 +34,7 @@ STATUS = FIXTURES / "system_simulation_status.json"
 SCRIPT = REPO_ROOT / "python" / "scripts" / "simulate_all_systems.py"
 
 # Known broken, with the root cause. EMPTY, and the goal is to keep it that
-# way: every one of the 103 catalog systems completes the recorded mode cleanly.
+# way: every one of the 102 catalog systems completes the recorded mode cleanly.
 KNOWN_BAD: dict = {}
 
 

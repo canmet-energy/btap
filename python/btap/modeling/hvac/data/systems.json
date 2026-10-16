@@ -1095,47 +1095,6 @@
       "comment": "100% OA dehumidifying DOAS with passive chilled-beam terminals, electric perimeter heat, and dew-point-safe tempered chilled water"
     },
     {
-      "name": "DOAS with hydronic radiant floors, gas boiler and air-cooled chiller",
-      "family": "radiant",
-      "sys_abbr": "radiant_floor",
-      "sizing": "modern_doas",
-      "doas_supply_air_temperature": 20.0,
-      "doas_maximum_humidity_ratio": 0.008,
-      "radiant_heating_control_temperature": 20.0,
-      "radiant_cooling_control_temperature": 24.0,
-      "radiant_control_throttling_range": 2.0,
-      "radiant_changeover_delay_hours": 24.0,
-      "radiant_condensation_control_type": "VariableOff",
-      "dewpoint_margin": 2.0,
-      "radiant_tube_spacing": 0.2,
-      "radiant_tubing_inside_diameter": 0.015,
-      "radiant_tubing_outside_diameter": 0.019,
-      "radiant_number_of_circuits": "CalculateFromCircuitLength",
-      "radiant_circuit_length": 100.0,
-      "radiant_source_after_layer_number": 1,
-      "radiant_temperature_after_layer_number": 1,
-      "radiant_trim_type": "DX PTAC",
-      "needs_boiler": true,
-      "boiler_fuel": "NaturalGas",
-      "hot_water_profile": {
-        "name": "low_temperature_heating",
-        "design_exit_temperature": 40.0,
-        "design_temperature_difference": 5.0,
-        "setpoint_temperature": 40.0
-      },
-      "needs_chiller": true,
-      "chw_source": "air_cooled",
-      "chiller_type": "Scroll",
-      "chilled_water_profile": {
-        "name": "tempered_chilled_water",
-        "design_exit_temperature": 15.0,
-        "design_temperature_difference": 3.0,
-        "setpoint_temperature": 15.0
-      },
-      "origin": "generic",
-      "comment": "100% OA dehumidifying DOAS with variable-flow radiant floors, preserved slab layers, hot-water perimeter trim, low-temperature hot water, dew-point-safe tempered radiant water, and zero-outdoor-air DX terminal cooling trim"
-    },
-    {
       "name": "Dual-duct VAV with gas boiler and water-cooled chiller",
       "family": "dual_duct",
       "sys_abbr": "dual_duct",
