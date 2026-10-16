@@ -20,11 +20,19 @@ ROWS = catalog.rows()
 FAMILY_KEYS = {
     'baseboards': ['baseboard_type', 'boiler_fuel', 'family', 'hw_source', 'name',
                    'needs_boiler', 'origin'],
+    'chilled_beams': ['baseboard_type', 'beam_design_inlet_water_temperature',
+                      'beam_design_outlet_water_temperature', 'beam_type',
+                      'chilled_water_profile', 'chiller_type', 'chw_source',
+                      'comment', 'dewpoint_margin', 'doas_maximum_humidity_ratio',
+                      'doas_supply_air_temperature', 'family', 'name',
+                      'needs_boiler', 'needs_chiller', 'origin', 'sizing', 'sys_abbr'],
     'composite': ['comment', 'family', 'name', 'needs_boiler', 'origin', 'parts'],
     'doas': ['comment', 'family', 'heating_type', 'name', 'needs_boiler', 'origin',
              'sizing'],
     'doas_pthp': ['comment', 'family', 'name', 'needs_boiler', 'origin', 'sizing',
                   'supp_htg_fuel', 'sys_abbr'],
+    'dual_duct': ['boiler_fuel', 'chiller_type', 'comment', 'family', 'name',
+                  'needs_boiler', 'needs_chiller', 'origin', 'sizing', 'sys_abbr'],
     'ecm_ashp_baseboard': ['air_eqpt', 'baseboard_type', 'comment', 'family', 'name',
                            'needs_boiler', 'origin', 'sizing', 'supp_htg_fuel',
                            'sys_abbr', 'vent_type'],
@@ -48,8 +56,16 @@ FAMILY_KEYS = {
             'supp_htg_fuel', 'sys_abbr'],
     'unit_heaters': ['family', 'heating_type', 'name', 'needs_boiler', 'origin'],
     'vav_reheat': ['baseboard_type', 'boiler_fuel', 'chiller_type', 'comment',
-                   'cooling_type', 'family', 'heating_coil_type', 'name', 'needs_boiler',
-                   'needs_chiller', 'origin', 'sizing', 'sys_abbr'],
+                   'cooling_type', 'erv_bypass_control_type',
+                   'erv_defrost_time_fraction_increase_rate',
+                   'erv_economizer_lockout', 'erv_frost_control_type',
+                   'erv_frost_threshold_temperature', 'erv_heat_exchanger_type',
+                   'erv_initial_defrost_time_fraction',
+                   'erv_latent_effectiveness', 'erv_nominal_electric_power',
+                   'erv_sensible_effectiveness',
+                   'erv_supply_air_outlet_temperature_control', 'family',
+                   'heating_coil_type', 'name', 'needs_boiler', 'needs_chiller',
+                   'needs_erv', 'origin', 'sizing', 'sys_abbr'],
     'vrf': ['comment', 'family', 'name', 'needs_boiler', 'origin', 'zone_ventilation'],
     'wshp': ['boiler_fuel', 'comment', 'family', 'name', 'needs_boiler', 'origin',
              'sizing', 'ventilation'],
@@ -69,6 +85,14 @@ ENUMS = {
     'mau_cooling_type': ['DX', 'Hydronic'],  # DX IS a real coil type here — cooling
     'unit_type': ['ptac', 'pthp', 'window_ac'],
     'origin': ['cbecs', 'generic', 'necb_ecm', 'necb_reference_hp'],
+    'beam_type': ['Active', 'Passive'],
+    'erv_heat_exchanger_type': ['Plate', 'Rotary'],
+    'erv_frost_control_type': [
+        'None', 'ExhaustAirRecirculation', 'ExhaustOnly',
+        'MinimumExhaustTemperature'],
+    'erv_bypass_control_type': [
+        'BypassWhenWithinEconomizerLimits',
+        'BypassWhenOAFlowGreaterThanMinimum'],
 }
 
 

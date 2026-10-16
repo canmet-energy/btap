@@ -5,16 +5,16 @@
     "energyplus": "EnergyPlus, Version 25.2.0-cf7368216c",
     "mode": "sizing-only (design days from the DDY; no run period)",
     "catalogue": "systems.json",
-    "catalogue_sha256": "a0361fcedc8e7b800c86fe165402a6913664bffe905b0ff977f9a482dff12242",
+    "catalogue_sha256": "0890fbe8d9c66c14e747f14ee702b49a9650ddf4bc4782a46f88c0316f4755d5",
     "fixture": "5ZoneNoHVAC.osm",
     "fixture_sha256": "532d43e6fedb08425f4bb0450c7f2bb1219d53f1db74d4ba09f8db6d39c38aed",
     "epw": "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw",
     "epw_sha256": "b062d77fec9ae2cba62909507bab80c83572a2cb2aa9d92e0000d0cb6b2ac4bc",
     "ddy": "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.ddy",
     "ddy_sha256": "39a3a0bbcf759b36d2545d1348afa47f9bbbd74dce02f478cc68052634c75238",
-    "source_revision": "1e6ff2b357c0f0c67b7577a8d0f1a9f9693c9e8d",
+    "source_revision": "8b0e9133a39d1cb5bd385e1aea166810e41e655f",
     "source_dirty": false,
-    "generated_utc": "2026-10-12T22:56:07+00:00"
+    "generated_utc": "2026-10-16T13:48:04+00:00"
   },
   "systems": [
     {
@@ -24,7 +24,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.2
+      "seconds": 4.3
     },
     {
       "name": "Baseboard electric",
@@ -33,7 +33,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.1
+      "seconds": 4.3
     },
     {
       "name": "Baseboard gas boiler",
@@ -42,7 +42,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.3
+      "seconds": 4.4
     },
     {
       "name": "DOAS ventilation only",
@@ -60,7 +60,16 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.9
+      "seconds": 5.1
+    },
+    {
+      "name": "DOAS with active chilled beams and electric baseboards",
+      "family": "chilled_beams",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.6
     },
     {
       "name": "DOAS with fan coil air-cooled chiller with boiler",
@@ -69,7 +78,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.7
+      "seconds": 5.1
     },
     {
       "name": "DOAS with fan coil air-cooled chiller with district hot water",
@@ -78,7 +87,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.8
+      "seconds": 4.9
     },
     {
       "name": "DOAS with fan coil chiller with boiler",
@@ -96,7 +105,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.8
+      "seconds": 5.3
     },
     {
       "name": "DOAS with fan coil district chilled water with boiler",
@@ -114,7 +123,16 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.7
+      "seconds": 4.9
+    },
+    {
+      "name": "DOAS with passive chilled beams and electric baseboards",
+      "family": "chilled_beams",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.6
     },
     {
       "name": "DOAS with water source heat pumps cooling tower with boiler",
@@ -141,7 +159,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.8
+      "seconds": 4.9
     },
     {
       "name": "Direct evap coolers with baseboard electric",
@@ -150,7 +168,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.5
+      "seconds": 4.7
     },
     {
       "name": "Direct evap coolers with no heat",
@@ -159,7 +177,16 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.6
+      "seconds": 4.5
+    },
+    {
+      "name": "Dual-duct VAV with gas boiler and water-cooled chiller",
+      "family": "dual_duct",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.7
     },
     {
       "name": "Electric unit heaters",
@@ -168,7 +195,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.2
+      "seconds": 4.4
     },
     {
       "name": "FPFC MAU Chilled Water Coils with Centrifugal Chiller",
@@ -177,7 +204,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.5
+      "seconds": 5.3
     },
     {
       "name": "FPFC MAU Chilled Water Coils with Reciprocating Chiller",
@@ -186,7 +213,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.6
+      "seconds": 5.4
     },
     {
       "name": "FPFC MAU Chilled Water Coils with Rotary Screw Chiller",
@@ -222,7 +249,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.6
+      "seconds": 5.4
     },
     {
       "name": "FPFC MAU DX Coils with Rotary Screw Chiller",
@@ -231,7 +258,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.2
+      "seconds": 5.3
     },
     {
       "name": "FPFC MAU DX Coils with Scroll Chiller",
@@ -249,7 +276,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.6
+      "seconds": 4.5
     },
     {
       "name": "Gas unit heaters",
@@ -258,7 +285,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.2
+      "seconds": 4.4
     },
     {
       "name": "MZ BU RTU Electric Heating Coil Centrifugal Chiller and Electric Baseboard",
@@ -267,7 +294,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.9
+      "seconds": 5.0
     },
     {
       "name": "MZ BU RTU Electric Heating Coil Centrifugal Chiller and Hot Water Baseboard",
@@ -276,7 +303,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.7
+      "seconds": 5.3
     },
     {
       "name": "MZ BU RTU Electric Heating Coil Reciprocating Chiller and Electric Baseboard",
@@ -285,7 +312,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.1
+      "seconds": 4.7
     },
     {
       "name": "MZ BU RTU Electric Heating Coil Reciprocating Chiller and Hot Water Baseboard",
@@ -294,7 +321,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.1
+      "seconds": 4.9
     },
     {
       "name": "MZ BU RTU Electric Heating Coil Rotary Screw Chiller and Electric Baseboard",
@@ -303,7 +330,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.0
+      "seconds": 4.9
     },
     {
       "name": "MZ BU RTU Electric Heating Coil Rotary Screw Chiller and Hot Water Baseboard",
@@ -312,7 +339,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.2
+      "seconds": 4.9
     },
     {
       "name": "MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard",
@@ -330,7 +357,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.6
+      "seconds": 5.2
     },
     {
       "name": "MZ BU RTU Hot Water Heating Coil Centrifugal Chiller and Electric Baseboard",
@@ -339,7 +366,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.8
+      "seconds": 4.9
     },
     {
       "name": "MZ BU RTU Hot Water Heating Coil Centrifugal Chiller and Hot Water Baseboard",
@@ -348,7 +375,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.9
+      "seconds": 4.8
     },
     {
       "name": "MZ BU RTU Hot Water Heating Coil Reciprocating Chiller and Electric Baseboard",
@@ -357,7 +384,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.9
+      "seconds": 4.8
     },
     {
       "name": "MZ BU RTU Hot Water Heating Coil Reciprocating Chiller and Hot Water Baseboard",
@@ -366,7 +393,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.8
+      "seconds": 4.9
     },
     {
       "name": "MZ BU RTU Hot Water Heating Coil Rotary Screw Chiller and Electric Baseboard",
@@ -375,7 +402,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.9
+      "seconds": 5.0
     },
     {
       "name": "MZ BU RTU Hot Water Heating Coil Rotary Screw Chiller and Hot Water Baseboard",
@@ -384,7 +411,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.9
+      "seconds": 5.0
     },
     {
       "name": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Electric Baseboard",
@@ -393,7 +420,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.2
+      "seconds": 4.8
     },
     {
       "name": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
@@ -402,7 +429,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.9
+      "seconds": 4.8
     },
     {
       "name": "PSZ MAU Electric and DX Coils and Electric Baseboard with PTAC",
@@ -411,7 +438,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.5
+      "seconds": 4.6
     },
     {
       "name": "PSZ MAU Electric and DX Coils and Hot Water Baseboard with PTAC",
@@ -456,7 +483,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.5
+      "seconds": 4.6
     },
     {
       "name": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard",
@@ -474,7 +501,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.9
+      "seconds": 4.8
     },
     {
       "name": "PSZ RTU ASHP with Gas and ASHP Coils and Electric Baseboard with Gas Reheat",
@@ -483,7 +510,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.3
+      "seconds": 4.4
     },
     {
       "name": "PSZ RTU ASHP with Gas and ASHP Coils and Hot Water Baseboard with Gas Reheat",
@@ -492,7 +519,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.3
+      "seconds": 4.4
     },
     {
       "name": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Electric Baseboard",
@@ -501,7 +528,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.5
+      "seconds": 4.4
     },
     {
       "name": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard",
@@ -510,7 +537,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.9
+      "seconds": 4.7
     },
     {
       "name": "PSZ RTU Electric and DX Coils and Electric Baseboard",
@@ -519,7 +546,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.3
+      "seconds": 4.8
     },
     {
       "name": "PSZ RTU Electric and DX Coils and Hot Water Baseboard",
@@ -528,7 +555,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.7
+      "seconds": 5.1
     },
     {
       "name": "PSZ RTU Gas and DX Coils and Electric Baseboard",
@@ -537,7 +564,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.4
+      "seconds": 4.5
     },
     {
       "name": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
@@ -546,7 +573,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 7.7
+      "seconds": 8.6
     },
     {
       "name": "PSZ RTU with exhaust ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard",
@@ -555,7 +582,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.4
+      "seconds": 4.5
     },
     {
       "name": "PSZ RTU with exhaust ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard",
@@ -564,7 +591,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.7
+      "seconds": 4.9
     },
     {
       "name": "PSZ RTU with exhaust ASHP with Gas and ASHP with Gas Supp. Heat Coils and Electric Baseboard",
@@ -573,7 +600,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.6
+      "seconds": 4.5
     },
     {
       "name": "PSZ RTU with exhaust ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard",
@@ -582,7 +609,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.9
+      "seconds": 5.0
     },
     {
       "name": "PSZ RTU with exhaust Electric and DX Coils and Electric Baseboard",
@@ -591,7 +618,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.4
+      "seconds": 4.5
     },
     {
       "name": "PSZ RTU with exhaust Electric and DX Coils and Hot Water Baseboard",
@@ -600,7 +627,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.6
+      "seconds": 5.0
     },
     {
       "name": "PSZ RTU with exhaust Gas and DX Coils and Electric Baseboard",
@@ -609,7 +636,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.4
+      "seconds": 4.8
     },
     {
       "name": "PSZ RTU with exhaust Gas and DX Coils and Hot Water Baseboard",
@@ -618,7 +645,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.6
+      "seconds": 5.1
     },
     {
       "name": "PSZ-AC with electric baseboard heat",
@@ -627,7 +654,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.8
+      "seconds": 5.0
     },
     {
       "name": "PSZ-AC with electric coil",
@@ -645,7 +672,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.8
+      "seconds": 5.1
     },
     {
       "name": "PSZ-AC with gas coil",
@@ -654,7 +681,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.7
+      "seconds": 4.8
     },
     {
       "name": "PTAC with baseboard electric",
@@ -663,7 +690,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.4
+      "seconds": 4.5
     },
     {
       "name": "PTAC with baseboard gas boiler",
@@ -672,7 +699,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.4
+      "seconds": 4.8
     },
     {
       "name": "PTHP",
@@ -681,7 +708,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.4
+      "seconds": 4.5
     },
     {
       "name": "PVAV with gas boiler reheat",
@@ -690,7 +717,16 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.4
+      "seconds": 4.7
+    },
+    {
+      "name": "PVAV with gas boiler reheat and plate HRV",
+      "family": "vav_reheat",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.6
     },
     {
       "name": "Residential AC with baseboard electric",
@@ -708,7 +744,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.0
+      "seconds": 5.3
     },
     {
       "name": "TPFC MAU Chilled Water Coils with Reciprocating Chiller",
@@ -717,7 +753,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.8
+      "seconds": 5.1
     },
     {
       "name": "TPFC MAU Chilled Water Coils with Rotary Screw Chiller",
@@ -726,7 +762,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.1
+      "seconds": 5.0
     },
     {
       "name": "TPFC MAU Chilled Water Coils with Scroll Chiller",
@@ -735,7 +771,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.0
+      "seconds": 5.2
     },
     {
       "name": "TPFC MAU DX Coils with Centrifugal Chiller",
@@ -744,7 +780,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.2
+      "seconds": 5.1
     },
     {
       "name": "TPFC MAU DX Coils with Reciprocating Chiller",
@@ -753,7 +789,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.0
+      "seconds": 5.1
     },
     {
       "name": "TPFC MAU DX Coils with Rotary Screw Chiller",
@@ -771,7 +807,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.1
+      "seconds": 5.0
     },
     {
       "name": "VAV chiller with gas boiler reheat",
@@ -780,7 +816,16 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.8
+      "seconds": 5.0
+    },
+    {
+      "name": "VAV chiller with gas boiler reheat and rotary ERV",
+      "family": "vav_reheat",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.0
     },
     {
       "name": "VRF",
@@ -789,7 +834,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.5
+      "seconds": 4.6
     },
     {
       "name": "Water source heat pumps",
@@ -798,7 +843,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.8
+      "seconds": 4.5
     },
     {
       "name": "Window AC with baseboard electric",
@@ -807,7 +852,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.3
+      "seconds": 4.4
     },
     {
       "name": "Zone ERVs",
@@ -816,7 +861,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.2
+      "seconds": 4.4
     },
     {
       "name": "hs08_ccashp_vrf",
@@ -825,7 +870,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.1
+      "seconds": 5.3
     },
     {
       "name": "hs09_ccashp_baseboard",
@@ -834,7 +879,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.8
+      "seconds": 4.7
     },
     {
       "name": "hs11_ashp_pthp",
@@ -843,7 +888,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.8
+      "seconds": 4.7
     },
     {
       "name": "hs12_ashp_baseboard",
@@ -852,7 +897,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.6
+      "seconds": 4.8
     },
     {
       "name": "hs13_ashp_vrf",
@@ -861,7 +906,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.1
+      "seconds": 5.3
     },
     {
       "name": "hs14_cgshp_fancoils",
@@ -879,7 +924,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.9
+      "seconds": 5.0
     },
     {
       "name": "hs16_ashp_cawhp_fancoils",
@@ -888,7 +933,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.9
+      "seconds": 5.0
     }
   ]
 }

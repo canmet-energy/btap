@@ -22,6 +22,11 @@ class BaseSystem:
     def sizing(self):
         return self.config.get('sizing') or {}
 
+    def preflight(self, model, zones, control_zone=None, namer='default',
+                  remove_existing=False):
+        """Validate family-specific configuration before any HVAC is removed or built."""
+        return None
+
     def apply_system_sizing(self, air_loop):
         """Apply the sizing block's air-loop-level fields to a Sizing:System object.
         Ported from openstudio-standards common_air_loop."""

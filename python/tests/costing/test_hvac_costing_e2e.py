@@ -31,6 +31,15 @@ class TestCostingE2E(unittest.TestCase):
             self.assertIn(family, VentilationQuantifier.FAMILY_SYS_TYPE,
                           f"family '{family}' missing from the AHU manifest")
 
+    def test_modern_families_use_their_serving_air_system_type(self):
+        self.assertEqual(
+            {'chilled_beams': 1, 'dual_duct': 6},
+            {
+                family: VentilationQuantifier.FAMILY_SYS_TYPE[family]
+                for family in ('chilled_beams', 'dual_duct')
+            },
+        )
+
     def test_psz_system_costs_end_to_end(self):
         model = load_fixture()
         zones = self.sorted_zones(model)

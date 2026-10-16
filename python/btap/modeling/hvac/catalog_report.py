@@ -126,6 +126,7 @@ ZONE_EQUIPMENT = [
 TERMINAL_KINDS = [
     (r'VAV_HeatAndCool_Reheat',           'VAV heat/cool reheat terminal'),
     (r'VAV_HeatAndCool_NoReheat',         'VAV heat/cool terminal'),
+    (r'DualDuct_VAV',                     'Dual-duct VAV terminal'),
     (r'VAV_Reheat',                       'VAV reheat terminal'),
     (r'VAV_NoReheat',                     'VAV terminal'),
     (r'ConstantVolume_Reheat',            'CV reheat terminal'),
@@ -143,8 +144,10 @@ TERMINAL_KINDS = [
 # description; the canonical name is displayed separately (no duplication).
 FAMILY_BLURB = {
     'baseboards': 'Perimeter baseboard heating only, no central air system.',
+    'chilled_beams': 'A dehumidifying 100% outdoor-air system supplies active or passive chilled-beam terminals on dew-point-reset tempered water, with perimeter heating.',
     'composite': 'A dedicated ventilation unit paired with separate zone conditioning (fan coils, water/ground-source heat pumps, or residential AC).',
     'doas': 'Dedicated outdoor air system providing ventilation only; zone conditioning is separate.',
+    'dual_duct': 'A true two-deck variable-air-volume system with independently controlled hydronic hot and cold decks feeding dual-duct zone terminals.',
     'doas_pthp': 'Dedicated outdoor air with packaged terminal heat pumps at each zone (NECB ECM hs11).',
     'ecm_ashp_baseboard': 'Air-source (or cold-climate) heat pump for primary heating and cooling with baseboard backup (NECB ECMs hs09/hs12).',
     'ecm_doas_vrf': 'Dedicated outdoor air with variable refrigerant flow zone terminals on an air-source heat pump (NECB ECMs hs08/hs13).',
@@ -164,7 +167,9 @@ FAMILY_BLURB = {
 
 FAMILY_TITLES = {
     'baseboards': 'Baseboard heating', 'composite': 'Composite (DOAS + zone conditioning)',
+    'chilled_beams': 'Chilled beams',
     'doas': 'Dedicated outdoor air', 'doas_pthp': 'DOAS + PTHP (ECM hs11)',
+    'dual_duct': 'Dual-duct VAV',
     'ecm_ashp_baseboard': 'ASHP + baseboard (ECM hs09/hs12)',
     'ecm_doas_vrf': 'DOAS + VRF (ECM hs08/hs13)',
     'ecm_hp_fancoils': 'Heat-pump plant fan coils (ECM hs14-16)',
@@ -434,16 +439,21 @@ def zone_terminal(zone):
             name = obj.nameString()
         except Exception:
             name = ''
-        tip = [f'Air terminal: {terminal_label(idd)}', f'Type: {clean_idd(idd)}']
+        label = terminal_label(idd, obj)
+        tip = [f'Air terminal: {label}', f'Type: {clean_idd(idd)}']
         if str(name) != '':
             tip.append(f'Name: {truncate(name, 48)}')
-        return {'label': terminal_label(idd), 'idd': idd, 'name': name,
+        return {'label': label, 'idd': idd, 'name': name,
                 'tooltip': '\n'.join(tip)}
     except Exception:
         return None
 
 
-def terminal_label(idd_name):
+def terminal_label(idd_name, terminal=None):
+    if terminal is not None and re.search(r'CooledBeam', idd_name):
+        cooled_beam = terminal.to_AirTerminalSingleDuctConstantVolumeCooledBeam()
+        if cooled_beam.is_initialized():
+            return f'{cooled_beam.get().cooledBeamType()} chilled-beam terminal'
     for regex, label in TERMINAL_KINDS:
         if re.search(regex, idd_name):
             return label
@@ -520,6 +530,9 @@ def demand_spec(component, idd, name):
 
     if re.search(r'Coil_Heating_Water_Baseboard', idd):
         return zone_or_group(component, 'baseboard', 'Baseboard (hydronic)')
+    if re.search(r'Coil_Cooling_CooledBeam', idd):
+        return zone_or_group(
+            component, 'cooling_coil', 'Cooled-beam cooling coil')
     if re.search(r'WaterUse_Connections', idd):
         return {'kind': 'water_use', 'label': 'Water use'}
     if re.search(r'WaterToAirHeatPump|WaterToWaterHeatPump', idd):
@@ -558,8 +571,21 @@ def zone_of(component):
         if not hvac.is_initialized():
             return None
 
-        cz = hvac.get().containingZoneHVACComponent()
+        hvac_component = hvac.get()
+        cz = hvac_component.containingZoneHVACComponent()
         if not cz.is_initialized():
+            container = hvac_component.containingHVACComponent()
+            if not container.is_initialized():
+                return None
+            terminal = container.get()
+            if hasattr(terminal, 'thermalZone'):
+                tz = terminal.thermalZone()
+                return tz.get().nameString() if tz.is_initialized() else None
+            for zone in component.model().getThermalZones():
+                zone_terminal = zone.airLoopHVACTerminal()
+                if (zone_terminal.is_initialized()
+                        and zone_terminal.get().handle() == terminal.handle()):
+                    return zone.nameString()
             return None
 
         tz = cz.get().thermalZone()
@@ -669,10 +695,26 @@ def decompose_demand_plant(loop):
 
 
 def decompose_air_supply(loop):
-    """An air loop's supply is a single air-handler path (no supply splitter): every
-    real component is a series cell in flow order. AirLoopHVACUnitarySystem
-    containers (staged NECB reference systems) are expanded to the fan and
-    coils they hold — the container itself draws nothing."""
+    """Decompose a single-path supply or the two parallel decks of a dual duct."""
+    if loop.isDualDuct():
+        splitter = loop.supplySplitter()
+        if splitter.is_initialized():
+            splitter = splitter.get()
+            pre = real_cells(
+                loop.supplyComponents(loop.supplyInletNode(), splitter),
+                classify_component)
+            branches = [
+                real_cells(
+                    loop.supplyComponents(branch_inlet, deck_outlet),
+                    classify_component)
+                for branch_inlet, deck_outlet
+                in zip(loop.supplySplitterOutletNodes(),
+                       loop.supplyOutletNodes())
+            ]
+            return {'pre': pre, 'branches': branches, 'post': []}
+
+    # AirLoopHVACUnitarySystem containers (staged NECB reference systems) are
+    # expanded to the fan and coils they hold.
     return {'pre': real_cells(coils.supply_components(loop), classify_component),
             'branches': [], 'post': []}
 
@@ -739,6 +781,8 @@ def component_label(idd, name=''):
         return 'Gas heating coil'
     if re.search(r'Coil_Cooling_DX', idd):
         return 'DX cooling coil'
+    if re.search(r'Coil_Cooling_CooledBeam', idd):
+        return 'Cooled-beam cooling coil'
     if re.search(r'Coil_Cooling_WaterToAirHeatPump', idd):
         return 'Heat-pump cooling coil'
     if re.search(r'Coil_Cooling_Water', idd):

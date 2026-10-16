@@ -61,7 +61,17 @@ def primary_part(row):
         return base
     if family == 'vav_reheat':
         cool = 'DX' if row.get('cooling_type') == 'dx' else 'chilled water'
-        return f"built-up VAV with {fuel(row.get('heating_coil_type'))} reheat and {cool} cooling"
+        primary = (
+            f"built-up VAV with {fuel(row.get('heating_coil_type'))} reheat "
+            f"and {cool} cooling")
+        if row.get('needs_erv'):
+            recovery = (
+                'ERV' if float(row.get('erv_latent_effectiveness', 0.0)) > 0.0
+                else 'HRV')
+            primary += (
+                f" and {str(row.get('erv_heat_exchanger_type')).lower()} "
+                f"{recovery}")
+        return primary
     if family == 'fan_coils':
         pipes = 'two-pipe' if row.get('fan_coil_type') == 'TPFC' else 'four-pipe'
         if row.get('mau', True):
@@ -96,6 +106,10 @@ def primary_part(row):
         return f"water-source heat pumps on a {rej} loop"
     if family == 'doas':
         return 'DOAS ventilation'
+    if family == 'chilled_beams':
+        return f"DOAS with {row.get('beam_type', '').lower()} chilled beams"
+    if family == 'dual_duct':
+        return 'dual-duct VAV with hydronic hot and cold decks'
     if family == 'vrf':
         return 'VRF heat recovery system'
     if family == 'doas_pthp':

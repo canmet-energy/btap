@@ -28,6 +28,8 @@ FAMILIES = {
     'doas': ('doas', 'Doas'),
     'vrf': ('vrf', 'Vrf'),
     'zone_ervs': ('zone_ervs', 'ZoneErvs'),
+    'chilled_beams': ('chilled_beams', 'ChilledBeams'),
+    'dual_duct': ('dual_duct', 'DualDuctVAV'),
 }
 
 
@@ -62,6 +64,33 @@ def _system_class(family):
                 "which is not ported yet") from error
         raise
     return getattr(module, class_name)
+
+
+def _preflight_resolved(model, resolved, zones, control_zone, namer,
+                        remove_existing):
+    """Validate a resolved row, including every composite part, without mutation."""
+    if resolved['family'] == 'composite':
+        for part in resolved['parts']:
+            part_resolved = catalog.resolve(part['name'])
+            if part.get('config'):
+                part_resolved = {
+                    **part_resolved,
+                    **{str(k): v for k, v in part['config'].items()},
+                }
+            _preflight_resolved(
+                model, part_resolved, zones, control_zone, namer,
+                remove_existing)
+        return
+
+    from btap.modeling.hvac.systems import plant_loops
+
+    plant_loops.validate_plant_config(resolved)
+    system_class = _system_class(resolved['family'])
+    if system_class is None:
+        raise ValueError(f"no builder registered for family '{resolved['family']}'")
+    system_class(resolved).preflight(
+        model, zones, control_zone=control_zone, namer=namer,
+        remove_existing=remove_existing)
 
 
 def build_system(model, system_name, zones, control_zone=None, remove_existing=False,
@@ -102,6 +131,9 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
     if config:
         resolved = {**resolved, **{str(k): v for k, v in config.items()}}
 
+    _preflight_resolved(
+        model, resolved, zones, control_zone, namer, remove_existing)
+
     if remove_existing:
         teardown.remove_hvac_from_zones(model, zones)
 
@@ -128,6 +160,7 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
 
     from btap.modeling.hvac.systems import plant_loops
 
+    system = system_class(resolved)
     hw_loop = None
     if resolved.get('needs_boiler'):
         hw_loop = plant_loops.hot_water(model,
@@ -135,17 +168,18 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
                                         source=resolved.get('hw_source', 'boiler'),
                                         part_load_curve_class=resolved.get(
                                             'boiler_part_load_curve_class'),
+                                        profile=resolved.get('hot_water_profile'),
                                         exclude=exclude_plants or ())
     chw_loop = None
     if resolved.get('needs_chiller'):
         chw_loop = plant_loops.chilled_water(model,
                                              chiller_type=resolved.get('chiller_type', 'Scroll'),
                                              source=resolved.get('chw_source', 'water_cooled'),
+                                             profile=resolved.get('chilled_water_profile'),
                                              exclude=exclude_plants or ())
 
     # The INSTANCE is kept, not discarded: a builder may record structured
     # evidence about a decision only it can see.
-    system = system_class(resolved)
     air_loops = system.build(model, zones,
                              control_zone=control_zone,
                              namer=namer,

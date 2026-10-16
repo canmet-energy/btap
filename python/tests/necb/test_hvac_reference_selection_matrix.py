@@ -1,17 +1,19 @@
 """D-58 — the proposed->reference verification matrix.
 
 Every catalog system, built as a PROPOSED on the 5-zone fixture, characterized
-and selected under four discriminating scenarios, must produce the ADJUDICATED
-reference assignment vendored in fixtures/reference_selection_matrix.json — in
-BOTH naming passes: 'catalog' (name resolution) and 'scrubbed' (randomized
-names, forcing the structural detector foreign models hit).
+and selected under four discriminating scenarios in BOTH supported editions,
+must produce the ADJUDICATED reference assignment vendored in
+fixtures/reference_selection_matrix.json — in BOTH naming passes: 'catalog'
+(name resolution) and 'scrubbed' (randomized names, forcing the structural
+detector foreign models hit).
 
 The golden was adjudicated 2026-08-02 against Table 8.4.4.7.-A fetched from the
 codes MCP (all 12 category rules match the printed table) plus the 8.4.4.13
-heat-pump rules; see D-58 in docs/necb_decisions.md.
+heat-pump rules. D-58 establishes the corresponding 2025 provisions and
+governs both code ids; see docs/necb_decisions.md.
 
 Default run: a representative subset (every family + every special-rule shape).
-FULL_MATRIX=1 runs all 97. The golden is NEVER regenerated from Python — the
+FULL_MATRIX=1 runs all 102. The golden is NEVER regenerated from Python — the
 Ruby suite's UPDATE_GOLDEN escape hatch is deliberately not ported (D-79: the
 adjudicated matrix is the shared contract both ports read).
 
@@ -47,16 +49,13 @@ import btap.modeling as modeling
 from btap.codes.necb import hvac
 from btap.modeling.hvac import catalog
 from tests.necb.hvac_helpers import load_fixture, sorted_zones
-from tests.support import FIXTURES, needs_sdk
-
-GOLDEN = FIXTURES / 'reference_selection_matrix.json'
-
-SCENARIOS = {
-    'general_2storey': {'storeys': 2, 'type': 'office'},
-    'general_3storey': {'storeys': 3, 'type': 'office'},
-    'residential': {'storeys': 3, 'type': 'multi-unit residential'},
-    'data_processing': {'storeys': 1, 'type': 'data centre'},
-}
+from tests.necb.reference_matrix_support import (
+    ASSIGNMENT_KEYS,
+    CODES,
+    GOLDEN,
+    SCENARIOS,
+)
+from tests.support import needs_sdk
 
 # One representative per family plus every special-rule shape the matrix
 # found interesting: plant HPs (hs09/14), district variants, DOAS+fan-coil
@@ -71,7 +70,12 @@ SUBSET = [
     'MZ BU RTU Electric Heating Coil Centrifugal Chiller and Electric Baseboard',
     'DOAS with fan coil air-cooled chiller with boiler',
     'DOAS with fan coil air-cooled chiller with district hot water',
+    'DOAS with active chilled beams and electric baseboards',
+    'DOAS with passive chilled beams and electric baseboards',
     'DOAS with VRF', 'DOAS with water source heat pumps',
+    'Dual-duct VAV with gas boiler and water-cooled chiller',
+    'PVAV with gas boiler reheat and plate HRV',
+    'VAV chiller with gas boiler reheat and rotary ERV',
     'hs09_ccashp_baseboard', 'hs11_ashp_pthp', 'hs14_cgshp_fancoils',
     'hs16_ashp_cawhp_fancoils', 'Direct evap coolers with no heat',
     'Gas unit heaters', 'Window AC with baseboard electric', 'PTHP',
@@ -83,7 +87,7 @@ SUBSET = [
 #: blocks of one assignment with every assignment listed, so the schema
 #: change itself fails a stale golden instead of silently comparing two
 #: different meanings of the same number.
-_KEYS = ('system', 'action', 'energy_type', 'catalog', 'blocks')
+_KEYS = ASSIGNMENT_KEYS
 
 #: The prefix every generated per-system test carries.
 PER_SYSTEM_PREFIX = 'test_reference_assignments_match_the_adjudicated_golden__'
@@ -120,7 +124,7 @@ class TestReferenceSelectionMatrix(unittest.TestCase):
         with open(GOLDEN, encoding='utf-8') as f:
             cls.golden = json.load(f)
 
-    def compute_row(self, name):
+    def compute_row(self, name, code='necb2020'):
         row = next(r for r in catalog.rows() if r['name'] == name)
         record = {'name': name, 'family': row['family']}
         for pass_ in ('catalog', 'scrubbed'):
@@ -153,8 +157,8 @@ class TestReferenceSelectionMatrix(unittest.TestCase):
                         'winter_design_temp_c': -20}
                 assignments = []
                 covered = []
-                for a in hvac.select_reference_systems(facts=facts, building=info,
-                                                       code='necb2020', audit=None):
+                for a in hvac.select_reference_systems(
+                        facts=facts, building=info, code=code, audit=None):
                     # NO DEDUPE. Multiplicity is the point since D-101: five
                     # single-zone units over five thermal blocks is a different
                     # reference from one unit over five, and collapsing
@@ -187,26 +191,31 @@ class TestReferenceSelectionMatrix(unittest.TestCase):
             f"from Python (D-79): ADD the row and adjudicate it against Table "
             f"8.4.x.7.-A, or remove the catalogue entry. 'Regenerate' is what "
             f"the file header forbids, and this message used to say it")
-        actual = self.compute_row(name)
-        for pass_ in ('catalog', 'scrubbed'):
-            for label in SCENARIOS:
-                key = f'{pass_}_{label}'
-                self.assertEqual(
-                    self.normalize(expected[key]), self.normalize(actual[key]),
-                    f'{name} / {key}: reference assignment drifted from the adjudicated matrix')
-                # D-101: the assignments must PARTITION the retained
-                # conditioned blocks — every one covered, none twice. The row
-                # comparison above would accept five assignments that all name
-                # the same block, or four that leave one unconditioned.
-                covered = actual[f'{key}__covered']
-                conditioned = actual[f'{key}__conditioned']
-                self.assertEqual(
-                    sorted(conditioned), sorted(covered),
-                    f'{name} / {key}: the assignments must cover every retained '
-                    f'conditioned block exactly once')
-                self.assertEqual(
-                    len(set(covered)), len(covered),
-                    f'{name} / {key}: a block is served by two assignments')
+        for code in CODES:
+            actual = self.compute_row(name, code=code)
+            for pass_ in ('catalog', 'scrubbed'):
+                for label in SCENARIOS:
+                    key = f'{pass_}_{label}'
+                    self.assertEqual(
+                        self.normalize(expected[key]),
+                        self.normalize(actual[key]),
+                        f'{name} / {code} / {key}: reference assignment '
+                        'drifted from the adjudicated matrix')
+                    # D-101: the assignments must PARTITION the retained
+                    # conditioned blocks — every one covered, none twice. The
+                    # row comparison above would accept five assignments that
+                    # all name the same block, or four that leave one
+                    # unconditioned.
+                    covered = actual[f'{key}__covered']
+                    conditioned = actual[f'{key}__conditioned']
+                    self.assertEqual(
+                        sorted(conditioned), sorted(covered),
+                        f'{name} / {code} / {key}: the assignments must cover '
+                        'every retained conditioned block exactly once')
+                    self.assertEqual(
+                        len(set(covered)), len(covered),
+                        f'{name} / {code} / {key}: a block is served by two '
+                        'assignments')
 
     def test_every_subset_entry_matches_a_catalog_system(self):
         _names, unmatched = names_under_test()

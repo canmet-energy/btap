@@ -206,8 +206,8 @@ jobs:
         working-directory: python
         run: |
           # FULL_MATRIX=1: the D-58 reference-selection matrix defaults to a
-          # 22-system subset for PR speed. The M5 acceptance claim is about
-          # all 97, so the claim is enforced HERE rather than resting on a
+          # representative subset for PR speed. The acceptance claim is about
+          # all 102, so the claim is enforced HERE rather than resting on a
           # manual run someone did once.
           # The verify-lane frozen scenarios (the adjudicated R4 behaviour
           # after the live cross-language drivers retired) ride this parallel
@@ -228,7 +228,7 @@ jobs:
       # (--cov-fail-under=84, above) sits below the 2026-09-14 local baseline
       # of 85.3%; the baseline and its history are in
       # docs/necb_rule_verification.md. Raise the floor as coverage rises.
-      # THE 97-SYSTEM ENERGYPLUS SWEEP, which is what makes the committed
+      # THE 102-SYSTEM ENERGYPLUS SWEEP, which is what makes the committed
       # verdict a gate rather than a dated snapshot. Sol's `234`: a
       # catalogue row edited under its own name left every status test
       # green, because they compare names against a file nobody re-produced.
@@ -237,7 +237,7 @@ jobs:
       #
       # It belongs here rather than in `python`: this lane already has
       # EnergyPlus, and it is dispatch-only, so a PR pays nothing. ~8 min
-      # serial for 97 systems — one at a time, deliberately (CLAUDE.md's
+      # serial for 102 systems — one at a time, deliberately (CLAUDE.md's
       # VM incident). `--check` re-runs and diffs without writing, so a
       # drifted verdict fails here instead of being quietly rewritten.
       - name: The catalogue simulation sweep, re-run and diffed

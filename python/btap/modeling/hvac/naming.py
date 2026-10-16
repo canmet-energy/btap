@@ -25,6 +25,11 @@ CLG_TOKENS = {
 }
 
 FAN_TOKENS = {'none': 'none', 'cv': 'cv', 'vv': 'vv'}
+HEAT_RECOVERY_TOKENS = {
+    'none': 'shr>none',
+    'erv': 'shr>erv',
+    'hrv': 'shr>hrv',
+}
 
 ZONE_HTG_TOKENS = {
     'none': 'zh>none', 'electric': 'zh>b-e', 'hot water': 'zh>b-hw',
@@ -35,7 +40,7 @@ ZONE_HTG_TOKENS = {
 ZONE_CLG_TOKENS = {
     'none': 'zc>none', 'tpfc': 'zc>tpfc', 'fpfc': 'zc>fpfc',
     'ptac': 'zc>ptac', 'pthp': 'zc>pthp', 'vrf': 'zc>vrf',
-    'fancoil_4pipe': 'zc>fancoil_4pipe',
+    'fancoil_4pipe': 'zc>fancoil_4pipe', 'chilled_beam': 'zc>chilled_beam',
 }
 
 
@@ -65,7 +70,7 @@ def necb_pipe_name(*, sys_abbr, sys_oa, parts):
         v = _downcased(value)
         key = str(key)
         if key == 'sys_hr':
-            token = 'shr>none'
+            token = HEAT_RECOVERY_TOKENS.get(v, 'shr>none')
         elif key == 'sys_clg':
             # Legacy quirk preserved: DX cooling paired with heat-pump heating reads 'sc>ashp'.
             if v == 'dx' and htg in ('dx', 'ashp>c-g', 'ashp>c-e', 'ashp>c-hw'):

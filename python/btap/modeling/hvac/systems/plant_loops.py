@@ -3,6 +3,7 @@ openstudio-standards setup_hw_loop_with_components et al.)."""
 
 from __future__ import annotations
 
+import json
 import re
 
 import openstudio
@@ -21,6 +22,387 @@ BOILER_PART_LOAD_CLASS_FEATURE = 'btap_part_load_curve_class'
 #: order for reuse matching, and by the codes-side D-90 staging pass
 #: (`btap.codes.necb.hvac.efficiency._plant_role`).
 BOILER_PLANT_ROLE_FEATURE = 'btap_plant_role'
+#: Serialized, normalized temperature/setpoint profile on an explicitly
+#: configured plant. Unstamped loops are the legacy 82/7 C plants.
+TEMPERATURE_PROFILE_FEATURE = 'btap_temperature_profile'
+#: Positive margin, in kelvins, applied above the warmest served-zone
+#: dew-point sensor by the chilled-water EMS reset. This is the maximum of
+#: the per-zone margins stored in ``DEWPOINT_ZONE_MARGINS_FEATURE``.
+DEWPOINT_MARGIN_FEATURE = 'btap_dewpoint_margin_k'
+#: Serialized ``{zone_handle: margin_k}`` identity for a shared chilled-water
+#: loop's dew-point reset. Handles keep EMS object names collision-free when
+#: distinct zone names sanitize to the same identifier.
+DEWPOINT_ZONE_MARGINS_FEATURE = 'btap_dewpoint_zone_margins'
+HOT_WATER_SOURCES = frozenset({'boiler', 'district'})
+CHILLED_WATER_SOURCES = frozenset({
+    'water_cooled', 'air_cooled', 'district',
+})
+
+
+def _normalize_temperature_profile(profile, loop_kind):
+    """Validate and normalize an explicit plant temperature profile.
+
+    ``None`` deliberately means the legacy profile and remains unstamped.
+    Explicit profiles are data, not mutable defaults: their complete
+    temperature identity is serialized onto the loop and participates in
+    reuse matching.
+    """
+    if profile is None:
+        return None
+    if not isinstance(profile, dict):
+        raise ValueError(f'{loop_kind} temperature profile must be a dict')
+
+    required = {
+        'name',
+        'design_exit_temperature',
+        'design_temperature_difference',
+        'setpoint_temperature',
+    }
+    unknown = sorted(set(profile) - required)
+    missing = sorted(required - set(profile))
+    if missing:
+        raise ValueError(
+            f"{loop_kind} temperature profile is missing {', '.join(missing)}")
+    if unknown:
+        raise ValueError(
+            f"{loop_kind} temperature profile has unknown keys {unknown!r}")
+
+    name = profile['name']
+    if not isinstance(name, str) or not name.strip():
+        raise ValueError(f'{loop_kind} temperature profile name must be non-empty')
+
+    normalized = {'name': name.strip()}
+    for key in required - {'name'}:
+        value = profile[key]
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError(f'{loop_kind} temperature profile {key} must be numeric')
+        normalized[key] = float(value)
+
+    if not -20.0 <= normalized['design_exit_temperature'] <= 100.0:
+        raise ValueError(
+            f'{loop_kind} design_exit_temperature must be between -20 and 100 C')
+    if not 0.0 < normalized['design_temperature_difference'] <= 50.0:
+        raise ValueError(
+            f'{loop_kind} design_temperature_difference must be between 0 and 50 K')
+    if not -20.0 <= normalized['setpoint_temperature'] <= 100.0:
+        raise ValueError(
+            f'{loop_kind} setpoint_temperature must be between -20 and 100 C')
+    return normalized
+
+
+def validate_plant_config(config):
+    """Validate plant flags, sources, and profiles without mutating a model."""
+    for key in ('needs_boiler', 'needs_chiller'):
+        if key in config and not isinstance(config[key], bool):
+            raise ValueError(f'{key} must be a boolean')
+
+    hot_source = config.get('hw_source', 'boiler')
+    if hot_source not in HOT_WATER_SOURCES:
+        raise ValueError(
+            f"hw_source must be one of {sorted(HOT_WATER_SOURCES)!r}")
+    chilled_source = config.get('chw_source', 'water_cooled')
+    if chilled_source not in CHILLED_WATER_SOURCES:
+        raise ValueError(
+            f"chw_source must be one of {sorted(CHILLED_WATER_SOURCES)!r}")
+
+    _normalize_temperature_profile(
+        config.get('hot_water_profile'), 'hot_water')
+    _normalize_temperature_profile(
+        config.get('chilled_water_profile'), 'chilled_water')
+
+
+def _temperature_profile_key(profile, loop_kind):
+    normalized = _normalize_temperature_profile(profile, loop_kind)
+    if normalized is None:
+        return None
+    return json.dumps({'loop_kind': loop_kind, **normalized},
+                      sort_keys=True, separators=(',', ':'))
+
+
+def _temperature_profile_matches(loop, profile, loop_kind):
+    requested = _temperature_profile_key(profile, loop_kind)
+    stored = loop.additionalProperties().getFeatureAsString(
+        TEMPERATURE_PROFILE_FEATURE)
+    if requested is None:
+        return not stored.is_initialized()
+    return stored.is_initialized() and stored.get() == requested
+
+
+def _stamp_temperature_profile(loop, profile, loop_kind):
+    key = _temperature_profile_key(profile, loop_kind)
+    if key is not None:
+        loop.additionalProperties().setFeature(TEMPERATURE_PROFILE_FEATURE, key)
+
+
+def temperature_profile(loop):
+    """Return an explicitly stamped plant profile, or ``None`` for legacy."""
+    stored = loop.additionalProperties().getFeatureAsString(
+        TEMPERATURE_PROFILE_FEATURE)
+    return json.loads(stored.get()) if stored.is_initialized() else None
+
+
+def _scheduled_plant_setpoint(model, loop, temperature, label):
+    schedule = openstudio.model.ScheduleConstant(model)
+    schedule.setName(f'{loop.nameString()} {label} Setpoint')
+    schedule.setValue(temperature)
+    manager = openstudio.model.SetpointManagerScheduled(model, schedule)
+    manager.setName(f'{loop.nameString()} {label} Setpoint Manager')
+    manager.addToNode(loop.supplyOutletNode())
+    return schedule
+
+
+def _plant_setpoint_schedule(loop):
+    outlet = loop.supplyOutletNode().handle()
+    for manager in loop.model().getSetpointManagerScheduleds():
+        node = manager.setpointNode()
+        if not node.is_initialized() or node.get().handle() != outlet:
+            continue
+        schedule = manager.schedule().to_ScheduleConstant()
+        if schedule.is_initialized():
+            return schedule.get()
+    return None
+
+
+def _ems_identifier(value):
+    identifier = re.sub(r'[^A-Za-z0-9_]', '_', str(value))
+    if not identifier or identifier[0].isdigit():
+        identifier = f'BTAP_{identifier}'
+    return identifier
+
+
+def _dewpoint_zone_margins(loop):
+    stored = loop.additionalProperties().getFeatureAsString(
+        DEWPOINT_ZONE_MARGINS_FEATURE)
+    if not stored.is_initialized():
+        return {}
+    margins = json.loads(stored.get())
+    if not isinstance(margins, dict):
+        raise ValueError('dew-point zone margins must be a JSON object')
+    return {str(handle): float(margin)
+            for handle, margin in margins.items()}
+
+
+def _dewpoint_sensor_name(sensor_prefix, zone_handle):
+    token = _ems_identifier(str(zone_handle).replace('-', ''))
+    return f'{sensor_prefix}{token}'
+
+
+def _stamp_dewpoint_margins(loop, margins):
+    maximum = max(margins.values())
+    properties = loop.additionalProperties()
+    properties.setFeature(
+        DEWPOINT_ZONE_MARGINS_FEATURE,
+        json.dumps(margins, sort_keys=True, separators=(',', ':')))
+    properties.setFeature(DEWPOINT_MARGIN_FEATURE, maximum)
+    return maximum
+
+
+def _set_dewpoint_program_lines(program, sensors, pressure_sensor, actuator,
+                                prefix, margin, base_setpoint):
+    maximum = f'{prefix}_Maximum'
+    candidate = f'{prefix}_Candidate'
+
+    def dewpoint(sensor):
+        return f'@TdpFnWPb {sensor.nameString()} {pressure_sensor.nameString()}'
+
+    lines = [f'SET {maximum} = {dewpoint(sensors[0])}']
+    for sensor in sensors[1:]:
+        lines.extend([
+            f'SET {candidate} = {dewpoint(sensor)}',
+            f'IF {candidate} > {maximum}',
+            f'  SET {maximum} = {candidate}',
+            'ENDIF',
+        ])
+    lines.extend([
+        f'SET {actuator.nameString()} = {maximum} + {margin:g}',
+        f'IF {actuator.nameString()} < {base_setpoint:g}',
+        f'  SET {actuator.nameString()} = {base_setpoint:g}',
+        'ENDIF',
+    ])
+    program.setLines(lines)
+
+
+def configure_dewpoint_reset(loop, zones, margin):
+    """Reset an explicit chilled-water profile above served-zone dew point.
+
+    The setpoint is ``max(profile setpoint, warmest zone dew point + margin)``.
+    Raising chilled-water temperature sacrifices cooling capacity rather than
+    allowing condensation. Calling again with more zones updates the one
+    program for this loop instead of creating competing actuators.
+    """
+    profile = temperature_profile(loop)
+    if profile is None or profile.get('loop_kind') != 'chilled_water':
+        raise ValueError('dew-point reset requires an explicit chilled-water profile')
+    if isinstance(margin, bool) or not isinstance(margin, (int, float)):
+        raise ValueError('dew-point margin must be numeric')
+    margin = float(margin)
+    if not 0.0 < margin <= 10.0:
+        raise ValueError('dew-point margin must be between 0 and 10 K')
+    if not zones:
+        raise ValueError('dew-point reset requires at least one thermal zone')
+
+    schedule = _plant_setpoint_schedule(loop)
+    if schedule is None:
+        raise ValueError(
+            'dew-point reset requires the explicit profile ScheduleConstant setpoint')
+
+    model = loop.model()
+    token = _ems_identifier(str(loop.handle()).replace('-', ''))
+    prefix = f'BTAP_{token}_Dewpoint_Reset'
+    sensor_prefix = f'{prefix}_Humidity_'
+
+    by_name = {sensor.nameString(): sensor
+               for sensor in model.getEnergyManagementSystemSensors()}
+    margins = _dewpoint_zone_margins(loop)
+    for zone in zones:
+        handle = str(zone.handle())
+        margins[handle] = max(margins.get(handle, 0.0), margin)
+        name = _dewpoint_sensor_name(sensor_prefix, handle)
+        sensor = by_name.get(name)
+        if sensor is None:
+            sensor = openstudio.model.EnergyManagementSystemSensor(
+                model, 'Zone Mean Air Humidity Ratio')
+            sensor.setName(name)
+            by_name[name] = sensor
+        sensor.setKeyName(zone.nameString())
+
+    zones_by_handle = {
+        str(zone.handle()): zone for zone in model.getThermalZones()
+    }
+    for handle in list(margins):
+        if handle not in zones_by_handle:
+            stale = by_name.get(_dewpoint_sensor_name(sensor_prefix, handle))
+            if stale is not None:
+                stale.remove()
+            margins.pop(handle)
+    sensors = []
+    for handle in sorted(margins):
+        name = _dewpoint_sensor_name(sensor_prefix, handle)
+        sensor = by_name.get(name)
+        if sensor is None:
+            sensor = openstudio.model.EnergyManagementSystemSensor(
+                model, 'Zone Mean Air Humidity Ratio')
+            sensor.setName(name)
+            sensor.setKeyName(zones_by_handle[handle].nameString())
+            by_name[name] = sensor
+        sensors.append(sensor)
+    effective_margin = _stamp_dewpoint_margins(loop, margins)
+
+    pressure_name = f'{prefix}_Pressure'
+    pressure_sensor = by_name.get(pressure_name)
+    if pressure_sensor is None:
+        pressure_sensor = openstudio.model.EnergyManagementSystemSensor(
+            model, 'Site Outdoor Air Barometric Pressure')
+        pressure_sensor.setName(pressure_name)
+        pressure_sensor.setKeyName('Environment')
+
+    actuator_name = f'{prefix}_Setpoint'
+    actuator = next(
+        (item for item in model.getEnergyManagementSystemActuators()
+         if item.nameString() == actuator_name),
+        None)
+    if actuator is None:
+        actuator = openstudio.model.EnergyManagementSystemActuator(
+            schedule, 'Schedule:Constant', 'Schedule Value')
+        actuator.setName(actuator_name)
+
+    program_name = f'{prefix}_Program'
+    program = next(
+        (item for item in model.getEnergyManagementSystemPrograms()
+         if item.nameString() == program_name),
+        None)
+    if program is None:
+        program = openstudio.model.EnergyManagementSystemProgram(model)
+        program.setName(program_name)
+
+    _set_dewpoint_program_lines(
+        program, sensors, pressure_sensor, actuator, prefix, effective_margin,
+        profile['setpoint_temperature'])
+
+    manager_name = f'{prefix}_Manager'
+    manager = next(
+        (item for item in model.getEnergyManagementSystemProgramCallingManagers()
+         if item.nameString() == manager_name),
+        None)
+    if manager is None:
+        manager = openstudio.model.EnergyManagementSystemProgramCallingManager(
+            model)
+        manager.setName(manager_name)
+        manager.setCallingPoint('BeginTimestepBeforePredictor')
+    if not any(item.handle() == program.handle() for item in manager.programs()):
+        manager.addProgram(program)
+
+    return program
+
+
+def remove_zones_from_dewpoint_reset(loop, zones):
+    """Remove zones from this loop's dew-point control during subset teardown."""
+    margins = _dewpoint_zone_margins(loop)
+    if not margins:
+        return
+
+    model = loop.model()
+    token = _ems_identifier(str(loop.handle()).replace('-', ''))
+    prefix = f'BTAP_{token}_Dewpoint_Reset'
+    sensor_prefix = f'{prefix}_Humidity_'
+    target_handles = {str(zone.handle()) for zone in zones}
+    target_names = {
+        _dewpoint_sensor_name(sensor_prefix, handle)
+        for handle in target_handles
+    }
+    for sensor in list(model.getEnergyManagementSystemSensors()):
+        if sensor.nameString() in target_names:
+            sensor.remove()
+    for handle in target_handles:
+        margins.pop(handle, None)
+
+    by_name = {
+        sensor.nameString(): sensor
+        for sensor in model.getEnergyManagementSystemSensors()
+    }
+    remaining = [
+        by_name[_dewpoint_sensor_name(sensor_prefix, handle)]
+        for handle in sorted(margins)
+        if _dewpoint_sensor_name(sensor_prefix, handle) in by_name
+    ]
+    actuator = next(
+        (item for item in model.getEnergyManagementSystemActuators()
+         if item.nameString() == f'{prefix}_Setpoint'),
+        None)
+    program = next(
+        (item for item in model.getEnergyManagementSystemPrograms()
+         if item.nameString() == f'{prefix}_Program'),
+        None)
+    manager = next(
+        (item for item in model.getEnergyManagementSystemProgramCallingManagers()
+         if item.nameString() == f'{prefix}_Manager'),
+        None)
+    pressure_sensor = next(
+        (item for item in model.getEnergyManagementSystemSensors()
+         if item.nameString() == f'{prefix}_Pressure'),
+        None)
+
+    if (remaining and pressure_sensor is not None
+            and actuator is not None and program is not None):
+        profile = temperature_profile(loop)
+        effective_margin = _stamp_dewpoint_margins(loop, margins)
+        _set_dewpoint_program_lines(
+            program, remaining, pressure_sensor, actuator, prefix,
+            effective_margin,
+            profile['setpoint_temperature'])
+        return
+
+    if pressure_sensor is not None:
+        pressure_sensor.remove()
+    if manager is not None:
+        manager.remove()
+    if program is not None:
+        program.remove()
+    if actuator is not None:
+        actuator.remove()
+    properties = loop.additionalProperties()
+    properties.resetFeature(DEWPOINT_MARGIN_FEATURE)
+    properties.resetFeature(DEWPOINT_ZONE_MARGINS_FEATURE)
 
 
 def boiler_part_load_class(loop):
@@ -149,7 +531,7 @@ def _named_hot_water_loop(loop):
 
 
 def find_hot_water(model, part_load_curve_class=None, exclude=(), fuel=None,
-                   backup_fuel=None):
+                   backup_fuel=None, temperature_profile=None):
     """Find an existing hot-water loop (one with a boiler on the supply side), or None.
 
     :param model: openstudio.model.Model
@@ -171,6 +553,8 @@ def find_hot_water(model, part_load_curve_class=None, exclude=(), fuel=None,
          if str(pl.handle()) not in blocked
          and _boiler_heated(pl) and not _district_heated(pl)
          and boiler_part_load_class(pl) == part_load_curve_class
+         and _temperature_profile_matches(
+             pl, temperature_profile, 'hot_water')
          and (fuel is None or _fuels_compatible(pl, fuel, backup_fuel))),
         None)
 
@@ -202,7 +586,7 @@ def _boiler_heated(loop):
 
 
 def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='boiler',
-              part_load_curve_class=None, exclude=()):
+              part_load_curve_class=None, exclude=(), profile=None):
     """Build a hot-water loop: primary + secondary boiler, variable-speed pump,
     82C design exit / 16K dT, OA-reset 82C@-16C down to 60C@0C.
 
@@ -234,6 +618,10 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
         ordinary group's boilers and vice versa.
     :return: openstudio.model.PlantLoop
     """
+    if source not in HOT_WATER_SOURCES:
+        raise ValueError(
+            f"hot-water source must be one of {sorted(HOT_WATER_SOURCES)!r}")
+    profile = _normalize_temperature_profile(profile, 'hot_water')
     if reuse:
         # Source first: a caller asking for DISTRICT heat must never adopt a
         # boiler loop (and a boiler caller never a district loop), whatever
@@ -246,11 +634,14 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
             existing = next((pl for pl in model.getPlantLoops()
                              if str(pl.handle()) not in blocked
                              and _named_hot_water_loop(pl)
-                             and _district_heated(pl) and not _boiler_heated(pl)), None)
+                             and _district_heated(pl) and not _boiler_heated(pl)
+                             and _temperature_profile_matches(
+                                 pl, profile, 'hot_water')), None)
         else:
             existing = find_hot_water(model, part_load_curve_class,
                                       exclude=exclude, fuel=fuel,
-                                      backup_fuel=backup_fuel)
+                                      backup_fuel=backup_fuel,
+                                      temperature_profile=profile)
         # The name fallback catches a loop that has no boiler YET. It must not
         # adopt a loop heated by a DIFFERENT SOURCE than the one asked for:
         # every loop this builder makes is named 'Hot Water Loop', district
@@ -280,6 +671,8 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
                  and _district_heated(pl) == (source == 'district')
                  and not (source == 'district' and _boiler_heated(pl))
                  and boiler_part_load_class(pl) == part_load_curve_class
+                 and _temperature_profile_matches(
+                     pl, profile, 'hot_water')
                  # FUEL-AWARE here too. The typed lookup above and this
                  # fallback are two paths to the same adoption, and fixing one
                  # of a pair has already been the shape of two defects in this
@@ -295,8 +688,11 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
     hw_loop.setName('Hot Water Loop')
     sizing_plant = hw_loop.sizingPlant()
     sizing_plant.setLoopType('Heating')
-    sizing_plant.setDesignLoopExitTemperature(82.0)
-    sizing_plant.setLoopDesignTemperatureDifference(16.0)
+    sizing_plant.setDesignLoopExitTemperature(
+        profile['design_exit_temperature'] if profile else 82.0)
+    sizing_plant.setLoopDesignTemperatureDifference(
+        profile['design_temperature_difference'] if profile else 16.0)
+    _stamp_temperature_profile(hw_loop, profile, 'hot_water')
 
     # Variable speed (legacy note: constant-speed showed run-away plant temperatures)
     pump = openstudio.model.PumpVariableSpeed(model)
@@ -334,13 +730,17 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
     hw_loop.addSupplyBranchForComponent(openstudio.model.PipeAdiabatic(model))
     openstudio.model.PipeAdiabatic(model).addToNode(hw_loop.supplyOutletNode())
 
-    stpt = openstudio.model.SetpointManagerOutdoorAirReset(model)
-    stpt.setControlVariable('Temperature')
-    stpt.setSetpointatOutdoorLowTemperature(82.0)
-    stpt.setOutdoorLowTemperature(-16.0)
-    stpt.setSetpointatOutdoorHighTemperature(60.0)
-    stpt.setOutdoorHighTemperature(0.0)
-    stpt.addToNode(hw_loop.supplyOutletNode())
+    if profile:
+        _scheduled_plant_setpoint(
+            model, hw_loop, profile['setpoint_temperature'], 'Hot Water')
+    else:
+        stpt = openstudio.model.SetpointManagerOutdoorAirReset(model)
+        stpt.setControlVariable('Temperature')
+        stpt.setSetpointatOutdoorLowTemperature(82.0)
+        stpt.setOutdoorLowTemperature(-16.0)
+        stpt.setSetpointatOutdoorHighTemperature(60.0)
+        stpt.setOutdoorHighTemperature(0.0)
+        stpt.addToNode(hw_loop.supplyOutletNode())
 
     return hw_loop
 
@@ -423,7 +823,8 @@ def plant_is_hvac_candidate(loop):
                 or chw_name_fallback)
 
 
-def find_chilled_water(model, exclude=(), source=None):
+def find_chilled_water(model, exclude=(), source=None,
+                       temperature_profile=None):
     """Find an existing chilled-water loop (one with a chiller on the supply side),
     or None.
 
@@ -442,16 +843,20 @@ def find_chilled_water(model, exclude=(), source=None):
         if str(loop.handle()) in blocked:
             continue
         if source is None:
-            if len(_chillers(loop)) > 0:
+            if (len(_chillers(loop)) > 0
+                    and _temperature_profile_matches(
+                        loop, temperature_profile, 'chilled_water')):
                 return loop
             continue
-        if _cooling_source(loop) == source:
+        if (_cooling_source(loop) == source
+                and _temperature_profile_matches(
+                    loop, temperature_profile, 'chilled_water')):
             return loop
     return None
 
 
 def chilled_water(model, chiller_type='Scroll', reuse=True, source='water_cooled',
-                  exclude=()):
+                  exclude=(), profile=None):
     """Build a chilled-water loop (7C exit / 6K dT, variable-speed pump, primary +
     secondary water-cooled chillers, constant 7C setpoint) AND its condenser-water
     loop (29C / 6K, single-speed cooling tower 24/35/5/6 design temps, constant 29C
@@ -467,6 +872,11 @@ def chilled_water(model, chiller_type='Scroll', reuse=True, source='water_cooled
         'district' (DistrictCooling object — the CBECS 'district chilled water' pattern)
     :return: openstudio.model.PlantLoop (the chilled-water loop)
     """
+    if source not in CHILLED_WATER_SOURCES:
+        raise ValueError(
+            'chilled-water source must be one of '
+            f'{sorted(CHILLED_WATER_SOURCES)!r}')
+    profile = _normalize_temperature_profile(profile, 'chilled_water')
     if reuse:
         # SOURCE-MATCHED and EXCLUSION-AWARE, for the same two reasons the
         # hot-water side already is. A district-cooling caller must not be
@@ -477,7 +887,9 @@ def chilled_water(model, chiller_type='Scroll', reuse=True, source='water_cooled
         # not be a copied block: process cooling on a `WaterUseConnections`
         # keeps a chilled-water loop alive the same way (`149`).
         blocked = {str(handle) for handle in exclude}
-        existing = find_chilled_water(model, exclude=exclude, source=source)
+        existing = find_chilled_water(
+            model, exclude=exclude, source=source,
+            temperature_profile=profile)
         if existing is None:
             # The name fallback catches a loop with no chiller YET. It honours
             # the exclusion too: on the hot-water side this exact fallback
@@ -485,7 +897,9 @@ def chilled_water(model, chiller_type='Scroll', reuse=True, source='water_cooled
             existing = next((pl for pl in model.getPlantLoops()
                              if pl.nameString() == 'Chilled Water Loop'
                              and str(pl.handle()) not in blocked
-                             and _cooling_source(pl) in (None, source)), None)
+                             and _cooling_source(pl) in (None, source)
+                             and _temperature_profile_matches(
+                                 pl, profile, 'chilled_water')), None)
         if existing is not None:
             return existing
 
@@ -494,8 +908,11 @@ def chilled_water(model, chiller_type='Scroll', reuse=True, source='water_cooled
     chw_loop.setName('Chilled Water Loop')
     sizing_plant = chw_loop.sizingPlant()
     sizing_plant.setLoopType('Cooling')
-    sizing_plant.setDesignLoopExitTemperature(7.0)
-    sizing_plant.setLoopDesignTemperatureDifference(6.0)
+    sizing_plant.setDesignLoopExitTemperature(
+        profile['design_exit_temperature'] if profile else 7.0)
+    sizing_plant.setLoopDesignTemperatureDifference(
+        profile['design_temperature_difference'] if profile else 6.0)
+    _stamp_temperature_profile(chw_loop, profile, 'chilled_water')
 
     chw_pump = openstudio.model.PumpVariableSpeed(model)
     chw_pump.addToNode(chw_loop.supplyInletNode())
@@ -524,9 +941,13 @@ def chilled_water(model, chiller_type='Scroll', reuse=True, source='water_cooled
     chw_loop.addSupplyBranchForComponent(openstudio.model.PipeAdiabatic(model))
     openstudio.model.PipeAdiabatic(model).addToNode(chw_loop.supplyOutletNode())
 
-    chw_stpt = openstudio.model.SetpointManagerScheduled(
-        model, schedules.constant_ruleset(model, 'CHW Temp', 7.0))
-    chw_stpt.addToNode(chw_loop.supplyOutletNode())
+    if profile:
+        _scheduled_plant_setpoint(
+            model, chw_loop, profile['setpoint_temperature'], 'Chilled Water')
+    else:
+        chw_stpt = openstudio.model.SetpointManagerScheduled(
+            model, schedules.constant_ruleset(model, 'CHW Temp', 7.0))
+        chw_stpt.addToNode(chw_loop.supplyOutletNode())
 
     if source != 'water_cooled':
         return chw_loop

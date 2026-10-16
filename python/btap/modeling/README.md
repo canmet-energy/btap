@@ -6,8 +6,8 @@ simulates. Four engines: the footprint wizards and the bar engine (verbatim
 ports from openstudio-standards), a 3D viewer (ported from
 canmet-energy/campus) and a per-storey 2D floor-plan renderer — plus, since
 the by-nature refactor (D-77), the **HVAC authoring machinery**: the
-97-system topology catalog, `build_system` / `replace_system`, twenty system
-builders, the coil/curve/schedule components, `classify.characterize`,
+102-system topology catalog, `build_system` / `replace_system`, the system
+builders, coil/curve/schedule components, `classify.characterize`,
 teardown, and the envelope authoring pieces (constructions, the
 exposed-surface census).
 
@@ -16,12 +16,79 @@ exposed-surface census).
 ```
 btap/modeling/
   geometry/   wizards, bar engine, footprints, plans, 3D render
-  hvac/       97-system catalog + builders (systems/, components/, data/)
+  hvac/       102-system catalog + builders (systems/, components/, data/)
   envelope/   constructions + surface census
 ```
 
 No `lighting/` or `shw/`: their authoring is NECB-table application and
 lives in `btap.codes` — see [CLAUDE.md](CLAUDE.md).
+
+## Modern HVAC systems
+
+Five opt-in catalog rows add modern hydronic and air-system topology without
+changing the existing rows:
+
+- active and passive chilled beams use a dehumidifying/reheating 100% OA DOAS,
+  electric baseboards, and 15/18 C tempered chilled water;
+- rotary ERV VAV and sensible-only plate HRV PVAV variants use a central
+  air-to-air exchanger, pretreat setpoint control, explicit frost/bypass
+  inputs, current-SDK effectiveness curves, and gas-boiler hydronic perimeter
+  trim; and
+- true dual-duct VAV uses independent 35 C hot and 13 C cold decks with one
+  `AirTerminalDualDuctVAV` per zone.
+
+The chilled-beam rows reset chilled-water setpoints to the warmest served-zone
+dew point plus a 2 K margin. Each zone dew point is evaluated once into an EMS
+variable before comparison; inline `@TdpFnWPb` evaluation in an Erl `IF`
+produced 2265 psychrometric failures per annual run in EnergyPlus 25.2. Plant
+loops are reused only when their source and full temperature profile match.
+Existing VRF and DOAS+VRF systems already enable heat recovery; that behavior
+is tested rather than exposed as a duplicate row.
+
+All five rows must complete the standard five-zone annual simulation cleanly,
+consume both heating and cooling energy, and remain at or below 100 occupied
+unmet hours in each mode. This common gate was introduced after completed runs
+left both beam rows at 411-420 cooling unmet hours and both recovery rows at
+468.5 heating unmet hours. The accepted annual results are:
+
+| System | Heating h | Cooling h |
+| --- | ---: | ---: |
+| Active chilled beam | 49.00 | 76.25 |
+| Passive chilled beam | 49.00 | 89.00 |
+| Rotary ERV VAV | 70.00 | 0.75 |
+| Plate HRV PVAV | 70.00 | 0.75 |
+| Dual-duct VAV | 54.00 | 0.00 |
+
+The chilled-beam sizing block retains an explicitly empirical 2.2 cooling
+reserve: 2.0 produced 116.0 occupied cooling unmet hours for the passive row,
+while 2.2 produced 89.0. This is fixture-tested catalog sizing, not a code
+requirement or a general design rule. Likewise, the legacy non-recovery VAV
+comparator records 468.75 heating unmet hours while the recovery rows include
+new perimeter baseboards. The rows prove that their heat exchangers operate
+and that their complete topologies condition this fixture; they are not an
+isolated A/B proof that heat recovery caused the comfort result.
+
+A hydronic-radiant candidate was retired rather than shipped under a misleading
+name. On the same annual fixture, its PTAC DX coils delivered 18,680 kWh versus
+3,955 kWh from the slab, and removing the PTACs left 2,315.5 occupied cooling
+unmet hours. The slab injected about 313 MWh of heat while roughly 271 MWh left
+through the preserved 3.401 W/(m2 K) uninsulated ground slab, producing
+555.6 kWh/m2 heating intensity versus 91-156 kWh/m2 for the five accepted
+rows. Inserting insulation would silently change the envelope rather than fix
+the HVAC topology, so the catalog row, builder family, and its one-value trim
+option were removed.
+
+The unrelated pre-existing NECB System 2/5 water-coil sizing failure discovered
+by the reference-generation gate is tracked in
+[#113](https://github.com/canmet-energy/btap/issues/113); no code-driven sizing
+workaround is part of this modeling feature.
+
+UFAD is not a catalog option. OpenStudio 3.11 can author the required
+EnergyPlus room-air objects in a translated workspace, but has no typed,
+persistent OpenStudio Model (`.osm`) representation. Post-translation
+injection would also be bypassed by ordinary external translation and the
+remote OpenStudio-model workflow, so shipping a UFAD name would overstate
+portable model behavior.
 
 ## Footprint wizards
 
