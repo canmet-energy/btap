@@ -19,15 +19,15 @@ compliance paths share — so nothing is silently missed.
 | | NECB 2020 | NECB 2025 |
 |---|---|---|
 | Implemented | 60 | 62 |
-| Partial (warns every run) | 30 | 31 |
+| Partial (warns every run) | 31 | 32 |
 | Not implemented (warns every run) | 4 | 4 |
 | Satisfied by construction (clone) | 2 | 3 |
 | Host / other-domain scope | 12 | 12 |
 | Field / document verification (modeller scope, does not warn) | 9 | 10 |
-| **Total entries** | **117** | **122** |
+| **Total entries** | **118** | **123** |
 
 <details>
-<summary><b>NECB 2020</b> — 117 entries (click to expand)</summary>
+<summary><b>NECB 2020</b> — 118 entries (click to expand)</summary>
 
 ### Implemented (60)
 
@@ -40,7 +40,7 @@ compliance paths share — so nothing is silently missed.
 | envelope | 3.2.2.2. | Opaque above-ground U-values by HDD zone | opaque U-values applied per HDD bin (legacy-compatible construction conductance; include_films: for overall) — Code: `prescriptive.py#_target_conductance` |
 | envelope | 3.2.2.3. | Fenestration/skylight U-values by HDD zone | window/skylight U via SimpleGlazing replacement preserving SHGC/VT; opaque doors via insulation solve — Code: `prescriptive.py#_target_conductance`, `prescriptive.py#_apply_ground_strip` |
 | envelope | 3.2.2.4. | Door U-values (door row of Table 3.2.2.x) | door values applied (door row of Table 3.2.2.x) — Code: `prescriptive.py#_subsurface_target_construction` |
-| envelope | 3.2.3.1. | Building assemblies in contact with the ground | ground-contact wall/roof U-values applied full-area; floors follow the zone-conditional extent (zone 8 full-area retarget; zones 4-7B keep the slab field and get a 1.2 m Kiva perimeter strip per 3.2.3.3.(3) — warns when no Kiva foundation to carry it) — Code: `prescriptive.py#apply` |
+| envelope | 3.2.3.1. | Building assemblies in contact with the ground | ground-contact wall/roof U-values applied full-area; the floors row is applied through the separate 3.2.3.3 extent determination, including the embedded-system exception — Code: `prescriptive.py#apply` |
 | envelope | 8.4.1.1. (envelope) | General — envelope components accounted | Envelope components accounted per the prescriptive Section 3.2 requirements via the reference transform (8.4.4.3./8.4.4.4.: U-values at the building HDD, FDWR/SRR, lightweight construction) — the realization of 8.4.1.1.(1) for the envelope slice. — Code: `reference.py#reference_envelope`, `prescriptive.py#apply` |
 | envelope | 8.4.2.9. | Air Leakage | The (2) I_AGW operating-pressure conversion of the 75 Pa leakage rate is computed and applied per space in the reference air-leakage default (apply_air_leakage_default, which cites this article); (1) accounting happens through the infiltration objects on both models. — Code: `reference.py#apply_air_leakage_default` |
 | envelope | 8.4.4.1. | Reference building basis (envelope meets Section 3.2) | reference envelope meets prescriptive Section 3.2 (U-values at the building HDD; FDWR/SRR enforced via 8.4.4.3.(3) scaling) — Code: `reference.py#reference_envelope` |
@@ -94,10 +94,11 @@ compliance paths share — so nothing is silently missed.
 | shw | 8.4.3.2. (SWH loads) | Service water heating loads representative of the building | per-space WaterUseEquipment from the NECB space-type peak flows, target temperatures and NECB-<letter> SWH schedules (openstudio-loads data) — Code: `demand.py#apply_shw`, `demand.py#_add_water_use` |
 | shw | 8.4.4.20.(2) | HP-source SWH -> air-source HP in the reference | apply_shw(fuel: 'HeatPump') builds an air-source HPWH; a reference generated from it keeps the air-source energy type by construction — Code: `demand.py#_wrap_heat_pump`, `efficiency.py#apply_heat_pump_efficiency` |
 
-### Partial (warns every run) (30)
+### Partial (warns every run) (31)
 
 | Python domain | Article | Title | Notes |
 |---|---|---|---|
+| envelope | 3.2.3.3. | Thermal characteristics and insulation extent of floors in contact with the ground | Sentence (3): ordinary floors use the zone-conditional extent (zone 8 full-area; zones 4-7B retain the slab field and receive a 1.2 m Kiva perimeter strip, with a warning when no foundation can carry it). Sentence (4): low-temperature radiant surface associations are inventoried before reference-HVAC teardown and internal-source constructions provide independent surface evidence; detected embedded floors receive the Table 3.2.3.1 target over their full area in every climate zone, while unresolved topology warns and is not guessed into Sentence (3). Sentence (5): for detected embedded floors, a Kiva exterior-insulation exception is retained or the floor insulation is continued vertically to the floor bottom; an unrepresentable continuation warns. — Gaps: Sentence (5)'s vertical perimeter continuation is not yet applied or verified for ordinary Sentence (3) floors; semi-heated applicability under Sentence (2) remains caller-supplied through the HDD input rather than inferred from model classification. — Code: `rules.py#ground_floor_extent`, `prescriptive.py#_embedded_floor_inventory`, `prescriptive.py#_assign_ground_floor`, `path.py#build_reference` |
 | hvac | 8.4.4.6.(1) | Purchased Energy | purchased HEATING is represented by a gas-fired modulating boiler ((1)(a)) via the energy-type election — Gaps: the (1)(b) capacity-ratio adjustment is sizing-time and not enforced — Code: `reference.py#_reference_energy_type`, `plant_loops.py#hot_water` |
 | hvac | 8.4.4.6.(2) | Purchased Energy | purchased COOLING forces an air-cooled electric chiller ((2)(a)) via the chw_source config — Gaps: the (2)(b) capacity-ratio adjustment is sizing-time and not enforced — Code: `reference.py#_reference_energy_type`, `plant_loops.py#chilled_water` |
 | hvac | 8.4.4.6.(4) | Purchased Energy | operating schedules carry over to the representing equipment by clone — Gaps: priority-of-use and other operational characteristics of the purchased supply are not explicitly modelled — Code: `reference.py#_clone_model` |
@@ -205,7 +206,7 @@ genuine open item to watch on a real run.
 </details>
 
 <details>
-<summary><b>NECB 2025</b> — 122 entries (click to expand)</summary>
+<summary><b>NECB 2025</b> — 123 entries (click to expand)</summary>
 
 ### Implemented (62)
 
@@ -218,7 +219,7 @@ genuine open item to watch on a real run.
 | envelope | 3.2.2.2. | Opaque above-ground U-values by HDD zone | opaque U-values applied per HDD bin (legacy-compatible construction conductance; include_films: for overall) — Code: `prescriptive.py#_target_conductance` |
 | envelope | 3.2.2.3. | Fenestration/skylight U-values by HDD zone | window/skylight U via SimpleGlazing replacement preserving SHGC/VT; opaque doors via insulation solve — Code: `prescriptive.py#_target_conductance`, `prescriptive.py#_apply_ground_strip` |
 | envelope | 3.2.2.4. | Door U-values (Table 3.2.2.4) | door values applied (Table 3.2.2.4) — Code: `prescriptive.py#_subsurface_target_construction` |
-| envelope | 3.2.3.1. | Building assemblies in contact with the ground | ground-contact wall/roof U-values applied full-area; floors follow the zone-conditional extent (zone 8 full-area retarget; zones 4-7B keep the slab field and get a 1.2 m Kiva perimeter strip per 3.2.3.3.(3) — warns when no Kiva foundation to carry it) — Code: `prescriptive.py#apply` |
+| envelope | 3.2.3.1. | Building assemblies in contact with the ground | ground-contact wall/roof U-values applied full-area; the floors row is applied through the separate 3.2.3.3 extent determination, including the embedded-system exception — Code: `prescriptive.py#apply` |
 | envelope | 8.4.1.1. (envelope) | General — envelope components accounted | Envelope components accounted per the prescriptive Section 3.2 requirements via the reference transform (8.4.5.3./8.4.5.4.: U-values at the building HDD, FDWR/SRR, lightweight construction) — the realization of 8.4.1.1.(1) for the envelope slice. — Code: `reference.py#reference_envelope`, `prescriptive.py#apply` |
 | envelope | 8.4.2.9. | Air Leakage | The (2) I_AGW operating-pressure conversion of the 75 Pa leakage rate is computed and applied per space in the reference air-leakage default (apply_air_leakage_default, which cites this article); (1) accounting happens through the infiltration objects on both models. — Code: `reference.py#apply_air_leakage_default` |
 | envelope | 8.4.5.1. | Reference building basis (envelope meets Section 3.2) | reference envelope meets prescriptive Section 3.2 (U-values at the building HDD; FDWR/SRR enforced via 8.4.5.3.(3) scaling) — Code: `reference.py#reference_envelope` |
@@ -274,10 +275,11 @@ genuine open item to watch on a real run.
 | shw | 8.4.3.2. (SWH loads) | Service water heating loads representative of the building | per-space WaterUseEquipment from the NECB space-type peak flows, target temperatures and NECB-<letter> SWH schedules (loads-domain data) — Code: `demand.py#apply_shw`, `demand.py#_add_water_use` |
 | shw | 8.4.5.20.(2) | HP-source SWH -> air-source HP in the reference | apply_shw(fuel: 'HeatPump') builds an air-source HPWH; a reference generated from it keeps the air-source energy type by construction — Code: `demand.py#_wrap_heat_pump`, `efficiency.py#apply_heat_pump_efficiency` |
 
-### Partial (warns every run) (31)
+### Partial (warns every run) (32)
 
 | Python domain | Article | Title | Notes |
 |---|---|---|---|
+| envelope | 3.2.3.3. | Thermal characteristics and insulation extent of floors in contact with the ground | Sentence (3): ordinary floors use the zone-conditional extent (zone 8 full-area; zones 4-7B retain the slab field and receive a 1.2 m Kiva perimeter strip, with a warning when no foundation can carry it). Sentence (4): low-temperature radiant surface associations are inventoried before reference-HVAC teardown and internal-source constructions provide independent surface evidence; detected embedded floors receive the Table 3.2.3.1 target over their full area in every climate zone, while unresolved topology warns and is not guessed into Sentence (3). Sentence (5): for detected embedded floors, a Kiva exterior-insulation exception is retained or the floor insulation is continued vertically to the floor bottom; an unrepresentable continuation warns. — Gaps: Sentence (5)'s vertical perimeter continuation is not yet applied or verified for ordinary Sentence (3) floors; semi-heated applicability under Sentence (2) remains caller-supplied through the HDD input rather than inferred from model classification. — Code: `rules.py#ground_floor_extent`, `prescriptive.py#_embedded_floor_inventory`, `prescriptive.py#_assign_ground_floor`, `path.py#build_reference` |
 | hvac | 8.4.5.6.(1) | Purchased Energy | purchased HEATING is represented by a gas-fired modulating boiler ((1)(a)) via the energy-type election — Gaps: the (1)(b) capacity-ratio adjustment is sizing-time and not enforced — Code: `reference.py#_reference_energy_type`, `plant_loops.py#hot_water` |
 | hvac | 8.4.5.6.(2) | Purchased Energy | purchased COOLING forces an air-cooled electric chiller ((2)(a)) via the chw_source config — Gaps: the (2)(b) capacity-ratio adjustment is sizing-time and not enforced — Code: `reference.py#_reference_energy_type`, `plant_loops.py#chilled_water` |
 | hvac | 8.4.5.6.(4) | Purchased Energy | operating schedules carry over to the representing equipment by clone — Gaps: priority-of-use and other operational characteristics of the purchased supply are not explicitly modelled — Code: `reference.py#_clone_model` |
@@ -387,4 +389,4 @@ genuine open item to watch on a real run.
 
 </details>
 
-_239 coverage entries across 6 domains (117 × 2020, 122 × 2025)._
+_241 coverage entries across 6 domains (118 × 2020, 123 × 2025)._

@@ -88,11 +88,14 @@ def test_manifest_inventory_and_every_code_ref_resolves():
     # reference-path forwarding surfaces and the EUI path executes neither.
     # Recorded in `coverage_code_ref_additions.json` rather than by editing a
     # historical ledger.
-    assert sum(len(articles) for _path, articles in manifests) == 239
+    #
+    # 239 -> 241 and 313 -> 321 under D-105: both envelope snapshots gained
+    # the previously absent 3.2.3.3 row and its four runtime witnesses.
+    assert sum(len(articles) for _path, articles in manifests) == 241
 
     refs = code_refs(manifests)
     assert len(refs) > 60
-    assert len(refs) == 313
+    assert len(refs) == 321
     assert all(not re.match(r"^btap-[^/]+/lib/", ref) for ref in refs)
 
     definitions_by_path = {}

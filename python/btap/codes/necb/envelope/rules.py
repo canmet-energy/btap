@@ -60,15 +60,22 @@ def _max_u(*, ruleset, surface, boundary, hdd, audit=None):
     return value
 
 
-def ground_floor_extent(*, code, hdd):
-    """Ground-floor insulation extent (Table 3.2.3.1 floors row): zone 8
-    requires the table U over the full slab area; zones 4-7B require it only
-    within a perimeter strip (3.2.3.3.(3)) — the slab field carries no
-    prescriptive maximum there."""
-    return _ground_floor_extent(ruleset=resolve(code), hdd=hdd)
+def ground_floor_extent(*, code, hdd, embedded_system=False):
+    """Ground-floor insulation extent (Table 3.2.3.1 floors row).
+
+    Floors with embedded heating ducts, cables, or heating/cooling pipes use
+    the table U over their full area in every climate zone (3.2.3.3.(4)).
+    Ordinary floors use the zone-conditional Sentence (3) extent: full area in
+    zone 8 and a 1.2 m perimeter strip in zones 4-7B.
+    """
+    return _ground_floor_extent(
+        ruleset=resolve(code), hdd=hdd, embedded_system=embedded_system)
 
 
-def _ground_floor_extent(*, ruleset, hdd):
+def _ground_floor_extent(*, ruleset, hdd, embedded_system=False):
+    if embedded_system:
+        return {"extent": "full_area"}
+
     ext = ruleset.rules("envelope").get("ground_floor_extent")
     if ext is None or hdd >= ext["full_area_min_hdd"]:
         return {"extent": "full_area"}

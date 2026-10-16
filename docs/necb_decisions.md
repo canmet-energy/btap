@@ -153,6 +153,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-102** — The Code states EIR_FPLR; EnergyPlus carries PLF in [0.7, 1.0], and the gaps at BOTH carrier edges are declared _(runtime)_
 - **D-103** — Verification evidence is a property of behaviour, not of Git lineage or of machinery source hashes _(process)_
 - **D-104** — Unknown VRF phase uses the generic pre-M1 rating with disclosure _(runtime)_
+- **D-105** — Embedded ground-floor systems require full-area insulation _(runtime)_
 
 <!-- TOC END -->
 
@@ -7862,3 +7863,61 @@ pins the applied cooling and heating COPs plus the D-104 information entry.
 The SDK-free provenance test derives the 2025 ladders and test standards from
 the archived 14-row Table-I payload and proves the phase-qualified row is
 retained without becoming selectable by the generic lookup.
+
+<a id="d-105"></a>
+
+## D-105 — Embedded ground-floor systems require full-area insulation
+
+**Decided:** A floor-on-ground with modeled evidence of embedded heating
+ducts, cables, or heating/cooling pipes is assigned the Table 3.2.3.1
+transmittance over its full area in every heating-degree-day category.
+Sentence 3.2.3.3.(4), not the ordinary-floor option in Sentence (3), controls.
+This is a ruled runtime choice, not an AHJ referral.
+
+**Applicability:** the public prescriptive applier and the performance-path
+reference builder use the same inventory. A ground floor is detected when it
+has a `ConstructionWithInternalSource`, or when one of OpenStudio's three
+low-temperature radiant zone-object classes explicitly returns that surface.
+The performance path takes this inventory from the proposed model before
+reference-HVAC replacement and carries surface names to the clone; OpenStudio
+changes object handles when cloning but preserves names. Duplicate names, or
+a floor-radiant object assigned to a zone but resolving no served surface,
+make applicability unresolved. The tool then warns, leaves the floor as
+modeled, and does not guess that Sentence (3)'s perimeter strip applies.
+
+For a detected floor, the direct prescriptive transform preserves the
+internal-source construction and its source location while changing its
+insulation layer. Where a Kiva foundation is present, the full-area
+insulation continues vertically to the bottom of the floor under Sentence
+(5), unless existing exterior vertical insulation already reaches that
+depth. A missing foundation or unresolvable construction depth produces a
+surface-specific warning rather than a false claim that the continuation was
+modeled.
+
+**Who/when:** Sol, 2026-10-16.
+
+**Why:** Sentence (3) expressly applies to floors with **no** embedded system
+and permits the table value over a 1.2 m perimeter strip or the full area,
+according to Table 3.2.3.1. Sentence (4) is the converse case and requires
+both the table transmittance and insulation under the full area. Deciding
+extent from HDD alone therefore silently misclassified embedded floors in
+zones 4 through 7B; zone 8 happened to reach the same extent for a different
+reason. Absence of a resolvable surface relationship is not evidence that an
+indicated radiant system is absent.
+
+**Legacy finding:** the pinned `openstudio-standards` revision
+`f01da13a6b89e45761d1ede481fedb1c1aeb6ea0` provides useful mechanics in
+`Prototype.hvac_systems.rb`: it assigns each radiant object to exact surfaces
+and uses `ConstructionWithInternalSource` for embedded floors. Its
+ASHRAE-climate R-15-to-R-25 insulation policy is not the NECB table rule, and
+its NECB envelope path independently makes the ordinary floor decision from
+HDD alone. The surface-association mechanism was consulted; neither legacy
+policy was adopted.
+
+**Evidence:** `test_embedded_ground_floor_is_full_area_in_both_editions`
+constructs a real SDK electric radiant floor, pins the full-area target,
+retained source construction, Sentence (5) continuation, and D-105 audit in
+both editions. `test_unresolved_radiant_floor_does_not_guess_the_ordinary_strip`
+removes radiant HVAC from a cloned model and proves the pre-teardown inventory
+still prevents the perimeter-strip fallback. The existing D-32 strip and
+zone-8 controls remain green.

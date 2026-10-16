@@ -22,6 +22,30 @@
    "uses": 1,
    "authority": "Sol, review `220` (PR #100)",
    "reason": "NECB 2025's 8.4.1.2 row claims that on the 8.4.4 archetype-EUI path the (3) and (4)(a) verdicts are applied per thermal block and composed into the determination. Its two existing pointers, `compliance.py#_evaluate` and `#_evaluate_unmet`, are preserved forwarding surfaces for the REFERENCE path and are not on the EUI path's executed call path — `_eui_compliance` calls `path.evaluate_unmet_8_4_4` directly. Stage 9's evidence rule makes a forwarding pointer not executed for the claim substantively false, so the claim needed this pointer. I first removed it instead, reasoning that the R7 ledger forbade additions; Sol ruled that the ledger is a historical migration record, not a rule that this product may never acquire a coverage pointer."
+  },
+  {
+   "ref": "python/btap/codes/necb/envelope/rules.py#ground_floor_extent",
+   "uses": 2,
+   "authority": "D-105 (Sol, 2026-10-16)",
+   "reason": "Both edition snapshots gained the previously absent 3.2.3.3 coverage row. The public extent lookup now expresses Sentence (4)'s embedded-system override rather than deciding every floor from HDD alone."
+  },
+  {
+   "ref": "python/btap/codes/necb/envelope/prescriptive.py#_embedded_floor_inventory",
+   "uses": 2,
+   "authority": "D-105 (Sol, 2026-10-16)",
+   "reason": "Both edition snapshots gained the previously absent 3.2.3.3 coverage row. This inventory preserves exact radiant-surface applicability before reference-HVAC teardown and recognizes internal-source floor constructions."
+  },
+  {
+   "ref": "python/btap/codes/necb/envelope/prescriptive.py#_assign_ground_floor",
+   "uses": 2,
+   "authority": "D-105 (Sol, 2026-10-16)",
+   "reason": "Both edition snapshots gained the previously absent 3.2.3.3 coverage row. This application site selects full-area insulation for detected embedded floors and emits the unresolved-topology warning."
+  },
+  {
+   "ref": "python/btap/codes/necb/path.py#build_reference",
+   "uses": 2,
+   "authority": "D-105 (Sol, 2026-10-16)",
+   "reason": "Both edition snapshots gained the previously absent 3.2.3.3 coverage row. The performance path executes the applicability inventory before HVAC replacement and hands it to the cloned reference envelope."
   }
  ]
 }

@@ -60,7 +60,7 @@ def apply(model, *, code, hdd=None, actual_roof_absorptance_used=False,
 
 
 def _apply(model, ruleset, *, hdd=None, actual_roof_absorptance_used=False,
-           thermal_bridging=None, audit=None):
+           thermal_bridging=None, audit=None, embedded_floor_inventory=None):
     """The 8.4.4.3/.4 envelope transform against ONE resolved edition — the
     reference subsection, the prescriptive pass under it and the coverage
     emission all read the same :class:`btap.codes.Ruleset` (Stage 6)."""
@@ -72,7 +72,8 @@ def _apply(model, ruleset, *, hdd=None, actual_roof_absorptance_used=False,
 
     # 1. prescriptive Section 3.2 on the reference (no window rebuild here)
     Prescriptive._apply(model, ruleset=ruleset, hdd=hdd,
-                       thermal_bridging=thermal_bridging, audit=audit)
+                       thermal_bridging=thermal_bridging, audit=audit,
+                       embedded_floor_inventory=embedded_floor_inventory)
     audit.decision("reference", "reference envelope meets prescriptive Section 3.2",
                    inputs={"hdd": hdd}, article=f"{prefix}.1.(2)")
 
@@ -218,7 +219,10 @@ def _apply_lightweight_construction(model, ruleset, hdd, prefix, audit):
         if boundary is None or surface_class is None:
             continue
         construction = opt(surface.construction())
-        original = None if construction is None else opt(construction.to_Construction())
+        original = (
+            None if construction is None
+            else opt(construction.to_LayeredConstruction())
+        )
         if original is None:
             continue
         # 8.4.4.4.(1) covers the building envelope; exterior surfaces of

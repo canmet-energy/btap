@@ -82,8 +82,8 @@ class TestDataIntegrity(unittest.TestCase):
             self.assertEqual(edition, prov['edition'])
             self.assertRegex(prov['source'], r'MCP')
             coverage = rules['article_coverage']['articles']
-            # 14 + 8.4.1.1 (envelope slice) + 8.4.2.9 air leakage
-            self.assertEqual(17, len(coverage))
+            # 15 + 8.4.1.1 (envelope slice) + 8.4.2.9 air leakage
+            self.assertEqual(18, len(coverage))
             for art in coverage:
                 self.assertIn(art['status'], valid, f"{art['article']}: invalid status")
                 self.assertTrue(art['title'])
@@ -99,6 +99,19 @@ class TestDataIntegrity(unittest.TestCase):
             self.assertFalse(any(a['article'].startswith(wrong) for a in renumbered),
                              f'{edition}: reference-building articles must not use the '
                              f'{wrong} numbering')
+
+    def test_heated_ground_floor_coverage_is_explicit(self):
+        for edition in EDITIONS:
+            coverage = self.n.rules(edition)['article_coverage']['articles']
+            article = next(
+                entry for entry in coverage if entry['article'] == '3.2.3.3.')
+            self.assertEqual('partial', article['status'])
+            self.assertIn('Sentence (4)', article['how'])
+            self.assertIn('full area', article['how'])
+            self.assertIn('Sentence (5)', article['gaps'])
+            self.assertTrue(any(
+                ref.endswith('prescriptive.py#_assign_ground_floor')
+                for ref in article['code']))
 
     def test_2025_values_equal_2020(self):
         self.assertEqual(

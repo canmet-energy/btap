@@ -30,6 +30,7 @@ import re
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 
 import btap.codes as codes
 from btap.codes import compliance, pipeline
@@ -149,6 +150,73 @@ class TestForwardingFunctionsAreExecuted(unittest.TestCase):
                          "compliance._build_reference must be ON the executed "
                          "call path, not a stub that resolves the pointer")
         self.assertIsNotNone(result.reference_model)
+
+    def test_embedded_floor_inventory_precedes_reference_hvac_teardown(self):
+        from btap.audit import AuditLog
+        from btap.codes.necb import envelope, hvac, lighting
+        from btap.codes.necb.shw import reference as shw_reference
+
+        calls = []
+        sentinel = object()
+        proposed = object()
+        reference = object()
+
+        originals = (
+            envelope.prescriptive._embedded_floor_inventory,
+            hvac.reference._reference_hvac,
+            envelope.reference._apply,
+            lighting.Reference._reference_lighting,
+            shw_reference._reference_shw,
+        )
+
+        def inventory(model):
+            calls.append(('inventory', model))
+            return sentinel
+
+        def reference_hvac(model, ruleset, **_kwargs):
+            calls.append(('hvac', model, ruleset.id))
+            return SimpleNamespace(model=reference)
+
+        def reference_envelope(model, ruleset, **kwargs):
+            calls.append((
+                'envelope', model, ruleset.id,
+                kwargs['embedded_floor_inventory']))
+
+        envelope.prescriptive._embedded_floor_inventory = inventory
+        hvac.reference._reference_hvac = reference_hvac
+        envelope.reference._apply = reference_envelope
+        lighting.Reference._reference_lighting = lambda *_a, **_k: None
+        shw_reference._reference_shw = lambda *_a, **_k: None
+        run = SimpleNamespace(
+            opts={
+                'building': {},
+                'actual_roof_absorptance_used': False,
+                'thermal_bridging': None,
+                'reference_daylighting': False,
+            },
+            audit=AuditLog(),
+            proposed=proposed,
+            proposed_annual_data=None,
+            ruleset=codes.resolve('necb2020'),
+            hdd=3890,
+            reference=None,
+        )
+        try:
+            necb_path.build_reference(run)
+        finally:
+            (
+                envelope.prescriptive._embedded_floor_inventory,
+                hvac.reference._reference_hvac,
+                envelope.reference._apply,
+                lighting.Reference._reference_lighting,
+                shw_reference._reference_shw,
+            ) = originals
+
+        self.assertEqual('inventory', calls[0][0])
+        self.assertEqual('hvac', calls[1][0])
+        self.assertEqual(
+            ('envelope', reference, 'necb2020', sentinel), calls[2])
+        self.assertIs(reference, run.reference)
 
 
 class TestRenderHooks(unittest.TestCase):

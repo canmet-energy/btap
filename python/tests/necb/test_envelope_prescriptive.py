@@ -22,6 +22,65 @@ def print_at(z):
     return pts
 
 
+def embedded_ground_floor_model(*, internal_source=True):
+    import openstudio
+
+    model = openstudio.model.Model()
+    space = openstudio.model.Space.fromFloorPrint(print_at(0.0), 3.0, model).get()
+    zone = openstudio.model.ThermalZone(model)
+    space.setThermalZone(zone)
+
+    slab = openstudio.model.StandardOpaqueMaterial(
+        model, 'MediumRough', 0.1, 1.8, 2300, 900)
+    insulation = openstudio.model.StandardOpaqueMaterial(
+        model, 'MediumSmooth', 0.03, 0.03, 30, 1200)
+    if internal_source:
+        floor_construction = openstudio.model.ConstructionWithInternalSource(model)
+        floor_construction.setLayers([insulation, slab])
+        floor_construction.setSourcePresentAfterLayerNumber(1)
+        floor_construction.setTemperatureCalculationRequestedAfterLayerNumber(1)
+    else:
+        floor_construction = openstudio.model.Construction(model)
+        floor_construction.setLayers([insulation, slab])
+    floor_construction.setInsulation(insulation)
+
+    wall = openstudio.model.StandardOpaqueMaterial(
+        model, 'MediumRough', 0.1, 1.0, 1000, 900)
+    wall_insulation = openstudio.model.StandardOpaqueMaterial(
+        model, 'MediumSmooth', 0.05, 0.05, 30, 1200)
+    enclosure = openstudio.model.Construction(model)
+    enclosure.setLayers([wall, wall_insulation])
+    enclosure.setInsulation(wall_insulation)
+
+    floor = None
+    for surface in space.surfaces():
+        if surface.surfaceType() == 'Floor':
+            surface.setName('Embedded ground floor')
+            surface.setOutsideBoundaryCondition('Ground')
+            surface.setConstruction(floor_construction)
+            floor = surface
+        else:
+            surface.setConstruction(enclosure)
+
+    foundation = openstudio.model.FoundationKiva(model)
+    foundation.setName('Embedded floor foundation')
+    floor.setAdjacentFoundation(foundation)
+
+    availability = openstudio.model.ScheduleConstant(model)
+    availability.setValue(1.0)
+    temperature_limits = openstudio.model.ScheduleTypeLimits(model)
+    temperature_limits.setUnitType('Temperature')
+    temperature = openstudio.model.ScheduleConstant(model)
+    temperature.setScheduleTypeLimits(temperature_limits)
+    temperature.setValue(20.0)
+    radiant = openstudio.model.ZoneHVACLowTemperatureRadiantElectric(
+        model, availability, temperature)
+    radiant.setName('Embedded floor electric radiant')
+    radiant.setRadiantSurfaceType('Floors')
+    radiant.addToThermalZone(zone)
+    return model, floor, foundation, radiant
+
+
 @needs_sdk
 class TestPrescriptive(unittest.TestCase):
     @property
@@ -139,6 +198,99 @@ class TestPrescriptive(unittest.TestCase):
             delta=1e-4, msg='zone 8: slab retargeted full-area to the 0.379 overall U')
         self.assertFalse(kiva8.interiorHorizontalInsulationMaterial().is_initialized(),
                          'zone 8: no strip — full-area requirement instead')
+
+    # D-105: Sentence (4) overrides the ordinary Sentence (3) perimeter
+    # option in EVERY climate zone. The actual SDK radiant-surface
+    # relationship and its ConstructionWithInternalSource both identify the
+    # floor before the reference HVAC teardown.
+    def test_embedded_ground_floor_is_full_area_in_both_editions(self):
+        from btap.modeling.envelope import constructions as Constructions
+
+        for code in ('necb2020', 'necb2025'):
+            with self.subTest(code=code):
+                model, floor, foundation, radiant = embedded_ground_floor_model()
+                self.assertEqual(
+                    [floor.nameString()],
+                    [surface.nameString() for surface in radiant.surfaces()])
+
+                audit = self.n.apply_prescriptive(model, code=code, hdd=HDD)
+                construction = floor.construction().get()
+                internal = construction.to_ConstructionWithInternalSource()
+                self.assertTrue(
+                    internal.is_initialized(),
+                    'direct prescriptive use must retain the embedded source')
+                self.assertEqual(
+                    1, internal.get().sourcePresentAfterLayerNumber(),
+                    'retargeting must preserve the embedded source location')
+                self.assertEqual(
+                    1,
+                    internal.get().temperatureCalculationRequestedAfterLayerNumber(),
+                    'retargeting must preserve the source temperature plane')
+                target = 1.0 / (
+                    (1.0 / 0.757) - Constructions.film_r('floor', 'ground'))
+                self.assertAlmostEqual(
+                    target, internal.get().thermalConductance().get(), delta=1e-4,
+                    msg='3.2.3.3.(4): the table U applies over the full slab')
+                self.assertFalse(
+                    foundation.interiorHorizontalInsulationMaterial().is_initialized(),
+                    'the ordinary 1.2 m Sentence (3) strip must not return')
+                self.assertTrue(
+                    foundation.interiorVerticalInsulationMaterial().is_initialized(),
+                    'Sentence (5): full-area insulation continues vertically')
+                self.assertGreater(
+                    foundation.interiorVerticalInsulationDepth().get(), 0.0)
+                self.assertTrue(any(
+                    entry.get('article') == '3.2.3.3.(4)(b)'
+                    and entry.get('ruling') == 'D-105'
+                    and entry.get('level') == 'decision'
+                    for entry in audit.entries))
+                self.assertTrue(any(
+                    entry.get('article') == '3.2.3.3.(5)'
+                    and entry.get('ruling') == 'D-105'
+                    for entry in audit.entries))
+
+    def test_unresolved_radiant_floor_does_not_guess_the_ordinary_strip(self):
+        from btap.audit import AuditLog
+        from btap.codes import resolve
+
+        model, floor, foundation, _radiant = embedded_ground_floor_model(
+            internal_source=False)
+        inventory = self.n.prescriptive._embedded_floor_inventory(model)
+        self.assertEqual('unresolved', inventory.status(floor.nameString()))
+
+        # Clone and remove the radiant object exactly as the reference-HVAC
+        # phase does. Only the pre-teardown inventory can now preserve the
+        # unresolved applicability result.
+        reference = model.clone().to_Model()
+        for equipment in reference.getZoneHVACLowTemperatureRadiantElectrics():
+            equipment.remove()
+        reference_floor = reference.getSurfaceByName(floor.nameString()).get()
+        reference_foundation = reference_floor.adjacentFoundation().get()
+        before = reference_floor.construction().get().nameString()
+        audit = AuditLog()
+        self.n.prescriptive._apply(
+            reference, resolve('necb2020'), hdd=HDD, audit=audit,
+            embedded_floor_inventory=inventory)
+
+        self.assertEqual(before, reference_floor.construction().get().nameString())
+        self.assertFalse(
+            reference_foundation.interiorHorizontalInsulationMaterial().is_initialized(),
+            'an unresolved embedded-floor signal must not fall through to D-32')
+        self.assertTrue(any(
+            warning.get('article') == '3.2.3.3.(4)(b)'
+            and warning.get('ruling') == 'D-105'
+            and 'UNRESOLVED' in warning['action']
+            for warning in audit.warnings))
+
+    def test_ground_floor_extent_can_express_an_embedded_system(self):
+        for code in ('necb2020', 'necb2025'):
+            with self.subTest(code=code):
+                ordinary = self.n.ground_floor_extent(code=code, hdd=HDD)
+                embedded = self.n.ground_floor_extent(
+                    code=code, hdd=HDD, embedded_system=True)
+                self.assertEqual(
+                    {'extent': 'perimeter_strip', 'width_m': 1.2}, ordinary)
+                self.assertEqual({'extent': 'full_area'}, embedded)
 
     def test_legacy_naming_and_reuse_conventions(self):
         model, _ = self.applied_model()
