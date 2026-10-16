@@ -323,21 +323,26 @@ pumps, furnaces, heat rejection) + the NECB performance curves. A transcribed
 code TABLE rather than a rule manifest, which is why the orphan-key lint
 deliberately leaves it out of scope (`necb_orphan_keys.NON_RULE_MANIFESTS`).
 
-- **2020**: vendored verbatim from openstudio-standards NECB2020 `data/*.json`
-  (= Table 5.2.12.1 values), curves from NECB2011 `curves.json`.
+- **2020**: the original equipment families were ported from
+  openstudio-standards NECB2020 `data/*.json`, with curves from NECB2011
+  `curves.json`. The oracle has no Table 5.2.12.1.-I data: the two VRF
+  families were transcribed separately from the archived 2020 MCP payload and
+  are owned as data by D-59.
 - **2025**: transcribed/verified per-table from the NECB 2025 Table 5.2.12.1
   series via the MCP (letter map: -K chillers, -N boilers, -O furnaces, -A
-  unitary ACs & HPs; the file's `provenance.verification` block records the
-  per-table result). Verified **identical** to 2020: chillers (Path B COPc,
-  every bin), boilers, furnaces, and the unitary-AC/HP cooling SEER/EER ladders.
-  **Real 2025 change**: split-system HP heating HSPF 7.4 → 7.8. Additions:
-  single-phase SEER2/HSPF2 class rows (distinct subcategories, engine-neutral),
-  COPh at −8.3 °C (informational), and the NEW Table 5.2.12.1.-M plant-heat-pump
-  heating COPs by leaving water temperature (`plant_heat_pumps_heating`,
-  informational). SEER2/EER2/HSPF2 convert with the SEER/EER/HSPF formulas,
-  matching the documented openstudio-standards assumption. Table -C (PTAC/PTHP
-  coefficients) changed moderately in 2025; that coefficient path is not
-  implemented by the engine (documented gap, same as 2020).
+  unitary ACs & HPs, -G PTAC/PTHP, -I VRF, -M plant heat pumps; the file's
+  `provenance.verification` block records the per-table result). Verified
+  **identical** to 2020: chillers (Path B COPc, every bin), boilers, furnaces,
+  PTAC/PTHP coefficients, and the generic unitary-AC/HP cooling SEER/EER
+  ladders. **Real 2025 changes** include split-system HP heating HSPF
+  7.4 → 7.8 and the new phase-qualified Table-I Appendix M1 row. Table -A
+  carries only the single-phase air-conditioner SEER2 rows; its heat-pump
+  HSPF2 rows are not vendored. Table -I carries SEER2 14.3/HSPF2 6.6 as inert
+  phase-qualified data. Because the classic VRF object has no phase field,
+  D-104 visibly selects the generic CSA C656 row; the M1 metrics are never
+  passed to the pre-M1 SEER/HSPF regressions. EER2 appears in none of the
+  archived tables consumed here. Low-temperature COPh and Table
+  5.2.12.1.-M plant-heat-pump values remain informational.
 
 ### Part-load curve class (D-89)
 

@@ -820,7 +820,8 @@ NON_METRIC_KEYS = {
     "maximum_capacity_kw", "capft", "eirft", "eirfplr", "efffplr",
     "cool_cap_ft", "cool_cap_fflow", "cool_eir_ft", "cool_eir_fflow",
     "cool_plf_fplr", "heat_cap_ft", "heat_cap_fflow", "heat_eir_ft",
-    "heat_eir_fflow", "heat_plf_fplr", "condition",
+    "heat_eir_fflow", "heat_plf_fplr", "condition", "phase",
+    "test_standard",
 }
 
 

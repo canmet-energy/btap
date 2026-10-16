@@ -69,9 +69,11 @@ MIGRATED_IDS = (
     "D-90", "D-91", "D-92", "D-93", "D-97", "D-99", "D-100", "D-101",
     "D-102",
 )
+NATIVE_STRUCTURED_IDS = ("D-104",)
+STRUCTURED_IDS = MIGRATED_IDS + NATIVE_STRUCTURED_IDS
 #: Phase D decisions moved from `unverified` to the structured form; the other
-#: 23 are Phase C's. Every digest below is of the decision's title and summary
-#: at the commit BEFORE its conversion.
+#: 23 migrated decisions are Phase C's. D-104 is native structured source.
+#: Every digest below pins the report-visible title and summary.
 PHASE_D_BATCH_1_IDS = (
     "D-18", "D-28", "D-34", "D-37", "D-42", "D-43", "D-45", "D-55",
 )
@@ -87,7 +89,7 @@ PHASE_D_BATCH_7_IDS = (
     "D-05", "D-22", "D-24", "D-58",
     "D-59", "D-60", "D-61", "D-65",
 )
-MIGRATED_RUNTIME_SHA256 = {
+STRUCTURED_RUNTIME_SHA256 = {
     "D-02": "0f39e8bb648ff77f85c91a14e7bf3376a5f82ff9b861f93c362d0c55b18d5a89",
     "D-03": "30a16c7cc674259ee2eb9320736a0badf51b376f0a9b0344e58f9fdb5f6555fa",
     "D-04": "1f72d5d11097cf5af4c7686e4905b19cb932978e25bfc4d585064c05d7807c5a",
@@ -134,15 +136,15 @@ MIGRATED_RUNTIME_SHA256 = {
     "D-56": "45fde852ece1c7fda7a6c634d82def8a24300d56b80e50fb8191ec30ff94e372",
     "D-57": "9aa89dd9b6f154800c5458b15442030ca5dc0c138bf94df932280fce2d7676da",
     "D-58": "ce427b6aec78543c7a26655f1884a15802a1419b43fc224546da56738a458cec",
-    "D-59": "368fc0645b413c7401904577119461007dfbf361e32af5883fc26b913b674ab6",
-    "D-60": "6e5920afc4398175222a56f79daa8253a32002ebe27f9c50d948b7eecc243e4e",
+    "D-59": "93a0410d254b202c2cf3e567b9bcb234401c0cbb91b14f74f912610123e90ddb",
+    "D-60": "06773f3e4e9bb9c1d4d81f77b99343ce9c102b8a30ea448b261cd50784eb87d8",
     "D-61": "0414b6eacd2e79a2ce00f13ee250eecf5a7645ab0a895cb0e29c5828fdef8437",
     "D-62": "035f4d4416907045e6ef365017983fde8c92094f9338cc9a9530cf6601bf271c",
     "D-63": "db7b854dc1bbf32b204d71058101ee475fc7ec9cc861fe5d0e92c34ae12b8a75",
     "D-65": "f318479ec6eff50833478ce37e8c08cb74af6ac17bbb79236e9b3e03cb0de7bc",
     "D-74": "b2438c36fd9a9713ea76a1b9c4dc2bd0511a508239544ccd1451adb3cecc7b39",
     "D-76": "d0488f1809e412e3a2871415d466dfc6a33bbd67ac1800202a667feab3873857",
-    "D-85": "1be2a15512d2ec06a24e57128d02a8fe1b5a73682f5399aedf66a640d33a2da0",
+    "D-85": "2bfb65a370494500592760cad0f42e44541f98ee1e27e0890bcc307703a719b3",
     "D-89": "d2d60bfd9baff780388a68fac64f41ded05363c1390e9a8457d2bb6fefa2dff5",
     "D-90": "80996e2dde0fa7797f6341bcdf7885a4358f96df2347c0f0695c2844dd536e59",
     "D-91": "e411f246aeb43f8c0d608b547a31e5668cdc5219983fe9ca5ac4381cee569efc",
@@ -153,11 +155,12 @@ MIGRATED_RUNTIME_SHA256 = {
     "D-100": "15aa0d6080200fea28ec3e04400c89faa7a1d0292815e2ac009a17500ada9c5f",
     "D-101": "fe8c03c393dcfbf4677febbcd0452be8aedfe2799495963945a51b2156fe7ab0",
     "D-102": "c1db1f4f6c220c0ee04cf3bcd7df1debdbf7e6c2a2f97807a4e44084242a2368",
+    "D-104": "299cd43f2f4707a8cfc7aaa84f85fe06bd24148f8dc8e59768d8246517cac983",
 }
-#: Each migrated decision's requirement keys in AUTHORED order, as the
-#: sources record them. Phase C's 23 had them in the legacy front matter;
-#: Phase D's 42 converted decisions were authored with their structured form.
-MIGRATED_KEYS = {
+#: Each structured decision's requirement keys in AUTHORED order, as the
+#: sources record them. Phase C's 23 had them in legacy front matter; Phase
+#: D's 42 converted decisions and later native decisions authored this form.
+STRUCTURED_KEYS = {
     "D-02": ("resolvable_space_type_inputs",),
     "D-03": ("water_cooled_chiller_eir_temperature_erratum",),
     "D-04": (
@@ -258,7 +261,10 @@ MIGRATED_KEYS = {
         "purchased_energy_service_scope",
         "residential_compatible_cooling_identity",
     ),
-    "D-59": ("necb2020_equipment_efficiency_minima",),
+    "D-59": (
+        "necb2020_equipment_efficiency_minima",
+        "necb2020_vrf_efficiency_minima",
+    ),
     "D-60": (
         "necb2025_equipment_efficiency_minima",
         "reference_system_selection_2025",
@@ -325,8 +331,9 @@ MIGRATED_KEYS = {
         "thermal_block_identity",
     ),
     "D-102": ("dx_cooling_part_load", "heat_pump_part_load"),
+    "D-104": ("vrf_minimum_when_electrical_phase_is_unknown",),
 }
-#: Each migrated requirement as the sources record it: its label, then its
+#: Each structured requirement as the sources record it: its label, then its
 #: NECB 2020 and NECB 2025 citations in authored order. A requirement the
 #: edition's text does not establish carries `None` for that edition (D-42's
 #: sentence 8.4.1.2.(4) is NECB 2020 only). Written out rather than hashed, so
@@ -335,7 +342,7 @@ MIGRATED_KEYS = {
 #: `Note` prefixed to an Appendix A note (`A-8.4.4.14.(2)`) -- which the
 #: provision grammar would otherwise refuse as an alias. A key shared by
 #: several decisions appears once: it is one requirement.
-MIGRATED_REQUIREMENTS = {
+STRUCTURED_REQUIREMENTS = {
     "air_leakage_conditioned_enclosure_area": (
         "Building-envelope area used to normalize modeled air leakage",
         ("3.2.4.2.(1)(c)", "8.4.2.9.(2)"),
@@ -645,6 +652,11 @@ MIGRATED_REQUIREMENTS = {
         ),
         None,
     ),
+    "necb2020_vrf_efficiency_minima": (
+        "NECB 2020 variable refrigerant flow minimum-efficiency dataset",
+        ("Table 5.2.12.1.-I",),
+        None,
+    ),
     "necb2025_equipment_efficiency_minima": (
         "NECB 2025 equipment minimum-efficiency dataset",
         None,
@@ -923,6 +935,12 @@ MIGRATED_REQUIREMENTS = {
         ("Table 5.2.12.1.-I",),
         ("Table 5.2.12.1.-I",),
     ),
+    "vrf_minimum_when_electrical_phase_is_unknown": (
+        ("Minimum performance of sub-19 kW VRF equipment when electrical "
+         "phase is unknown"),
+        None,
+        ("Table 5.2.12.1.-I",),
+    ),
     "unmet_cooling_hours_vs_reference": (
         ("Proposed-building unmet cooling hours compared with the reference "
          "building's"),
@@ -991,9 +1009,9 @@ RELATED_SOURCES = {
 }
 
 
-def migrated_sources(key):
-    """The literal source records a migrated requirement carries."""
-    _label, *citations = MIGRATED_REQUIREMENTS[key]
+def structured_sources(key):
+    """The literal source records a structured requirement carries."""
+    _label, *citations = STRUCTURED_REQUIREMENTS[key]
     sources = [
         {"code": "necb", "edition": edition, "role": "governing",
          "references": list(references)}
@@ -1005,11 +1023,11 @@ def migrated_sources(key):
         source["code"], source["edition"], source["role"]))
 
 
-def migrated_editions(decision_id):
-    """The code ids a migrated decision governs, read off the literal table."""
+def structured_editions(decision_id):
+    """The code ids a structured decision governs, read off the literal table."""
     return sorted({"necb" + source["edition"]
-                   for key in MIGRATED_KEYS[decision_id]
-                   for source in migrated_sources(key)
+                   for key in STRUCTURED_KEYS[decision_id]
+                   for source in structured_sources(key)
                    if source["role"] == "governing"})
 
 
@@ -1613,16 +1631,16 @@ class TestTheCommittedProvisionView(unittest.TestCase):
     """
 
     #: Phase C converted every established mapping (23 structured), then Phase
-    #: D's seven batches moved 42 held decisions to the structured form (65),
-    #: leaving 3 held. Neither moves the 68 citation-bearing or 35
-    #: citation-free totals. Fourteen requirements have one source and the
-    #: other 108 have two; one of those records is D-60's related 2020
-    #: comparison. REQUIREMENTS counts instances, including a shared key once
-    #: per decision that uses it.
-    STRUCTURED, ESTABLISHED, HELD, INCLUDED, OMITTED = 65, 0, 3, 68, 35
-    SOURCE_ROWS = 230
-    GOVERNING_ROWS = 229
-    REQUIREMENTS = 122
+    #: D's seven batches moved 42 held decisions to the structured form (65).
+    #: D-104 is the first native structured decision, taking the total to 66
+    #: with 3 held. Sixteen requirements have one source and the other 108
+    #: have two; one of those records is D-60's related 2020 comparison.
+    #: REQUIREMENTS counts instances, including a shared key once per decision
+    #: that uses it.
+    STRUCTURED, ESTABLISHED, HELD, INCLUDED, OMITTED = 66, 0, 3, 69, 35
+    SOURCE_ROWS = 232
+    GOVERNING_ROWS = 231
+    REQUIREMENTS = 124
 
     @classmethod
     def setUpClass(cls):
@@ -1677,7 +1695,7 @@ class TestTheCommittedProvisionView(unittest.TestCase):
                 len(self.omitted),
             ),
         )
-        self.assertEqual(MIGRATED_IDS, tuple(self.structured))
+        self.assertEqual(STRUCTURED_IDS, tuple(self.structured))
         self.assertEqual(
             self.REQUIREMENTS,
             sum(
@@ -1715,7 +1733,11 @@ class TestTheCommittedProvisionView(unittest.TestCase):
         self.assertEqual(8, len(set(PHASE_D_BATCH_7_IDS)))
         self.assertEqual(42, len(phase_d))
         self.assertLessEqual(phase_d, set(self.structured))
-        self.assertEqual(23, len(set(self.structured) - phase_d))
+        self.assertEqual(23, len(set(MIGRATED_IDS) - phase_d))
+        self.assertEqual(
+            set(NATIVE_STRUCTURED_IDS),
+            set(self.structured) - set(MIGRATED_IDS),
+        )
         self.assertEqual(set(), phase_d & set(self.held))
         self.assertEqual(set(), phase_d & set(self.omitted))
 
@@ -1727,7 +1749,7 @@ class TestTheCommittedProvisionView(unittest.TestCase):
                    for block in self.front[decision_id]["articles"].values())
         }
         self.assertEqual(
-            {"D-04", "D-05", "D-42", "D-59", "D-60", "D-61"},
+            {"D-04", "D-05", "D-42", "D-59", "D-60", "D-61", "D-104"},
             single,
         )
         d04 = self.front["D-04"]
@@ -1790,33 +1812,33 @@ class TestTheCommittedProvisionView(unittest.TestCase):
             ).hexdigest()
             for decision_id in self.structured
         }
-        self.assertEqual(MIGRATED_RUNTIME_SHA256, actual)
+        self.assertEqual(STRUCTURED_RUNTIME_SHA256, actual)
 
-    def test_each_migrated_requirement_is_its_legacy_mapping_verbatim(self):
-        """Keys in authored order, labels, and each established edition's
-        citations in authored order, against the literal tables -- and
-        nothing else in a requirement but its `decided`. Phase D mappings
-        also include the narrowings and requirement splits recorded by the
-        decisions."""
-        self.assertEqual(MIGRATED_IDS, tuple(MIGRATED_KEYS))
+    def test_each_structured_requirement_matches_its_authored_mapping(self):
+        """Keys, labels and citations match the literal structured table.
+
+        Migrated mappings keep their established narrowings and splits; native
+        structured decisions enter this same explicit contract directly.
+        """
+        self.assertEqual(STRUCTURED_IDS, tuple(STRUCTURED_KEYS))
         self.assertEqual(
-            sorted(MIGRATED_REQUIREMENTS),
-            sorted({key for keys in MIGRATED_KEYS.values() for key in keys}),
+            sorted(STRUCTURED_REQUIREMENTS),
+            sorted({key for keys in STRUCTURED_KEYS.values() for key in keys}),
             "the literal table names exactly the requirements in use")
-        for decision_id, keys in MIGRATED_KEYS.items():
+        for decision_id, keys in STRUCTURED_KEYS.items():
             meta = self.front[decision_id]
             self.assertEqual(keys, tuple(meta["articles"]), decision_id)
             # Top-level editions are kept as authored; the generator holds
             # them equal to what the governing records derive.
-            self.assertEqual(migrated_editions(decision_id), meta["editions"])
+            self.assertEqual(structured_editions(decision_id), meta["editions"])
             for key in keys:
-                label = MIGRATED_REQUIREMENTS[key][0]
+                label = STRUCTURED_REQUIREMENTS[key][0]
                 block = meta["articles"][key]
                 with self.subTest(decision=decision_id, requirement=key):
                     self.assertEqual(("label", "decided", "sources"),
                                      tuple(block))
                     self.assertEqual(label, block["label"])
-                    self.assertEqual(migrated_sources(key), block["sources"])
+                    self.assertEqual(structured_sources(key), block["sources"])
                     self.assertEqual(
                         [("code", "edition", "role", "references")]
                         * len(block["sources"]),
@@ -1939,11 +1961,11 @@ class TestTheCommittedProvisionView(unittest.TestCase):
         label_of = {code_id: codes.resolve(code_id).label
                     for code_id in ("necb2020", "necb2025")}
         expected = {}
-        for decision_id, keys in MIGRATED_KEYS.items():
+        for decision_id, keys in STRUCTURED_KEYS.items():
             for key in keys:
-                label = MIGRATED_REQUIREMENTS[key][0]
+                label = STRUCTURED_REQUIREMENTS[key][0]
                 decided = self.front[decision_id]["articles"][key]["decided"]
-                sources = migrated_sources(key)
+                sources = structured_sources(key)
                 mine = {
                     "necb" + source["edition"]: source["references"]
                     for source in sources
@@ -1974,7 +1996,7 @@ class TestTheCommittedProvisionView(unittest.TestCase):
         actual = {}
         for code_id, cells in self.edition_rows:
             identity = (code_id, self.linked(cells[1]), code_spans(cells[2])[-1])
-            if identity[1] in MIGRATED_KEYS:
+            if identity[1] in STRUCTURED_KEYS:
                 self.assertNotIn(identity, actual)
                 actual[identity] = (code_spans(cells[0]),
                                     unescape(cells[2].split("<br>")[0]),
@@ -2024,7 +2046,7 @@ class TestTheCommittedProvisionView(unittest.TestCase):
                         {"label", "decided", "sources"}, set(block),
                     )
                     self.assertEqual(
-                        [source["edition"] for source in migrated_sources(key)],
+                        [source["edition"] for source in structured_sources(key)],
                         [source["edition"] for source in block["sources"]],
                     )
                     self.assertTrue(
@@ -2059,8 +2081,8 @@ class TestTheCommittedProvisionView(unittest.TestCase):
         # requirement, so it may not be structured in one place and legacy
         # or held in another.
         for decision_id, meta in self.front.items():
-            if decision_id not in MIGRATED_KEYS:
-                self.assertEqual(set(), set(meta["articles"]) & set(MIGRATED_REQUIREMENTS),
+            if decision_id not in STRUCTURED_KEYS:
+                self.assertEqual(set(), set(meta["articles"]) & set(STRUCTURED_REQUIREMENTS),
                                  decision_id)
         for key, records in shared.items():
             with self.subTest(requirement=key):
@@ -2144,10 +2166,11 @@ HOLDING_KEYS = ("unverified", "not_applicable")
 
 class TestThePhaseCMigration(unittest.TestCase):
     """Phase C converted every established mapping and Phase D's 42
-    held decisions, read straight from the committed files: no legacy
-    per-code-id shape survives in a converted source or registry entry, the
-    registry projects each migrated requirement exactly as the literal tables
-    say, and the decision log carries none of the new committee metadata."""
+    held decisions, and later decisions may be natively structured. Read
+    straight from the committed files: no legacy per-code-id shape survives
+    in a structured source or registry entry, the registry projects each
+    requirement exactly as the literal tables say, and the decision log
+    carries none of the committee metadata."""
 
     @classmethod
     def setUpClass(cls):
@@ -2164,7 +2187,7 @@ class TestThePhaseCMigration(unittest.TestCase):
             articles = meta["articles"]
             with self.subTest(decision=decision_id):
                 self.assertIsNone(LEGACY_LIST_LINE.search(self.fronts[decision_id]))
-                if decision_id in MIGRATED_KEYS:
+                if decision_id in STRUCTURED_KEYS:
                     for block in articles.values():
                         self.assertIsInstance(block, dict)
                         self.assertEqual(("label", "decided", "sources"),
@@ -2183,7 +2206,7 @@ class TestThePhaseCMigration(unittest.TestCase):
         self.assertEqual(list(self.front), [entry["id"] for entry in self.registry])
         for entry in self.registry:
             with self.subTest(decision=entry["id"]):
-                if entry["id"] in MIGRATED_KEYS:
+                if entry["id"] in STRUCTURED_KEYS:
                     self.assertEqual(STRUCTURED_FIELDS, tuple(entry))
                     continue
                 self.assertEqual(LEGACY_FIELDS, tuple(entry))
@@ -2191,28 +2214,28 @@ class TestThePhaseCMigration(unittest.TestCase):
                 self.assertIn(entry["editions"][0], HOLDING_KEYS)
                 self.assertIsInstance(entry["articles"][entry["editions"][0]], list)
 
-    def test_the_registry_projects_each_migrated_requirement_exactly(self):
+    def test_the_registry_projects_each_structured_requirement_exactly(self):
         """Requirements sorted by key, each the literal mapping plus its own
         `decided`; the runtime fields and `editions` as authored."""
-        for decision_id, keys in MIGRATED_KEYS.items():
+        for decision_id, keys in STRUCTURED_KEYS.items():
             entry, meta = self.by_id[decision_id], self.front[decision_id]
             with self.subTest(decision=decision_id):
                 self.assertEqual({field: meta[field] for field in RUNTIME_FIELDS},
                                  {field: entry[field] for field in RUNTIME_FIELDS})
-                self.assertEqual(migrated_editions(decision_id), entry["editions"])
+                self.assertEqual(structured_editions(decision_id), entry["editions"])
                 expected = []
                 for key in sorted(keys):
                     expected.append({
-                        "id": key, "label": MIGRATED_REQUIREMENTS[key][0],
+                        "id": key, "label": STRUCTURED_REQUIREMENTS[key][0],
                         "decided": meta["articles"][key]["decided"],
-                        "sources": migrated_sources(key)})
+                        "sources": structured_sources(key)})
                 self.assertEqual(ordered(expected), ordered(entry["requirements"]))
 
     def test_the_decision_log_carries_no_committee_metadata(self):
         """The log renders titles, kinds and bodies. A `decided` reaching it
         would mean the representation change moved a document it may not."""
         doc = DECISIONS_DOC.read_text(encoding="utf-8")
-        for decision_id, keys in MIGRATED_KEYS.items():
+        for decision_id, keys in STRUCTURED_KEYS.items():
             for key in keys:
                 with self.subTest(decision=decision_id, requirement=key):
                     self.assertNotIn(

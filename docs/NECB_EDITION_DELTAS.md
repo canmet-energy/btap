@@ -31,7 +31,7 @@ there rather than silently dropped from the comparison.
 |---|---|---|---|---|---|
 | envelope (`envelope_rules.json`) | 75 | 2 | 0 | 0 | 0 |
 | hvac (`reference_rules.json`) | 322 | 30 | 1 | 1 | 0 |
-| hvac_efficiencies (`efficiencies.json`) | 2704 | 24 | 111 | 427 | 48 |
+| hvac_efficiencies (`efficiencies.json`) | 2709 | 24 | 114 | 438 | 48 |
 | lighting (`lighting_rules.json`) | 6 | 0 | 0 | 0 | 0 |
 | loads (`loads_rules.json`) | 0 | 1 | 0 | 0 | 0 |
 | shw (`shw_rules.json`) | 76 | 1 | 3 | 0 | 0 |
@@ -42,7 +42,7 @@ there rather than silently dropped from the comparison.
 | tables/schedules (`tables/schedules.json`) | 7473 | 0 | 0 | 0 | 0 |
 | tables/space_types (`tables/space_types.json`) | 24024 | 0 | 0 | 0 | 0 |
 | tables/table_c1 (`tables/table_c1.json`) | 8827 | 0 | 0 | 0 | 0 |
-| **Total** | **46055** | **58** | **117** | **428** | **48** |
+| **Total** | **46060** | **58** | **120** | **439** | **48** |
 
 ## necb2020 → necb2025
 
@@ -106,7 +106,7 @@ there rather than silently dropped from the comparison.
 </details>
 
 <details>
-<summary><b>hvac_efficiencies</b> (`efficiencies.json`) — 3314 leaves: 2704 identical, 24 renumbered, 111 changed, 427 added, 48 removed (click to expand)</summary>
+<summary><b>hvac_efficiencies</b> (`efficiencies.json`) — 3333 leaves: 2709 identical, 24 renumbered, 114 changed, 438 added, 48 removed (click to expand)</summary>
 
 #### Renumbered
 
@@ -252,6 +252,9 @@ there rather than silently dropped from the comparison.
 | `unitary_acs.7.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
 | `unitary_acs.8.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
 | `unitary_acs.9.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `vrf_air_conditioners.1.test_standard` | changed | CSA C656 → AHRI 1230 |
+| `vrf_air_conditioners.2.test_standard` | changed | CSA C656 → AHRI 1230 |
+| `vrf_air_conditioners.3.test_standard` | changed | CSA C656 → AHRI 1230 |
 | `chillers.0.notes` | added | — → capacity in ton, full load eff in kW/ton |
 | `chillers.1.notes` | added | — → capacity in ton, full load eff in kW/ton |
 | `chillers.10.notes` | added | — → capacity in ton, full load eff in kW/ton |
@@ -679,6 +682,17 @@ there rather than silently dropped from the comparison.
 | `unitary_acs.29.notes` | added | — → NECB 2025 Table 5.2.12.1.-A: single-phase DOE 10 CFR 430 App. M1 class (SEER2). Not selected by the engine (subcategory). |
 | `unitary_acs.29.start_date` | added | — → 9/9/1919 |
 | `unitary_acs.29.subcategory` | added | — → Split System (single-phase) |
+| `vrf_air_conditioners.4.maximum_capacity_kw` | added | — → 19.0 |
+| `vrf_air_conditioners.4.minimum_capacity_kw` | added | — → 0.0 |
+| `vrf_air_conditioners.4.minimum_seer2` | added | — → 14.3 |
+| `vrf_air_conditioners.4.phase` | added | — → single-phase |
+| `vrf_air_conditioners.4.test_standard` | added | — → DOE 10 CFR, Part 430, Subpart B, Appendix M1 |
+| `vrf_air_source_heat_pumps.4.maximum_capacity_kw` | added | — → 19.0 |
+| `vrf_air_source_heat_pumps.4.minimum_capacity_kw` | added | — → 0.0 |
+| `vrf_air_source_heat_pumps.4.minimum_hspf2` | added | — → 6.6 |
+| `vrf_air_source_heat_pumps.4.minimum_seer2` | added | — → 14.3 |
+| `vrf_air_source_heat_pumps.4.phase` | added | — → single-phase |
+| `vrf_air_source_heat_pumps.4.test_standard` | added | — → DOE 10 CFR, Part 430, Subpart B, Appendix M1 |
 | `curves.0.implements.error_grid` | removed | exact at all ten printed points (error 0 by construction); the Code publishes no value between or below them, so there is no exact function to measure an interpolation error against. → — |
 | `heat_pumps.0.minimum_full_load_efficiency` | removed | null → — |
 | `heat_pumps.1.minimum_full_load_efficiency` | removed | null → — |
