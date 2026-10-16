@@ -223,21 +223,34 @@ audit are drained and archived — see `docs/README.md`.
   occupant density does not replace the proposed DSOA.
 - **Who/when:** phylroy ("do what you think is correct for both … it makes
   sense"), 2026-07-22.
-- **Why:** 8.4.4.2 normalizes operating conditions so archetype comparison is
-  apples-to-apples; leaving proposed lighting schedules or proposed OA rates in
-  place would leak proposed-design behaviour into the normalized run.
+- **Why (original reading):** 8.4.4.2 normalizes operating conditions so
+  archetype comparison is apples-to-apples. The outdoor-air part of that
+  reading was superseded by the correction below.
 - **Evidence:** commit `f42f19533`.
 
 ### Applicability correction
+
+- **Correction ruling/when:** Sol, 2026-10-14.
 
 The lighting-schedule decision is established by Sentence 8.4.4.2.(1) and
 its table. The earlier outdoor-air reading is not: Sentence 8.4.4.2.(2)
 expressly retains the rates in the proposed building specifications, and
 8.4.3.6.(1)(a) points to that Article. The structured record above therefore
-records the Code-backed replacement. The old interpretation remains a
-runtime and report-wording defect until Phase E changes the implementation
-and the summary; it is not carried into the committee mapping as if it were
-established.
+records the Code-backed replacement, and the runtime retains the proposed
+DSOA rather than substituting archetype rates.
+
+`test_2025_archetype_normalization_preserves_proposed_outdoor_air` is the
+focused witness: it supplies deliberately non-archetype rates and proves that
+the DSOA object, method and all flow terms survive normalization. Restoring
+the former overwrite makes that test fail. The frozen EUI scenario emits the
+decision narration but does not supply a hostile proposed DSOA, so it cannot
+distinguish preservation from overwrite. The focused SDK test is therefore
+the canonical behavioural evidence; adding a frozen scenario solely to
+duplicate this object-level assertion would not improve the proof.
+
+This correction retains D-05 because it replaces the interpretation of the
+same archetype-outdoor-air requirement; a second decision id would split one
+requirement identity across competing rulings.
 
 <a id="d-06"></a>
 
@@ -909,6 +922,8 @@ enclosure credit; pair shares the construction).
 
 ### Applicability correction
 
+- **Correction ruling/when:** Sol, 2026-10-14.
+
 The decision bundles three independent questions. The envelope boundary and
 inclination classification are established for both editions. The blanket
 enclosed-space credit is not: each edition's Appendix note excludes vented
@@ -916,6 +931,21 @@ attic, roof and crawl spaces, while the former transform credited every
 unconditioned enclosure. The structured record and Phase E runtime correction
 therefore apply the Code-backed exclusion conservatively rather than
 laundering the old behavior into the committee mapping.
+
+`test_reference_attic_ceiling_withholds_unproven_enclosure_credit` exercises
+the complete reference-envelope transform on a conditioned floor below an
+unconditioned attic. It measures the exterior-roof target against the
+superseded U=6.25-credit target; restoring the credit changes the construction
+conductance by more than 0.005 W/(m2.K) and makes the test fail. No frozen
+scenario contains the conditioned-to-unconditioned enclosure needed to reach
+this branch. The focused SDK test is therefore the canonical behavioural
+evidence; an artificial frozen model would duplicate a more precise
+construction-level assertion.
+
+This correction retains D-24 because it corrects the applicability of the
+same enclosed-space-credit requirement already governed by D-24; assigning a
+second decision id would divide one requirement identity between conflicting
+rulings.
 
 <a id="d-25"></a>
 

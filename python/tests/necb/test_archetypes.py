@@ -109,14 +109,6 @@ class TestArchetypes(unittest.TestCase):
             equipment = openstudio.model.WaterUseEquipment(definition)
             equipment.setName(f"{space.nameString()} SWH")
             equipment.setSpace(space)
-        space = model.getSpaces()[0]
-        proposed_oa = openstudio.model.DesignSpecificationOutdoorAir(model)
-        proposed_oa.setName("Hostile proposed OA specification")
-        proposed_oa.setOutdoorAirMethod("Maximum")
-        proposed_oa.setOutdoorAirFlowperPerson(0.0123)
-        proposed_oa.setOutdoorAirFlowperFloorArea(0.00456)
-        proposed_oa.setOutdoorAirFlowRate(0.0789)
-        space.setDesignSpecificationOutdoorAir(proposed_oa)
         audit = quiet()
         resolved = A.resolve(model, {"Office": "all"}, audit=audit)
         A.normalize(model, resolved, code="necb2025", audit=audit)
@@ -130,6 +122,7 @@ class TestArchetypes(unittest.TestCase):
             + " | ".join(check["mismatches"][:5]))
 
         # spot-check the physical values against Table 8.4.4.2 (Office row)
+        space = model.getSpaces()[0]
         self.assertAlmostEqual(1.0 / 25.0,
                                space.numberOfPeople() / space.floorArea(),
                                delta=1e-4, msg="Office: 25 m2/person")
@@ -139,14 +132,52 @@ class TestArchetypes(unittest.TestCase):
         zone = space.thermalZone().get()
         self.assertTrue(zone.thermostatSetpointDualSetpoint().is_initialized(),
                         "zone thermostat forced to the letter-A setpoints")
+
+    def test_2025_archetype_normalization_preserves_proposed_outdoor_air(self):
+        import openstudio
+
+        model = proposed_with_hvac()
+        space = model.getSpaces()[0]
+        proposed_oa = openstudio.model.DesignSpecificationOutdoorAir(model)
+        proposed_oa.setName("Hostile proposed OA specification")
+        proposed_oa.setOutdoorAirMethod("Maximum")
+        proposed_oa.setOutdoorAirFlowperPerson(0.0123)
+        proposed_oa.setOutdoorAirFlowperFloorArea(0.00456)
+        proposed_oa.setOutdoorAirFlowRate(0.0789)
+        space.setDesignSpecificationOutdoorAir(proposed_oa)
+
+        audit = quiet()
+        resolved = A.resolve(model, {"Office": "all"}, audit=audit)
+        A.normalize(model, resolved, code="necb2025", audit=audit)
+
         normalized_oa = space.designSpecificationOutdoorAir().get()
-        self.assertEqual(proposed_oa.handle(), normalized_oa.handle(),
-                         "8.4.4.2.(2): keep the proposed OA specification")
+        self.assertEqual(
+            proposed_oa.handle(), normalized_oa.handle(),
+            "8.4.4.2.(2): normalization must retain the proposed DSOA object")
         self.assertEqual("Maximum", normalized_oa.outdoorAirMethod())
         self.assertAlmostEqual(0.0123, normalized_oa.outdoorAirFlowperPerson())
-        self.assertAlmostEqual(0.00456,
-                               normalized_oa.outdoorAirFlowperFloorArea())
+        self.assertAlmostEqual(
+            0.00456, normalized_oa.outdoorAirFlowperFloorArea())
         self.assertAlmostEqual(0.0789, normalized_oa.outdoorAirFlowRate())
+
+        check = A.conformance(
+            model,
+            A.resolve(model, {"Office": "all"}, audit=audit),
+            code="necb2025",
+            audit=audit,
+        )
+        self.assertFalse(
+            any("OA " in mismatch
+                or "DesignSpecificationOutdoorAir" in mismatch
+                for mismatch in check["mismatches"]),
+            "proposed outdoor-air rates are not Table 8.4.4.2 mismatches")
+        decision = next(
+            entry for entry in audit.entries
+            if entry.get("ruling") == "D-05"
+            and entry.get("article") == "8.4.4.2.(2)")
+        self.assertIn(
+            "outdoor-air rates remain", decision["action"],
+            "the preservation decision must be visible in the audit")
 
     def test_lighting_power_is_never_touched(self):
         import openstudio
