@@ -2,7 +2,7 @@
   "provenance": {
     "code": "NECB",
     "edition": "2020",
-    "source": "Vendored verbatim from openstudio-standards NECB2020/data/*.json (tables) and NECB2011/data/curves.json (performance curves); values correspond to NECB 2020 Table 5.2.12.1 minimum performance requirements",
+    "source": "Mixed origin: the original equipment families were ported from openstudio-standards NECB2020/data/*.json and the performance curves from NECB2011/data/curves.json; the two VRF families have no oracle counterpart and were transcribed from NECB 2020 Table 5.2.12.1.-I archived through the building-codes MCP",
     "generated": "2026-07-12",
     "articles": [
       "5.2.12.1",
@@ -10,30 +10,34 @@
       "8.4.5.2",
       "8.4.5.3"
     ],
-    "note": "Capacity match rule (ported from legacy model_find_object): row matches when minimum_capacity < capacity <= maximum_capacity, retried at 0.99x capacity on boundary misses; criteria keys absent from a row act as wildcards. VERIFIED against the printed NECB 2020 tables via MCP 2026-08-02 and corrected under D-59: unitary_acs and heat_pumps = Table 5.2.12.1.-A exact, including SEER 15 for heat pumps below 19 kW; PTAC rows = Table -G exact (formula coefficient 0.3058/kBtu-h = printed 1.0435/kW unit-converted); heat_pumps_heating = Table -A exact; boilers = Table -N exact; furnaces = Table -O exact (strict-side row choices documented); chillers = Table -K PATH B full-load COPc exact. The 90.1-sourced heat_rejection family left this file under D-89: nothing read it, and the reference tower fan is set by apply_tower_rules from Table 5.2.12.2 plus the 8.4.4.11.(2)-(3) cell rules (D-26). IEER/IPLV/SCOP columns are not modeled: EnergyPlus carries full-load COP plus the reference part-load curves. Those part-load curves are this edition's own since D-89: part_load_fheatplc carries every FHeatPLC class Articles 8.4.5.2. and 8.4.5.3. publish (with a deferred_reason on each class no reference rule elects), part_load_curves maps an equipment class to the curve that represents it, and every boilers and furnaces row declares its part_load_curve_class instead of naming one curve for all of them."
+    "note": "Capacity match rule (ported from legacy model_find_object): row matches when minimum_capacity < capacity <= maximum_capacity, retried at 0.99x capacity on boundary misses; criteria keys absent from a row act as wildcards. VERIFIED against the printed NECB 2020 tables via MCP 2026-08-02 and corrected under D-59: unitary_acs and heat_pumps = Table 5.2.12.1.-A exact, including SEER 15 for heat pumps below 19 kW; PTAC rows = Table -G exact (formula coefficient 0.3058/kBtu-h = printed 1.0435/kW unit-converted); heat_pumps_heating = Table -A exact; boilers = Table -N exact; furnaces = Table -O exact (strict-side row choices documented); chillers = Table -K PATH B full-load COPc exact; vrf_air_conditioners and vrf_air_source_heat_pumps = Table -I exact under D-59, with no corresponding openstudio-standards NECB2020 data file. The 90.1-sourced heat_rejection family left this file under D-89: nothing read it, and the reference tower fan is set by apply_tower_rules from Table 5.2.12.2 plus the 8.4.4.11.(2)-(3) cell rules (D-26). IEER/IPLV/SCOP columns are not modeled: EnergyPlus carries full-load COP plus the reference part-load curves. Those part-load curves are this edition's own since D-89: part_load_fheatplc carries every FHeatPLC class Articles 8.4.5.2. and 8.4.5.3. publish (with a deferred_reason on each class no reference rule elects), part_load_curves maps an equipment class to the curve that represents it, and every boilers and furnaces row declares its part_load_curve_class instead of naming one curve for all of them."
   },
   "vrf_air_source_heat_pumps": [
     {
       "minimum_capacity_kw": 0.0,
       "maximum_capacity_kw": 19.0,
+      "test_standard": "CSA C656",
       "minimum_seer": 15.0,
       "minimum_hspf": 7.8
     },
     {
       "minimum_capacity_kw": 19.0,
       "maximum_capacity_kw": 40.0,
+      "test_standard": "AHRI 1230",
       "minimum_eer": 10.8,
       "minimum_heating_cop": 3.3
     },
     {
       "minimum_capacity_kw": 40.0,
       "maximum_capacity_kw": 70.0,
+      "test_standard": "AHRI 1230",
       "minimum_eer": 10.4,
       "minimum_heating_cop": 3.2
     },
     {
       "minimum_capacity_kw": 70.0,
       "maximum_capacity_kw": null,
+      "test_standard": "AHRI 1230",
       "minimum_eer": 9.3,
       "minimum_heating_cop": 3.2
     }
@@ -42,21 +46,25 @@
     {
       "minimum_capacity_kw": 0.0,
       "maximum_capacity_kw": 19.0,
+      "test_standard": "CSA C656",
       "minimum_seer": 15.0
     },
     {
       "minimum_capacity_kw": 19.0,
       "maximum_capacity_kw": 40.0,
+      "test_standard": "CSA C656",
       "minimum_eer": 11.2
     },
     {
       "minimum_capacity_kw": 40.0,
       "maximum_capacity_kw": 70.0,
+      "test_standard": "CSA C656",
       "minimum_eer": 11.0
     },
     {
       "minimum_capacity_kw": 70.0,
       "maximum_capacity_kw": null,
+      "test_standard": "CSA C656",
       "minimum_eer": 10.0
     }
   ],

@@ -107,7 +107,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-56** — Reference fan-coil systems get a real water-side economizer, and the cooling-tower setpoint reset is what makes it operate _(runtime)_
 - **D-57** — Reference daylighting photocontrols follow the current daylight-responsive control requirement, not the superseded one _(runtime)_
 - **D-58** — Residential compatible-cooling and heat-pump detection are decided from facts, not family names _(runtime)_
-- **D-59** — The original NECB 2020 equipment families are verified against their tables _(data)_
+- **D-59** — NECB 2020 equipment families are verified against their tables _(data)_
 - **D-60** — NECB 2025 equipment data verified against its own edition _(data)_
 - **D-61** — Extraction-backed NECB 2025 datasets rechecked with explicit residuals _(data)_
 - **D-62** — Economizer systems' staged cooling gets the prescribed lowest-stage capacity floor _(runtime)_
@@ -152,6 +152,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-101** — The thermal block is the selection unit; plant, election and disclosure scopes stay larger _(runtime)_
 - **D-102** — The Code states EIR_FPLR; EnergyPlus carries PLF in [0.7, 1.0], and the gaps at BOTH carrier edges are declared _(runtime)_
 - **D-103** — Verification evidence is a property of behaviour, not of Git lineage or of machinery source hashes _(process)_
+- **D-104** — Unknown VRF phase uses the generic pre-M1 rating with disclosure _(runtime)_
 
 <!-- TOC END -->
 
@@ -3501,6 +3502,7 @@ reference path applies [RAN `get_table` on 5.2.12.1.-A/-B/-G/-H/-I/-K/-M/-N/-O/-
 | boilers | -N | EXACT — gas AFUE 90/Et 90/Ec 90; oil 86/87/88; electric 100% |
 | furnaces | -O | EXACT within strict-side row choices (AFUE 95% ≤66 kW; Et 81% above) |
 | chillers | **-K PATH B** | EXACT — every kW/ton = 3.51685/printed COPc (4.513/4.694/5.177/5.633/6.018 PD; 5.065/5.544/5.917/6.018 centrifugal; 2.866 air-cooled) |
+| air-cooled VRF | -I | EXACT — 4/4 air-conditioner rows and 4/4 air-source heat-pump rows, transcribed from the archived MCP payload because the pinned gem has no Table-I dataset |
 | heat_rejection | (none) | VESTIGIAL — 90.1-sourced rows never read; tower fan from Table 5.2.12.2 + 8.4.4.11.(2)-(3) cells (apply_tower_rules, D-26) |
 
 **Findings:**
@@ -3523,6 +3525,11 @@ reference path applies [RAN `get_table` on 5.2.12.1.-A/-B/-G/-H/-I/-K/-M/-N/-O/-
    the modeling idiom (the curve story of D-03/D-13).
 6. **2025's split-system small-HP heating differs from 2020** (HSPF 7.8 versus
   7.4); the cooling ladder is shared after the small-bin correction.
+7. **The 2020 VRF ladders are not oracle-vendored.** The pinned gem has no
+   NECB2020 Table-I file; its only VRF efficiency records are ECMS assumptions
+   at cooling/heating COP 5.58/4.68. The shipped rows instead match the
+   archived 2020 Table 5.2.12.1.-I payload and carry each row's printed test
+   standard.
 
 **Pinned:** `openstudio-hvac/test/test_efficiency_provenance.rb` (6 runs,
 37 assertions) — each assertion states the printed value and the conversion,
@@ -3534,11 +3541,14 @@ so data drift fails with the printed number in the message.
 
 ### Applicability split
 
+**Ownership correction — Sol under D-94 review, 2026-10-16.**
+
 This decision is the bounded 2020 data verification that was actually run.
-It no longer claims ownership of every family the current path applies:
-VRF Table-I is D-85, part-load curves are D-89, and tower fan/cell treatment
-is D-26. The unused historical heat-rejection block is implementation
-provenance, not a governing D-59 source.
+It now owns the independently verified Table-I rows as data; D-85 still owns
+how runtime model evidence selects and applies those rows. Part-load curves
+remain D-89, tower fan/cell treatment remains D-26, and the unused historical
+heat-rejection block is implementation provenance rather than a governing
+D-59 source.
 
 <a id="d-60"></a>
 
@@ -3549,7 +3559,8 @@ provenance, not a governing D-59 source.
 2026-07-12 — BEFORE the hbix table-extraction fixes — and its provenance
 carried a letter map from the corrupted extraction ("-C PTAC/PTHP"). Re-run
 against the corrected extraction [RAN `get_table` on 2025
-5.2.12.1.-A/-C/-G/-K/-N/-O, 5.2.12.2, 8.4.5.7.-A + 2020 5.2.12.2].
+5.2.12.1.-A/-G/-I/-K/-M/-N/-O, 5.2.12.2, 8.4.5.7.-A + 2020
+5.2.12.1.-I and 5.2.12.2].
 
 | check | verdict |
 |---|---|
@@ -3558,17 +3569,21 @@ against the corrected extraction [RAN `get_table` on 2025
 | Chillers (-K) | byte-identical to 2020 printed — Path B ladder stands for 2025 |
 | Boilers (-N) / Furnaces (-O) | identical (2025 moves the three-phase furnace option to ≤66 kW; vendored strict-side picks unaffected) |
 | Tower (5.2.12.2) | same 10 rows both editions (2020's "20 rows" was extraction doubling); axial direct-contact ≤ 0.013 kW/kW — `apply_tower_rules`' constant correct for both |
-| Unitary/HP (-A) | genuine 2025 changes verified: split-system small HSPF 7.4→**7.8** ✓; SEER2 single-phase rows (14.3) vendored and INERT (subcategory never matches the lookup) ✓; low-temp COPh 2.25/2.05 vendored informationally (unread — the −8.3 °C behaviour comes from the reference curves) |
+| VRF (-I) | 14 printed rows, including the new single-phase <19 kW Appendix M1 class at SEER2 14.3/HSPF2 6.6; every air-cooled/air-source row and test standard is retained. The phase-qualified row is inert under D-104, while the generic C656 values and every ≥19 kW value remain unchanged |
+| Unitary/HP (-A) | genuine 2025 changes verified: split-system small HSPF 7.4→**7.8** ✓; single-phase air-conditioner SEER2 rows are vendored and inert, while the Table-A heat-pump/HSPF2 rows are not vendored; low-temp COPh 2.25/2.05 remains informational |
 | Small-HP cooling | both editions use the explicit Table -A class for air conditioners and heat pumps below 19 kW: SEER 15 (D-59 correction) |
-| `dx_cooling_cop` field coverage | reads every 2025 field variant incl. `minimum_seasonal_efficiency` and SEER2/EER2 — the 2025 rows apply cleanly [READ efficiency.rb:1100-1116] |
+| M1 conversion boundary | the former dormant SEER2/EER2/HSPF2 branches were retired: the available regressions are on the pre-M1 basis, and directly feeding them M1 metrics would understate the equivalent reference COP |
 | Selection (8.4.5.7.-A) | **verbatim 2020's 8.4.4.7.-A** (printed); vendored 2025 selection rules differ only in table-number strings; the 97-system matrix under vintage '2025' produces IDENTICAL assignments (system/action/energy_type) to the adjudicated 2020 golden |
 
-**Pinned:** `test_efficiency_provenance.rb` extended to 10 runs / 49
-assertions — cross-edition identity for the shared families, the 7.8/7.4
-HSPF split, SEER 15, SEER2 inertness. The 2025 provenance block rewritten
-with the corrected letter map and today's verification.
+**Pinned:** the SDK-free efficiency-provenance tests read the archived
+Table-I payload, require its 14 rows, and compare every shipped 2025
+air-cooled/air-source VRF row and test standard with that source. They also
+pin the 7.8/7.4 HSPF split, SEER 15, the inert phase-qualified M1 row and the
+absence of any executable `_2` conversion. The 2025 provenance block records
+the corrected letter map and completeness boundary.
 
-- **Files:** `efficiencies_2025.json` (provenance), the test.
+- **Files:** `necb2025/efficiencies.json` and
+  `test_hvac_efficiency_provenance.py`.
 - **Who/when:** Fable under D-10, 2026-08-02.
 
 ### Applicability split
@@ -3578,6 +3593,19 @@ requirements. The 2020 selection records are retained only as related
 comparison evidence. Cross-edition identity is not generalized to
 Table 5.2.12.2 or to efficiency families whose rows or metrics differ; every
 2025 minimum is established from the 2025 table itself.
+
+### Table-I completeness correction
+
+**Who/when:** Sol under D-94 review, 2026-10-16.
+
+The 14-row archived payload has been present since 2026-09-08; the first
+vendoring pass dropped its new single-phase row. Restoring that row repairs
+the snapshot's evidence boundary without changing an applied efficiency.
+
+The codes MCP archive exposes every Table-I row but not footnotes (2), (3) or
+(4), so their text remains an hbix evidence gap. That limitation does not
+hide a numeric or test-standard cell and does not change D-104's runtime
+choice.
 
 <a id="d-61"></a>
 
@@ -5329,9 +5357,19 @@ objects warn because `condenserType` cannot distinguish the printed water,
 groundwater and ground-source classes; unsized applicable modes also warn
 rather than passing silently.
 
-**Evidence:** direct tests pin both editions' air-conditioner and air-source
-heat-pump rows, cooling-only classification, exact assignment from an initially
-better COP, independent cooling/heating handling, and article-cited warnings.
+**2025 applicability correction — Sol under D-94 review, 2026-10-16.**
+
+NECB 2025 adds a single-phase Appendix M1 class to the air-cooled <19 kW bin.
+The classic object carries no electrical-phase field, so which of the two
+printed rows applies when phase is unknown is a new question decided and
+audited under D-104; it does not narrow the class-and-capacity rules above,
+whose selected values remain valid in both editions.
+
+**Evidence:** engine-facing classification and exact-assignment tests run
+under NECB 2020 and pin cooling-only, heat-pump, terminal-less and unsized
+paths. The 2025 rows are pinned independently against that edition's archived
+Table-I payload, including its additional phase-qualified class; D-104 owns
+the focused 2025 runtime witness.
 
 <a id="d-86"></a>
 
@@ -7791,3 +7829,36 @@ meaning, Fable owns adversarial implementation; the reviewer who raised the
 last accepted blocker clears its fix. After review begins, a fix round may
 change behaviour only to satisfy an accepted reproducer or an adjudicated
 property — a newly discovered unrelated change gets its own issue.
+
+<a id="d-104"></a>
+
+## D-104 — Unknown VRF phase uses the generic pre-M1 rating with disclosure
+
+**Decided:** For an NECB 2025 air-cooled VRF unit below 19 kW, when the
+classic OpenStudio model cannot establish electrical phase, apply the generic
+CSA C656 row (SEER 15/HSPF 7.8) and emit an information entry stating that
+the single-phase DOE Appendix M1 row (SEER2 14.3/HSPF2 6.6) was not applied.
+This is a ruled runtime choice, not an AHJ referral.
+
+**Who/when:** Sol, 2026-10-16.
+
+**Why:** Table 5.2.12.1-I publishes both rows, but
+`AirConditionerVariableRefrigerantFlow` exposes no phase field. The Code's own
+paired values are a DOE M-to-M1 restatement of one stringency:
+14.3/15 = 0.953 and 6.6/7.8 = 0.846. The engine's available SEER/HSPF-to-COP
+regressions are on the pre-M1 basis. Passing 14.3 and 6.6 directly through
+those regressions would reduce the modeled reference COP by about 2.8% and
+9.2%, respectively, despite the paired requirements representing the same
+minimum.
+
+**Implementation boundary:** the 2025 snapshot carries the single-phase row
+as phase-qualified, inert evidence. Runtime lookup selects only an
+unqualified row unless phase evidence exists. The dormant SEER2, EER2 and
+HSPF2 branches that reused the old regressions are removed, so an M1 metric
+cannot silently wake through another table.
+
+**Evidence:** `test_small_2025_vrf_with_unknown_phase_uses_c656_and_discloses`
+pins the applied cooling and heating COPs plus the D-104 information entry.
+The SDK-free provenance test derives the 2025 ladders and test standards from
+the archived 14-row Table-I payload and proves the phase-qualified row is
+retained without becoming selectable by the generic lookup.

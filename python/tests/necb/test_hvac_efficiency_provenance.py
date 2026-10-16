@@ -20,12 +20,90 @@ with open(DATA_DIR / 'necb2020' / 'efficiencies.json', encoding='utf-8') as f:
     DATA = json.load(f)
 with open(DATA_DIR / 'necb2025' / 'efficiencies.json', encoding='utf-8') as f:
     DATA_2025 = json.load(f)
+with open(DATA_DIR / 'necb2020' / 'provenance' / 'vintage_match'
+          / '5.2.12.1.-I.result.json', encoding='utf-8') as f:
+    TABLE_I_2020 = json.load(f)['get_table:necb:2020:5.2.12.1.-I']
+with open(DATA_DIR / 'necb2025' / 'provenance' / 'efficiencies.result.json',
+          encoding='utf-8') as f:
+    TABLE_I_2025 = json.load(f)['get_table:necb:2025:5.2.12.1.-I']
 
 KW_PER_TON = 3.51685
 
 
 def rows(family, **criteria):
     return [r for r in DATA[family] if all(r.get(k) == v for k, v in criteria.items())]
+
+
+def table_i_metric(row, metric):
+    suffix = r'(?:\s+V)?' if metric.startswith('HSPF') else ''
+    match = re.search(
+        rf'{re.escape(metric)}\b{suffix}\s*=\s*([0-9.]+)',
+        row['Minimum Performance'],
+    )
+    if match is None and metric == 'COP':
+        match = re.search(r'COP[^=]*=\s*([0-9.]+)', row['Minimum Performance'])
+    if match is None:
+        raise AssertionError(
+            f"{metric} absent from archived row {row['Minimum Performance']!r}")
+    return float(match.group(1))
+
+
+def table_i_band(row):
+    text = row['Cooling or Heating Capacity, kW']
+    numbers = [float(value) for value in re.findall(r'[0-9.]+', text)]
+    if text.startswith('<'):
+        return 0.0, numbers[0]
+    if 'and <' in text:
+        return numbers[0], numbers[1]
+    return numbers[0], None
+
+
+def table_i_air_cooled_ladders(table):
+    rows = table['rows']
+    air_conditioners = []
+    heat_pumps = []
+    for row in rows:
+        equipment = row['Equipment Type']
+        lower, upper = table_i_band(row)
+        common = {
+            'minimum_capacity_kw': lower,
+            'maximum_capacity_kw': upper,
+            'test_standard': row['Performance Testing Standard'],
+        }
+        if equipment.startswith('Single-phase air-cooled air conditioners and heat pumps'):
+            air_conditioners.append({
+                **common,
+                'phase': 'single-phase',
+                'minimum_seer2': table_i_metric(row, 'SEER2'),
+            })
+            heat_pumps.append({
+                **common,
+                'phase': 'single-phase',
+                'minimum_seer2': table_i_metric(row, 'SEER2'),
+                'minimum_hspf2': table_i_metric(row, 'HSPF2'),
+            })
+        elif equipment.startswith('Air-cooled air conditioners and heat pumps'):
+            air_conditioners.append({
+                **common,
+                'minimum_seer': table_i_metric(row, 'SEER'),
+            })
+            heat_pumps.append({
+                **common,
+                'minimum_seer': table_i_metric(row, 'SEER'),
+                'minimum_hspf': table_i_metric(row, 'HSPF'),
+            })
+        elif equipment == 'Air-cooled air conditioners':
+            air_conditioners.append({
+                **common,
+                'minimum_eer': table_i_metric(row, 'EER'),
+            })
+        elif equipment == 'Air-source heat pumps, with or without heat recovery':
+            heat_pumps.append({
+                **common,
+                'minimum_eer': table_i_metric(row, 'EER'),
+                'minimum_heating_cop': table_i_metric(row, 'COP'),
+            })
+    return air_conditioners, heat_pumps
 
 
 class TestEfficiencyProvenance(unittest.TestCase):
@@ -123,32 +201,34 @@ class TestEfficiencyProvenance(unittest.TestCase):
                         'are SEER 15, not Table-B SPVAC EER 11')
 
     def test_vrf_air_source_heat_pump_ladder_is_table_i(self):
-        heat_pumps = [
-            (0.0, 19.0, 15.0, None, 7.8, None),
-            (19.0, 40.0, None, 10.8, None, 3.3),
-            (40.0, 70.0, None, 10.4, None, 3.2),
-            (70.0, None, None, 9.3, None, 3.2),
-        ]
-        air_conditioners = [
-            (0.0, 19.0, 15.0, None, None, None),
-            (19.0, 40.0, None, 11.2, None, None),
-            (40.0, 70.0, None, 11.0, None, None),
-            (70.0, None, None, 10.0, None, None),
-        ]
+        self.assertEqual(13, TABLE_I_2020['row_count'])
+        air_conditioners, heat_pumps = table_i_air_cooled_ladders(TABLE_I_2020)
+        self.assertEqual(
+            heat_pumps, DATA['vrf_air_source_heat_pumps'],
+            '2020 VRF heat-pump rows come from archived Table -I, not the gem')
+        self.assertEqual(
+            air_conditioners, DATA['vrf_air_conditioners'],
+            '2020 VRF air-conditioner rows come from archived Table -I, not the gem')
 
-        def signature(row):
-            return (row['minimum_capacity_kw'], row['maximum_capacity_kw'],
-                    row.get('minimum_seer'), row.get('minimum_eer'),
-                    row.get('minimum_hspf'), row.get('minimum_heating_cop'))
+    def test_2025_vrf_ladders_are_complete_against_archived_table_i(self):
+        self.assertEqual(14, TABLE_I_2025['row_count'])
+        air_conditioners, heat_pumps = table_i_air_cooled_ladders(TABLE_I_2025)
 
-        self.assertEqual(heat_pumps,
-                         [signature(row) for row in DATA['vrf_air_source_heat_pumps']])
-        self.assertEqual(heat_pumps,
-                         [signature(row) for row in DATA_2025['vrf_air_source_heat_pumps']])
-        self.assertEqual(air_conditioners,
-                 [signature(row) for row in DATA['vrf_air_conditioners']])
-        self.assertEqual(air_conditioners,
-                 [signature(row) for row in DATA_2025['vrf_air_conditioners']])
+        def engine_order(ladder):
+            return ([row for row in ladder if row.get('phase') is None]
+                    + [row for row in ladder if row.get('phase') is not None])
+
+        self.assertEqual(
+            engine_order(heat_pumps), DATA_2025['vrf_air_source_heat_pumps'],
+            'every printed 2025 air-source class, including Appendix M1')
+        self.assertEqual(
+            engine_order(air_conditioners), DATA_2025['vrf_air_conditioners'],
+            'every printed 2025 air-conditioner class, including Appendix M1')
+        self.assertEqual(
+            ['DOE 10 CFR, Part 430, Subpart B, Appendix M1',
+             'CSA C656', 'AHRI 1230', 'AHRI 1230', 'AHRI 1230'],
+            [row['test_standard'] for row in air_conditioners],
+            'the 2025 C656-to-AHRI 1230 test-standard change has a data footprint')
 
     def test_heat_pump_capacity_ladders_have_no_boundary_gaps(self):
         for edition, dataset in (('2020', DATA), ('2025', DATA_2025)):

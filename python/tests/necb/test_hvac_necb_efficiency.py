@@ -250,6 +250,56 @@ class TestNecbEfficiency(unittest.TestCase):
         self.assertAlmostEqual(hvac.efficiency.hspf_to_cop_no_fan(7.8),
                                unit.ratedHeatingCOP(), delta=1e-6)
 
+    def test_small_2025_vrf_with_unknown_phase_uses_c656_and_discloses(self):
+        import openstudio
+
+        model = openstudio.model.Model()
+        unit = self._vrf_unit(model, heating=True)
+        unit.setGrossRatedTotalCoolingCapacity(12_000.0)
+        unit.setGrossRatedHeatingCapacity(12_000.0)
+        unit.setGrossRatedCoolingCOP(1.0)
+        unit.setRatedHeatingCOP(1.0)
+        audit = AuditLog()
+
+        hvac.apply_efficiencies(model, code='necb2025', audit=audit)
+
+        self.assertAlmostEqual(
+            hvac.efficiency.seer_to_cop_no_fan(15.0),
+            unit.grossRatedCoolingCOP(),
+            delta=1e-6,
+        )
+        self.assertAlmostEqual(
+            hvac.efficiency.hspf_to_cop_no_fan(7.8),
+            unit.ratedHeatingCOP(),
+            delta=1e-6,
+        )
+        disclosure = next(
+            entry for entry in audit.entries
+            if entry.get('ruling') == 'D-104')
+        self.assertEqual('info', disclosure['level'])
+        self.assertEqual(
+            ['cooling', 'heating'],
+            disclosure['inputs']['applicable_modes'])
+        self.assertEqual(
+            'CSA C656',
+            disclosure['inputs']['selected_test_standard'])
+        self.assertEqual(
+            'DOE 10 CFR, Part 430, Subpart B, Appendix M1',
+            disclosure['inputs']['not_applied_test_standard'])
+        self.assertEqual(14.3, disclosure['inputs']['not_applied_seer2'])
+        self.assertEqual(6.6, disclosure['inputs']['not_applied_hspf2'])
+
+    def test_m1_metrics_are_not_converted_by_pre_m1_regressions(self):
+        self.assertIsNone(hvac.efficiency.dx_cooling_cop({
+            'minimum_seasonal_energy_efficiency_ratio_2': 14.3,
+        }))
+        self.assertIsNone(hvac.efficiency.dx_cooling_cop({
+            'minimum_energy_efficiency_ratio_2': 11.0,
+        }))
+        self.assertIsNone(hvac.efficiency.dx_heating_cop({
+            'minimum_heating_seasonal_performance_factor_2': 6.6,
+        }, 12_000.0))
+
     def test_unsized_vrf_warns_with_table_i_citation(self):
         model = load_fixture()
         modeling.build_system(model, 'VRF', sorted_zones(model))

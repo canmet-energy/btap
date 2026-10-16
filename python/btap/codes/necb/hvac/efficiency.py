@@ -104,9 +104,10 @@ def _apply(model, ruleset, audit=None, proposed=None):
     return True
 
 
-def _vrf_row(rows, capacity_w):
+def _vrf_row(rows, capacity_w, *, phase=None):
     capacity_kw = capacity_w / 1000.0
     return next((row for row in rows
+                 if row.get('phase') == phase
                  if capacity_kw >= row['minimum_capacity_kw']
                  and (row['maximum_capacity_kw'] is None
                       or capacity_kw < row['maximum_capacity_kw'])), None)
@@ -143,8 +144,11 @@ def _apply_vrf(unit, tables, ruleset, audit):
     groundwater, and ground-source classes, so those paths warn instead of
     guessing. An attached VRF DX heating coil selects the heat-pump class;
     cooling-only terminals select the air-conditioner class; an outdoor unit
-    serving no terminals at all is INDETERMINATE and warns. Code minimums are
-    assigned exactly, consistently with the other equipment appliers.
+    serving no terminals at all is INDETERMINATE and warns. The classic object
+    also carries no electrical-phase field. For NECB 2025 equipment below
+    19 kW, the generic CSA C656 row is applied and the unselected single-phase
+    Appendix M1 row is disclosed under D-104. Code minimums are assigned
+    exactly, consistently with the other equipment appliers.
     """
     article = 'Table 5.2.12.1.-I'
     if unit.condenserType() != 'AirCooled':
@@ -173,6 +177,45 @@ def _apply_vrf(unit, tables, ruleset, audit):
     applied = []
 
     cooling_row = _vrf_row(rows, cooling_w) if cooling_w is not None else None
+    heating_row = (
+        _vrf_row(rows, heating_w)
+        if heat_pump and heating_w is not None
+        else None
+    )
+    phase_ambiguous = []
+    if ruleset.id == 'necb2025':
+        for mode, capacity_w, row in (
+                ('cooling', cooling_w, cooling_row),
+                ('heating', heating_w, heating_row if heat_pump else None)):
+            if (capacity_w is not None and row is not None
+                    and _vrf_row(rows, capacity_w, phase='single-phase') is not None):
+                phase_ambiguous.append(mode)
+    if phase_ambiguous:
+        selected_row = (
+            cooling_row if 'cooling' in phase_ambiguous else heating_row
+        )
+        single_phase = _vrf_row(
+            rows,
+            cooling_w if 'cooling' in phase_ambiguous else heating_w,
+            phase='single-phase',
+        )
+        audit.info(
+            'efficiency',
+            'VRF electrical phase unavailable — the CSA C656 row is used and '
+            'the single-phase Appendix M1 row is not applied',
+            target=unit.nameString(),
+            inputs={
+                'equipment_class': equipment_class,
+                'applicable_modes': phase_ambiguous,
+                'selected_test_standard': selected_row['test_standard'],
+                'not_applied_test_standard': single_phase['test_standard'],
+                'not_applied_seer2': single_phase.get('minimum_seer2'),
+                'not_applied_hspf2': single_phase.get('minimum_hspf2'),
+            },
+            article=article,
+            ruling='D-104',
+        )
+
     if cooling_row is None:
         audit.warn('efficiency', 'VRF cooling capacity unavailable (model not sized?) — '
                                  'Table-I cooling minimum not set',
@@ -187,9 +230,7 @@ def _apply_vrf(unit, tables, ruleset, audit):
             cooling_label = f"EER {cooling_row['minimum_eer']}"
         unit.setGrossRatedCoolingCOP(cooling_cop)
         applied.append(f'cooling {cooling_label} (COP {ruby_round(cooling_cop, 2)})')
-
     if heat_pump:
-        heating_row = _vrf_row(rows, heating_w) if heating_w is not None else None
         if heating_row is None:
             audit.warn('efficiency', 'VRF heating capacity unavailable (model not sized?) — '
                                      'Table-I heating minimum not set',
@@ -2903,8 +2944,6 @@ def _apply_dx_cooling(coil, tables, audit):
                           inputs={'heat_pump': heat_pump, 'heating_type': heating_type,
                                   'capacity_btu_hr': ruby_round(cap_btuh)})
 
-    # SEER2/EER2 converted like SEER/EER — the documented openstudio-standards
-    # assumption (Standards.CoilCoolingDXSingleSpeed: 'assumed to be the same').
     cop_label = dx_cooling_cop(row)
     if cop_label is None:
         return audit.warn('efficiency', 'DX cooling row has no efficiency value — not set', target=name)
@@ -2996,18 +3035,12 @@ def dx_cooling_cop(row):
     if row.get('minimum_seasonal_energy_efficiency_ratio'):
         return (seer_to_cop_no_fan(row['minimum_seasonal_energy_efficiency_ratio']),
                 f"{row['minimum_seasonal_energy_efficiency_ratio']}SEER")
-    if row.get('minimum_seasonal_energy_efficiency_ratio_2'):
-        return (seer_to_cop_no_fan(row['minimum_seasonal_energy_efficiency_ratio_2']),
-                f"{row['minimum_seasonal_energy_efficiency_ratio_2']}SEER2")
     if row.get('minimum_seasonal_efficiency'):
         return (seer_to_cop_no_fan(row['minimum_seasonal_efficiency']),
                 f"{row['minimum_seasonal_efficiency']}SEER")
     if row.get('minimum_energy_efficiency_ratio'):
         return (eer_to_cop_no_fan(row['minimum_energy_efficiency_ratio']),
                 f"{row['minimum_energy_efficiency_ratio']}EER")
-    if row.get('minimum_energy_efficiency_ratio_2'):
-        return (eer_to_cop_no_fan(row['minimum_energy_efficiency_ratio_2']),
-                f"{row['minimum_energy_efficiency_ratio_2']}EER2")
     if row.get('minimum_full_load_efficiency'):
         return (eer_to_cop_no_fan(row['minimum_full_load_efficiency']),
                 f"{row['minimum_full_load_efficiency']}EER")
@@ -3067,10 +3100,6 @@ def dx_heating_cop(row, capacity_w):
     if row.get('minimum_heating_seasonal_performance_factor'):
         return (hspf_to_cop_no_fan(row['minimum_heating_seasonal_performance_factor']),
                 f"{row['minimum_heating_seasonal_performance_factor']}HSPF")
-    if row.get('minimum_heating_seasonal_performance_factor_2'):
-        # HSPF2 converted like HSPF (consistent with the SEER2/EER2 assumption)
-        return (hspf_to_cop_no_fan(row['minimum_heating_seasonal_performance_factor_2']),
-                f"{row['minimum_heating_seasonal_performance_factor_2']}HSPF2")
     if row.get('minimum_coefficient_of_performance_heating'):
         return (cop_heating_to_cop_heating_no_fan(row['minimum_coefficient_of_performance_heating'],
                                                   capacity_w),

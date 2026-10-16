@@ -10,54 +10,77 @@
       "8.4.6.2",
       "8.4.6.3"
     ],
-    "note": "Capacity match rule (ported from legacy model_find_object): row matches when minimum_capacity < capacity <= maximum_capacity, retried at 0.99x capacity on boundary misses; criteria keys absent from a row act as wildcards. Values re-verified against the post-hbix#88 MCP extraction 2026-08-02 (D-59/D-60): unitary_acs and heat_pumps = Table 5.2.12.1.-A, the small air-cooled bin reading \"air conditioners AND heat pumps ... SEER 15\" as an explicit class (D-59); PTAC/PTHP = Table -G (EER 11.9 / 14.1-1.0435xCap / 9.5; PTHP COPh 3.3/formula/2.9); heat_pumps_heating = Table -A (split-system small HSPF 7.8, single-package 7.4, COPh 3.3/3.2); chillers = Table -K Path B full-load COPc; boilers = Table -N; furnaces = Table -O (strict-side row choices documented). Vendored but INERT for the engine: the single-phase SEER2/EER2/HSPF2 rows (the subcategory never matches the Single Package lookup), the low-temperature COPh 2.25/2.05 rows (the -8.3 C behaviour comes from the reference part-load curves), and the Table 5.2.12.1.-M plant-heat-pump COPs. The 90.1-sourced heat_rejection family left this file under D-89: nothing read it, and the reference tower fan is set by apply_tower_rules from Table 5.2.12.2 plus the 8.4.5.11.(2)-(3) cell rules (D-26). IEER/IPLV/SCOP columns are not modeled: EnergyPlus carries full-load COP plus the reference part-load curves. Those part-load curves are this edition's own since D-89: part_load_fheatplc carries every FHeatPLC class Articles 8.4.6.2. and 8.4.6.3. publish (with a deferred_reason on each class no reference rule elects), part_load_curves maps an equipment class to the curve that represents it, and every boilers and furnaces row declares its part_load_curve_class instead of naming one curve for all of them."
+    "note": "Capacity match rule (ported from legacy model_find_object): row matches when minimum_capacity < capacity <= maximum_capacity, retried at 0.99x capacity on boundary misses; criteria keys absent from a row act as wildcards. Values re-verified against the post-hbix#88 MCP extraction 2026-08-02 (D-60): unitary_acs and heat_pumps = Table 5.2.12.1.-A, the small air-cooled generic bin reading \"air conditioners AND heat pumps ... SEER 15\" as an explicit class; PTAC/PTHP = Table -G (EER 11.9 / 14.1-1.0435xCap / 9.5; PTHP COPh 3.3/formula/2.9); heat_pumps_heating = Table -A (split-system small HSPF 7.8, single-package 7.4, COPh 3.3/3.2); vrf_air_conditioners and vrf_air_source_heat_pumps = Table -I, including the phase-qualified Appendix M1 row; chillers = Table -K Path B full-load COPc; boilers = Table -N; furnaces = Table -O (strict-side row choices documented). Table -A vendors only the single-phase air-conditioner SEER2 rows; its heat-pump HSPF2 rows are not carried. Table -I carries its single-phase SEER2/HSPF2 row as inert phase-qualified data: D-104 applies the generic CSA C656 row when the classic OpenStudio VRF object cannot establish phase, and no M1 metric is fed to the pre-M1 conversion regressions. EER2 appears in none of the archived tables this file reads. Also vendored but informational for the engine are the low-temperature COPh 2.25/2.05 rows (the -8.3 C behaviour comes from the reference part-load curves) and the Table 5.2.12.1.-M plant-heat-pump COPs. The 90.1-sourced heat_rejection family left this file under D-89: nothing read it, and the reference tower fan is set by apply_tower_rules from Table 5.2.12.2 plus the 8.4.5.11.(2)-(3) cell rules (D-26). IEER/IPLV/SCOP columns are not modeled: EnergyPlus carries full-load COP plus the reference part-load curves. Those part-load curves are this edition's own since D-89: part_load_fheatplc carries every FHeatPLC class Articles 8.4.6.2. and 8.4.6.3. publish (with a deferred_reason on each class no reference rule elects), part_load_curves maps an equipment class to the curve that represents it, and every boilers and furnaces row declares its part_load_curve_class instead of naming one curve for all of them."
   },
   "vrf_air_source_heat_pumps": [
     {
       "minimum_capacity_kw": 0.0,
       "maximum_capacity_kw": 19.0,
+      "test_standard": "CSA C656",
       "minimum_seer": 15.0,
       "minimum_hspf": 7.8
     },
     {
       "minimum_capacity_kw": 19.0,
       "maximum_capacity_kw": 40.0,
+      "test_standard": "AHRI 1230",
       "minimum_eer": 10.8,
       "minimum_heating_cop": 3.3
     },
     {
       "minimum_capacity_kw": 40.0,
       "maximum_capacity_kw": 70.0,
+      "test_standard": "AHRI 1230",
       "minimum_eer": 10.4,
       "minimum_heating_cop": 3.2
     },
     {
       "minimum_capacity_kw": 70.0,
       "maximum_capacity_kw": null,
+      "test_standard": "AHRI 1230",
       "minimum_eer": 9.3,
       "minimum_heating_cop": 3.2
+    },
+    {
+      "minimum_capacity_kw": 0.0,
+      "maximum_capacity_kw": 19.0,
+      "phase": "single-phase",
+      "test_standard": "DOE 10 CFR, Part 430, Subpart B, Appendix M1",
+      "minimum_seer2": 14.3,
+      "minimum_hspf2": 6.6
     }
   ],
   "vrf_air_conditioners": [
     {
       "minimum_capacity_kw": 0.0,
       "maximum_capacity_kw": 19.0,
+      "test_standard": "CSA C656",
       "minimum_seer": 15.0
     },
     {
       "minimum_capacity_kw": 19.0,
       "maximum_capacity_kw": 40.0,
+      "test_standard": "AHRI 1230",
       "minimum_eer": 11.2
     },
     {
       "minimum_capacity_kw": 40.0,
       "maximum_capacity_kw": 70.0,
+      "test_standard": "AHRI 1230",
       "minimum_eer": 11.0
     },
     {
       "minimum_capacity_kw": 70.0,
       "maximum_capacity_kw": null,
+      "test_standard": "AHRI 1230",
       "minimum_eer": 10.0
+    },
+    {
+      "minimum_capacity_kw": 0.0,
+      "maximum_capacity_kw": 19.0,
+      "phase": "single-phase",
+      "test_standard": "DOE 10 CFR, Part 430, Subpart B, Appendix M1",
+      "minimum_seer2": 14.3
     }
   ],
   "boilers": [
