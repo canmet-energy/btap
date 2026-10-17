@@ -310,6 +310,14 @@ When a deliberate behaviour change affects output, run
 `verification/scenarios/freeze.py` from a clean tree and commit the resulting
 baselines and provenance with the change.
 
+Coverage declarations are output too. `emit_coverage` writes every declared
+article on every reference run, whether or not that run exercises the article's
+implemented behaviour. Adding or rewording a coverage row therefore moves the
+audit and report baselines of every reference scenario independently of any
+energy, unmet-hours, conductance or other model-result change. Treat that as an
+expected declaration delta only after reviewing the structured diff; it still
+requires a clean-tree re-freeze of every affected scenario.
+
 **`--scenario ID` re-freezes one scenario and carries the rest forward.**
 Repeatable. Without it every scenario is re-run, which for the annual lanes
 is a long job — and a full re-freeze for one moved output is what made the
