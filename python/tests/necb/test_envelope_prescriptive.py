@@ -302,6 +302,21 @@ class TestPrescriptive(unittest.TestCase):
             and 'exception applies' in entry['action']
             for entry in audit.entries
         ))
+        self.assertFalse(any(
+            entry.get('article') == '3.2.3.3.(5)'
+            and 'PARTIAL-PERIMETER wall condition' in entry['action']
+            for entry in audit.warnings
+        ))
+
+        openstudio.model.SurfacePropertyExposedFoundationPerimeter(
+            floor, 'TotalExposedPerimeter', 40.0005)
+        submillimetre_audit = self.n.apply_prescriptive(
+            model, code='necb2020', hdd=HDD)
+        self.assertFalse(any(
+            entry.get('article') == '3.2.3.3.(5)'
+            and 'PARTIAL-PERIMETER wall condition' in entry['action']
+            for entry in submillimetre_audit.warnings
+        ))
 
     def test_mixed_foundation_wall_heights_use_the_tallest_and_warn(self):
         import openstudio
@@ -355,6 +370,54 @@ class TestPrescriptive(unittest.TestCase):
             [{'height_m': 1.0,
               'walls': ['Foundation wall 1', 'Foundation wall 2']}],
             mixed[0]['inputs']['over_reached_wall_instances'])
+
+    def test_partial_perimeter_wall_warns_about_zero_height_remainder(self):
+        import openstudio
+
+        model, floor, foundation, _radiant = embedded_ground_floor_model()
+        wall = next(
+            surface for surface in floor.space().get().surfaces()
+            if surface.surfaceType() == 'Wall'
+        )
+        wall.setName('Partial-perimeter foundation wall')
+        self.assertTrue(wall.setAdjacentFoundation(foundation))
+
+        audit = self.n.apply_prescriptive(
+            model, code='necb2020', hdd=HDD)
+        construction = floor.construction().get().to_LayeredConstruction().get()
+        floor_thickness = sum(
+            material.to_StandardOpaqueMaterial().get().thickness()
+            for material in construction.layers()
+        )
+        self.assertAlmostEqual(
+            3.0 + floor_thickness,
+            foundation.interiorVerticalInsulationDepth().get(),
+            delta=1e-6)
+
+        partial = [
+            entry for entry in audit.warnings
+            if entry.get('article') == '3.2.3.3.(5)'
+            and 'PARTIAL-PERIMETER wall condition' in entry['action']
+        ]
+        self.assertEqual(1, len(partial))
+        self.assertEqual(
+            {
+                'floor': 'Embedded ground floor',
+                'selected_wall_perimeter_m': 10.0,
+                'exposed_floor_perimeter_m': 40.0,
+                'zero_wall_height_remainder_m': 30.0,
+            },
+            partial[0]['inputs'])
+
+        openstudio.model.SurfacePropertyExposedFoundationPerimeter(
+            floor, 'TotalExposedPerimeter', 10.0)
+        matching_audit = self.n.apply_prescriptive(
+            model, code='necb2020', hdd=HDD)
+        self.assertFalse(any(
+            entry.get('article') == '3.2.3.3.(5)'
+            and 'PARTIAL-PERIMETER wall condition' in entry['action']
+            for entry in matching_audit.warnings
+        ))
 
     def test_shared_foundation_uses_only_the_floor_zone_walls_and_warns(self):
         import openstudio
@@ -420,6 +483,42 @@ class TestPrescriptive(unittest.TestCase):
         self.assertEqual(
             ['Other plain ground floor'],
             shared[0]['inputs']['other_floor_instances'])
+        self.assertEqual([], shared[0]['inputs']['same_zone_floor_instances'])
+        self.assertNotIn('ENERGYPLUS REPORTS', shared[0]['action'])
+        self.assertNotIn('run as not clean', shared[0]['action'])
+
+    def test_same_zone_shared_foundation_warns_that_run_is_not_clean(self):
+        import openstudio
+
+        model, floor, foundation, _radiant = embedded_ground_floor_model()
+        other = openstudio.model.Space.fromFloorPrint(
+            print_at(0.0), 3.0, model).get()
+        other.setXOrigin(20.0)
+        other.setThermalZone(floor.space().get().thermalZone().get())
+        other_floor = next(
+            surface for surface in other.surfaces()
+            if surface.surfaceType() == 'Floor'
+        )
+        other_floor.setName('Same-zone shared ground floor')
+        self.assertTrue(other_floor.setAdjacentFoundation(foundation))
+
+        audit = self.n.apply_prescriptive(
+            model, code='necb2020', hdd=HDD)
+        shared = [
+            entry for entry in audit.warnings
+            if entry.get('article') == '3.2.3.3.(5)'
+            and 'SHARED by multiple floor surfaces' in entry['action']
+        ]
+        self.assertEqual(1, len(shared))
+        self.assertIn('ENERGYPLUS REPORTS', shared[0]['action'])
+        self.assertIn('BTAP CLASSIFIES the run as not clean', shared[0]['action'])
+        self.assertNotIn('REJECTS', shared[0]['action'])
+        self.assertIn(
+            'only one floor per Foundation:Kiva Object allowed',
+            shared[0]['action'])
+        self.assertEqual(
+            ['Same-zone shared ground floor'],
+            shared[0]['inputs']['same_zone_floor_instances'])
 
     def test_internal_source_roof_is_retargeted_without_classifying_ground_floor(self):
         import openstudio
