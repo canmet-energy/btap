@@ -1543,8 +1543,8 @@ def _apply_zone_fan_rules(zones, reference_system, rules_data, audit):
         return
 
     spec = (rules_data.get('fans') or {}).get('systems_1_3_4_5') or {}
-    pressure = spec.get('supply_pa') or 640.0
-    eff = spec.get('supply_efficiency') or 0.40
+    pressure = spec['supply_pa']
+    eff = spec['supply_efficiency']
     touched = 0
     for zone in zones:
         for eq in zone.equipment():
