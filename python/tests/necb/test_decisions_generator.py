@@ -195,6 +195,19 @@ class TestSourceValidation(unittest.TestCase):
         self.assertEqual(GOOD_META, meta)
         self.assertEqual(GOOD_BODY, body)
 
+    def test_an_applicability_section_must_name_its_decider_and_date(self):
+        body = GOOD_BODY + "\n### Applicability split\n\nBody text.\n"
+        self.rejects("Applicability split must name its ruling/when", body=body)
+
+    def test_a_corrected_bullet_is_marked_above_the_original_attribution(self):
+        body = (
+            GOOD_BODY.replace(
+                "Body text.",
+                "- **Who/when:** Example, 2026-01-01.\n\n"
+                "### Applicability correction\n\n"
+                "- **Correction ruling/when:** Example, 2026-01-02.\n"))
+        self.rejects("corrected applicability must be marked", body=body)
+
     def test_the_heading_text_need_not_equal_the_title(self):
         """69 of the 97 real decisions differ here; that is a source fact."""
         meta, _ = self.parse()
