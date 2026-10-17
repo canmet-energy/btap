@@ -302,6 +302,21 @@ class TestPrescriptive(unittest.TestCase):
             and 'exception applies' in entry['action']
             for entry in audit.entries
         ))
+        self.assertFalse(any(
+            entry.get('article') == '3.2.3.3.(5)'
+            and 'PARTIAL-PERIMETER wall condition' in entry['action']
+            for entry in audit.warnings
+        ))
+
+        openstudio.model.SurfacePropertyExposedFoundationPerimeter(
+            floor, 'TotalExposedPerimeter', 40.0005)
+        submillimetre_audit = self.n.apply_prescriptive(
+            model, code='necb2020', hdd=HDD)
+        self.assertFalse(any(
+            entry.get('article') == '3.2.3.3.(5)'
+            and 'PARTIAL-PERIMETER wall condition' in entry['action']
+            for entry in submillimetre_audit.warnings
+        ))
 
     def test_mixed_foundation_wall_heights_use_the_tallest_and_warn(self):
         import openstudio
@@ -469,9 +484,10 @@ class TestPrescriptive(unittest.TestCase):
             ['Other plain ground floor'],
             shared[0]['inputs']['other_floor_instances'])
         self.assertEqual([], shared[0]['inputs']['same_zone_floor_instances'])
-        self.assertNotIn('ENERGYPLUS REJECTS', shared[0]['action'])
+        self.assertNotIn('ENERGYPLUS REPORTS', shared[0]['action'])
+        self.assertNotIn('run as not clean', shared[0]['action'])
 
-    def test_same_zone_shared_foundation_warns_that_energyplus_rejects_it(self):
+    def test_same_zone_shared_foundation_warns_that_run_is_not_clean(self):
         import openstudio
 
         model, floor, foundation, _radiant = embedded_ground_floor_model()
@@ -494,7 +510,9 @@ class TestPrescriptive(unittest.TestCase):
             and 'SHARED by multiple floor surfaces' in entry['action']
         ]
         self.assertEqual(1, len(shared))
-        self.assertIn('ENERGYPLUS REJECTS', shared[0]['action'])
+        self.assertIn('ENERGYPLUS REPORTS', shared[0]['action'])
+        self.assertIn('BTAP CLASSIFIES the run as not clean', shared[0]['action'])
+        self.assertNotIn('REJECTS', shared[0]['action'])
         self.assertIn(
             'only one floor per Foundation:Kiva Object allowed',
             shared[0]['action'])

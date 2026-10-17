@@ -648,7 +648,8 @@ def _apply_embedded_floor_perimeter(surface, construction, audit):
             ruling="D-105",
         )
     zero_height_remainder = exposed_floor_perimeter - selected_wall_perimeter
-    if wall_instances and zero_height_remainder > 1e-6:
+    # EnergyPlus drops a remaining exposed perimeter below 0.001 m.
+    if wall_instances and zero_height_remainder >= 0.001:
         audit.warn(
             "prescriptive",
             "Kiva foundation has a PARTIAL-PERIMETER wall condition — "
@@ -672,8 +673,10 @@ def _apply_embedded_floor_perimeter(surface, construction, audit):
         if same_zone_other_floors:
             action = (
                 "Kiva foundation is SHARED by multiple floor surfaces — "
-                "ENERGYPLUS REJECTS same-zone sharing as a Severe input error "
-                "('only one floor per Foundation:Kiva Object allowed'); its "
+                "ENERGYPLUS REPORTS same-zone sharing as a Severe input error "
+                "('only one floor per Foundation:Kiva Object allowed'), "
+                "simulates every instance with the same walls, and BTAP "
+                "CLASSIFIES the run as not clean; its "
                 "Sentence (3) strip and Sentence (5) continuation fields also "
                 "apply to every instance"
             )
