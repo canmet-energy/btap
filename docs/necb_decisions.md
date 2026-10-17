@@ -1404,7 +1404,9 @@ D-37 subsequently narrowed this branch. A water-loop heat pump retained by
 Article 13 Sentence (1) does not take this redirect; it continues to the
 residential selection-table branches.
 
-- **Correction ruling/when:** Claude under D-94 review, 2026-10-14.
+- **Correction ruling/when:** #111 commit `3678951` (phylroy,
+  co-authored by Copilot), 2026-10-14; accepted by phylroy at merge on
+  2026-10-15.
 
 <a id="d-35"></a>
 
