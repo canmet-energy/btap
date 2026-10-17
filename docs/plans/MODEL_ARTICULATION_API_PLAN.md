@@ -107,6 +107,34 @@ Code-agnostic by contract — it seeds a buildable baseline and applies no NECB
 values, so `apply_prescriptive` remains what retargets to code conductances,
 the D-77 direction holds, and no `article=` enters `btap.modeling`.
 
+### A seed that reaches simulation is a new silent failure
+
+Measured while scoping this phase: **nothing in the package checks whether a
+placeholder construction survives to simulation.**
+
+The test helper builds `MasslessOpaqueMaterial(model, 'MediumSmooth', 2.0)` —
+an R-2 wall — and a `SimpleGlazing` at U-2.5. Those are placeholders chosen to
+be *retargetable*, not values anyone should simulate. They are also plausible
+enough to be mistaken for real ones: R-2 is a believable wall and U-2.5 a
+believable double-glazed window.
+
+So productizing the seed as-is would INTRODUCE a silent failure of exactly the
+class this plan exists to close: a model that runs, produces numbers, and
+reports nothing wrong, while its envelope is a placeholder.
+
+Phase 1 therefore ships the seed *and* its guard together:
+
+- name the constructions so their status is unmistakable in the model;
+- have the simulation path refuse, or at minimum SHOUT, when a seed
+  construction reaches it. A warning is never silent, per the audit contract;
+- witness the guard at the call site — delete the call and a named test must
+  fail, with a control that stays green.
+
+The retarget is already proven to work on a massless single-layer seed:
+`tests/modeling/test_bar.py:138` asserts the D-23 naming
+`1/(1/0.265 - R_films) = 0.2759` on exactly this seed, so no richer base
+construction is needed to make `apply_prescriptive` function.
+
 ## Phase 2 — export the five domains
 
 Give each domain a named, documented entry point and a real `__all__`.
