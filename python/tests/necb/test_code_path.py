@@ -206,6 +206,71 @@ class TestForwardingFunctionsAreExecuted(unittest.TestCase):
             .is_initialized(),
             'the real envelope call must receive the pre-teardown inventory')
 
+    @needs_sdk
+    def test_real_pipeline_preserves_resolved_embedded_floor_inventory(self):
+        import openstudio
+
+        from btap.modeling.envelope import constructions as Constructions
+
+        proposed = proposed_with_hvac()
+        floor = proposed.getSurfaceByName('Surface 7').get()
+        insulation = openstudio.model.StandardOpaqueMaterial(
+            proposed, 'MediumSmooth', 0.03, 0.03, 30, 1200)
+        slab = openstudio.model.StandardOpaqueMaterial(
+            proposed, 'MediumRough', 0.1, 1.8, 2300, 900)
+        internal = openstudio.model.ConstructionWithInternalSource(proposed)
+        internal.setName('Resolved embedded floor construction')
+        self.assertTrue(internal.setLayers([insulation, slab]))
+        self.assertTrue(internal.setSourcePresentAfterLayerNumber(1))
+        self.assertTrue(
+            internal.setTemperatureCalculationRequestedAfterLayerNumber(1))
+        self.assertTrue(internal.setInsulation(insulation))
+        self.assertTrue(floor.setConstruction(internal))
+
+        foundation = openstudio.model.FoundationKiva(proposed)
+        foundation.setName('Resolved embedded floor foundation')
+        self.assertTrue(floor.setAdjacentFoundation(foundation))
+
+        with tempfile.TemporaryDirectory(prefix='d105-real-path-') as run_dir:
+            result = compliance.performance_compliance(
+                proposed, code='necb2020', simulate='none', hdd=3890,
+                building={
+                    'storeys': 1,
+                    'zone_types': zone_types_for(proposed),
+                    'winter_design_temp_c': -20,
+                },
+                run_dir=run_dir)
+
+        reference_floor = result.reference_model.getSurfaceByName(
+            floor.nameString()).get()
+        reference_foundation = reference_floor.adjacentFoundation().get()
+        target = 1.0 / (
+            (1.0 / 0.757) - Constructions.film_r('floor', 'ground'))
+        reference_construction = (
+            reference_floor.construction().get().to_LayeredConstruction().get())
+        self.assertAlmostEqual(
+            target, reference_construction.thermalConductance().get(),
+            delta=1e-4,
+            msg='the real pipeline must apply the full-area table target')
+        self.assertFalse(
+            reference_foundation.interiorHorizontalInsulationMaterial()
+            .is_initialized(),
+            'the real envelope call must not fall through to the 1.2 m strip')
+        decisions = [
+            entry for entry in result.audit.entries
+            if entry.get('ruling') == 'D-105'
+            and entry.get('article') == '3.2.3.3.(4)(b)'
+            and entry.get('level') == 'decision'
+        ]
+        self.assertEqual(1, len(decisions))
+        self.assertEqual('reference building', decisions[0].get('building'))
+        self.assertTrue(any(
+            entry.get('ruling') == 'D-105'
+            and entry.get('article') == '3.2.3.3.(5)'
+            and 'ENERGYPLUS REJECTS' in entry['action']
+            for entry in result.audit.warnings
+        ))
+
     def test_embedded_floor_inventory_precedes_reference_hvac_teardown(self):
         from btap.audit import AuditLog
         from btap.codes.necb import envelope, hvac, lighting

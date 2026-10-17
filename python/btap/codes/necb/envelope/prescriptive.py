@@ -473,22 +473,40 @@ def _construction_thickness(construction):
     return thickness
 
 
-def _foundation_wall_height(foundation):
-    heights = []
-    for surface in foundation.surfaces():
-        if surface.surfaceType() != "Wall":
+def _foundation_wall_profile(foundation, floor):
+    floor_space = opt(floor.space())
+    floor_zone = (
+        None if floor_space is None
+        else opt(floor_space.thermalZone())
+    )
+    if floor_zone is None:
+        return None
+
+    wall_instances = []
+    other_floors = []
+    for candidate in sorted_by_name(foundation.surfaces()):
+        if candidate.surfaceType() == "Floor":
+            if candidate.handle() != floor.handle():
+                other_floors.append(candidate.nameString())
             continue
-        space = opt(surface.space())
-        if space is None:
-            return None
-        vertices = list(space.transformation() * surface.vertices())
+        if candidate.surfaceType() != "Wall":
+            continue
+
+        space = opt(candidate.space())
+        zone = None if space is None else opt(space.thermalZone())
+        if zone is None or zone.handle() != floor_zone.handle():
+            continue
+
+        vertices = list(space.transformation() * candidate.vertices())
         if not vertices:
             return None
-        heights.append(
+        wall_instances.append((
+            candidate.nameString(),
             max(vertex.z() for vertex in vertices)
-            - min(vertex.z() for vertex in vertices)
-        )
-    return max(heights, default=0.0)
+            - min(vertex.z() for vertex in vertices),
+        ))
+
+    return wall_instances, other_floors
 
 
 def _apply_embedded_floor_perimeter(surface, construction, audit):
@@ -506,11 +524,27 @@ def _apply_embedded_floor_perimeter(surface, construction, audit):
         )
         return
 
+    internal_source = opt(construction.to_ConstructionWithInternalSource())
+    if internal_source is not None:
+        audit.warn(
+            "prescriptive",
+            "ENERGYPLUS REJECTS an internal-source construction on a "
+            "Foundation surface — this input representation cannot simulate "
+            "unless the construction or boundary is replaced",
+            target=name,
+            inputs={
+                "construction": internal_source.nameString(),
+                "foundation": foundation.nameString(),
+            },
+            article="3.2.3.3.(5)",
+            ruling="D-105",
+        )
+
     insulation = opt(construction.insulation())
     floor_thickness = _construction_thickness(construction)
-    foundation_wall_height = _foundation_wall_height(foundation)
+    wall_profile = _foundation_wall_profile(foundation, surface)
     if (insulation is None or floor_thickness <= 0
-            or foundation_wall_height is None):
+            or wall_profile is None):
         audit.warn(
             "prescriptive",
             "embedded ground floor's insulation layer, floor thickness, or "
@@ -521,6 +555,46 @@ def _apply_embedded_floor_perimeter(surface, construction, audit):
             ruling="D-105",
         )
         return
+
+    wall_instances, other_floors = wall_profile
+    foundation_wall_height = max(
+        (height for _wall, height in wall_instances), default=0.0)
+    height_groups = defaultdict(list)
+    for wall_name, height in wall_instances:
+        height_groups[ruby_round(height, 3)].append(wall_name)
+    grouped_instances = [
+        {"height_m": height, "walls": sorted(walls)}
+        for height, walls in sorted(height_groups.items())
+    ]
+    if len(grouped_instances) > 1:
+        audit.warn(
+            "prescriptive",
+            "Kiva foundation has MIXED adjoining wall heights — its one "
+            "vertical-insulation depth uses the tallest instance and "
+            "over-insulates the shorter instances",
+            target=foundation.nameString(),
+            inputs={
+                "floor": name,
+                "wall_instances": grouped_instances,
+                "over_reached_wall_instances": grouped_instances[:-1],
+            },
+            article="3.2.3.3.(5)",
+            ruling="D-105",
+        )
+    if other_floors:
+        audit.warn(
+            "prescriptive",
+            "Kiva foundation is SHARED by multiple floor surfaces — its "
+            "Sentence (3) strip and Sentence (5) continuation fields apply "
+            "to every EnergyPlus instance and can affect the other floors",
+            target=foundation.nameString(),
+            inputs={
+                "floor": name,
+                "other_floor_instances": sorted(other_floors),
+            },
+            article="3.2.3.3.(5)",
+            ruling="D-105",
+        )
 
     depth = foundation_wall_height + floor_thickness
     exterior = opt(foundation.exteriorVerticalInsulationMaterial())

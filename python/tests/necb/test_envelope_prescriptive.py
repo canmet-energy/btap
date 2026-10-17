@@ -248,6 +248,14 @@ class TestPrescriptive(unittest.TestCase):
                     entry.get('article') == '3.2.3.3.(5)'
                     and entry.get('ruling') == 'D-105'
                     for entry in audit.entries))
+                engine_warning = [
+                    entry for entry in audit.warnings
+                    if entry.get('article') == '3.2.3.3.(5)'
+                    and entry.get('ruling') == 'D-105'
+                    and 'ENERGYPLUS REJECTS' in entry['action']
+                ]
+                self.assertEqual(1, len(engine_warning))
+                self.assertEqual(floor.nameString(), engine_warning[0]['target'])
 
     def test_foundation_wall_height_is_included_in_vertical_continuation(self):
         model, floor, foundation, _radiant = embedded_ground_floor_model()
@@ -294,6 +302,124 @@ class TestPrescriptive(unittest.TestCase):
             and 'exception applies' in entry['action']
             for entry in audit.entries
         ))
+
+    def test_mixed_foundation_wall_heights_use_the_tallest_and_warn(self):
+        import openstudio
+
+        model, floor, foundation, _radiant = embedded_ground_floor_model()
+        walls = [
+            surface for surface in floor.space().get().surfaces()
+            if surface.surfaceType() == 'Wall'
+        ]
+        for index, wall in enumerate(walls, start=1):
+            wall.setName(f'Foundation wall {index}')
+            self.assertTrue(wall.setAdjacentFoundation(foundation))
+
+        for wall in walls[:2]:
+            vertices = openstudio.Point3dVector()
+            base = min(vertex.z() for vertex in wall.vertices())
+            for vertex in wall.vertices():
+                vertices.append(openstudio.Point3d(
+                    vertex.x(), vertex.y(), min(vertex.z(), base + 1.0)))
+            self.assertTrue(wall.setVertices(vertices))
+
+        audit = self.n.apply_prescriptive(
+            model, code='necb2020', hdd=HDD)
+        construction = floor.construction().get().to_LayeredConstruction().get()
+        floor_thickness = sum(
+            material.to_StandardOpaqueMaterial().get().thickness()
+            for material in construction.layers()
+        )
+        expected_depth = 3.0 + floor_thickness
+        self.assertAlmostEqual(
+            expected_depth,
+            foundation.interiorVerticalInsulationDepth().get(),
+            delta=1e-6,
+            msg='the one Kiva depth must satisfy the tallest wall instance')
+
+        mixed = [
+            entry for entry in audit.warnings
+            if entry.get('article') == '3.2.3.3.(5)'
+            and 'MIXED adjoining wall heights' in entry['action']
+        ]
+        self.assertEqual(1, len(mixed))
+        self.assertEqual(
+            [
+                {'height_m': 1.0,
+                 'walls': ['Foundation wall 1', 'Foundation wall 2']},
+                {'height_m': 3.0,
+                 'walls': ['Foundation wall 3', 'Foundation wall 4']},
+            ],
+            mixed[0]['inputs']['wall_instances'])
+        self.assertEqual(
+            [{'height_m': 1.0,
+              'walls': ['Foundation wall 1', 'Foundation wall 2']}],
+            mixed[0]['inputs']['over_reached_wall_instances'])
+
+    def test_shared_foundation_uses_only_the_floor_zone_walls_and_warns(self):
+        import openstudio
+
+        model, floor, foundation, _radiant = embedded_ground_floor_model()
+        other = openstudio.model.Space.fromFloorPrint(
+            print_at(0.0), 3.0, model).get()
+        other.setXOrigin(20.0)
+        other_zone = openstudio.model.ThermalZone(model)
+        other.setThermalZone(other_zone)
+
+        slab_material = openstudio.model.StandardOpaqueMaterial(
+            model, 'MediumRough', 0.1, 1.8, 2300, 900)
+        plain_slab = openstudio.model.Construction(model)
+        plain_slab.setLayers([slab_material])
+        enclosure = next(
+            surface.construction().get()
+            for surface in floor.space().get().surfaces()
+            if surface.surfaceType() == 'Wall'
+        )
+        other_floor = None
+        wall_number = 0
+        for surface in other.surfaces():
+            if surface.surfaceType() == 'Floor':
+                surface.setName('Other plain ground floor')
+                surface.setConstruction(plain_slab)
+                self.assertTrue(surface.setAdjacentFoundation(foundation))
+                other_floor = surface
+            else:
+                surface.setConstruction(enclosure)
+                if surface.surfaceType() == 'Wall':
+                    wall_number += 1
+                    surface.setName(f'Other-zone foundation wall {wall_number}')
+                    self.assertTrue(surface.setAdjacentFoundation(foundation))
+        self.assertIsNotNone(other_floor)
+
+        audit = self.n.apply_prescriptive(
+            model, code='necb2020', hdd=HDD)
+        construction = floor.construction().get().to_LayeredConstruction().get()
+        floor_thickness = sum(
+            material.to_StandardOpaqueMaterial().get().thickness()
+            for material in construction.layers()
+        )
+        self.assertAlmostEqual(
+            floor_thickness,
+            foundation.interiorVerticalInsulationDepth().get(),
+            delta=1e-6,
+            msg='walls from another zone do not adjoin this floor in EnergyPlus')
+
+        decision = next(
+            entry for entry in audit.entries
+            if entry.get('article') == '3.2.3.3.(5)'
+            and entry.get('level') == 'decision'
+        )
+        self.assertEqual(
+            0.0, decision['inputs']['adjoining_foundation_wall_height_m'])
+        shared = [
+            entry for entry in audit.warnings
+            if entry.get('article') == '3.2.3.3.(5)'
+            and 'SHARED by multiple floor surfaces' in entry['action']
+        ]
+        self.assertEqual(1, len(shared))
+        self.assertEqual(
+            ['Other plain ground floor'],
+            shared[0]['inputs']['other_floor_instances'])
 
     def test_internal_source_roof_is_retargeted_without_classifying_ground_floor(self):
         import openstudio

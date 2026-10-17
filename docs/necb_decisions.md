@@ -7894,13 +7894,26 @@ insulation layer. Internal-source walls and roofs are also valid layered
 assemblies for Table 3.2.2.2 retargeting and the reference lightweight
 rebuild, but they do not classify a ground floor: only ground floors enter
 this inventory. Where a Kiva foundation is present, Sentence (5)'s required
-depth is measured from the foundation-wall top to the floor bottom. The tool
-adds the maximum adjoining Foundation-wall height to the final floor
-construction thickness, and compares an existing exterior vertical-insulation
-exception against that same depth. Otherwise the full-area insulation is
-continued vertically to that level. A missing foundation or unresolvable
-floor or wall depth produces a surface-specific warning rather than a false
-claim that the continuation was modeled.
+depth is measured from the foundation-wall top to the floor bottom. EnergyPlus
+admits only Foundation walls in the floor's thermal zone to that floor's Kiva
+instance, so the tool selects walls by the same zone rule. It adds the tallest
+selected wall height to the final floor-construction thickness and compares
+an existing exterior vertical-insulation exception against that same depth.
+A floor with no selected walls has a zero wall height, matching EnergyPlus's
+slab-only instance. Mixed selected wall heights use the tallest depth and
+warn that the shorter Kiva instances are over-insulated. A Foundation object
+shared with another floor also warns because its strip and vertical-insulation
+fields apply to every instance and can cross-contaminate the floors.
+
+EnergyPlus 25.2 rejects a `Construction:InternalSource` on a
+Foundation-boundary surface. That is an input/engine constraint rather than a
+different Sentence (4) extent: the full-area action works on a plain Ground
+boundary, while the same construction with Kiva cannot be simulated as
+modeled. The tool emits a surface-specific Sentence (5) warning and still
+records the Kiva fields it can assign; an annual run cannot verify that
+continuation without replacing the input representation. A missing foundation
+or unresolvable floor or zone-matched wall depth likewise warns rather than
+making a false claim.
 
 **Who/when:** Sol, 2026-10-16.
 
@@ -7909,7 +7922,12 @@ that OpenStudio's radiant `surfaces()` result is derived from the
 internal-source construction rather than corroborating it independently, and
 that Kiva vertical depth is measured from the wall top rather than the slab
 top. The evidence description and Sentence (5) implementation were corrected
-accordingly; the Sentence (4) full-area ruling is unchanged.
+accordingly. The internal-source wall/roof widening also deliberately changes
+main's prior `surface has no layered construction — skipped` warning into the
+Table 3.2.2.2 retargeting and reference lightweight rebuild. Fable's engine
+re-review then established EnergyPlus's zone-scoped Kiva wall membership, the
+mixed-height/shared-foundation limits, and the internal-source/Foundation
+fatal described above. The Sentence (4) full-area ruling is unchanged.
 
 **Why:** Sentence (3) expressly applies to floors with **no** embedded system
 and permits the table value over a 1.2 m perimeter strip or the full area,
@@ -7934,11 +7952,17 @@ constructs a real SDK electric radiant floor, pins the full-area target,
 retained source construction, Sentence (5) continuation, and D-105 audit in
 both editions. `test_foundation_wall_height_is_included_in_vertical_continuation`
 pins the wall-top depth and rejects a shallow exterior-insulation exception.
+`test_mixed_foundation_wall_heights_use_the_tallest_and_warn` pins the maximum
+and its shorter-instance warning, while
+`test_shared_foundation_uses_only_the_floor_zone_walls_and_warns` pins
+EnergyPlus's zone membership and the multi-floor warning.
 `test_internal_source_roof_is_retargeted_without_classifying_ground_floor`
 pins the above-ground widening and the ordinary-floor non-leakage control.
 `test_unresolved_radiant_floor_does_not_guess_the_ordinary_strip` removes
 radiant HVAC from a cloned model, while
-`test_real_pipeline_preserves_unresolved_embedded_floor_inventory` exercises
-the actual `performance_compliance(simulate="none")` call site; both prove the
-pre-teardown inventory prevents the perimeter-strip fallback. The existing
-D-32 strip and zone-8 controls remain green.
+the resolved and unresolved `test_real_pipeline_preserves_*_embedded_floor_inventory`
+witnesses exercise the actual `performance_compliance(simulate="none")` call
+path; together they prove the pre-teardown inventory reaches both downstream
+branches and prevents the perimeter-strip fallback. The direct two-edition
+witness also pins the EnergyPlus incompatibility warning. The existing D-32
+strip and zone-8 controls remain green.
