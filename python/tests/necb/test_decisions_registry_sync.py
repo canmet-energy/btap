@@ -157,7 +157,7 @@ STRUCTURED_RUNTIME_SHA256 = {
     "D-101": "fe8c03c393dcfbf4677febbcd0452be8aedfe2799495963945a51b2156fe7ab0",
     "D-102": "c1db1f4f6c220c0ee04cf3bcd7df1debdbf7e6c2a2f97807a4e44084242a2368",
     "D-104": "299cd43f2f4707a8cfc7aaa84f85fe06bd24148f8dc8e59768d8246517cac983",
-    "D-105": "61776fc9bf2b6e953f1fcddf91b0d02a245344a47000a0605e5c10ee86814163",
+    "D-105": "8afd3dccafa72a5564f0bd71a9e68a656b87b3aa2f58f47aa3bb91124f9837dc",
 }
 #: Each structured decision's requirement keys in AUTHORED order, as the
 #: sources record them. Phase C's 23 had them in legacy front matter; Phase

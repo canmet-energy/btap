@@ -201,8 +201,8 @@ class TestPrescriptive(unittest.TestCase):
 
     # D-105: Sentence (4) overrides the ordinary Sentence (3) perimeter
     # option in EVERY climate zone. The actual SDK radiant-surface
-    # relationship and its ConstructionWithInternalSource both identify the
-    # floor before the reference HVAC teardown.
+    # relationship is derived from the ConstructionWithInternalSource; the
+    # inventory captures that construction evidence before HVAC teardown.
     def test_embedded_ground_floor_is_full_area_in_both_editions(self):
         from btap.modeling.envelope import constructions as Constructions
 
@@ -248,6 +248,103 @@ class TestPrescriptive(unittest.TestCase):
                     entry.get('article') == '3.2.3.3.(5)'
                     and entry.get('ruling') == 'D-105'
                     for entry in audit.entries))
+
+    def test_foundation_wall_height_is_included_in_vertical_continuation(self):
+        model, floor, foundation, _radiant = embedded_ground_floor_model()
+        for surface in floor.space().get().surfaces():
+            if surface.surfaceType() == 'Wall':
+                self.assertTrue(surface.setAdjacentFoundation(foundation))
+
+        import openstudio
+
+        shallow_exterior = openstudio.model.StandardOpaqueMaterial(
+            model, 'MediumSmooth', 0.05, 0.04, 30, 1200)
+        self.assertTrue(
+            foundation.setExteriorVerticalInsulationMaterial(shallow_exterior))
+        self.assertTrue(foundation.setExteriorVerticalInsulationDepth(0.2))
+
+        audit = self.n.apply_prescriptive(model, code='necb2020', hdd=HDD)
+        construction = floor.construction().get().to_LayeredConstruction().get()
+        floor_thickness = sum(
+            material.to_StandardOpaqueMaterial().get().thickness()
+            for material in construction.layers()
+        )
+        expected_depth = 3.0 + floor_thickness
+
+        self.assertTrue(
+            foundation.interiorVerticalInsulationMaterial().is_initialized(),
+            '0.2 m exterior insulation cannot exempt a floor over 3 m below wall top')
+        self.assertAlmostEqual(
+            expected_depth,
+            foundation.interiorVerticalInsulationDepth().get(),
+            delta=1e-6,
+            msg='Kiva depth runs from foundation-wall top to the slab bottom')
+        decision = next(
+            entry for entry in audit.entries
+            if entry.get('article') == '3.2.3.3.(5)'
+            and entry.get('level') == 'decision'
+        )
+        self.assertEqual(
+            3.0, decision['inputs']['adjoining_foundation_wall_height_m'])
+        self.assertEqual(
+            round(expected_depth, 4),
+            decision['inputs']['required_vertical_depth_m'])
+        self.assertFalse(any(
+            entry.get('article') == '3.2.3.3.(5)'
+            and 'exception applies' in entry['action']
+            for entry in audit.entries
+        ))
+
+    def test_internal_source_roof_is_retargeted_without_classifying_ground_floor(self):
+        import openstudio
+
+        from btap.audit import AuditLog
+        from btap.modeling.envelope import constructions as Constructions
+
+        model, floor, foundation, radiant = embedded_ground_floor_model(
+            internal_source=False)
+        radiant.remove()
+        roof = next(
+            surface for surface in model.getSurfaces()
+            if surface.surfaceType() == 'RoofCeiling'
+        )
+        original = roof.construction().get().to_Construction().get()
+        internal = openstudio.model.ConstructionWithInternalSource(model)
+        internal.setName('Internal-source roof')
+        self.assertTrue(internal.setLayers(original.layers()))
+        self.assertTrue(internal.setSourcePresentAfterLayerNumber(1))
+        self.assertTrue(
+            internal.setTemperatureCalculationRequestedAfterLayerNumber(1))
+        self.assertTrue(internal.setInsulation(original.insulation().get()))
+        self.assertTrue(roof.setConstruction(internal))
+
+        audit = AuditLog()
+        self.n.reference_envelope(
+            model, code='necb2020', hdd=HDD, audit=audit)
+
+        target = 1.0 / (
+            (1.0 / 0.156) - Constructions.film_r('roofceiling', 'outdoors'))
+        rebuilt = roof.construction().get()
+        self.assertTrue(
+            rebuilt.to_Construction().is_initialized(),
+            'the reference lightweight rebuild accepts internal-source roofs')
+        self.assertAlmostEqual(
+            target,
+            rebuilt.to_Construction().get().thermalConductance().get(),
+            delta=1e-4,
+            msg='internal-source roof reaches the Table 3.2.2.2 target')
+        self.assertTrue(
+            foundation.interiorHorizontalInsulationMaterial().is_initialized(),
+            'an unrelated internal-source roof must not classify the plain slab')
+        self.assertAlmostEqual(
+            1.2, foundation.interiorHorizontalInsulationWidth().get(),
+            delta=1e-9)
+        self.assertFalse(any(
+            entry.get('ruling') == 'D-105' for entry in audit.entries))
+        self.assertFalse(any(
+            entry.get('target') == roof.nameString()
+            and 'no layered construction' in entry['action']
+            for entry in audit.warnings))
 
     def test_unresolved_radiant_floor_does_not_guess_the_ordinary_strip(self):
         from btap.audit import AuditLog

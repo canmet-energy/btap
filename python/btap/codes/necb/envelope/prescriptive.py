@@ -30,7 +30,7 @@ changing, so a literal was wrong on every 2025 run (Sol, applicability review).
 
 from __future__ import annotations
 
-from collections import Counter, defaultdict
+from collections import defaultdict
 from dataclasses import dataclass, field
 
 import openstudio
@@ -69,12 +69,9 @@ _FLOOR_RADIANT_TYPES = {"Floors", "CeilingsAndFloors", "AllSurfaces"}
 class _EmbeddedFloorInventory:
     embedded: set[str] = field(default_factory=set)
     unresolved: set[str] = field(default_factory=set)
-    ambiguous: set[str] = field(default_factory=set)
     evidence: dict[str, list[str]] = field(default_factory=lambda: defaultdict(list))
 
     def status(self, surface_name):
-        if surface_name in self.ambiguous:
-            return "unresolved"
         if surface_name in self.embedded:
             return "embedded"
         if surface_name in self.unresolved:
@@ -99,22 +96,15 @@ def _embedded_floor_inventory(model):
     """Inventory embedded-floor applicability while proposed HVAC exists.
 
     Surface names are the handoff key because OpenStudio changes handles when
-    cloning but preserves names. Duplicate ground-surface names are marked
-    unresolved rather than allowing one surface's evidence to classify both.
+    cloning but preserves names. OpenStudio enforces unique object names
+    case-insensitively, so the names remain unambiguous through the clone.
     """
     inventory = _EmbeddedFloorInventory()
     ground_floors = [surface for surface in model.getSurfaces()
                      if _is_ground_floor(surface)]
-    name_counts = Counter(surface.nameString() for surface in ground_floors)
 
     for surface in ground_floors:
         name = surface.nameString()
-        if name_counts[name] > 1:
-            inventory.ambiguous.add(name)
-            inventory.evidence[name].append(
-                "duplicate ground-floor surface name prevents clone-safe identification")
-            continue
-
         construction = opt(surface.construction())
         internal = (
             None if construction is None
@@ -139,7 +129,8 @@ def _embedded_floor_inventory(model):
                 inventory.embedded.add(name)
                 inventory.evidence[name].append(
                     f"{equipment.iddObjectType().valueName()} "
-                    f"'{equipment.nameString()}' surface association")
+                    f"'{equipment.nameString()}' construction-derived "
+                    "surface association")
 
             if selected:
                 continue
@@ -482,6 +473,24 @@ def _construction_thickness(construction):
     return thickness
 
 
+def _foundation_wall_height(foundation):
+    heights = []
+    for surface in foundation.surfaces():
+        if surface.surfaceType() != "Wall":
+            continue
+        space = opt(surface.space())
+        if space is None:
+            return None
+        vertices = list(space.transformation() * surface.vertices())
+        if not vertices:
+            return None
+        heights.append(
+            max(vertex.z() for vertex in vertices)
+            - min(vertex.z() for vertex in vertices)
+        )
+    return max(heights, default=0.0)
+
+
 def _apply_embedded_floor_perimeter(surface, construction, audit):
     """Represent Sentence (5)'s vertical continuation for a detected floor."""
     name = surface.nameString()
@@ -498,11 +507,14 @@ def _apply_embedded_floor_perimeter(surface, construction, audit):
         return
 
     insulation = opt(construction.insulation())
-    depth = _construction_thickness(construction)
-    if insulation is None or depth <= 0:
+    floor_thickness = _construction_thickness(construction)
+    foundation_wall_height = _foundation_wall_height(foundation)
+    if (insulation is None or floor_thickness <= 0
+            or foundation_wall_height is None):
         audit.warn(
             "prescriptive",
-            "embedded ground floor's insulation layer or floor depth is "
+            "embedded ground floor's insulation layer, floor thickness, or "
+            "adjoining foundation-wall height is "
             "UNRESOLVED — the vertical perimeter continuation is not representable",
             target=name,
             article="3.2.3.3.(5)",
@@ -510,6 +522,7 @@ def _apply_embedded_floor_perimeter(surface, construction, audit):
         )
         return
 
+    depth = foundation_wall_height + floor_thickness
     exterior = opt(foundation.exteriorVerticalInsulationMaterial())
     exterior_depth = opt(foundation.exteriorVerticalInsulationDepth())
     if exterior is not None and exterior_depth is not None and exterior_depth >= depth:
@@ -518,7 +531,10 @@ def _apply_embedded_floor_perimeter(surface, construction, audit):
             "exterior foundation-wall insulation reaches the bottom of the "
             "embedded floor — the vertical perimeter exception applies",
             target=name,
-            inputs={"floor_depth_m": ruby_round(depth, 4),
+            inputs={"floor_thickness_m": ruby_round(floor_thickness, 4),
+                    "adjoining_foundation_wall_height_m":
+                        ruby_round(foundation_wall_height, 4),
+                    "required_vertical_depth_m": ruby_round(depth, 4),
                     "exterior_insulation_depth_m": ruby_round(exterior_depth, 4)},
             article="3.2.3.3.(5)",
             ruling="D-105",
@@ -540,7 +556,13 @@ def _apply_embedded_floor_perimeter(surface, construction, audit):
         "prescriptive",
         "full-area floor insulation continued vertically around the perimeter",
         target=foundation.nameString(),
-        inputs={"floor": name, "floor_depth_m": ruby_round(depth, 4)},
+        inputs={
+            "floor": name,
+            "floor_thickness_m": ruby_round(floor_thickness, 4),
+            "adjoining_foundation_wall_height_m":
+                ruby_round(foundation_wall_height, 4),
+            "required_vertical_depth_m": ruby_round(depth, 4),
+        },
         value=f"interior vertical insulation depth {ruby_str(ruby_round(depth, 4))} m",
         article="3.2.3.3.(5)",
         ruling="D-105",

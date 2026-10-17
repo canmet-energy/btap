@@ -151,6 +151,61 @@ class TestForwardingFunctionsAreExecuted(unittest.TestCase):
                          "call path, not a stub that resolves the pointer")
         self.assertIsNotNone(result.reference_model)
 
+    @needs_sdk
+    def test_real_pipeline_preserves_unresolved_embedded_floor_inventory(self):
+        import openstudio
+
+        proposed = proposed_with_hvac()
+        floor = proposed.getSurfaceByName('Surface 7').get()
+        self.assertEqual('Floor', floor.surfaceType())
+        self.assertTrue(floor.isGroundSurface())
+        foundation = openstudio.model.FoundationKiva(proposed)
+        foundation.setName('Unresolved embedded floor foundation')
+        self.assertTrue(floor.setAdjacentFoundation(foundation))
+
+        availability = openstudio.model.ScheduleConstant(proposed)
+        availability.setValue(1.0)
+        temperature_limits = openstudio.model.ScheduleTypeLimits(proposed)
+        temperature_limits.setUnitType('Temperature')
+        temperature = openstudio.model.ScheduleConstant(proposed)
+        temperature.setScheduleTypeLimits(temperature_limits)
+        temperature.setValue(20.0)
+        radiant = openstudio.model.ZoneHVACLowTemperatureRadiantElectric(
+            proposed, availability, temperature)
+        radiant.setName('Unresolved floor radiant')
+        radiant.setRadiantSurfaceType('Floors')
+        zone = floor.space().get().thermalZone().get()
+        self.assertTrue(radiant.addToThermalZone(zone))
+        self.assertEqual(
+            [], list(radiant.surfaces()),
+            'the SDK derives surfaces only from internal-source constructions')
+
+        with tempfile.TemporaryDirectory(prefix='d105-real-path-') as run_dir:
+            result = compliance.performance_compliance(
+                proposed, code='necb2020', simulate='none', hdd=3890,
+                building={
+                    'storeys': 1,
+                    'zone_types': zone_types_for(proposed),
+                    'winter_design_temp_c': -20,
+                },
+                run_dir=run_dir)
+
+        reference_floor = result.reference_model.getSurfaceByName(
+            floor.nameString()).get()
+        reference_foundation = reference_floor.adjacentFoundation().get()
+        warnings = [
+            entry for entry in result.audit.warnings
+            if entry.get('ruling') == 'D-105'
+            and entry.get('article') == '3.2.3.3.(4)(b)'
+        ]
+        self.assertEqual(1, len(warnings))
+        self.assertEqual('reference building', warnings[0].get('building'))
+        self.assertIn('UNRESOLVED', warnings[0]['action'])
+        self.assertFalse(
+            reference_foundation.interiorHorizontalInsulationMaterial()
+            .is_initialized(),
+            'the real envelope call must receive the pre-teardown inventory')
+
     def test_embedded_floor_inventory_precedes_reference_hvac_teardown(self):
         from btap.audit import AuditLog
         from btap.codes.necb import envelope, hvac, lighting

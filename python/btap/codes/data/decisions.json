@@ -4249,7 +4249,7 @@
         "necb2020",
         "necb2025"
       ],
-      "summary": "NECB 3.2.3.3.(4) removes Sentence (3)'s perimeter-strip option for a floor-on-ground containing embedded heating ducts, cables, or heating/cooling pipes. The tool inventories explicit low-temperature radiant surface associations before reference-HVAC teardown and also recognizes an internal-source floor construction. A detected floor receives the Table 3.2.3.1 target over its full area in every climate zone. An indicated floor-radiant system whose served surfaces cannot be established is left as modeled with a warning rather than guessed into the ordinary-floor branch.",
+      "summary": "NECB 3.2.3.3.(4) removes Sentence (3)'s perimeter-strip option for a floor-on-ground containing embedded heating ducts, cables, or heating/cooling pipes. The tool inventories internal-source ground-floor constructions and supported floor-radiant topology before reference-HVAC teardown; OpenStudio's radiant surface view is derived from the construction and is not separate evidence. A detected floor receives the Table 3.2.3.1 target over its full area in every climate zone. An indicated floor-radiant system whose served surfaces cannot be established is left as modeled with a warning rather than guessed into the ordinary-floor branch.",
       "requirements": [
         {
           "id": "embedded_ground_floor_insulation",
