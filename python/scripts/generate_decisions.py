@@ -166,6 +166,15 @@ SPLIT_HEADING_RE = re.compile("^## (D-\\d+)(?: " + EM_DASH + " (.+))?$")
 #: turned the sync gate red while the generator itself reported success
 #: (Sol, `124`.6).
 ANCHOR_RE = re.compile(r'^<a id="d-\d+"></a>$')
+#: A retroactive applicability correction, split or hold needs a dated
+#: attribution distinct from the decision's original record.
+APPLICABILITY_HEADING_RE = re.compile(r"^### Applicability\b.*$", re.MULTILINE)
+RULING_WHEN_RE = re.compile(
+    r"^[-*] \*\*[^*\n]*ruling/when:\*\*(?:[^\n]|\n[ \t]+)*?"
+    r"\b20\d{2}-\d{2}-\d{2}\b",
+    re.IGNORECASE | re.MULTILINE)
+WHO_WHEN_RE = re.compile(
+    r"^[-*] \*\*Who/when:\*\*[^\n]*(?:\n[ \t]+[^\n]*)*", re.MULTILINE)
 
 def numeric_order(ids) -> list:
     """Decision ids in numeric id order -- the one ordering invariant."""
@@ -1191,8 +1200,29 @@ def validate(name: str, meta: dict, body: str) -> None:
     if heading.group(1) != meta["id"]:
         raise ValueError("{}: heading declares {}, front matter {}".format(
             name, heading.group(1), meta["id"]))
+    check_body_attribution(name, body)
     if not body.endswith("\n") or body.endswith("\n\n"):
         raise ValueError("{}: body must end with exactly one newline".format(name))
+
+
+def check_body_attribution(name: str, body: str) -> None:
+    """Keep later applicability rulings distinct from the original record."""
+    original = WHO_WHEN_RE.search(body)
+    for heading in APPLICABILITY_HEADING_RE.finditer(body):
+        section = body[heading.end():]
+        next_heading = re.search(r"^### ", section, re.MULTILINE)
+        if next_heading is not None:
+            section = section[:next_heading.start()]
+        if RULING_WHEN_RE.search(section) is None:
+            raise ValueError(
+                "{}: {} must name its ruling/when with an ISO date".format(
+                    name, heading.group(0)))
+        if original is not None and original.start() < heading.start():
+            record = body[:original.end()].casefold()
+            if "as corrected" not in record and "original reading" not in record:
+                raise ValueError(
+                    "{}: corrected applicability must be marked above the "
+                    "original Who/when attribution".format(name))
 
 
 def check_editions(name: str, meta: dict) -> None:

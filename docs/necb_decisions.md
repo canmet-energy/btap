@@ -221,9 +221,10 @@ audit are drained and archived — see `docs/README.md`.
   LPD): the Table 8.4.4.2 operating schedule replaces the model's lighting
   schedules for the EUI run. (b) *outdoor air* retains the peak rates from
   the proposed building specifications under Sentence 8.4.4.2.(2); changing
-  occupant density does not replace the proposed DSOA.
+  occupant density does not replace the proposed DSOA (as corrected 2026-10-14
+  — see "Applicability correction" below).
 - **Who/when:** phylroy ("do what you think is correct for both … it makes
-  sense"), 2026-07-22.
+  sense"), 2026-07-22 — original reading.
 - **Why (original reading):** 8.4.4.2 normalizes operating conditions so
   archetype comparison is apples-to-apples. The outdoor-air part of that
   reading was superseded by the correction below.
@@ -281,9 +282,10 @@ requirement identity across competing rulings.
   could be installed into) is retained as a disclosed alternative solution,
   not called literal satisfaction. The disposition is backed by a gated
   numeric cross-check rather than argument alone and is surfaced through
-  AHJ-22 wherever a reference cooling tower is present.
+  AHJ-22 wherever a reference cooling tower is present (as corrected
+  2026-10-14 — see "Applicability correction" below).
 - **Who/when:** phylroy ("do the disposition with the numeric cross-check"),
-  2026-07-23.
+  2026-07-23 — original reading.
 - **Why:** the FWB/FRA polynomial (identical in 2020 8.4.5.6 / 2025 8.4.6.6) is
   the DOE-2.1E curve-fit of the same physics. Cross-check anchored at the CTI
   rating point (78°F wb / 10°F range / 7°F approach): exact agreement at the
@@ -295,6 +297,18 @@ requirement identity across competing rulings.
 - **Evidence:** `openstudio-necb/scripts/necb_8_4_6_curve_probe.rb` (tower section, in
   `rake necb:verify`); `python/btap/necb/data/coverage/necb_8_4_disposition.json`
   8.4.6.6.
+
+### Applicability correction
+
+- **Correction ruling/when:** Decider attribution is not established. The
+  Phase E review is dated 2026-10-14; phylroy accepted the correction in the
+  #111 merge on 2026-10-15. Register entry: AHJ-22
+  (`alternative-solution`).
+
+The original disposition called the Merkel substitution satisfaction of
+8.4.5.6/8.4.6.6. It is a non-literal substitution the text does not authorize,
+so it is disclosed under AHJ-22 and the numeric cross-check remains evidence,
+not compliance.
 
 <a id="d-08"></a>
 
@@ -359,7 +373,7 @@ requirement identity across competing rulings.
 
 ## D-11 — Variable-flow pump riding curve implemented; transfer superseded
 
-- **Decision:** implement, with these interpretive choices:
+- **Decision (original reading):** implement, with these interpretive choices:
   - **Superseded by [D-93](#d-93) (2026-09-19).** The interpretive choices
     below are history: the value source is now decided per correspondence, by
     the sentence that governs it. Specifically reversed — "(1)-(3) through one
@@ -408,6 +422,17 @@ requirement identity across competing rulings.
   `proposed_pump_stats` in `openstudio-hvac/.../necb/efficiency.rb`; umbrella
   passes `proposed:` post-sizing; `test_necb_pump_rules.rb` (6 runs, incl.
   combined-intensity arithmetic, warn-never-silent, 2025 renumbering).
+
+### Applicability correction
+
+- **Correction ruling/when:** Decider attribution is not established. The
+  structured scope was recorded in Phase E on 2026-10-14 and accepted in #111
+  on 2026-10-15.
+
+The summary and structured sources retain D-11's published riding curve and
+below-breakpoint clamp. D-92 and D-93 own the superseded transfer mechanism
+and correspondence decisions, respectively; the history above remains the
+original record rather than an unattributed current ruling.
 
 <a id="d-12"></a>
 
@@ -458,16 +483,28 @@ and reference energy; deferred to its own work session).*
   availability schedule before the strip and applies it to the reference loop
   serving those zones, per 8.4.4.2.(1) (2025: 8.4.5.2.(1)), which requires
   the reference schedules to match those determined for the proposed under
-  8.4.3.2.(1). No proposed air system → builder default (Always On) retained
+  8.4.3.2.(1) (as corrected 2026-10-14 — see "Applicability correction"
+  below). No proposed air system → builder default (Always On) retained
   with an info note; conflicting schedules on one loop → most-zones schedule
   wins with a loud warning. This feeds the 5.2.10.1 continuous/non-continuous
   ERV classification: a proposed on a 12 h schedule now classifies
   non-continuous (Table -A) instead of defaulting continuous. Proposed models
   whose loops are Always On (the common default) are unchanged.
-- **Who/when:** Claude under D-10 delegation, 2026-07-23.
+- **Who/when:** Claude under D-10 delegation, 2026-07-23 — original reading.
 - **Evidence:** `Reference.apply_operating_schedules`; `TestNecbOperatingSchedules`
   (inheritance + non-continuous classification + no-air-system note); ERV suite
   and rake necb:verify green.
+
+### Applicability correction
+
+- **Correction ruling/when:** Decider attribution is not established. The
+  cross-edition citation mapping was recorded on 2026-10-14 and accepted in
+  #111 on 2026-10-15.
+
+The original account cited only the 2020 schedule sentence. The structured
+mapping now records the governing 8.4.4.2.(1)/8.4.5.2.(1) schedule requirement
+alongside 8.4.3.2.(1), without attributing that later mapping to the original
+delegation.
 
 <a id="d-15"></a>
 
@@ -507,11 +544,15 @@ and reference energy; deferred to its own work session).*
   with a loud audit warning — the reference's controls come from the reference
   ruleset, never proposed EMS overrides. All five archetypes now PASS
   (six real buildings including SmallOffice).
-- **Who/when:** Claude under D-10 delegation, 2026-07-23.
+- **Who/when:** Claude under D-10 delegation, 2026-07-23 — original reading;
+  applicability hold recorded below.
 - **Evidence:** sweep verdict tables (before/after); ERV+pump suites and
   rake necb:verify green post-fix.
 
 ### Applicability hold
+
+- **Hold ruling/when:** Decider attribution is not established. The hold was
+  recorded in Phase E on 2026-10-14 and accepted in #111 on 2026-10-15.
 
 No retained NECB 2020 or 2025 provision establishes a blanket rule that every
 proposed EMS program must be removed from the reference. The broad
@@ -583,6 +624,8 @@ or narrowed to non-normative model sanitation.
   space_apply_infiltration_rate (total = constant x wall+roof+subsurface,
   spread over all exterior area, no visible (5/75)^0.6 or S/A_AGW step) was
   found in building_envelope.rb.
+- **Correction marker:** as corrected in the registry mapping; see
+  "Applicability correction" below.
 - **Open items:** (1) locate where (if anywhere) legacy applies the pressure
   conversion for 2020; (2) reconcile DELIVERED ACH — the E+ tabular values are
   confounded by infiltration coefficient models (constant/wind terms may
@@ -592,8 +635,9 @@ or narrowed to non-normative model sanitation.
   cloned untouched — deviation below default is PERMISSIVE); (4) if legacy
   skips the pressure conversion, that is a third wrong-vintage/AS-IS defect
   for the upstream issue set.
-- **Who/when:** Claude under D-10 delegation, 2026-07-24. Findings [READ] from
-  code text (codes MCP) and both lineages' source; not yet numerically closed.
+- **Who/when:** Claude under D-10 delegation, 2026-07-24 — original
+  investigation. Findings [READ] from code text (codes MCP) and both
+  lineages' source; not yet numerically closed.
 
 ### D-19 amendment (same day): legacy override FOUND — divergence narrowed to area accounting
 
@@ -628,6 +672,16 @@ is the permissive direction). VERIFIED: reference delivered infiltration
 0.247 -> 0.135 ACH (proposed 0.142); reference energy 24128 -> 23069 kWh wk
 (78% -> 81% of target); envelope suite green incl. new inheritance +
 deviation-warning tests.
+
+### Applicability correction
+
+- **Correction ruling/when:** Decider attribution is not established. The
+  revised heading and structured mapping became canonical in #111 on
+  2026-10-15.
+
+The existing same-day amendment and resolution retain the technical
+investigation record. The later registry presentation must not imply that the
+original D-10 delegation adjudicated the cross-edition applicability mapping.
 
 <a id="d-20"></a>
 
@@ -702,6 +756,9 @@ upstream #2123, DX COP bins, infiltration normalization remainder). All
 gates green: full hvac suite, necb:verify, 5/5 sweep PASS.
 
 ### Applicability hold
+
+- **Hold ruling/when:** Decider attribution is not established. The hold was
+  recorded in Phase E on 2026-10-14 and accepted in #111 on 2026-10-15.
 
 The retained selection and system-description tables do not define System 1
 as inherently 100% outdoor air, while Article 8.4.x.12 routes a selected
@@ -822,9 +879,13 @@ counter-direction T6/T10 (wheel power, zone-fan spec) — the fleet now sits
 90-105% of target, the tightest fixed-point clustering yet. A-list items
 (A1-A5) remain with phylroy.
 
-- Who/when: Claude under D-10 delegation, 2026-07-25.
+- **Who/when:** Claude under D-10 delegation, 2026-07-25 — original reading;
+  applicability split recorded below.
 
 ### Applicability split
+
+- **Split ruling/when:** Decider attribution is not established. The split was
+  recorded in Phase E on 2026-10-14 and accepted in #111 on 2026-10-15.
 
 The batch history contains more implementation observations than its original
 seven citations establish. The structured record separates the eight
@@ -895,13 +956,15 @@ transform):
 - surfaces of unconditioned spaces (inside_envelope? = partofTotalFloorArea,
   with the legacy space_conditioning_category tag honoured so tagged plenums
   count as inside) are LEFT UNTOUCHED (audited info, Division A
-  1.4.1.2.(1));
+  1.4.1.2.(1)) (as corrected 2026-10-14 — see "Applicability correction"
+  below);
 - assemblies separating conditioned from unconditioned space are envelope:
   the Table 3.2.2.2 row is selected by INCLINATION. The model carries no
   explicit fact proving that an adjacent attic, roof or crawl space is
   unvented, so the Appendix-note exclusion prevents a blanket U=6.25 credit;
   the exterior requirement is applied conservatively and the reason is
-  audited. The paired surface gets the same construction.
+  audited (as corrected 2026-10-14 — see "Applicability correction" below).
+  The paired surface gets the same construction.
 - conditioned-to-conditioned interzone assemblies are left unchanged, with a
   warning that the definition's greater-than-10 C intended-temperature limb
   cannot be established from the model.
@@ -919,7 +982,7 @@ Pinned by test_attic_scope_deck_untouched_ceiling_retargeted (deck
 construction unchanged; ceiling uses the roof row without an unsupported
 enclosure credit; pair shares the construction).
 
-- Who/when: Claude under D-10 delegation, 2026-07-25.
+- **Who/when:** Claude under D-10 delegation, 2026-07-25 — original reading.
 
 ### Applicability correction
 
@@ -1094,7 +1157,13 @@ zone_groups). Single-zone families (1/3/4/hp) keep their selection
 grouping (sys-3 school/retail loop counts stay at legacy parity). Audited
 as 'multizone selection groups merged into whole-building systems'.
 
-Applicability correction (2026-10-14): D-101 established that the Code uses
+### Applicability correction
+
+- **Correction ruling/when:** Decider attribution is not established. The
+  correction was recorded in Phase E on 2026-10-14 and accepted in #111 on
+  2026-10-15.
+
+D-101 established that the Code uses
 two authorities for this construction step. System 6 uses Table
 8.4.x.7.-B Note (3), while Systems 2 and 5 use the common ventilation system
 authorized by Note (2). The implementation still merges all three families,
@@ -1106,7 +1175,8 @@ Effect: LargeOffice 17 -> 6 loops, cooling 2.1 -> 0.2 GJ, pumps 10.4 ->
 51.4 vs ours 23.1 GJ at similar design flows/pressures/schedules), under
 investigation via the legacy-curve transplant experiment.
 
-- Who/when: Claude under D-10 delegation, 2026-07-25.
+- **Who/when:** Claude under D-10 delegation, 2026-07-25 — original reading;
+  applicability correction above is distinct.
 
 ### D-28 verdict (2026-07-25): the residual office gap is legacy fan energy
 
@@ -1557,14 +1627,25 @@ clone-based treatment SATISFIES (3) (boiler-fed immersion coil keeps the
 boiler's energy type), (4) (identical capacities/schedules trivially
 match the ratio + operational requirements; the note only describes how
 to determine the ratio), and (6)/(7)/(8). D-53 now applies Sentence (5)'s
-fuel-fired part-load curve. The remaining caveat is Sentence (9):
+fuel-fired part-load curve (as corrected 2026-10-15 — see "Applicability
+correction" below). The remaining caveat is Sentence (9):
 consolidation of multiple proposed circulation pumps into one constant-speed
 pump (the clone keeps identical W/(L/s) — energy-equivalent, topology
 differs).
 
-- Who/when: Claude under D-10 delegation, 2026-07-28.
+- **Who/when:** Claude under D-10 delegation, 2026-07-28 — original reading.
 - Evidence: [READ, MCP] 8.4.4.20 + A-8.4.4.20.(4)(a); [READ] SHW reference
   and efficiency passes (clone treatment plus D-53 part-load handling).
+
+### Applicability correction
+
+- **Correction ruling/when:** Decider attribution is not established. The
+  revised status and structured mapping became canonical in #111 on
+  2026-10-15.
+
+The structured sources retain the clone-backed sentences while naming D-53 as
+the owner of Sentence (5). This later ownership update is distinct from the
+original service-water verification record.
 
 <a id="d-42"></a>
 
@@ -3472,9 +3553,13 @@ stand.
   deduplicated, the per-row `zones` count became `blocks`, and the assignments
   must partition the retained conditioned blocks. D-101 records the
   derivation.
-- **Who/when:** Fable under D-10, 2026-08-02.
+- **Who/when:** Fable under D-10, 2026-08-02 — original reading;
+  applicability split recorded below.
 
 ### Applicability split
+
+- **Split ruling/when:** Decider attribution is not established. The split was
+  recorded in Phase E on 2026-10-14 and accepted in #111 on 2026-10-15.
 
 The matrix establishes three independent requirements in both editions:
 the residential identity row, Article 13 heat-pump classification and the
@@ -3537,11 +3622,12 @@ so data drift fails with the printed number in the message.
 
 - **Files:** `efficiencies_2020.json` (chiller notes + provenance block),
   the new test.
-- **Who/when:** Fable under D-10, 2026-08-02.
+- **Who/when:** Fable under D-10, 2026-08-02 — original reading; scope
+  correction recorded below.
 
 ### Applicability split
 
-**Ownership correction — Sol under D-94 review, 2026-10-16.**
+- **Split ruling/when:** Sol under D-94 review, 2026-10-16.
 
 This decision is the bounded 2020 data verification that was actually run.
 It now owns the independently verified Table-I rows as data; D-85 still owns
@@ -3584,9 +3670,14 @@ the corrected letter map and completeness boundary.
 
 - **Files:** `necb2025/efficiencies.json` and
   `test_hvac_efficiency_provenance.py`.
-- **Who/when:** Fable under D-10, 2026-08-02.
+- **Who/when:** Fable under D-10, 2026-08-02 — original reading; the
+  applicability split below is distinct.
 
 ### Applicability split
+
+- **Split ruling/when:** Decider attribution for the original split is not
+  established; it was recorded in #111 on 2026-10-15. Sol's Table-I
+  completeness correction below is dated 2026-10-16.
 
 The 2025 minimums and the 2025 selection dataset are independent
 requirements. The 2020 selection records are retained only as related
@@ -3649,7 +3740,8 @@ whole-file `json.dump` stamp pass reformatted two files — reverted and
 stamped by targeted regex; ALWAYS `git diff --stat` after touching data
 files.)
 
-- **Who/when:** Fable under D-10, 2026-08-02.
+- **Who/when:** Fable under D-10, 2026-08-02 — original reading; the
+  applicability split below is distinct.
 
 ### D-61 amendment (2026-08-02): hbix's own table audit, mapped to our exposure
 
@@ -3794,6 +3886,9 @@ SWEEP_MODE=full ruby openstudio-necb/scripts/necb_archetype_sweep.rb <types>`
 - Who/when: consolidated by Fable under D-10, 2026-08-03.
 
 ### Applicability split
+
+- **Split ruling/when:** Decider attribution is not established. The split
+  became canonical in #111 on 2026-10-15.
 
 This decision now records the 2025 extraction-backed datasets as separate
 requirements instead of one cross-edition zero-defect claim. The
@@ -3992,9 +4087,13 @@ as it matches the proposed['s] units", and the proposed has ONE unit);
 standing in the baseline table; revisit only if a determination on a real
 project turns on it.
 
-- **Who/when:** Fable under D-10, 2026-08-03.
+- **Who/when:** Fable under D-10, 2026-08-03 — original reading;
+  applicability hold recorded below.
 
 ### Applicability hold
+
+- **Hold ruling/when:** Decider attribution is not established. The hold was
+  recorded in Phase E on 2026-10-14 and accepted in #111 on 2026-10-15.
 
 Sentences 8.4.1.2.(3) and (5) establish the unmet-heating criterion and the
 capacity-increase response; they do not establish that morning recovery in
@@ -4029,9 +4128,13 @@ when that subsystem is next touched.
 **Operational note (already applied):** Hospital+Outpatient full-annual
 sweeps get a ~12 h window.
 
-- **Who/when:** Fable under D-10, 2026-08-03.
+- **Who/when:** Fable under D-10, 2026-08-03 — original reading;
+  applicability split recorded below.
 
 ### Applicability split
+
+- **Split ruling/when:** Decider attribution is not established. The split was
+  recorded in Phase E on 2026-10-14 and accepted in #111 on 2026-10-15.
 
 The Code-backed slice is the reference energy-recovery obligation and the
 Part 5 trigger and performance provisions it invokes. Article 8.4.x.10.(8)
