@@ -233,7 +233,9 @@ audit are drained and archived — see `docs/README.md`.
 
 ### Applicability correction
 
-- **Correction ruling/when:** Sol, 2026-10-14.
+- **Correction ruling/when:** #111 commits `9fffcb9` and `f3065f3` (phylroy,
+  co-authored by Copilot), 2026-10-14; accepted by phylroy at merge on
+  2026-10-15.
 
 The lighting-schedule decision is established by Sentence 8.4.4.2.(1) and
 its table. The earlier outdoor-air reading is not: Sentence 8.4.4.2.(2)
@@ -301,10 +303,9 @@ requirement identity across competing rulings.
 
 ### Applicability correction
 
-- **Correction ruling/when:** Decider attribution is not established. The
-  Phase E review is dated 2026-10-14; phylroy accepted the correction in the
-  #111 merge on 2026-10-15. Register entry: AHJ-22
-  (`alternative-solution`).
+- **Correction ruling/when:** #111 commit `29f442c` (phylroy, co-authored by
+  Copilot), 2026-10-14; accepted by phylroy at merge on 2026-10-15. Register
+  entry: AHJ-22 (`alternative-solution`).
 
 The original disposition called the Merkel substitution satisfaction of
 8.4.5.6/8.4.6.6. It is a non-literal substitution the text does not authorize,
@@ -426,9 +427,8 @@ not compliance.
 
 ### Applicability correction
 
-- **Correction ruling/when:** Decider attribution is not established. The
-  structured scope was recorded in Phase E on 2026-10-14 and accepted in #111
-  on 2026-10-15.
+- **Correction ruling/when:** #111 commit `84af82d` (phylroy, co-authored by
+  Copilot), 2026-10-14; accepted by phylroy at merge on 2026-10-15.
 
 The summary and structured sources retain D-11's published riding curve and
 below-breakpoint clamp. D-92 and D-93 own the superseded transfer mechanism
@@ -498,9 +498,8 @@ and reference energy; deferred to its own work session).*
 
 ### Applicability correction
 
-- **Correction ruling/when:** Decider attribution is not established. The
-  cross-edition citation mapping was recorded on 2026-10-14 and accepted in
-  #111 on 2026-10-15.
+- **Correction ruling/when:** #111 commit `29f442c` (phylroy, co-authored by
+  Copilot), 2026-10-14; accepted by phylroy at merge on 2026-10-15.
 
 The original account cited only the 2020 schedule sentence. The structured
 mapping now records the governing 8.4.4.2.(1)/8.4.5.2.(1) schedule requirement
@@ -552,8 +551,8 @@ delegation.
 
 ### Applicability hold
 
-- **Hold ruling/when:** Decider attribution is not established. The hold was
-  recorded in Phase E on 2026-10-14 and accepted in #111 on 2026-10-15.
+- **Hold ruling/when:** #111 commit `9fffcb9` (phylroy, co-authored by
+  Copilot), 2026-10-14; accepted by phylroy at merge on 2026-10-15.
 
 No retained NECB 2020 or 2025 provision establishes a blanket rule that every
 proposed EMS program must be removed from the reference. The broad
@@ -625,8 +624,6 @@ or narrowed to non-normative model sanitation.
   space_apply_infiltration_rate (total = constant x wall+roof+subsurface,
   spread over all exterior area, no visible (5/75)^0.6 or S/A_AGW step) was
   found in building_envelope.rb.
-- **Correction marker:** as corrected in the registry mapping; see
-  "Applicability correction" below.
 - **Open items:** (1) locate where (if anywhere) legacy applies the pressure
   conversion for 2020; (2) reconcile DELIVERED ACH — the E+ tabular values are
   confounded by infiltration coefficient models (constant/wind terms may
@@ -636,8 +633,8 @@ or narrowed to non-normative model sanitation.
   cloned untouched — deviation below default is PERMISSIVE); (4) if legacy
   skips the pressure conversion, that is a third wrong-vintage/AS-IS defect
   for the upstream issue set.
-- **Who/when:** Claude under D-10 delegation, 2026-07-24 — original
-  investigation. Findings [READ] from code text (codes MCP) and both
+- **Who/when:** Claude under D-10 delegation, 2026-07-24 — original reading.
+  Findings [READ] from code text (codes MCP) and both
   lineages' source; not yet numerically closed.
 
 ### D-19 amendment (same day): legacy override FOUND — divergence narrowed to area accounting
@@ -676,9 +673,8 @@ deviation-warning tests.
 
 ### Applicability correction
 
-- **Correction ruling/when:** Decider attribution is not established. The
-  revised heading and structured mapping became canonical in #111 on
-  2026-10-15.
+- **Correction ruling/when:** #111 commit `29f442c` (phylroy, co-authored by
+  Copilot), 2026-10-14; accepted by phylroy at merge on 2026-10-15.
 
 The existing same-day amendment and resolution retain the technical
 investigation record. The later registry presentation must not imply that the
@@ -758,8 +754,8 @@ gates green: full hvac suite, necb:verify, 5/5 sweep PASS.
 
 ### Applicability hold
 
-- **Hold ruling/when:** Decider attribution is not established. The hold was
-  recorded in Phase E on 2026-10-14 and accepted in #111 on 2026-10-15.
+- **Hold ruling/when:** #111 commit `9fffcb9` (phylroy, co-authored by
+  Copilot), 2026-10-14; accepted by phylroy at merge on 2026-10-15.
 
 The retained selection and system-description tables do not define System 1
 as inherently 100% outdoor air, while Article 8.4.x.12 routes a selected
@@ -885,8 +881,8 @@ counter-direction T6/T10 (wheel power, zone-fan spec) — the fleet now sits
 
 ### Applicability split
 
-- **Split ruling/when:** Decider attribution is not established. The split was
-  recorded in Phase E on 2026-10-14 and accepted in #111 on 2026-10-15.
+- **Split ruling/when:** #111 commit `9fffcb9` (phylroy, co-authored by
+  Copilot), 2026-10-14; accepted by phylroy at merge on 2026-10-15.
 
 The batch history contains more implementation observations than its original
 seven citations establish. The structured record separates the eight
@@ -987,7 +983,9 @@ enclosure credit; pair shares the construction).
 
 ### Applicability correction
 
-- **Correction ruling/when:** Sol, 2026-10-14.
+- **Correction ruling/when:** #111 commits `9fffcb9` and `f3065f3` (phylroy,
+  co-authored by Copilot), 2026-10-14; accepted by phylroy at merge on
+  2026-10-15.
 
 The decision bundles three independent questions. The envelope boundary and
 inclination classification are established for both editions. The blanket
@@ -1160,9 +1158,8 @@ as 'multizone selection groups merged into whole-building systems'.
 
 ### Applicability correction
 
-- **Correction ruling/when:** Decider attribution is not established. The
-  correction was recorded in Phase E on 2026-10-14 and accepted in #111 on
-  2026-10-15.
+- **Correction ruling/when:** #111 commit `3678951` (phylroy, co-authored by
+  Copilot), 2026-10-14; accepted by phylroy at merge on 2026-10-15.
 
 D-101 established that the Code uses
 two authorities for this construction step. System 6 uses Table
@@ -1628,7 +1625,7 @@ clone-based treatment SATISFIES (3) (boiler-fed immersion coil keeps the
 boiler's energy type), (4) (identical capacities/schedules trivially
 match the ratio + operational requirements; the note only describes how
 to determine the ratio), and (6)/(7)/(8). D-53 now applies Sentence (5)'s
-fuel-fired part-load curve (as corrected 2026-10-15 — see "Applicability
+fuel-fired part-load curve (as corrected 2026-10-14 — see "Applicability
 correction" below). The remaining caveat is Sentence (9):
 consolidation of multiple proposed circulation pumps into one constant-speed
 pump (the clone keeps identical W/(L/s) — energy-equivalent, topology
@@ -1640,9 +1637,8 @@ differs).
 
 ### Applicability correction
 
-- **Correction ruling/when:** Decider attribution is not established. The
-  revised status and structured mapping became canonical in #111 on
-  2026-10-15.
+- **Correction ruling/when:** #111 commit `84af82d` (phylroy, co-authored by
+  Copilot), 2026-10-14; accepted by phylroy at merge on 2026-10-15.
 
 The structured sources retain the clone-backed sentences while naming D-53 as
 the owner of Sentence (5). This later ownership update is distinct from the
@@ -3559,8 +3555,8 @@ stand.
 
 ### Applicability split
 
-- **Split ruling/when:** Decider attribution is not established. The split was
-  recorded in Phase E on 2026-10-14 and accepted in #111 on 2026-10-15.
+- **Split ruling/when:** #111 commit `9fffcb9` (phylroy, co-authored by
+  Copilot), 2026-10-14; accepted by phylroy at merge on 2026-10-15.
 
 The matrix establishes three independent requirements in both editions:
 the residential identity row, Article 13 heat-pump classification and the
@@ -3676,9 +3672,9 @@ the corrected letter map and completeness boundary.
 
 ### Applicability split
 
-- **Split ruling/when:** Decider attribution for the original split is not
-  established; it was recorded in #111 on 2026-10-15. Sol's Table-I
-  completeness correction below is dated 2026-10-16.
+- **Split ruling/when:** #111 commit `9fffcb9` (phylroy, co-authored by
+  Copilot), 2026-10-14; accepted by phylroy at merge on 2026-10-15. Sol's
+  Table-I completeness correction below is dated 2026-10-16.
 
 The 2025 minimums and the 2025 selection dataset are independent
 requirements. The 2020 selection records are retained only as related
@@ -3888,8 +3884,8 @@ SWEEP_MODE=full ruby openstudio-necb/scripts/necb_archetype_sweep.rb <types>`
 
 ### Applicability split
 
-- **Split ruling/when:** Decider attribution is not established. The split
-  became canonical in #111 on 2026-10-15.
+- **Split ruling/when:** #111 commit `9fffcb9` (phylroy, co-authored by
+  Copilot), 2026-10-14; accepted by phylroy at merge on 2026-10-15.
 
 This decision now records the 2025 extraction-backed datasets as separate
 requirements instead of one cross-edition zero-defect claim. The
@@ -4093,8 +4089,8 @@ project turns on it.
 
 ### Applicability hold
 
-- **Hold ruling/when:** Decider attribution is not established. The hold was
-  recorded in Phase E on 2026-10-14 and accepted in #111 on 2026-10-15.
+- **Hold ruling/when:** #111 commit `9fffcb9` (phylroy, co-authored by
+  Copilot), 2026-10-14; accepted by phylroy at merge on 2026-10-15.
 
 Sentences 8.4.1.2.(3) and (5) establish the unmet-heating criterion and the
 capacity-increase response; they do not establish that morning recovery in
@@ -4134,8 +4130,8 @@ sweeps get a ~12 h window.
 
 ### Applicability split
 
-- **Split ruling/when:** Decider attribution is not established. The split was
-  recorded in Phase E on 2026-10-14 and accepted in #111 on 2026-10-15.
+- **Split ruling/when:** #111 commit `9fffcb9` (phylroy, co-authored by
+  Copilot), 2026-10-14; accepted by phylroy at merge on 2026-10-15.
 
 The Code-backed slice is the reference energy-recovery obligation and the
 Part 5 trigger and performance provisions it invokes. Article 8.4.x.10.(8)
