@@ -199,18 +199,70 @@ class TestSourceValidation(unittest.TestCase):
         body = GOOD_BODY + "\n### Applicability split\n\nBody text.\n"
         self.rejects("Applicability split must name its ruling/when", body=body)
 
-    def test_a_corrected_bullet_is_marked_above_the_original_attribution(self):
+    def test_a_corrected_record_is_marked_in_either_section_order(self):
         for who_when in (
                 "- **Who/when:** Example, 2026-01-01.",
-                "- Who/when: Example, 2026-01-01."):
-            with self.subTest(who_when=who_when):
-                body = (
-                    GOOD_BODY.replace(
-                        "Body text.",
-                        f"{who_when}\n\n"
-                        "### Applicability correction\n\n"
-                        "- **Correction ruling/when:** Example, 2026-01-02.\n"))
-                self.rejects("corrected applicability must be marked", body=body)
+                "- Who/when: Example, 2026-01-01.",
+                "**Who/when:** Example, 2026-01-01.",
+                "Who/when: Example, 2026-01-01."):
+            ruling = (
+                "### Applicability correction\n\n"
+                "- **Correction ruling/when:** Example, 2026-01-02.")
+            for heading_first in (False, True):
+                with self.subTest(
+                        who_when=who_when, heading_first=heading_first):
+                    records = (
+                        f"{ruling}\n\n{who_when}" if heading_first
+                        else f"{who_when}\n\n{ruling}")
+                    body = GOOD_BODY.replace("Body text.", records)
+                    self.rejects(
+                        "corrected applicability must be marked", body=body)
+
+    def test_a_marked_record_is_accepted_in_either_section_order(self):
+        ruling = (
+            "### Applicability correction\n\n"
+            "- **Correction ruling/when:** Example, 2026-01-02.")
+        for who_when in (
+                "- **Who/when:** Example, 2026-01-01 — original reading.",
+                "**Who/when:** Example, 2026-01-01 — original reading."):
+            for heading_first in (False, True):
+                with self.subTest(
+                        who_when=who_when, heading_first=heading_first):
+                    records = (
+                        f"{ruling}\n\n{who_when}" if heading_first
+                        else f"{who_when}\n\n{ruling}")
+                    self.accepts(
+                        body=GOOD_BODY.replace("Body text.", records))
+
+    def test_attribution_dates_must_be_real_iso_dates(self):
+        bodies = (
+            GOOD_BODY.replace(
+                "Body text.",
+                "**Who/when:** Example, 2026-13-45."),
+            GOOD_BODY.replace(
+                "Body text.",
+                "**Who/when:** Example, 2026-01-01 — original reading.\n\n"
+                "### Applicability correction\n\n"
+                "- **Correction ruling/when:** Example, 2026-13-45."),
+            GOOD_BODY.replace(
+                "Body text.",
+                "- **Who/when:** Example, 2026-01-01.\n\n"
+                "**Who/when:** Later record, 2026-13-45."),
+        )
+        for body in bodies:
+            with self.subTest(body=body):
+                self.rejects(
+                    "invalid ISO date '2026-13-45' in attribution", body=body)
+
+    def test_applicability_heading_must_use_exact_case(self):
+        body = GOOD_BODY.replace(
+            "Body text.",
+            "**Who/when:** Example, 2026-01-01 — original reading.\n\n"
+            "### applicability correction\n\n"
+            "- **Correction ruling/when:** Example, 2026-01-02.")
+        self.rejects(
+            "applicability heading must use exact '### Applicability' case",
+            body=body)
 
     def test_the_heading_text_need_not_equal_the_title(self):
         """69 of the 97 real decisions differ here; that is a source fact."""

@@ -48,6 +48,7 @@ reads.
 from __future__ import annotations
 
 import argparse
+import datetime
 import itertools
 import json
 import pathlib
@@ -168,13 +169,16 @@ SPLIT_HEADING_RE = re.compile("^## (D-\\d+)(?: " + EM_DASH + " (.+))?$")
 ANCHOR_RE = re.compile(r'^<a id="d-\d+"></a>$')
 #: A retroactive applicability correction, split or hold needs a dated
 #: attribution distinct from the decision's original record.
-APPLICABILITY_HEADING_RE = re.compile(r"^### Applicability\b.*$", re.MULTILINE)
+APPLICABILITY_HEADING_RE = re.compile(
+    r"^### Applicability\b.*$", re.IGNORECASE | re.MULTILINE)
+ISO_DATE_RE = re.compile(r"\b20\d{2}-\d{2}-\d{2}\b")
 RULING_WHEN_RE = re.compile(
     r"^[-*] \*\*[^*\n]*ruling/when:\*\*(?:[^\n]|\n[ \t]+)*?"
     r"\b20\d{2}-\d{2}-\d{2}\b",
     re.IGNORECASE | re.MULTILINE)
 WHO_WHEN_RE = re.compile(
-    r"^[-*] (?:\*\*Who/when:\*\*|Who/when:)[^\n]*(?:\n[ \t]+[^\n]*)*",
+    r"^(?:[-*] )?(?:\*\*Who/when:\*\*|Who/when:)"
+    r"[^\n]*(?:\n[ \t]+[^\n]*)*",
     re.MULTILINE)
 
 def numeric_order(ids) -> list:
@@ -1208,8 +1212,16 @@ def validate(name: str, meta: dict, body: str) -> None:
 
 def check_body_attribution(name: str, body: str) -> None:
     """Keep later applicability rulings distinct from the original record."""
-    original = WHO_WHEN_RE.search(body)
+    attributions = list(WHO_WHEN_RE.finditer(body))
+    original = attributions[0] if attributions else None
+    for attribution in attributions:
+        check_attribution_dates(name, attribution.group(0))
     for heading in APPLICABILITY_HEADING_RE.finditer(body):
+        if not heading.group(0).startswith("### Applicability"):
+            raise ValueError(
+                "{}: applicability heading must use exact "
+                "'### Applicability' case, got {!r}".format(
+                    name, heading.group(0)))
         section = body[heading.end():]
         next_heading = re.search(r"^### ", section, re.MULTILINE)
         if next_heading is not None:
@@ -1218,12 +1230,24 @@ def check_body_attribution(name: str, body: str) -> None:
             raise ValueError(
                 "{}: {} must name its ruling/when with an ISO date".format(
                     name, heading.group(0)))
-        if original is not None and original.start() < heading.start():
+        check_attribution_dates(name, section)
+        if original is not None:
             record = body[:original.end()].casefold()
             if "as corrected" not in record and "original reading" not in record:
                 raise ValueError(
                     "{}: corrected applicability must be marked above the "
                     "original Who/when attribution".format(name))
+
+
+def check_attribution_dates(name: str, record: str) -> None:
+    """Reject calendar-impossible dates inside attribution records."""
+    for value in ISO_DATE_RE.findall(record):
+        try:
+            datetime.date.fromisoformat(value)
+        except ValueError as error:
+            raise ValueError(
+                "{}: invalid ISO date {!r} in attribution".format(
+                    name, value)) from error
 
 
 def check_editions(name: str, meta: dict) -> None:
