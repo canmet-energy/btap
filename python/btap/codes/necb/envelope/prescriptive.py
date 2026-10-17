@@ -30,6 +30,9 @@ changing, so a literal was wrong on every 2025 run (Sol, applicability review).
 
 from __future__ import annotations
 
+from collections import defaultdict
+from dataclasses import dataclass, field
+
 import openstudio
 
 from btap._compat import opt, opt_or, ruby_round, ruby_str, sorted_by_name
@@ -54,6 +57,97 @@ SUBSURFACE_CLASS = {
 
 SURFACE_CLASS = {"Wall": "wall", "RoofCeiling": "roofceiling", "Floor": "floor"}
 
+_RADIANT_FLOOR_GETTERS = (
+    "getZoneHVACLowTempRadiantVarFlows",
+    "getZoneHVACLowTempRadiantConstFlows",
+    "getZoneHVACLowTemperatureRadiantElectrics",
+)
+_FLOOR_RADIANT_TYPES = {"Floors", "CeilingsAndFloors", "AllSurfaces"}
+
+
+@dataclass
+class _EmbeddedFloorInventory:
+    embedded: set[str] = field(default_factory=set)
+    unresolved: set[str] = field(default_factory=set)
+    evidence: dict[str, list[str]] = field(default_factory=lambda: defaultdict(list))
+
+    def status(self, surface_name):
+        if surface_name in self.embedded:
+            return "embedded"
+        if surface_name in self.unresolved:
+            return "unresolved"
+        return "ordinary"
+
+
+def _is_ground_floor(surface):
+    return surface.surfaceType() == "Floor" and boundary_of(surface) == "ground"
+
+
+def _zone_ground_floors(zone):
+    return [
+        surface
+        for space in zone.spaces()
+        for surface in space.surfaces()
+        if _is_ground_floor(surface)
+    ]
+
+
+def _embedded_floor_inventory(model):
+    """Inventory embedded-floor applicability while proposed HVAC exists.
+
+    Surface names are the handoff key because OpenStudio changes handles when
+    cloning but preserves names. OpenStudio enforces unique object names
+    case-insensitively, so the names remain unambiguous through the clone.
+    """
+    inventory = _EmbeddedFloorInventory()
+    ground_floors = [surface for surface in model.getSurfaces()
+                     if _is_ground_floor(surface)]
+
+    for surface in ground_floors:
+        name = surface.nameString()
+        construction = opt(surface.construction())
+        internal = (
+            None if construction is None
+            else opt(construction.to_ConstructionWithInternalSource())
+        )
+        if internal is not None:
+            inventory.embedded.add(name)
+            inventory.evidence[name].append(
+                f"internal-source construction '{internal.nameString()}'")
+
+    for getter_name in _RADIANT_FLOOR_GETTERS:
+        for equipment in getattr(model, getter_name)():
+            radiant_surface_type = opt(equipment.radiantSurfaceType())
+            if radiant_surface_type not in _FLOOR_RADIANT_TYPES:
+                continue
+
+            selected = list(equipment.surfaces())
+            selected_ground = [surface for surface in selected
+                               if _is_ground_floor(surface)]
+            for surface in selected_ground:
+                name = surface.nameString()
+                inventory.embedded.add(name)
+                inventory.evidence[name].append(
+                    f"{equipment.iddObjectType().valueName()} "
+                    f"'{equipment.nameString()}' construction-derived "
+                    "surface association")
+
+            if selected:
+                continue
+
+            zone = opt(equipment.thermalZone())
+            if zone is None:
+                continue
+            for surface in _zone_ground_floors(zone):
+                name = surface.nameString()
+                inventory.unresolved.add(name)
+                inventory.evidence[name].append(
+                    f"{equipment.iddObjectType().valueName()} "
+                    f"'{equipment.nameString()}' declares floor radiant service "
+                    "but resolves no surfaces")
+
+    return inventory
+
 
 def apply(model, *, code, hdd=None, apply_fdwr=False, apply_srr=False,
           include_films=True, thermal_bridging=None, audit=None):
@@ -67,7 +161,8 @@ def apply(model, *, code, hdd=None, apply_fdwr=False, apply_srr=False,
 
 
 def _apply(model, ruleset, *, hdd=None, apply_fdwr=False, apply_srr=False,
-           include_films=True, thermal_bridging=None, audit=None):
+           include_films=True, thermal_bridging=None, audit=None,
+           embedded_floor_inventory=None):
     """The prescriptive pass over ONE resolved edition: the surface loop and
     every table lookup under it read the same :class:`btap.codes.Ruleset`
     rather than re-resolving the edition per surface (Stage 6)."""
@@ -75,6 +170,11 @@ def _apply(model, ruleset, *, hdd=None, apply_fdwr=False, apply_srr=False,
     hdd = climate.hdd18(model, edition=ruleset.edition, hdd=hdd, audit=audit)
     if hdd is None:
         raise ValueError("HDD unresolvable: pass hdd: explicitly or set a weather file")
+    embedded_floor_inventory = (
+        _embedded_floor_inventory(model)
+        if embedded_floor_inventory is None
+        else embedded_floor_inventory
+    )
 
     audit.info("prescriptive", "film convention",
                value=("code-literal: table U treated as overall transmittance incl. air "
@@ -108,7 +208,9 @@ def _apply(model, ruleset, *, hdd=None, apply_fdwr=False, apply_srr=False,
             continue
 
         if boundary == "ground" and surface_class == "floor":
-            _assign_ground_floor(model, surface, ruleset, hdd, include_films, cache, audit)
+            _assign_ground_floor(
+                model, surface, ruleset, hdd, include_films, cache, audit,
+                embedded_floor_inventory)
         else:
             _assign_surface(model, surface, surface_class, boundary, ruleset, hdd,
                             include_films, cache, audit)
@@ -224,7 +326,10 @@ def _assign_interzone_envelope(model, surface, surface_class, ruleset, hdd,
         return
 
     construction = opt(surface.construction())
-    layered = None if construction is None else opt(construction.to_Construction())
+    layered = (
+        None if construction is None
+        else opt(construction.to_LayeredConstruction())
+    )
     if layered is None:
         audit.warn("prescriptive",
                    "envelope surface to unconditioned space has no layered construction — skipped",
@@ -277,7 +382,10 @@ def _target_conductance(ruleset, surface_class, boundary, hdd, include_films, au
 def _assign_surface(model, surface, surface_class, boundary, ruleset, hdd,
                     include_films, cache, audit):
     construction = opt(surface.construction())
-    layered = None if construction is None else opt(construction.to_Construction())
+    layered = (
+        None if construction is None
+        else opt(construction.to_LayeredConstruction())
+    )
     if layered is None:
         audit.warn("prescriptive", "surface has no layered construction — skipped",
                    target=surface.nameString())
@@ -298,9 +406,11 @@ def _assign_surface(model, surface, surface_class, boundary, ruleset, hdd,
                                 else "Table 3.2.2.2."))
         cache[key] = c
     surface.setConstruction(cache[key])
+    return cache[key]
 
 
-def _assign_ground_floor(model, surface, ruleset, hdd, include_films, cache, audit):
+def _assign_ground_floor(model, surface, ruleset, hdd, include_films, cache, audit,
+                         embedded_floor_inventory):
     """Table 3.2.3.1 floors row is zone-conditional: zone 8 prescribes the
     table U over the FULL slab area; zones 4-7B prescribe it only within a
     1.2 m perimeter strip (3.2.3.3.(3)) and leave the slab field without a
@@ -310,14 +420,227 @@ def _assign_ground_floor(model, surface, ruleset, hdd, include_films, cache, aud
     the bare slab and OMIT the strip; the old BTAP path applied the strip U
     over the full area — both simplifications diverge from the printed table,
     see D-32.)"""
-    extent = _ground_floor_extent(ruleset=ruleset, hdd=hdd)
+    name = surface.nameString()
+    status = embedded_floor_inventory.status(name)
+    evidence = embedded_floor_inventory.evidence.get(name, [])
+    if status == "unresolved":
+        audit.warn(
+            "prescriptive",
+            "embedded-system applicability UNRESOLVED — a floor-radiant object "
+            "does not identify its served surfaces, so the ordinary perimeter-strip "
+            "rule is not guessed and the slab is left as modeled",
+            target=name,
+            inputs={"evidence": evidence, "code": ruleset.id,
+                    "edition": ruleset.edition},
+            article="3.2.3.3.(4)(b)",
+            ruling="D-105",
+        )
+        return
+
+    embedded = status == "embedded"
+    extent = _ground_floor_extent(
+        ruleset=ruleset, hdd=hdd, embedded_system=embedded)
     if extent["extent"] == "full_area":
-        _assign_surface(model, surface, "floor", "ground", ruleset, hdd,
-                        include_films, cache, audit)
+        construction = _assign_surface(
+            model, surface, "floor", "ground", ruleset, hdd,
+            include_films, cache, audit)
+        if embedded and construction is not None:
+            audit.decision(
+                "prescriptive",
+                "ground floor with an embedded heating/cooling system insulated "
+                "over its FULL AREA",
+                target=name,
+                inputs={"hdd": hdd, "code": ruleset.id,
+                        "edition": ruleset.edition, "detected_by": evidence},
+                value=f"full-area construction '{construction.nameString()}'",
+                article="3.2.3.3.(4)(b)",
+                ruling="D-105",
+            )
+            _apply_embedded_floor_perimeter(
+                surface, construction, audit)
         return
 
     _apply_ground_strip(model, surface, ruleset, hdd, include_films,
                         extent["width_m"], cache, audit)
+
+
+def _construction_thickness(construction):
+    thickness = 0.0
+    for layer in construction.layers():
+        material = opt(layer.to_StandardOpaqueMaterial())
+        if material is not None:
+            thickness += material.thickness()
+    return thickness
+
+
+def _foundation_wall_profile(foundation, floor):
+    floor_space = opt(floor.space())
+    floor_zone = (
+        None if floor_space is None
+        else opt(floor_space.thermalZone())
+    )
+    if floor_zone is None:
+        return None
+
+    wall_instances = []
+    other_floors = []
+    for candidate in sorted_by_name(foundation.surfaces()):
+        if candidate.surfaceType() == "Floor":
+            if candidate.handle() != floor.handle():
+                other_floors.append(candidate.nameString())
+            continue
+        if candidate.surfaceType() != "Wall":
+            continue
+
+        space = opt(candidate.space())
+        zone = None if space is None else opt(space.thermalZone())
+        if zone is None or zone.handle() != floor_zone.handle():
+            continue
+
+        vertices = list(space.transformation() * candidate.vertices())
+        if not vertices:
+            return None
+        wall_instances.append((
+            candidate.nameString(),
+            max(vertex.z() for vertex in vertices)
+            - min(vertex.z() for vertex in vertices),
+        ))
+
+    return wall_instances, other_floors
+
+
+def _apply_embedded_floor_perimeter(surface, construction, audit):
+    """Represent Sentence (5)'s vertical continuation for a detected floor."""
+    name = surface.nameString()
+    foundation = opt(surface.adjacentFoundation())
+    if foundation is None:
+        audit.warn(
+            "prescriptive",
+            "embedded ground floor has no Kiva foundation — the vertical "
+            "perimeter continuation is not representable",
+            target=name,
+            article="3.2.3.3.(5)",
+            ruling="D-105",
+        )
+        return
+
+    internal_source = opt(construction.to_ConstructionWithInternalSource())
+    if internal_source is not None:
+        audit.warn(
+            "prescriptive",
+            "ENERGYPLUS REJECTS an internal-source construction on a "
+            "Foundation surface — this input representation cannot simulate "
+            "unless the construction or boundary is replaced",
+            target=name,
+            inputs={
+                "construction": internal_source.nameString(),
+                "foundation": foundation.nameString(),
+            },
+            article="3.2.3.3.(5)",
+            ruling="D-105",
+        )
+
+    insulation = opt(construction.insulation())
+    floor_thickness = _construction_thickness(construction)
+    wall_profile = _foundation_wall_profile(foundation, surface)
+    if (insulation is None or floor_thickness <= 0
+            or wall_profile is None):
+        audit.warn(
+            "prescriptive",
+            "embedded ground floor's insulation layer, floor thickness, or "
+            "adjoining foundation-wall height is "
+            "UNRESOLVED — the vertical perimeter continuation is not representable",
+            target=name,
+            article="3.2.3.3.(5)",
+            ruling="D-105",
+        )
+        return
+
+    wall_instances, other_floors = wall_profile
+    foundation_wall_height = max(
+        (height for _wall, height in wall_instances), default=0.0)
+    height_groups = defaultdict(list)
+    for wall_name, height in wall_instances:
+        height_groups[ruby_round(height, 3)].append(wall_name)
+    grouped_instances = [
+        {"height_m": height, "walls": sorted(walls)}
+        for height, walls in sorted(height_groups.items())
+    ]
+    if len(grouped_instances) > 1:
+        audit.warn(
+            "prescriptive",
+            "Kiva foundation has MIXED adjoining wall heights — its one "
+            "vertical-insulation depth uses the tallest instance and "
+            "over-insulates the shorter instances",
+            target=foundation.nameString(),
+            inputs={
+                "floor": name,
+                "wall_instances": grouped_instances,
+                "over_reached_wall_instances": grouped_instances[:-1],
+            },
+            article="3.2.3.3.(5)",
+            ruling="D-105",
+        )
+    if other_floors:
+        audit.warn(
+            "prescriptive",
+            "Kiva foundation is SHARED by multiple floor surfaces — its "
+            "Sentence (3) strip and Sentence (5) continuation fields apply "
+            "to every EnergyPlus instance and can affect the other floors",
+            target=foundation.nameString(),
+            inputs={
+                "floor": name,
+                "other_floor_instances": sorted(other_floors),
+            },
+            article="3.2.3.3.(5)",
+            ruling="D-105",
+        )
+
+    depth = foundation_wall_height + floor_thickness
+    exterior = opt(foundation.exteriorVerticalInsulationMaterial())
+    exterior_depth = opt(foundation.exteriorVerticalInsulationDepth())
+    if exterior is not None and exterior_depth is not None and exterior_depth >= depth:
+        audit.info(
+            "prescriptive",
+            "exterior foundation-wall insulation reaches the bottom of the "
+            "embedded floor — the vertical perimeter exception applies",
+            target=name,
+            inputs={"floor_thickness_m": ruby_round(floor_thickness, 4),
+                    "adjoining_foundation_wall_height_m":
+                        ruby_round(foundation_wall_height, 4),
+                    "required_vertical_depth_m": ruby_round(depth, 4),
+                    "exterior_insulation_depth_m": ruby_round(exterior_depth, 4)},
+            article="3.2.3.3.(5)",
+            ruling="D-105",
+        )
+        return
+
+    interior = opt(foundation.interiorVerticalInsulationMaterial())
+    interior_depth = opt(foundation.interiorVerticalInsulationDepth())
+    if interior is None or interior_depth is None or interior_depth < depth:
+        if not foundation.setInteriorVerticalInsulationMaterial(insulation):
+            raise RuntimeError(
+                f"could not assign vertical perimeter insulation to "
+                f"{foundation.nameString()}")
+        if not foundation.setInteriorVerticalInsulationDepth(depth):
+            raise RuntimeError(
+                f"could not set vertical perimeter insulation depth on "
+                f"{foundation.nameString()}")
+    audit.decision(
+        "prescriptive",
+        "full-area floor insulation continued vertically around the perimeter",
+        target=foundation.nameString(),
+        inputs={
+            "floor": name,
+            "floor_thickness_m": ruby_round(floor_thickness, 4),
+            "adjoining_foundation_wall_height_m":
+                ruby_round(foundation_wall_height, 4),
+            "required_vertical_depth_m": ruby_round(depth, 4),
+        },
+        value=f"interior vertical insulation depth {ruby_str(ruby_round(depth, 4))} m",
+        article="3.2.3.3.(5)",
+        ruling="D-105",
+    )
 
 
 def _apply_ground_strip(model, surface, ruleset, hdd, include_films, width_m,

@@ -266,6 +266,8 @@ def build_reference(run):
     ruleset = run.ruleset
     prefix = ruleset.article("lighting_subsection")
     with audit.with_building("reference building"):
+        embedded_floor_inventory = (
+            envelope.prescriptive._embedded_floor_inventory(proposed))
         reference_result = hvac.reference._reference_hvac(
             proposed, ruleset, building=opts["building"], audit=audit,
             proposed_annual=run.proposed_annual_data)
@@ -273,7 +275,8 @@ def build_reference(run):
         envelope.reference._apply(
             reference, ruleset, hdd=run.hdd,
             actual_roof_absorptance_used=opts["actual_roof_absorptance_used"],
-            thermal_bridging=opts["thermal_bridging"], audit=audit)
+            thermal_bridging=opts["thermal_bridging"], audit=audit,
+            embedded_floor_inventory=embedded_floor_inventory)
         # daylighting: tells reference_lighting whether (5)-(12) are covered
         # by the separate daylighting transform below — it shouts the gap only
         # when they are not.

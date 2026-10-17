@@ -68,10 +68,15 @@ def film_r_interzone(surface) -> float:
 
 def deep_copy(model, construction):
     """Clone the construction AND every layer material (a bare
-    Construction#clone shares material objects, so solving one construction's
-    insulation would mutate every other construction using the same material
-    — port of the legacy construction_deep_copy)."""
-    copy = construction.clone(model).to_Construction().get()
+    LayeredConstruction#clone shares material objects, so solving one
+    construction's insulation would mutate every other construction using the
+    same material — port of the legacy construction_deep_copy). Internal-source
+    constructions retain their source location and tube spacing."""
+    internal_source = opt(construction.to_ConstructionWithInternalSource())
+    if internal_source is None:
+        copy = construction.clone(model).to_Construction().get()
+    else:
+        copy = construction.clone(model).to_ConstructionWithInternalSource().get()
     copy.setName(construction.nameString())
     copy.setLayers([layer.clone(model).to_Material().get()
                     for layer in construction.layers()])
@@ -127,7 +132,12 @@ def opaque_at_conductance(model, construction, conductance):
     # the unrounded `conductance`). NECB table U-values are separated by far
     # more than 1e-4 W/(m2.K), so 4dp display names cannot collide.
     name = f"{base}:U-{ruby_str(ruby_round(conductance, 4))}"
-    existing = opt(model.getConstructionByName(name))
+    internal_source = opt(construction.to_ConstructionWithInternalSource())
+    existing = opt(
+        model.getConstructionByName(name)
+        if internal_source is None
+        else model.getConstructionWithInternalSourceByName(name)
+    )
     if existing is not None:
         return existing
 

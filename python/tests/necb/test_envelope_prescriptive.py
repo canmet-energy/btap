@@ -22,6 +22,65 @@ def print_at(z):
     return pts
 
 
+def embedded_ground_floor_model(*, internal_source=True):
+    import openstudio
+
+    model = openstudio.model.Model()
+    space = openstudio.model.Space.fromFloorPrint(print_at(0.0), 3.0, model).get()
+    zone = openstudio.model.ThermalZone(model)
+    space.setThermalZone(zone)
+
+    slab = openstudio.model.StandardOpaqueMaterial(
+        model, 'MediumRough', 0.1, 1.8, 2300, 900)
+    insulation = openstudio.model.StandardOpaqueMaterial(
+        model, 'MediumSmooth', 0.03, 0.03, 30, 1200)
+    if internal_source:
+        floor_construction = openstudio.model.ConstructionWithInternalSource(model)
+        floor_construction.setLayers([insulation, slab])
+        floor_construction.setSourcePresentAfterLayerNumber(1)
+        floor_construction.setTemperatureCalculationRequestedAfterLayerNumber(1)
+    else:
+        floor_construction = openstudio.model.Construction(model)
+        floor_construction.setLayers([insulation, slab])
+    floor_construction.setInsulation(insulation)
+
+    wall = openstudio.model.StandardOpaqueMaterial(
+        model, 'MediumRough', 0.1, 1.0, 1000, 900)
+    wall_insulation = openstudio.model.StandardOpaqueMaterial(
+        model, 'MediumSmooth', 0.05, 0.05, 30, 1200)
+    enclosure = openstudio.model.Construction(model)
+    enclosure.setLayers([wall, wall_insulation])
+    enclosure.setInsulation(wall_insulation)
+
+    floor = None
+    for surface in space.surfaces():
+        if surface.surfaceType() == 'Floor':
+            surface.setName('Embedded ground floor')
+            surface.setOutsideBoundaryCondition('Ground')
+            surface.setConstruction(floor_construction)
+            floor = surface
+        else:
+            surface.setConstruction(enclosure)
+
+    foundation = openstudio.model.FoundationKiva(model)
+    foundation.setName('Embedded floor foundation')
+    floor.setAdjacentFoundation(foundation)
+
+    availability = openstudio.model.ScheduleConstant(model)
+    availability.setValue(1.0)
+    temperature_limits = openstudio.model.ScheduleTypeLimits(model)
+    temperature_limits.setUnitType('Temperature')
+    temperature = openstudio.model.ScheduleConstant(model)
+    temperature.setScheduleTypeLimits(temperature_limits)
+    temperature.setValue(20.0)
+    radiant = openstudio.model.ZoneHVACLowTemperatureRadiantElectric(
+        model, availability, temperature)
+    radiant.setName('Embedded floor electric radiant')
+    radiant.setRadiantSurfaceType('Floors')
+    radiant.addToThermalZone(zone)
+    return model, floor, foundation, radiant
+
+
 @needs_sdk
 class TestPrescriptive(unittest.TestCase):
     @property
@@ -139,6 +198,322 @@ class TestPrescriptive(unittest.TestCase):
             delta=1e-4, msg='zone 8: slab retargeted full-area to the 0.379 overall U')
         self.assertFalse(kiva8.interiorHorizontalInsulationMaterial().is_initialized(),
                          'zone 8: no strip — full-area requirement instead')
+
+    # D-105: Sentence (4) overrides the ordinary Sentence (3) perimeter
+    # option in EVERY climate zone. The actual SDK radiant-surface
+    # relationship is derived from the ConstructionWithInternalSource; the
+    # inventory captures that construction evidence before HVAC teardown.
+    def test_embedded_ground_floor_is_full_area_in_both_editions(self):
+        from btap.modeling.envelope import constructions as Constructions
+
+        for code in ('necb2020', 'necb2025'):
+            with self.subTest(code=code):
+                model, floor, foundation, radiant = embedded_ground_floor_model()
+                self.assertEqual(
+                    [floor.nameString()],
+                    [surface.nameString() for surface in radiant.surfaces()])
+
+                audit = self.n.apply_prescriptive(model, code=code, hdd=HDD)
+                construction = floor.construction().get()
+                internal = construction.to_ConstructionWithInternalSource()
+                self.assertTrue(
+                    internal.is_initialized(),
+                    'direct prescriptive use must retain the embedded source')
+                self.assertEqual(
+                    1, internal.get().sourcePresentAfterLayerNumber(),
+                    'retargeting must preserve the embedded source location')
+                self.assertEqual(
+                    1,
+                    internal.get().temperatureCalculationRequestedAfterLayerNumber(),
+                    'retargeting must preserve the source temperature plane')
+                target = 1.0 / (
+                    (1.0 / 0.757) - Constructions.film_r('floor', 'ground'))
+                self.assertAlmostEqual(
+                    target, internal.get().thermalConductance().get(), delta=1e-4,
+                    msg='3.2.3.3.(4): the table U applies over the full slab')
+                self.assertFalse(
+                    foundation.interiorHorizontalInsulationMaterial().is_initialized(),
+                    'the ordinary 1.2 m Sentence (3) strip must not return')
+                self.assertTrue(
+                    foundation.interiorVerticalInsulationMaterial().is_initialized(),
+                    'Sentence (5): full-area insulation continues vertically')
+                self.assertGreater(
+                    foundation.interiorVerticalInsulationDepth().get(), 0.0)
+                self.assertTrue(any(
+                    entry.get('article') == '3.2.3.3.(4)(b)'
+                    and entry.get('ruling') == 'D-105'
+                    and entry.get('level') == 'decision'
+                    for entry in audit.entries))
+                self.assertTrue(any(
+                    entry.get('article') == '3.2.3.3.(5)'
+                    and entry.get('ruling') == 'D-105'
+                    for entry in audit.entries))
+                engine_warning = [
+                    entry for entry in audit.warnings
+                    if entry.get('article') == '3.2.3.3.(5)'
+                    and entry.get('ruling') == 'D-105'
+                    and 'ENERGYPLUS REJECTS' in entry['action']
+                ]
+                self.assertEqual(1, len(engine_warning))
+                self.assertEqual(floor.nameString(), engine_warning[0]['target'])
+
+    def test_foundation_wall_height_is_included_in_vertical_continuation(self):
+        model, floor, foundation, _radiant = embedded_ground_floor_model()
+        for surface in floor.space().get().surfaces():
+            if surface.surfaceType() == 'Wall':
+                self.assertTrue(surface.setAdjacentFoundation(foundation))
+
+        import openstudio
+
+        shallow_exterior = openstudio.model.StandardOpaqueMaterial(
+            model, 'MediumSmooth', 0.05, 0.04, 30, 1200)
+        self.assertTrue(
+            foundation.setExteriorVerticalInsulationMaterial(shallow_exterior))
+        self.assertTrue(foundation.setExteriorVerticalInsulationDepth(0.2))
+
+        audit = self.n.apply_prescriptive(model, code='necb2020', hdd=HDD)
+        construction = floor.construction().get().to_LayeredConstruction().get()
+        floor_thickness = sum(
+            material.to_StandardOpaqueMaterial().get().thickness()
+            for material in construction.layers()
+        )
+        expected_depth = 3.0 + floor_thickness
+
+        self.assertTrue(
+            foundation.interiorVerticalInsulationMaterial().is_initialized(),
+            '0.2 m exterior insulation cannot exempt a floor over 3 m below wall top')
+        self.assertAlmostEqual(
+            expected_depth,
+            foundation.interiorVerticalInsulationDepth().get(),
+            delta=1e-6,
+            msg='Kiva depth runs from foundation-wall top to the slab bottom')
+        decision = next(
+            entry for entry in audit.entries
+            if entry.get('article') == '3.2.3.3.(5)'
+            and entry.get('level') == 'decision'
+        )
+        self.assertEqual(
+            3.0, decision['inputs']['adjoining_foundation_wall_height_m'])
+        self.assertEqual(
+            round(expected_depth, 4),
+            decision['inputs']['required_vertical_depth_m'])
+        self.assertFalse(any(
+            entry.get('article') == '3.2.3.3.(5)'
+            and 'exception applies' in entry['action']
+            for entry in audit.entries
+        ))
+
+    def test_mixed_foundation_wall_heights_use_the_tallest_and_warn(self):
+        import openstudio
+
+        model, floor, foundation, _radiant = embedded_ground_floor_model()
+        walls = [
+            surface for surface in floor.space().get().surfaces()
+            if surface.surfaceType() == 'Wall'
+        ]
+        for index, wall in enumerate(walls, start=1):
+            wall.setName(f'Foundation wall {index}')
+            self.assertTrue(wall.setAdjacentFoundation(foundation))
+
+        for wall in walls[:2]:
+            vertices = openstudio.Point3dVector()
+            base = min(vertex.z() for vertex in wall.vertices())
+            for vertex in wall.vertices():
+                vertices.append(openstudio.Point3d(
+                    vertex.x(), vertex.y(), min(vertex.z(), base + 1.0)))
+            self.assertTrue(wall.setVertices(vertices))
+
+        audit = self.n.apply_prescriptive(
+            model, code='necb2020', hdd=HDD)
+        construction = floor.construction().get().to_LayeredConstruction().get()
+        floor_thickness = sum(
+            material.to_StandardOpaqueMaterial().get().thickness()
+            for material in construction.layers()
+        )
+        expected_depth = 3.0 + floor_thickness
+        self.assertAlmostEqual(
+            expected_depth,
+            foundation.interiorVerticalInsulationDepth().get(),
+            delta=1e-6,
+            msg='the one Kiva depth must satisfy the tallest wall instance')
+
+        mixed = [
+            entry for entry in audit.warnings
+            if entry.get('article') == '3.2.3.3.(5)'
+            and 'MIXED adjoining wall heights' in entry['action']
+        ]
+        self.assertEqual(1, len(mixed))
+        self.assertEqual(
+            [
+                {'height_m': 1.0,
+                 'walls': ['Foundation wall 1', 'Foundation wall 2']},
+                {'height_m': 3.0,
+                 'walls': ['Foundation wall 3', 'Foundation wall 4']},
+            ],
+            mixed[0]['inputs']['wall_instances'])
+        self.assertEqual(
+            [{'height_m': 1.0,
+              'walls': ['Foundation wall 1', 'Foundation wall 2']}],
+            mixed[0]['inputs']['over_reached_wall_instances'])
+
+    def test_shared_foundation_uses_only_the_floor_zone_walls_and_warns(self):
+        import openstudio
+
+        model, floor, foundation, _radiant = embedded_ground_floor_model()
+        other = openstudio.model.Space.fromFloorPrint(
+            print_at(0.0), 3.0, model).get()
+        other.setXOrigin(20.0)
+        other_zone = openstudio.model.ThermalZone(model)
+        other.setThermalZone(other_zone)
+
+        slab_material = openstudio.model.StandardOpaqueMaterial(
+            model, 'MediumRough', 0.1, 1.8, 2300, 900)
+        plain_slab = openstudio.model.Construction(model)
+        plain_slab.setLayers([slab_material])
+        enclosure = next(
+            surface.construction().get()
+            for surface in floor.space().get().surfaces()
+            if surface.surfaceType() == 'Wall'
+        )
+        other_floor = None
+        wall_number = 0
+        for surface in other.surfaces():
+            if surface.surfaceType() == 'Floor':
+                surface.setName('Other plain ground floor')
+                surface.setConstruction(plain_slab)
+                self.assertTrue(surface.setAdjacentFoundation(foundation))
+                other_floor = surface
+            else:
+                surface.setConstruction(enclosure)
+                if surface.surfaceType() == 'Wall':
+                    wall_number += 1
+                    surface.setName(f'Other-zone foundation wall {wall_number}')
+                    self.assertTrue(surface.setAdjacentFoundation(foundation))
+        self.assertIsNotNone(other_floor)
+
+        audit = self.n.apply_prescriptive(
+            model, code='necb2020', hdd=HDD)
+        construction = floor.construction().get().to_LayeredConstruction().get()
+        floor_thickness = sum(
+            material.to_StandardOpaqueMaterial().get().thickness()
+            for material in construction.layers()
+        )
+        self.assertAlmostEqual(
+            floor_thickness,
+            foundation.interiorVerticalInsulationDepth().get(),
+            delta=1e-6,
+            msg='walls from another zone do not adjoin this floor in EnergyPlus')
+
+        decision = next(
+            entry for entry in audit.entries
+            if entry.get('article') == '3.2.3.3.(5)'
+            and entry.get('level') == 'decision'
+        )
+        self.assertEqual(
+            0.0, decision['inputs']['adjoining_foundation_wall_height_m'])
+        shared = [
+            entry for entry in audit.warnings
+            if entry.get('article') == '3.2.3.3.(5)'
+            and 'SHARED by multiple floor surfaces' in entry['action']
+        ]
+        self.assertEqual(1, len(shared))
+        self.assertEqual(
+            ['Other plain ground floor'],
+            shared[0]['inputs']['other_floor_instances'])
+
+    def test_internal_source_roof_is_retargeted_without_classifying_ground_floor(self):
+        import openstudio
+
+        from btap.audit import AuditLog
+        from btap.modeling.envelope import constructions as Constructions
+
+        model, floor, foundation, radiant = embedded_ground_floor_model(
+            internal_source=False)
+        radiant.remove()
+        roof = next(
+            surface for surface in model.getSurfaces()
+            if surface.surfaceType() == 'RoofCeiling'
+        )
+        original = roof.construction().get().to_Construction().get()
+        internal = openstudio.model.ConstructionWithInternalSource(model)
+        internal.setName('Internal-source roof')
+        self.assertTrue(internal.setLayers(original.layers()))
+        self.assertTrue(internal.setSourcePresentAfterLayerNumber(1))
+        self.assertTrue(
+            internal.setTemperatureCalculationRequestedAfterLayerNumber(1))
+        self.assertTrue(internal.setInsulation(original.insulation().get()))
+        self.assertTrue(roof.setConstruction(internal))
+
+        audit = AuditLog()
+        self.n.reference_envelope(
+            model, code='necb2020', hdd=HDD, audit=audit)
+
+        target = 1.0 / (
+            (1.0 / 0.156) - Constructions.film_r('roofceiling', 'outdoors'))
+        rebuilt = roof.construction().get()
+        self.assertTrue(
+            rebuilt.to_Construction().is_initialized(),
+            'the reference lightweight rebuild accepts internal-source roofs')
+        self.assertAlmostEqual(
+            target,
+            rebuilt.to_Construction().get().thermalConductance().get(),
+            delta=1e-4,
+            msg='internal-source roof reaches the Table 3.2.2.2 target')
+        self.assertTrue(
+            foundation.interiorHorizontalInsulationMaterial().is_initialized(),
+            'an unrelated internal-source roof must not classify the plain slab')
+        self.assertAlmostEqual(
+            1.2, foundation.interiorHorizontalInsulationWidth().get(),
+            delta=1e-9)
+        self.assertFalse(any(
+            entry.get('ruling') == 'D-105' for entry in audit.entries))
+        self.assertFalse(any(
+            entry.get('target') == roof.nameString()
+            and 'no layered construction' in entry['action']
+            for entry in audit.warnings))
+
+    def test_unresolved_radiant_floor_does_not_guess_the_ordinary_strip(self):
+        from btap.audit import AuditLog
+        from btap.codes import resolve
+
+        model, floor, foundation, _radiant = embedded_ground_floor_model(
+            internal_source=False)
+        inventory = self.n.prescriptive._embedded_floor_inventory(model)
+        self.assertEqual('unresolved', inventory.status(floor.nameString()))
+
+        # Clone and remove the radiant object exactly as the reference-HVAC
+        # phase does. Only the pre-teardown inventory can now preserve the
+        # unresolved applicability result.
+        reference = model.clone().to_Model()
+        for equipment in reference.getZoneHVACLowTemperatureRadiantElectrics():
+            equipment.remove()
+        reference_floor = reference.getSurfaceByName(floor.nameString()).get()
+        reference_foundation = reference_floor.adjacentFoundation().get()
+        before = reference_floor.construction().get().nameString()
+        audit = AuditLog()
+        self.n.prescriptive._apply(
+            reference, resolve('necb2020'), hdd=HDD, audit=audit,
+            embedded_floor_inventory=inventory)
+
+        self.assertEqual(before, reference_floor.construction().get().nameString())
+        self.assertFalse(
+            reference_foundation.interiorHorizontalInsulationMaterial().is_initialized(),
+            'an unresolved embedded-floor signal must not fall through to D-32')
+        self.assertTrue(any(
+            warning.get('article') == '3.2.3.3.(4)(b)'
+            and warning.get('ruling') == 'D-105'
+            and 'UNRESOLVED' in warning['action']
+            for warning in audit.warnings))
+
+    def test_ground_floor_extent_can_express_an_embedded_system(self):
+        for code in ('necb2020', 'necb2025'):
+            with self.subTest(code=code):
+                ordinary = self.n.ground_floor_extent(code=code, hdd=HDD)
+                embedded = self.n.ground_floor_extent(
+                    code=code, hdd=HDD, embedded_system=True)
+                self.assertEqual(
+                    {'extent': 'perimeter_strip', 'width_m': 1.2}, ordinary)
+                self.assertEqual({'extent': 'full_area'}, embedded)
 
     def test_legacy_naming_and_reuse_conventions(self):
         model, _ = self.applied_model()

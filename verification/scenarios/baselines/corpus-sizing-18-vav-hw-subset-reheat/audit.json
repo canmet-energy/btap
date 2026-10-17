@@ -2202,7 +2202,7 @@
  },
  {
   "step": "coverage",
-  "action": "Opaque above-ground U-values by HDD zone \u2014 implemented: opaque U-values applied per HDD bin (legacy-compatible construction conductance; include_films: for overall)",
+  "action": "Opaque above-ground U-values by HDD zone \u2014 implemented: opaque U-values applied per HDD bin, including layered internal-source wall and roof assemblies; in reference runs those assemblies then receive the required lightweight rebuild without classifying an unrelated ground floor as embedded (legacy-compatible construction conductance; include_films: for overall)",
   "inputs": {
    "status": "implemented",
    "decisions_citing": 2,
@@ -2245,7 +2245,7 @@
  },
  {
   "step": "coverage",
-  "action": "Building assemblies in contact with the ground \u2014 implemented: ground-contact wall/roof U-values applied full-area; floors follow the zone-conditional extent (zone 8 full-area retarget; zones 4-7B keep the slab field and get a 1.2 m Kiva perimeter strip per 3.2.3.3.(3) \u2014 warns when no Kiva foundation to carry it)",
+  "action": "Building assemblies in contact with the ground \u2014 implemented: ground-contact wall/roof U-values applied full-area; the floors row is applied through the separate 3.2.3.3 extent determination, including the embedded-system exception",
   "inputs": {
    "status": "implemented",
    "decisions_citing": 0,
@@ -2256,6 +2256,23 @@
   "article": "3.2.3.1.",
   "building": "reference building",
   "level": "info"
+ },
+ {
+  "step": "coverage",
+  "action": "Thermal characteristics and insulation extent of floors in contact with the ground \u2014 partial. Applied: Sentence (3): ordinary floors use the zone-conditional extent (zone 8 full-area; zones 4-7B retain the slab field and receive a 1.2 m Kiva perimeter strip, with a warning when no foundation can carry it). Sentence (4): its prescribed transmittance and full-area action are implemented once applicability is established. Applicability is established from an internal-source ground-floor construction; a supported radiant object's surface view is derived from that construction and supplies equipment attribution rather than independent evidence. The inventory is taken before reference-HVAC teardown. Detected embedded floors receive the Table 3.2.3.1 target over their full area in every climate zone, while an indicated floor-radiant topology whose served surface is unresolved warns and is not guessed into Sentence (3). Sentence (5): for detected embedded floors, the required Kiva depth is the tallest adjoining Foundation-wall height in that floor's thermal zone plus the final floor thickness; an exterior-insulation exception is measured against that same wall-top-to-floor-bottom depth, otherwise the floor insulation is continued vertically to it. Mixed wall heights and Foundation objects shared by multiple floors warn because one Kiva field cannot represent independent instance depths. EnergyPlus 25.2 rejects the internal-source/Foundation pairing used as applicability evidence, so that detected input also receives a surface-specific warning. An unrepresentable continuation warns.. Gaps: Sentence (5)'s vertical perimeter continuation is not yet applied or verified for ordinary Sentence (3) floors. EnergyPlus 25.2 rejects an internal-source construction on a Foundation surface, so the detected embedded-floor/Kiva input warns and its assigned continuation cannot be annual-verified without replacing the input representation. Mixed-height and shared-Foundation inputs warn because their one Kiva depth can over-insulate or cross-contaminate instances. Semi-heated applicability under Sentence (2) remains caller-supplied through the HDD input rather than inferred from model classification; an embedded component represented without inspectable internal-source construction evidence cannot be inferred.",
+  "inputs": {
+   "status": "partial",
+   "decisions_citing": 5,
+   "code": [
+    "python/btap/codes/necb/envelope/rules.py#ground_floor_extent",
+    "python/btap/codes/necb/envelope/prescriptive.py#_embedded_floor_inventory",
+    "python/btap/codes/necb/envelope/prescriptive.py#_assign_ground_floor",
+    "python/btap/codes/necb/path.py#build_reference"
+   ]
+  },
+  "article": "3.2.3.3.",
+  "building": "reference building",
+  "level": "warning"
  },
  {
   "step": "coverage",
@@ -2328,7 +2345,7 @@
  },
  {
   "step": "coverage",
-  "action": "Lightweight construction + space thermal characteristics \u2014 implemented: opaque assemblies rebuilt as a single light-frame layer calibrated to the thermal-mass Note's wood-frame example (40.8 kg/m2, 45.5 kJ/(m2.K)) at unchanged Ut; space thermal characteristics satisfied by clone",
+  "action": "Lightweight construction + space thermal characteristics \u2014 implemented: opaque assemblies, including internal-source walls and roofs after prescriptive retargeting, rebuilt as a single light-frame layer calibrated to the thermal-mass Note's wood-frame example (40.8 kg/m2, 45.5 kJ/(m2.K)) at unchanged Ut; space thermal characteristics satisfied by clone",
   "inputs": {
    "status": "implemented",
    "decisions_citing": 2,
