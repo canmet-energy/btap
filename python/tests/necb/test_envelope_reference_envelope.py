@@ -377,11 +377,12 @@ class TestReferenceEnvelope(unittest.TestCase):
         self.assertAlmostEqual(expected_l_s, installed_l_s, delta=0.2,
                                msg='installed total = code default over the (1)(c) enclosure')
 
-    def test_coverage_emitted_all_17_articles(self):
+    def test_coverage_emitted_all_18_articles(self):
         audit = reference(proposed_model())
         coverage = [e for e in audit.entries if e['step'] == 'coverage']
-        # 14 + 8.4.1.1 (envelope slice) + 8.4.2.9 air leakage + 3.2.4.2 (D-76)
-        self.assertEqual(17, len(coverage))
+        # 14 + 8.4.1.1 (envelope slice) + 8.4.2.9 air leakage
+        # + 3.2.3.3 embedded floors (D-105) + 3.2.4.2 (D-76)
+        self.assertEqual(18, len(coverage))
         ref3 = next(e for e in coverage if e.get('article') == '8.4.4.3.')
         self.assertEqual('implemented', ref3['inputs']['status'])
         self.assertGreater(ref3['inputs']['decisions_citing'], 0)
