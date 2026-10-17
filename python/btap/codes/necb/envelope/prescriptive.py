@@ -473,6 +473,45 @@ def _construction_thickness(construction):
     return thickness
 
 
+def _polygon_perimeter(vertices):
+    return sum(
+        (vertices[(index + 1) % len(vertices)] - vertex).length()
+        for index, vertex in enumerate(vertices)
+    )
+
+
+def _floor_exposed_perimeter(floor, vertices):
+    geometric_perimeter = _polygon_perimeter(vertices)
+    exposed = opt(floor.surfacePropertyExposedFoundationPerimeter())
+    if exposed is None:
+        # This is also the forward translator's default for a Kiva floor.
+        return geometric_perimeter
+
+    total = opt(exposed.totalExposedPerimeter())
+    if total is not None:
+        return total
+    return exposed.exposedPerimeterFraction() * geometric_perimeter
+
+
+def _wall_floor_contact_length(vertices, floor_elevation):
+    coplanar = {
+        index for index, vertex in enumerate(vertices)
+        if abs(vertex.z() - floor_elevation) <= 1e-6
+    }
+    contact = sum(
+        (vertices[(index + 1) % len(vertices)] - vertex).length()
+        for index, vertex in enumerate(vertices)
+        if index in coplanar
+        and (index + 1) % len(vertices) in coplanar
+    )
+    if contact > 0:
+        return contact
+    if len(vertices) < 2:
+        return None
+    lowest = sorted(vertices, key=lambda vertex: vertex.z())[:2]
+    return (lowest[1] - lowest[0]).length()
+
+
 def _foundation_wall_profile(foundation, floor):
     floor_space = opt(floor.space())
     floor_zone = (
@@ -482,12 +521,23 @@ def _foundation_wall_profile(foundation, floor):
     if floor_zone is None:
         return None
 
+    floor_vertices = list(floor_space.transformation() * floor.vertices())
+    if not floor_vertices:
+        return None
+    floor_elevation = sum(vertex.z() for vertex in floor_vertices) / len(floor_vertices)
+    exposed_floor_perimeter = _floor_exposed_perimeter(floor, floor_vertices)
+
     wall_instances = []
     other_floors = []
+    same_zone_other_floors = []
     for candidate in sorted_by_name(foundation.surfaces()):
         if candidate.surfaceType() == "Floor":
             if candidate.handle() != floor.handle():
                 other_floors.append(candidate.nameString())
+                space = opt(candidate.space())
+                zone = None if space is None else opt(space.thermalZone())
+                if zone is not None and zone.handle() == floor_zone.handle():
+                    same_zone_other_floors.append(candidate.nameString())
             continue
         if candidate.surfaceType() != "Wall":
             continue
@@ -500,13 +550,23 @@ def _foundation_wall_profile(foundation, floor):
         vertices = list(space.transformation() * candidate.vertices())
         if not vertices:
             return None
+        contact_length = _wall_floor_contact_length(vertices, floor_elevation)
+        if contact_length is None:
+            return None
         wall_instances.append((
             candidate.nameString(),
             max(vertex.z() for vertex in vertices)
             - min(vertex.z() for vertex in vertices),
+            contact_length,
         ))
 
-    return wall_instances, other_floors
+    return (
+        wall_instances,
+        other_floors,
+        same_zone_other_floors,
+        sum(contact for _wall, _height, contact in wall_instances),
+        exposed_floor_perimeter,
+    )
 
 
 def _apply_embedded_floor_perimeter(surface, construction, audit):
@@ -556,11 +616,17 @@ def _apply_embedded_floor_perimeter(surface, construction, audit):
         )
         return
 
-    wall_instances, other_floors = wall_profile
+    (
+        wall_instances,
+        other_floors,
+        same_zone_other_floors,
+        selected_wall_perimeter,
+        exposed_floor_perimeter,
+    ) = wall_profile
     foundation_wall_height = max(
-        (height for _wall, height in wall_instances), default=0.0)
+        (height for _wall, height, _contact in wall_instances), default=0.0)
     height_groups = defaultdict(list)
-    for wall_name, height in wall_instances:
+    for wall_name, height, _contact in wall_instances:
         height_groups[ruby_round(height, 3)].append(wall_name)
     grouped_instances = [
         {"height_m": height, "walls": sorted(walls)}
@@ -581,16 +647,50 @@ def _apply_embedded_floor_perimeter(surface, construction, audit):
             article="3.2.3.3.(5)",
             ruling="D-105",
         )
-    if other_floors:
+    zero_height_remainder = exposed_floor_perimeter - selected_wall_perimeter
+    if wall_instances and zero_height_remainder > 1e-6:
         audit.warn(
             "prescriptive",
-            "Kiva foundation is SHARED by multiple floor surfaces — its "
-            "Sentence (3) strip and Sentence (5) continuation fields apply "
-            "to every EnergyPlus instance and can affect the other floors",
+            "Kiva foundation has a PARTIAL-PERIMETER wall condition — "
+            "EnergyPlus creates a zero-wall-height slab-remainder instance, "
+            "but the foundation's one vertical-insulation depth uses the "
+            "tallest wall and over-insulates that remainder",
+            target=foundation.nameString(),
+            inputs={
+                "floor": name,
+                "selected_wall_perimeter_m":
+                    ruby_round(selected_wall_perimeter, 4),
+                "exposed_floor_perimeter_m":
+                    ruby_round(exposed_floor_perimeter, 4),
+                "zero_wall_height_remainder_m":
+                    ruby_round(zero_height_remainder, 4),
+            },
+            article="3.2.3.3.(5)",
+            ruling="D-105",
+        )
+    if other_floors:
+        if same_zone_other_floors:
+            action = (
+                "Kiva foundation is SHARED by multiple floor surfaces — "
+                "ENERGYPLUS REJECTS same-zone sharing as a Severe input error "
+                "('only one floor per Foundation:Kiva Object allowed'); its "
+                "Sentence (3) strip and Sentence (5) continuation fields also "
+                "apply to every instance"
+            )
+        else:
+            action = (
+                "Kiva foundation is SHARED by multiple floor surfaces — its "
+                "Sentence (3) strip and Sentence (5) continuation fields apply "
+                "to every EnergyPlus instance and can affect the other floors"
+            )
+        audit.warn(
+            "prescriptive",
+            action,
             target=foundation.nameString(),
             inputs={
                 "floor": name,
                 "other_floor_instances": sorted(other_floors),
+                "same_zone_floor_instances": sorted(same_zone_other_floors),
             },
             article="3.2.3.3.(5)",
             ruling="D-105",

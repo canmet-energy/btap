@@ -8000,9 +8000,15 @@ selected wall height to the final floor-construction thickness and compares
 an existing exterior vertical-insulation exception against that same depth.
 A floor with no selected walls has a zero wall height, matching EnergyPlus's
 slab-only instance. Mixed selected wall heights use the tallest depth and
-warn that the shorter Kiva instances are over-insulated. A Foundation object
-shared with another floor also warns because its strip and vertical-insulation
-fields apply to every instance and can cross-contaminate the floors.
+warn that the shorter Kiva instances are over-insulated. Where selected walls
+cover only part of the exposed floor perimeter, EnergyPlus creates a
+zero-wall-height remainder instance; the tool warns that the same tallest-wall
+depth over-insulates that remainder. A Foundation object shared with another
+floor also warns because its strip and vertical-insulation fields apply to
+every instance and can cross-contaminate the floors. When the other floor is
+in the same thermal zone, EnergyPlus additionally rejects the shared object
+with the Severe input error "only one floor per Foundation:Kiva Object
+allowed."
 
 EnergyPlus 25.2 rejects a `Construction:InternalSource` on a
 Foundation-boundary surface. That is an input/engine constraint rather than a
@@ -8026,7 +8032,10 @@ main's prior `surface has no layered construction — skipped` warning into the
 Table 3.2.2.2 retargeting and reference lightweight rebuild. Fable's engine
 re-review then established EnergyPlus's zone-scoped Kiva wall membership, the
 mixed-height/shared-foundation limits, and the internal-source/Foundation
-fatal described above. The Sentence (4) full-area ruling is unchanged.
+fatal described above. Fable's final engine review established the
+partial-perimeter zero-wall-height remainder and the same-zone shared
+Foundation Severe now disclosed above. The Sentence (4) full-area ruling is
+unchanged.
 
 **Why:** Sentence (3) expressly applies to floors with **no** embedded system
 and permits the table value over a 1.2 m perimeter strip or the full area,
@@ -8052,9 +8061,13 @@ retained source construction, Sentence (5) continuation, and D-105 audit in
 both editions. `test_foundation_wall_height_is_included_in_vertical_continuation`
 pins the wall-top depth and rejects a shallow exterior-insulation exception.
 `test_mixed_foundation_wall_heights_use_the_tallest_and_warn` pins the maximum
-and its shorter-instance warning, while
+and its shorter-instance warning;
+`test_partial_perimeter_wall_warns_about_zero_height_remainder` pins the
+slab-remainder warning, while
 `test_shared_foundation_uses_only_the_floor_zone_walls_and_warns` pins
-EnergyPlus's zone membership and the multi-floor warning.
+EnergyPlus's zone membership and the cross-zone multi-floor warning, and
+`test_same_zone_shared_foundation_warns_that_energyplus_rejects_it` pins the
+engine Severe disclosure.
 `test_internal_source_roof_is_retargeted_without_classifying_ground_floor`
 pins the above-ground widening and the ordinary-floor non-leakage control.
 `test_unresolved_radiant_floor_does_not_guess_the_ordinary_strip` removes
