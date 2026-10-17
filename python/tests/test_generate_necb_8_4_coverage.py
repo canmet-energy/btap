@@ -1,6 +1,7 @@
 """Byte contract and self-checks for the Python NECB 8.4 coverage generator."""
 
 import importlib.util
+import json
 import sys
 import tempfile
 import unittest
@@ -64,6 +65,25 @@ class TestGenerateNecb84Coverage(unittest.TestCase):
         self.assertIn("python/scripts/generate_necb_8_4_coverage.py", html)
         self.assertIn("python/btap/codes/", html)
         self.assertNotRegex(html, r"btap-[^/]+/lib/")
+
+    def test_constant_format_thermal_mass_citation_is_visible(self):
+        generator = coverage.CoverageGenerator(coverage.Inputs())
+        expected = {
+            "2020": "8.4.4.4",
+            "2025": "8.4.5.4",
+        }
+        for edition, article in expected.items():
+            with self.subTest(edition=edition):
+                articles = json.loads(
+                    generator.inputs.caches[edition].read_text(encoding="utf-8")
+                )["articles"]
+                sites = generator.citations_for(edition, articles)[article]
+                thermal_mass = [
+                    site for site in sites
+                    if site["file"].endswith("/envelope/reference.py")
+                ]
+                self.assertEqual(1, len(thermal_mass))
+                self.assertEqual("cited", thermal_mass[0]["kind"])
 
     def test_python_is_the_only_input_authority(self):
         self.assertEqual("python", coverage.DEFAULT_INPUT_MODE)

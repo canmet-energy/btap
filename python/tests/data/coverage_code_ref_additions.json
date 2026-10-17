@@ -2,12 +2,12 @@
  "schema_version": 1,
  "why": [
   "Coverage code-references ADDED after R-B, because a coverage claim",
-  "acquired a surface that did not exist when the R6 -> R7 ledgers were",
-  "written. Those ledgers record RENAMES and assert that R-B 'moved",
-  "paths, it did not add, drop or merge an owner', so an addition must",
-  "not be recorded by rewriting them — the same reasoning that put",
-  "deletions in `coverage_code_ref_retirements.json` rather than in a",
-  "ledger edit.",
+  "acquired a surface or an ambiguous historical pointer was replaced by",
+  "qualified concrete surfaces. The R6 -> R7 ledgers record RENAMES and",
+  "assert that R-B 'moved paths, it did not add, drop or merge an owner',",
+  "so an addition must not be recorded by rewriting them — the same",
+  "reasoning that records retired live pointers in",
+  "`coverage_code_ref_retirements.json` rather than in a ledger edit.",
   "",
   "With this file the invariant is still exact and still provable from",
   "R6's total of 313: every reference a manifest names today is either",
@@ -46,6 +46,18 @@
    "uses": 2,
    "authority": "D-105 (Sol, 2026-10-16)",
    "reason": "Both edition snapshots gained the previously absent 3.2.3.3 coverage row. The performance path executes the applicability inventory before HVAC replacement and hands it to the cloned reference envelope."
+  },
+  {
+   "ref": "python/btap/simulation/backends.py#Local.execute",
+   "uses": 2,
+   "authority": "Issue #73 (Sol, 2026-10-16)",
+   "reason": "Both editions' 8.4.2.2.(4) rows formerly named the ambiguous unqualified `execute`, which resolved first to Backend.execute's abstract NotImplementedError stub. Local.execute is the default concrete path that translates the model and invokes the provisioned EnergyPlus binary; EnergyPlus's ANSI/ASHRAE 140 testing remains the conformance authority stated by the row."
+  },
+  {
+   "ref": "python/btap/simulation/backends.py#Remote.execute",
+   "uses": 2,
+   "authority": "Issue #73 (Sol, 2026-10-16)",
+   "reason": "The same requirement applies when the supported remote backend is selected. Remote.execute is the concrete orchestration path that prepares, submits, polls and downloads that EnergyPlus run, so both concrete execution paths are named rather than presenting the default local path as the only implementation."
   }
  ]
 }

@@ -40,6 +40,38 @@ class TestGenerateNecbGemCoverage(unittest.TestCase):
         self.assertTrue(refs)
         self.assertTrue(all(str(ref).startswith("python/btap/") for ref in refs))
 
+    def test_implemented_negation_needs_a_row_level_disposition(self):
+        records = coverage.collect_records(REPO_ROOT)
+        mutated = [dict(row) for row in records]
+        row = next(
+            row for row in mutated
+            if row["edition"] == "2020" and row["article"] == "8.4.2.2.(3)"
+        )
+        row["how"] = "the hourly requirement does not yet evaluate its inputs"
+        with self.assertRaisesRegex(
+            ValueError,
+            r"8\.4\.2\.2\.\(3\).*how.*does not yet evaluate",
+        ):
+            coverage.validate_implemented_negations(mutated)
+
+    def test_part3_cited_not_declared_is_rejected(self):
+        records = coverage.collect_records(REPO_ROOT)
+        citations = coverage.literal_part3_citations(REPO_ROOT)
+        self.assertEqual(13, len(citations["3.2.3.3"]))
+        mutated = [
+            row for row in records
+            if not (
+                row["edition"] == "2020"
+                and coverage.PART_3_ARTICLE.search(row["article"])
+                and coverage.PART_3_ARTICLE.search(row["article"]).group(1) == "3.2.3.3"
+            )
+        ]
+        with self.assertRaisesRegex(
+            ValueError,
+            r"NECB 2020 3\.2\.3\.3 cited at .*prescriptive\.py",
+        ):
+            coverage.validate_part3_declarations(mutated, citations)
+
     def test_python_is_the_only_input_authority(self):
         self.assertEqual(REPO_ROOT / "docs" / "NECB_COVERAGE.md", coverage.DEFAULT_OUTPUT)
         rendered = coverage.render(coverage.collect_records(REPO_ROOT))

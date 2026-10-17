@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import re
 from pathlib import Path
@@ -28,6 +29,27 @@ STATUS_GROUPS = (
 )
 FIELD_VERIFIED_HEADING = "Field / document verification (modeller scope, does not warn)"
 EDITIONS = ("2020", "2025")
+PART_3_ARTICLE = re.compile(r"(?<![\d.])(3\.\d+\.\d+\.\d+)")
+IMPLEMENTED_NEGATION = re.compile(
+    r"\b(?:not yet|not implemented|not applied|"
+    r"does not(?: yet)? (?:apply|evaluate|implement)|"
+    r"is not (?:applied|evaluated|implemented))\b",
+    re.IGNORECASE,
+)
+# Exact row-level dispositions, not a phrase suppression. If either row or
+# phrase changes, the disposition becomes stale and the generator refuses it.
+IMPLEMENTED_NEGATION_DISPOSITIONS = {
+    ("2020", "8.4.4.14.", "gaps", "is not implemented"): (
+        "The gap is scoped to Sentence (6)'s incorporated Part 5 equipment "
+        "adjustment; the implemented how text covers the pump transfer, "
+        "riding curve, minimum-flow clamp, and Part 5 pump-power cap."
+    ),
+    ("2025", "8.4.5.14.", "gaps", "is not implemented"): (
+        "The gap is scoped to Sentence (6)'s incorporated Part 5 equipment "
+        "adjustment; the implemented how text covers the pump transfer, "
+        "riding curve, minimum-flow clamp, and Part 5 pump-power cap."
+    ),
+}
 
 
 def manifest_paths(manifest_root: Path) -> list[tuple[Path, str, str]]:
@@ -60,6 +82,99 @@ def canonicals_match(first: str, second: str) -> bool:
     return first.startswith(second) or second.startswith(first)
 
 
+def literal_part3_citations(source_root: Path) -> dict[str, list[dict]]:
+    """Static Part 3 ``article=`` citations, grouped by article.
+
+    This deliberately claims only literal visibility. Data-bound and computed
+    citations remain in the citation no-loss inventories rather than being
+    guessed into an edition.
+    """
+    found: dict[str, list[dict]] = {}
+    source_dir = source_root / "python" / "btap" / "codes"
+    for path in sorted(source_dir.rglob("*.py")):
+        source = path.read_text(encoding="utf-8")
+        tree = ast.parse(source, filename=str(path))
+        relative = path.relative_to(source_root).as_posix()
+        for call in (node for node in ast.walk(tree) if isinstance(node, ast.Call)):
+            for keyword in call.keywords:
+                value = keyword.value
+                if not (
+                    keyword.arg == "article"
+                    and isinstance(value, ast.Constant)
+                    and isinstance(value.value, str)
+                ):
+                    continue
+                for article in dict.fromkeys(PART_3_ARTICLE.findall(value.value)):
+                    found.setdefault(article, []).append({
+                        "file": relative,
+                        "line": value.lineno,
+                    })
+    if not found:
+        raise ValueError(
+            f"no literal Part 3 citations found under {source_dir} — "
+            "the coverage scan went stale"
+        )
+    return found
+
+
+def validate_part3_declarations(
+    records: list[dict],
+    citations: dict[str, list[dict]],
+) -> None:
+    """Every statically cited Part 3 article is declared in every edition."""
+    missing = []
+    editions = sorted({row["edition"] for row in records})
+    for edition in editions:
+        declared = {
+            match.group(1)
+            for row in records
+            if row["edition"] == edition
+            if (match := PART_3_ARTICLE.search(row["article"]))
+        }
+        for article, sites in sorted(citations.items()):
+            if article not in declared:
+                where = ", ".join(f"{site['file']}:{site['line']}" for site in sites)
+                missing.append(f"NECB {edition} {article} cited at {where}")
+    if missing:
+        raise ValueError(
+            "Part 3 citation(s) have no article_coverage declaration:\n"
+            + "\n".join(missing)
+        )
+
+
+def validate_implemented_negations(records: list[dict]) -> None:
+    """Reject undisposed negation in an ``implemented`` row's own prose."""
+    hits = {}
+    for row in records:
+        if row["status"] != "implemented":
+            continue
+        for field in ("how", "gaps"):
+            for match in IMPLEMENTED_NEGATION.finditer(str(row.get(field) or "")):
+                key = (
+                    row["edition"],
+                    row["article"],
+                    field,
+                    match.group(0).lower(),
+                )
+                hits[key] = str(row.get(field) or "")
+
+    unexpected = sorted(set(hits) - set(IMPLEMENTED_NEGATION_DISPOSITIONS))
+    stale = sorted(set(IMPLEMENTED_NEGATION_DISPOSITIONS) - set(hits))
+    if unexpected or stale:
+        details = []
+        if unexpected:
+            details.append(
+                "implemented coverage prose negates itself without a row-level "
+                "disposition: " + ", ".join(map(str, unexpected))
+            )
+        if stale:
+            details.append(
+                "implemented-negation disposition(s) are stale: "
+                + ", ".join(map(str, stale))
+            )
+        raise ValueError("\n".join(details))
+
+
 def collect_records(manifest_root: Path) -> list[dict]:
     manifests = manifest_paths(manifest_root)
     if not manifests:
@@ -85,6 +200,8 @@ def collect_records(manifest_root: Path) -> list[dict]:
                 "gap_owner": article.get("gap_owner"),
                 "code": article.get("code"),
             })
+    validate_implemented_negations(records)
+    validate_part3_declarations(records, literal_part3_citations(manifest_root))
     return records
 
 
