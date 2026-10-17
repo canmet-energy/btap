@@ -88,6 +88,19 @@ class TestNecbMultistoreySys6Reference(unittest.TestCase):
                     'ever mismatches, that is a FINDING against _apply_fan_rules '
                     '(necb/hvac/reference.py), not this test.')
 
+        for missing_key in ('supply_pa', 'supply_efficiency'):
+            spec = {
+                'supply_pa': 1000,
+                'supply_efficiency': declared,
+                'article': '8.4.4.18.(4)',
+            }
+            del spec[missing_key]
+            with self.subTest(missing_key=missing_key), self.assertRaisesRegex(
+                    KeyError, missing_key):
+                hvac.reference._apply_fan_rules(
+                    result.model.getAirLoopHVACs(), 6,
+                    {'fans': {'system_6': spec}}, AuditLog())
+
 
 if __name__ == '__main__':
     unittest.main()
