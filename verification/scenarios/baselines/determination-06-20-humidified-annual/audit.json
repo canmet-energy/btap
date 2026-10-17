@@ -2273,7 +2273,7 @@
  },
  {
   "step": "coverage",
-  "action": "Building assemblies in contact with the ground \u2014 implemented: ground-contact wall/roof U-values applied full-area; floors follow the zone-conditional extent (zone 8 full-area retarget; zones 4-7B keep the slab field and get a 1.2 m Kiva perimeter strip per 3.2.3.3.(3) \u2014 warns when no Kiva foundation to carry it)",
+  "action": "Building assemblies in contact with the ground \u2014 implemented: ground-contact wall/roof U-values applied full-area; the floors row is applied through the separate 3.2.3.3 extent determination, including the embedded-system exception",
   "inputs": {
    "status": "implemented",
    "decisions_citing": 0,
@@ -2284,6 +2284,23 @@
   "article": "3.2.3.1.",
   "building": "reference building",
   "level": "info"
+ },
+ {
+  "step": "coverage",
+  "action": "Thermal characteristics and insulation extent of floors in contact with the ground \u2014 partial. Applied: Sentence (3): ordinary floors use the zone-conditional extent (zone 8 full-area; zones 4-7B retain the slab field and receive a 1.2 m Kiva perimeter strip, with a warning when no foundation can carry it). Sentence (4): its prescribed transmittance and full-area action are implemented once applicability is established. Low-temperature radiant surface associations are inventoried before reference-HVAC teardown and internal-source constructions provide independent surface evidence; detected embedded floors receive the Table 3.2.3.1 target over their full area in every climate zone, while an indicated floor-radiant topology whose served surface is unresolved warns and is not guessed into Sentence (3). Sentence (5): for detected embedded floors, a Kiva exterior-insulation exception is retained or the floor insulation is continued vertically to the floor bottom; an unrepresentable continuation warns. Gaps: Sentence (5)'s vertical perimeter continuation is not yet applied or verified for ordinary Sentence (3) floors; semi-heated applicability under Sentence (2) remains caller-supplied through the HDD input rather than inferred from model classification.",
+  "inputs": {
+   "status": "partial",
+   "decisions_citing": 5,
+   "code": [
+    "python/btap/codes/necb/envelope/rules.py#ground_floor_extent",
+    "python/btap/codes/necb/envelope/prescriptive.py#_embedded_floor_inventory",
+    "python/btap/codes/necb/envelope/prescriptive.py#_assign_ground_floor",
+    "python/btap/codes/necb/path.py#build_reference"
+   ]
+  },
+  "article": "3.2.3.3.",
+  "building": "reference building",
+  "level": "warning"
  },
  {
   "step": "coverage",
