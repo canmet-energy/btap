@@ -179,6 +179,51 @@ class TestArchetypes(unittest.TestCase):
             "outdoor-air rates remain", decision["action"],
             "the preservation decision must be visible in the audit")
 
+    def test_2025_archetype_normalization_preserves_space_type_outdoor_air(self):
+        import openstudio
+
+        model = proposed_with_hvac()
+        space = model.getSpaces()[0]
+        original_type = space.spaceType().get()
+        space.resetDesignSpecificationOutdoorAir()
+        type_oa = openstudio.model.DesignSpecificationOutdoorAir(model)
+        type_oa.setName("Hostile space-type OA specification")
+        type_oa.setOutdoorAirMethod("Maximum")
+        type_oa.setOutdoorAirFlowperPerson(0.0123)
+        type_oa.setOutdoorAirFlowperFloorArea(0.00456)
+        type_oa.setOutdoorAirFlowRate(0.0789)
+        original_type.setDesignSpecificationOutdoorAir(type_oa)
+        self.assertTrue(space.isDesignSpecificationOutdoorAirDefaulted())
+        inherited = space.designSpecificationOutdoorAir()
+        self.assertTrue(inherited.is_initialized())
+        self.assertEqual(
+            type_oa.handle(),
+            inherited.get().handle())
+
+        audit = quiet()
+        resolved = A.resolve(model, {"Office": "all"}, audit=audit)
+        A.normalize(model, resolved, code="necb2025", audit=audit)
+
+        self.assertNotEqual(
+            original_type.handle(), space.spaceType().get().handle(),
+            "normalize must have cloned and reassigned the space type")
+        self.assertTrue(
+            space.isDesignSpecificationOutdoorAirDefaulted(),
+            "the rate is still inherited, not copied onto the space")
+        inherited = space.designSpecificationOutdoorAir()
+        self.assertTrue(
+            inherited.is_initialized(),
+            "the cloned space type must still provide the proposed DSOA")
+        inherited = inherited.get()
+        self.assertEqual(
+            type_oa.handle(), inherited.handle(),
+            "8.4.4.2.(2): the proposed DSOA survives the space-type clone")
+        self.assertEqual("Maximum", inherited.outdoorAirMethod())
+        self.assertAlmostEqual(0.0123, inherited.outdoorAirFlowperPerson())
+        self.assertAlmostEqual(
+            0.00456, inherited.outdoorAirFlowperFloorArea())
+        self.assertAlmostEqual(0.0789, inherited.outdoorAirFlowRate())
+
     def test_lighting_power_is_never_touched(self):
         import openstudio
 

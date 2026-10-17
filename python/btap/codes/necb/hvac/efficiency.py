@@ -183,13 +183,13 @@ def _apply_vrf(unit, tables, ruleset, audit):
         else None
     )
     phase_ambiguous = []
-    if ruleset.id == 'necb2025':
-        for mode, capacity_w, row in (
-                ('cooling', cooling_w, cooling_row),
-                ('heating', heating_w, heating_row if heat_pump else None)):
-            if (capacity_w is not None and row is not None
-                    and _vrf_row(rows, capacity_w, phase='single-phase') is not None):
-                phase_ambiguous.append(mode)
+
+    for mode, capacity_w, row in (
+            ('cooling', cooling_w, cooling_row),
+            ('heating', heating_w, heating_row if heat_pump else None)):
+        if (capacity_w is not None and row is not None
+                and _vrf_row(rows, capacity_w, phase='single-phase') is not None):
+            phase_ambiguous.append(mode)
     if phase_ambiguous:
         selected_row = (
             cooling_row if 'cooling' in phase_ambiguous else heating_row

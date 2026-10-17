@@ -1543,8 +1543,8 @@ def _apply_zone_fan_rules(zones, reference_system, rules_data, audit):
         return
 
     spec = (rules_data.get('fans') or {}).get('systems_1_3_4_5') or {}
-    pressure = spec.get('supply_pa') or 640.0
-    eff = spec.get('supply_efficiency') or 0.40
+    pressure = spec['supply_pa']
+    eff = spec['supply_efficiency']
     touched = 0
     for zone in zones:
         for eq in zone.equipment():
@@ -2407,8 +2407,8 @@ def _apply_fan_rules(air_loops, reference_system, rules_data, audit):
                 continue
 
             is_return = re.search(r'return', fan.nameString(), re.IGNORECASE) is not None
-            pa = spec.get('return_pa') if is_return else spec.get('supply_pa')
-            eff = spec.get('return_efficiency') if is_return else spec.get('supply_efficiency')
+            pa = spec.get('return_pa') if is_return else spec['supply_pa']
+            eff = spec.get('return_efficiency') if is_return else spec['supply_efficiency']
             if pa is None:
                 continue  # sys 1/3/4/5 has no return-fan spec
 

@@ -289,6 +289,36 @@ class TestNecbEfficiency(unittest.TestCase):
         self.assertEqual(14.3, disclosure['inputs']['not_applied_seer2'])
         self.assertEqual(6.6, disclosure['inputs']['not_applied_hspf2'])
 
+    def test_vrf_phase_disclosure_is_driven_by_data_not_edition_id(self):
+        import openstudio
+
+        from btap.codes import resolve
+
+        base = resolve('necb2025')
+
+        class FutureRuleset:
+            id = 'necb2099'
+
+            def __getattr__(self, name):
+                return getattr(base, name)
+
+        model = openstudio.model.Model()
+        unit = self._vrf_unit(model, heating=True)
+        unit.setGrossRatedTotalCoolingCapacity(12_000.0)
+        unit.setGrossRatedHeatingCapacity(12_000.0)
+        audit = AuditLog()
+
+        hvac.efficiency._apply(model, FutureRuleset(), audit=audit)
+
+        disclosures = [
+            entry for entry in audit.entries
+            if entry.get('ruling') == 'D-104'
+        ]
+        self.assertEqual(1, len(disclosures))
+        self.assertEqual(
+            ['cooling', 'heating'],
+            disclosures[0]['inputs']['applicable_modes'])
+
     def test_m1_metrics_are_not_converted_by_pre_m1_regressions(self):
         self.assertIsNone(hvac.efficiency.dx_cooling_cop({
             'minimum_seasonal_energy_efficiency_ratio_2': 14.3,

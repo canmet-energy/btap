@@ -77,8 +77,34 @@ class TestNecbMurbDwellingReference(unittest.TestCase):
                          'test_hvac_necb_selector')
         self.assertEqual([1], sorted({a.reference_system for a in result.assignments}))
         self.assertEqual(['build'], sorted({a.action for a in result.assignments}))
-        self.assertTrue(len(result.model.getZoneHVACPackagedTerminalAirConditioners()),
-                        'System 1 = MAU + PTAC per zone')
+        ptacs = list(result.model.getZoneHVACPackagedTerminalAirConditioners())
+        self.assertEqual(5, len(ptacs), 'System 1 = MAU + PTAC per zone')
+        for ptac in ptacs:
+            fan = ptac.supplyAirFan().to_FanOnOff()
+            self.assertTrue(fan.is_initialized())
+            self.assertAlmostEqual(640.0, fan.get().pressureRise(), delta=1e-9)
+            self.assertAlmostEqual(
+                0.4, fan.get().fanTotalEfficiency(), delta=1e-9)
+        fan_decision = next(
+            entry for entry in audit.entries
+            if entry['action']
+            == 'zone-equipment supply fans set to the systems 1-5 spec')
+        self.assertEqual(
+            {'fans': 5, 'pressure_pa': 640, 'total_efficiency': 0.4},
+            fan_decision['inputs'])
+        self.assertEqual('8.4.4.18.(3)', fan_decision['article'])
+        for missing_key in ('supply_pa', 'supply_efficiency'):
+            spec = {
+                'supply_pa': 640,
+                'supply_efficiency': 0.4,
+                'article': '8.4.4.18.(3)',
+            }
+            del spec[missing_key]
+            with self.subTest(missing_key=missing_key), self.assertRaisesRegex(
+                    KeyError, missing_key):
+                hvac.reference._apply_zone_fan_rules(
+                    result.model.getThermalZones(), 1,
+                    {'fans': {'systems_1_3_4_5': spec}}, AuditLog())
 
     # ---- (2) reference lighting dwelling override, at MODEL level ----
 
