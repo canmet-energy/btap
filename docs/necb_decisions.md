@@ -1394,13 +1394,19 @@ the full pipeline with sizing; res_copy mockup switched to PTAC so the
 copy rule keeps its own end-to-end pin. All green (selector 18, reference
 7, ttw, murb, mockups 9/9).
 
-- Who/when: ruling phylroy 2026-07-27; implementation Claude under D-10.
+- Who/when: ruling phylroy 2026-07-27; implementation Claude under D-10 — original reading.
 - Evidence: [READ] legacy autozone.rb necb_reference_hp branches (e.g.
   :1082), fuel_type_set plumbing necb_2011.rb:409/708; [RAN] test batteries.
 
-Applicability correction (2026-10-14): D-37 subsequently narrowed this
-branch. A water-loop heat pump retained by Article 13 Sentence (1) does not
-take this redirect; it continues to the residential selection-table branches.
+### Applicability correction
+
+D-37 subsequently narrowed this branch. A water-loop heat pump retained by
+Article 13 Sentence (1) does not take this redirect; it continues to the
+residential selection-table branches.
+
+- **Correction ruling/when:** #111 commit `3678951` (phylroy,
+  co-authored by Copilot), 2026-10-14; accepted by phylroy at merge on
+  2026-10-15.
 
 <a id="d-35"></a>
 

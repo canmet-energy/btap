@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-import ast
+import importlib.util
 import json
 import re
+import sys
 from collections import Counter
 from pathlib import Path
 
@@ -15,13 +16,19 @@ MAPPING_PATH = Path(__file__).with_name("data") / "coverage_code_ref_mapping.jso
 #: ledgers, never one rewritten in place — see test_r7_ledger_chains_from_r6.
 MAPPING_PATH_R7 = (Path(__file__).with_name("data")
                    / "coverage_code_ref_mapping_r7.json")
-#: References retired because the coverage CLAIM that carried them was deleted,
-#: not because the code moved. The third term that keeps R6's 313 provable
-#: instead of edited — see test_r7_ledger_chains_from_r6_to_the_live_manifests.
+#: References retired from the live manifests after R-B: either their coverage
+#: claim was deleted or an ambiguous pointer was superseded. The third term
+#: that keeps R6's 313 provable instead of edited — see
+#: test_r7_ledger_chains_from_r6_to_the_live_manifests.
 ADDITIONS_PATH = (Path(__file__).with_name("data")
                   / "coverage_code_ref_additions.json")
 RETIREMENTS_PATH = (Path(__file__).with_name("data")
                     / "coverage_code_ref_retirements.json")
+GENERATOR = REPO_ROOT / "python" / "scripts" / "generate_necb_8_4_coverage.py"
+SPEC = importlib.util.spec_from_file_location("generate_necb_8_4_coverage_refs", GENERATOR)
+coverage = importlib.util.module_from_spec(SPEC)
+sys.modules[SPEC.name] = coverage
+SPEC.loader.exec_module(coverage)
 SIZING_TIME = re.compile(
     r"sizing[- ]time|autosiz|not explicitly enforced|not individually evaluated",
     re.IGNORECASE,
@@ -58,15 +65,6 @@ def code_refs(manifests):
     ]
 
 
-def definitions(path):
-    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-    return {
-        node.name
-        for node in ast.walk(tree)
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-    }
-
-
 def test_manifest_inventory_and_every_code_ref_resolves():
     manifests = coverage_manifests()
     assert len(manifests) == 12
@@ -91,14 +89,18 @@ def test_manifest_inventory_and_every_code_ref_resolves():
     #
     # 239 -> 241 and 313 -> 321 under D-105: both envelope snapshots gained
     # the previously absent 3.2.3.3 row and its four runtime witnesses.
+    #
+    # 321 -> 323 for issue #73: the ambiguous backends.py#execute pointer was
+    # retired and replaced by both concrete execution paths, Local.execute and
+    # Remote.execute. The historical R7 ledger stays frozen; the retirement
+    # and two additions record the correction.
     assert sum(len(articles) for _path, articles in manifests) == 241
 
     refs = code_refs(manifests)
     assert len(refs) > 60
-    assert len(refs) == 321
+    assert len(refs) == 323
     assert all(not re.match(r"^btap-[^/]+/lib/", ref) for ref in refs)
 
-    definitions_by_path = {}
     for manifest, articles in manifests:
         for article in articles:
             for ref in article.get("code", []):
@@ -106,10 +108,31 @@ def test_manifest_inventory_and_every_code_ref_resolves():
                 assert separator and symbol, f"{manifest} {article['article']}: invalid ref {ref}"
                 path = REPO_ROOT / path_text
                 assert path.is_file(), f"{manifest} {article['article']}: no such file {path_text}"
-                definitions_by_path.setdefault(path, definitions(path))
-                assert symbol in definitions_by_path[path], (
-                    f"{manifest} {article['article']}: {path_text} does not define #{symbol}"
+                lines = coverage.python_definition_lines(path, symbol)
+                assert len(lines) == 1, (
+                    f"{manifest} {article['article']}: {ref} resolves to "
+                    f"{len(lines)} definitions at lines {lines}; use Class.method "
+                    "when a name is ambiguous"
                 )
+
+
+def test_qualified_backend_refs_reject_the_ambiguous_stub_name():
+    path = REPO_ROOT / "python" / "btap" / "simulation" / "backends.py"
+    assert len(coverage.python_definition_lines(path, "execute")) == 3
+    for symbol in ("Backend.execute", "Local.execute", "Remote.execute"):
+        assert len(coverage.python_definition_lines(path, symbol)) == 1
+
+    old = "python/btap/simulation/backends.py#execute"
+    refs = Counter(code_refs(coverage_manifests()))
+    assert refs[old] == 0
+    assert refs["python/btap/simulation/backends.py#Local.execute"] == 2
+    assert refs["python/btap/simulation/backends.py#Remote.execute"] == 2
+    try:
+        coverage.code_ref_line(REPO_ROOT, old)
+    except ValueError as error:
+        assert "resolves to 3 definitions" in str(error)
+    else:
+        raise AssertionError("the ambiguous unqualified execute ref must be rejected")
 
 
 def test_every_covering_entry_names_its_code():
@@ -182,14 +205,14 @@ def test_r7_ledger_chains_from_r6_to_the_live_manifests():
 
     # --- link 2: R7.new == the live manifests PLUS the retirements ----------
     #
-    # A deleted coverage claim takes its code reference with it. That is a
-    # different event from the rename these ledgers record — link 1 asserts
-    # R-B "did not add, drop or merge an owner" — so it is accounted in a
-    # THIRD file rather than by rewriting a ledger in place, which both
+    # A deleted coverage claim takes its code reference with it; an ambiguous
+    # historical pointer can likewise be replaced by qualified live refs.
+    # Those are different events from the rename these ledgers record — link 1
+    # asserts R-B "did not add, drop or merge an owner" — so they are accounted
+    # in a THIRD file rather than by rewriting a ledger in place, which both
     # ledgers forbid. The invariant is unchanged and still exact: every
-    # reference R7 names is either live today or retired on a stated
-    # authority. A silent ledger edit still fails this; a recorded retirement
-    # passes it.
+    # reference R7 names is either live today or retired on a stated authority.
+    # A silent ledger edit still fails this; a recorded retirement passes it.
     retirements = json.loads(RETIREMENTS_PATH.read_text(encoding="utf-8"))
     assert retirements["schema_version"] == 1
     retired = Counter()

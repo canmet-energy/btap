@@ -1,11 +1,12 @@
 {
   "schema_version": 1,
   "why": [
-    "Coverage code-references RETIRED because the coverage claim that carried",
-    "them was deleted, not because the code moved. The R6 -> R7 ledgers record",
+    "Coverage code-references RETIRED from the live manifests after R-B.",
+    "A coverage claim can be deleted, or an ambiguous historical pointer can",
+    "be superseded by qualified concrete surfaces. The R6 -> R7 ledgers record",
     "RENAMES and assert that R-B 'moved paths, it did not add, drop or merge an",
-    "owner'. A deleted claim is a different event and must not be recorded by",
-    "rewriting a ledger in place, which those files forbid.",
+    "owner'. Either later event must be recorded here rather than by rewriting",
+    "a ledger in place, which those files forbid.",
     "",
     "This file is the third term that keeps R6's total of 313 PROVABLE rather",
     "than edited: every reference R7 names is either live in a manifest today",
@@ -32,6 +33,23 @@
         "alternative-solution framework, because an alternative solution and",
         "the 2025 exceptional-calculation method are not the same requirement.",
         "The 2025 claim for 8.4.2.12 is untouched: it exists there."
+      ]
+    },
+    {
+      "ref": "python/btap/simulation/backends.py#execute",
+      "uses": 2,
+      "article": "8.4.2.2.(4)",
+      "editions": ["necb2020", "necb2025"],
+      "authority": "Issue #73 (Sol, 2026-10-16)",
+      "reason": [
+        "The unqualified symbol resolves to three methods: Backend.execute,",
+        "Local.execute and Remote.execute. The generated AHJ-facing document",
+        "selected the first and linked both editions to Backend.execute's",
+        "abstract NotImplementedError stub.",
+        "",
+        "Both coverage rows now name Local.execute and Remote.execute",
+        "explicitly. The historical ledger remains unchanged; the two",
+        "qualified surfaces are recorded in the additions ledger."
       ]
     }
   ]
