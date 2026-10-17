@@ -4422,7 +4422,8 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/simulation/backends.py#execute"
+    "python/btap/simulation/backends.py#Local.execute",
+    "python/btap/simulation/backends.py#Remote.execute"
    ]
   },
   "article": "8.4.2.2.(4)",

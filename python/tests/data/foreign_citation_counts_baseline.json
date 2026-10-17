@@ -191,9 +191,6 @@
     "\"Table 3.2.3.1.\" if boundary == \"ground\"\n                                else \"Table 3.2.2.2.\"": {
       "cited": 1
     },
-    "\"{}.4.(1) (Note {}: light-frame example \"\n                           \"mass/heat capacity)\".format(\n                               prefix, ruleset.article(\"thermal_mass_note\"))": {
-      "cited": 1
-    },
     "f\"NECB {ruleset.edition} Tables 3.2.2.x/3.2.3.1 \"\n                           \"(3.1.1.7 effective)\"": {
       "cited": 1
     },
@@ -365,6 +362,7 @@
     "Re-baselined 2026-10-09 for Sol's `143` blockers 4 and 5: the post-selection merge audit split by note — Table 8.4.x.7.-B Note (3) for System 6, Note (2) for Systems 1/2/5, which is what the table marks on them — so the Note (3) key is re-spelled against a local `subsection` and a Note (2) key joins it; and the Data Processing cooling threshold now declares whether it measured the block or the serving system, adding one warn site on `rule['article']`.",
     "Re-baselined 2026-10-09 for Sol's `145` blocker 2: the unsized data-processing threshold warning moved out of `_assign` to the caller, which aggregates the blocks that actually reached the rule, so its citation is now `'; '.join(articles)` instead of `rule['article']` — the order-dependent `_first_block` dedupe could suppress the only warning entirely.",
     "Re-baselined 2026-10-15 for Phase E exact-citation alignment. Exact Part 3/4/5 and table citations replace compound strings, while edition-specific Section 8.4 values move to data or resolved expressions. The foreign surface grows 194 -> 215 sites (static 79 -> 86, dynamic 115 -> 129). The economizer mutation fixture now guards the standalone 5.2.2.8.(1) record created by that split instead of the retired mixed dynamic citation.",
-    "Re-baselined 2026-10-16 for D-105. The embedded-floor transform adds one decision and one warning site at 3.2.3.3.(4)(b), plus two decision/info and two warning sites at Sentence (5); the guarded foreign citation surface grows from 215 to 222 sites."
+    "Re-baselined 2026-10-16 for D-105. The embedded-floor transform adds one decision and one warning site at 3.2.3.3.(4)(b), plus two decision/info and two warning sites at Sentence (5); the guarded foreign citation surface grows from 215 to 222 sites.",
+    "Re-baselined 2026-10-16 for issue #72's original Thermal Mass example. The constant `str.format` citation moves out of this conservative dynamic inventory and into the Section 8.4 scanner as one cited site in each edition (8.4.4.4 / 8.4.5.4). The source site is unchanged; the two gates now assign it to its known Section 8.4 articles instead of treating it as unplaceable."
   ]
 }

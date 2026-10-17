@@ -8,6 +8,7 @@ import ast
 import json
 import os
 import re
+import string
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
@@ -235,7 +236,8 @@ def resolved_name_bindings(tree: ast.AST) -> dict[str, str]:
     Deliberately NOT resolved: a name bound from a parameter, a subscript or a
     conditional. Those need interprocedural analysis to be correct, and a
     wrong attribution is worse than a missing one — the invisible remainder is
-    counted by ``test_coverage_citation_visibility`` instead of guessed at.
+    counted by ``TestForeignCitationNoLoss.
+    test_no_dynamic_citation_drops_below_baseline`` instead of guessed at.
     """
     bindings: dict[str, str] = {"prefix": "PREFIX"}
     for node in ast.walk(tree):
@@ -279,6 +281,53 @@ def joined_str_text(node: ast.JoinedStr, bindings: dict[str, str]) -> str | None
     return "".join(parts)
 
 
+def constant_format_text(node: ast.expr, bindings: dict[str, str]) -> str | None:
+    """Fold ``"constant {}".format(...)`` when every field is resolvable.
+
+    Only plain replacement fields are accepted. Conversions and format specs
+    can truncate or otherwise rewrite an article token, so treating those as a
+    citation would be an inference rather than constant folding.
+    """
+    if not (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "format"
+        and isinstance(node.func.value, ast.Constant)
+        and isinstance(node.func.value.value, str)
+    ):
+        return None
+
+    template = node.func.value.value
+    try:
+        fields = list(string.Formatter().parse(template))
+    except ValueError:
+        return None
+    if any(format_spec or conversion for _, _, format_spec, conversion in fields):
+        return None
+
+    def fragment(value: ast.expr) -> str | None:
+        if isinstance(value, ast.Name):
+            return bindings.get(value.id)
+        return python_citation_value(value, bindings)
+
+    args = [fragment(value) for value in node.args]
+    kwargs = {
+        keyword.arg: fragment(keyword.value)
+        for keyword in node.keywords
+        if keyword.arg is not None
+    }
+    if (
+        any(value is None for value in args)
+        or len(kwargs) != len(node.keywords)
+        or any(value is None for value in kwargs.values())
+    ):
+        return None
+    try:
+        return template.format(*args, **kwargs)
+    except (IndexError, KeyError, ValueError):
+        return None
+
+
 def python_citation_value(node: ast.expr,
                           bindings: dict[str, str] | None = None) -> str | None:
     bindings = bindings if bindings is not None else {"prefix": "PREFIX"}
@@ -289,6 +338,9 @@ def python_citation_value(node: ast.expr,
     if key is not None:
         return ("PREFIX" if key == "reference_subsection"
                 else MANIFEST_TOKEN + key)
+    formatted = constant_format_text(node, bindings)
+    if formatted is not None:
+        return formatted
     if not isinstance(node, ast.JoinedStr):
         return None
     return joined_str_text(node, bindings)
@@ -308,6 +360,56 @@ def domain_for(relative: str) -> str:
         segment = remainder.split("/", 1)[0]
         return segment if segment in DOMAIN_SUBDIRS else "necb"
     raise ValueError(f"cannot attribute {relative} to a domain — teach domain_for")
+
+
+class _DefinitionLines(ast.NodeVisitor):
+    def __init__(self):
+        self.classes: list[str] = []
+        self.lines: dict[str, list[int]] = defaultdict(list)
+
+    def visit_ClassDef(self, node: ast.ClassDef) -> None:
+        self.classes.append(node.name)
+        for child in node.body:
+            self.visit(child)
+        self.classes.pop()
+
+    def _function(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
+        self.lines[node.name].append(node.lineno)
+        if self.classes:
+            qualified = ".".join((*self.classes, node.name))
+            self.lines[qualified].append(node.lineno)
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        self._function(node)
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+        self._function(node)
+
+
+def python_definition_lines(path: Path, symbol: str) -> list[int]:
+    """Lines defining an unqualified function name or exact ``Class.method``."""
+    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    visitor = _DefinitionLines()
+    visitor.visit(tree)
+    return visitor.lines.get(symbol, [])
+
+
+def code_ref_line(source_root: Path, ref: object) -> int:
+    """Resolve one ``path#symbol`` ref to exactly one Python definition."""
+    value = str(ref)
+    path_text, separator, symbol = value.partition("#")
+    if not separator or not path_text or not symbol:
+        raise ValueError(f"invalid coverage code ref {value!r}; expected path#symbol")
+    path = source_root / path_text
+    if not path.is_file():
+        raise ValueError(f"coverage code ref {value!r} names no file")
+    lines = python_definition_lines(path, symbol)
+    if len(lines) != 1:
+        raise ValueError(
+            f"coverage code ref {value!r} resolves to {len(lines)} definitions "
+            f"at lines {lines}; use Class.method when a name is ambiguous"
+        )
+    return lines[0]
 
 
 class CoverageGenerator:
@@ -556,22 +658,10 @@ class CoverageGenerator:
             return esc(value)
         path_text, symbol = value.split("#", 1)
         if value not in self.code_lines:
-            line_number = None
-            path = self.inputs.source_root / path_text
-            if path.is_file():
-                pattern = re.compile(
-                    rf"def (?:self\.)?{re.escape(symbol)}(?:[\s(=]|$)"
-                )
-                for index, line in enumerate(
-                    path.read_text(encoding="utf-8", errors="replace").splitlines(), 1
-                ):
-                    if pattern.search(line):
-                        line_number = index
-                        break
-            self.code_lines[value] = line_number
+            self.code_lines[value] = code_ref_line(self.inputs.source_root, value)
         line_number = self.code_lines[value]
-        line_suffix = f":{line_number}" if line_number else ""
-        anchor = f"#L{line_number}" if line_number else ""
+        line_suffix = f":{line_number}"
+        anchor = f"#L{line_number}"
         text = f"{Path(path_text).name}#{symbol}{line_suffix}"
         return (
             f'<a href="{self.inputs.blob}/{esc(path_text)}{anchor}" '
