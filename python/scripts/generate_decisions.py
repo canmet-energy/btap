@@ -174,7 +174,8 @@ RULING_WHEN_RE = re.compile(
     r"\b20\d{2}-\d{2}-\d{2}\b",
     re.IGNORECASE | re.MULTILINE)
 WHO_WHEN_RE = re.compile(
-    r"^[-*] \*\*Who/when:\*\*[^\n]*(?:\n[ \t]+[^\n]*)*", re.MULTILINE)
+    r"^[-*] (?:\*\*Who/when:\*\*|Who/when:)[^\n]*(?:\n[ \t]+[^\n]*)*",
+    re.MULTILINE)
 
 def numeric_order(ids) -> list:
     """Decision ids in numeric id order -- the one ordering invariant."""
