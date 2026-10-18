@@ -117,9 +117,22 @@ def _apply_to_space_type(model, space_type, ruleset, audit):
     record = SpaceTypes.find(building_type=building_type, space_type=standards_type,
                              edition=ruleset.edition)
     if record is None:
-        audit.warn('loads', f"space type not in the NECB {ruleset.edition} data (standards tags "
-                            f"[{_inspect(building_type)}, {_inspect(standards_type)}]) — "
-                            'no loads applied', target=name)
+        # A space type with NO spaces models nothing, so "no loads applied" is
+        # true of the tag and false of the building. `--space-type` reassigns
+        # every space to one NECB type, which orphans the model's own types:
+        # on one archetype that produced 17 warnings naming gaps that did not
+        # exist, and 245 across 26 archetypes. The disclosure that matters is
+        # about spaces that got no loads, so it is scoped to those.
+        if space_type.spaces():
+            audit.warn('loads', f"space type not in the NECB {ruleset.edition} data (standards tags "
+                                f"[{_inspect(building_type)}, {_inspect(standards_type)}]) — "
+                                'no loads applied',
+                       target=name,
+                       inputs={'spaces': len(space_type.spaces())})
+        else:
+            audit.info('loads',
+                       'space type carries no spaces — nothing to apply loads to',
+                       target=name)
         return False
     if SpaceTypes.is_undefined(record):
         audit.info('loads', "'- undefined -' space type — no loads applied (legacy behavior)",

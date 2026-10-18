@@ -138,6 +138,38 @@ class TestNecbEfficiency(unittest.TestCase):
         hvac.apply_efficiencies(model, code='necb2020', audit=audit)
         self.assertTrue(any('not sized' in w['action'] for w in audit.warnings))
 
+    def test_a_pass_that_will_be_followed_by_sizing_does_NOT_warn(self):
+        """The complement of `test_unsized_model_warns_never_silent`.
+
+        The reference build runs this pass TWICE: once in `_reference_hvac`
+        before the model is sized, and again in `_size_reference` after. Every
+        capacity-binned determination is made by the second pass — measured on
+        two archetypes, the first emitted 78 and 194 capacity warnings and made
+        0 and 1 decisions, while the second made 80 and 195.
+
+        So the first pass was reporting the expected pre-sizing state as a
+        finding: 1,166 false warnings across 26 archetypes, 194 of them in the
+        Compliance checklist an AHJ reads first, each saying "model not sized?"
+        of a model that was about to be sized, and was.
+
+        The control is the sibling test: with no sizing to follow, the SAME
+        model must still warn, because then this pass is the only disclosure
+        there will be.
+        """
+        model = load_fixture()
+        modeling.build_system(model, 'PSZ RTU Gas and DX Coils and Electric Baseboard',
+                              sorted_zones(model))
+        audit = AuditLog()
+        hvac.apply_efficiencies(model, code='necb2020', audit=audit,
+                                sizing_follows=True)
+        offenders = [w['action'] for w in audit.warnings
+                     if 'not sized' in w['action']
+                     or 'capacity unavailable' in w['action']]
+        self.assertEqual(
+            [], offenders,
+            'a pass whose determinations are redone after sizing must not '
+            'report the pre-sizing state as a finding')
+
     def test_air_source_vrf_uses_table_i_minimums_and_audits(self):
         model = load_fixture()
         modeling.build_system(model, 'VRF', sorted_zones(model))

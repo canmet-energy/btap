@@ -317,7 +317,12 @@ def compliance_kwargs(o):
           "simulate": o["simulate"], "report_html": o["report_html"],
           "report_options": default_report_options(o)}
     if o.get("epw"):
-        kw["weather"] = {"epw": o["epw"], "ddy": o["ddy"]}
+        # `--simulate none` returns from validation BEFORE the .ddy default is
+        # resolved, so the key may be absent while --epw/--city is set. The
+        # library already takes `weather.get("ddy")` and requires it only when
+        # simulating, so a bracket read here was the whole defect: it raised a
+        # bare KeyError('ddy') on the documented `--city X --simulate none`.
+        kw["weather"] = {"epw": o["epw"], "ddy": o.get("ddy")}
     if o.get("hdd") is not None:
         kw["hdd"] = o["hdd"]
     # ONE `building` dict, built up: a second assignment silently dropped
