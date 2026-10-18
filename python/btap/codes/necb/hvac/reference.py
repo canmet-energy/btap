@@ -946,7 +946,8 @@ def _reconcile_declared_storeys(reference, building, audit, ruleset=None):
                inputs={'storeys': declared}, article=article, ruling='D-18')
 
 
-def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=None):
+def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=None,
+                    sizing_follows=False):
     """The proposed -> reference HVAC transform against ONE resolved edition.
 
     Everything under it — the selection, the per-assignment rules, the
@@ -1367,7 +1368,14 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
     _purge_orphaned_ems(reference, audit)
     _purge_orphaned_vrf(reference, audit)
     _apply_oversizing_caps(model, reference, rules_data, audit)
-    _efficiency._apply(reference, ruleset=ruleset, audit=audit)
+    # `sizing_follows`: `_size_reference` sizes this model and runs the
+    # efficiency pass AGAIN, which is where every capacity-binned
+    # determination is actually made. Telling this pass so keeps it from
+    # reporting the expected pre-sizing state as a finding. With
+    # `simulate: none` the second pass never runs, so the flag is False and
+    # these warnings remain the only, correct disclosure.
+    _efficiency._apply(reference, ruleset=ruleset, audit=audit,
+                       sizing_follows=sizing_follows)
     for chiller, cop in purchased_cooling_chillers:
         chiller.setReferenceCOP(cop)
         audit.decision('efficiency', 'purchased-cooling reference chiller COP applied',

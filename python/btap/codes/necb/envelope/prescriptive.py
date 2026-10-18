@@ -189,6 +189,21 @@ def _apply(model, ruleset, *, hdd=None, apply_fdwr=False, apply_srr=False,
     skylight_construction = None
 
     outside_envelope = 0
+    # D-24 interzone pairs, collected rather than warned one at a time: the
+    # condition is a property of the MODEL (no intended >10 C difference is
+    # established anywhere), so 90 identical sentences on an office archetype
+    # told an AHJ reader one fact ninety times and crowded out the rest of the
+    # trail. One warning carries the count and every pair.
+    interzone_unchanged = []
+    # 3.2.3.3.(3)'s 1.2 m insulated perimeter strip needs a Kiva foundation to
+    # be representable. Where there is none the slab is left AS MODELLED —
+    # prescribed insulation NOT applied — so unlike a diagnostic this one is
+    # compliance-material and must stay prominent. It was emitted per surface:
+    # 588 times across 26 archetypes, ~22 per model, which buried the finding
+    # in copies of itself. Nothing in this package creates Kiva foundations,
+    # so the condition is a property of the INPUT model, stated once with
+    # every floor named.
+    kiva_missing = []
     for surface in sorted_by_name(model.getSurfaces()):
         surface_class = SURFACE_CLASS.get(surface.surfaceType())
         if surface_class is None:
@@ -204,13 +219,14 @@ def _apply(model, ruleset, *, hdd=None, apply_fdwr=False, apply_srr=False,
         boundary = boundary_of(surface)
         if boundary is None:
             _assign_interzone_envelope(model, surface, surface_class, ruleset, hdd,
-                                       include_films, cache, audit)
+                                       include_films, cache, audit,
+                                       interzone_unchanged)
             continue
 
         if boundary == "ground" and surface_class == "floor":
             _assign_ground_floor(
                 model, surface, ruleset, hdd, include_films, cache, audit,
-                embedded_floor_inventory)
+                embedded_floor_inventory, kiva_missing)
         else:
             _assign_surface(model, surface, surface_class, boundary, ruleset, hdd,
                             include_films, cache, audit)
@@ -231,6 +247,29 @@ def _apply(model, ruleset, *, hdd=None, apply_fdwr=False, apply_srr=False,
                 window_construction = construction
             if sub_class == "skylight" and skylight_construction is None:
                 skylight_construction = construction
+
+    if kiva_missing:
+        audit.warn(
+            "prescriptive",
+            f"{len(kiva_missing)} ground floors have NO Kiva foundation in a "
+            "perimeter-strip zone — the 1.2 m insulated strip required by "
+            "3.2.3.3.(3) is not representable and those slabs are left AS "
+            "MODELLED, so the prescribed perimeter insulation is NOT applied",
+            inputs={"floors": len(kiva_missing), "surfaces": kiva_missing},
+            article="3.2.3.3.(3)", ruling="D-32",
+        )
+
+    if interzone_unchanged:
+        audit.warn(
+            "prescriptive",
+            f"{len(interzone_unchanged)} conditioned-to-conditioned interzone "
+            "assemblies left unchanged because an intended temperature "
+            "difference greater than 10 C is NOT established from the model",
+            inputs={"assemblies": len(interzone_unchanged),
+                    "pairs": interzone_unchanged},
+            article="Division A 1.4.1.2.(1)",
+            ruling="D-24",
+        )
 
     if outside_envelope > 0:
         audit.info("prescriptive",
@@ -298,7 +337,8 @@ def inside_envelope(space) -> bool:
 
 
 def _assign_interzone_envelope(model, surface, surface_class, ruleset, hdd,
-                               include_films, cache, audit):
+                               include_films, cache, audit,
+                               interzone_unchanged=None):
     """Apply the envelope row to an interzone assembly where its scope is known."""
     if surface.outsideBoundaryCondition() != "Surface":
         return
@@ -314,15 +354,21 @@ def _assign_interzone_envelope(model, surface, surface_class, ruleset, hdd,
     if inside_envelope(adj_space):
         pair = sorted((surface.nameString(), adj.nameString()))
         if surface.nameString() == pair[0]:
-            audit.warn(
-                "prescriptive",
-                "conditioned-to-conditioned interzone assembly left unchanged "
-                "because an intended temperature difference greater than 10 C "
-                "is NOT established from the model",
-                target=" / ".join(pair),
-                article="Division A 1.4.1.2.(1)",
-                ruling="D-24",
-            )
+            # The caller emits ONE aggregated warning. `is None` keeps a direct
+            # caller warning per pair rather than silently dropping the
+            # disclosure — a warning is never silent.
+            if interzone_unchanged is None:
+                audit.warn(
+                    "prescriptive",
+                    "conditioned-to-conditioned interzone assembly left "
+                    "unchanged because an intended temperature difference "
+                    "greater than 10 C is NOT established from the model",
+                    target=" / ".join(pair),
+                    article="Division A 1.4.1.2.(1)",
+                    ruling="D-24",
+                )
+            else:
+                interzone_unchanged.append(" / ".join(pair))
         return
 
     construction = opt(surface.construction())
@@ -410,7 +456,7 @@ def _assign_surface(model, surface, surface_class, boundary, ruleset, hdd,
 
 
 def _assign_ground_floor(model, surface, ruleset, hdd, include_films, cache, audit,
-                         embedded_floor_inventory):
+                         embedded_floor_inventory, kiva_missing=None):
     """Table 3.2.3.1 floors row is zone-conditional: zone 8 prescribes the
     table U over the FULL slab area; zones 4-7B prescribe it only within a
     1.2 m perimeter strip (3.2.3.3.(3)) and leave the slab field without a
@@ -461,7 +507,7 @@ def _assign_ground_floor(model, surface, ruleset, hdd, include_films, cache, aud
         return
 
     _apply_ground_strip(model, surface, ruleset, hdd, include_films,
-                        extent["width_m"], cache, audit)
+                        extent["width_m"], cache, audit, kiva_missing)
 
 
 def _construction_thickness(construction):
@@ -747,14 +793,20 @@ def _apply_embedded_floor_perimeter(surface, construction, audit):
 
 
 def _apply_ground_strip(model, surface, ruleset, hdd, include_films, width_m,
-                        cache, audit):
+                        cache, audit, kiva_missing=None):
     kiva = opt(surface.adjacentFoundation())
     if kiva is None:
-        audit.warn("prescriptive",
-                   "ground floor without a Kiva foundation in a perimeter-strip zone — "
-                   "the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
-                   target=surface.nameString(),
-                   article="3.2.3.3.(3)", ruling="D-32")
+        # `is None` keeps a direct caller warning per surface rather than
+        # dropping a material disclosure; the loop passes a list and reports
+        # once with every floor named.
+        if kiva_missing is None:
+            audit.warn("prescriptive",
+                       "ground floor without a Kiva foundation in a perimeter-strip zone — "
+                       "the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
+                       target=surface.nameString(),
+                       article="3.2.3.3.(3)", ruling="D-32")
+        else:
+            kiva_missing.append(surface.nameString())
         return
 
     u = _max_u(ruleset=ruleset, surface="floor", boundary="ground", hdd=hdd)

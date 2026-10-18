@@ -178,6 +178,52 @@ class TestApplyLoads(unittest.TestCase):
                      and e['level'] == 'decision']
         self.assertNotEqual([], decisions)
 
+    def test_an_unmatched_space_type_warns_only_when_it_has_SPACES(self):
+        """"No loads applied" was true of the tag and false of the building.
+
+        A space type with no spaces models nothing, so there is nothing for
+        loads to be applied TO. `--space-type` reassigns every space to one
+        NECB type, which orphans the model's own types: one office archetype
+        produced 17 such warnings naming gaps that did not exist, and 245
+        across 26 archetypes, beside a decision reading
+        `space_types_applied: 1` that looked like a catastrophic
+        under-application when it was correct and complete.
+
+        The disclosure that matters is about spaces that got no loads, so it is
+        scoped to those. An orphan still records an INFO — never silent.
+        """
+        import openstudio
+
+        from btap.audit import AuditLog
+        from btap.codes.necb import loads
+
+        model, map_ = self.mapped_model()
+        orphan = openstudio.model.SpaceType(model)
+        orphan.setName('Untagged orphan')
+        occupied = openstudio.model.SpaceType(model)
+        occupied.setName('Untagged but occupied')
+        space = openstudio.model.Space(model)
+        space.setName('A space with an untagged type')
+        space.setSpaceType(occupied)
+
+        audit = AuditLog()
+        loads.assign_space_types(model, map_, code='necb2020', audit=audit)
+        loads.apply_loads(model, code='necb2020', audit=audit)
+
+        warned = {e.get('target') for e in audit.warnings
+                  if 'no loads applied' in e['action']}
+        self.assertIn('Untagged but occupied', warned,
+                      'a space type WITH spaces means spaces got no loads — '
+                      'that is the disclosure and it must stay')
+        self.assertNotIn('Untagged orphan', warned,
+                         'a space type with NO spaces models nothing, so it '
+                         'is not a gap in the building')
+        noted = {e.get('target') for e in audit.entries
+                 if e.get('level') == 'info'
+                 and 'carries no spaces' in e['action']}
+        self.assertIn('Untagged orphan', noted,
+                      'the orphan is still recorded — never silent')
+
     def test_2025_citation_prefix_flows_to_audit(self):
         from btap.audit import AuditLog
         from btap.codes.necb import loads

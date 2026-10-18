@@ -138,6 +138,82 @@ class TestNecbEfficiency(unittest.TestCase):
         hvac.apply_efficiencies(model, code='necb2020', audit=audit)
         self.assertTrue(any('not sized' in w['action'] for w in audit.warnings))
 
+    def test_a_pass_that_will_be_followed_by_sizing_does_NOT_warn(self):
+        """The complement of `test_unsized_model_warns_never_silent`.
+
+        The reference build runs this pass TWICE: once in `_reference_hvac`
+        before the model is sized, and again in `_size_reference` after. Every
+        capacity-binned determination is made by the second pass — measured on
+        two archetypes, the first emitted 78 and 194 capacity warnings and made
+        0 and 1 decisions, while the second made 80 and 195.
+
+        So the first pass was reporting the expected pre-sizing state as a
+        finding: 1,166 false warnings across 26 archetypes, 194 of them in the
+        Compliance checklist an AHJ reads first, each saying "model not sized?"
+        of a model that was about to be sized, and was.
+
+        The control is the sibling test: with no sizing to follow, the SAME
+        model must still warn, because then this pass is the only disclosure
+        there will be.
+        """
+        model = load_fixture()
+        modeling.build_system(model, 'PSZ RTU Gas and DX Coils and Electric Baseboard',
+                              sorted_zones(model))
+        audit = AuditLog()
+        hvac.apply_efficiencies(model, code='necb2020', audit=audit,
+                                sizing_follows=True)
+        offenders = [w['action'] for w in audit.warnings
+                     if 'not sized' in w['action']
+                     or 'capacity unavailable' in w['action']]
+        self.assertEqual(
+            [], offenders,
+            'a pass whose determinations are redone after sizing must not '
+            'report the pre-sizing state as a finding')
+
+    def test_the_sizing_guard_withholds_the_WARNING_not_the_WORK(self):
+        """Pins the three flow fixes, which no test caught.
+
+        Fable's `302` found my guards had changed CONTROL FLOW, not just the
+        warning: `_apply_vrf` returned twice where main fell through to its
+        heating branch, and `_align_heat_pump_heating_capacity` returned where
+        main continued, abandoning every later air loop. He proved it with hand
+        probes — a VRF with hard-sized heating took COP 3.3 on main and 3.5 on
+        my head. His `303` then noted the fixes were pinned by that probe
+        alone: reverting either guard passed every test in the suite (37 and
+        153 passed).
+
+        Nothing in the frozen corpus exercises these shapes, which is why
+        neither the corpus nor any focused test could catch them. So the probe
+        becomes a test: a VRF whose capacities are HARD-SET is unaffected by
+        the pre-sizing guard, because nothing about it is unavailable. The
+        guard must withhold the warning and not the work.
+        """
+        model = load_fixture()
+        modeling.build_system(model, 'VRF', sorted_zones(model))
+        unit = model.getAirConditionerVariableRefrigerantFlows()[0]
+        # The shape that reaches the guard: COOLING capacity left autosized on
+        # a model with no sql, so its table row cannot be resolved, while
+        # HEATING is hard-set and its row CAN. Hard-setting both (my first
+        # attempt) never enters the branch at all and the test passed with the
+        # bug restored — 15 passed either way.
+        unit.autosizeGrossRatedTotalCoolingCapacity()
+        unit.setGrossRatedHeatingCapacity(20_000.0)
+        unit.setRatedHeatingCOP(5.0)
+
+        audit = AuditLog()
+        hvac.apply_efficiencies(model, code='necb2020', audit=audit,
+                                sizing_follows=True)
+
+        self.assertNotAlmostEqual(
+            5.0, unit.ratedHeatingCOP(), delta=0.01,
+            msg='an unresolvable COOLING row must not skip the HEATING '
+                'branch: main fell through to it, so returning left the '
+                'authored 5.0 COP in place')
+        offenders = [w['action'] for w in audit.warnings
+                     if 'capacity unavailable' in w['action']]
+        self.assertEqual([], offenders,
+                         'and the pre-sizing warning is still withheld')
+
     def test_air_source_vrf_uses_table_i_minimums_and_audits(self):
         model = load_fixture()
         modeling.build_system(model, 'VRF', sorted_zones(model))

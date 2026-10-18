@@ -1848,33 +1848,6 @@
  },
  {
   "step": "prescriptive",
-  "target": "Surface 1",
-  "action": "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
-  "article": "3.2.3.3.(3)",
-  "ruling": "D-32",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "prescriptive",
-  "target": "Surface 10 / Surface 27",
-  "action": "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
-  "article": "Division A 1.4.1.2.(1)",
-  "ruling": "D-24",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "prescriptive",
-  "target": "Surface 11 / Surface 3",
-  "action": "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
-  "article": "Division A 1.4.1.2.(1)",
-  "ruling": "D-24",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "prescriptive",
   "target": "ASHRAE 189.1-2009 ExtRoof IEAD ClimateZone 2-5:U-0.1594",
   "action": "outdoors roofceiling construction set to maximum U",
   "inputs": {
@@ -1885,15 +1858,6 @@
   "article": "Table 3.2.2.2.",
   "building": "reference building",
   "level": "decision"
- },
- {
-  "step": "prescriptive",
-  "target": "Surface 13",
-  "action": "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
-  "article": "3.2.3.3.(3)",
-  "ruling": "D-32",
-  "building": "reference building",
-  "level": "warning"
  },
  {
   "step": "prescriptive",
@@ -1923,35 +1887,17 @@
  },
  {
   "step": "prescriptive",
-  "target": "Surface 15 / Surface 23",
-  "action": "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
-  "article": "Division A 1.4.1.2.(1)",
-  "ruling": "D-24",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "prescriptive",
-  "target": "Surface 16 / Surface 28",
-  "action": "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
-  "article": "Division A 1.4.1.2.(1)",
-  "ruling": "D-24",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "prescriptive",
-  "target": "Surface 17 / Surface 9",
-  "action": "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
-  "article": "Division A 1.4.1.2.(1)",
-  "ruling": "D-24",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "prescriptive",
-  "target": "Surface 19",
-  "action": "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
+  "action": "5 ground floors have NO Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m insulated strip required by 3.2.3.3.(3) is not representable and those slabs are left AS MODELLED, so the prescribed perimeter insulation is NOT applied",
+  "inputs": {
+   "floors": 5,
+   "surfaces": [
+    "Surface 1",
+    "Surface 13",
+    "Surface 19",
+    "Surface 25",
+    "Surface 7"
+   ]
+  },
   "article": "3.2.3.3.(3)",
   "ruling": "D-32",
   "building": "reference building",
@@ -1959,46 +1905,22 @@
  },
  {
   "step": "prescriptive",
-  "target": "Surface 21 / Surface 5",
-  "action": "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
+  "action": "8 conditioned-to-conditioned interzone assemblies left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
+  "inputs": {
+   "assemblies": 8,
+   "pairs": [
+    "Surface 10 / Surface 27",
+    "Surface 11 / Surface 3",
+    "Surface 15 / Surface 23",
+    "Surface 16 / Surface 28",
+    "Surface 17 / Surface 9",
+    "Surface 21 / Surface 5",
+    "Surface 22 / Surface 29",
+    "Surface 26 / Surface 4"
+   ]
+  },
   "article": "Division A 1.4.1.2.(1)",
   "ruling": "D-24",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "prescriptive",
-  "target": "Surface 22 / Surface 29",
-  "action": "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
-  "article": "Division A 1.4.1.2.(1)",
-  "ruling": "D-24",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "prescriptive",
-  "target": "Surface 25",
-  "action": "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
-  "article": "3.2.3.3.(3)",
-  "ruling": "D-32",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "prescriptive",
-  "target": "Surface 26 / Surface 4",
-  "action": "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
-  "article": "Division A 1.4.1.2.(1)",
-  "ruling": "D-24",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "prescriptive",
-  "target": "Surface 7",
-  "action": "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
-  "article": "3.2.3.3.(3)",
-  "ruling": "D-32",
   "building": "reference building",
   "level": "warning"
  },
@@ -2281,7 +2203,7 @@
   "action": "Thermal characteristics and insulation extent of floors in contact with the ground \u2014 partial. Applied: Sentence (3): ordinary floors use the zone-conditional extent (zone 8 full-area; zones 4-7B retain the slab field and receive a 1.2 m Kiva perimeter strip, with a warning when no foundation can carry it). Sentence (4): its prescribed transmittance and full-area action are implemented once applicability is established. Applicability is established from an internal-source ground-floor construction; a supported radiant object's surface view is derived from that construction and supplies equipment attribution rather than independent evidence. The inventory is taken before reference-HVAC teardown. Detected embedded floors receive the Table 3.2.3.1 target over their full area in every climate zone, while an indicated floor-radiant topology whose served surface is unresolved warns and is not guessed into Sentence (3). Sentence (5): for detected embedded floors, the required Kiva depth is the tallest adjoining Foundation-wall height in that floor's thermal zone plus the final floor thickness; an exterior-insulation exception is measured against that same wall-top-to-floor-bottom depth, otherwise the floor insulation is continued vertically to it. Mixed wall heights and an exposed-perimeter remainder of at least 0.001 m warn because one Kiva field over-insulates shorter or zero-wall-height remainder instances. Foundation objects shared by multiple floors warn about cross-contamination; same-zone sharing is additionally reported by EnergyPlus as a Severe input error, and BTAP classifies the run as not clean. EnergyPlus 25.2 rejects the internal-source/Foundation pairing used as applicability evidence, so that detected input also receives a surface-specific warning. An unrepresentable continuation warns.. Gaps: Sentence (5)'s vertical perimeter continuation is not yet applied or verified for ordinary Sentence (3) floors. EnergyPlus 25.2 rejects an internal-source construction on a Foundation surface, so the detected embedded-floor/Kiva input warns and its assigned continuation cannot be annual-verified without replacing the input representation. Mixed-height and engine-significant partial-perimeter inputs warn because their one Kiva depth can over-insulate shorter or zero-wall-height remainder instances. Shared-Foundation inputs warn because their fields can cross-contaminate instances, and same-zone sharing is an EnergyPlus Severe input error. Semi-heated applicability under Sentence (2) remains caller-supplied through the HDD input rather than inferred from model classification; an embedded component represented without inspectable internal-source construction evidence cannot be inferred.",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 5,
+   "decisions_citing": 1,
    "code": [
     "python/btap/codes/necb/envelope/rules.py#ground_floor_extent",
     "python/btap/codes/necb/envelope/prescriptive.py#_embedded_floor_inventory",

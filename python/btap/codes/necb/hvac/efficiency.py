@@ -50,11 +50,23 @@ def apply(model, code='necb2020', audit=None, proposed=None):
     return _apply(model, resolve(code), audit=audit, proposed=proposed)
 
 
-def _apply(model, ruleset, audit=None, proposed=None):
+def _apply(model, ruleset, audit=None, proposed=None, sizing_follows=False):
     """The minimum-performance pass against ONE resolved edition — the
     efficiency tables, the plant staging rules and every article number under
     them come from this same :class:`btap.codes.Ruleset` (Stage 6)."""
     audit = audit if audit is not None else NullAudit()
+    # `sizing_follows` says a POST-SIZING efficiency pass is still to come, so
+    # an unavailable capacity here is the expected pre-sizing state and not a
+    # finding. Measured on two archetypes: this pass emitted 78 and 194
+    # capacity warnings and the pass after sizing then made every one of those
+    # determinations successfully (80 and 195 decisions). Reporting them as
+    # warnings put 1,166 false findings across 26 models into the AHJ trail —
+    # 194 of them in the Compliance checklist alone — saying "model not
+    # sized?" of a model that was about to be, and was.
+    #
+    # It is NOT unconditional suppression: with `simulate: none`,
+    # `_size_reference` returns before the second pass, so this pass is the
+    # only one and its warnings are the correct and only disclosure.
     tables = ruleset.rules("hvac_efficiencies")
     # Boiler/chiller staging thresholds (8.4.4.9.(6)/8.4.4.10.(6)) live in the
     # reference ruleset (heating_plant/cooling_plant), not the efficiencies
@@ -63,34 +75,45 @@ def _apply(model, ruleset, audit=None, proposed=None):
     heating_plant = plant_rules['heating_plant']
     cooling_plant = plant_rules['cooling_plant']
     for b in sorted_by_name(model.getBoilerHotWaters()):
-        _apply_boiler(b, tables, heating_plant, audit)
+        _apply_boiler(b, tables, heating_plant, audit,
+                      sizing_follows=sizing_follows)
     for c in sorted_by_name(model.getChillerElectricEIRs()):
-        _apply_chiller(c, tables, cooling_plant, audit)
+        _apply_chiller(c, tables, cooling_plant, audit,
+                       sizing_follows=sizing_follows)
     # after ALL chiller capacities are final — the tower sees the loop SUM
     _apply_tower_rules(model, plant_rules, audit)
     # 8.4.4.9.(7)/8.4.4.10.(8) stage COUNTS first: the multispeed appliers bin
     # by TOP-stage capacity, and the top stage is unchanged by re-staging, but
     # the per-stage values must land on the stages the staging pass leaves behind.
-    totals = _apply_staging(model, plant_rules, ruleset, audit)
+    totals = _apply_staging(model, plant_rules, ruleset, audit,
+                            sizing_follows=sizing_follows)
     for c in sorted_by_name(model.getCoilCoolingDXSingleSpeeds()):
-        _apply_dx_cooling(c, tables, audit)
+        _apply_dx_cooling(c, tables, audit,
+                          sizing_follows=sizing_follows)
     for c in sorted_by_name(model.getCoilCoolingDXMultiSpeeds()):
-        _apply_dx_cooling_multi(c, tables, audit, totals.get(str(c.handle())))
+        _apply_dx_cooling_multi(c, tables, audit, totals.get(str(c.handle())),
+                                sizing_follows=sizing_follows)
     for c in sorted_by_name(model.getCoilHeatingDXSingleSpeeds()):
-        _apply_dx_heating(c, tables, audit)
+        _apply_dx_heating(c, tables, audit,
+                          sizing_follows=sizing_follows)
     for c in sorted_by_name(model.getCoilHeatingDXMultiSpeeds()):
-        _apply_dx_heating_multi(c, tables, audit, totals.get(str(c.handle())))
+        _apply_dx_heating_multi(c, tables, audit, totals.get(str(c.handle())),
+                                sizing_follows=sizing_follows)
     for c in sorted_by_name(model.getCoilHeatingGass()):
-        _apply_gas_coil(c, tables, audit)
+        _apply_gas_coil(c, tables, audit,
+                        sizing_follows=sizing_follows)
     for c in sorted_by_name(model.getCoilHeatingGasMultiStages()):
-        _apply_gas_multi(c, tables, audit, totals.get(str(c.handle())))
+        _apply_gas_multi(c, tables, audit, totals.get(str(c.handle())),
+                         sizing_follows=sizing_follows)
     for unit in sorted_by_name(model.getAirConditionerVariableRefrigerantFlows()):
-        _apply_vrf(unit, tables, ruleset, audit)
+        _apply_vrf(unit, tables, ruleset, audit,
+                   sizing_follows=sizing_follows)
     for f in sorted_by_name(model.getFanVariableVolumes()):
         _apply_fan_power_curve(f, ruleset, audit)
     _apply_pump_rules(model, ruleset, plant_rules.get('hydronic_pumps'), audit,
                       proposed=proposed)
-    _align_heat_pump_heating_capacity(model, audit, ruleset)
+    _align_heat_pump_heating_capacity(model, audit, ruleset,
+                                      sizing_follows=sizing_follows)
     audit.info('efficiency', 'NECB efficiency pass complete',
                inputs={'code': ruleset.id, 'edition': ruleset.edition,
                        'boilers': len(model.getBoilerHotWaters()),
@@ -136,7 +159,7 @@ def _vrf_class(unit):
     return 'air_conditioner'
 
 
-def _apply_vrf(unit, tables, ruleset, audit):
+def _apply_vrf(unit, tables, ruleset, audit, sizing_follows=False):
     """Apply the air-cooled AC or air-source HP rows of Table 5.2.12.1.-I.
 
     OpenStudio's classic VRF object distinguishes only AirCooled, WaterCooled,
@@ -217,10 +240,16 @@ def _apply_vrf(unit, tables, ruleset, audit):
         )
 
     if cooling_row is None:
-        audit.warn('efficiency', 'VRF cooling capacity unavailable (model not sized?) — '
-                                 'Table-I cooling minimum not set',
-                   target=unit.nameString(), inputs={'equipment_class': equipment_class},
-                   article=article, ruling='D-85')
+        # Guard the WARN, not the flow: main fell through to the else branch
+        # here, so returning skipped the cooling application entirely. A
+        # VRF with hard-sized heating lost its heating COP (3.3 -> 3.5)
+        # (Fable's `302` probe).
+        if not sizing_follows:
+            audit.warn('efficiency',
+                       'VRF cooling capacity unavailable (model not sized?) — '
+                       'Table-I cooling minimum not set',
+                       target=unit.nameString(), inputs={'equipment_class': equipment_class},
+                       article=article, ruling='D-85')
     else:
         if cooling_row.get('minimum_seer') is not None:
             cooling_cop = seer_to_cop_no_fan(cooling_row['minimum_seer'])
@@ -232,10 +261,13 @@ def _apply_vrf(unit, tables, ruleset, audit):
         applied.append(f'cooling {cooling_label} (COP {ruby_round(cooling_cop, 2)})')
     if heat_pump:
         if heating_row is None:
-            audit.warn('efficiency', 'VRF heating capacity unavailable (model not sized?) — '
-                                     'Table-I heating minimum not set',
-                       target=unit.nameString(), inputs={'equipment_class': equipment_class},
-                       article=article, ruling='D-85')
+            # Guard the WARN, not the flow — see the cooling branch above.
+            if not sizing_follows:
+                audit.warn('efficiency',
+                           'VRF heating capacity unavailable (model not sized?) — '
+                           'Table-I heating minimum not set',
+                           target=unit.nameString(), inputs={'equipment_class': equipment_class},
+                           article=article, ruling='D-85')
         else:
             if heating_row.get('minimum_hspf') is not None:
                 heating_cop = hspf_to_cop_no_fan(heating_row['minimum_hspf'])
@@ -290,16 +322,18 @@ def apply_staging(model, rules, code, audit):
     return _apply_staging(model, rules, resolve(code), audit)
 
 
-def _apply_staging(model, rules, ruleset, audit):
+def _apply_staging(model, rules, ruleset, audit, sizing_follows=False):
     audit = audit if audit is not None else NullAudit()
     prefix = ruleset.article('reference_subsection')
     totals: dict = {}
     for unitary in sorted_by_name(model.getAirLoopHVACUnitarySystems()):
         _stage_multispeed_coil(unitary.coolingCoil(), rules.get('dx_staging'),
                                f'{prefix}.10.(8)', 'DX cooling', audit, totals,
-                               unitary=unitary, economizer_spec=rules.get('economizer_dx_staging'))
+                               unitary=unitary, economizer_spec=rules.get('economizer_dx_staging'),
+                               sizing_follows=sizing_follows)
         _stage_multispeed_coil(unitary.heatingCoil(), rules.get('furnace_staging'),
-                               f'{prefix}.9.(7)', 'furnace', audit, totals)
+                               f'{prefix}.9.(7)', 'furnace', audit, totals,
+                               sizing_follows=sizing_follows)
         _audit_electric_resistance_heating(unitary, prefix, audit)
         _apply_stage_flow_ratios(unitary, prefix, audit)
     _audit_staging_skips(model, prefix, audit)
@@ -330,7 +364,8 @@ def _apply_stage_flow_ratios(unitary, prefix, audit):
 
 
 def _stage_multispeed_coil(optional_coil, rule, article, label, audit, totals=None,
-                           unitary=None, economizer_spec=None):
+                           unitary=None, economizer_spec=None,
+                           sizing_follows=False):
     """:return: the stage count applied, None when the coil is not staged"""
     if totals is None:
         totals = {}
@@ -344,7 +379,8 @@ def _stage_multispeed_coil(optional_coil, rule, article, label, audit, totals=No
     name = coil.nameString()
     capacity_w = _top_stage_capacity(coil)
     if capacity_w is None:
-        audit.warn('efficiency', f'{name}: staged capacity unavailable (model not sized?) — {article} stage '
+        if not sizing_follows:
+            audit.warn('efficiency', f'{name}: staged capacity unavailable (model not sized?) — {article} stage '
                                  'count NOT set; run sizing first', article=article, ruling='D-46')
         return None
     totals[str(coil.handle())] = capacity_w
@@ -1739,7 +1775,8 @@ def _apply_sentence_3(reference_pump, proposed_pumps, distribution_flow, referen
                    article=f'{prefix}.14.(3)', ruling='D-93')
 
 
-def _align_heat_pump_heating_capacity(model, audit, ruleset):
+def _align_heat_pump_heating_capacity(model, audit, ruleset,
+                                      sizing_follows=False):
     """T4 (audit 2026-07-25) 8.4.4.13.(2)(c): "the heat pump's heating capacity
     at an outdoor air temperature of 8.3 C shall be identical to its cooling
     capacity". The vendored CAP_FT cubic evaluates ~1.0 at 8.3 C, so pinning
@@ -1756,7 +1793,8 @@ def _align_heat_pump_heating_capacity(model, audit, ruleset):
         staged_cool = next((c for c in comps if c.to_CoilCoolingDXMultiSpeed().is_initialized()), None)
         if staged_heat is not None and staged_cool is not None:
             _align_staged_heat_pump(staged_heat.to_CoilHeatingDXMultiSpeed().get(),
-                                    staged_cool.to_CoilCoolingDXMultiSpeed().get(), audit, hp_article)
+                                    staged_cool.to_CoilCoolingDXMultiSpeed().get(), audit, hp_article,
+                                    sizing_follows=sizing_follows)
             continue
 
         heat = next((c for c in comps if c.to_CoilHeatingDXSingleSpeed().is_initialized()), None)
@@ -1769,6 +1807,11 @@ def _align_heat_pump_heating_capacity(model, audit, ruleset):
         cool_w = (optional_f(cool.ratedTotalCoolingCapacity())
                   or optional_f(cool.autosizedRatedTotalCoolingCapacity()))
         if cool_w is None:
+            # `continue`, NOT return: main advanced to the next air loop here,
+            # so returning abandoned every later one — one unsized heat pump
+            # silently stopped the alignment for all of them (Fable's `302`).
+            if sizing_follows:
+                continue
             audit.warn('efficiency', f'{heat.nameString()}: cooling capacity unavailable — '
                                      f'{hp_article} heating=cooling alignment skipped '
                                      '(run sizing first)')
@@ -1782,7 +1825,8 @@ def _align_heat_pump_heating_capacity(model, audit, ruleset):
                        article=hp_article, ruling='D-22')
 
 
-def _align_staged_heat_pump(heat, cool, audit, hp_article='8.4.4.13.(2)(c)'):
+def _align_staged_heat_pump(heat, cool, audit, hp_article='8.4.4.13.(2)(c)',
+                            sizing_follows=False):
     """Same sentence on a STAGED heat pump: the unit's heating capacity is its
     top stage, so the top stages are what must match. The lower stages follow
     the cooling coil's own increments stage-for-stage, which keeps the two
@@ -1811,6 +1855,13 @@ def _align_staged_heat_pump(heat, cool, audit, hp_article='8.4.4.13.(2)(c)'):
         heat_stage.setGrossRatedHeatingCapacity(cool_w)
         top = cool_w
     if top is None:
+        # Threaded late: Fable's `302` found this one still reporting the
+        # pre-sizing state — the 10 surviving capacity warnings in
+        # determination-04 were all its, 5 of them from the pass whose
+        # determinations are redone after sizing. Main returns here, so the
+        # guard returns.
+        if sizing_follows:
+            return
         audit.warn('efficiency', f'{heat.nameString()}: staged cooling capacity unavailable — '
                                  f'{hp_article} '
                                  'heating=cooling alignment skipped (run sizing first)',
@@ -2541,7 +2592,7 @@ def _forced_modulating(boiler) -> bool:
     return bool(marker.is_initialized()) and bool(marker.get())
 
 
-def _apply_boiler(boiler, tables, plant, audit):
+def _apply_boiler(boiler, tables, plant, audit, sizing_follows=False):
     """Legacy boiler_hot_water_apply_efficiency_and_curves (NECB2011 hvac_systems.rb:539):
     primary/secondary staging (176/352 kW), the part-load curve of the boiler's own
     FHeatPLC class (D-89), AFUE/thermal/combustion -> thermal efficiency, legacy
@@ -2556,6 +2607,8 @@ def _apply_boiler(boiler, tables, plant, audit):
     capacity_w, capacity_source = _plant_capacity(
         boiler, optional_f(boiler.nominalCapacity()), optional_f(boiler.autosizedNominalCapacity()))
     if capacity_w is None:
+        if sizing_follows:
+            return None
         return audit.warn('efficiency', 'boiler capacity unavailable (model not sized?) — not set',
                           target=boiler.nameString())
 
@@ -2715,7 +2768,7 @@ def boiler_thermal_efficiency(row):
     return None, None
 
 
-def _apply_chiller(chiller, tables, plant, audit):
+def _apply_chiller(chiller, tables, plant, audit, sizing_follows=False):
     """Legacy chiller_electric_eir_apply_efficiency_and_curves (NECB2011:648): modulating
     to 25%, primary/secondary 2100 kW split, curves, kW/ton -> COP, tower sizing."""
     name = _base_name(chiller)
@@ -2723,7 +2776,10 @@ def _apply_chiller(chiller, tables, plant, audit):
         chiller, optional_f(chiller.referenceCapacity()),
         optional_f(chiller.autosizedReferenceCapacity()))
     if capacity_w is None:
-        return audit.warn('efficiency', 'chiller capacity unavailable (model not sized?) — not set', target=name)
+        if sizing_follows:
+            return None
+        return audit.warn('efficiency', 'chiller capacity unavailable (model not sized?) — not set',
+                          target=name)
 
     chiller.setChillerFlowMode('LeavingSetpointModulated')
     chiller.setMinimumPartLoadRatio(plant['modulating_min_fraction'])
@@ -2921,13 +2977,15 @@ def _apply_tower_rules(model, rules, audit):
                            article='Table 5.2.12.2', ruling='D-26')
 
 
-def _apply_dx_cooling(coil, tables, audit):
+def _apply_dx_cooling(coil, tables, audit, sizing_follows=False):
     """Legacy coil_cooling_dx_single_speed_apply_efficiency_and_curves via NECB
     unitary_acs/heat_pumps tables: SEER/EER -> COP (no fan) + performance curves."""
     name = coil.nameString()
     capacity_w = (optional_f(coil.ratedTotalCoolingCapacity())
                   or optional_f(coil.autosizedRatedTotalCoolingCapacity()))
     if capacity_w is None:
+        if sizing_follows:
+            return None
         return audit.warn('efficiency', 'DX cooling capacity unavailable (model not sized?) — not set',
                           target=name)
 
@@ -2970,7 +3028,8 @@ def _apply_dx_cooling(coil, tables, audit):
                           ruling='D-102')
 
 
-def _apply_dx_cooling_multi(coil, tables, audit, capacity_w=None):
+def _apply_dx_cooling_multi(coil, tables, audit, capacity_w=None,
+                            sizing_follows=False):
     """Staged DX cooling (8.4.4.10.(8)). Binned by TOP-stage capacity — which IS
     the unit's total capacity — against the same unitary_acs/heat_pumps
     tables as the single-speed coil, with the row's COP and curves applied to
@@ -2981,6 +3040,8 @@ def _apply_dx_cooling_multi(coil, tables, audit, capacity_w=None):
     if capacity_w is None:
         capacity_w = _top_stage_capacity(coil)
     if capacity_w is None:
+        if sizing_follows:
+            return None
         return audit.warn('efficiency', 'staged DX cooling capacity unavailable (model not sized?) — not set',
                           target=name)
 
@@ -3047,13 +3108,16 @@ def dx_cooling_cop(row):
     return None
 
 
-def _apply_dx_heating_multi(coil, tables, audit, capacity_w=None):
+def _apply_dx_heating_multi(coil, tables, audit, capacity_w=None,
+                            sizing_follows=False):
     """Staged DX heating (reference ASHP). Same top-stage binning contract as
     the staged cooling applier."""
     name = coil.nameString()
     if capacity_w is None:
         capacity_w = _top_stage_capacity(coil)
     if capacity_w is None:
+        if sizing_follows:
+            return None
         return audit.warn('efficiency', 'staged DX heating capacity unavailable (model not sized?) — not set',
                           target=name)
 
@@ -3107,7 +3171,8 @@ def dx_heating_cop(row, capacity_w):
     return None
 
 
-def _apply_gas_multi(coil, tables, audit, capacity_w=None):
+def _apply_gas_multi(coil, tables, audit, capacity_w=None,
+                     sizing_follows=False):
     """Staged gas furnace (8.4.4.9.(7)). Binned by TOP-stage (= total) capacity
     against the same furnaces table; the burner efficiency goes on every
     stage and the part-load curve on the parent coil."""
@@ -3115,6 +3180,8 @@ def _apply_gas_multi(coil, tables, audit, capacity_w=None):
     if capacity_w is None:
         capacity_w = _top_stage_capacity(coil)
     if capacity_w is None:
+        if sizing_follows:
+            return None
         return audit.warn('efficiency', 'staged gas coil capacity unavailable (model not sized?) — not set',
                           target=name)
 
@@ -3156,12 +3223,14 @@ def _apply_gas_multi(coil, tables, audit, capacity_w=None):
                           ahj=_boiler_class_ahj(klass, class_source))
 
 
-def _apply_dx_heating(coil, tables, audit):
+def _apply_dx_heating(coil, tables, audit, sizing_follows=False):
     """Legacy DX heating via heat_pumps_heating: HSPF or COPH47 -> heating COP (no fan)."""
     name = coil.nameString()
     capacity_w = (optional_f(coil.ratedTotalHeatingCapacity())
                   or optional_f(coil.autosizedRatedTotalHeatingCapacity()))
     if capacity_w is None:
+        if sizing_follows:
+            return None
         return audit.warn('efficiency', 'DX heating capacity unavailable (model not sized?) — not set',
                           target=name)
 
@@ -3196,11 +3265,13 @@ def _apply_dx_heating(coil, tables, audit):
                           ruling='D-102')
 
 
-def _apply_gas_coil(coil, tables, audit):
+def _apply_gas_coil(coil, tables, audit, sizing_follows=False):
     """Legacy coil_heating_gas_apply_efficiency_and_curves (NECB2011:855)."""
     name = coil.nameString()
     capacity_w = optional_f(coil.nominalCapacity()) or optional_f(coil.autosizedNominalCapacity())
     if capacity_w is None:
+        if sizing_follows:
+            return None
         return audit.warn('efficiency', 'gas coil capacity unavailable (model not sized?) — not set',
                           target=name)
 
@@ -3305,13 +3376,19 @@ def electric_or_no_heating(coil):
 
 # ---------------- the HVAC-module facades ----------------
 
-def apply_efficiencies(model, code='necb2020', audit=None, proposed=None):
+def apply_efficiencies(model, code='necb2020', audit=None, proposed=None,
+                       sizing_follows=False):
     """Facade: apply NECB minimum efficiencies to a sized model. Pass the sized
     PROPOSED model via proposed= to enable the 8.4.4.14.(1)-(3) pump power
     transfer (combined W/(L/s) by loop type); without it the Table 8.4.4.14
-    curves still apply and the skip is noted in the audit."""
+    curves still apply and the skip is noted in the audit.
+
+    `sizing_follows=True` says ANOTHER efficiency pass will run after this
+    model is sized, so an unavailable capacity is the expected pre-sizing state
+    rather than a finding. The default warns, because for a caller who sizes
+    nothing afterwards this pass is the only disclosure there will be."""
     return _apply(model, resolve(code), audit=audit,
-                  proposed=proposed)
+                  proposed=proposed, sizing_follows=sizing_follows)
 
 
 def prepare_for_resizing(model, audit=None, code='necb2020'):

@@ -1190,6 +1190,53 @@ class TestNo2020ArticleReachesA2025Run(unittest.TestCase):
                 offenders[:6]))
 
 
+class TestSimulateNoneWithWeatherDoesNotCrash(unittest.TestCase):
+    """`--city X --simulate none` died with a bare `KeyError: 'ddy'`.
+
+    Validation returns early on `simulate: none`, BEFORE the `.ddy` default
+    beside the `.epw` is resolved — correctly, since design days are not
+    needed when nothing is simulated. But `compliance_kwargs` then read
+    `o["ddy"]` with a bracket, so any run that named weather and asked for no
+    simulation raised `KeyError` and surfaced as `ERROR: 'ddy'`, four
+    characters of diagnosis on a documented combination.
+
+    The library layer was never wrong: `_attach_weather_and_hdd` takes
+    `weather.get(key)` and requires epw/ddy only when `simulate != "none"`.
+    So this is witnessed at the CALL SITE — `compliance_kwargs` itself —
+    because the helper it calls was already right and a test of the helper
+    would have stayed green through the whole defect.
+
+    Found by running `btap-compliance` on a real archetype, not by a check.
+    """
+
+    def _kwargs(self, argv, simulate):
+        from btap.codes import cli
+
+        namespace = cli.build_parser().parse_args(argv)
+        options = {"code": "necb2020", "run_dir": "/tmp/x",
+                   "simulate": simulate, "report_options": {},
+                   "model": "b.osm", "report_html": None}
+        options.update({key: value for key, value
+                        in vars(namespace).items() if value is not None})
+        _model, kwargs = cli.compliance_kwargs(options)
+        return kwargs
+
+    def test_an_epw_without_a_resolved_ddy_does_not_raise(self):
+        kwargs = self._kwargs(["--epw", "/w/toronto.epw"], "none")
+        self.assertEqual({"epw": "/w/toronto.epw", "ddy": None},
+                         kwargs["weather"],
+                         "the key is present and None, not absent: the "
+                         "library reads weather.get('ddy') and skips it when "
+                         "simulate is none")
+
+    def test_a_resolved_ddy_still_rides_through(self):
+        kwargs = self._kwargs(["--epw", "/w/toronto.epw",
+                               "--ddy", "/w/toronto.ddy"], "annual")
+        self.assertEqual({"epw": "/w/toronto.epw", "ddy": "/w/toronto.ddy"},
+                         kwargs["weather"],
+                         "the control: an explicit --ddy is unaffected")
+
+
 class TestTheCLICanReachAHJ11(unittest.TestCase):
     """Fable's `131` F9: `compliance_kwargs` built `building` from `--storeys`
     alone and no option offered refrigerated zones, so every CLI run took the

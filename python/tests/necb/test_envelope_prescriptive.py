@@ -838,6 +838,111 @@ class TestPrescriptive(unittest.TestCase):
                          'the paired boundary is disclosed once, not once per face')
         self.assertIn('greater than 10 C', disclosures[0]['action'])
 
+    def test_missing_Kiva_floors_are_ONE_warning_that_names_every_floor(self):
+        """The largest warning class across 26 archetypes — 588 of them — and
+        unlike a diagnostic this one is compliance-material.
+
+        3.2.3.3.(3) prescribes a 1.2 m insulated perimeter strip. Without a
+        Kiva foundation it is not representable and the slab is left AS
+        MODELLED, so prescribed insulation is NOT applied. Nothing in this
+        package creates Kiva foundations, so the condition is a property of the
+        input model.
+
+        It was emitted per surface — about 22 per model — which buried the
+        finding in copies of itself, next to 194 copies of a capacity warning
+        that was false. Aggregating keeps it prominent and legible: one
+        warning, the count, and every floor named in `inputs`.
+
+        The existing `test_ground_floor_strip_vs_full_area` is the control: it
+        asserts the article and ruling still appear, and it passes either way,
+        which is why it could not catch the repetition.
+        """
+        from btap.audit import AuditLog
+
+        model = load_raw_fixture()
+        audit = AuditLog()
+        self.n.apply_prescriptive(model, code='necb2020', hdd=HDD, audit=audit)
+
+        no_kiva = [s.nameString() for s in model.getSurfaces()
+                   if s.isGroundSurface() and s.surfaceType() == 'Floor'
+                   and not s.adjacentFoundation().is_initialized()]
+        self.assertTrue(no_kiva, 'the fixture must exercise the no-Kiva path')
+
+        strip = [w for w in audit.warnings
+                 if w.get('article') == '3.2.3.3.(3)'
+                 and w.get('ruling') == 'D-32'
+                 and 'Kiva' in w['action']]
+        self.assertEqual(
+            1, len(strip),
+            f'{len(no_kiva)} floors without a Kiva foundation must be ONE '
+            f'warning, not one each; got {len(strip)}')
+
+        inputs = strip[0].get('inputs') or {}
+        self.assertEqual(len(no_kiva), inputs.get('floors'),
+                         'the count is stated so a reader need not tally')
+        self.assertEqual(sorted(no_kiva), sorted(inputs.get('surfaces') or []),
+                         'every floor is still named — aggregating a MATERIAL '
+                         'gap must not lose which slabs it applies to')
+        self.assertIn('NOT applied', strip[0]['action'],
+                      'the consequence is stated: prescribed insulation is '
+                      'not applied to those slabs')
+
+    def test_many_interzone_pairs_are_disclosed_in_ONE_warning(self):
+        """90 identical sentences is one fact told ninety times.
+
+        A real office archetype produced 90 of these — 40% of all 228
+        warnings, every one the same sentence with a different surface pair.
+        The condition is a property of the MODEL (no intended >10 C difference
+        is established anywhere), so the per-pair warning buried the rest of
+        the trail an AHJ reader needs.
+
+        `test_conditioned_interzone_temperature_limb_is_disclosed` cannot
+        catch this: its model has ONE pair, so aggregated and per-pair output
+        are indistinguishable. This one stacks four spaces for three pairs.
+
+        No disclosure is lost — the pairs ride in `inputs`.
+        """
+        import openstudio
+
+        from btap.audit import AuditLog
+
+        model = openstudio.model.Model()
+        spaces = openstudio.model.SpaceVector()
+        for z in (0.0, 3.0, 6.0, 9.0):
+            spaces.append(
+                openstudio.model.Space.fromFloorPrint(print_at(z), 3.0,
+                                                      model).get())
+        openstudio.model.matchSurfaces(spaces)
+        material = openstudio.model.StandardOpaqueMaterial(
+            model, 'MediumSmooth', 0.2, 0.03, 45, 1000)
+        seed = openstudio.model.Construction(model)
+        seed.setLayers([material])
+        for surface in model.getSurfaces():
+            surface.setConstruction(seed)
+
+        audit = AuditLog()
+        self.n.apply_prescriptive(
+            model, code='necb2020', hdd=HDD, audit=audit)
+
+        disclosures = [
+            entry for entry in audit.warnings
+            if entry.get('ruling') == 'D-24'
+            and entry.get('article') == 'Division A 1.4.1.2.(1)'
+            and 'greater than 10 C' in str(entry.get('action'))
+        ]
+        self.assertEqual(
+            1, len(disclosures),
+            'four stacked spaces make three interzone pairs and must be '
+            'disclosed in ONE warning, not three: got '
+            + repr([d.get('target') for d in disclosures]))
+
+        inputs = disclosures[0].get('inputs') or {}
+        self.assertEqual(3, inputs.get('assemblies'),
+                         'the count is stated so a reader need not tally')
+        self.assertEqual(3, len(inputs.get('pairs') or []),
+                         'every pair is still named — aggregating must not '
+                         'drop the disclosure it summarises')
+
     def test_windows_preserve_shgc(self):
         import openstudio
 

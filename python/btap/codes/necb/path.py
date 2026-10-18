@@ -270,7 +270,16 @@ def build_reference(run):
             envelope.prescriptive._embedded_floor_inventory(proposed))
         reference_result = hvac.reference._reference_hvac(
             proposed, ruleset, building=opts["building"], audit=audit,
-            proposed_annual=run.proposed_annual_data)
+            proposed_annual=run.proposed_annual_data,
+            # `_size_reference` sizes and re-runs the efficiency pass for every
+            # mode but `none`, so only `none` makes that pass's capacity
+            # warnings the final word.
+            # `.get` with a warning-preserving default, because a bracket on a
+            # possibly-absent key is the same defect this commit fixes in
+            # cli.py: a caller whose opts omit `simulate` got a KeyError rather
+            # than a run. Absent means "assume nothing sizes afterwards", which
+            # keeps the capacity warnings instead of losing them.
+            sizing_follows=opts.get("simulate", "none") != "none")
         reference = reference_result.model
         envelope.reference._apply(
             reference, ruleset, hdd=run.hdd,
