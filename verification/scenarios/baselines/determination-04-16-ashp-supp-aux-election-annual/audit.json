@@ -934,51 +934,6 @@
  },
  {
   "step": "efficiency",
-  "target": "CoilHeatingDXMultiSpeed_ashp",
-  "action": "CoilHeatingDXMultiSpeed_ashp: staged cooling capacity unavailable \u2014 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
-  "article": "8.4.4.13.(2)(c)",
-  "ruling": "D-22",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingDXMultiSpeed_ashp 1",
-  "action": "CoilHeatingDXMultiSpeed_ashp 1: staged cooling capacity unavailable \u2014 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
-  "article": "8.4.4.13.(2)(c)",
-  "ruling": "D-22",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingDXMultiSpeed_ashp 2",
-  "action": "CoilHeatingDXMultiSpeed_ashp 2: staged cooling capacity unavailable \u2014 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
-  "article": "8.4.4.13.(2)(c)",
-  "ruling": "D-22",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingDXMultiSpeed_ashp 3",
-  "action": "CoilHeatingDXMultiSpeed_ashp 3: staged cooling capacity unavailable \u2014 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
-  "article": "8.4.4.13.(2)(c)",
-  "ruling": "D-22",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingDXMultiSpeed_ashp 4",
-  "action": "CoilHeatingDXMultiSpeed_ashp 4: staged cooling capacity unavailable \u2014 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
-  "article": "8.4.4.13.(2)(c)",
-  "ruling": "D-22",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "efficiency",
   "action": "NECB efficiency pass complete",
   "inputs": {
    "code": "necb2020",
@@ -1510,7 +1465,7 @@
   "action": "Heat Pumps \u2014 implemented: a water-LOOP heat pump (internal loop; auxiliary boiler/tower allowed) KEEPS its Table 8.4.4.7.-A selection per the printed split (D-37, Note A-8.4.4.13)",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 27,
+   "decisions_citing": 22,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_heat_pump_redirects",
     "python/btap/modeling/hvac/classify.py#_plant_facts"
@@ -1525,7 +1480,7 @@
   "action": "Heat Pumps \u2014 partial. Applied: air-, water- and ground-SOURCE heat pumps redirect to the Table 8.4.4.13. packaged rooftop ASHP, source classified from the HP\u2019s source plant loop with no-evidence detections keeping the conservative redirect; -10 C heating cutoff applied ((2)(d)); cooling sized at the peak load without oversizing ((2)(b), D-52); the (2)(g) auxiliary-fuel election runs on annual data with the 33% proviso. Gaps: (2)(c)\u2019s -8.3 C point evaluates to 47.8% on the vendored legacy CAP_FT curve against the code\u2019s 50% (known approximation, D-52 review); on simulate: :sizing/:none the (2)(g) election cannot run and the structural 8.4.4.9.(4) proxy elects, audited as such",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 27,
+   "decisions_citing": 22,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_apply_heat_pump_limits",
     "python/btap/codes/necb/hvac/reference.py#heat_pump_aux_energy_type",
