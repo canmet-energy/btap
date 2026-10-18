@@ -336,6 +336,81 @@ def inside_envelope(space) -> bool:
     return tag is not None and tag.lower() != "unconditioned"
 
 
+def characterize_as_modelled(model, ruleset, audit):
+    """State the proposed envelope AS SUBMITTED, before any transform.
+
+    The trail recorded the reference's prescribed conductance for every
+    assembly with its table, and nothing comparable about the building those
+    values replace — so two archetypes of different vintage, differing
+    precisely in their envelopes, produced audits differing in ONE of 353
+    entries. A reviewer could audit how the reference was built and not what
+    the tool took the submission to be.
+
+    Values and citations, no verdict: Part 8's determination is the 8.4.1.2
+    energy comparison, and an assembly-by-assembly pass/fail is the
+    prescriptive path's job. What the model must CARRY to be usable at all is
+    enforced by the three preflight gates, which are fatal; this is the
+    disclosure of what those gates accepted.
+
+    Areas and the as-submitted ratios come from the census the envelope pass
+    already runs; conductances are read where the prescriptive pass reads them
+    to decide what to retarget.
+    """
+    from btap.modeling.envelope.geometry import exposed_roofs, exposed_walls
+
+    assemblies: dict[str, dict] = {}
+    for surface in sorted_by_name(model.getSurfaces()):
+        surface_class = SURFACE_CLASS.get(surface.surfaceType())
+        boundary = boundary_of(surface)
+        if surface_class is None or boundary is None:
+            continue
+        space = opt(surface.space())
+        if space is not None and not inside_envelope(space):
+            continue
+        construction = opt(surface.construction())
+        layered = (None if construction is None
+                   else opt(construction.to_LayeredConstruction()))
+        key = f"{boundary} {surface_class}"
+        row = assemblies.setdefault(
+            key, {"surfaces": 0, "area_m2": 0.0, "conductance_w_m2k": [],
+                  "without_layered_construction": 0})
+        row["surfaces"] += 1
+        row["area_m2"] = round(row["area_m2"] + surface.grossArea(), 2)
+        if layered is None:
+            row["without_layered_construction"] += 1
+            continue
+        conductance = opt(layered.thermalConductance())
+        if conductance is not None and conductance > 0:
+            row["conductance_w_m2k"].append(round(float(conductance), 4))
+
+    for row in assemblies.values():
+        row["distinct_conductances_w_m2k"] = sorted(
+            set(row.pop("conductance_w_m2k")))
+
+    walls = exposed_walls(model)
+    roofs = exposed_roofs(model)
+    audit.decision(
+        "characterize",
+        "proposed envelope as modelled — the assemblies and ratios the "
+        "reference's prescribed values will replace",
+        inputs={
+            "assemblies": assemblies,
+            "exposed_wall_area_m2": round(walls["wall_area_m2"], 2),
+            "fdwr_as_modelled": (None if walls["fdwr"] is None
+                                 else round(walls["fdwr"], 4)),
+            "exposed_roof_area_m2": round(roofs["roof_area_m2"], 2),
+            "srr_as_modelled": (None if roofs["srr"] is None
+                                else round(roofs["srr"], 4)),
+        },
+        value=f"{len(assemblies)} assembly group(s) as submitted",
+        # Through the ruleset, NEVER the literal: "Building Envelope
+        # Components" is 8.4.4.3 in NECB 2020 and 8.4.5.3 in NECB 2025, where
+        # 8.4.4.3 does not exist at all — and 8.4.5.3 in 2020 is "Furnace".
+        # A hardcoded number would cite a different requirement in one
+        # edition and a nonexistent one in the other.
+        article=f'{ruleset.article("reference_subsection")}.3.')
+
+
 def _assign_interzone_envelope(model, surface, surface_class, ruleset, hdd,
                                include_films, cache, audit,
                                interzone_unchanged=None):

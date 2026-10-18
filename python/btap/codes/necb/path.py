@@ -82,8 +82,11 @@ _UPSTREAM_COOLING_PATTERN = re.compile(r"Chiller|DistrictCooling")
 
 def validate(run):
     """Phase 1 (family half): the bare-geometry on-ramp, the simulate-ability
-    gate and the NECB space-type pre-flight, then the run's opening
-    decision. The model itself was loaded by the pipeline."""
+    gate, the NECB space-type pre-flight and the as-modelled
+    characterization, then the run's opening decision. The model itself was
+    loaded by the pipeline."""
+    from btap.codes.necb import envelope
+
     opts = run.opts
     audit = run.audit
     ruleset = run.ruleset
@@ -105,6 +108,10 @@ def validate(run):
         # the full list (the raise lands inside the pipeline except, so the
         # audit trail is still flushed to run_dir).
         _validate_space_types(proposed, ruleset, audit)
+        # Past the gates, state what they accepted. The gates decide whether
+        # the model is usable; this says what it IS, so a reviewer can check
+        # the tool read their submission as they built it.
+        envelope.prescriptive.characterize_as_modelled(proposed, ruleset, audit)
     audit.decision("compliance", "performance-path run started",
                    inputs={"code": ruleset.id, "edition": ruleset.edition,
                            "simulate": opts["simulate"],
@@ -2363,6 +2370,13 @@ def _validate_space_types(proposed, ruleset, audit):
     from btap.codes.necb import loads
 
     problems: dict[tuple, list] = {}
+    # The gate already resolves every floor-area space; it discarded WHAT it
+    # resolved them to. The resolution drives the LPD allowance, the internal
+    # loads and the SHW demand the 8.4.1.2 comparison rests on, so a reader
+    # who is told only "56 spaces checked" cannot audit the allowance the
+    # determination depends on. Collected per model-authored type, with the
+    # floor area it covers.
+    resolved: dict[str, dict] = {}
     checked = 0
     for space in sorted_by_name(proposed.getSpaces()):
         if not space.partofTotalFloorArea():
@@ -2382,17 +2396,34 @@ def _validate_space_types(proposed, ruleset, audit):
                                         edition=ruleset.edition)
                   if bt and st else None)
         if record is not None and not loads.SpaceTypes.is_undefined(record):
+            seen = resolved.setdefault(
+                name, {"necb": [bt, st], "spaces": 0, "floor_area_m2": 0.0})
+            seen["spaces"] += 1
+            seen["floor_area_m2"] = round(
+                seen["floor_area_m2"] + space.floorArea() * space.multiplier(), 2)
             continue
 
         problems.setdefault((name, bt, st), []).append(space.nameString())
     if not problems:
         # A silent pass left the 'input model' phase invisible in the audit —
         # the narrative must show the gate ran and what it covered.
-        audit.info("compliance",
-                   "space-type pre-flight passed — every floor-area space "
-                   "type resolves against the NECB catalog",
-                   inputs={"floor_area_spaces_checked": checked,
-                           "code": ruleset.id, "edition": ruleset.edition})
+        audit.decision(
+            "characterize",
+            "space-type pre-flight passed — every floor-area space type "
+            "resolves against the NECB catalog, and these are the "
+            "resolutions the allowance is built from",
+            inputs={"floor_area_spaces_checked": checked,
+                    "space_types": resolved,
+                    "code": ruleset.id, "edition": ruleset.edition},
+            value=f"{len(resolved)} authored space type(s) resolved",
+            # 8.4.3.2 "Operating Schedules, Internal Loads, Service Water
+            # Heating Loads and Set-points" is what the resolution feeds and
+            # what the loads pass itself cites. NO `ruling`: the first draft
+            # cited D-10, which is `kind = "process"` with
+            # `editions = ["not_applicable"]` — a delegation decision, not a
+            # runtime interpretation, and CLAUDE.md requires a runtime citation
+            # to name a `kind: runtime` entry.
+            article="8.4.3.2.")
         return
 
     catalog = loads.table(ruleset.edition, "space_types")

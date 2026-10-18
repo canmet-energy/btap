@@ -355,12 +355,23 @@ def _validate_input_model(proposed, audit, building=None, require_storeys=True):
             "it (System 3 vs 6), and the fallback would silently treat the "
             "building as ONE storey. Declare it in the model or pass the "
             "override")
+    # The VALUE as well as its source. The source alone left a reader unable
+    # to see the number the gate accepted, and the only `storeys` figure in
+    # the trail is `building info for selection` — which is the count the
+    # SELECTOR used and, per `_reconcile_declared_storeys`, "THE OVERRIDE
+    # WINS, including over a model that declares its own count". So that
+    # entry cannot stand in for what the submitted model said.
     if overridden:
         counts["storeys_source"] = "building: override"
+        counts["storeys"] = building["storeys"]
     elif declared.is_initialized():
         counts["storeys_source"] = "declared on Building"
+        counts["storeys"] = declared.get()
     elif derivable:
         counts["storeys_source"] = "derived from BuildingStorys"
+        counts["storeys"] = sum(
+            1 for st in proposed.getBuildingStorys()
+            if any(float(s.zOrigin()) >= -0.01 for s in st.spaces()))
     else:
         counts["storeys_source"] = "not required (EUI path)"
 
