@@ -69,11 +69,11 @@ MIGRATED_IDS = (
     "D-90", "D-91", "D-92", "D-93", "D-97", "D-99", "D-100", "D-101",
     "D-102",
 )
-NATIVE_STRUCTURED_IDS = ("D-104", "D-105")
+NATIVE_STRUCTURED_IDS = ("D-104", "D-105", "D-106")
 STRUCTURED_IDS = MIGRATED_IDS + NATIVE_STRUCTURED_IDS
 #: Phase D decisions moved from `unverified` to the structured form; the other
-#: 23 migrated decisions are Phase C's. D-104 and D-105 are native structured
-#: sources.
+#: 23 migrated decisions are Phase C's. D-104 through D-106 are native
+#: structured sources.
 #: Every digest below pins the report-visible title and summary.
 PHASE_D_BATCH_1_IDS = (
     "D-18", "D-28", "D-34", "D-37", "D-42", "D-43", "D-45", "D-55",
@@ -158,6 +158,7 @@ STRUCTURED_RUNTIME_SHA256 = {
     "D-102": "c1db1f4f6c220c0ee04cf3bcd7df1debdbf7e6c2a2f97807a4e44084242a2368",
     "D-104": "299cd43f2f4707a8cfc7aaa84f85fe06bd24148f8dc8e59768d8246517cac983",
     "D-105": "8afd3dccafa72a5564f0bd71a9e68a656b87b3aa2f58f47aa3bb91124f9837dc",
+    "D-106": "1d80c9ebe30ce530f75b2a62cea7377a8b2cf3d3f41730cdcb0323a42fecad1f",
 }
 #: Each structured decision's requirement keys in AUTHORED order, as the
 #: sources record them. Phase C's 23 had them in legacy front matter; Phase
@@ -335,6 +336,7 @@ STRUCTURED_KEYS = {
     "D-102": ("dx_cooling_part_load", "heat_pump_part_load"),
     "D-104": ("vrf_minimum_when_electrical_phase_is_unknown",),
     "D-105": ("embedded_ground_floor_insulation",),
+    "D-106": ("reference_fan_coil_mode_specific_airflow",),
 }
 #: Each structured requirement as the sources record it: its label, then its
 #: NECB 2020 and NECB 2025 citations in authored order. A requirement the
@@ -411,6 +413,11 @@ STRUCTURED_REQUIREMENTS = {
         "Continuous air-barrier system compliance path",
         ("3.2.4.1.(1)",),
         ("3.2.4.1.(1)",),
+    ),
+    "reference_fan_coil_mode_specific_airflow": (
+        "Mode-specific design airflow for reference fan-coil water-coil sizing",
+        ("Table 8.4.4.7.-B", "8.4.4.8.(1)", "8.4.4.8.(2)"),
+        ("Table 8.4.5.7.-B", "8.4.5.8.(1)", "8.4.5.8.(2)"),
     ),
     "cooling_tower_capacity_and_cells": (
         "Cooling-tower capacity and cell count from nominal heat rejection",
@@ -1651,15 +1658,15 @@ class TestTheCommittedProvisionView(unittest.TestCase):
 
     #: Phase C converted every established mapping (23 structured), then Phase
     #: D's seven batches moved 42 held decisions to the structured form (65).
-    #: D-104 and D-105 are native structured decisions, taking the total to 67
-    #: with 3 held. Sixteen requirements have one source and the other 109
+    #: D-104 through D-106 are native structured decisions, taking the total
+    #: to 68 with 3 held. Sixteen requirements have one source and the other 110
     #: have two; one of those records is D-60's related 2020 comparison.
     #: REQUIREMENTS counts instances, including a shared key once per decision
     #: that uses it.
-    STRUCTURED, ESTABLISHED, HELD, INCLUDED, OMITTED = 67, 0, 3, 70, 35
-    SOURCE_ROWS = 234
-    GOVERNING_ROWS = 233
-    REQUIREMENTS = 125
+    STRUCTURED, ESTABLISHED, HELD, INCLUDED, OMITTED = 68, 0, 3, 71, 35
+    SOURCE_ROWS = 236
+    GOVERNING_ROWS = 235
+    REQUIREMENTS = 126
 
     @classmethod
     def setUpClass(cls):

@@ -10,7 +10,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from btap.simulation import Backend, Local, Remote, Result, run, runner
+from btap.simulation import Backend, Local, Remote, Result, run, runner, translation
 from tests.support import load_fixture, needs_sdk
 
 
@@ -121,6 +121,132 @@ class TestBackends(unittest.TestCase):
         self.assertIsInstance(Remote(), Backend)
         self.assertTrue(callable(Local().execute))
         self.assertTrue(callable(Remote().execute))
+
+
+@needs_sdk
+class TestFanCoilSizingTranslation(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+
+    def _model(self, *, marked):
+        import openstudio
+
+        model = load_fixture()
+        zone = model.getThermalZones()[0]
+        always_on = model.alwaysOnDiscreteSchedule()
+        hot_water = openstudio.model.PlantLoop(model)
+        chilled_water = openstudio.model.PlantLoop(model)
+        fan = openstudio.model.FanConstantVolume(model, always_on)
+        cooling = openstudio.model.CoilCoolingWater(model, always_on)
+        heating = openstudio.model.CoilHeatingWater(model, always_on)
+        chilled_water.addDemandBranchForComponent(cooling)
+        hot_water.addDemandBranchForComponent(heating)
+        fan_coil = openstudio.model.ZoneHVACFourPipeFanCoil(
+            model, always_on, fan, cooling, heating
+        )
+        fan_coil.setName("Mode-Specific Test Fan Coil")
+        fan_coil.addToThermalZone(zone)
+        if marked:
+            translation.mark_fan_coil_for_mode_specific_sizing(fan_coil)
+        control = model.getSimulationControl()
+        control.setDoZoneSizingCalculation(True)
+        control.setDoSystemSizingCalculation(True)
+        control.setDoPlantSizingCalculation(True)
+        return model
+
+    @staticmethod
+    def _field(obj, name):
+        idd = obj.iddObject()
+        for index in range(idd.numFields()):
+            field = idd.getField(index)
+            if field.is_initialized() and field.get().name() == name:
+                value = obj.getString(index)
+                return value.get() if value.is_initialized() else None
+        raise AssertionError(f"{idd.name()} has no field named {name}")
+
+    def test_marked_fan_coil_gets_mode_specific_sizing_in_both_backend_paths(self):
+        import openstudio
+
+        model = self._model(marked=True)
+        for backend_name in ("local", "remote"):
+            with self.subTest(backend=backend_name):
+                directory = Path(self.tmp.name) / backend_name
+                directory.mkdir()
+                model.save(openstudio.path(str(directory / "in.osm")), True)
+                if backend_name == "local":
+                    with self.assertRaises(FileNotFoundError):
+                        Local(energyplus="/nonexistent/energyplus").execute(
+                            directory
+                        )
+                    idf = (directory / "in.idf").read_text(encoding="utf-8")
+                else:
+                    remote = Remote(
+                        endpoint="https://example.invalid",
+                        api_key="x",
+                        transport=ExplodingTransport(),
+                    )
+                    payload, filename = remote._prepare_payload(directory)
+                    self.assertEqual("in.idf", filename)
+                    idf = payload.decode("utf-8")
+
+                self.assertIn(
+                    "DesignSpecification:ZoneHVAC:Sizing", idf
+                )
+                self.assertIn(
+                    translation.FAN_COIL_SIZING_SPEC_NAME, idf
+                )
+                self.assertIn(
+                    "FractionOfAutosizedCoolingAirflow", idf
+                )
+                self.assertIn(
+                    "FractionOfAutosizedHeatingAirflow", idf
+                )
+
+    def test_unmarked_fan_coil_translation_is_unchanged(self):
+        import openstudio
+
+        from btap.simulation.backends import translate_capturing_advisories
+
+        model = self._model(marked=False)
+        workspace, _ = translate_capturing_advisories(model)
+        specs = workspace.getObjectsByType(
+            openstudio.IddObjectType(
+                "DesignSpecification:ZoneHVAC:Sizing"
+            )
+        )
+        self.assertEqual([], list(specs))
+        fan_coils = workspace.getObjectsByType(
+            openstudio.IddObjectType("ZoneHVAC:FourPipeFanCoil")
+        )
+        self.assertEqual(1, len(fan_coils))
+        self.assertIn(
+            self._field(
+                fan_coils[0],
+                "Design Specification ZoneHVAC Sizing Object Name",
+            ),
+            (None, ""),
+        )
+
+    def test_remote_openstudio_workflow_refuses_before_upload(self):
+        import openstudio
+
+        model = self._model(marked=True)
+        directory = Path(self.tmp.name) / "openstudio"
+        directory.mkdir()
+        model.save(openstudio.path(str(directory / "in.osm")), True)
+        remote = Remote(
+            endpoint="https://example.invalid",
+            api_key="x",
+            transport=ExplodingTransport(),
+            workflow_type="openstudio",
+        )
+        with self.assertRaises(RuntimeError) as caught:
+            remote._prepare_payload(directory)
+        message = str(caught.exception)
+        self.assertIn("workflow_type='openstudio'", message)
+        self.assertIn("workflow_type='energyplus'", message)
+        self.assertIn("Mode-Specific Test Fan Coil", message)
 
 
 if __name__ == "__main__":

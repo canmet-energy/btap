@@ -4281,6 +4281,45 @@
           ]
         }
       ]
+    },
+    {
+      "id": "D-106",
+      "title": "Reference fan-coil water coils size at mode-specific airflow",
+      "kind": "runtime",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ],
+      "summary": "NECB Systems 2 and 5 retain one constant-volume fan-coil maximum airflow, but each water coil is rated at its own operating mode's design airflow. EnergyPlus otherwise fixes both coils to the larger unit maximum early in autosizing; in heating-dominated blocks this applies heating airflow to the cooling coil and can make its UA inversion fail. The reference marks newly built System 2/5 fan coils for a native DesignSpecification:ZoneHVAC:Sizing translation with unity cooling/heating airflow and capacity fractions. No ideal-loads probe or guessed hard size is introduced.",
+      "requirements": [
+        {
+          "id": "reference_fan_coil_mode_specific_airflow",
+          "label": "Mode-specific design airflow for reference fan-coil water-coil sizing",
+          "decided": "System 2/5 fan coils retain their larger unit airflow while each water coil's sizing calculation uses the design airflow of its own cooling or heating mode.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "Table 8.4.4.7.-B",
+                "8.4.4.8.(1)",
+                "8.4.4.8.(2)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "Table 8.4.5.7.-B",
+                "8.4.5.8.(1)",
+                "8.4.5.8.(2)"
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }
