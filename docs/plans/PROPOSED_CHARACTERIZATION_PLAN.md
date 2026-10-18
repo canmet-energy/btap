@@ -1,206 +1,190 @@
-# Characterizing the proposed building in the audit trail
+# Report what the input gate accepted
 
-**Status:** planned, 2026-10-18. Raised as "finding 6" of the archetype sweep
-behind #125, deferred from that PR because it ADDS disclosure rather than
-removing noise, and because its scope is a Code question as much as an
-engineering one.
+**Status:** planned, 2026-10-18. Rewritten after phylroy corrected the framing:
+a proposed model missing information NECB requires — an undeterminable storey
+count, space types not named against the catalog — must WARN AND STOP, not
+proceed. That gate already exists. This plan is about what the trail says once
+it passes.
 
-## The finding
+## The architecture is already right
 
-An authority reading a run can fully audit **how the reference was built** and
-cannot audit **what the tool understood the submitted building to be**.
-
-Measured on `main` at `86dc55c3`, two Hangar archetypes of different vintage
-(different SHA-256, different envelopes), both `--simulate none`:
-
-```
-Hangar pre-1960     353 entries   hash c9ccc0d4afa1
-Hangar 1980-2004    353 entries   hash f1dda3a2cafe
-entries that differ:  1 of 353
-```
-
-The single differing entry is a side effect, not a characterization:
+**Required inputs are gated and fatal.** Verified by running, not reading.
+Without the space-type on-ramp, a real archetype is refused before any
+simulation, exit 3:
 
 ```
-[243] opaque assemblies rebuilt as lightweight light-frame
-      pre-1960 : unique_assemblies: 4
-      1980-2004: unique_assemblies: 3
+ERROR: the model was REJECTED before any simulation ran.
+pre-flight FAILED: 17 space type(s) do not resolve against the NECB 2020
+space-type catalog, so the reference buil…
+  'Shop-Machinery-Hangar' [nil, nil] (1 space(s)) — untagged: run the loads
+  'Office Category 1' [nil, nil] (13 space(s)) — untagged: run the loads
+  … every offending type, its space count, and the fix
 ```
 
-Attribution across the trail:
+`btap/codes/necb/path.py#validate` runs three gates inside
+`audit.with_building("input model")`, and `compliance.PreflightError` maps to
+`EXIT["preflight"] = 3`:
 
-| Attributed to | Entries |
-|---|---|
-| reference building | **279** |
-| input model | 60 |
-| proposed building | 2 |
+- `pipeline._validate_input_model` — no spaces / zones / surfaces is fatal, and
+  so is **no thermostat anywhere**. Its own comment names that as the dangerous
+  case "because it RUNS: every zone free-floats, equipment sizes to nothing,
+  and the determination is numerically valid and physically meaningless".
+  Partial thermostat coverage warns, since storage and plenum zones
+  legitimately float.
+- The **storey gate**, `require_storeys=True`: fatal unless the count is
+  declared on `Building`, derivable from `BuildingStorys` with above-grade
+  spaces, or passed as `building={'storeys':}` — because Table 8.4.4.7.-A's
+  System 3-vs-6 split depends on it and "the fallback would silently treat the
+  building as ONE storey".
+- `_validate_space_types` — every floor-area space type must resolve against
+  the catalog BEFORE any transform, because the per-space-type transforms skip
+  unmatched types silently, "so an unresolvable space type yields a reference
+  identical to the proposed for exactly that space: the allowance is waived and
+  the proposed is compared against itself. You cannot certify a building whose
+  reference silently failed to build; fail here, loudly, with the full list".
 
-And those 60 input-model entries are almost entirely *what the tool did* plus
-coverage declarations — 17 "space type carries no spaces", 6 "NECB schedule
-built", one each of "people set" / "lights set" / "ventilation outdoor air
-set", "input model loaded and structurally simulate-able", and ~25 coverage
-status lines. **Exactly one records a measured property of the submitted
-building**, which is why it is also the only thing distinguishing two
-different buildings.
+That reasoning is the whole requirement, already implemented. **This plan adds
+no gate and relaxes none.**
 
-For contrast, the reference side records every assembly with its value and its
-table:
+### Two corrections to the previous draft
+
+The first version of this plan was written as a disclosure problem with a
+disclosure-versus-verification question for phylroy or Sol to rule on. That
+question is already settled by the architecture above: required inputs are
+fatal, and what lies past the gate is disclosure. The tool does not check a
+proposed assembly against a prescriptive maximum because Part 8's verdict is
+the 8.4.1.2 energy comparison — but it does refuse to run without what it
+needs. **The question is withdrawn.**
+
+It also claimed the 17 untagged space types were a live gap. They are not: they
+appear only because `--space-type` reassigns every space to one NECB type,
+orphaning the model's own. A genuinely untagged model never reaches that code —
+it is refused at the gate. And it claimed `storeys_source` was discarded into a
+local; it is in the audit.
+
+## What the trail actually says once the gate passes
+
+Measured on `main` at `86dc55c3`:
 
 ```
-outdoors roofceiling  conductance 0.1594 W/m2K   Table 3.2.2.2.
-outdoors wall         conductance 0.2759 W/m2K   Table 3.2.2.2.
-door                  conductance 2.6552         Table 3.2.2.3.
-window                SimpleGlazing U 1.9        Table 3.2.2.3.
-ground wall           conductance 0.397 W/m2K    Table 3.2.3.1.
+input model loaded and structurally simulate-able        level=info  article=None
+  {"spaces": 56, "thermal_zones": 55, "surfaces": 600,
+   "storeys_source": "derived from BuildingStorys",
+   "zones_with_thermostats": 55, "openstudio_version": "3.11.0"}
+
+space-type pre-flight passed — every floor-area space type resolves
+                                                          level=info  article=None
+  {"floor_area_spaces_checked": 56, "code": "necb2020", "edition": "2020"}
 ```
 
-`report.json` carries `proposed: 0 keys` and `reference: 0 keys` with no
-characterization block, on a sized run as well as an unsized one.
+So the trail records that the gates ran and what they counted. Four things it
+does not record:
 
-## Why it matters
+1. **Which NECB space type each space resolved TO.** Only counts exist:
+   `spaces_assigned: 56`, `space_types_created: 1`. The gate proves every space
+   type resolved; the trail never says to WHAT. For a reviewer this is the
+   single most consequential omission, because the space type drives the LPD
+   allowance, the loads and the SHW demand — the allowance the whole
+   determination rests on.
+2. **The storey COUNT as an accepted input.** The source is recorded
+   (`"derived from BuildingStorys"`) but the number is not. `{'storeys': 4}`
+   does appear, in `building info for selection` — attributed to the
+   **reference building**, because it is emitted from
+   `hvac/reference.py:1863` inside the reference's `with_building`.
+3. **The envelope as modelled.** No conductance, U, SHGC or as-submitted FDWR
+   for the proposed, although `exposed_walls` already returns the areas and the
+   FDWR and the prescriptive pass already reads each existing construction to
+   decide what to retarget.
+4. **A citation.** Both gate entries carry `article=None` and `level=info`, so
+   they sit outside the article trail the rest of the audit is organised by.
 
-A reviewer needs two things, and the tool answers one of them:
+The consequence is measurable: two Hangar archetypes of different vintage —
+different files, different envelopes — produce **353 audit entries each that
+differ in exactly one**, and that one is a thermal-mass side effect.
 
-- *how was the reference built* — answered exhaustively, 156 distinct articles;
-- *what did the tool take my building to be* — effectively unanswered.
+## Phase 1 — attribute the accepted inputs to the input model
 
-The second is not academic. The sweep behind #125 found the tool can read a
-proposed model as having **no internal loads at all** for some space types, and
-until that PR it said so in a form that looked like 17 modelling gaps. A
-reviewer who cannot see what was read cannot catch a misreading.
+`hvac/classify.py` and `hvac/reference.py` already characterize the proposed —
+31 `characterize` entries on the Hangar run, including the storey count — and
+every one lands under `building: reference building` because of the enclosing
+`with_building`. Decide per entry whether it states a fact about the input
+model or a choice about the reference selection, and attribute accordingly.
 
-It also means two submissions with materially different envelopes produce
-near-identical trails, so the trail cannot evidence which building it describes.
+No new measurement. This alone lets a reviewer see the accepted storey count
+and the proposed's loop topology as properties of their submission.
 
-## What already exists
+Baseline movement: `building` is a top-level AuditLog field, so every
+re-attributed entry moves. Verify the usual property — decision SETS unchanged
+apart from the `building` value.
 
-This is a REPORTING gap, not a computation gap. Most of the data is computed
-and discarded:
+## Phase 2 — state what the gate accepted, per space type
 
-- `btap/modeling/envelope/geometry.py#exposed_walls` returns
-  `wall_area_m2`, `subsurface_area_m2` and the as-found `fdwr`;
-- `#exposed_roofs` returns the roof census;
-- `btap/codes/necb/envelope/climate.py#hdd18` already audits the HDD source;
-- the prescriptive pass walks every surface and reads its EXISTING
-  construction to decide what to retarget — the proposed's U-values pass
-  through code that currently records only the reference's new value;
-- `btap/modeling/hvac/classify.py` already emits a **`characterize`** step
-  (31 entries on the Hangar run) with `plant loop classified`, `zone group
-  characterized` and `proposed air loop carries demand` — but every entry
-  lands under `building: reference building`, because it runs inside the
-  reference's `audit.with_building` context.
+Extend the two passing-gate entries from counts to contents:
 
-So the step name, the vocabulary and most of the measurements are in place.
-What is missing is a pass that states them about the INPUT model, attributed
-to it.
+- **the space-type resolution map**: each space type as named in the model, the
+  NECB `[building_type, space_type]` it resolved to, and the floor area it
+  covers. This is what makes the gate's pass auditable rather than asserted;
+- **the accepted storey count and its source**, as an input-model fact;
+- **thermostat coverage** as the fraction already computed.
 
-## The scope question to settle FIRST
+Promote both entries from `info` to `decision` and cite them — the storey gate
+to Table 8.4.4.7.-A, which is the requirement that makes the count load-bearing;
+the space-type gate to the loads/LPD articles the resolution feeds. A fact the
+determination depends on belongs in the article trail.
 
-**How much of this is disclosure and how much is verification?**
+## Phase 3 — the envelope as modelled
 
-Recording "the submitted wall is U-0.31 as modelled" is disclosure. Comparing
-it against the prescriptive maximum and flagging it is a PRESCRIPTIVE CHECK,
-which the Part 8 performance path deliberately does not perform — the
-performance path's verdict is the 8.4.1.2 energy comparison, not an
-assembly-by-assembly pass/fail.
+One pass on the input model, before any transform, recording the proposed's
+envelope the way the reference's is already recorded: opaque conductance by
+surface class and boundary, fenestration U and SHGC, the as-submitted FDWR and
+SRR, conditioned floor area, exposed wall and roof area, and the space
+multipliers in effect.
 
-This plan assumes **disclosure only**: record values, cite the article they
-bear on, and emit no verdict. Entries are `decision` or `info`, never a
-violation, and nothing reaches `compliant` or
-`compliance_determination`.
+Read from where the data already is (`exposed_walls`, `exposed_roofs`, the
+constructions the prescriptive pass inspects) rather than recomputing. Values
+and citations, no verdicts.
 
-That assumption needs phylroy's or Sol's ruling before Phase 2 is written,
-because the opposite reading — that an AHJ-facing artifact should flag a
-proposed assembly worse than prescriptive — is defensible and would change the
-audit levels, the checklist classifier's input and possibly the determination.
-Getting it wrong in the direction of verification would make the tool assert a
-compliance opinion the Code does not ask it for.
+## Phase 4 — `report.json`
 
-## Phase 1 — attribute what already runs
+`report.json` carries `proposed: 0 keys` and `reference: 0 keys`. Add a
+`characterization` block with the Phase 2 and 3 facts as data, so the HTML
+report and downstream consumers read it without parsing the audit. The report
+already renders `Reference building systems`; this is its counterpart.
 
-`classify.py`'s `characterize` entries describe the PROPOSED's loops and zone
-groups but are attributed to the reference, because of the enclosing
-`with_building`. Decide per entry whether it describes the input model or the
-reference selection, and attribute accordingly.
+## Phase 5 — the guard
 
-No new measurement. This alone makes a reader able to see the proposed's
-system topology, and it is the cheapest correction of the asymmetry.
+**Two archetypes differing only in vintage must produce audits that differ.**
+Today they differ in 1 of 353 entries. That property cannot hold while the gap
+exists, which is what makes it a guard rather than a description.
 
-Expect baseline movement: `building` is a top-level AuditLog field, so every
-re-attributed entry moves. Re-freeze accordingly, and verify the usual
-property — decision SETS unchanged except for the `building` value itself.
+Pair it with the inverse — the same model twice produces identical
+characterization — so it cannot be satisfied by noise.
 
-## Phase 2 — a characterization pass on the input model
-
-One pass, run once on the proposed before any transform, inside
-`audit.with_building("input model")`, emitting one entry per fact:
-
-- **Envelope, as modelled.** Opaque assembly conductance by surface class and
-  boundary (wall/roof/floor × outdoors/ground), fenestration U and SHGC, the
-  as-submitted FDWR and SRR. `exposed_walls` and `exposed_roofs` already
-  return the areas and the FDWR; the conductances are read where the
-  prescriptive pass reads them.
-- **Geometry.** Conditioned floor area, above-grade storeys, exposed wall and
-  roof area, and the space multipliers in effect — a multiplier of 36 on a
-  28-storey record is a fact a reviewer must see.
-- **Systems.** HVAC systems present by catalogue identity, SHW fuel, and
-  whether a DOAS is present (`btap/modeling/CLAUDE.md` records that a
-  user-authored DOAS graph can be malformed in ways EnergyPlus accepts
-  silently, so its presence is worth stating).
-- **Loads.** Which space types resolved to NECB records and which did not,
-  with the affected floor area — the 17-warning case from #125, stated as a
-  quantity rather than a count of tags.
-- **Infiltration.** The space-type modelling infiltration actually applied,
-  which is distinct from the envelope's 8.4.3.3 air-leakage rule and is
-  already recorded per space type.
-
-Each entry cites the article it bears on so it joins the existing trail rather
-than sitting beside it, and carries its value in `value` with the measurement
-in `inputs`, following the reference side's own convention.
-
-## Phase 3 — a characterization block in `report.json`
-
-`report.json` has `proposed: 0 keys`. Add a `characterization` block carrying
-the Phase 2 facts as data, so the HTML report and any downstream consumer read
-it without parsing the audit. The report already renders a
-`Reference building systems` section; the proposed deserves its counterpart.
-
-## Phase 4 — the vintage test
-
-The property that makes this verifiable: **two archetypes that differ only in
-vintage must produce audits that differ.** Today they differ in 1 of 353
-entries. A test that freezes two vintages of one archetype and asserts their
-characterization entries differ in the envelope facts is the regression guard,
-and it is the one check that could not pass while the gap exists.
-
-Pair it with the inverse — the same model run twice produces identical
-characterization — so the test cannot be satisfied by noise.
+Add a gate regression too: a model whose space types do not resolve must still
+exit 3 with every offending type named, and an undeterminable storey count must
+still exit 3. Those behaviours are the reason this plan is small, and nothing
+here may weaken them.
 
 ## What this plan deliberately does not do
 
-- **No verdicts on the proposed.** See the scope question. Values without
-  pass/fail until that is ruled on.
-- **No new computation where a measurement exists.** If `exposed_walls`
-  already returns it, the pass reads it rather than recomputing.
+- **No new gates, and no relaxed ones.** The three preflight gates stay fatal.
+- **No verdicts on the proposed.** Part 8's verdict is the energy comparison;
+  an assembly-by-assembly pass/fail is the prescriptive path's job.
+- **No recomputation** where a measurement already exists.
 - **No change to the determination.** `compliant`,
-  `compliance_determination`, the conditional label and the exit code are
+  `compliance_determination`, the conditional label and the exit codes are
   untouched; `test_the_exit_code_is_UNCHANGED_by_the_label` stays green.
-- **No prescriptive-path work.** The prescriptive path already reports
-  per-assembly compliance; this is about the performance path's trail.
 
 ## Verification
 
-Phases 1–3 move audit output, so each re-freezes on a clean tree in the same
-change. The property to assert each time, as in #125: decision SETS and
-verdict fields unchanged, with the movement confined to the entries the phase
-adds or re-attributes.
-
-Scope the freeze by what can actually move — #125's 15-of-54 scoping held up
-under review because the changed sites were byte-equivalent in the unaffected
-lanes. A characterization pass runs in every lane, so expect all 54.
+Each phase moves audit output and re-freezes on a clean tree in the same
+change, asserting what #125 established: decision SETS and verdict fields
+unchanged, movement confined to the entries the phase adds or re-attributes.
+A characterization pass runs in every lane, so expect all 54 scenarios rather
+than the 15 that #125 could scope to.
 
 ## Provenance
 
-Finding 6 of the 56-run archetype sweep behind #125 (28 models × 2 editions).
-The other five findings were defects in what the trail SAID; this one is about
-what it does not say. Evidence re-verified on `main` at `86dc55c3`.
+Finding 6 of the 56-run archetype sweep behind #125 (28 models × 2 editions),
+reframed by phylroy on 2026-10-18. Gate behaviour verified by running an
+untagged archetype to exit 3; trail contents measured on `main` at `86dc55c3`.
