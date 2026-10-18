@@ -274,7 +274,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
     "target": "Primary Boiler",
     "detail": "boiler efficiency applied",
-    "entry_index": 259
+    "entry_index": 223
    },
    {
     "id": "AHJ-14",
@@ -283,7 +283,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "Coil Heating Gas 1",
     "detail": "gas heating coil efficiency applied",
-    "entry_index": 287
+    "entry_index": 251
    },
    {
     "id": "AHJ-14",
@@ -292,7 +292,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "Coil Heating Gas 2",
     "detail": "gas heating coil efficiency applied",
-    "entry_index": 288
+    "entry_index": 252
    },
    {
     "id": "AHJ-14",
@@ -301,7 +301,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "Coil Heating Gas 3",
     "detail": "gas heating coil efficiency applied",
-    "entry_index": 289
+    "entry_index": 253
    },
    {
     "id": "AHJ-14",
@@ -310,7 +310,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "Coil Heating Gas 4",
     "detail": "gas heating coil efficiency applied",
-    "entry_index": 290
+    "entry_index": 254
    },
    {
     "id": "AHJ-14",
@@ -319,38 +319,13 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "Coil Heating Gas 5",
     "detail": "gas heating coil efficiency applied",
-    "entry_index": 291
+    "entry_index": 255
    }
   ]
  },
  "compliant": false,
  "warnings": [
   "UNRESOLVED: the heating equipment serving this group uses MORE THAN ONE ENERGY TYPE. 8.4.4.9.(5) requires the reference heating capacities to follow the proposed energy-type allocation, and this tool does NOT compute or enforce that allocation \u2014 it elects ONE energy type for the group. Whether the reference happens to match the proposed allocation is therefore NOT VERIFIED here, in either direction, and a passing annual result is not evidence that it does",
-  "CoilCoolingDXMultiSpeed_ashp: staged capacity unavailable (model not sized?) \u2014 8.4.4.10.(8) stage count NOT set; run sizing first",
-  "CoilHeatingDXMultiSpeed_ashp: staged capacity unavailable (model not sized?) \u2014 8.4.4.9.(7) stage count NOT set; run sizing first",
-  "CoilCoolingDXMultiSpeed_ashp 1: staged capacity unavailable (model not sized?) \u2014 8.4.4.10.(8) stage count NOT set; run sizing first",
-  "CoilHeatingDXMultiSpeed_ashp 1: staged capacity unavailable (model not sized?) \u2014 8.4.4.9.(7) stage count NOT set; run sizing first",
-  "CoilCoolingDXMultiSpeed_ashp 2: staged capacity unavailable (model not sized?) \u2014 8.4.4.10.(8) stage count NOT set; run sizing first",
-  "CoilHeatingDXMultiSpeed_ashp 2: staged capacity unavailable (model not sized?) \u2014 8.4.4.9.(7) stage count NOT set; run sizing first",
-  "CoilCoolingDXMultiSpeed_ashp 3: staged capacity unavailable (model not sized?) \u2014 8.4.4.10.(8) stage count NOT set; run sizing first",
-  "CoilHeatingDXMultiSpeed_ashp 3: staged capacity unavailable (model not sized?) \u2014 8.4.4.9.(7) stage count NOT set; run sizing first",
-  "CoilCoolingDXMultiSpeed_ashp 4: staged capacity unavailable (model not sized?) \u2014 8.4.4.10.(8) stage count NOT set; run sizing first",
-  "CoilHeatingDXMultiSpeed_ashp 4: staged capacity unavailable (model not sized?) \u2014 8.4.4.9.(7) stage count NOT set; run sizing first",
-  "staged DX cooling capacity unavailable (model not sized?) \u2014 not set",
-  "staged DX cooling capacity unavailable (model not sized?) \u2014 not set",
-  "staged DX cooling capacity unavailable (model not sized?) \u2014 not set",
-  "staged DX cooling capacity unavailable (model not sized?) \u2014 not set",
-  "staged DX cooling capacity unavailable (model not sized?) \u2014 not set",
-  "staged DX heating capacity unavailable (model not sized?) \u2014 not set",
-  "staged DX heating capacity unavailable (model not sized?) \u2014 not set",
-  "staged DX heating capacity unavailable (model not sized?) \u2014 not set",
-  "staged DX heating capacity unavailable (model not sized?) \u2014 not set",
-  "staged DX heating capacity unavailable (model not sized?) \u2014 not set",
-  "gas coil capacity unavailable (model not sized?) \u2014 not set",
-  "gas coil capacity unavailable (model not sized?) \u2014 not set",
-  "gas coil capacity unavailable (model not sized?) \u2014 not set",
-  "gas coil capacity unavailable (model not sized?) \u2014 not set",
-  "gas coil capacity unavailable (model not sized?) \u2014 not set",
   "CoilHeatingDXMultiSpeed_ashp: staged cooling capacity unavailable \u2014 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
   "CoilHeatingDXMultiSpeed_ashp 1: staged cooling capacity unavailable \u2014 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
   "CoilHeatingDXMultiSpeed_ashp 2: staged cooling capacity unavailable \u2014 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
@@ -378,19 +353,8 @@
   "Supply Air Systems (airflow rates, fan specs) \u2014 partial. Applied: block supply airflow comes from zone sizing. Gaps: the greater-of criteria at the 21/11 C supply-air deltas are not explicitly enforced",
   "Supply Air Systems (airflow rates, fan specs) \u2014 not implemented. Gaps: the identical-fan-power fallback for secondaries failing 5.2.3.1.(1)(b) is not modeled",
   "Supply Air Systems (airflow rates, fan specs) \u2014 not implemented. Gaps: the exemption for equipment whose fan energy is included in the Tables 5.2.12.1 minimum performance is not modeled",
-  "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
-  "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
-  "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
-  "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
-  "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
-  "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
-  "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
-  "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
-  "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
-  "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
-  "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
-  "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
-  "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
+  "5 ground floors have NO Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m insulated strip required by 3.2.3.3.(3) is not representable and those slabs are left AS MODELLED, so the prescribed perimeter insulation is NOT applied",
+  "8 conditioned-to-conditioned interzone assemblies left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
   "thermal bridging not requested \u2014 applied U-values are clear-field; NECB 3.1.1.7 requires EFFECTIVE transmittance (pass thermal_bridging:)",
   "proposed infiltration total 0 L/s DEVIATES from the untested 8.4.3.3.(3) default 607 L/s by -100% \u2014 only a 3.2.4.2 airtightness test justifies a different value",
   "Thermal characteristics and insulation extent of floors in contact with the ground \u2014 partial. Applied: Sentence (3): ordinary floors use the zone-conditional extent (zone 8 full-area; zones 4-7B retain the slab field and receive a 1.2 m Kiva perimeter strip, with a warning when no foundation can carry it). Sentence (4): its prescribed transmittance and full-area action are implemented once applicability is established. Applicability is established from an internal-source ground-floor construction; a supported radiant object's surface view is derived from that construction and supplies equipment attribution rather than independent evidence. The inventory is taken before reference-HVAC teardown. Detected embedded floors receive the Table 3.2.3.1 target over their full area in every climate zone, while an indicated floor-radiant topology whose served surface is unresolved warns and is not guessed into Sentence (3). Sentence (5): for detected embedded floors, the required Kiva depth is the tallest adjoining Foundation-wall height in that floor's thermal zone plus the final floor thickness; an exterior-insulation exception is measured against that same wall-top-to-floor-bottom depth, otherwise the floor insulation is continued vertically to it. Mixed wall heights and an exposed-perimeter remainder of at least 0.001 m warn because one Kiva field over-insulates shorter or zero-wall-height remainder instances. Foundation objects shared by multiple floors warn about cross-contamination; same-zone sharing is additionally reported by EnergyPlus as a Severe input error, and BTAP classifies the run as not clean. EnergyPlus 25.2 rejects the internal-source/Foundation pairing used as applicability evidence, so that detected input also receives a surface-specific warning. An unrepresentable continuation warns.. Gaps: Sentence (5)'s vertical perimeter continuation is not yet applied or verified for ordinary Sentence (3) floors. EnergyPlus 25.2 rejects an internal-source construction on a Foundation surface, so the detected embedded-floor/Kiva input warns and its assigned continuation cannot be annual-verified without replacing the input representation. Mixed-height and engine-significant partial-perimeter inputs warn because their one Kiva depth can over-insulate shorter or zero-wall-height remainder instances. Shared-Foundation inputs warn because their fields can cross-contaminate instances, and same-zone sharing is an EnergyPlus Severe input error. Semi-heated applicability under Sentence (2) remains caller-supplied through the HDD input rather than inferred from model classification; an embedded component represented without inspectable internal-source construction evidence cannot be inferred.",

@@ -927,14 +927,6 @@
  },
  {
   "step": "efficiency",
-  "action": "CoilCoolingDXMultiSpeed_dx: staged capacity unavailable (model not sized?) \u2014 8.4.4.10.(8) stage count NOT set; run sizing first",
-  "article": "8.4.4.10.(8)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "efficiency",
   "target": "Coil Heating Electric 1",
   "action": "electric resistance heating left single-stage \u2014 it is not a furnace, so the furnace staging sentence does not apply (the staged DX cooling still does)",
   "inputs": {
@@ -944,14 +936,6 @@
   "ruling": "D-49",
   "building": "reference building",
   "level": "info"
- },
- {
-  "step": "efficiency",
-  "action": "CoilCoolingDXMultiSpeed_dx 1: staged capacity unavailable (model not sized?) \u2014 8.4.4.10.(8) stage count NOT set; run sizing first",
-  "article": "8.4.4.10.(8)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "warning"
  },
  {
   "step": "efficiency",
@@ -967,14 +951,6 @@
  },
  {
   "step": "efficiency",
-  "action": "CoilCoolingDXMultiSpeed_dx 2: staged capacity unavailable (model not sized?) \u2014 8.4.4.10.(8) stage count NOT set; run sizing first",
-  "article": "8.4.4.10.(8)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "efficiency",
   "target": "Coil Heating Electric 3",
   "action": "electric resistance heating left single-stage \u2014 it is not a furnace, so the furnace staging sentence does not apply (the staged DX cooling still does)",
   "inputs": {
@@ -984,14 +960,6 @@
   "ruling": "D-49",
   "building": "reference building",
   "level": "info"
- },
- {
-  "step": "efficiency",
-  "action": "CoilCoolingDXMultiSpeed_dx 3: staged capacity unavailable (model not sized?) \u2014 8.4.4.10.(8) stage count NOT set; run sizing first",
-  "article": "8.4.4.10.(8)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "warning"
  },
  {
   "step": "efficiency",
@@ -1007,14 +975,6 @@
  },
  {
   "step": "efficiency",
-  "action": "CoilCoolingDXMultiSpeed_dx 4: staged capacity unavailable (model not sized?) \u2014 8.4.4.10.(8) stage count NOT set; run sizing first",
-  "article": "8.4.4.10.(8)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "efficiency",
   "target": "Coil Heating Electric 5",
   "action": "electric resistance heating left single-stage \u2014 it is not a furnace, so the furnace staging sentence does not apply (the staged DX cooling still does)",
   "inputs": {
@@ -1024,41 +984,6 @@
   "ruling": "D-49",
   "building": "reference building",
   "level": "info"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx",
-  "action": "staged DX cooling capacity unavailable (model not sized?) \u2014 not set",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 1",
-  "action": "staged DX cooling capacity unavailable (model not sized?) \u2014 not set",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 2",
-  "action": "staged DX cooling capacity unavailable (model not sized?) \u2014 not set",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 3",
-  "action": "staged DX cooling capacity unavailable (model not sized?) \u2014 not set",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 4",
-  "action": "staged DX cooling capacity unavailable (model not sized?) \u2014 not set",
-  "building": "reference building",
-  "level": "warning"
  },
  {
   "step": "efficiency",
@@ -1368,7 +1293,7 @@
   "action": "Cooling Systems \u2014 implemented: reference cooling system selected per Table 8.4.4.7.-A and this Article",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 10,
+   "decisions_citing": 5,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_assign"
    ]
@@ -1382,7 +1307,7 @@
   "action": "Cooling Systems \u2014 implemented: purchased energy routes to Article 8.4.4.6.",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 10,
+   "decisions_citing": 5,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_reference_energy_type"
    ]
@@ -1396,7 +1321,7 @@
   "action": "Cooling Systems \u2014 implemented: reference cooling energy type modeled identical to the proposed",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 10,
+   "decisions_citing": 5,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_reference_energy_type"
    ]
@@ -1410,7 +1335,7 @@
   "action": "Cooling Systems \u2014 not implemented. Gaps: multi-energy COOLING capacity ratios are not modelled \u2014 the same gap as the heating article, sentence (5) of 8.4.4.9. A proposed cooling system drawing on more than one energy type is elected into ONE energy type at SELECTION, with no capacity ratio computed. What the reference's final cooling equipment carries is not established here; the adoption-versus-replacement outcomes measured for the HEATING plant were not measured for cooling and are not claimed for it, so clause (a)'s capacity ratio and clause (b)'s operating priority are both unaddressed. No cooling diagnostic is emitted yet and no cooling behaviour has been measured: the heating-side measurement does not transfer.",
   "inputs": {
    "status": "not_implemented",
-   "decisions_citing": 10
+   "decisions_citing": 5
   },
   "article": "8.4.4.10.(4)",
   "building": "reference building",
@@ -1421,7 +1346,7 @@
   "action": "Cooling Systems \u2014 implemented: cooling part-load performance applied from the Subsection 8.4.5. curve set (chiller and unitary curves; the as-applied coefficients are audited)",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 10,
+   "decisions_citing": 5,
    "code": [
     "python/btap/modeling/hvac/components/curves.py#build",
     "python/btap/codes/necb/hvac/efficiency.py#apply"
@@ -1436,7 +1361,7 @@
   "action": "Cooling Systems \u2014 implemented: hydronic cooling plant per the article: 2100 kW chiller split, 7 C CHWST, 25% modulating floor \u2014 plant defaults + the efficiency pass",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 10,
+   "decisions_citing": 5,
    "code": [
     "python/btap/modeling/hvac/systems/plant_loops.py#chilled_water",
     "python/btap/codes/necb/hvac/efficiency.py#_apply_chiller"
@@ -1451,7 +1376,7 @@
   "action": "Cooling Systems \u2014 partial. Applied: terminal/secondary split accounted for systems 1/2/5 via Sizing:Zone dedicated-outdoor-air accounting (D-50). Gaps: systems 3, 4 and 6 have no separate ventilation stream, so their split is approximated by mixed-air zone sizing and audited as such",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 10,
+   "decisions_citing": 5,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_audit_terminal_secondary_split"
    ]
@@ -1465,7 +1390,7 @@
   "action": "Cooling Systems \u2014 partial. Applied: DX staging IS modelled since D-46: multispeed DX cooling inside an AirLoopHVACUnitarySystem on reference systems 3/4 and the ASHP, stage COUNT set post-sizing, efficiencies and curves binned by the top-stage capacity. Gaps: zone-terminal DX stays single-speed (packaged terminal units cannot host a multispeed coil in EnergyPlus) and make-up-air tempering DX likewise (D-48); stage counts above four are CLAMPED with a shouted warning (D-47)",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 10,
+   "decisions_citing": 5,
    "code": [
     "python/btap/codes/necb/hvac/efficiency.py#apply_staging",
     "python/btap/codes/necb/hvac/efficiency.py#_apply_dx_cooling_multi"
@@ -1480,7 +1405,7 @@
   "action": "Cooling Systems \u2014 implemented: water-cooled systems pair to the cooling tower built per Article 8.4.4.11.",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 10,
+   "decisions_citing": 5,
    "code": [
     "python/btap/codes/necb/hvac/efficiency.py#_apply_tower_rules"
    ]
@@ -1880,33 +1805,6 @@
  },
  {
   "step": "prescriptive",
-  "target": "Surface 1",
-  "action": "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
-  "article": "3.2.3.3.(3)",
-  "ruling": "D-32",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "prescriptive",
-  "target": "Surface 10 / Surface 27",
-  "action": "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
-  "article": "Division A 1.4.1.2.(1)",
-  "ruling": "D-24",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "prescriptive",
-  "target": "Surface 11 / Surface 3",
-  "action": "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
-  "article": "Division A 1.4.1.2.(1)",
-  "ruling": "D-24",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "prescriptive",
   "target": "ASHRAE 189.1-2009 ExtRoof IEAD ClimateZone 2-5:U-0.1594",
   "action": "outdoors roofceiling construction set to maximum U",
   "inputs": {
@@ -1917,15 +1815,6 @@
   "article": "Table 3.2.2.2.",
   "building": "reference building",
   "level": "decision"
- },
- {
-  "step": "prescriptive",
-  "target": "Surface 13",
-  "action": "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
-  "article": "3.2.3.3.(3)",
-  "ruling": "D-32",
-  "building": "reference building",
-  "level": "warning"
  },
  {
   "step": "prescriptive",
@@ -1955,35 +1844,17 @@
  },
  {
   "step": "prescriptive",
-  "target": "Surface 15 / Surface 23",
-  "action": "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
-  "article": "Division A 1.4.1.2.(1)",
-  "ruling": "D-24",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "prescriptive",
-  "target": "Surface 16 / Surface 28",
-  "action": "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
-  "article": "Division A 1.4.1.2.(1)",
-  "ruling": "D-24",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "prescriptive",
-  "target": "Surface 17 / Surface 9",
-  "action": "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
-  "article": "Division A 1.4.1.2.(1)",
-  "ruling": "D-24",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "prescriptive",
-  "target": "Surface 19",
-  "action": "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
+  "action": "5 ground floors have NO Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m insulated strip required by 3.2.3.3.(3) is not representable and those slabs are left AS MODELLED, so the prescribed perimeter insulation is NOT applied",
+  "inputs": {
+   "floors": 5,
+   "surfaces": [
+    "Surface 1",
+    "Surface 13",
+    "Surface 19",
+    "Surface 25",
+    "Surface 7"
+   ]
+  },
   "article": "3.2.3.3.(3)",
   "ruling": "D-32",
   "building": "reference building",
@@ -1991,46 +1862,22 @@
  },
  {
   "step": "prescriptive",
-  "target": "Surface 21 / Surface 5",
-  "action": "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
+  "action": "8 conditioned-to-conditioned interzone assemblies left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
+  "inputs": {
+   "assemblies": 8,
+   "pairs": [
+    "Surface 10 / Surface 27",
+    "Surface 11 / Surface 3",
+    "Surface 15 / Surface 23",
+    "Surface 16 / Surface 28",
+    "Surface 17 / Surface 9",
+    "Surface 21 / Surface 5",
+    "Surface 22 / Surface 29",
+    "Surface 26 / Surface 4"
+   ]
+  },
   "article": "Division A 1.4.1.2.(1)",
   "ruling": "D-24",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "prescriptive",
-  "target": "Surface 22 / Surface 29",
-  "action": "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
-  "article": "Division A 1.4.1.2.(1)",
-  "ruling": "D-24",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "prescriptive",
-  "target": "Surface 25",
-  "action": "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
-  "article": "3.2.3.3.(3)",
-  "ruling": "D-32",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "prescriptive",
-  "target": "Surface 26 / Surface 4",
-  "action": "conditioned-to-conditioned interzone assembly left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
-  "article": "Division A 1.4.1.2.(1)",
-  "ruling": "D-24",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "prescriptive",
-  "target": "Surface 7",
-  "action": "ground floor without a Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
-  "article": "3.2.3.3.(3)",
-  "ruling": "D-32",
   "building": "reference building",
   "level": "warning"
  },
@@ -2313,7 +2160,7 @@
   "action": "Thermal characteristics and insulation extent of floors in contact with the ground \u2014 partial. Applied: Sentence (3): ordinary floors use the zone-conditional extent (zone 8 full-area; zones 4-7B retain the slab field and receive a 1.2 m Kiva perimeter strip, with a warning when no foundation can carry it). Sentence (4): its prescribed transmittance and full-area action are implemented once applicability is established. Applicability is established from an internal-source ground-floor construction; a supported radiant object's surface view is derived from that construction and supplies equipment attribution rather than independent evidence. The inventory is taken before reference-HVAC teardown. Detected embedded floors receive the Table 3.2.3.1 target over their full area in every climate zone, while an indicated floor-radiant topology whose served surface is unresolved warns and is not guessed into Sentence (3). Sentence (5): for detected embedded floors, the required Kiva depth is the tallest adjoining Foundation-wall height in that floor's thermal zone plus the final floor thickness; an exterior-insulation exception is measured against that same wall-top-to-floor-bottom depth, otherwise the floor insulation is continued vertically to it. Mixed wall heights and an exposed-perimeter remainder of at least 0.001 m warn because one Kiva field over-insulates shorter or zero-wall-height remainder instances. Foundation objects shared by multiple floors warn about cross-contamination; same-zone sharing is additionally reported by EnergyPlus as a Severe input error, and BTAP classifies the run as not clean. EnergyPlus 25.2 rejects the internal-source/Foundation pairing used as applicability evidence, so that detected input also receives a surface-specific warning. An unrepresentable continuation warns.. Gaps: Sentence (5)'s vertical perimeter continuation is not yet applied or verified for ordinary Sentence (3) floors. EnergyPlus 25.2 rejects an internal-source construction on a Foundation surface, so the detected embedded-floor/Kiva input warns and its assigned continuation cannot be annual-verified without replacing the input representation. Mixed-height and engine-significant partial-perimeter inputs warn because their one Kiva depth can over-insulate shorter or zero-wall-height remainder instances. Shared-Foundation inputs warn because their fields can cross-contaminate instances, and same-zone sharing is an EnergyPlus Severe input error. Semi-heated applicability under Sentence (2) remains caller-supplied through the HDD input rather than inferred from model classification; an embedded component represented without inspectable internal-source construction evidence cannot be inferred.",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 5,
+   "decisions_citing": 1,
    "code": [
     "python/btap/codes/necb/envelope/rules.py#ground_floor_extent",
     "python/btap/codes/necb/envelope/prescriptive.py#_embedded_floor_inventory",
