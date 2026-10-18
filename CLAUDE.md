@@ -67,6 +67,51 @@ unless a moved link itself is wrong.
 - **Python is authoritative.** Behaviour changes are Python-only and require a
   clean-tree frozen-scenario re-freeze in the same change when outputs move.
 
+## The input model is GATED, and the gate is fatal
+
+A proposed model that lacks what NECB requires to build a reference is
+REFUSED before any transform runs. It does not warn and continue. Three gates
+in `btap/codes/necb/path.py#validate` raise `compliance.PreflightError`, which
+the CLI maps to `EXIT["preflight"] = 3`, and all three run inside
+`audit.with_building("input model")` so the trail shows the gate ran:
+
+- **Structural absence** (`pipeline._validate_input_model`): no spaces, zones
+  or surfaces. And **no thermostat anywhere**, which is the dangerous case
+  precisely because it RUNS — every zone free-floats, equipment sizes to
+  nothing, and the determination comes out numerically valid and physically
+  meaningless. PARTIAL thermostat coverage only warns: storage and plenum
+  zones legitimately float.
+- **An undeterminable above-ground STOREY COUNT** (`require_storeys=True`).
+  Determinable means declared on `Building`, derivable from `BuildingStorys`
+  with above-grade spaces, or passed as `building={'storeys':}`. It is fatal
+  because Table 8.4.4.7.-A's System 3-vs-6 split depends on it and the
+  fallback would silently treat a tower as ONE storey.
+- **Any floor-area SPACE TYPE that does not resolve** against the edition's
+  catalog (`_validate_space_types`), reported with every offending type, its
+  space count and the fix. It is fatal because the per-space-type transforms
+  (lighting LPD, loads, SHW demand) skip unmatched types SILENTLY, so an
+  unresolvable type yields a reference identical to the proposed for that
+  space: the allowance is waived and the proposed is compared against itself.
+  You cannot certify a building whose reference silently failed to build.
+
+**Do not plan around this gate as though it were missing.** A draft of
+`docs/plans/PROPOSED_CHARACTERIZATION_PLAN.md` proposed adding exactly these
+checks and asked whether the tool should flag bad proposed inputs — a question
+the architecture had already answered. Run an untagged archetype through
+`btap-compliance` and read the exit code before concluding anything about
+input validation.
+
+The architecture that follows from it: **required inputs are fatal; everything
+past the gate is DISCLOSURE.** The performance path does not check a proposed
+assembly against a prescriptive maximum, because its verdict is the 8.4.1.2
+energy comparison and assembly-by-assembly pass/fail is the prescriptive
+path's job. So a characterization of the proposed records values and citations
+and emits no verdict — but the tool still refuses to run without what it needs.
+
+Relaxing any of the three into a warning is an adjudicated change, not a
+convenience: each exists because the silent-success path it replaces produced
+a determination that looked valid.
+
 ## Commands
 
 ```bash
