@@ -240,12 +240,16 @@ def _apply_vrf(unit, tables, ruleset, audit, sizing_follows=False):
         )
 
     if cooling_row is None:
-        if sizing_follows:
-            return None
-        audit.warn('efficiency', 'VRF cooling capacity unavailable (model not sized?) — '
-                                 'Table-I cooling minimum not set',
-                   target=unit.nameString(), inputs={'equipment_class': equipment_class},
-                   article=article, ruling='D-85')
+        # Guard the WARN, not the flow: main fell through to the else branch
+        # here, so returning skipped the cooling application entirely. A
+        # VRF with hard-sized heating lost its heating COP (3.3 -> 3.5)
+        # (Fable's `302` probe).
+        if not sizing_follows:
+            audit.warn('efficiency',
+                       'VRF cooling capacity unavailable (model not sized?) — '
+                       'Table-I cooling minimum not set',
+                       target=unit.nameString(), inputs={'equipment_class': equipment_class},
+                       article=article, ruling='D-85')
     else:
         if cooling_row.get('minimum_seer') is not None:
             cooling_cop = seer_to_cop_no_fan(cooling_row['minimum_seer'])
@@ -257,12 +261,13 @@ def _apply_vrf(unit, tables, ruleset, audit, sizing_follows=False):
         applied.append(f'cooling {cooling_label} (COP {ruby_round(cooling_cop, 2)})')
     if heat_pump:
         if heating_row is None:
-            if sizing_follows:
-                return None
-            audit.warn('efficiency', 'VRF heating capacity unavailable (model not sized?) — '
-                                     'Table-I heating minimum not set',
-                       target=unit.nameString(), inputs={'equipment_class': equipment_class},
-                       article=article, ruling='D-85')
+            # Guard the WARN, not the flow — see the cooling branch above.
+            if not sizing_follows:
+                audit.warn('efficiency',
+                           'VRF heating capacity unavailable (model not sized?) — '
+                           'Table-I heating minimum not set',
+                           target=unit.nameString(), inputs={'equipment_class': equipment_class},
+                           article=article, ruling='D-85')
         else:
             if heating_row.get('minimum_hspf') is not None:
                 heating_cop = hspf_to_cop_no_fan(heating_row['minimum_hspf'])
@@ -1788,7 +1793,8 @@ def _align_heat_pump_heating_capacity(model, audit, ruleset,
         staged_cool = next((c for c in comps if c.to_CoilCoolingDXMultiSpeed().is_initialized()), None)
         if staged_heat is not None and staged_cool is not None:
             _align_staged_heat_pump(staged_heat.to_CoilHeatingDXMultiSpeed().get(),
-                                    staged_cool.to_CoilCoolingDXMultiSpeed().get(), audit, hp_article)
+                                    staged_cool.to_CoilCoolingDXMultiSpeed().get(), audit, hp_article,
+                                    sizing_follows=sizing_follows)
             continue
 
         heat = next((c for c in comps if c.to_CoilHeatingDXSingleSpeed().is_initialized()), None)
@@ -1801,8 +1807,11 @@ def _align_heat_pump_heating_capacity(model, audit, ruleset,
         cool_w = (optional_f(cool.ratedTotalCoolingCapacity())
                   or optional_f(cool.autosizedRatedTotalCoolingCapacity()))
         if cool_w is None:
+            # `continue`, NOT return: main advanced to the next air loop here,
+            # so returning abandoned every later one — one unsized heat pump
+            # silently stopped the alignment for all of them (Fable's `302`).
             if sizing_follows:
-                return None
+                continue
             audit.warn('efficiency', f'{heat.nameString()}: cooling capacity unavailable — '
                                      f'{hp_article} heating=cooling alignment skipped '
                                      '(run sizing first)')
@@ -1816,7 +1825,8 @@ def _align_heat_pump_heating_capacity(model, audit, ruleset,
                        article=hp_article, ruling='D-22')
 
 
-def _align_staged_heat_pump(heat, cool, audit, hp_article='8.4.4.13.(2)(c)'):
+def _align_staged_heat_pump(heat, cool, audit, hp_article='8.4.4.13.(2)(c)',
+                            sizing_follows=False):
     """Same sentence on a STAGED heat pump: the unit's heating capacity is its
     top stage, so the top stages are what must match. The lower stages follow
     the cooling coil's own increments stage-for-stage, which keeps the two
@@ -1845,6 +1855,13 @@ def _align_staged_heat_pump(heat, cool, audit, hp_article='8.4.4.13.(2)(c)'):
         heat_stage.setGrossRatedHeatingCapacity(cool_w)
         top = cool_w
     if top is None:
+        # Threaded late: Fable's `302` found this one still reporting the
+        # pre-sizing state — the 10 surviving capacity warnings in
+        # determination-04 were all its, 5 of them from the pass whose
+        # determinations are redone after sizing. Main returns here, so the
+        # guard returns.
+        if sizing_follows:
+            return
         audit.warn('efficiency', f'{heat.nameString()}: staged cooling capacity unavailable — '
                                  f'{hp_article} '
                                  'heating=cooling alignment skipped (run sizing first)',

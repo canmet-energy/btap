@@ -271,6 +271,78 @@ class TestForwardingFunctionsAreExecuted(unittest.TestCase):
             for entry in result.audit.warnings
         ))
 
+    def test_build_reference_tells_the_hvac_pass_whether_sizing_FOLLOWS(self):
+        """Witnesses the CALL SITE, which nothing else does.
+
+        Fable's `302`: reverting `path.py`'s `sizing_follows=` argument so the
+        flag is never passed left all 89 tests in the two efficiency modules
+        green. The leaf guards were witnessed; the thing that switches them on
+        was not — only verify-lane frozen scenarios covered it, and those do
+        not run on a pull request.
+
+        Both directions matter. `simulate: none` must send False, because then
+        `_size_reference` returns before the second efficiency pass and the
+        first pass's capacity warnings are the only disclosure there will be.
+        Anything else must send True, because the determinations are redone
+        after sizing.
+
+        The absent key is pinned too: it reached `path.py` as a bracket read
+        and raised `KeyError: 'simulate'` — the same defect this change fixes
+        in `cli.py`. Absent now means False, which keeps the warnings.
+        """
+        from btap.audit import AuditLog
+        from btap.codes.necb import envelope, hvac, lighting
+        from btap.codes.necb.shw import reference as shw_reference
+
+        originals = (
+            envelope.prescriptive._embedded_floor_inventory,
+            hvac.reference._reference_hvac,
+            envelope.reference._apply,
+            lighting.Reference._reference_lighting,
+            shw_reference._reference_shw,
+        )
+        seen = []
+
+        def reference_hvac(model, ruleset, **kwargs):
+            seen.append(kwargs.get('sizing_follows', '<absent>'))
+            return SimpleNamespace(model=object())
+
+        envelope.prescriptive._embedded_floor_inventory = lambda _m: None
+        hvac.reference._reference_hvac = reference_hvac
+        envelope.reference._apply = lambda *_a, **_k: None
+        lighting.Reference._reference_lighting = lambda *_a, **_k: None
+        shw_reference._reference_shw = lambda *_a, **_k: None
+        try:
+            for simulate, expected in (('annual', True), ('sizing', True),
+                                       ('none', False), (None, False)):
+                opts = {
+                    'building': {},
+                    'actual_roof_absorptance_used': False,
+                    'thermal_bridging': None,
+                    'reference_daylighting': False,
+                }
+                if simulate is not None:
+                    opts['simulate'] = simulate
+                run = SimpleNamespace(
+                    opts=opts, audit=AuditLog(), proposed=object(),
+                    proposed_annual_data=None,
+                    ruleset=codes.resolve('necb2020'), hdd=3890)
+                seen.clear()
+                necb_path.build_reference(run)
+                with self.subTest(simulate=simulate):
+                    self.assertEqual(
+                        [expected], seen,
+                        f'simulate={simulate!r} must pass '
+                        f'sizing_follows={expected}: a False here reports the '
+                        'pre-sizing state as a finding, and a True where no '
+                        'second pass runs loses the disclosure entirely')
+        finally:
+            (envelope.prescriptive._embedded_floor_inventory,
+             hvac.reference._reference_hvac,
+             envelope.reference._apply,
+             lighting.Reference._reference_lighting,
+             shw_reference._reference_shw) = originals
+
     def test_embedded_floor_inventory_precedes_reference_hvac_teardown(self):
         from btap.audit import AuditLog
         from btap.codes.necb import envelope, hvac, lighting
