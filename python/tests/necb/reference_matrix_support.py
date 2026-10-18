@@ -42,8 +42,8 @@ SIGNATURE_REPRESENTATIVES = (
 
 # The EnergyPlus layer covers all five modern inputs plus one row from every
 # remaining D-58 signature. Scenarios span every adjudicated action, including
-# copy_proposed through the residential PSZ case. The data-processing System
-# 2/5 water-coil UA failure remains tracked separately in #113.
+# copy_proposed through the residential PSZ case. The focused System 2/5
+# water-coil sizing gate lives in test_system25_fan_coil_sizing.py.
 ENGINE_CASES = (
     ('DOAS with active chilled beams and electric baseboards',
      'general_2storey'),

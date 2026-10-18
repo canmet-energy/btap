@@ -567,8 +567,8 @@ class TestTheRulingsAppendixReadsOnlyTitleAndSummary(unittest.TestCase):
         self.assertNotEqual(self.appendix, appendix)
 
 
-#: The decisions converted to structured requirements (Phase C's 23 and Phase
-#: D's 42), in id order.
+#: The decisions represented as structured requirements (Phase C's 23, Phase
+#: D's 42, and native D-104 through D-106), in id order.
 #: tests/necb/test_decisions_registry_sync.py pins the same set as MIGRATED_IDS.
 MIGRATED = ("D-02", "D-03", "D-04", "D-05", "D-06", "D-07", "D-09", "D-11",
             "D-12", "D-13", "D-14", "D-15", "D-17", "D-18", "D-19", "D-21",
@@ -579,7 +579,7 @@ MIGRATED = ("D-02", "D-03", "D-04", "D-05", "D-06", "D-07", "D-09", "D-11",
             "D-61", "D-62", "D-63", "D-65", "D-74", "D-76", "D-85", "D-89",
             "D-90", "D-91", "D-92", "D-93", "D-97", "D-99", "D-100", "D-101",
             "D-102",
-            "D-104", "D-105")
+            "D-104", "D-105", "D-106")
 
 
 def migrated_audit():
@@ -608,11 +608,11 @@ def legacy_shaped(entry):
 
 class TestTheMigratedDecisionsRenderAsTheirLegacyShape(unittest.TestCase):
     """The migrations (Phase C's 23 decisions, then Phase D's 42)
-    changed how 65 decisions record their provisions and nothing a
-    report reads. A run that fires every one of them renders the same rulings
-    appendix and the same report whether the registry holds them structured,
-    back in the per-code-id shape they replaced, or reduced to the fields the
-    runtime reads."""
+    changed how 65 decisions record their provisions, and D-104 through D-106
+    were authored directly in that form. A run that fires all 68 renders the
+    same rulings appendix and the same report whether the registry holds them
+    structured, in the equivalent per-code-id shape, or reduced to the fields
+    the runtime reads."""
 
     @classmethod
     def setUpClass(cls):

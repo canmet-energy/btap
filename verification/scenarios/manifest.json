@@ -2,7 +2,7 @@
  "version": 2,
  "spec_sha256": "f7d5cb76db9e77c526024a6545047ba19f6517332372b39242c64682168be76c",
  "provenance": {
-  "commit": "06df78f6178152712b28ff5fa3f350c06d1ffa6a",
+  "commit": "70324862c578ce1a6118f65e5aeb3f6d6e73e5de",
   "dirty": false,
   "openstudio_cli": "3.11.0+241b8abb4d",
   "producer": {

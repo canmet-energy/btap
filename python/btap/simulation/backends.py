@@ -29,7 +29,7 @@ import urllib.request
 from pathlib import Path
 from urllib.parse import urlencode, urlsplit
 
-from btap.simulation import engine
+from btap.simulation import engine, translation
 
 
 class Backend:
@@ -113,6 +113,7 @@ def translate_capturing_advisories(model):
     sink = openstudio.StringStreamLogSink()
     sink.setLogLevel(openstudio.Warn)
     workspace = openstudio.energyplus.ForwardTranslator().translateModel(model)
+    translation.apply_workspace_contracts(model, workspace)
     messages = [" ".join(str(m.logMessage()).split()) for m in sink.logMessages()]
     return workspace, [m for m in messages if "SizingCalculation" in m]
 
@@ -444,6 +445,15 @@ class Remote(Backend):
         _require_sizing_calculations(model, idf, osm, advisories)
 
         if self._workflow_type() == "openstudio":
+            marked = translation.marked_fan_coil_names(model)
+            if marked:
+                raise RuntimeError(
+                    "remote backend: workflow_type='openstudio' cannot carry "
+                    "the EnergyPlus-only mode-specific fan-coil sizing "
+                    "specification required by "
+                    + ", ".join(sorted(marked))
+                    + "; use the default workflow_type='energyplus'"
+                )
             return osm.read_bytes(), "in.osm"
         path = run_dir / "in.idf"
         idf.save(openstudio.path(str(path)), True)

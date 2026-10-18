@@ -32,6 +32,7 @@ from btap.modeling.hvac import classify as _classify
 from btap.modeling.hvac.components import coils as _coils
 from btap.modeling.hvac.components import schedules as _schedules
 from btap.modeling.hvac.systems.plant_loops import BOILER_PART_LOAD_CLASS_FEATURE
+from btap.simulation import translation as _simulation_translation
 
 
 def rules(edition):
@@ -1278,12 +1279,28 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
                              for chiller in reference.getChillerElectricEIRs()}
         existing_boilers = {str(boiler.handle())
                             for boiler in reference.getBoilerHotWaters()}
+        existing_fan_coils = {
+            str(fan_coil.handle())
+            for fan_coil in reference.getZoneHVACFourPipeFanCoils()
+        }
         # NOT `replace_system`: the teardown already ran above for the whole
         # closure. Removing again here would destroy a plant another block's
         # system has already been built onto.
         result = modeling.build_system(reference, assignment.catalog_name, zones,
                                        config=assignment.config,
                                        exclude_plants=retained_plants)
+        if assignment.reference_system in (2, 5):
+            _apply_reference_fan_coil_sizing(
+                [
+                    fan_coil
+                    for fan_coil in reference.getZoneHVACFourPipeFanCoils()
+                    if str(fan_coil.handle()) not in existing_fan_coils
+                ],
+                assignment.reference_system,
+                ruleset,
+                audit,
+            )
+
         _audit_corner_block_grouping(result, assignment,
                                      _subsection(ruleset), audit)
         purchased_cooling_cop = (assignment.config or {}).get(
@@ -1578,6 +1595,37 @@ def _apply_zone_fan_rules(zones, reference_system, rules_data, audit):
                    inputs={'fans': touched, 'pressure_pa': pressure, 'total_efficiency': eff},
                    value=f'{touched} zone fan(s) at {pressure} Pa / {ruby_round(eff * 100)}%',
                    article=spec['article'], ruling='D-22')
+
+
+def _apply_reference_fan_coil_sizing(fan_coils, reference_system, ruleset, audit):
+    """Keep EnergyPlus water-coil sizing on each operating mode's airflow."""
+    if not fan_coils:
+        raise RuntimeError(
+            f"reference System {reference_system} built no fan coils to size"
+        )
+    for fan_coil in fan_coils:
+        _simulation_translation.mark_fan_coil_for_mode_specific_sizing(fan_coil)
+
+    prefix = _subsection(ruleset)
+    audit.decision(
+        'build',
+        'reference fan-coil water coils use mode-specific design airflow',
+        target=','.join(sorted(fc.nameString() for fc in fan_coils)),
+        inputs={
+            'fan_coils': len(fan_coils),
+            'reference_system': reference_system,
+            'sizing_specification': 'DesignSpecification:ZoneHVAC:Sizing',
+        },
+        value=(
+            'cooling-coil UA uses cooling design airflow and heating-coil '
+            'sizing uses heating design airflow while unit flow remains the '
+            'larger mode'
+        ),
+        article=(
+            f'Table {prefix}.7.-B; {prefix}.8.(1); {prefix}.8.(2)'
+        ),
+        ruling='D-106',
+    )
 
 
 def apply_economizer_thresholds(model, audit=None, code=None):

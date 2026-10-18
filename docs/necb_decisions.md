@@ -154,6 +154,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-103** — Verification evidence is a property of behaviour, not of Git lineage or of machinery source hashes _(process)_
 - **D-104** — Unknown VRF phase uses the generic pre-M1 rating with disclosure _(runtime)_
 - **D-105** — Embedded ground-floor systems require full-area insulation _(runtime)_
+- **D-106** — Reference fan-coil water coils size at mode-specific airflow _(runtime)_
 
 <!-- TOC END -->
 
@@ -8086,3 +8087,87 @@ path; together they prove the pre-teardown inventory reaches both downstream
 branches and prevents the perimeter-strip fallback. The direct two-edition
 witness also pins the EnergyPlus incompatibility warning. The existing D-32
 strip and zone-8 controls remain green.
+
+<a id="d-106"></a>
+
+## D-106 — Reference fan-coil water coils size at mode-specific airflow
+
+**Decided:** NECB reference Systems 2 and 5 keep one constant-volume fan-coil
+maximum airflow, sized to the larger heating or cooling requirement. The
+cooling-water coil's rating calculation uses the zone cooling design airflow,
+and the heating coil's sizing calculation uses the zone heating design
+airflow. The tool expresses that distinction through EnergyPlus's native
+`DesignSpecification:ZoneHVAC:Sizing` object with unity cooling airflow,
+heating airflow, cooling capacity and heating capacity fractions. It does not
+run a separate ideal-loads probe, derive a flow from the proposed system, or
+hard-code a guessed value.
+
+**Who/when:** Sol, 2026-10-18.
+
+**The requirement and modeling boundary:** Tables 8.4.4.7.-B and 8.4.5.7.-B
+define System 2 as a constant-volume four-pipe fan coil with water-cooled
+chiller and boiler, and System 5 as a constant-volume two-pipe fan coil with
+water-cooled chiller and no heating system. Articles 8.4.4.8 and 8.4.5.8 set
+separate heating- and cooling-equipment oversizing limits. The Code does not
+direct a simulation engine to rate a cooling coil at the heating mode's
+airflow. Keeping the unit maximum at the larger mode while rating each coil at
+its own mode preserves both requirements without inventing a second fan-coil
+system.
+
+**What failed:** EnergyPlus 25.2 initially gives both water coils the
+fan-coil maximum design airflow. Its later attempt to provide the separate
+zone cooling and heating design flows does not replace a value already fixed
+inside the coil. In the five-zone issue #113 witness, zones 1 and 3 had cooling
+design airflows of 0.3671 and 0.1474 m3/s but fan-coil maxima, set by heating,
+of 0.8146 and 0.8163 m3/s. The cooling coils therefore received 2.22 and 5.54
+times their cooling design airflow. Both terminated the water-coil UA root
+inversion with `Bad starting values for UA`, producing two Severe errors. A
+control that supplied the actual cooling design airflows completed with zero
+Severes; seeding from proposed-system airflow still produced two Severes and
+only moved the failed coils.
+
+**Implementation:** only fan coils newly built for NECB reference System 2 or
+5 carry the translation marker and the D-106 audit entry. OpenStudio 3.11's
+OSM schema omits both the fan-coil sizing-specification field and the
+specification object even though its EnergyPlus schema contains them. The
+local backend and the default one-phase remote backend therefore materialize
+the object after forward translation. The explicit remote
+`workflow_type='openstudio'` path uploads the OSM unchanged and cannot preserve
+this contract, so it refuses these marked models before upload and directs the
+caller to the default EnergyPlus workflow rather than silently restoring the
+failure.
+
+**What this changes, measured:** design loads, water flows and every heating
+coil are unchanged. The cooling coil's nominal rating and UA change on EVERY
+heating-dominated zone, including coils whose UA inversion previously
+succeeded — one moved from 9487 W to 8349 W. That is the correction's point
+rather than a side effect: before it, a coil that inverted "cleanly" had still
+been rated at the heating airflow, and a coil that failed fell back to
+`UA0 * 10`, so the simulation carried an invented coil — 10953 W/K against a
+4 kW load in the issue #113 witness. Annual energy moves 0.001% in Toronto and
+0.000% in a mild climate, so the consequence that matters is the rating
+itself, not the annual total. The failure also accumulates through the
+8.4.1.2.(5) oversizing iterations and reached a cooling-dominated building
+with three of five zones affected by iteration 3, so its scope is not limited
+to data centres (Fable, `305`).
+
+**Legacy finding:** the pinned `openstudio-standards` revision
+`f01da13a6b89e45761d1ede481fedb1c1aeb6ea0` builds the same per-zone
+`ZoneHVACFourPipeFanCoil` topology in
+`NECB2011/hvac_system_2_and_5.rb`, with 11 C cooling and 21 C heating design
+temperature differences and 1.1/1.3 sizing factors. It leaves the fan coil and
+both water coils autosized and provides no mode-specific sizing
+specification. Its topology and sizing inputs were retained; its unresolved
+engine behavior was not adopted as authority.
+
+**Evidence:** `test_heating_dominated_system_2_water_coils_size_cleanly`
+drives the real compliance call in both editions, proves the trigger remains
+above a 5:1 heating-to-cooling airflow ratio, matches every cooling coil's
+translated sizing value to its zone cooling design airflow, and requires a
+clean EnergyPlus result. `test_system_5_fan_coils_carry_the_same_translation_contract`
+pins the second reference-system call site.
+`test_marked_fan_coil_gets_mode_specific_sizing_in_both_backend_paths` pins
+the local and remote-IDF translation paths, while
+`test_unmarked_fan_coil_translation_is_unchanged` is the non-NECB control and
+`test_remote_openstudio_workflow_refuses_before_upload` pins the unsupported
+transport boundary.
