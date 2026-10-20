@@ -73,12 +73,21 @@ class TestFreezeSealTransition(unittest.TestCase):
         #      fixture's perimeter zones each face exactly one way) and
         #      20-humidified-psz for AHJ-12 (the only sample carrying
         #      humidification at all; `btap.modeling` builds none)
-        #   = 23
+        #   2  reference System 2/5, which the corpus never selected at all:
+        #      the baselines carry `reference_system` 3 (310 entries) and 6
+        #      (6) and never 2 or 5, which is why issue #113 survived 54
+        #      frozen scenarios, the live oracle at 23/23 and the archetype
+        #      gate simultaneously. `corpus-sizing-5zone-data-processing-`
+        #      `system2` covers the SELECTION path; `api-sizing-system2-`
+        #      `heating-dominated` covers the FAILURE, and needs the api kind
+        #      because the CLI's one-space-type-for-every-space flag cannot
+        #      make the loads and the classification disagree
+        #   = 25
         #
         # This enumeration was ALREADY one behind before sample 09: it listed
         # 4+4+2+4 = 14 beside an assertion of 15, having never recorded sample
         # 11. A provenance narrative that does not add up is not provenance.
-        self.assertEqual({"python-only:post-handoff": 31, "python-only": 23}, active)
+        self.assertEqual({"python-only:post-handoff": 31, "python-only": 25}, active)
         self.assertEqual({"ruby": 29, "ruby-api": 2}, retired)
         self.assertEqual({
             "commit": "85ab14352677093e24038d933cf1071e5b03431a",

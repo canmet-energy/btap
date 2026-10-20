@@ -709,8 +709,10 @@ _WEATHER_2025 = {"epw": "<EPW>", "ddy": "<DDY>"}
 #: A Computer/Server room carries large equipment loads and is therefore
 #: COOLING-dominated: measured here, zone 1 sizes to 2.3245 m3/s cooling
 #: against 0.5161 heating and zone 5 to 3.9130 against 0.5278. Deleting the
-#: `_apply_reference_fan_coil_sizing` call leaves this scenario clean, so it
-#: would not have caught the bug.
+#: `_apply_reference_fan_coil_sizing` call leaves ENERGYPLUS clean here — the
+#: scenario itself does fail, but only because that stub also removes the D-106
+#: audit entry, which is a different fact from the UA inversion. It would not
+#: have caught the bug.
 #:
 #: #113's own witness forces heating dominance with
 #: `building={'winter_design_temp_c': -20}`, which no CLI flag expresses — so
@@ -739,10 +741,24 @@ _SEED_ZONES = [f"Thermal Zone {n}" for n in range(1, 6)]
 #: only when HEATING dominates. Office loads with the classification overridden
 #: give Data Processing Area selection AND heating dominance: zone 1 at 0.3468
 #: cooling against 0.8023 heating (2.31x), zone 3 at 0.1393 against 0.8040
-#: (5.77x), against the 2.22x and 5.54x of issue #113's own witness.
+#: (5.77x), against the 2.22x and 5.54x of issue #113's own witness. The
+#: margin is not wide: the two failing zones sit at 2.31x and 5.77x while the
+#: three that invert cleanly sit at 1.12-1.41x, and NOTHING in the scenario
+#: pins the ratio. A weather or loads-table change could flip it and leave a
+#: scenario that passes while guarding nothing — which is why the `fragments`
+#: check on the engine's own error file carries the guard rather than the
+#: audit asserts alone.
+#: `winter_design_temp_c` is NOT here: Fable's `306` found it has no runtime
+#: consumer at all, and the scenario without it is byte-identical. Issue #113's
+#: witness passes it, and I had attributed the heating dominance to it — the
+#: dominance comes from office loads against the Toronto DDY, nothing else.
+#:
+#: The api kind is needed because the CLI has no `zone_types` flag:
+#: `--space-type` applies ONE NECB type to every floor-area space, which sets
+#: the loads AND the classification together, and this scenario needs them to
+#: disagree.
 _SYSTEM_25_FAILURE_BUILDING = {
     "storeys": 1,
-    "winter_design_temp_c": -20,
     "zone_types": {zone: "data centre" for zone in _SEED_ZONES},
 }
 
@@ -801,13 +817,25 @@ SYSTEM_25_SCENARIOS = [
      "env": {}, "expect_exit": 6,
      "files": CORPUS_FILES, "text_files": CORPUS_TEXT, "streams": {},
      "seal": SYSTEM_25_SEAL,
+     # THE GUARD. Nothing else here reads the ENGINE's result: the frozen
+     # artifacts are the audit and the report, `_size_reference` never calls
+     # `is_clean_run`, and a sizing report's `proposed`/`reference` blocks are
+     # empty — so sizing-mode Severes are invisible to every frozen comparison.
+     # Fable's `306` proved the consequence: keep the D-106 audit entry and
+     # delete only the physics (the marking loop, or the
+     # `apply_workspace_contracts` call site) and this scenario passed with
+     # ZERO problems while `eplusout.err` carried the issue's own two UA
+     # Severes. My own mutation had stubbed the whole function, which removes
+     # the entry too — so it proved the asserts detect a missing LOG LINE, not
+     # a missing correction.
+     "fragments": {"reference_sizing/run/eplusout.err": {
+         "required": ["; 0 Severe Errors; Elapsed Time"]}},
      "asserts": [
          {"op": "audit_entry", "step": "selection",
           "action": "reference system selected",
           "inputs": {"category": "Data Processing Area"}, "count": 5},
-         # The entry the mutation removes, with the facts that prove the
-         # engine's own sizing specification was attached to all five coils —
-         # not merely that some entry exists.
+         # The D-106 facts, which prove the specification reached all five
+         # coils. Necessary and NOT sufficient — see `fragments` above.
          {"op": "audit_entry", "ruling": "D-106",
           "inputs": {"fan_coils": 5, "reference_system": 2,
                      "sizing_specification":
