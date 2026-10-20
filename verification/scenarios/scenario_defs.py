@@ -685,6 +685,138 @@ NECB2025_EDITION = "necb2025"
 
 _WEATHER_2025 = {"epw": "<EPW>", "ddy": "<DDY>"}
 
+#: The corpus selects reference System 3 (310 baseline entries) and System 6
+#: (6), and NEVER System 2 or 5. That gap is why issue #113 survived every
+#: signal at once: 54 frozen scenarios, the live pinned oracle at 23/23 and the
+#: whole-building archetype gate were simultaneously green while reference
+#: cooling coils were being rated at the HEATING airflow, and a failed UA
+#: inversion fell back to `UA0 * 10` — simulating an invented coil at
+#: 10953 W/K against a 4 kW load. The freeze for the fix moved zero bytes
+#: BECAUSE nothing reached the path.
+#:
+#: Reaching System 2 needs three things at once, which is why no existing
+#: scenario does. The zones must classify as a Data Processing Area, which the
+#: selector decides by matching `zone_types` against Table 8.4.x.7's category
+#: keywords ('computer', 'server room'); the proposed must carry HVAC, or every
+#: zone characterizes as `unconditioned` and no reference system is selected at
+#: all; and the tier must SIZE, because Table 8.4.x.7.-A's "cooling capacity
+#: exceeding 20 kW" cannot be evaluated against an unsized model — under
+#: `--simulate none` the same inputs select System 1.
+#:
+#: WHAT THIS SCENARIO DOES NOT COVER. It is NOT a #113 regression guard. The
+#: UA inversion fails only when HEATING dominates, so the fan-coil maximum is
+#: the heating flow and the cooling coil is rated above its own design flow.
+#: A Computer/Server room carries large equipment loads and is therefore
+#: COOLING-dominated: measured here, zone 1 sizes to 2.3245 m3/s cooling
+#: against 0.5161 heating and zone 5 to 3.9130 against 0.5278. Deleting the
+#: `_apply_reference_fan_coil_sizing` call leaves this scenario clean, so it
+#: would not have caught the bug.
+#:
+#: #113's own witness forces heating dominance with
+#: `building={'winter_design_temp_c': -20}`, which no CLI flag expresses — so
+#: covering the FAILURE needs an `api` scenario, and that in turn needs
+#: `api_worker` to be able to build the proposed HVAC, which it cannot today.
+#: `test_system25_fan_coil_sizing.py` is the live witness meanwhile. What this
+#: scenario does cover is the System 2 selection path and the D-106 translation
+#: contract on it, both of which had NO frozen coverage at all.
+#: The 5ZoneNoHVAC seed's own names, hardcoded because an `api_call` is a
+#: serialisable record and cannot compute them. Verified against the fixture:
+#: five floor-area spaces and five thermal zones.
+_SEED_SPACES = [
+    "Story 1 Core Space",
+    "Story 1 East Perimeter Space",
+    "Story 1 North Perimeter Space",
+    "Story 1 South Perimeter Space",
+    "Story 1 West Perimeter Space",
+]
+_SEED_ZONES = [f"Thermal Zone {n}" for n in range(1, 6)]
+
+#: The spaces are tagged OFFICE while `zone_types` is overridden to
+#: `data centre`, and that combination is the whole trick. Tagging them with
+#: the real `Computer/Server room` NECB type brings real data-centre equipment
+#: loads, which makes the zones COOLING-dominated — measured, zone 1 at
+#: 2.3245 m3/s cooling against 0.5161 heating — and the #113 UA inversion fails
+#: only when HEATING dominates. Office loads with the classification overridden
+#: give Data Processing Area selection AND heating dominance: zone 1 at 0.3468
+#: cooling against 0.8023 heating (2.31x), zone 3 at 0.1393 against 0.8040
+#: (5.77x), against the 2.22x and 5.54x of issue #113's own witness.
+_SYSTEM_25_FAILURE_BUILDING = {
+    "storeys": 1,
+    "winter_design_temp_c": -20,
+    "zone_types": {zone: "data centre" for zone in _SEED_ZONES},
+}
+
+PROPOSED_FAN_COIL_SYSTEM = "PSZ RTU Gas and DX Coils and Hot Water Baseboard"
+
+SYSTEM_25_SEAL = ("python-only:first frozen to cover reference System 2/5 "
+                  "after issue #113 — authored after the Ruby product "
+                  "retired; no cross-language attestation exists for this "
+                  "scenario")
+
+SYSTEM_25_SCENARIOS = [
+    {"id": "corpus-sizing-5zone-data-processing-system2",
+     "lane": "verify", "kind": "cli", "replaces": [],
+     "argv": ["<SEED>", "--simulate", "sizing", "--epw", "<EPW>",
+              *BASE_ARGS,
+              "--space-type", "Space Function/Computer/Server room-sch-A",
+              "--hvac-system", PROPOSED_FAN_COIL_SYSTEM,
+              "-o", "<RUN_DIR>"],
+     "env": {}, "expect_exit": 6,
+     "files": CORPUS_FILES, "text_files": CORPUS_TEXT,
+     "streams": {"stdout": "exact", "stderr": "exact"},
+     "seal": SYSTEM_25_SEAL,
+     "asserts": [
+         # The scenario exists to reach System 2. If a future selection change
+         # moves it, these fail rather than the scenario quietly becoming
+         # another System 3 run that proves nothing about #113.
+         {"op": "audit_entry", "step": "selection",
+          "action": "reference system selected",
+          "inputs": {"category": "Data Processing Area"}, "count": 5},
+         # D-106's marker reaches the trail on the path it governs.
+         {"op": "audit_entry", "ruling": "D-106", "count": 1},
+     ]},
+
+    # The HEATING-dominated companion, which IS the #113 regression guard.
+    # Proven rather than assumed: with `_apply_reference_fan_coil_sizing`
+    # stubbed to return, this exact call produces the issue's own two Severes —
+    # `Calculation of cooling coil design UA failed for coil COIL COOLING
+    # WATER 2` and `... WATER 4`, both `Bad starting values for UA` — and its
+    # `audit.json` and `audit.txt` bytes both move. `report.json` and
+    # `observations.json` do NOT move, which is why the audit files carry this
+    # scenario and the asserts below name the entry directly.
+    #
+    # It needs the API path: the classification override and the office
+    # space-type tagging cannot both be expressed through the CLI, which
+    # applies ONE space type to every floor-area space.
+    {"id": "api-sizing-system2-heating-dominated", "lane": "verify",
+     "kind": "api", "replaces": [],
+     "api_call": {"code": "necb2020", "simulate": "sizing", "hdd": 3890,
+                  "model": "<SEED>",
+                  "hvac_system": PROPOSED_FAN_COIL_SYSTEM,
+                  "weather": {"epw": "<EPW>", "ddy": "<DDY>"},
+                  "necb_loads": {"space_type_map": {
+                      space: ["Space Function", "Office enclosed > 25 m2"]
+                      for space in _SEED_SPACES}},
+                  "building": _SYSTEM_25_FAILURE_BUILDING},
+     "env": {}, "expect_exit": 6,
+     "files": CORPUS_FILES, "text_files": CORPUS_TEXT, "streams": {},
+     "seal": SYSTEM_25_SEAL,
+     "asserts": [
+         {"op": "audit_entry", "step": "selection",
+          "action": "reference system selected",
+          "inputs": {"category": "Data Processing Area"}, "count": 5},
+         # The entry the mutation removes, with the facts that prove the
+         # engine's own sizing specification was attached to all five coils —
+         # not merely that some entry exists.
+         {"op": "audit_entry", "ruling": "D-106",
+          "inputs": {"fan_coils": 5, "reference_system": 2,
+                     "sizing_specification":
+                         "DesignSpecification:ZoneHVAC:Sizing"},
+          "count": 1},
+     ]},
+]
+
+
 EDITION_SCENARIOS = [
     # Reference build audited at 2025: the envelope prescriptive decision
     # cites 8.4.5.1.(2) (8.4.4.1.(2) at 2020), and every emitter that
@@ -814,7 +946,7 @@ EDITION_SCENARIOS = [
 def all_scenarios(slugs):
     scenarios = (corpus_scenarios(slugs) + API_SCENARIOS + FAILURE_SCENARIOS
                  + VERDICT_SCENARIOS + DETERMINATION_SCENARIOS
-                 + EDITION_SCENARIOS)
+                 + EDITION_SCENARIOS + SYSTEM_25_SCENARIOS)
     for scenario in scenarios:
         seal = scenario["seal"]
         if seal == "ruby" or seal.startswith("ruby-api:"):
