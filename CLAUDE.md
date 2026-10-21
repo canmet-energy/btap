@@ -209,8 +209,8 @@ against the editions DISCOVERED under `btap/codes/necb/data/`, so registering a
 new edition does not leave the check stale, and it never takes a collective
 word: "both" stops meaning anything once a third edition exists, and `vintage`
 is retired vocabulary. `unverified` may not be mixed with a code id — either a
-decision has been checked against that edition or it has not. Of the 103
-decisions, 49 are `unverified`: they were authored before the field existed,
+decision has been checked against that edition or it has not. Of the 106
+decisions, 15 are `unverified`: they were authored before the field existed,
 mostly against one edition's text, and asserting a list for them would be a
 guess. That is a DECLARED gap where it used to be a silent one; establishing
 them is open work, and the remaining count moves as decisions are checked —
@@ -262,7 +262,7 @@ per-code-id mapping, and Phase D's seven batches established 42 held
 decisions directly in this form (D-02, D-03, D-04, D-05, D-06, D-07, D-09,
 D-11, D-12, D-13, D-14, D-15, D-17, D-18, D-19, D-21, D-22, D-23, D-24,
 D-26, D-28, D-31, D-32, D-34, D-35, D-37, D-41, D-42, D-43, D-45, D-53,
-D-55, D-58, D-59, D-60, D-61, D-62, D-63, D-65, D-74, D-76 and D-85; 65
+D-55, D-58, D-59, D-60, D-61, D-62, D-63, D-65, D-74, D-76 and D-85; 68
 structured in all), so no committed
 decision still uses the
 per-code-id lists above: every other decision holds `unverified` or
@@ -464,8 +464,8 @@ Add the entry in the same change as the condition that cites it.
 
 The post-R6 verification model has two independent parts:
 
-- `verification/scenarios/` holds 54 frozen Python pipeline scenarios across
-  `python`, `verify`, and `parity` lanes. Intentional output changes use
+- `verification/scenarios/` holds 56 frozen Python pipeline scenarios across
+  `python` (36), `verify` (8), and `parity` (12) lanes. Intentional output changes use
   `verification/scenarios/freeze.py` on a clean tree and commit the baseline
   changes with the code.
 - `legacy_pin/` plus `verification/oracle/` compare Python against the live,
