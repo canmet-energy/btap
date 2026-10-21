@@ -112,6 +112,49 @@ Relaxing any of the three into a warning is an adjudicated change, not a
 convenience: each exists because the silent-success path it replaces produced
 a determination that looked valid.
 
+## A proposed FATAL stops the run; a proposed SEVERE does not
+
+phylroy's ruling (2026-10-21): **we cannot babysit people who have not done
+their due diligence on the proposed building.** Reference creation is
+responsible for creating a reference building, NOT for whether every aspect of
+the proposed model is correct. A proposed model may fail in many ways, and
+some Severe errors are acceptable. The reference code builds from what is
+available. It stops only when the preflight gates above refuse, or when the
+proposed does not simulate without a FATAL.
+
+That is what the code already does, and the asymmetry is deliberate:
+
+- a FATAL raises `RuntimeError` from the backend, which
+  `pipeline._size_proposed` catches, SHOUTS as the input model's defect, and
+  re-raises — `EXIT["simulation"] = 4`. Verified on
+  `models/gagetown_coldlake_Barracks_pre-1960.osm`, whose surfaces carry no
+  construction: *"the PROPOSED (input) model failed its sizing simulation —
+  the input file is not simulate-able as given"*;
+- a SEVERE does not stop anything, and nothing GATES on it.
+  `runner.is_clean_run` IS called — `compliance.py#_run_annual` records its
+  result as the `clean_run` field of each report section — but only on the
+  ANNUAL path, and only as a reported fact. No sizing path calls it, a sizing
+  report's `proposed`/`reference` sections are empty, and no code anywhere
+  turns a Severe into a refusal.
+
+**Do not read that as a defect to close.** It was raised as one in this
+session — "`is_clean_run` has no caller in the pipeline", and separately
+"arguably more valuable than either coil fix". The first is simply wrong, and
+the second mistakes the policy for an oversight. Nor extend a reference-side
+correction to the proposed model to silence a Severe there: D-106 marks fan
+coils built FOR the reference, and marking the user's own coils would re-size
+their submission, which is the babysitting this rule forbids.
+
+The corollary for OUR OWN artifacts is the opposite. A sample we author and
+ship should be clean, because shipping one with a known Severe teaches the
+wrong thing. `scripts/simulate_all_systems.py` enforces exactly that for the
+catalogue — `SEVERE_RE`, `is_clean()`, status `simulation_error`, and 102 of
+102 systems currently `ok` with `severe: 0`. It gates the CATALOGUE on the
+shared fixture, so a shipped sample model is a separate artifact and is NOT
+covered by it: `packaging/windows/samples/04-fancoil-chiller.osm` and
+`13-district-heating.osm` each carry one `Coil:Cooling:Water` UA Severe
+(issue #68) that the catalogue gate never sees.
+
 ## Commands
 
 ```bash
