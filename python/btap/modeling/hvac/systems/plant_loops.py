@@ -37,6 +37,13 @@ HOT_WATER_SOURCES = frozenset({'boiler', 'district'})
 CHILLED_WATER_SOURCES = frozenset({
     'water_cooled', 'air_cooled', 'district',
 })
+_HOT_WATER_SHELL_COMPONENT_TYPES = frozenset({
+    'OS_Connector_Mixer',
+    'OS_Connector_Splitter',
+    'OS_Node',
+    'OS_Pipe_Adiabatic',
+    'OS_Pump_VariableSpeed',
+})
 
 
 def _normalize_temperature_profile(profile, loop_kind):
@@ -508,7 +515,9 @@ def _fuels_compatible(loop, fuel, backup_fuel):
     multiplicity. Plain equality fails the omitted-backup case instead, which
     the frozen corpus caught by way of sample 11 losing AHJ-1/AHJ-3.
 
-    A loop with no boilers is compatible with anything.
+    A loop with no boilers is provisionally fuel-compatible with anything.
+    ``hot_water`` separately requires a source-less shell, then completes it
+    with the requested boiler realization before returning it.
     """
     existing = boiler_fuels(loop)
     if not existing:
@@ -585,6 +594,22 @@ def _boiler_heated(loop):
     return len(loop.supplyComponents(openstudio.model.BoilerHotWater.iddObjectType())) > 0
 
 
+def _source_less_hot_water_shell(loop):
+    """Whether a named loop has distribution topology but no heating source."""
+    if _boiler_heated(loop) or _district_heated(loop):
+        return False
+    components = loop.supplyComponents()
+    if not all(
+        component.iddObjectType().valueName() in _HOT_WATER_SHELL_COMPONENT_TYPES
+        for component in components
+    ):
+        return False
+    pipes = loop.supplyComponents(openstudio.model.PipeAdiabatic.iddObjectType())
+    pumps = loop.supplyComponents(
+        openstudio.model.PumpVariableSpeed.iddObjectType())
+    return len(pipes) in (0, 2) and len(pumps) <= 1
+
+
 def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='boiler',
               part_load_curve_class=None, exclude=(), profile=None):
     """Build a hot-water loop: primary + secondary boiler, variable-speed pump,
@@ -608,7 +633,8 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
 
         The omitted-backup reuse branch is what samples 11 and 12 depend on
         (Sol, `153`).
-    :param reuse: return an existing boiler loop when present (default True)
+    :param reuse: return a complete compatible loop, or complete a compatible
+        named loop that has no heating source yet (default True)
     :param source: 'boiler' (default) or 'district' (DistrictHeating object
         instead of boilers — the CBECS 'district hot water' pattern)
     :param part_load_curve_class: the part-load curve class the caller's
@@ -622,6 +648,7 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
         raise ValueError(
             f"hot-water source must be one of {sorted(HOT_WATER_SOURCES)!r}")
     profile = _normalize_temperature_profile(profile, 'hot_water')
+    hw_loop = None
     if reuse:
         # Source first: a caller asking for DISTRICT heat must never adopt a
         # boiler loop (and a boiler caller never a district loop), whatever
@@ -648,14 +675,11 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
         # ones included, so a bare name match happily hands a district loop to
         # a caller that asked for boilers.
         #
-        # That is exactly how 8.4.4.6.(1)(a) ended up half-applied. The
-        # reference builder tears down and rebuilds ONE GROUP AT A TIME, and
-        # Teardown only drops a plant loop whose demand side is empty — so with
-        # several single-zone groups the district loop still carries the other
-        # groups' coils, survives, and was then re-adopted here by name. The
-        # reference kept purchased heating while its energy type said gas.
-        # Refusing the adoption lets the district loop drain group by group and
-        # be removed by the teardown's own fixpoint.
+        # That is how 8.4.4.6.(1)(a) ended up half-applied before D-101 phased
+        # teardown ahead of construction. The old reference builder rebuilt
+        # one group at a time, so a district loop still serving later groups
+        # survived and was re-adopted here by name. Refusing that cross-source
+        # adoption let the loop drain and be removed by teardown's fixpoint.
         #
         # The fallback honours `exclude` too. It did not, and an excluded loop
         # came straight back through it by NAME: `find_hot_water` returned None
@@ -673,6 +697,8 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
                  and boiler_part_load_class(pl) == part_load_curve_class
                  and _temperature_profile_matches(
                      pl, profile, 'hot_water')
+                 and (_boiler_heated(pl) or source == 'district'
+                      or _source_less_hot_water_shell(pl))
                  # FUEL-AWARE here too. The typed lookup above and this
                  # fallback are two paths to the same adoption, and fixing one
                  # of a pair has already been the shape of two defects in this
@@ -680,12 +706,15 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
                  and _fuels_compatible(pl, fuel, backup_fuel)),
                 None)
         if existing is not None:
-            return existing
+            if _boiler_heated(existing) or _district_heated(existing):
+                return existing
+            hw_loop = existing
 
     if backup_fuel is None:
         backup_fuel = fuel
-    hw_loop = openstudio.model.PlantLoop(model)
-    hw_loop.setName('Hot Water Loop')
+    if hw_loop is None:
+        hw_loop = openstudio.model.PlantLoop(model)
+        hw_loop.setName('Hot Water Loop')
     sizing_plant = hw_loop.sizingPlant()
     sizing_plant.setLoopType('Heating')
     sizing_plant.setDesignLoopExitTemperature(
@@ -695,8 +724,10 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
     _stamp_temperature_profile(hw_loop, profile, 'hot_water')
 
     # Variable speed (legacy note: constant-speed showed run-away plant temperatures)
-    pump = openstudio.model.PumpVariableSpeed(model)
-    pump.addToNode(hw_loop.supplyInletNode())
+    if not hw_loop.supplyComponents(
+            openstudio.model.PumpVariableSpeed.iddObjectType()):
+        pump = openstudio.model.PumpVariableSpeed(model)
+        pump.addToNode(hw_loop.supplyInletNode())
 
     if source == 'district':
         if model.version() < openstudio.VersionString('3.7.0'):
@@ -727,20 +758,25 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
         hw_loop.addSupplyBranchForComponent(boiler1)
         hw_loop.addSupplyBranchForComponent(boiler2)
 
-    hw_loop.addSupplyBranchForComponent(openstudio.model.PipeAdiabatic(model))
-    openstudio.model.PipeAdiabatic(model).addToNode(hw_loop.supplyOutletNode())
+    pipe_count = len(hw_loop.supplyComponents(
+        openstudio.model.PipeAdiabatic.iddObjectType()))
+    if pipe_count == 0:
+        hw_loop.addSupplyBranchForComponent(openstudio.model.PipeAdiabatic(model))
+    if pipe_count < 2:
+        openstudio.model.PipeAdiabatic(model).addToNode(hw_loop.supplyOutletNode())
 
-    if profile:
-        _scheduled_plant_setpoint(
-            model, hw_loop, profile['setpoint_temperature'], 'Hot Water')
-    else:
-        stpt = openstudio.model.SetpointManagerOutdoorAirReset(model)
-        stpt.setControlVariable('Temperature')
-        stpt.setSetpointatOutdoorLowTemperature(82.0)
-        stpt.setOutdoorLowTemperature(-16.0)
-        stpt.setSetpointatOutdoorHighTemperature(60.0)
-        stpt.setOutdoorHighTemperature(0.0)
-        stpt.addToNode(hw_loop.supplyOutletNode())
+    if not hw_loop.supplyOutletNode().setpointManagers():
+        if profile:
+            _scheduled_plant_setpoint(
+                model, hw_loop, profile['setpoint_temperature'], 'Hot Water')
+        else:
+            stpt = openstudio.model.SetpointManagerOutdoorAirReset(model)
+            stpt.setControlVariable('Temperature')
+            stpt.setSetpointatOutdoorLowTemperature(82.0)
+            stpt.setOutdoorLowTemperature(-16.0)
+            stpt.setSetpointatOutdoorHighTemperature(60.0)
+            stpt.setOutdoorHighTemperature(0.0)
+            stpt.addToNode(hw_loop.supplyOutletNode())
 
     return hw_loop
 
@@ -797,7 +833,7 @@ def plant_is_hvac_candidate(loop):
     * district hot water — district-heated, NOT boiler-heated, AND carrying
       the builder's own hot-water name;
     * the hot-water name fallback — the builder's name, with a source that
-      matches or no boilers yet;
+      matches or a distribution-only shell with no heating source yet;
     * chilled water — chillers or district cooling, which `chilled_water`
       reaches by source;
     * the CHILLED-WATER name fallback — an exact `Chilled Water Loop` with no
@@ -815,7 +851,8 @@ def plant_is_hvac_candidate(loop):
     boiler_hw = _boiler_heated(loop) and not _district_heated(loop)
     district_hw = (_district_heated(loop) and not _boiler_heated(loop)
                    and _named_hot_water_loop(loop))
-    hw_name_fallback = _named_hot_water_loop(loop) and not boiler_fuels(loop)
+    hw_name_fallback = (
+        _named_hot_water_loop(loop) and _source_less_hot_water_shell(loop))
     cooling = bool(_chillers(loop) or _district_cooled(loop))
     chw_name_fallback = (loop.nameString() == 'Chilled Water Loop'
                          and _cooling_source(loop) is None)
