@@ -2,7 +2,7 @@
  "version": 2,
  "spec_sha256": "f7d5cb76db9e77c526024a6545047ba19f6517332372b39242c64682168be76c",
  "provenance": {
-  "commit": "8c9dc6902c171e675f2ad0f99812d43dac68c0dd",
+  "commit": "4a6e6ce47c873506d11cf559d24c6ecdc59cf555",
   "dirty": false,
   "openstudio_cli": "3.11.0+241b8abb4d",
   "producer": {
@@ -3689,7 +3689,6 @@
     },
     "building": {
      "storeys": 1,
-     "winter_design_temp_c": -20,
      "zone_types": {
       "Thermal Zone 1": "data centre",
       "Thermal Zone 2": "data centre",
@@ -3710,6 +3709,13 @@
    },
    "streams": {},
    "seal": "python-only:first frozen to cover reference System 2/5 after issue #113 \u2014 authored after the Ruby product retired; no cross-language attestation exists for this scenario",
+   "fragments": {
+    "reference_sizing/run/eplusout.err": {
+     "required": [
+      "; 0 Severe Errors; Elapsed Time"
+     ]
+    }
+   },
    "asserts": [
     {
      "op": "audit_entry",
