@@ -115,6 +115,53 @@ compute `_wall_floor_contact_length` already and never compare it to the
 perimeter, so the check is close to free. `kiva_apply.py` refuses it before
 writing anything.
 
+## Phases 1 and 2 — LANDED
+
+`btap/modeling/envelope/foundations.py` plus
+`python/tests/modeling/test_kiva_foundations.py` (13 tests). They run in the
+**`python` CI lane** — SDK only, no EnergyPlus, and that job sets
+`BTAP_SDK_REQUIRED=1` — so they are on every PR, not dispatch-only.
+
+What the probes established on our own SDK, rather than taking on trust:
+
+- **the courtyard measures 160.0 m**, where the raw polygon perimeter gives 240
+  and a hole-filling join gives 120. Each of the eight ring slabs contributes
+  exactly two of its four edges;
+- **hazard 2 is real here.** `setAdjacentFoundation` on a sun-exposed surface
+  leaves `sun='SunExposed' wind='WindExposed'` with the boundary condition
+  already `Foundation`. The ordered write gives `NoSun`/`NoWind`. My first
+  probe of this was CONFOUNDED — the floor I tested was already `Ground`, hence
+  already NoSun, so the hazard appeared not to exist. The control that starts
+  from `Outdoors` is the one that shows it, and it is in the test;
+- **hazard 3 is real here.** `createSurfacePropertyExposedFoundationPerimeter`
+  with a total of `-5.0` returns `initialized=True` and holds `None`; with a
+  method of `'Nonsense'` or `'Calculate'` it reads back `''`. `is_initialized()`
+  is not a success signal;
+- **the massless-layer refusal fires on `openstudio.model.exampleModel()`**,
+  whose ground floor carries `CP02 CARPET PAD`. That is the engine's rule
+  showing up, not a defect in the check;
+- **E11 refuses before writing.** 80 m of wall against a 40 m slab edge leaves
+  `kivas=0`, the floor still `Ground`, and no perimeter object.
+
+### The mutations, and the two that got through
+
+Seven mutations, each reverted, with the restored tree re-run green. Five were
+caught by the test that should catch them: the ordered write (2 tests), the
+E11 check, the interval subtraction (4 tests), the massless-layer refusal, and
+the subsurface refusal.
+
+**Two were not.** Deleting the exposed-perimeter VALUE read-back left all 12
+tests green, because the public path refuses a non-positive perimeter before
+the write and the SDK accepts every value that reaches it. That is the
+unwitnessed-guard pattern, so a thirteenth test drives
+`_write_exposed_perimeter` directly and fails when the read-back goes.
+
+Deleting the METHOD read-back is **still green**, and that is recorded rather
+than papered over: `PERIMETER_METHOD_TOTAL` is a module constant no caller can
+vary, so the check can only fire if someone edits the constant to an invalid
+string. It is kept as documentation of a real SDK behaviour and as defence
+against that future edit, and it is honestly untested.
+
 ## Phase 1 — compute the exposed perimeter, and refuse what E+ will reject
 
 Port the eligibility half first. It writes nothing, needs no EnergyPlus run,
@@ -129,6 +176,9 @@ and its absence is what would make Phase 2 dangerous:
   than duplicating it. E11 lands here.
 
 ## Phase 2 — create the foundation
+
+**Done.** `create_kiva_foundation(model, floor, walls=(), *, perimeter_m=None,
+name=None)` returns a result dict and leaves the model untouched on refusal.
 
 One function in `btap.modeling.envelope`, code-agnostic, creating a
 `FoundationKiva` per eligible ground floor — one floor per object — in the
