@@ -24,7 +24,12 @@ def _building(model, space_type, **extra):
             zone.nameString(): space_type
             for zone in model.getThermalZones()
         },
-        "winter_design_temp_c": -20,
+        # `winter_design_temp_c` is NOT passed: Fable's `306` found it has no
+        # runtime consumer, and this test's output is byte-identical without
+        # it. The heating dominance that makes the #113 UA inversion fail
+        # comes from the fixture's office loads against the Toronto DDY, which
+        # `test_heating_dominated_system_2_water_coils_size_cleanly` pins by
+        # requiring the max heating/cooling flow ratio to stay above 5.
         **extra,
     }
 

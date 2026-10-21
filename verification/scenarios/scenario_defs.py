@@ -714,11 +714,14 @@ _WEATHER_2025 = {"epw": "<EPW>", "ddy": "<DDY>"}
 #: audit entry, which is a different fact from the UA inversion. It would not
 #: have caught the bug.
 #:
-#: #113's own witness forces heating dominance with
-#: `building={'winter_design_temp_c': -20}`, which no CLI flag expresses — so
-#: covering the FAILURE needs an `api` scenario, and that in turn needs
-#: `api_worker` to be able to build the proposed HVAC, which it cannot today.
-#: `test_system25_fan_coil_sizing.py` is the live witness meanwhile. What this
+#: Covering the FAILURE needs an `api` scenario, because the CLI has no
+#: `zone_types` flag: `--space-type` sets the loads AND the classification
+#: together, and the heating-dominated case needs them to disagree — office
+#: loads with the classification overridden. (An earlier version of this
+#: comment credited `winter_design_temp_c: -20` with the dominance. Fable's
+#: `306` found that key INERT — no runtime consumer, output byte-identical
+#: without it — so it is not what makes the difference; see
+#: `_SYSTEM_25_FAILURE_BUILDING` below.) What this
 #: scenario does cover is the System 2 selection path and the D-106 translation
 #: contract on it, both of which had NO frozen coverage at all.
 #: The 5ZoneNoHVAC seed's own names, hardcoded because an `api_call` is a
