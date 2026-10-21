@@ -13,8 +13,13 @@ The json is the scenario's ``api_call`` with every placeholder already
 resolved by the parent. ``"model"`` is POPPED from it: present, it is a
 path loaded through ``btap._sdk.load_model``; absent, the shared
 ``compliance_fixture()`` stands in — which is what the pre-existing
-``api-thermal-bridging`` scenario relies on. Everything else is passed
-through to ``performance_compliance`` verbatim.
+``api-thermal-bridging`` scenario relies on. ``"hvac_system"`` is popped
+too: a catalogue name built onto the proposed before the call, because a
+model with no HVAC characterizes every zone as ``unconditioned`` and NO
+reference system is selected at all — so a scenario that needs a particular
+reference system cannot reach it from a bare seed, and the CLI's
+``--hvac-system`` has no API counterpart. Everything else is passed through
+to ``performance_compliance`` verbatim.
 
 On success ``<run_dir>/observations.json`` carries the structured
 observations the ``asserts`` block addresses; the ``exit`` key comes from
@@ -49,6 +54,7 @@ def run(call, run_dir):
 
     kwargs = dict(call)
     model_path = kwargs.pop("model", None)
+    hvac_system = kwargs.pop("hvac_system", None)
     if model_path is not None:
         from btap._sdk import load_model
         model = load_model(str(model_path))
@@ -56,6 +62,14 @@ def run(call, run_dir):
         # No model: the fixture the in-process executor always used.
         from tests.necb.support import compliance_fixture
         model = compliance_fixture()
+
+    if hvac_system is not None:
+        # The same catalogue call the CLI's `--hvac-system` makes, over every
+        # zone in name order so the built systems are deterministic.
+        import btap.modeling as modeling
+        from btap._compat import sorted_by_name
+        modeling.build_system(model, str(hvac_system),
+                              sorted_by_name(model.getThermalZones()))
 
     result = performance_compliance(model, run_dir=str(run_dir), **kwargs)
     return {

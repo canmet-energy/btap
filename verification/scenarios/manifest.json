@@ -2,7 +2,7 @@
  "version": 2,
  "spec_sha256": "f7d5cb76db9e77c526024a6545047ba19f6517332372b39242c64682168be76c",
  "provenance": {
-  "commit": "70324862c578ce1a6118f65e5aeb3f6d6e73e5de",
+  "commit": "4a6e6ce47c873506d11cf559d24c6ecdc59cf555",
   "dirty": false,
   "openstudio_cli": "3.11.0+241b8abb4d",
   "producer": {
@@ -19,7 +19,7 @@
   "producer_scope": "this invocation only; see each scenario's `produced_by` for the baseline that bears it",
   "active_seals": {
    "python-only:post-handoff": 31,
-   "python-only": 23
+   "python-only": 25
   },
   "retired_seals": {
    "ruby": 29,
@@ -38,7 +38,7 @@
  },
  "counts": {
   "python": 36,
-  "verify": 6,
+  "verify": 8,
   "parity": 12
  },
  "scenarios": [
@@ -3558,6 +3558,189 @@
     "audit.json": "eca04c9fbd716c5c29950865eae30684c9b8cfef1725f527625d832e21c068a2",
     "audit.txt": "963c351cb0baa157129edee0b1d33ac2fdfce190cbec45d07025ba8c567ddf28",
     "report.json": "aabd33e4cfcbb36090a62fbefd994d2d09fcbe48de38d41fb3caddc619dcc3a1"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
+   }
+  },
+  {
+   "id": "corpus-sizing-5zone-data-processing-system2",
+   "lane": "verify",
+   "kind": "cli",
+   "replaces": [],
+   "argv": [
+    "<SEED>",
+    "--simulate",
+    "sizing",
+    "--epw",
+    "<EPW>",
+    "--hdd",
+    "3890",
+    "--no-report",
+    "--quiet",
+    "--space-type",
+    "Space Function/Computer/Server room-sch-A",
+    "--hvac-system",
+    "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "python-only:first frozen to cover reference System 2/5 after issue #113 \u2014 authored after the Ruby product retired; no cross-language attestation exists for this scenario",
+   "asserts": [
+    {
+     "op": "audit_entry",
+     "step": "selection",
+     "action": "reference system selected",
+     "inputs": {
+      "category": "Data Processing Area"
+     },
+     "count": 5
+    },
+    {
+     "op": "audit_entry",
+     "ruling": "D-106",
+     "count": 1
+    }
+   ],
+   "baseline_sha256": {
+    "audit.json": "59c45876d23a2b6cda3528a098fad1840f9516f663ec665e2c0780bc23a2dd92",
+    "audit.txt": "2e7eac45f05271f22e294205dd8d7999c03847a7507dddd59971fa681470e1cc",
+    "report.json": "2cbfb12a79ed11e79bfc9c486aad9ded6989ab85118fc2a1fe4260af1df8eb9d",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "a07dd4f2839b628e5bd9189317dff0802b4840ea669ced7c8e3be7d67f8ee7e4"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
+   }
+  },
+  {
+   "id": "api-sizing-system2-heating-dominated",
+   "lane": "verify",
+   "kind": "api",
+   "replaces": [],
+   "api_call": {
+    "code": "necb2020",
+    "simulate": "sizing",
+    "hdd": 3890,
+    "model": "<SEED>",
+    "hvac_system": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+    "weather": {
+     "epw": "<EPW>",
+     "ddy": "<DDY>"
+    },
+    "necb_loads": {
+     "space_type_map": {
+      "Story 1 Core Space": [
+       "Space Function",
+       "Office enclosed > 25 m2"
+      ],
+      "Story 1 East Perimeter Space": [
+       "Space Function",
+       "Office enclosed > 25 m2"
+      ],
+      "Story 1 North Perimeter Space": [
+       "Space Function",
+       "Office enclosed > 25 m2"
+      ],
+      "Story 1 South Perimeter Space": [
+       "Space Function",
+       "Office enclosed > 25 m2"
+      ],
+      "Story 1 West Perimeter Space": [
+       "Space Function",
+       "Office enclosed > 25 m2"
+      ]
+     }
+    },
+    "building": {
+     "storeys": 1,
+     "zone_types": {
+      "Thermal Zone 1": "data centre",
+      "Thermal Zone 2": "data centre",
+      "Thermal Zone 3": "data centre",
+      "Thermal Zone 4": "data centre",
+      "Thermal Zone 5": "data centre"
+     }
+    }
+   },
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {},
+   "seal": "python-only:first frozen to cover reference System 2/5 after issue #113 \u2014 authored after the Ruby product retired; no cross-language attestation exists for this scenario",
+   "fragments": {
+    "reference_sizing/run/eplusout.err": {
+     "required": [
+      "; 0 Severe Errors; Elapsed Time"
+     ]
+    }
+   },
+   "asserts": [
+    {
+     "op": "audit_entry",
+     "step": "selection",
+     "action": "reference system selected",
+     "inputs": {
+      "category": "Data Processing Area"
+     },
+     "count": 5
+    },
+    {
+     "op": "audit_entry",
+     "ruling": "D-106",
+     "inputs": {
+      "fan_coils": 5,
+      "reference_system": 2,
+      "sizing_specification": "DesignSpecification:ZoneHVAC:Sizing"
+     },
+     "count": 1
+    }
+   ],
+   "baseline_sha256": {
+    "audit.json": "5e02d603802959b9aaee76b875c6169d8a91a99a1705f74f1139336d12e7f01f",
+    "audit.txt": "d45fcadaa8b45b771341cda8609615e935bbec78d8f1a5fe549a342ddb852050",
+    "report.json": "7b774cd248ad9ae1e8573b3200482bef5bf23df973674b194a0edffe39796408"
    },
    "produced_by": {
     "producer": {
