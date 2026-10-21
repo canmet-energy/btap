@@ -8,11 +8,18 @@ and carries no `article=` — NECB's 1.2 m perimeter strip (3.2.3.3.(3)) is
 `_apply_ground_strip`, once a foundation exists.
 
 Ported with attribution from `canmet-energy/openstudio-mcp` (SWR 26-035,
-`mcp_server/skills/geometry/kiva_eligibility.py` and `kiva_apply.py`), which
-is BSD-licensed; this file is GPL-3.0-or-later as part of canmet-btap. The
-interval-subtraction perimeter and the four SDK hazards below are theirs,
-probed on OpenStudio 3.11.0 / EnergyPlus 25.2.0 — the pair our CI image pins.
-See docs/plans/KIVA_FOUNDATION_PLAN.md and ATTRIBUTION.md.
+`mcp_server/skills/geometry/kiva_eligibility.py` and `kiva_apply.py`) at
+revision 17e4deea. The interval-subtraction perimeter and the four SDK hazards
+below are theirs, probed on OpenStudio 3.11.0 / EnergyPlus 25.2.0 — the pair
+our CI image pins.
+
+That upstream is NOT under a plain BSD licence: it carries the four-condition
+OpenStudio(R) licence, copyright Alliance for Energy Innovation, LLC, whose
+condition (1) requires source redistributions to retain the copyright notice,
+the conditions and the disclaimer. They are reproduced in full in
+`data/ATTRIBUTION.md` beside this file, which ships in the wheel. This file is
+GPL-3.0-or-later as part of canmet-btap. See also
+docs/plans/KIVA_FOUNDATION_PLAN.md.
 
 SDK hazards, every one of which produces a silently wrong model:
 
@@ -34,6 +41,10 @@ SDK hazards, every one of which produces a silently wrong model:
     an open COURTYARD loses the courtyard's edges entirely (a 3x3 ring of 10 m
     slabs gives 120 m where 160 m is right). Hence `exposed_perimeters`.
 
+A known simplification, shared with the source: a basement floor at z=-3
+abutting a slab at z=0 covers the shared edge in plan, in both directions.
+Both are ground-contact, so the grade filter does not separate them.
+
 `BySegment` is a legal IDD method and is deliberately not offered: EnergyPlus
 cannot auto-correct a clockwise floor polygon under it and OpenStudio exposes
 no segment API.
@@ -50,6 +61,9 @@ from btap._compat import opt, sorted_by_name
 # Collinearity and overlap tolerance for the perimeter intervals, and the
 # degenerate-edge floor. openstudio-mcp's POLYGON_JOIN_TOLERANCE_M.
 TOLERANCE_M = 0.01
+# A floor whose highest world z is at or below this counts as ground-contact,
+# and only such a floor may cover another slab's edge.
+GRADE_TOLERANCE_M = 0.01
 # EnergyPlus refuses a Kiva wall with more vertices than this.
 MAX_KIVA_WALL_VERTICES = 4
 # The only exposed-perimeter method this module writes.
@@ -70,6 +84,22 @@ def world_vertices(surface):
 
 def _distance(p, q) -> float:
     return ((p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2) ** 0.5
+
+
+def _xy_extent(vertices) -> float:
+    """Longest horizontal distance between any two of a surface's vertices.
+
+    NOT a bounding-box side. A wall at 45 degrees to the axes projects to a
+    7.07 x 7.07 box, so `max(x_extent, y_extent)` reads 7.07 m for a 10 m wall
+    and UNDER-counts — the dangerous direction for the E11 check below, because
+    it lets through a model EnergyPlus will Fatal on. Measured by Fable on a
+    space with `setDirectionofRelativeNorth(45)`: five 10 m walls (50 m true)
+    against a 40 m slab edge were accepted where the unrotated control refused.
+    """
+    points = [(v.x(), v.y()) for v in vertices]
+    return max(
+        (_distance(p, q) for index, p in enumerate(points) for q in points[index + 1:]),
+        default=0.0)
 
 
 def _flat_edges(vertices) -> list[tuple[tuple[float, float], tuple[float, float]]]:
@@ -132,6 +162,24 @@ def _exposed_length(own_edges, neighbour_edges, tolerance: float = TOLERANCE_M) 
     return total
 
 
+def _duplicate_footprints(edges_by_floor) -> list:
+    """Pairs of floors whose edge sets coincide within tolerance, either way round.
+
+    Two coincident floors cover each other completely, so each would measure
+    0.0 m of exposed edge and both would be refused. A twin is excluded from
+    its twin's neighbours and reported instead.
+    """
+    def key(edges):
+        def rounded(point):
+            return (round(point[0], 3), round(point[1], 3))
+        return sorted(tuple(sorted((rounded(p), rounded(q)))) for p, q in edges)
+
+    keyed = {name: key(edges) for name, edges in edges_by_floor.items()}
+    names = sorted(keyed)
+    return [(a, b) for index, a in enumerate(names) for b in names[index + 1:]
+            if keyed[a] == keyed[b]]
+
+
 def exposed_perimeters(model, floors) -> dict:
     """Exposed slab-edge length per floor surface, by interval subtraction.
 
@@ -147,6 +195,7 @@ def exposed_perimeters(model, floors) -> dict:
     """
     reported = {s.nameString(): s for s in floors}
     edges_by_floor = {}
+    neighbours_by_floor = {}
     skipped = []
     for surface in sorted_by_name(model.getSurfaces()):
         if surface.surfaceType() != "Floor":
@@ -156,19 +205,41 @@ def exposed_perimeters(model, floors) -> dict:
             if surface.nameString() in reported:
                 skipped.append(surface.nameString())
             continue
-        edges_by_floor[surface.nameString()] = _flat_edges(vertices)
+        name = surface.nameString()
+        edges = _flat_edges(vertices)
+        edges_by_floor[name] = edges
+        # A floor covers a slab edge only if it is itself ground-contact. An
+        # upper storey's plate sits directly ABOVE the slab in plan, so without
+        # this filter a tower zeroes its own ground floor: measured on the
+        # Hangar archetype as 38 of 45 slabs at 0.0 m and 143.1 m in total,
+        # against 13 and 337.0 m once the filter is applied. Worse, a plate
+        # that only PARTIALLY overlaps gives a wrong perimeter rather than
+        # zero, so nothing refuses it. An interior floor matched to the ceiling
+        # below reads 'Surface' and is excluded for the same reason.
+        if (max(v.z() for v in vertices) <= GRADE_TOLERANCE_M
+                and surface.outsideBoundaryCondition() != "Surface"):
+            neighbours_by_floor[name] = edges
+
+    twins = _duplicate_footprints(neighbours_by_floor)
 
     perimeters = {}
+    duplicates = []
     for name in reported:
         own = edges_by_floor.get(name)
         if own is None:
             continue
-        neighbours = [
-            edge for other, edges in edges_by_floor.items() if other != name
-            for edge in edges
+        twinned = ({b for a, b in twins if a == name}
+                   | {a for a, b in twins if b == name})
+        if twinned:
+            duplicates.append({"floor": name, "duplicates": sorted(twinned)})
+        covering = [
+            edge for other in sorted(neighbours_by_floor)
+            if other != name and other not in twinned
+            for edge in neighbours_by_floor[other]
         ]
-        perimeters[name] = _exposed_length(own, neighbours)
-    return {"perimeters": perimeters, "no_space": skipped}
+        perimeters[name] = _exposed_length(own, covering)
+    return {"perimeters": perimeters, "no_space": skipped,
+            "duplicates": duplicates}
 
 
 def _layers_are_standard_opaque(surface):
@@ -240,9 +311,7 @@ def walls_exceed_perimeter(walls, perimeter_m: float):
         vertices = world_vertices(wall)
         if vertices is None:
             return False, f"wall '{wall.nameString()}' has no parent space"
-        xs = [v.x() for v in vertices]
-        ys = [v.y() for v in vertices]
-        total += max(max(xs) - min(xs), max(ys) - min(ys))
+        total += _xy_extent(vertices)
     if total - perimeter_m > TOLERANCE_M:
         return False, (
             f"paired walls total {total:.3f} m against an exposed perimeter of "
@@ -316,7 +385,15 @@ def create_kiva_foundation(model, floor, walls=(), *, perimeter_m=None, name=Non
         if perimeter_m is None:
             refusals.append(
                 f"could not measure the exposed perimeter of '{floor.nameString()}'")
-    if perimeter_m is not None and perimeter_m <= TOLERANCE_M and not refusals:
+    if perimeter_m is not None and not math.isfinite(perimeter_m) and not refusals:
+        # NaN passes every comparison below, and inf passes the small-value
+        # gate, so both would reach the SDK write and be discarded there —
+        # which is the only way the public API could reach the rollback.
+        refusals.append(
+            f"exposed perimeter for '{floor.nameString()}' is {perimeter_m}, which is "
+            "not a finite length")
+    if perimeter_m is not None and math.isfinite(perimeter_m) \
+            and perimeter_m <= TOLERANCE_M and not refusals:
         refusals.append(
             f"'{floor.nameString()}' has an exposed perimeter of {perimeter_m:.3f} m; "
             "a Kiva floor needs exposed slab edge")
@@ -332,6 +409,18 @@ def create_kiva_foundation(model, floor, walls=(), *, perimeter_m=None, name=Non
 
     kiva = openstudio.model.FoundationKiva(model)
     kiva.setName(name or f"Kiva Foundation {floor.nameString()}")
+
+    # Snapshot every boundary condition BEFORE the write, because
+    # `kiva.remove()` is not a rollback: it clears `adjacentFoundation` and
+    # leaves the surface reading 'Foundation'. A surface in that state
+    # forward-translates to a BuildingSurface:Detailed with a BLANK Foundation
+    # reference, no translator error, and EnergyPlus resolves a blank reference
+    # to its own default Foundation:Kiva — so a model the caller was told was
+    # unmodified would run WITH a foundation. Measured by Fable on PR #132.
+    original_conditions = {
+        surface.nameString(): surface.outsideBoundaryCondition()
+        for surface in [floor] + walls
+    }
 
     attached = []
     for surface in [floor] + walls:
@@ -356,7 +445,14 @@ def create_kiva_foundation(model, floor, walls=(), *, perimeter_m=None, name=Non
             refusals.append(reason)
 
     if refusals:
+        # Unwind in the reverse order of the write, so nothing is left pointing
+        # at an object that is about to go.
+        if floor.surfacePropertyExposedFoundationPerimeter().is_initialized():
+            floor.resetSurfacePropertyExposedFoundationPerimeter()
         kiva.remove()
+        for surface in [floor] + walls:
+            surface.setOutsideBoundaryCondition(
+                original_conditions[surface.nameString()])
         return {"created": False, "foundation": None, "floor": floor.nameString(),
                 "walls": [], "perimeter_m": perimeter_m, "refusals": refusals}
 

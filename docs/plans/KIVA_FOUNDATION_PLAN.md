@@ -143,24 +143,77 @@ What the probes established on our own SDK, rather than taking on trust:
 - **E11 refuses before writing.** 80 m of wall against a 40 m slab edge leaves
   `kivas=0`, the floor still `Ground`, and no perimeter object.
 
-### The mutations, and the two that got through
+### What Fable's review changed
 
-Seven mutations, each reverted, with the restored tree re-run green. Five were
-caught by the test that should catch them: the ordered write (2 tests), the
-E11 check, the interval subtraction (4 tests), the massless-layer refusal, and
-the subsurface refusal.
+Six findings, all fixed in the same PR. Four were real defects the first
+implementation shipped:
 
-**Two were not.** Deleting the exposed-perimeter VALUE read-back left all 12
-tests green, because the public path refuses a non-positive perimeter before
-the write and the SDK accepts every value that reaches it. That is the
-unwitnessed-guard pattern, so a thirteenth test drives
-`_write_exposed_perimeter` directly and fails when the read-back goes.
+- **neighbours were drawn from EVERY floor at any elevation and any boundary
+  condition.** Upstream filters to at-or-below-grade floors whose boundary
+  condition is not `Surface`; the port dropped both filters, so an upper
+  storey's plate covered the slab beneath it. On the real archetypes:
+  Hangar 38 of 45 slabs zeroed and 143.1 m total, against 13 and 337.0 m
+  filtered; MaintenanceShop_1980-2004 14/102.0 against 6/185.8;
+  FoodService_pre-1960 10/213.4 against 7/251.3. All three now reproduce
+  Fable's filtered figures exactly. The dangerous case is a plate that only
+  PARTIALLY overlaps, which gives a WRONG perimeter rather than zero, so
+  nothing refuses it;
+- **the rollback left a half-written model.** `kiva.remove()` clears
+  `adjacentFoundation` but leaves the surface reading `Foundation`, and such a
+  surface forward-translates to a BLANK Foundation reference that EnergyPlus
+  resolves to its own default `Foundation:Kiva`. A model the caller was told
+  was unmodified would have run WITH a foundation. Reachable through the public
+  API with `perimeter_m=float('nan')`, because every NaN comparison is False
+  and the value therefore passed the small-value gate;
+- **E11 under-counted any wall not aligned to the axes.** A wall at 45 degrees
+  projects to a 7.07 x 7.07 bounding box, so `max(x_extent, y_extent)` read
+  7.07 m for a 10 m wall. Five such walls (50 m true) against a 40 m slab edge
+  were ACCEPTED where the unrotated control refused — a model EnergyPlus would
+  Fatal on. Now measured as the longest horizontal distance between any two
+  vertices;
+- **the attribution did not meet the upstream licence.** See Attribution below.
 
-Deleting the METHOD read-back is **still green**, and that is recorded rather
-than papered over: `PERIMETER_METHOD_TOTAL` is a module constant no caller can
-vary, so the check can only fire if someone edits the constant to an invalid
-string. It is kept as documentation of a real SDK behaviour and as defence
-against that future edit, and it is honestly untested.
+Two were weaker: coincident footprints zeroed each other silently, and three
+blockers had no test.
+
+### The mutations
+
+Nine mutations now, each reverted with the restored tree re-run green at 22
+tests. Every one is caught: the grade filter (5 failures), the non-finite
+refusal (2), the boundary-condition restore (1), the perimeter-object reset
+(1), the wall extent (1), the twin exclusion (1), the four-vertex wall (1), the
+no-construction branch (2) and the space-less blocker (1).
+
+Three of those witnesses had to be rewritten, and each failure is worth
+recording because each looked like coverage:
+
+- **the upper-storey test first used an IDENTICAL footprint**, which the new
+  duplicate-footprint rule already excludes, so it passed with the grade filter
+  deleted. One of my own fixes was masking the other. A strictly LARGER plate
+  is masked too, having no collinear edge. Only a partial overlap and an inset
+  plate discriminate, and the test now uses both;
+- **the rollback could not be reached at all** once the non-finite refusal
+  landed, so deleting the restore left everything green. It is witnessed by
+  INJECTING the fault instead — which is legitimate where no input can reach
+  the guard, and better than deleting a guard that protects a real SDK
+  behaviour;
+- **the injected fault first failed without creating the perimeter object**,
+  so the rollback's `reset...` call stayed unwitnessed. The real hazard creates
+  the object and then discards the value, so the injection now does that too.
+
+**One guard remains unwitnessed, and it is kept deliberately.** Deleting the
+exposed-perimeter METHOD read-back leaves the suite green:
+`PERIMETER_METHOD_TOTAL` is a module constant no caller can vary, so the check
+can only fire if someone edits the constant to an invalid string. Fable
+confirmed independently that it is unreachable from the public API. It stays as
+documentation of a real SDK behaviour — `'Nonsense'` and `'Calculate'` both
+read back as `''` — and is honestly untested.
+
+### Known simplifications, shared with the source
+
+A basement floor at z=-3 abutting a slab at z=0 covers the shared edge in
+plan, in both directions. That is a step-down the upstream makes too, not a
+port defect, and it is noted in the module rather than silently inherited.
 
 ## Phase 1 — compute the exposed perimeter, and refuse what E+ will reject
 
@@ -237,6 +290,22 @@ exceed the perimeter, which must be refused rather than reaching EnergyPlus.
 
 ## Attribution
 
-Ported code carries its origin in the module docstring: repository, revision,
-the SoftwareX DOI and the BSD notice. `btap/codes/data/ATTRIBUTION.md` is the
-existing pattern.
+**The upstream licence is not BSD**, which an earlier draft of this plan and
+the first implementation both said. It is the four-condition OpenStudio(R)
+licence, copyright Alliance for Energy Innovation, LLC, and its condition (1)
+requires a source redistribution to retain the copyright notice, the list of
+conditions and the disclaimer. A docstring naming the repository does not
+satisfy that.
+
+So ported code carries `python/btap/modeling/envelope/data/ATTRIBUTION.md`,
+which ships in the wheel under the `data/**/*.md` package-data glob and
+reproduces the licence in full, names the ported revision
+(`17e4deeae8465f6931c84a69ce3f7d06bbbb26da`, `develop` at fetch time), the
+Zenodo DOI `10.5281/zenodo.21905081` and the SoftwareX DOI
+`10.1016/j.softx.2026.103020`, and lists which functions derive from it. The
+module docstring points at that file.
+
+The pre-existing `btap/codes/data/coverage/ATTRIBUTION.md` is NOT the pattern
+for this: it covers Crown-copyright NECB text, not third-party code, and both
+the first draft of this plan and the first docstring cited it at a path that
+does not exist.

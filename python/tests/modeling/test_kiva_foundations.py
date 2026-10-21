@@ -25,19 +25,21 @@ def _concrete(model):
     return construction
 
 
-def _slab(model, name, ox, oy, width=10.0, depth=10.0, construction=None):
+def _slab(model, name, ox, oy, width=10.0, depth=10.0, construction=None,
+          elevation=0.0, boundary="Ground", space=None):
     import openstudio
 
-    space = openstudio.model.Space(model)
-    space.setName(f"{name} Space")
+    if space is None:
+        space = openstudio.model.Space(model)
+        space.setName(f"{name} Space")
     points = openstudio.Point3dVector()
     for x, y in [(ox, oy), (ox + width, oy), (ox + width, oy + depth), (ox, oy + depth)]:
-        points.append(openstudio.Point3d(x, y, 0.0))
+        points.append(openstudio.Point3d(x, y, elevation))
     surface = openstudio.model.Surface(points, model)
     surface.setName(name)
     surface.setSurfaceType("Floor")
     surface.setSpace(space)
-    surface.setOutsideBoundaryCondition("Ground")
+    surface.setOutsideBoundaryCondition(boundary)
     if construction is not None:
         surface.setConstruction(construction)
     return surface
@@ -116,6 +118,91 @@ class TestExposedPerimeter(unittest.TestCase):
         measured = foundations.exposed_perimeters(model, [left])
 
         self.assertAlmostEqual(measured["perimeters"]["Left"], 30.0, places=3)
+
+    def test_an_upper_storey_does_not_cover_the_ground_slab(self):
+        """The filter without which an upper plate eats the slab's edge.
+
+        Measured on the Hangar archetype: 38 of 45 slabs at 0.0 m and 143.1 m
+        in total unfiltered, against 13 and 337.0 m filtered.
+
+        The SHAPES here are chosen deliberately. An upper plate with an
+        IDENTICAL footprint is already excluded by the duplicate-footprint
+        rule, and one strictly LARGER than the slab has no edge collinear with
+        it, so neither case can fail — the first version of this test used an
+        identical plate and passed with the filter deleted. A partial overlap
+        and an inset plate are the cases that discriminate, and they are the
+        ones Fable named as the dangerous direction: the perimeter comes out
+        WRONG rather than zero, so nothing refuses it.
+        """
+        import openstudio
+
+        from btap.modeling.envelope import foundations
+
+        cases = [
+            # label, upper plate geometry, what an unfiltered search returns
+            ("partial overlap", dict(ox=5.0, oy=0.0, width=10.0, depth=10.0), 30.0),
+            ("inset", dict(ox=0.0, oy=0.0, width=10.0, depth=5.0), 20.0),
+        ]
+        for label, plate, unfiltered in cases:
+            for boundary in ("Surface", "Outdoors"):
+                with self.subTest(plate=label, boundary=boundary):
+                    model = openstudio.model.Model()
+                    construction = _concrete(model)
+                    ground = _slab(model, "Ground", 0.0, 0.0,
+                                   construction=construction)
+                    _slab(model, "Upper", plate["ox"], plate["oy"],
+                          width=plate["width"], depth=plate["depth"],
+                          construction=construction, elevation=9.0,
+                          boundary=boundary)
+                    measured = foundations.exposed_perimeters(model, [ground])
+
+                    self.assertAlmostEqual(measured["perimeters"]["Ground"],
+                                           40.0, places=3)
+                    # And the value this would have been without the filter,
+                    # so the test states what it is guarding against.
+                    self.assertNotAlmostEqual(measured["perimeters"]["Ground"],
+                                              unfiltered, places=3)
+
+    def test_a_tower_with_offset_plates_still_gets_a_foundation(self):
+        """The same failure at the public call site, which is where it bit.
+
+        The plates are offset rather than identical for the reason above.
+        """
+        import openstudio
+
+        from btap.modeling.envelope import foundations
+
+        model = openstudio.model.Model()
+        construction = _concrete(model)
+        ground = _slab(model, "Ground", 0.0, 0.0, construction=construction)
+        for index, elevation in enumerate([3.0, 6.0, 9.0]):
+            _slab(model, f"Plate {index}", 5.0, 0.0, construction=construction,
+                  elevation=elevation, boundary="Surface")
+
+        result = foundations.create_kiva_foundation(model, ground)
+        self.assertTrue(result["created"], result["refusals"])
+        self.assertAlmostEqual(result["perimeter_m"], 40.0, places=3)
+
+    def test_coincident_floors_are_reported_rather_than_zeroed(self):
+        """Two floors on the same footprint cover each other completely, so
+        each would measure 0.0 m and both be refused. A twin is excluded from
+        its twin's neighbours and named instead."""
+        import openstudio
+
+        from btap.modeling.envelope import foundations
+
+        model = openstudio.model.Model()
+        construction = _concrete(model)
+        first = _slab(model, "Twin A", 0.0, 0.0, construction=construction)
+        second = _slab(model, "Twin B", 0.0, 0.0, construction=construction)
+        measured = foundations.exposed_perimeters(model, [first, second])
+
+        self.assertAlmostEqual(measured["perimeters"]["Twin A"], 40.0, places=3)
+        self.assertAlmostEqual(measured["perimeters"]["Twin B"], 40.0, places=3)
+        self.assertEqual(
+            measured["duplicates"],
+            [{"floor": "Twin A", "duplicates": ["Twin B"]},
+             {"floor": "Twin B", "duplicates": ["Twin A"]}])
 
     def test_a_space_less_surface_is_reported_not_crashed(self):
         """`Surface.exposedPerimeter()` SEGFAULTS without a parent Space.
@@ -344,6 +431,191 @@ class TestKivaRefusals(unittest.TestCase):
         self.assertIsNone(foundations._write_exposed_perimeter(floor, 25.0))
         written = opt(floor.surfacePropertyExposedFoundationPerimeter())
         self.assertAlmostEqual(opt(written.totalExposedPerimeter()), 25.0, places=3)
+
+    def test_a_non_finite_perimeter_is_refused_and_the_model_restored(self):
+        """The only public route to the rollback, and what it has to undo.
+
+        NaN passes every comparison and inf passes the small-value gate, so
+        both would reach the SDK write and be discarded there. `kiva.remove()`
+        alone is NOT a rollback: it clears `adjacentFoundation` and leaves the
+        surface reading 'Foundation', which forward-translates to a BLANK
+        Foundation reference that EnergyPlus resolves to its own default
+        Foundation:Kiva — a model the caller was told was unmodified would run
+        WITH a foundation. Found by Fable on PR #132.
+        """
+        import openstudio
+
+        from btap.modeling.envelope import foundations
+
+        for bad in (float("nan"), float("inf")):
+            with self.subTest(perimeter=bad):
+                model = openstudio.model.Model()
+                floor = _slab(model, "Slab", 0.0, 0.0,
+                              construction=_concrete(model), boundary="Outdoors")
+                result = foundations.create_kiva_foundation(
+                    model, floor, perimeter_m=bad)
+
+                self.assertFalse(result["created"])
+                self.assertTrue(any("not a finite length" in r
+                                    for r in result["refusals"]),
+                                result["refusals"])
+                # The model is as it was, including the derived exposures.
+                self.assertEqual(floor.outsideBoundaryCondition(), "Outdoors")
+                self.assertEqual(floor.sunExposure(), "SunExposed")
+                self.assertEqual(len(model.getFoundationKivas()), 0)
+                self.assertFalse(
+                    floor.surfacePropertyExposedFoundationPerimeter().is_initialized())
+
+    def test_a_failed_write_restores_every_boundary_condition(self):
+        """The rollback, witnessed by INJECTING the failure it exists for.
+
+        No input can reach it any more: the non-finite refusal and the
+        small-value gate between them leave only values the SDK accepts, so
+        deleting the restore loop leaves the rest of this file green. That is
+        the unwitnessed-guard pattern, and the honest fix is to drive the real
+        call site with a realistic fault rather than to delete the guard or
+        claim it is covered.
+
+        What it must undo: `kiva.remove()` clears `adjacentFoundation` but
+        leaves the surface reading 'Foundation'. A surface in that state
+        forward-translates to a BLANK Foundation reference, which EnergyPlus
+        resolves to its own default Foundation:Kiva — so a model the caller was
+        told was unmodified would run WITH a foundation.
+        """
+        import unittest.mock
+
+        import openstudio
+
+        from btap.modeling.envelope import foundations
+
+        model = openstudio.model.Model()
+        construction = _concrete(model)
+        floor = _slab(model, "Slab", 0.0, 0.0, construction=construction,
+                      boundary="Outdoors")
+        space = floor.space().get()
+        walls = [_wall(model, space, f"Wall {i}", i * 1.0, construction)
+                 for i in range(2)]
+        before = {s.nameString(): s.outsideBoundaryCondition()
+                  for s in [floor] + walls}
+        self.assertEqual(before["Slab"], "Outdoors")
+
+        # The injected fault MATCHES the real hazard: the SDK creates the
+        # perimeter object and then discards the value, so the object is
+        # present when the write reports failure. A mock that merely returns a
+        # reason without creating it leaves the rollback's
+        # resetSurfacePropertyExposedFoundationPerimeter() unwitnessed.
+        def created_then_discarded(surface, perimeter_m):
+            surface.createSurfacePropertyExposedFoundationPerimeter(
+                "TotalExposedPerimeter", perimeter_m)
+            return "injected: the SDK discarded the value"
+
+        with unittest.mock.patch.object(
+                foundations, "_write_exposed_perimeter",
+                side_effect=created_then_discarded):
+            result = foundations.create_kiva_foundation(model, floor, walls)
+
+        self.assertFalse(result["created"])
+        self.assertIn("injected", result["refusals"][0])
+        # Nothing of the attempt survives.
+        self.assertEqual(len(model.getFoundationKivas()), 0)
+        for surface in [floor] + walls:
+            self.assertEqual(surface.outsideBoundaryCondition(),
+                             before[surface.nameString()])
+            self.assertFalse(surface.adjacentFoundation().is_initialized())
+        self.assertFalse(
+            floor.surfacePropertyExposedFoundationPerimeter().is_initialized())
+        # 'Outdoors' re-derives the exposures that 'Foundation' had cleared.
+        self.assertEqual(floor.sunExposure(), "SunExposed")
+        self.assertEqual(floor.windExposure(), "WindExposed")
+
+    def test_a_rotated_wall_is_measured_by_its_true_length(self):
+        """E11 under-counted any wall not aligned to the axes.
+
+        A wall at 45 degrees projects to a 7.07 x 7.07 bounding box, so
+        `max(x_extent, y_extent)` read 7.07 m for a 10 m wall. Five such walls
+        (50 m true) against a 40 m slab edge were ACCEPTED, and EnergyPlus
+        would Fatal on that model. The unrotated control is the comparison.
+        """
+        import openstudio
+
+        from btap.modeling.envelope import foundations
+
+        for rotation in (0.0, 45.0):
+            with self.subTest(rotation=rotation):
+                model = openstudio.model.Model()
+                construction = _concrete(model)
+                space = openstudio.model.Space(model)
+                space.setName("Rotated")
+                space.setDirectionofRelativeNorth(rotation)
+                floor = _slab(model, "Slab", 0.0, 0.0, construction=construction,
+                              space=space)
+                walls = [_wall(model, space, f"Wall {i}", i * 1.0, construction)
+                         for i in range(5)]
+
+                result = foundations.create_kiva_foundation(model, floor, walls)
+                self.assertFalse(result["created"])
+                self.assertTrue(
+                    any("50.000 m" in r and "40.000 m" in r
+                        for r in result["refusals"]),
+                    result["refusals"])
+
+    def test_a_wall_with_too_many_vertices_is_refused(self):
+        """Kiva walls are limited to four vertices."""
+        import openstudio
+
+        from btap.modeling.envelope import foundations
+
+        model = openstudio.model.Model()
+        construction = _concrete(model)
+        floor = _slab(model, "Slab", 0.0, 0.0, construction=construction)
+        space = floor.space().get()
+        points = openstudio.Point3dVector()
+        for x, z in [(0.0, 0.0), (5.0, 0.0), (10.0, 0.0), (10.0, -3.0), (0.0, -3.0)]:
+            points.append(openstudio.Point3d(x, 0.0, z))
+        wall = openstudio.model.Surface(points, model)
+        wall.setName("Five Vertex Wall")
+        wall.setSurfaceType("Wall")
+        wall.setSpace(space)
+        wall.setConstruction(construction)
+
+        result = foundations.create_kiva_foundation(model, floor, [wall])
+        self.assertFalse(result["created"])
+        self.assertTrue(any("limited to 4" in r for r in result["refusals"]),
+                        result["refusals"])
+
+    def test_a_floor_with_no_construction_is_refused_not_crashed(self):
+        """Without this branch the layer check raises AttributeError on None
+        instead of refusing, which Fable's mutation M3 exposed."""
+        import openstudio
+
+        from btap.modeling.envelope import foundations
+
+        model = openstudio.model.Model()
+        floor = _slab(model, "Slab", 0.0, 0.0)   # no construction
+
+        self.assertIn("no construction assigned", foundations.kiva_blockers(floor))
+        result = foundations.create_kiva_foundation(model, floor)
+        self.assertFalse(result["created"])
+        self.assertTrue(any("no construction assigned" in r
+                            for r in result["refusals"]), result["refusals"])
+
+    def test_a_space_less_surface_is_a_blocker_in_its_own_right(self):
+        """`kiva_blockers` names it even though `world_vertices` also guards it,
+        so the refusal does not depend on the perimeter measurement failing."""
+        import openstudio
+
+        from btap.modeling.envelope import foundations
+
+        model = openstudio.model.Model()
+        points = openstudio.Point3dVector()
+        for x, y in [(0.0, 0.0), (10.0, 0.0), (10.0, 10.0), (0.0, 10.0)]:
+            points.append(openstudio.Point3d(x, y, 0.0))
+        orphan = openstudio.model.Surface(points, model)
+        orphan.setName("Orphan")
+        orphan.setSurfaceType("Floor")
+
+        self.assertIn("surface has no parent space",
+                      foundations.kiva_blockers(orphan))
 
     def test_a_floor_with_no_exposed_edge_is_refused(self):
         """A slab fully enclosed by neighbours has no slab edge to solve."""
