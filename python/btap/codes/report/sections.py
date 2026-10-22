@@ -883,13 +883,20 @@ def ahj_appendix(ctx):
                     bearing = "no — settled; the row records which way"
                 else:
                     bearing = "no"
-            elif not determination:
+            elif not determination or determination == "no_determination":
                 # NO DETERMINATION TO BE CONDITIONAL ON. Fable's `133` G2:
                 # this column was derived from the register status alone, so a
                 # `--simulate none` or `sizing` run badged UNDETERMINED carried
                 # rows saying "this run's determination is conditional on it".
                 # Every `--report-html` run of an ordinary gas building short
                 # of annual reached that.
+                # The explicit label is checked beside the falsy case because
+                # `"no_determination"` is a TRUTHY string: a `--ground-model
+                # simple` run sets it and walked straight past this branch into
+                # the conditional one. Defence in depth — the determination also
+                # drops its reason block now — because this renderer is the
+                # AHJ-facing surface and must not infer a verdict from an
+                # absence.
                 bearing = ("not applicable — this run reached no "
                            "determination")
             elif ident in conditional_ids:

@@ -149,6 +149,84 @@ class TestTheRefusalIsRenderedHonestly(unittest.TestCase):
             {"report": {"compliant": None, "simulate": "none"}}))
         self.assertIn("no annual run", html)
 
+    def test_a_CONDITIONAL_building_does_not_ship_a_contradictory_appendix(self):
+        """The AHJ appendix is the fourth surface, and the one that mattered.
+
+        `"no_determination"` is a TRUTHY string, so the appendix's
+        "no determination to be conditional on" branch — added for Fable's
+        earlier finding, which guarded `--simulate none` — was walked straight
+        past, and the row fell through to "YES — this run's determination is
+        conditional on it". Meanwhile the badge beside it said UNDETERMINED.
+        The report is the AHJ-facing artifact and it contradicted itself, for
+        AHJ-1, AHJ-2 and AHJ-14, on any building that would have been
+        conditional — four of the six frozen determinations.
+
+        The sibling tests could not see this: their fixture is never
+        conditional, so `conditional_ids` was always empty and the fall-through
+        was unreachable. This one supplies the conditional state the others
+        lack, which is the whole point of it.
+        """
+        from btap.codes.report import sections
+
+        report = dict(self.REPORT)
+        # Exactly what a conditional run writes, left in place beside the
+        # refusal — the state the override now clears.
+        report["compliance_determination_reason"] = {
+            "ahj_ids": ["AHJ-1", "AHJ-2", "AHJ-14"],
+            "condition": "approval by the authority having jurisdiction",
+            "ahj_must_approve": ["AHJ-1: ...", "AHJ-2: ...", "AHJ-14: ..."],
+        }
+        # AHJ-1 is `alternative-solution` and AHJ-2 is `referral`, so both are
+        # approval-required and reach the bearing branch. Entries that actually
+        # CITE them are required or `fired` is empty and no row renders at all,
+        # which would make this assertion vacuous.
+        ctx = {"report": report,
+               "audit_entries": [{"ahj": "AHJ-1"}, {"ahj": "AHJ-2"}]}
+        html = str(sections.ahj_appendix(ctx))
+
+        self.assertIn("AHJ-1", html, "the row must exist for its bearing to "
+                                     "be worth asserting")
+        self.assertNotIn("conditional on it", html,
+                         "a run that established no target cannot be "
+                         "conditional on anything")
+        self.assertIn("reached no determination", html)
+
+    def test_the_refusal_clears_a_REAL_conditional_reason_block(self):
+        """Defence in depth, and the half that was unwitnessed.
+
+        Asserting the absence of the block after an ordinary run proves
+        nothing, because every available fixture is unconditional and the block
+        was never written. So this builds one with the REAL `_set_conditional`
+        and hands it to the refusal, which is the only way to see the clearing
+        happen.
+        """
+        from btap.audit import AuditLog
+        from btap.codes.necb import path as necb_path
+        from tests.necb.support import real_conditional_report
+
+        report = real_conditional_report(
+            [{"id": "AHJ-1", "status": "alternative-solution",
+              "title": "t", "article": "8.4.1.2.(2)", "target": "Boiler",
+              "account": "a"}])
+        self.assertIn("compliance_determination_reason", report,
+                      "the fixture must START conditional or this test is "
+                      "vacuous")
+
+        class _Run:
+            pass
+
+        run = _Run()
+        run.report = report
+        run.audit = AuditLog()
+        run.compliant = True
+        necb_path._refuse_determination(run, {"reason": "x", "floors": ["F"]})
+
+        self.assertIsNone(run.compliant)
+        self.assertEqual("no_determination",
+                         report["compliance_determination"])
+        self.assertNotIn("compliance_determination_reason", report)
+        self.assertIn("no_determination", report)
+
     def test_an_ordinary_unsized_run_still_says_no_annual_simulation(self):
         """The CONTROL: the old message is still right when it IS the reason,
         so the fix reads the report rather than replacing the default."""
@@ -159,6 +237,33 @@ class TestTheRefusalIsRenderedHonestly(unittest.TestCase):
         rep = {"annual": True, "simulate": "none", "compliant": None}
         line = cli.determination(SimpleNamespace(compliant=None, report=rep), rep)
         self.assertIn("no annual simulation", line)
+
+
+class TestTheModeIsValidatedAtTheBoundary(unittest.TestCase):
+    """Everything downstream asks `!= "kiva"`, so an unvalidated value makes a
+    typo, a None or a capitalised "Kiva" silently select `simple` — and refuse
+    to determine. A wrong mode is an argument error, not a verdict.
+
+    The CLI cannot deliver a bad value (argparse `choices=` rejects it first),
+    so the API is the only route that had the bug and the only route this
+    pins. Fable flagged the validator as fixed-but-untested.
+    """
+
+    def test_the_two_modes_are_accepted(self):
+        from btap.codes import pipeline
+
+        for mode in ("kiva", "simple"):
+            self.assertEqual(mode, pipeline._ground_model(mode))
+
+    def test_anything_else_raises_rather_than_meaning_simple(self):
+        from btap.codes import pipeline
+
+        for bad in (None, "Kiva", "KIVA", "", "nonsense", 0, True):
+            with self.subTest(value=bad):
+                with self.assertRaises(ValueError) as caught:
+                    pipeline._ground_model(bad)
+                self.assertIn("ground_model must be one of",
+                              str(caught.exception))
 
 
 @needs_sdk

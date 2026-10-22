@@ -344,27 +344,7 @@ def determine(run):
     # already use. The override is LAST so no later phase can undo it.
     blocked = run.state.get("target_not_established")
     if blocked is not None:
-        run.compliant = None
-        run.report["compliance_determination"] = "no_determination"
-        run.report["no_determination"] = {
-            "reason": "building energy target not established",
-            "article": "8.4.1.1.(1)",
-            "ruling": "D-32",
-            "detail": blocked,
-            "what_would_fix_it": (
-                "re-run without --ground-model simple; the default kiva mode "
-                "gives the reference a slab edge on which 3.2.3.3.(3)'s 1.2 m "
-                "strip can be applied, which is what 8.4.1.1.(1) requires the "
-                "target to account for"
-            ),
-        }
-        run.audit.warn(
-            "compliance",
-            "NO DETERMINATION — the building energy target was not established "
-            "per 8.4.1.1.(1), so the 8.4.1.2.(2) comparison has no valid basis; "
-            "the energies below are DIAGNOSTIC only and are neither a pass nor "
-            "a fail, and this is deliberately NOT a conditional result",
-            inputs=blocked, article="8.4.1.1.(1)", ruling="D-32")
+        _refuse_determination(run, blocked)
 
     return Verdict(compliant=run.compliant, report=run.report)
 
@@ -2647,3 +2627,49 @@ def suggest_space_types(name, catalog):
 def _inspect(value):
     """Ruby ``#inspect`` for the pre-flight message: nil / "quoted"."""
     return "nil" if value is None else f'"{value}"'
+
+
+def _refuse_determination(run, blocked):
+    """Turn a run whose TARGET was never established into no determination.
+
+    Named rather than inlined in `determine` because it carries a contract
+    worth driving directly: a run that WOULD have been conditional must have
+    its conditional reason block CLEARED, and the only way to witness that is
+    to hand this function a report which already has one. Through `determine`
+    alone the clearing was unwitnessed — every available fixture is
+    unconditional, so the assertion passed against a report that never held
+    the block. Fable's `133` re-review found the consequence.
+    """
+    run.compliant = None
+    run.report["compliance_determination"] = "no_determination"
+    # A target that was never established cannot be CONDITIONAL on
+    # anything, so the conditional reason block must go rather than sit
+    # beside the refusal. Fable's `133` re-review: it survived, so
+    # `ahj_appendix` read its `ahj_ids` and told an authority "YES — this
+    # run's determination is conditional on it" for AHJ-1, AHJ-2 and
+    # AHJ-14 while the badge beside it said UNDETERMINED. The report is the
+    # AHJ-facing artifact and it contradicted itself.
+    #
+    # `ahj_applied` is deliberately KEPT: those dispositions really were
+    # applied to runtime choices during the run, which stays true whether
+    # or not a determination came out of it.
+    run.report.pop("compliance_determination_reason", None)
+    run.report["no_determination"] = {
+        "reason": "building energy target not established",
+        "article": "8.4.1.1.(1)",
+        "ruling": "D-32",
+        "detail": blocked,
+        "what_would_fix_it": (
+            "re-run without --ground-model simple; the default kiva mode "
+            "gives the reference a slab edge on which 3.2.3.3.(3)'s 1.2 m "
+            "strip can be applied, which is what 8.4.1.1.(1) requires the "
+            "target to account for"
+        ),
+    }
+    run.audit.warn(
+        "compliance",
+        "NO DETERMINATION — the building energy target was not established "
+        "per 8.4.1.1.(1), so the 8.4.1.2.(2) comparison has no valid basis; "
+        "the energies below are DIAGNOSTIC only and are neither a pass nor "
+        "a fail, and this is deliberately NOT a conditional result",
+        inputs=blocked, article="8.4.1.1.(1)", ruling="D-32")
