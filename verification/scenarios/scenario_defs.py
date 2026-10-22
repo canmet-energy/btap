@@ -381,12 +381,13 @@ DETERMINATION_SCENARIOS = [
     # quick run a non-determination, which is the whole reason the other
     # annual-tier scenarios cannot serve as guard-7 witnesses.
     #
-    # Every value below was read off two consecutive runs of the unmodified
-    # product that agreed on every reported figure (necb2020, Toronto
-    # CWEC2020). The reference's unmet hours are the substance of the guard:
-    # 0.0 h heating and 4.75 h cooling, where the proposed building logs 4.0 h
-    # cooling, so the comparison basis now holds setpoint. The remaining NOT
-    # COMPLIANT is the proposed building at 112.2% of target — a statement
+    # Every value below was originally read off two consecutive runs of the
+    # unmodified product that agreed on every reported figure (necb2020,
+    # Toronto CWEC2020). D-32's 2026-10-22 common Kiva ground method moved
+    # reference cooling unmet hours from 4.75 to 10.5 and proposed cooling
+    # unmet hours from 4.0 to 1.25; reference heating remains 0.0. The
+    # comparison basis still holds setpoint. The remaining NOT COMPLIANT is the
+    # proposed building at 112.9% of target — a statement
     # about the proposed building, which is what a performance path is for.
       #
       # 112.3 -> 112.2 on 2026-10-10, and the freeze gate REFUSED the baseline
@@ -396,6 +397,10 @@ DETERMINATION_SCENARIOS = [
       # DXCOOL-REF-COOLPLFFPLR, so the reference burns MORE at low load, the
       # target grows, and proposed/target falls. The direction was predicted
       # before the number was read.
+      #
+      # 112.2 -> 112.9 on 2026-10-22 when D-32 put both buildings on Kiva
+      # before sizing. The common method changes both annual ground loads; it
+      # does not restore the former simple-Ground ratio.
     {"id": "determination-03-18-vav-hw-subset-reheat-annual",
      "lane": "parity", "kind": "cli", "replaces": [],
      "argv": ["<CORPUS>/18-vav-hw-subset-reheat.osm",
@@ -417,9 +422,9 @@ DETERMINATION_SCENARIOS = [
          {"op": "json_equals", "file": "report.json",
           "path": "reference.unmet_occupied_hours.heating", "value": 0.0},
          {"op": "json_equals", "file": "report.json",
-          "path": "reference.unmet_occupied_hours.cooling", "value": 4.75},
+           "path": "reference.unmet_occupied_hours.cooling", "value": 10.5},
          {"op": "json_equals", "file": "report.json",
-          "path": "proposed.unmet_occupied_hours.cooling", "value": 4.0},
+           "path": "proposed.unmet_occupied_hours.cooling", "value": 1.25},
          # Per block, because an aggregate can hide four drifting blocks.
          {"op": "json_equals", "file": "report.json",
           "path": "reference.zone_unmet_occupied_hours.THERMAL ZONE 5.heating",
@@ -429,7 +434,7 @@ DETERMINATION_SCENARIOS = [
           "value": 0.0},
          # And the verdict is about the PROPOSED building.
          {"op": "json_equals", "file": "report.json",
-          "path": "percent_of_target", "value": 112.2},
+          "path": "percent_of_target", "value": 112.9},
          {"op": "json_equals", "file": "report.json", "path": "compliant",
           "value": False},
      ]},
