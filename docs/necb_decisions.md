@@ -8201,10 +8201,13 @@ engine behavior was not adopted as authority.
 
 **Evidence:** `test_heating_dominated_system_2_water_coils_size_cleanly`
 drives the real compliance call in both editions, proves the trigger remains
-above a 5:1 heating-to-cooling airflow ratio, matches every cooling coil's
-translated sizing value to its zone cooling design airflow, and requires a
-clean EnergyPlus result. `test_system_5_fan_coils_carry_the_same_translation_contract`
-pins the second reference-system call site.
+above a 4:1 heating-to-cooling airflow ratio after D-32's symmetric Kiva
+preparation, matches every cooling coil's translated sizing value to its zone
+cooling design airflow, and requires a clean EnergyPlus result. Deleting only
+the sizing marker while retaining the D-106 audit entry produces the issue's
+`Bad starting values for UA` Severe in both editions.
+`test_system_5_fan_coils_carry_the_same_translation_contract` pins the second
+reference-system call site.
 `test_marked_fan_coil_gets_mode_specific_sizing_in_both_backend_paths` pins
 the local and remote-IDF translation paths, while
 `test_unmarked_fan_coil_translation_is_unchanged` is the non-NECB control and

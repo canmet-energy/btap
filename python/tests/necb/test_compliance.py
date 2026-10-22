@@ -472,8 +472,11 @@ class TestComplianceWithEngine(unittest.TestCase):
                             for w in result.audit.warnings),
                         "week-long run loudly flagged as not code-compliant")
 
-        target = next((e for e in result.audit.entries
-                       if e.get("article") == "8.4.1.2.(2)"), None)
+        target = next((
+            e for e in result.audit.entries
+            if e.get("step") == "compliance"
+            and e.get("article") == "8.4.1.2.(2)"
+        ), None)
         self.assertIsNotNone(target, "building-energy-target decision cited")
         self.assertGreater(
             target["inputs"]["reference_building_energy_target_kwh"], 0)
