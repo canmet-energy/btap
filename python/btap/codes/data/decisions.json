@@ -1369,12 +1369,12 @@
         "necb2020",
         "necb2025"
       ],
-      "summary": "A warehouse residual was traced to insulating the full slab area to the table value in climate zones where the printed table prescribes only a perimeter strip and sets no maximum for the slab field. The transform now keeps the modelled slab field in those zones and adds the strip via the foundation model's interior horizontal insulation, sized so the strip assembly meets the table value; the coldest zone keeps its full-area requirement. Ground floors without a foundation object get an audited warning that the strip is not representable.",
+      "summary": "A warehouse residual was traced to insulating the full slab area to the table value in climate zones where the printed table prescribes only a perimeter strip and sets no maximum for the slab field. The transform keeps the modelled slab field in those zones and adds the strip through the foundation model; the coldest zone keeps its full-area requirement. For an ordinary perimeter-strip floor submitted with the simple Ground boundary, the performance path applies the same Kiva ground-heat-transfer method to proposed and reference before sizing so the energy comparison isolates the prescribed strip rather than also carrying a ground-model change. Ineligible floors remain as modeled with an audited warning.",
       "requirements": [
         {
           "id": "ground_floor_insulation_extent",
           "label": "Ground-floor insulation extent by climate zone",
-          "decided": "Zones 4 through 7B retain the modeled slab field and apply the table value over a 1.2 m perimeter strip, while zone 8 applies its full-area value; an unrepresentable strip warns.",
+          "decided": "Zones 4 through 7B retain the modeled slab field and apply the table value over a 1.2 m perimeter strip, while zone 8 applies its full-area value; an ineligible strip warns.",
           "sources": [
             {
               "code": "necb",
@@ -1392,6 +1392,29 @@
               "references": [
                 "Table 3.2.3.1",
                 "3.2.3.3.(3)"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ground_heat_transfer_method_symmetry",
+          "label": "Common ground heat-transfer method for the proposed/reference comparison",
+          "decided": "An eligible ordinary floor in a perimeter-strip climate uses Kiva in both proposed and reference before sizing; full-area, embedded and unresolved floors are not normalized into this branch.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "8.4.1.2.(2)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "8.4.1.2.(2)"
               ]
             }
           ]

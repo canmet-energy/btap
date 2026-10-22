@@ -71,19 +71,22 @@ class CodePath(Protocol):
 
     def prepare_model(self, run) -> None:
         """Anything this code must change about the PROPOSED model before it is
-        simulated at all — representation, never performance.
+        simulated at all to establish a common calculation method.
 
         Called after the weather and climate are known and BEFORE the proposed
         sizing run, because both of the proposed's runs and the reference
         (which is a CLONE of the proposed) have to see the same model. NECB's
-        implementation switches ground-contact floors to the EnergyPlus Kiva
-        foundation model so the proposed and the reference are compared under
-        the SAME ground physics.
+        implementation switches eligible ordinary perimeter-strip floors to
+        the EnergyPlus Kiva foundation model so proposed and reference are
+        compared under the SAME ground physics.
 
-        This is the one hook that edits the caller's model, so it is held to a
-        strict rule: it may change how an assembly is REPRESENTED and must not
-        change what it does. NECB's preserves every construction's resistance
-        exactly. Correcting a proposed model's PERFORMANCE remains out of
+        The hook edits the pipeline's cloned proposed, never the caller's model.
+        A calculation-method change can move simulated energy, so the boundary
+        is physical characteristics rather than numerical invariance: it may
+        normalize one solver representation on BOTH buildings, but must not
+        repair the submitted assembly or make it comply. NECB's implementation
+        preserves the slab-field resistance and does not add the prescribed
+        strip to the proposed. Correcting the proposed building remains out of
         scope — the gates refuse what cannot be used, and everything past them
         is disclosure.
 
@@ -215,6 +218,7 @@ def run(model, *, code="necb2020", weather=None, building=None,
         compliance._load_and_validate(state)  # 1. input model in, gates passed
         _attach_weather_and_hdd(state)   # 2. weather + the family's climate
         _prepare_model(state)            # 2b. the family's model preparation
+
         _size_proposed(state)            # 3. proposed sizing run
         state.report = _base_report(state)  # (the report rebinding — see above)
         _proposed_annual(state)          # 4. proposed annual (D-52: BEFORE the determination)
@@ -252,8 +256,6 @@ def _attach_weather_and_hdd(run):
             "HDD unresolvable: pass hdd= or weather with a recognized site")
 
 
-# 3. size the PROPOSED building (selection thresholds + efficiencies + costing
-#    all need capacities; the domain packages never simulate)
 # 2b. the family's chance to change the PROPOSED model before anything is
 #     simulated. It sits before the sizing run deliberately: the proposed's two
 #     runs and the reference (a clone of the proposed) must all see one model,
@@ -266,6 +268,8 @@ def _prepare_model(run):
         prepare(run)
 
 
+# 3. size the PROPOSED building (selection thresholds + efficiencies + costing
+#    all need capacities; the domain packages never simulate)
 def _size_proposed(run):
     opts = run.opts
     audit = run.audit

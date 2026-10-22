@@ -262,11 +262,14 @@ def _layers_are_standard_opaque(surface):
     return True, None
 
 
-def kiva_blockers(surface) -> list[str]:
+def kiva_blockers(surface, *, check_layers=True) -> list[str]:
     """Every reason EnergyPlus would refuse this surface as a Kiva surface.
 
     Empty means eligible. Each entry is a sentence naming the condition, so a
-    caller can report it rather than restating the rule.
+    caller can report it rather than restating the rule. ``check_layers=False``
+    is the preflight used before a caller replaces a known no-mass material
+    with a sourced Kiva-compatible representation; the final creation call
+    always checks the resulting layers.
     """
     blockers = []
 
@@ -288,9 +291,10 @@ def kiva_blockers(surface) -> list[str]:
             f"wall has {len(surface.vertices())} vertices; Kiva walls are limited to "
             f"{MAX_KIVA_WALL_VERTICES}")
 
-    ok, reason = _layers_are_standard_opaque(surface)
-    if not ok:
-        blockers.append(reason)
+    if check_layers:
+        ok, reason = _layers_are_standard_opaque(surface)
+        if not ok:
+            blockers.append(reason)
 
     return blockers
 

@@ -1298,11 +1298,12 @@ Decision: openstudio-envelope Prescriptive now implements the printed rule —
 zone 8 keeps the full-area retarget; zones 4-7B keep the modeled slab field
 and get the strip via the Kiva foundation's interior horizontal insulation
 (R sized so the strip assembly meets the table U, width from the rules JSON;
-plain-Ground floors without Kiva get an audited warning that the strip is
-not representable). The extent metadata lives OUTSIDE u_values (which is
-structurally pinned to the legacy JSON by test_data_integrity). Mechanism-
-parity test excludes ground floors (legacy old-BTAP applies full-area — one
-of the two mutually inconsistent legacy paths, see L-20).
+in the original implementation, plain-Ground floors without Kiva received an
+audited warning that the strip was not representable). The extent metadata
+lives OUTSIDE u_values (which is structurally pinned to the legacy JSON by
+test_data_integrity). Mechanism-parity test excludes ground floors (legacy
+old-BTAP applies full-area — one of the two mutually inconsistent legacy
+paths, see L-20).
 
 Measured effect (January week, % of target): Toronto electric 106 -> 104
 (heating delta +2.72 -> +1.28 GJ), Toronto gas 102 -> 106 (the reference's
@@ -1317,11 +1318,49 @@ in all climates from the wrong-vintage trigger (#2123 family, +0.19 GJ
 parasitic), and CV fan character (+0.31 GJ, #2127 family). The fixed-point
 premise again breaks from the legacy side, as with the D-28 offices.
 
-- Who/when: Claude under D-10 delegation, 2026-07-25.
+- Who/when: Claude under D-10 delegation, 2026-07-25 — original reading.
 - Evidence: [RAN] ABUPS end-use + SensibleHeatGainSummary decomposition on
   cached sweep SQL (4 variants); [RAN] object survey incl. Foundation
   surfaces; [READ, MCP] NECB 2020/2025 3.2.3.1/3.2.3.3/8.4.4.1; [RAN]
   envelope test battery + parity gate green; [RAN] 4-variant re-runs.
+
+### Applicability correction
+
+The original implementation boundary treated every ordinary floor submitted
+with the simple `Ground` boundary as unable to carry the perimeter strip.
+That is no longer the tool's limit. For an ordinary floor in a perimeter-strip
+climate, the performance path creates an EnergyPlus Kiva foundation when the
+floor passes the measured eligibility checks and applies that same
+ground-heat-transfer method to proposed and reference before proposed sizing.
+The proposed keeps its submitted slab-field resistance and receives no
+prescriptive strip; the reference clone receives the 1.2 m strip. This makes
+the 8.4.1.2 annual-energy comparison carry the prescribed assembly difference
+without also charging the proposed for a different ground algorithm.
+
+This is calculation-method normalization under Articles 8.4.2.1, 8.4.2.2,
+8.4.2.4 and 8.4.2.8, not correction of the proposed building's performance.
+It is deliberately narrower than "put Kiva on every ground floor." Zone 8 and
+embedded floors already take the full-area construction path and remain on
+their submitted ground method; unresolved embedded-system applicability also
+remains untouched rather than being guessed into the ordinary-floor branch.
+An ineligible perimeter-strip floor stays as modeled in both buildings and
+warns.
+
+For the known `CP02 CARPET PAD` no-mass representation, the compatibility
+conversion uses the pinned oracle's thin-carpet properties: conductivity
+0.06 W/(m.K), density 288 kg/m3 and specific heat 1380 J/(kg.K). It preserves
+the layer's resistance and submitted absorptances while disclosing the added
+heat capacity. Unknown no-mass materials and air gaps are refused rather than
+assigned invented physical properties.
+
+Setting monthly `Site:GroundTemperature:BuildingSurface` values is not a
+substitute: an EPW supplies weather, not a uniquely prescribed building-surface
+ground-temperature series, and the simple boundary still has no two-dimensional
+slab edge on which to place the strip.
+
+- **Correction ruling/when:** phylroy directed an apples-to-apples comparison
+  on 2026-10-22; Sol adjudicated the perimeter-strip-only scope and method
+  boundary on 2026-10-22.
 
 <a id="d-33"></a>
 

@@ -1,8 +1,8 @@
 # Creating Kiva foundations, so 3.2.3.3.(3) is representable
 
-**Status:** planned, 2026-10-21. The largest single warning class in the
-28-archetype sweep, and the only one that is compliance-material rather than
-diagnostic.
+**Status:** phases 1 and 2 landed; phase 3 adjudicated 2026-10-22. The largest
+single warning class in the 28-archetype sweep, and the only one that is
+compliance-material rather than diagnostic.
 
 ## The gap, measured
 
@@ -242,27 +242,38 @@ It sets NO insulation. NECB's strip is `btap.codes.necb`'s to prescribe and
 `_apply_ground_strip` already does it, so this keeps the D-77 direction intact
 and puts no `article=` in `btap.modeling`.
 
-## Phase 3 — decide WHEN the reference creates one
+## Phase 3 — adjudicated: one method on both sides
 
-The adjudicated part. Needs Sol.
+D-32 now requires the same EnergyPlus Kiva ground-heat-transfer method on the
+pipeline's proposed and reference copies before sizing. Reference-only Kiva
+would make the 8.4.1.2 comparison carry two changes: the prescribed perimeter
+strip and a change of ground solver. Symmetric Kiva is calculation-method
+normalization under 8.4.2.1, 8.4.2.2, 8.4.2.4 and 8.4.2.8, not a correction of
+the submitted building:
 
-Today the reference inherits whatever foundations the proposed carries and
-warns when there are none. Creating one changes the reference building. For:
-3.2.3.3.(3) prescribes the strip, we cannot apply it, and the alternative is a
-reference slab identical to the proposed. Against: a Kiva foundation is a
-modelling choice about soil and footing geometry the proposed did not make, and
-phylroy's ruling of 2026-10-21 is that reference creation builds from what is
-available rather than correcting the proposed.
+- the caller's model is never mutated;
+- the proposed copy retains its submitted slab-field thermal resistance and
+  receives no prescribed perimeter insulation;
+- the reference inherits that Kiva foundation and then receives D-32's 1.2 m
+  strip.
 
-Those pull opposite ways and the answer is not mine to pick. Creating on the
-REFERENCE only is the posture `_reconcile_declared_storeys` already takes, for
-the reason its comment gives: the caller's model is not ours to edit.
+This ruling is deliberately narrower than "put Kiva on every ground floor."
+It applies only to ordinary floors in the perimeter-strip branch. Full-area
+climates remain on the existing full-area construction path. Detected embedded
+floors and unresolved embedded-system cases remain on D-105's path. Floors with
+invalid topology, no exposed perimeter, or an unsupported material
+representation remain unchanged and visibly refused.
 
-If yes, it needs a decision record, and the archetype question arrives with it:
-Kiva wants insulation position and extent. NECB prescribes the extent (1.2 m);
-position and soil it does not. `kiva_archetypes.py` is explicit that its own
-numbers are "conventional starting points rather than anything sourced", so
-they cannot be imported as though sourced.
+Kiva cannot translate a massless layer. The one known fixture representation,
+`CP02 CARPET PAD`, is converted on each eligible floor's private construction
+using the pinned oracle's thin-carpet properties while preserving resistance
+and submitted absorptances. Unknown no-mass layers and air gaps are not guessed.
+The conversion adds sourced carpet heat capacity and is disclosed as such.
+
+An EPW is not an equivalent substitute. It does not uniquely prescribe the
+monthly `Site:GroundTemperature:BuildingSurface` series without another
+depth/model choice, and a simple `Ground` boundary still cannot represent the
+2-D perimeter strip.
 
 ## Phase 4 — the witness, and the freeze
 
@@ -271,9 +282,11 @@ all 56 scenarios, and expect NUMERIC movement — unlike every re-freeze in the
 last three days, this one legitimately changes results, which makes the
 before/after diff the review surface rather than a formality.
 
-The witness must be at the call site and mutated: delete the creation call and
-the aggregated "N ground floors have NO Kiva foundation" warning must return.
-No scenario currently exercises a created foundation, so one is needed — and
+The witness must be at the call site and mutated: deleting the neutral
+pipeline's `prepare_model` call must make a real compliance determination lose
+its proposed and reference Kiva foundations, while the full-area control stays
+green. The witness also checks that only the reference has the 1.2 m strip and
+that a zero-perimeter floor is refused before its construction changes.
 #128's lesson applies, that a scenario reaching the SELECTION is not one
 reaching the FAILURE. For E11 specifically the witness is a model whose walls
 exceed the perimeter, which must be refused rather than reaching EnergyPlus.
@@ -281,8 +294,9 @@ exceed the perimeter, which must be refused rather than reaching EnergyPlus.
 ## What this plan does not do
 
 - **No vendored archetype table**, for the provenance reason above.
-- **No proposed-model foundations.** Phase 2 creates on request; Phase 3 may
-  authorise the reference only.
+- **No submitted-model repair and no reference-only ground method.** The
+  pipeline's private proposed copy and its reference use the same Kiva method;
+  only the reference receives NECB's strip.
 - **No `openstudio-mcp` dependency** — a server, BSD, useful as a reference
   and a source of ported code, not as an import.
 - **No change to `_apply_ground_strip` or the D-105 trio.** Both already work

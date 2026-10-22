@@ -264,16 +264,20 @@ def fenestration_visible_transmittance(construction) -> float:
     return 0.60
 
 
-# A plausible conductivity for the soft finish layers (carpet pad, underlay)
-# that are modelled massless in the DOE prototypes, so a mass-equivalent
-# replacement gets a believable thickness rather than an arbitrary one.
-# 13 mm at R-0.2165 for CP02 CARPET PAD, the layer that blocks every shipped
-# archetype's slab.
-FINISH_CONDUCTIVITY_W_MK = 0.06
-# Light, like the carpet pad it replaces: ~1.3 kg/m2 at 13 mm, against the
-# 228 kg/m2 of a 100 mm concrete slab, so the added mass is under 1%.
-FINISH_DENSITY_KG_M3 = 100.0
-FINISH_SPECIFIC_HEAT_J_KGK = 1200.0
+# The pinned oracle models a thin carpet finish with these properties in
+# Prototype.hvac_systems.rb. They are evidence for CP02 CARPET PAD specifically,
+# not a licence to invent physical properties for arbitrary no-mass layers.
+KIVA_CARPET_CONDUCTIVITY_W_MK = 0.06
+KIVA_CARPET_DENSITY_KG_M3 = 288.0
+KIVA_CARPET_SPECIFIC_HEAT_J_KGK = 1380.0
+_CP02_CARPET_PAD = re.compile(r"^CP02 CARPET PAD(?: \d+)?$", re.IGNORECASE)
+
+
+def _kiva_carpet(layer):
+    material = opt(layer.to_MasslessOpaqueMaterial())
+    if material is None or not _CP02_CARPET_PAD.fullmatch(material.nameString()):
+        return None
+    return material
 
 
 def kiva_legal(model, surface):
@@ -282,22 +286,21 @@ def kiva_legal(model, surface):
     changed, or None when nothing had to.
 
     EnergyPlus refuses a Foundation surface whose construction carries any
-    no-mass layer, and every shipped archetype's slab does: `CP02 CARPET PAD`,
-    massless at R-0.2165, blocks 582 of 588 ground floors. Each such layer is
-    replaced by a StandardOpaqueMaterial at the SAME thermal resistance, given
-    a plausible finish conductivity so the thickness is believable and a low
-    density so the added thermal mass stays under 1% of the slab's.
+    no-mass layer, and 582 of the 588 shipped-archetype ground floors carry the
+    known `CP02 CARPET PAD`, massless at R-0.2165. That specific material is
+    replaced by a StandardOpaqueMaterial at the SAME thermal resistance using
+    the pinned oracle's sourced thin-carpet conductivity, density and specific
+    heat. Roughness and absorptances are copied from the submitted layer.
+    Unknown no-mass materials and air gaps are left untouched so Kiva
+    eligibility refuses them rather than assigning guessed physical properties.
 
-    The construction is CLONED when it is also used by surfaces that are not
-    being converted, so a shared construction cannot be changed out from under
-    them. The shipped archetypes do not need that — their slab construction is
-    used by ground floors only — but a model that shares one would otherwise
-    have its walls silently altered.
+    The construction is ALWAYS CLONED, so a shared construction cannot be
+    changed out from under a refused floor or another surface.
 
-    R is preserved, so this changes how the assembly is REPRESENTED, not how
-    much heat it resists. It is the symmetry requirement for comparing a
-    proposed and a reference under the same ground model, not a correction to
-    the proposed.
+    R is preserved, but replacing a no-mass layer necessarily introduces the
+    sourced carpet's heat capacity. This is part of the symmetric ground-method
+    normalization, not a claim that the two material objects are dynamically
+    identical.
     """
     construction = opt(surface.construction())
     if construction is None:
@@ -306,12 +309,16 @@ def kiva_legal(model, surface):
     if layered is None:
         return None
 
-    massless_layers = [
+    nonstandard_layers = [
         (index, layer) for index, layer in enumerate(layered.layers())
-        if opt(layer.to_MasslessOpaqueMaterial()) is not None
-        or opt(layer.to_AirGap()) is not None
+        if opt(layer.to_StandardOpaqueMaterial()) is None
     ]
-    if not massless_layers:
+    if not nonstandard_layers:
+        return None
+    convertible = [
+        (index, _kiva_carpet(layer)) for index, layer in nonstandard_layers
+    ]
+    if any(material is None for _index, material in convertible):
         return None
 
     before_r = None
@@ -319,37 +326,35 @@ def kiva_legal(model, surface):
     if conductance is not None and conductance > 0:
         before_r = 1.0 / conductance
 
-    # Only clone when another surface would be affected.
-    others = [
-        s for s in model.getSurfaces()
-        if s.handle() != surface.handle()
-        and (lambda c: c is not None and c.handle() == construction.handle())(
-            opt(s.construction()))
+    # Always clone. Besides protecting other surfaces, this makes the conversion
+    # replaceable as one object if the later foundation write is refused.
+    target = layered.clone(model).to_LayeredConstruction().get()
+    target.setName(f"{layered.nameString()} (Kiva)")
+    if not surface.setConstruction(target):
+        target.remove()
+        raise RuntimeError(
+            f"could not assign Kiva-compatible construction to "
+            f"{surface.nameString()!r}")
+    convertible = [
+        (index, _kiva_carpet(layer))
+        for index, layer in enumerate(target.layers())
+        if opt(layer.to_StandardOpaqueMaterial()) is None
     ]
-    target = layered
-    cloned = False
-    if others:
-        target = layered.clone(model).to_LayeredConstruction().get()
-        target.setName(f"{layered.nameString()} (Kiva)")
-        surface.setConstruction(target)
-        cloned = True
-        massless_layers = [
-            (index, layer) for index, layer in enumerate(target.layers())
-            if opt(layer.to_MasslessOpaqueMaterial()) is not None
-            or opt(layer.to_AirGap()) is not None
-        ]
 
     replaced = []
-    for index, layer in massless_layers:
-        massless = opt(layer.to_MasslessOpaqueMaterial())
-        resistance = (massless.thermalResistance() if massless is not None
-                      else opt(layer.to_AirGap()).thermalResistance())
-        thickness = FINISH_CONDUCTIVITY_W_MK * resistance
+    for index, material in convertible:
+        resistance = material.thermalResistance()
+        thickness = KIVA_CARPET_CONDUCTIVITY_W_MK * resistance
         replacement = openstudio.model.StandardOpaqueMaterial(
-            model, "MediumSmooth", thickness, FINISH_CONDUCTIVITY_W_MK,
-            FINISH_DENSITY_KG_M3, FINISH_SPECIFIC_HEAT_J_KGK)
+            model, material.roughness(), thickness,
+            KIVA_CARPET_CONDUCTIVITY_W_MK,
+            KIVA_CARPET_DENSITY_KG_M3,
+            KIVA_CARPET_SPECIFIC_HEAT_J_KGK)
+        replacement.setThermalAbsorptance(material.thermalAbsorptance())
+        replacement.setSolarAbsorptance(material.solarAbsorptance())
+        replacement.setVisibleAbsorptance(material.visibleAbsorptance())
         replacement.setName(
-            f"{layer.nameString()} (mass-equivalent, "
+            f"{material.nameString()} (Kiva-compatible, "
             f"R-{ruby_str(ruby_round(resistance, 4))})")
         if not target.setLayer(index, replacement):
             replacement.remove()
@@ -357,10 +362,13 @@ def kiva_legal(model, surface):
                 f"could not replace massless layer {index} of "
                 f"{target.nameString()!r}")
         replaced.append({
-            "layer": layer.nameString(),
+            "layer": material.nameString(),
             "resistance_m2k_w": resistance,
             "thickness_m": thickness,
-            "added_mass_kg_m2": thickness * FINISH_DENSITY_KG_M3,
+            "added_mass_kg_m2": thickness * KIVA_CARPET_DENSITY_KG_M3,
+            "added_heat_capacity_j_m2k":
+                thickness * KIVA_CARPET_DENSITY_KG_M3
+                * KIVA_CARPET_SPECIFIC_HEAT_J_KGK,
         })
 
     after_r = None
@@ -370,7 +378,7 @@ def kiva_legal(model, surface):
 
     return {
         "construction": target.nameString(),
-        "cloned": cloned,
+        "cloned": True,
         "replaced": replaced,
         "resistance_before_m2k_w": before_r,
         "resistance_after_m2k_w": after_r,

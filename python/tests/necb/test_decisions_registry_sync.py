@@ -114,7 +114,7 @@ STRUCTURED_RUNTIME_SHA256 = {
     "D-27": "25dfea7660112851261febd2cfe2c44eb2a54014d372a636afae08def6c58d07",
     "D-28": "39659f04a161b019ad9b4982ba1ef651d093661e469816ff410a2ef42571badc",
     "D-31": "18b9646d43dd3508a9c11625c1891e0b93c98da1f73884b6bf15ce6bbef55fca",
-    "D-32": "9bea4495592d5ed9d41b456146910b7eff8516947140ebda0da5d169edb92c9e",
+    "D-32": "8b4de9fb740d738a6c8dc899d53e7bc4d9a75ccd4447e2fe36836c9db950474c",
     "D-34": "9635c9859756a364f52688cf44de2f9f3e4b1103c73143881d4f883721ea9c05",
     "D-35": "a2aa95aa01f059f12d48400a402ad19dc9b638499e49bd145816ca06e7e22ebe",
     "D-37": "2b200a5bafaeb8bd4fcc344cd84762cfe08c5d1c25adac02facef0a680e079bd",
@@ -222,7 +222,10 @@ STRUCTURED_KEYS = {
         "multizone_thermal_block_grouping",
     ),
     "D-31": ("fan_inclusive_dx_efficiency_ratings",),
-    "D-32": ("ground_floor_insulation_extent",),
+    "D-32": (
+        "ground_floor_insulation_extent",
+        "ground_heat_transfer_method_symmetry",
+    ),
     "D-34": ("heat_pump_block_redirect",),
     "D-35": ("reference_envelope_lightweight_mass",),
     "D-37": ("heat_pump_reference_by_source",),
@@ -583,6 +586,11 @@ STRUCTURED_REQUIREMENTS = {
         "Ground-floor insulation extent by climate zone",
         ("Table 3.2.3.1", "3.2.3.3.(3)"),
         ("Table 3.2.3.1", "3.2.3.3.(3)"),
+    ),
+    "ground_heat_transfer_method_symmetry": (
+        "Common ground heat-transfer method for the proposed/reference comparison",
+        ("8.4.1.2.(2)",),
+        ("8.4.1.2.(2)",),
     ),
     "heat_pump_capacity_alignment": (
         "Reference heat-pump heating capacity aligned to cooling capacity",
@@ -1659,14 +1667,14 @@ class TestTheCommittedProvisionView(unittest.TestCase):
     #: Phase C converted every established mapping (23 structured), then Phase
     #: D's seven batches moved 42 held decisions to the structured form (65).
     #: D-104 through D-106 are native structured decisions, taking the total
-    #: to 68 with 3 held. Sixteen requirements have one source and the other 110
+    #: to 68 with 3 held. Sixteen requirements have one source and the other 111
     #: have two; one of those records is D-60's related 2020 comparison.
     #: REQUIREMENTS counts instances, including a shared key once per decision
     #: that uses it.
     STRUCTURED, ESTABLISHED, HELD, INCLUDED, OMITTED = 68, 0, 3, 71, 35
-    SOURCE_ROWS = 236
-    GOVERNING_ROWS = 235
-    REQUIREMENTS = 126
+    SOURCE_ROWS = 238
+    GOVERNING_ROWS = 237
+    REQUIREMENTS = 127
 
     @classmethod
     def setUpClass(cls):
