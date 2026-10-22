@@ -118,7 +118,8 @@ def run(argv, out=None, err=None):
 def parse(argv, out, err):
     """:return: (options, None) or (None, early exit code)"""
     o = {"code": DEFAULT_CODE, "simulate": "annual", "report_html": True,
-         "backend": "local", "report_options": {}, "necb_loads": {}}
+         "backend": "local", "report_options": {}, "necb_loads": {},
+         "ground_model": "kiva"}
     parser = build_parser()
     try:
         namespace, rest = parser.parse_known_args(list(argv))
@@ -203,6 +204,18 @@ def build_parser():
                         "System 5 for them")
     p.add_argument("--simulate", choices=["annual", "sizing", "none"],
                    default="annual", help="annual (default), sizing, or none")
+    p.add_argument("--ground-model", choices=["kiva", "simple"], default="kiva",
+                   dest="ground_model",
+                   help="ground heat transfer for slab-on-grade and basement "
+                        "floors. kiva (default) solves a 2D soil domain on "
+                        "BOTH the proposed and the reference, which is what "
+                        "gives the reference a slab edge for the 3.2.3.3.(3) "
+                        "perimeter strip that 8.4.1.1.(1) requires the energy "
+                        "target to account for. simple keeps each floor's "
+                        "Ground boundary condition and is DIAGNOSTIC ONLY: "
+                        "where that strip applies it establishes no energy "
+                        "target, so the run makes NO determination (exit 6) "
+                        "rather than a pass or a fail")
     p.add_argument("--quick", action="store_true",
                    help="one-week run period - NOT a code determination")
     p.add_argument("--backend", choices=["local", "remote"], default="local",
@@ -251,7 +264,7 @@ def _collect(o, namespace):
     for key in ("epw", "ddy", "hdd", "city", "run_dir", "code", "storeys",
                 "refrigerated_zones",
                 "simulate", "quick", "backend", "report_html", "json", "quiet",
-                "space_type", "space_type_map", "costs_csv"):
+                "space_type", "space_type_map", "costs_csv", "ground_model"):
         if ns.get(key) is not None:
             o[key] = ns[key]
     o["list_cities"] = bool(ns.get("list_cities"))
@@ -347,6 +360,8 @@ def compliance_kwargs(o):
     loads = necb_loads(o)
     if loads:
         kw["necb_loads"] = loads
+    if o.get("ground_model"):
+        kw["ground_model"] = o["ground_model"]
     return model_argument(o), kw
 
 
@@ -558,6 +573,14 @@ def determination(result, rep):
     if rep.get("annual") is False:
         return "NO DETERMINATION - run period shortened"
     if result.compliant is None:
+        # A run can reach `compliant is None` having simulated a full year:
+        # `--ground-model simple` establishes no building energy target per
+        # 8.4.1.1.(1), so there is nothing to compare against. Saying "no
+        # annual simulation" there is simply false, and the report carries the
+        # real reason — so render it rather than the default assumption.
+        block = rep.get("no_determination")
+        if block:
+            return f"NO DETERMINATION - {block['reason']}"
         return "NO DETERMINATION - no annual simulation"
     verdict = "COMPLIANT" if result.compliant else "NOT COMPLIANT"
     # 8.4.x.9.(5) is not implemented for a multi-energy serving system, so the
@@ -581,6 +604,19 @@ def verdict_block(result, rep):
             "  year. The comparison above is arithmetic only.", "",
             "  VERDICT: NO DETERMINATION", rule])
     if result.compliant is None:
+        block = rep.get("no_determination")
+        if block:
+            # A full year WAS simulated; what is missing is the target, so
+            # "run with --simulate annual" would be useless advice. The report
+            # carries both the reason and what would fix it.
+            lines = ["", "  *** NOT A CODE-COMPLIANT DETERMINATION ***",
+                     f"  {block['reason'].capitalize()} "
+                     f"({block.get('article', '')}).".rstrip(". ") + ".",
+                     "  The energies above are DIAGNOSTIC only.", ""]
+            fix = block.get("what_would_fix_it")
+            if fix:
+                lines += [f"  Fix: {fix}", ""]
+            return "\n".join(lines + ["  VERDICT: NO DETERMINATION", rule])
         return "\n".join([
             "", f"  VERDICT: NO DETERMINATION (simulate: {rep.get('simulate')})",
             "  Run with --simulate annual for an 8.4.1.2 determination.", rule])

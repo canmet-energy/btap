@@ -8,6 +8,8 @@
  "reference": {},
  "compliant": null,
  "warnings": [
+  "the pipeline's PROPOSED copy replaces known CP02 carpet-pad no-mass layers with the pinned thin-carpet material needed by Kiva; thermal resistance and submitted absorptances are preserved, while the sourced carpet heat capacity is disclosed",
+  "ordinary perimeter-strip floors that could NOT take a Kiva foundation keep the simple Ground boundary condition \u2014 the 1.2 m strip of 3.2.3.3.(3) is not representable and those slabs stay as modeled in BOTH proposed and reference",
   "proposed is UNSIZED (simulate: :none) \u2014 data-centre kW thresholds and capacity-binned efficiencies fall back with warnings; the 5.2.10.1 energy-recovery determination needs sized flows and is SKIPPED",
   "Purchased Energy \u2014 partial. Applied: purchased HEATING is represented by a gas-fired modulating boiler ((1)(a)) via the energy-type election. Gaps: the (1)(b) capacity-ratio adjustment is sizing-time and not enforced",
   "Purchased Energy \u2014 partial. Applied: purchased COOLING forces an air-cooled electric chiller ((2)(a)) via the chw_source config. Gaps: the (2)(b) capacity-ratio adjustment is sizing-time and not enforced",
@@ -31,7 +33,7 @@
   "Supply Air Systems (airflow rates, fan specs) \u2014 partial. Applied: block supply airflow comes from zone sizing. Gaps: the greater-of criteria at the 21/11 C supply-air deltas are not explicitly enforced",
   "Supply Air Systems (airflow rates, fan specs) \u2014 not implemented. Gaps: the identical-fan-power fallback for secondaries failing 5.2.3.1.(1)(b) is not modeled",
   "Supply Air Systems (airflow rates, fan specs) \u2014 not implemented. Gaps: the exemption for equipment whose fan energy is included in the Tables 5.2.12.1 minimum performance is not modeled",
-  "5 ground floors have NO Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m insulated strip required by 3.2.3.3.(3) is not representable and those slabs are left AS MODELLED, so the prescribed perimeter insulation is NOT applied",
+  "1 ground floors have NO Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m insulated strip required by 3.2.3.3.(3) is not representable and those slabs are left AS MODELLED, so the prescribed perimeter insulation is NOT applied",
   "8 conditioned-to-conditioned interzone assemblies left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
   "TBD: Zero 'ASHRAE 189.1-2009 ExtWall Mass ClimateZone 5:U-0.2759: new Rsi' (TBD::uo)",
   "TBD: Unable to uprate 'ASHRAE 189.1-2009 ExtWall Mass ClimateZone 5:U-0.2759' (TBD::uprate)",

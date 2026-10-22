@@ -645,6 +645,131 @@
   "level": "decision"
  },
  {
+  "step": "prepare",
+  "action": "the pipeline's PROPOSED copy replaces known CP02 carpet-pad no-mass layers with the pinned thin-carpet material needed by Kiva; thermal resistance and submitted absorptances are preserved, while the sourced carpet heat capacity is disclosed",
+  "inputs": {
+   "floors": 4,
+   "surfaces": [
+    {
+     "surface": "Surface 1",
+     "construction": "000 ExtSlabCarpet 4in ClimateZone 1-8 (Kiva)",
+     "cloned": true,
+     "replaced": [
+      {
+       "layer": "CP02 CARPET PAD",
+       "resistance_m2k_w": 0.2165,
+       "thickness_m": 0.01299,
+       "added_mass_kg_m2": 3.74112,
+       "added_heat_capacity_j_m2k": 5162.7456
+      }
+     ],
+     "resistance_before_m2k_w": 0.2939980930587338,
+     "resistance_after_m2k_w": 0.2939980930587338
+    },
+    {
+     "surface": "Surface 13",
+     "construction": "000 ExtSlabCarpet 4in ClimateZone 1-8 (Kiva) 1",
+     "cloned": true,
+     "replaced": [
+      {
+       "layer": "CP02 CARPET PAD",
+       "resistance_m2k_w": 0.2165,
+       "thickness_m": 0.01299,
+       "added_mass_kg_m2": 3.74112,
+       "added_heat_capacity_j_m2k": 5162.7456
+      }
+     ],
+     "resistance_before_m2k_w": 0.2939980930587338,
+     "resistance_after_m2k_w": 0.2939980930587338
+    },
+    {
+     "surface": "Surface 19",
+     "construction": "000 ExtSlabCarpet 4in ClimateZone 1-8 (Kiva) 2",
+     "cloned": true,
+     "replaced": [
+      {
+       "layer": "CP02 CARPET PAD",
+       "resistance_m2k_w": 0.2165,
+       "thickness_m": 0.01299,
+       "added_mass_kg_m2": 3.74112,
+       "added_heat_capacity_j_m2k": 5162.7456
+      }
+     ],
+     "resistance_before_m2k_w": 0.2939980930587338,
+     "resistance_after_m2k_w": 0.2939980930587338
+    },
+    {
+     "surface": "Surface 7",
+     "construction": "000 ExtSlabCarpet 4in ClimateZone 1-8 (Kiva) 3",
+     "cloned": true,
+     "replaced": [
+      {
+       "layer": "CP02 CARPET PAD",
+       "resistance_m2k_w": 0.2165,
+       "thickness_m": 0.01299,
+       "added_mass_kg_m2": 3.74112,
+       "added_heat_capacity_j_m2k": 5162.7456
+      }
+     ],
+     "resistance_before_m2k_w": 0.2939980930587338,
+     "resistance_after_m2k_w": 0.2939980930587338
+    }
+   ]
+  },
+  "article": "8.4.1.2.(2)",
+  "ruling": "D-32",
+  "building": "input model",
+  "level": "warning"
+ },
+ {
+  "step": "prepare",
+  "action": "eligible ordinary perimeter-strip floors use the EnergyPlus Kiva ground method in BOTH proposed and reference before sizing, so the 8.4.1.2 comparison isolates the prescribed strip instead of also carrying a ground-model difference",
+  "inputs": {
+   "floors": 4,
+   "foundations": [
+    {
+     "floor": "Surface 1",
+     "exposed_perimeter_m": 20.0
+    },
+    {
+     "floor": "Surface 13",
+     "exposed_perimeter_m": 20.0
+    },
+    {
+     "floor": "Surface 19",
+     "exposed_perimeter_m": 40.0
+    },
+    {
+     "floor": "Surface 7",
+     "exposed_perimeter_m": 40.0
+    }
+   ]
+  },
+  "article": "8.4.1.2.(2)",
+  "ruling": "D-32",
+  "building": "input model",
+  "level": "decision"
+ },
+ {
+  "step": "prepare",
+  "action": "ordinary perimeter-strip floors that could NOT take a Kiva foundation keep the simple Ground boundary condition \u2014 the 1.2 m strip of 3.2.3.3.(3) is not representable and those slabs stay as modeled in BOTH proposed and reference",
+  "inputs": {
+   "floors": 1,
+   "surfaces": [
+    {
+     "floor": "Surface 25",
+     "reasons": [
+      "'Surface 25' has an exposed perimeter of 0.000 m; a Kiva floor needs exposed slab edge"
+     ]
+    }
+   ]
+  },
+  "article": "3.2.3.3.(3)",
+  "ruling": "D-32",
+  "building": "input model",
+  "level": "warning"
+ },
+ {
   "step": "compliance",
   "target": "proposed",
   "action": "proposed sizing run complete",
@@ -705,7 +830,7 @@
   "action": "the cooling-capacity threshold deciding THIS thermal block's system was measured on the whole serving system (5 blocks), because \"the proposed building or space\" is not established as the block or the serving system. Another space on the same system may be contributing the capacity that put this block over the threshold",
   "inputs": {
    "threshold_kw": 20,
-   "measured_kw": 199.27115204642044,
+   "measured_kw": 203.3952088666867,
    "measured_over_blocks": [
     "Thermal Zone 1",
     "Thermal Zone 2",
@@ -729,7 +854,7 @@
   "action": "the cooling-capacity threshold deciding THIS thermal block's system was measured on the whole serving system (5 blocks), because \"the proposed building or space\" is not established as the block or the serving system. Another space on the same system may be contributing the capacity that put this block over the threshold",
   "inputs": {
    "threshold_kw": 20,
-   "measured_kw": 199.27115204642044,
+   "measured_kw": 203.3952088666867,
    "measured_over_blocks": [
     "Thermal Zone 1",
     "Thermal Zone 2",
@@ -753,7 +878,7 @@
   "action": "the cooling-capacity threshold deciding THIS thermal block's system was measured on the whole serving system (5 blocks), because \"the proposed building or space\" is not established as the block or the serving system. Another space on the same system may be contributing the capacity that put this block over the threshold",
   "inputs": {
    "threshold_kw": 20,
-   "measured_kw": 199.27115204642044,
+   "measured_kw": 203.3952088666867,
    "measured_over_blocks": [
     "Thermal Zone 1",
     "Thermal Zone 2",
@@ -777,7 +902,7 @@
   "action": "the cooling-capacity threshold deciding THIS thermal block's system was measured on the whole serving system (5 blocks), because \"the proposed building or space\" is not established as the block or the serving system. Another space on the same system may be contributing the capacity that put this block over the threshold",
   "inputs": {
    "threshold_kw": 20,
-   "measured_kw": 199.27115204642044,
+   "measured_kw": 203.3952088666867,
    "measured_over_blocks": [
     "Thermal Zone 1",
     "Thermal Zone 2",
@@ -801,7 +926,7 @@
   "action": "the cooling-capacity threshold deciding THIS thermal block's system was measured on the whole serving system (5 blocks), because \"the proposed building or space\" is not established as the block or the serving system. Another space on the same system may be contributing the capacity that put this block over the threshold",
   "inputs": {
    "threshold_kw": 20,
-   "measured_kw": 199.27115204642044,
+   "measured_kw": 203.3952088666867,
    "measured_over_blocks": [
     "Thermal Zone 1",
     "Thermal Zone 2",
@@ -829,7 +954,7 @@
    "serving_system": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
    "heated": true,
    "cooled": true,
-   "cooling_kw": 199.27115204642044
+   "cooling_kw": 203.3952088666867
   },
   "value": "System 2 -> 'FPFC MAU Chilled Water Coils with Scroll Chiller'",
   "article": "8.4.4.7.(1); 8.4.4.7.-A: 'Where the proposed building or space has a cooling capacity exceeding 20 kW, the reference building or space shall use System 2'",
@@ -846,7 +971,7 @@
    "serving_system": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
    "heated": true,
    "cooled": true,
-   "cooling_kw": 199.27115204642044
+   "cooling_kw": 203.3952088666867
   },
   "value": "System 2 -> 'FPFC MAU Chilled Water Coils with Scroll Chiller'",
   "article": "8.4.4.7.(1); 8.4.4.7.-A: 'Where the proposed building or space has a cooling capacity exceeding 20 kW, the reference building or space shall use System 2'",
@@ -863,7 +988,7 @@
    "serving_system": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
    "heated": true,
    "cooled": true,
-   "cooling_kw": 199.27115204642044
+   "cooling_kw": 203.3952088666867
   },
   "value": "System 2 -> 'FPFC MAU Chilled Water Coils with Scroll Chiller'",
   "article": "8.4.4.7.(1); 8.4.4.7.-A: 'Where the proposed building or space has a cooling capacity exceeding 20 kW, the reference building or space shall use System 2'",
@@ -880,7 +1005,7 @@
    "serving_system": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
    "heated": true,
    "cooled": true,
-   "cooling_kw": 199.27115204642044
+   "cooling_kw": 203.3952088666867
   },
   "value": "System 2 -> 'FPFC MAU Chilled Water Coils with Scroll Chiller'",
   "article": "8.4.4.7.(1); 8.4.4.7.-A: 'Where the proposed building or space has a cooling capacity exceeding 20 kW, the reference building or space shall use System 2'",
@@ -897,7 +1022,7 @@
    "serving_system": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
    "heated": true,
    "cooled": true,
-   "cooling_kw": 199.27115204642044
+   "cooling_kw": 203.3952088666867
   },
   "value": "System 2 -> 'FPFC MAU Chilled Water Coils with Scroll Chiller'",
   "article": "8.4.4.7.(1); 8.4.4.7.-A: 'Where the proposed building or space has a cooling capacity exceeding 20 kW, the reference building or space shall use System 2'",
@@ -1178,7 +1303,7 @@
   "target": "Coil Heating Gas 1",
   "action": "gas heating coil efficiency applied",
   "inputs": {
-   "capacity_kw": 367.2,
+   "capacity_kw": 372.2,
    "part_load_curve_class": "atmospheric",
    "class_source": "row",
    "curve": "FURNACE-PLF-ATMOSPHERIC",
@@ -1268,7 +1393,7 @@
    "minimum_flow_fraction": 0.47,
    "loop": "Hot Water Loop"
   },
-  "value": "below-D floor (E=0.68) via min flow 0.00016 m3/s",
+  "value": "below-D floor (E=0.68) via min flow 0.00015 m3/s",
   "article": "8.4.4.14.(4)-(5); Table 8.4.4.14.",
   "ruling": "D-11",
   "building": "reference building",
@@ -2108,6 +2233,24 @@
  },
  {
   "step": "prescriptive",
+  "target": "Kiva Foundation Surface 1",
+  "action": "ground floor: slab field left as modeled (no full-area maximum below zone 8); perimeter strip insulated via Kiva interior horizontal insulation",
+  "inputs": {
+   "hdd": 3890.0,
+   "table_u": 0.757,
+   "strip_target_u_construction": 0.8628,
+   "slab_r": 0.294,
+   "strip_insulation_r": 0.865,
+   "width_m": 1.2
+  },
+  "value": "insulation R 0.865 m2K/W x 1.2 m from perimeter",
+  "article": "3.2.3.3.(3)",
+  "ruling": "D-32",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "prescriptive",
   "target": "ASHRAE 189.1-2009 ExtRoof IEAD ClimateZone 2-5:U-0.1594",
   "action": "outdoors roofceiling construction set to maximum U",
   "inputs": {
@@ -2116,6 +2259,24 @@
   },
   "value": "conductance 0.1594 W/m2K",
   "article": "Table 3.2.2.2.",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "prescriptive",
+  "target": "Kiva Foundation Surface 13",
+  "action": "ground floor: slab field left as modeled (no full-area maximum below zone 8); perimeter strip insulated via Kiva interior horizontal insulation",
+  "inputs": {
+   "hdd": 3890.0,
+   "table_u": 0.757,
+   "strip_target_u_construction": 0.8628,
+   "slab_r": 0.294,
+   "strip_insulation_r": 0.865,
+   "width_m": 1.2
+  },
+  "value": "insulation R 0.865 m2K/W x 1.2 m from perimeter",
+  "article": "3.2.3.3.(3)",
+  "ruling": "D-32",
   "building": "reference building",
   "level": "decision"
  },
@@ -2147,15 +2308,47 @@
  },
  {
   "step": "prescriptive",
-  "action": "5 ground floors have NO Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m insulated strip required by 3.2.3.3.(3) is not representable and those slabs are left AS MODELLED, so the prescribed perimeter insulation is NOT applied",
+  "target": "Kiva Foundation Surface 19",
+  "action": "ground floor: slab field left as modeled (no full-area maximum below zone 8); perimeter strip insulated via Kiva interior horizontal insulation",
   "inputs": {
-   "floors": 5,
+   "hdd": 3890.0,
+   "table_u": 0.757,
+   "strip_target_u_construction": 0.8628,
+   "slab_r": 0.294,
+   "strip_insulation_r": 0.865,
+   "width_m": 1.2
+  },
+  "value": "insulation R 0.865 m2K/W x 1.2 m from perimeter",
+  "article": "3.2.3.3.(3)",
+  "ruling": "D-32",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "prescriptive",
+  "target": "Kiva Foundation Surface 7",
+  "action": "ground floor: slab field left as modeled (no full-area maximum below zone 8); perimeter strip insulated via Kiva interior horizontal insulation",
+  "inputs": {
+   "hdd": 3890.0,
+   "table_u": 0.757,
+   "strip_target_u_construction": 0.8628,
+   "slab_r": 0.294,
+   "strip_insulation_r": 0.865,
+   "width_m": 1.2
+  },
+  "value": "insulation R 0.865 m2K/W x 1.2 m from perimeter",
+  "article": "3.2.3.3.(3)",
+  "ruling": "D-32",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "prescriptive",
+  "action": "1 ground floors have NO Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m insulated strip required by 3.2.3.3.(3) is not representable and those slabs are left AS MODELLED, so the prescribed perimeter insulation is NOT applied",
+  "inputs": {
+   "floors": 1,
    "surfaces": [
-    "Surface 1",
-    "Surface 13",
-    "Surface 19",
-    "Surface 25",
-    "Surface 7"
+    "Surface 25"
    ]
   },
   "article": "3.2.3.3.(3)",
@@ -2463,7 +2656,7 @@
   "action": "Thermal characteristics and insulation extent of floors in contact with the ground \u2014 partial. Applied: Sentence (3): ordinary floors use the zone-conditional extent (zone 8 full-area; zones 4-7B retain the slab field and receive a 1.2 m Kiva perimeter strip, with a warning when no foundation can carry it). Sentence (4): its prescribed transmittance and full-area action are implemented once applicability is established. Applicability is established from an internal-source ground-floor construction; a supported radiant object's surface view is derived from that construction and supplies equipment attribution rather than independent evidence. The inventory is taken before reference-HVAC teardown. Detected embedded floors receive the Table 3.2.3.1 target over their full area in every climate zone, while an indicated floor-radiant topology whose served surface is unresolved warns and is not guessed into Sentence (3). Sentence (5): for detected embedded floors, the required Kiva depth is the tallest adjoining Foundation-wall height in that floor's thermal zone plus the final floor thickness; an exterior-insulation exception is measured against that same wall-top-to-floor-bottom depth, otherwise the floor insulation is continued vertically to it. Mixed wall heights and an exposed-perimeter remainder of at least 0.001 m warn because one Kiva field over-insulates shorter or zero-wall-height remainder instances. Foundation objects shared by multiple floors warn about cross-contamination; same-zone sharing is additionally reported by EnergyPlus as a Severe input error, and BTAP classifies the run as not clean. EnergyPlus 25.2 rejects the internal-source/Foundation pairing used as applicability evidence, so that detected input also receives a surface-specific warning. An unrepresentable continuation warns.. Gaps: Sentence (5)'s vertical perimeter continuation is not yet applied or verified for ordinary Sentence (3) floors. EnergyPlus 25.2 rejects an internal-source construction on a Foundation surface, so the detected embedded-floor/Kiva input warns and its assigned continuation cannot be annual-verified without replacing the input representation. Mixed-height and engine-significant partial-perimeter inputs warn because their one Kiva depth can over-insulate shorter or zero-wall-height remainder instances. Shared-Foundation inputs warn because their fields can cross-contaminate instances, and same-zone sharing is an EnergyPlus Severe input error. Semi-heated applicability under Sentence (2) remains caller-supplied through the HDD input rather than inferred from model classification; an embedded component represented without inspectable internal-source construction evidence cannot be inferred.",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 1,
+   "decisions_citing": 6,
    "code": [
     "python/btap/codes/necb/envelope/rules.py#ground_floor_extent",
     "python/btap/codes/necb/envelope/prescriptive.py#_embedded_floor_inventory",
@@ -3350,8 +3543,8 @@
   "inputs": {
    "cooling_type": "WaterCooled",
    "compressor": "Scroll",
-   "tons": 116.9,
-   "design_capacity_kw": 411.2,
+   "tons": 120.2,
+   "design_capacity_kw": 422.7,
    "capacity_source": "autosized"
   },
   "value": "COP 4.69 (0.75 kW/ton), curves WaterCooled_Scroll_CAPFT/WaterCooled_Scroll_EIRFT/WaterCooled_Scroll_EIRFPLR",
@@ -3382,7 +3575,7 @@
    "cooling_type": "WaterCooled",
    "compressor": "Scroll",
    "tons": 0.0,
-   "design_capacity_kw": 411.2,
+   "design_capacity_kw": 422.7,
    "capacity_source": "autosized"
   },
   "value": "COP 4.51 (0.78 kW/ton), curves WaterCooled_Scroll_CAPFT/WaterCooled_Scroll_EIRFT/WaterCooled_Scroll_EIRFPLR",
@@ -3410,7 +3603,7 @@
   "target": "Cooling Tower Single Speed 1",
   "action": "cooling tower cells set from heat rejection",
   "inputs": {
-   "tower_cap_kw": 498.8,
+   "tower_cap_kw": 512.7,
    "chillers_on_loop": 2
   },
   "value": "1 cell(s)",
@@ -3421,7 +3614,7 @@
  },
  {
   "step": "efficiency",
-  "target": "Coil Heating Gas 1 1253kBtu/hr 0.81 Thermal Eff",
+  "target": "Coil Heating Gas 1 1270kBtu/hr 0.81 Thermal Eff",
   "action": "gas heating coil efficiency applied",
   "inputs": {
    "capacity_kw": 0.0,
@@ -3451,7 +3644,7 @@
    "minimum_flow_fraction": 0.47,
    "loop": "Chilled Water Loop"
   },
-  "value": "below-D floor (E=0.68) via min flow 0.00767 m3/s",
+  "value": "below-D floor (E=0.68) via min flow 0.00789 m3/s",
   "article": "8.4.4.14.(4)-(5); Table 8.4.4.14.",
   "ruling": "D-11",
   "building": "reference building",
@@ -3472,10 +3665,10 @@
   "target": "Chilled Water Loop",
   "action": "combined pump power within the Table 5.2.6.3 maximum",
   "inputs": {
-   "combined_w": 4171,
-   "cap_w": 5757,
+   "combined_w": 4288,
+   "cap_w": 5917,
    "w_per_kw": 14.0,
-   "thermal_kw": 411.2,
+   "thermal_kw": 422.7,
    "system_type": "Cooling"
   },
   "article": "5.2.6.3.(1)",
@@ -3496,7 +3689,7 @@
    "minimum_flow_fraction": 0.47,
    "loop": "Condenser Water Loop"
   },
-  "value": "below-D floor (E=0.68) via min flow 0.02596 m3/s",
+  "value": "below-D floor (E=0.68) via min flow 0.02669 m3/s",
   "article": "8.4.4.14.(4)-(5); Table 8.4.4.14.",
   "ruling": "D-11",
   "building": "reference building",
@@ -3517,14 +3710,14 @@
   "target": "Condenser Water Loop",
   "action": "combined pump power exceeds Table 5.2.6.3 \u2014 clamped to the maximum (min-wins over the pump-power transfer)",
   "inputs": {
-   "before_w": 14114,
-   "cap_w": 5985,
+   "before_w": 14508,
+   "cap_w": 6152,
    "w_per_kw": 12.0,
-   "thermal_kw": 498.8,
+   "thermal_kw": 512.7,
    "system_type": "Heat rejection",
    "scale": 0.424
   },
-  "value": "14114 W -> 5985 W",
+  "value": "14508 W -> 6152 W",
   "article": "5.2.6.3.(1); 8.4.4.1.(2)",
   "ruling": "D-38",
   "building": "reference building",
@@ -3555,7 +3748,7 @@
   "action": "pump power intensity transferred from the proposed system",
   "inputs": {
    "proposed_pumps": 1,
-   "combined_electrical_w": 84.3,
+   "combined_electrical_w": 84.1,
    "distribution_flow_l_s": 0.33,
    "distribution_flow_source": "autosized",
    "proposed_w_per_l_s": 255.49,
@@ -3606,9 +3799,9 @@
   "target": "FPFC MAU Chilled Water Coils with Scroll Chiller",
   "action": "energy recovery added to reference system (Table 5.2.10.1 threshold met)",
   "inputs": {
-   "supply_l_s": 10643,
+   "supply_l_s": 11027,
    "min_oa_l_s": 1260,
-   "oa_pct": 11.8,
+   "oa_pct": 11.4,
    "operation": "continuous",
    "annual_hours": 8760,
    "hdd": 3890.0,
@@ -3657,7 +3850,7 @@
   "action": "Determination of Compliance \u2014 partial. Applied: The pipeline computes the (2) annual-energy verdict (proposed vs reference building). On the reference-building path, the (3)/(4) verdicts read each building\u2019s Facility unmet_occupied_hours row; that path does not yet evaluate the zone rows per thermal block, and (4) is vacuous when the proposed building has no mechanical cooling. The sentence-(5) capacity auto-iteration raises each failing zone\u2019s Sizing:Zone factors where zone data attributes the Facility failure, secant-targeted from that zone\u2019s own (factor, unmet-hours) history across rounds, with a global SizingParameters fallback when it cannot, and hard-sized-equipment stall detection.. Gaps: On the reference-building path, sentences (3) and (4) read each building\u2019s Facility row instead of evaluating every thermal block, so a block that exceeds its own limit can pass when the Facility-level comparison passes.",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 2,
+   "decisions_citing": 4,
    "code": [
     "python/btap/codes/compliance.py#_evaluate",
     "python/btap/codes/compliance.py#_evaluate_unmet"

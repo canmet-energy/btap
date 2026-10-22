@@ -388,15 +388,25 @@ class TestComplianceNoEngine(unittest.TestCase):
 
     def test_caller_model_never_mutated(self):
         model = proposed_with_hvac()
-        before = sorted(s.construction().get().nameString()
-                        for s in model.getSurfaces())
+        before = sorted((
+            s.nameString(),
+            s.construction().get().nameString(),
+            s.outsideBoundaryCondition(),
+            s.adjacentFoundation().is_initialized(),
+        ) for s in model.getSurfaces())
+        foundations_before = len(model.getFoundationKivas())
         performance_compliance(
             model, code="necb2020", simulate="none", hdd=3890,
             building=building_for(model),
             run_dir=tempfile.mkdtemp(prefix="osnecb-mut-"))
-        after = sorted(s.construction().get().nameString()
-                       for s in model.getSurfaces())
+        after = sorted((
+            s.nameString(),
+            s.construction().get().nameString(),
+            s.outsideBoundaryCondition(),
+            s.adjacentFoundation().is_initialized(),
+        ) for s in model.getSurfaces())
         self.assertEqual(before, after, "the pipeline works on its own copy")
+        self.assertEqual(foundations_before, len(model.getFoundationKivas()))
 
 
 @needs_engine
@@ -462,8 +472,11 @@ class TestComplianceWithEngine(unittest.TestCase):
                             for w in result.audit.warnings),
                         "week-long run loudly flagged as not code-compliant")
 
-        target = next((e for e in result.audit.entries
-                       if e.get("article") == "8.4.1.2.(2)"), None)
+        target = next((
+            e for e in result.audit.entries
+            if e.get("step") == "compliance"
+            and e.get("article") == "8.4.1.2.(2)"
+        ), None)
         self.assertIsNotNone(target, "building-energy-target decision cited")
         self.assertGreater(
             target["inputs"]["reference_building_energy_target_kwh"], 0)

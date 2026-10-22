@@ -8,13 +8,14 @@
 [openstudio.model.HeatExchangerAirToAirSensibleAndLatent] <0> As of 3.8.0, bool openstudio::model::HeatExchangerAirToAirSensibleAndLatent::setSensibleEffectivenessat75CoolingAirFlow(double) is deprecated. Use sensibleEffectivenessofCoolingAirFlowCurve instead.
 [openstudio.model.HeatExchangerAirToAirSensibleAndLatent] <0> As of 3.8.0, bool openstudio::model::HeatExchangerAirToAirSensibleAndLatent::setLatentEffectivenessat75CoolingAirFlow(double) is deprecated. Use latentEffectivenessofCoolingAirFlowCurve instead.
 [openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
+[openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
 
 ------------------------------------------------------------------
                    site kWh      kWh/m2/yr      area m2
-Proposed            167,150          208.9        800.0
-Reference           148,919          186.1        800.0
-Margin              -18,231   12.2% OVER target
-Unmet hours  heating 0.0 / 0.0 h    cooling 4.0 / 4.8 h
+Proposed            170,992          213.7        800.0
+Reference           151,500          189.4        800.0
+Margin              -19,492   12.9% OVER target
+Unmet hours  heating 0.0 / 0.0 h    cooling 1.3 / 10.5 h
 ------------------------------------------------------------------
 
   *** NOT A CODE-COMPLIANT DETERMINATION ***
@@ -74,4 +75,4 @@ Unmet hours  heating 0.0 / 0.0 h    cooling 4.0 / 4.8 h
 
   Audit    <RUN_DIR>/audit.txt
   Data     <RUN_DIR>/report.json
-  45 warning(s) recorded - see audit.txt
+  47 warning(s) recorded - see audit.txt

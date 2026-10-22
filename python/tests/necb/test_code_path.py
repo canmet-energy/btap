@@ -38,10 +38,10 @@ from btap.codes.necb import path as necb_path
 from btap.codes.report import sections
 from tests.necb.support import load_raw_fixture, needs_sdk, proposed_with_hvac, zone_types_for
 
-#: The protocol's members, by the names the plan fixed, plus ``abort`` — the
-#: failure-flush hook the scope correction added so the pipeline stops naming
-#: NECB's 8.4.2.1 in its own voice.
-HOOKS = ("validate", "climate", "prepare_annual", "consume_annual",
+#: The protocol's members, by the names the plan fixed, plus ``prepare_model``
+#: and ``abort`` — later lifecycle hooks whose family ownership keeps the
+#: neutral pipeline from speaking NECB's requirements.
+HOOKS = ("validate", "climate", "prepare_model", "prepare_annual", "consume_annual",
          "determine", "citations", "report_sections", "abort",
          "alternate_path")
 
@@ -150,6 +150,163 @@ class TestForwardingFunctionsAreExecuted(unittest.TestCase):
                          "compliance._build_reference must be ON the executed "
                          "call path, not a stub that resolves the pointer")
         self.assertIsNotNone(result.reference_model)
+
+    @needs_sdk
+    def test_real_pipeline_uses_kiva_on_both_sides_before_applying_the_strip(self):
+        proposed = proposed_with_hvac()
+        convertible_name = "Surface 7"
+        interior_name = "Surface 25"
+        input_floor = proposed.getSurfaceByName(convertible_name).get()
+        input_conductance = (
+            input_floor.construction().get().to_LayeredConstruction().get()
+            .thermalConductance().get())
+
+        with tempfile.TemporaryDirectory(prefix="d32-real-path-") as run_dir:
+            result = compliance.performance_compliance(
+                proposed, code="necb2020", simulate="none", hdd=3890,
+                building={
+                    "storeys": 1,
+                    "zone_types": zone_types_for(proposed),
+                    "winter_design_temp_c": -20,
+                },
+                run_dir=run_dir)
+
+        prepared_floor = result.proposed_model.getSurfaceByName(
+            convertible_name).get()
+        reference_floor = result.reference_model.getSurfaceByName(
+            convertible_name).get()
+        self.assertEqual("Foundation", prepared_floor.outsideBoundaryCondition())
+        self.assertEqual("Foundation", reference_floor.outsideBoundaryCondition())
+        prepared_conductance = (
+            prepared_floor.construction().get().to_LayeredConstruction().get()
+            .thermalConductance().get())
+        self.assertAlmostEqual(
+            input_conductance, prepared_conductance, delta=1e-9,
+            msg="method normalization must retain the proposed slab-field R")
+
+        proposed_foundation = prepared_floor.adjacentFoundation().get()
+        reference_foundation = reference_floor.adjacentFoundation().get()
+        self.assertFalse(
+            proposed_foundation.interiorHorizontalInsulationMaterial()
+            .is_initialized(),
+            "the proposed receives the Kiva method, not the prescribed strip")
+        self.assertTrue(
+            reference_foundation.interiorHorizontalInsulationMaterial()
+            .is_initialized(),
+            "D-32's 1.2 m strip belongs only on the reference")
+        self.assertAlmostEqual(
+            1.2, reference_foundation.interiorHorizontalInsulationWidth().get(),
+            delta=1e-9)
+
+        refused_interior = result.proposed_model.getSurfaceByName(
+            interior_name).get()
+        self.assertEqual(
+            "Ground", refused_interior.outsideBoundaryCondition(),
+            "a floor with no exposed perimeter must be refused before conversion")
+        self.assertFalse(refused_interior.adjacentFoundation().is_initialized())
+        self.assertTrue(any(
+            entry.get("ruling") == "D-32"
+            and entry.get("article") == "8.4.1.2.(2)"
+            and entry.get("level") == "decision"
+            for entry in result.audit.entries
+        ))
+        self.assertFalse(any(
+            entry.get("ruling") == "D-105"
+            for entry in result.audit.entries
+        ), "ordinary strip floors must not enter D-105's embedded-floor path")
+
+    @needs_sdk
+    def test_real_pipeline_leaves_full_area_climates_outside_kiva_preparation(self):
+        from btap.modeling.envelope import constructions as Constructions
+
+        proposed = proposed_with_hvac()
+        with tempfile.TemporaryDirectory(prefix="d32-full-area-") as run_dir:
+            result = compliance.performance_compliance(
+                proposed, code="necb2020", simulate="none", hdd=7000,
+                building={
+                    "storeys": 1,
+                    "zone_types": zone_types_for(proposed),
+                    "winter_design_temp_c": -30,
+                },
+                run_dir=run_dir)
+
+        self.assertEqual([], list(result.proposed_model.getFoundationKivas()))
+        self.assertTrue(all(
+            surface.outsideBoundaryCondition() == "Ground"
+            for surface in result.proposed_model.getSurfaces()
+            if surface.surfaceType() == "Floor" and surface.isGroundSurface()
+        ))
+        self.assertEqual([], list(result.reference_model.getFoundationKivas()))
+        reference_floor = result.reference_model.getSurfaceByName(
+            "Surface 7").get()
+        self.assertEqual("Ground", reference_floor.outsideBoundaryCondition())
+        full_area_target = 1.0 / (
+            (1.0 / 0.379) - Constructions.film_r("floor", "ground"))
+        reference_conductance = (
+            reference_floor.construction().get().to_LayeredConstruction().get()
+            .thermalConductance().get())
+        self.assertAlmostEqual(
+            full_area_target, reference_conductance, delta=1e-4,
+            msg="zone 8 keeps D-32's existing full-area construction path")
+        self.assertFalse(any(
+            entry.get("ruling") == "D-32"
+            and entry.get("article") == "8.4.1.2.(2)"
+            for entry in result.audit.entries
+        ), "the symmetry ruling is limited to the perimeter-strip branch")
+
+    @needs_sdk
+    def test_refused_foundation_write_rolls_back_conversion_and_its_material(self):
+        from btap.audit import AuditLog
+        from btap.modeling.envelope import foundations
+
+        proposed = proposed_with_hvac()
+        construction_handles = {
+            str(obj.handle()) for obj in proposed.getLayeredConstructions()}
+        material_handles = {str(obj.handle()) for obj in proposed.getMaterials()}
+        original = foundations.create_kiva_foundation
+
+        def refuse(_model, floor, _walls=(), *, perimeter_m=None, name=None):
+            return {
+                "created": False,
+                "foundation": None,
+                "floor": floor.nameString(),
+                "walls": [],
+                "perimeter_m": perimeter_m,
+                "refusals": ["forced post-conversion refusal"],
+            }
+
+        foundations.create_kiva_foundation = refuse
+        try:
+            necb_path.prepare_model(SimpleNamespace(
+                proposed=proposed,
+                audit=AuditLog(),
+                ruleset=codes.resolve("necb2020"),
+                hdd=3890,
+                state={},
+                # `prepare_model` reads the ground-model mode, so the double
+                # has to carry it; the default keeps this test on the Kiva path
+                # it is about.
+                opts={"ground_model": "kiva"},
+            ))
+        finally:
+            foundations.create_kiva_foundation = original
+
+        self.assertEqual(
+            construction_handles,
+            {str(obj.handle()) for obj in proposed.getLayeredConstructions()},
+        )
+        self.assertEqual(
+            material_handles,
+            {str(obj.handle()) for obj in proposed.getMaterials()},
+            "rollback must remove the temporary carpet material as well as "
+            "its cloned construction",
+        )
+        self.assertEqual([], list(proposed.getFoundationKivas()))
+        self.assertTrue(all(
+            surface.outsideBoundaryCondition() == "Ground"
+            for surface in proposed.getSurfaces()
+            if surface.surfaceType() == "Floor" and surface.isGroundSurface()
+        ))
 
     @needs_sdk
     def test_real_pipeline_preserves_unresolved_embedded_floor_inventory(self):

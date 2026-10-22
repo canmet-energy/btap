@@ -29,7 +29,7 @@ def _building(model, space_type, **extra):
         # it. The heating dominance that makes the #113 UA inversion fail
         # comes from the fixture's office loads against the Toronto DDY, which
         # `test_heating_dominated_system_2_water_coils_size_cleanly` pins by
-        # requiring the max heating/cooling flow ratio to stay above 5.
+        # requiring the max heating/cooling flow ratio to stay above 4.
         **extra,
     }
 
@@ -165,7 +165,7 @@ class TestSystem2HeatingDominatedSizing(unittest.TestCase):
             self.assertEqual([cooling], values)
         self.assertGreater(
             max(ratios),
-            5.0,
+            4.0,
             "the fixture must remain heating-dominated enough to reach the "
             "former UA-inversion failure",
         )

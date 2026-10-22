@@ -262,3 +262,124 @@ def fenestration_visible_transmittance(construction) -> float:
         if standard is not None:
             return _to_float(standard.visibleTransmittanceatNormalIncidence())
     return 0.60
+
+
+# The pinned oracle models a thin carpet finish with these properties in
+# Prototype.hvac_systems.rb. They are evidence for CP02 CARPET PAD specifically,
+# not a licence to invent physical properties for arbitrary no-mass layers.
+KIVA_CARPET_CONDUCTIVITY_W_MK = 0.06
+KIVA_CARPET_DENSITY_KG_M3 = 288.0
+KIVA_CARPET_SPECIFIC_HEAT_J_KGK = 1380.0
+_CP02_CARPET_PAD = re.compile(r"^CP02 CARPET PAD(?: \d+)?$", re.IGNORECASE)
+
+
+def _kiva_carpet(layer):
+    material = opt(layer.to_MasslessOpaqueMaterial())
+    if material is None or not _CP02_CARPET_PAD.fullmatch(material.nameString()):
+        return None
+    return material
+
+
+def kiva_legal(model, surface):
+    """Make `surface`'s construction legal for an EnergyPlus Foundation
+    boundary, PRESERVING its resistance exactly. Returns a dict describing what
+    changed, or None when nothing had to.
+
+    EnergyPlus refuses a Foundation surface whose construction carries any
+    no-mass layer, and 582 of the 588 shipped-archetype ground floors carry the
+    known `CP02 CARPET PAD`, massless at R-0.2165. That specific material is
+    replaced by a StandardOpaqueMaterial at the SAME thermal resistance using
+    the pinned oracle's sourced thin-carpet conductivity, density and specific
+    heat. Roughness and absorptances are copied from the submitted layer.
+    Unknown no-mass materials and air gaps are left untouched so Kiva
+    eligibility refuses them rather than assigning guessed physical properties.
+
+    The construction is ALWAYS CLONED, so a shared construction cannot be
+    changed out from under a refused floor or another surface.
+
+    R is preserved, but replacing a no-mass layer necessarily introduces the
+    sourced carpet's heat capacity. This is part of the symmetric ground-method
+    normalization, not a claim that the two material objects are dynamically
+    identical.
+    """
+    construction = opt(surface.construction())
+    if construction is None:
+        return None
+    layered = opt(construction.to_LayeredConstruction())
+    if layered is None:
+        return None
+
+    nonstandard_layers = [
+        (index, layer) for index, layer in enumerate(layered.layers())
+        if opt(layer.to_StandardOpaqueMaterial()) is None
+    ]
+    if not nonstandard_layers:
+        return None
+    convertible = [
+        (index, _kiva_carpet(layer)) for index, layer in nonstandard_layers
+    ]
+    if any(material is None for _index, material in convertible):
+        return None
+
+    before_r = None
+    conductance = opt(layered.thermalConductance())
+    if conductance is not None and conductance > 0:
+        before_r = 1.0 / conductance
+
+    # Always clone. Besides protecting other surfaces, this makes the conversion
+    # replaceable as one object if the later foundation write is refused.
+    target = layered.clone(model).to_LayeredConstruction().get()
+    target.setName(f"{layered.nameString()} (Kiva)")
+    if not surface.setConstruction(target):
+        target.remove()
+        raise RuntimeError(
+            f"could not assign Kiva-compatible construction to "
+            f"{surface.nameString()!r}")
+    convertible = [
+        (index, _kiva_carpet(layer))
+        for index, layer in enumerate(target.layers())
+        if opt(layer.to_StandardOpaqueMaterial()) is None
+    ]
+
+    replaced = []
+    for index, material in convertible:
+        resistance = material.thermalResistance()
+        thickness = KIVA_CARPET_CONDUCTIVITY_W_MK * resistance
+        replacement = openstudio.model.StandardOpaqueMaterial(
+            model, material.roughness(), thickness,
+            KIVA_CARPET_CONDUCTIVITY_W_MK,
+            KIVA_CARPET_DENSITY_KG_M3,
+            KIVA_CARPET_SPECIFIC_HEAT_J_KGK)
+        replacement.setThermalAbsorptance(material.thermalAbsorptance())
+        replacement.setSolarAbsorptance(material.solarAbsorptance())
+        replacement.setVisibleAbsorptance(material.visibleAbsorptance())
+        replacement.setName(
+            f"{material.nameString()} (Kiva-compatible, "
+            f"R-{ruby_str(ruby_round(resistance, 4))})")
+        if not target.setLayer(index, replacement):
+            replacement.remove()
+            raise RuntimeError(
+                f"could not replace massless layer {index} of "
+                f"{target.nameString()!r}")
+        replaced.append({
+            "layer": material.nameString(),
+            "resistance_m2k_w": resistance,
+            "thickness_m": thickness,
+            "added_mass_kg_m2": thickness * KIVA_CARPET_DENSITY_KG_M3,
+            "added_heat_capacity_j_m2k":
+                thickness * KIVA_CARPET_DENSITY_KG_M3
+                * KIVA_CARPET_SPECIFIC_HEAT_J_KGK,
+        })
+
+    after_r = None
+    conductance = opt(target.thermalConductance())
+    if conductance is not None and conductance > 0:
+        after_r = 1.0 / conductance
+
+    return {
+        "construction": target.nameString(),
+        "cloned": True,
+        "replaced": replaced,
+        "resistance_before_m2k_w": before_r,
+        "resistance_after_m2k_w": after_r,
+    }

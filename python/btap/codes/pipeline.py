@@ -69,6 +69,29 @@ class CodePath(Protocol):
         """The climate facts the rules need, ``{'hdd': ...}`` (NECB: Table
         C-1 by nearest city, or the ``.stat`` file)."""
 
+    def prepare_model(self, run) -> None:
+        """Anything this code must change about the PROPOSED model before it is
+        simulated at all to establish a common calculation method.
+
+        Called after the weather and climate are known and BEFORE the proposed
+        sizing run, because both of the proposed's runs and the reference
+        (which is a CLONE of the proposed) have to see the same model. NECB's
+        implementation switches eligible ordinary perimeter-strip floors to
+        the EnergyPlus Kiva foundation model so proposed and reference are
+        compared under the SAME ground physics.
+
+        The hook edits the pipeline's cloned proposed, never the caller's model.
+        A calculation-method change can move simulated energy, so the boundary
+        is physical characteristics rather than numerical invariance: it may
+        normalize one solver representation on BOTH buildings, but must not
+        repair the submitted assembly or make it comply. NECB's implementation
+        preserves the slab-field resistance and does not add the prescribed
+        strip to the proposed. Correcting the proposed building remains out of
+        scope — the gates refuse what cannot be used, and everything past them
+        is disclosure.
+
+        Optional: a family that needs nothing here defines nothing."""
+
     def prepare_annual(self, run) -> None:
         """Anything that must be set up BEFORE the proposed's annual run —
         output variables the determination will read back (NECB: the
@@ -142,7 +165,7 @@ class _Run:
 def run(model, *, code="necb2020", weather=None, building=None,
         hdd=None, run_dir, simulate="annual", run_period=None,
         costing=False, city=None, province_state=None,
-        costs_csv=None, thermal_bridging=None,
+        costs_csv=None, thermal_bridging=None, ground_model="kiva",
         actual_roof_absorptance_used=False,
         max_capacity_iterations=3, capacity_step=1.25,
         necb_loads=None, reference_daylighting=True,
@@ -183,6 +206,7 @@ def run(model, *, code="necb2020", weather=None, building=None,
             "run_period": run_period, "costing": costing, "city": city,
             "province_state": province_state, "costs_csv": costs_csv,
             "thermal_bridging": thermal_bridging,
+            "ground_model": _ground_model(ground_model),
             "actual_roof_absorptance_used": actual_roof_absorptance_used,
             "max_capacity_iterations": max_capacity_iterations,
             "capacity_step": capacity_step, "necb_loads": necb_loads,
@@ -194,6 +218,8 @@ def run(model, *, code="necb2020", weather=None, building=None,
     try:
         compliance._load_and_validate(state)  # 1. input model in, gates passed
         _attach_weather_and_hdd(state)   # 2. weather + the family's climate
+        _prepare_model(state)            # 2b. the family's model preparation
+
         _size_proposed(state)            # 3. proposed sizing run
         state.report = _base_report(state)  # (the report rebinding — see above)
         _proposed_annual(state)          # 4. proposed annual (D-52: BEFORE the determination)
@@ -229,6 +255,35 @@ def _attach_weather_and_hdd(run):
     if run.hdd is None:
         raise ValueError(
             "HDD unresolvable: pass hdd= or weather with a recognized site")
+
+
+# 2b. the family's chance to change the PROPOSED model before anything is
+#     simulated. It sits before the sizing run deliberately: the proposed's two
+#     runs and the reference (a clone of the proposed) must all see one model,
+#     and a model prepared after sizing would size against different physics
+#     than it runs against. `getattr` because the hook is optional — a family
+#     with nothing to prepare defines nothing rather than an empty function.
+GROUND_MODELS = ("kiva", "simple")
+
+
+def _ground_model(value):
+    """Validate the ground-model mode at the boundary.
+
+    Everything downstream asks `!= "kiva"`, so an unvalidated value means a
+    typo, a None or a capitalised "Kiva" all silently select `simple` — which
+    makes no determination. A wrong mode must be a loud argument error, not a
+    silent refusal to determine. Found by Fable on PR #133.
+    """
+    if value not in GROUND_MODELS:
+        raise ValueError(
+            f"ground_model must be one of {GROUND_MODELS}, got {value!r}")
+    return value
+
+
+def _prepare_model(run):
+    prepare = getattr(run.path, "prepare_model", None)
+    if prepare is not None:
+        prepare(run)
 
 
 # 3. size the PROPOSED building (selection thresholds + efficiencies + costing

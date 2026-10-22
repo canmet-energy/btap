@@ -7,22 +7,22 @@
  "proposed": {
   "mechanical_cooling": true,
   "clean_run": true,
-  "total_site_kwh": 191655.6,
-  "electricity_kwh": 63966.7,
-  "natural_gas_kwh": 127688.9,
+  "total_site_kwh": 196058.3,
+  "electricity_kwh": 66425.0,
+  "natural_gas_kwh": 129633.3,
   "district_heating_kwh": 0.0,
   "district_cooling_kwh": 0.0,
   "end_uses_kwh": {
-   "heating": 113416.7,
-   "cooling": 9047.2,
-   "fans": 6908.3,
-   "pumps": 8808.3,
+   "heating": 115355.6,
+   "cooling": 10291.7,
+   "fans": 7583.3,
+   "pumps": 9316.7,
    "interior_lighting": 16775.0,
    "interior_equipment": 22311.1,
-   "water_systems": 14272.2
+   "water_systems": 14277.8
   },
   "floor_area_m2": 800.0,
-  "eui_kwh_per_m2": 239.6,
+  "eui_kwh_per_m2": 245.1,
   "unmet_occupied_hours": {
    "heating": 0.0,
    "cooling": 0.0
@@ -48,24 +48,24 @@
  },
  "reference": {
   "clean_run": true,
-  "total_site_kwh": 295541.7,
-  "electricity_kwh": 104044.4,
-  "natural_gas_kwh": 191497.2,
+  "total_site_kwh": 289858.3,
+  "electricity_kwh": 105097.2,
+  "natural_gas_kwh": 184761.1,
   "district_heating_kwh": 0.0,
   "district_cooling_kwh": 0.0,
   "end_uses_kwh": {
-   "heating": 177225.0,
-   "cooling": 15325.0,
-   "fans": 41127.8,
-   "pumps": 13044.4,
+   "heating": 170486.1,
+   "cooling": 16088.9,
+   "fans": 41827.8,
+   "pumps": 12594.4,
    "interior_lighting": 10522.2,
    "interior_equipment": 22311.1,
    "water_systems": 14275.0
   },
   "floor_area_m2": 800.0,
-  "eui_kwh_per_m2": 369.4,
+  "eui_kwh_per_m2": 362.3,
   "unmet_occupied_hours": {
-   "heating": 23.5,
+   "heating": 31.5,
    "cooling": 0.0
   },
   "zone_unmet_occupied_hours": {
@@ -82,7 +82,7 @@
     "cooling": 0.0
    },
    "THERMAL ZONE 5": {
-    "heating": 23.5,
+    "heating": 31.5,
     "cooling": 0.0
    }
   }
@@ -96,6 +96,9 @@
      "zones": {
       "THERMAL ZONE 1": {
        "cooling_sizing_factor": 1.375
+      },
+      "THERMAL ZONE 4": {
+       "cooling_sizing_factor": 1.375
       }
      },
      "cooling_sizing_factor": 1.375
@@ -107,13 +110,13 @@
      "cooling": 0.0
     },
     "reference": {
-     "heating": 23.5,
+     "heating": 31.5,
      "cooling": 0.0
     }
    }
   }
  ],
- "percent_of_target": 64.8,
+ "percent_of_target": 67.6,
  "tier": 2,
  "annual": true,
  "ahj_applied": [
@@ -169,7 +172,7 @@
     "article": "Table 8.4.4.7.-B Note (3)",
     "target": "Thermal Zone 1",
     "detail": "corner thermal blocks assigned to ONE facade group by largest exterior wall area, with an N/E/S/W tie-break \u2014 Note (3) says only that blocks are grouped by facade orientation and supplies neither the metric nor the tie-break, so this assignment is ours",
-    "entry_index": 22
+    "entry_index": 25
    },
    {
     "id": "AHJ-14",
@@ -178,7 +181,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
     "target": "Primary Boiler",
     "detail": "boiler efficiency applied",
-    "entry_index": 219
+    "entry_index": 226
    },
    {
     "id": "AHJ-7",
@@ -187,7 +190,7 @@
     "article": "Table 8.4.5.5.-C",
     "target": "Primary Chiller WaterCooled Scroll",
     "detail": "published water-cooled chiller EIR_FT coefficients are NOT used literally \u2014 corrected coefficients applied as an alternative solution",
-    "entry_index": 221
+    "entry_index": 228
    },
    {
     "id": "AHJ-7",
@@ -196,7 +199,7 @@
     "article": "Table 8.4.5.5.-C",
     "target": "Secondary Chiller WaterCooled Scroll",
     "detail": "published water-cooled chiller EIR_FT coefficients are NOT used literally \u2014 corrected coefficients applied as an alternative solution",
-    "entry_index": 223
+    "entry_index": 230
    },
    {
     "id": "AHJ-22",
@@ -205,12 +208,14 @@
     "article": "8.4.5.6.(1)",
     "target": "Cooling Tower Single Speed 1",
     "detail": "prescribed cooling-tower capacity equations are NOT installed \u2014 the engine Merkel effectiveness-NTU model is retained as an alternative solution",
-    "entry_index": 225
+    "entry_index": 232
    }
   ]
  },
  "compliant": true,
  "warnings": [
+  "the pipeline's PROPOSED copy replaces known CP02 carpet-pad no-mass layers with the pinned thin-carpet material needed by Kiva; thermal resistance and submitted absorptances are preserved, while the sourced carpet heat capacity is disclosed",
+  "ordinary perimeter-strip floors that could NOT take a Kiva foundation keep the simple Ground boundary condition \u2014 the 1.2 m strip of 3.2.3.3.(3) is not representable and those slabs stay as modeled in BOTH proposed and reference",
   "published water-cooled chiller EIR_FT coefficients are NOT used literally \u2014 corrected coefficients applied as an alternative solution",
   "published water-cooled chiller EIR_FT coefficients are NOT used literally \u2014 corrected coefficients applied as an alternative solution",
   "prescribed cooling-tower capacity equations are NOT installed \u2014 the engine Merkel effectiveness-NTU model is retained as an alternative solution",
@@ -236,7 +241,7 @@
   "Supply Air Systems (airflow rates, fan specs) \u2014 partial. Applied: block supply airflow comes from zone sizing. Gaps: the greater-of criteria at the 21/11 C supply-air deltas are not explicitly enforced",
   "Supply Air Systems (airflow rates, fan specs) \u2014 not implemented. Gaps: the identical-fan-power fallback for secondaries failing 5.2.3.1.(1)(b) is not modeled",
   "Supply Air Systems (airflow rates, fan specs) \u2014 not implemented. Gaps: the exemption for equipment whose fan energy is included in the Tables 5.2.12.1 minimum performance is not modeled",
-  "5 ground floors have NO Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m insulated strip required by 3.2.3.3.(3) is not representable and those slabs are left AS MODELLED, so the prescribed perimeter insulation is NOT applied",
+  "1 ground floors have NO Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m insulated strip required by 3.2.3.3.(3) is not representable and those slabs are left AS MODELLED, so the prescribed perimeter insulation is NOT applied",
   "8 conditioned-to-conditioned interzone assemblies left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
   "thermal bridging not requested \u2014 applied U-values are clear-field; NECB 3.1.1.7 requires EFFECTIVE transmittance (pass thermal_bridging:)",
   "proposed infiltration total 0 L/s DEVIATES from the untested 8.4.3.3.(3) default 607 L/s by -100% \u2014 only a 3.2.4.2 airtightness test justifies a different value",

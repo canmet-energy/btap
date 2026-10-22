@@ -10,14 +10,13 @@
 [openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
 [openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
 [openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
-[openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
 
 ------------------------------------------------------------------
                    site kWh      kWh/m2/yr      area m2
-Proposed            121,614          152.0        800.0
-Reference           184,244          230.3        800.0
-Margin               62,631   34.0% under target   Tier 2
-Unmet hours  heating 488.5 / 0.0 h    cooling 262.0 / 231.3 h
+Proposed            128,919          161.1        800.0
+Reference           184,633          230.8        800.0
+Margin               55,714   30.2% under target   Tier 2
+Unmet hours  heating 513.3 / 0.0 h    cooling 401.5 / 566.8 h
 ------------------------------------------------------------------
 
   *** NOT A CODE-COMPLIANT DETERMINATION ***
@@ -59,7 +58,7 @@ Unmet hours  heating 488.5 / 0.0 h    cooling 262.0 / 231.3 h
       Zone 5 — auxiliary heating energy type ELECTED from the
       proposed run's simulated period: the terminal/aux energy type
       with the largest energy use over that period is NaturalGas
-      (110.08 GJ delivered), and the heat pump's 55.2% share exceeds
+      (117.97 GJ delivered), and the heat pump's 52.3% share exceeds
       the 33% proviso ((h) inapplicable: the source is classified
       air/water/ground)
     - AHJ-14 (referral): which part-load class a reference boiler or
@@ -77,4 +76,4 @@ Unmet hours  heating 488.5 / 0.0 h    cooling 262.0 / 231.3 h
 
   Audit    <RUN_DIR>/audit.txt
   Data     <RUN_DIR>/report.json
-  51 warning(s) recorded - see audit.txt
+  54 warning(s) recorded - see audit.txt

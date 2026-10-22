@@ -1298,11 +1298,12 @@ Decision: openstudio-envelope Prescriptive now implements the printed rule —
 zone 8 keeps the full-area retarget; zones 4-7B keep the modeled slab field
 and get the strip via the Kiva foundation's interior horizontal insulation
 (R sized so the strip assembly meets the table U, width from the rules JSON;
-plain-Ground floors without Kiva get an audited warning that the strip is
-not representable). The extent metadata lives OUTSIDE u_values (which is
-structurally pinned to the legacy JSON by test_data_integrity). Mechanism-
-parity test excludes ground floors (legacy old-BTAP applies full-area — one
-of the two mutually inconsistent legacy paths, see L-20).
+in the original implementation, plain-Ground floors without Kiva received an
+audited warning that the strip was not representable). The extent metadata
+lives OUTSIDE u_values (which is structurally pinned to the legacy JSON by
+test_data_integrity). Mechanism-parity test excludes ground floors (legacy
+old-BTAP applies full-area — one of the two mutually inconsistent legacy
+paths, see L-20).
 
 Measured effect (January week, % of target): Toronto electric 106 -> 104
 (heating delta +2.72 -> +1.28 GJ), Toronto gas 102 -> 106 (the reference's
@@ -1317,11 +1318,72 @@ in all climates from the wrong-vintage trigger (#2123 family, +0.19 GJ
 parasitic), and CV fan character (+0.31 GJ, #2127 family). The fixed-point
 premise again breaks from the legacy side, as with the D-28 offices.
 
-- Who/when: Claude under D-10 delegation, 2026-07-25.
+- Who/when: Claude under D-10 delegation, 2026-07-25 — original reading.
 - Evidence: [RAN] ABUPS end-use + SensibleHeatGainSummary decomposition on
   cached sweep SQL (4 variants); [RAN] object survey incl. Foundation
   surfaces; [READ, MCP] NECB 2020/2025 3.2.3.1/3.2.3.3/8.4.4.1; [RAN]
   envelope test battery + parity gate green; [RAN] 4-variant re-runs.
+
+### Applicability correction
+
+The original implementation boundary treated every ordinary floor submitted
+with the simple `Ground` boundary as unable to carry the perimeter strip.
+That is no longer the tool's limit. For an ordinary floor in a perimeter-strip
+climate, the performance path creates an EnergyPlus Kiva foundation when the
+floor passes the measured eligibility checks and applies that same
+ground-heat-transfer method to proposed and reference before proposed sizing.
+The proposed keeps its submitted slab-field resistance and receives no
+prescriptive strip; the reference clone receives the 1.2 m strip. This makes
+the 8.4.1.2 annual-energy comparison carry the prescribed assembly difference
+without also charging the proposed for a different ground algorithm.
+
+The allocation comes directly from the Code. Article 3.4.1.2.(1), identical
+in NECB 2020 and 2025, says that notwithstanding the performance path only
+Article 3.2.1.1 and Subsection 3.2.4 continue to apply to the proposed
+envelope. Article 3.2.3.3 is not in that list, so its perimeter strip is not a
+requirement of the proposed building. Separately, Article 8.4.1.1.(1) requires
+the building energy target to account for building components in accordance
+with the Section 3.2 prescriptive requirements. The strip therefore belongs
+in the reference target and not in the proposed. Article 8.4.1.2.(2) compares
+the resulting annual energies.
+
+Using one ground solver on both sides is calculation-method normalization
+under Articles 8.4.2.1, 8.4.2.2, 8.4.2.4 and 8.4.2.8, not correction of the
+proposed building's performance.
+It is deliberately narrower than "put Kiva on every ground floor." Zone 8 and
+embedded floors already take the full-area construction path and remain on
+their submitted ground method; unresolved embedded-system applicability also
+remains untouched rather than being guessed into the ordinary-floor branch.
+An ineligible perimeter-strip floor stays as modeled in both buildings and
+warns.
+
+A `simple` ground-model choice is not a second compliance method on a branch
+where the reference requires the perimeter strip. The simple `Ground`
+boundary has no slab edge on which to apply 3.2.3.3.(3), so selecting it
+leaves the 8.4.1.1.(1) building energy target unestablished. The text is not
+ambiguous, and an operator's deliberate omission is not by itself an
+alternative solution with demonstrated equivalent performance. No AHJ
+register entry or conditional verdict applies. If exposed for diagnostics,
+`simple` must return no determination (`compliant = null`, CLI exit 6) with an
+explicit reason; it may produce a determination only where no perimeter strip
+must be represented, such as the full-area branch or a model with no
+applicable ordinary perimeter floor.
+
+For the known `CP02 CARPET PAD` no-mass representation, the compatibility
+conversion uses the pinned oracle's thin-carpet properties: conductivity
+0.06 W/(m.K), density 288 kg/m3 and specific heat 1380 J/(kg.K). It preserves
+the layer's resistance and submitted absorptances while disclosing the added
+heat capacity. Unknown no-mass materials and air gaps are refused rather than
+assigned invented physical properties.
+
+Setting monthly `Site:GroundTemperature:BuildingSurface` values is not a
+substitute: an EPW supplies weather, not a uniquely prescribed building-surface
+ground-temperature series, and the simple boundary still has no two-dimensional
+slab edge on which to place the strip.
+
+- **Correction ruling/when:** phylroy directed an apples-to-apples comparison
+  on 2026-10-22; Sol adjudicated the perimeter-strip-only scope and method
+  boundary on 2026-10-22.
 
 <a id="d-33"></a>
 
@@ -8162,10 +8224,13 @@ engine behavior was not adopted as authority.
 
 **Evidence:** `test_heating_dominated_system_2_water_coils_size_cleanly`
 drives the real compliance call in both editions, proves the trigger remains
-above a 5:1 heating-to-cooling airflow ratio, matches every cooling coil's
-translated sizing value to its zone cooling design airflow, and requires a
-clean EnergyPlus result. `test_system_5_fan_coils_carry_the_same_translation_contract`
-pins the second reference-system call site.
+above a 4:1 heating-to-cooling airflow ratio after D-32's symmetric Kiva
+preparation, matches every cooling coil's translated sizing value to its zone
+cooling design airflow, and requires a clean EnergyPlus result. Deleting only
+the sizing marker while retaining the D-106 audit entry produces the issue's
+`Bad starting values for UA` Severe in both editions.
+`test_system_5_fan_coils_carry_the_same_translation_contract` pins the second
+reference-system call site.
 `test_marked_fan_coil_gets_mode_specific_sizing_in_both_backend_paths` pins
 the local and remote-IDF translation paths, while
 `test_unmarked_fan_coil_translation_is_unchanged` is the non-NECB control and

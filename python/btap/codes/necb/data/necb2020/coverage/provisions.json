@@ -4,7 +4,7 @@
     "family": "necb",
     "id": "necb2020"
   },
-  "generated": "2026-10-14",
+  "generated": "2026-10-22",
   "provisions": {
     "1.1.1.1": {
       "children_complete": true,
@@ -798,6 +798,36 @@
       ],
       "kind": "sentence",
       "parent": "3.2.4.2",
+      "status": "present",
+      "title": null
+    },
+    "3.4.1.2": {
+      "children_complete": true,
+      "citation": "3.4.1.2",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:3.4.1.2",
+          "source": "mcp"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Limitations"
+    },
+    "3.4.1.2.(1)": {
+      "children_complete": true,
+      "citation": "3.4.1.2.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2020:B:3.4.1.2",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "3.4.1.2",
       "status": "present",
       "title": null
     },
@@ -2838,6 +2868,66 @@
       ],
       "kind": "sentence",
       "parent": "6.2.2.1",
+      "status": "present",
+      "title": null
+    },
+    "8.4.1.1": {
+      "children_complete": true,
+      "citation": "8.4.1.1",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.1.1",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "General"
+    },
+    "8.4.1.1.(1)": {
+      "children_complete": true,
+      "citation": "8.4.1.1.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.1.1",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.1.1",
+      "status": "present",
+      "title": null
+    },
+    "8.4.1.1.(2)": {
+      "children_complete": true,
+      "citation": "8.4.1.1.(2)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.1.1",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.1.1",
+      "status": "present",
+      "title": null
+    },
+    "8.4.1.1.(3)": {
+      "children_complete": true,
+      "citation": "8.4.1.1.(3)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "articles.8.4.1.1",
+          "source": "section-8.4"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "8.4.1.1",
       "status": "present",
       "title": null
     },
@@ -8488,8 +8578,8 @@
     "mcp": {
       "kind": "authorized-mcp-payload",
       "path": "provenance/provisions.result.json",
-      "retrieved": "2026-10-14",
-      "sha256": "36578c1381965f71d8c2b338970c52ad7398a824811c82d7f78116218d3626be"
+      "retrieved": "2026-10-22",
+      "sha256": "ab20b315551a404314d3fb0ac5ac3fd39a81a73385a957e43f728594d2fcd235"
     },
     "section-8.4": {
       "kind": "existing-authorized-cache",

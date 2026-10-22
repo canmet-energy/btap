@@ -381,12 +381,13 @@ DETERMINATION_SCENARIOS = [
     # quick run a non-determination, which is the whole reason the other
     # annual-tier scenarios cannot serve as guard-7 witnesses.
     #
-    # Every value below was read off two consecutive runs of the unmodified
-    # product that agreed on every reported figure (necb2020, Toronto
-    # CWEC2020). The reference's unmet hours are the substance of the guard:
-    # 0.0 h heating and 4.75 h cooling, where the proposed building logs 4.0 h
-    # cooling, so the comparison basis now holds setpoint. The remaining NOT
-    # COMPLIANT is the proposed building at 112.2% of target — a statement
+    # Every value below was originally read off two consecutive runs of the
+    # unmodified product that agreed on every reported figure (necb2020,
+    # Toronto CWEC2020). D-32's 2026-10-22 common Kiva ground method moved
+    # reference cooling unmet hours from 4.75 to 10.5 and proposed cooling
+    # unmet hours from 4.0 to 1.25; reference heating remains 0.0. The
+    # comparison basis still holds setpoint. The remaining NOT COMPLIANT is the
+    # proposed building at 112.9% of target — a statement
     # about the proposed building, which is what a performance path is for.
       #
       # 112.3 -> 112.2 on 2026-10-10, and the freeze gate REFUSED the baseline
@@ -396,6 +397,10 @@ DETERMINATION_SCENARIOS = [
       # DXCOOL-REF-COOLPLFFPLR, so the reference burns MORE at low load, the
       # target grows, and proposed/target falls. The direction was predicted
       # before the number was read.
+      #
+      # 112.2 -> 112.9 on 2026-10-22 when D-32 put both buildings on Kiva
+      # before sizing. The common method changes both annual ground loads; it
+      # does not restore the former simple-Ground ratio.
     {"id": "determination-03-18-vav-hw-subset-reheat-annual",
      "lane": "parity", "kind": "cli", "replaces": [],
      "argv": ["<CORPUS>/18-vav-hw-subset-reheat.osm",
@@ -417,9 +422,9 @@ DETERMINATION_SCENARIOS = [
          {"op": "json_equals", "file": "report.json",
           "path": "reference.unmet_occupied_hours.heating", "value": 0.0},
          {"op": "json_equals", "file": "report.json",
-          "path": "reference.unmet_occupied_hours.cooling", "value": 4.75},
+           "path": "reference.unmet_occupied_hours.cooling", "value": 10.5},
          {"op": "json_equals", "file": "report.json",
-          "path": "proposed.unmet_occupied_hours.cooling", "value": 4.0},
+           "path": "proposed.unmet_occupied_hours.cooling", "value": 1.25},
          # Per block, because an aggregate can hide four drifting blocks.
          {"op": "json_equals", "file": "report.json",
           "path": "reference.zone_unmet_occupied_hours.THERMAL ZONE 5.heating",
@@ -429,7 +434,7 @@ DETERMINATION_SCENARIOS = [
           "value": 0.0},
          # And the verdict is about the PROPOSED building.
          {"op": "json_equals", "file": "report.json",
-          "path": "percent_of_target", "value": 112.2},
+          "path": "percent_of_target", "value": 112.9},
          {"op": "json_equals", "file": "report.json", "path": "compliant",
           "value": False},
      ]},
@@ -741,16 +746,14 @@ _SEED_ZONES = [f"Thermal Zone {n}" for n in range(1, 6)]
 #: the real `Computer/Server room` NECB type brings real data-centre equipment
 #: loads, which makes the zones COOLING-dominated — measured, zone 1 at
 #: 2.3245 m3/s cooling against 0.5161 heating — and the #113 UA inversion fails
-#: only when HEATING dominates. Office loads with the classification overridden
-#: give Data Processing Area selection AND heating dominance: zone 1 at 0.3468
-#: cooling against 0.8023 heating (2.31x), zone 3 at 0.1393 against 0.8040
-#: (5.77x), against the 2.22x and 5.54x of issue #113's own witness. The
-#: margin is not wide: the two failing zones sit at 2.31x and 5.77x while the
-#: three that invert cleanly sit at 1.12-1.41x, and NOTHING in the scenario
-#: pins the ratio. A weather or loads-table change could flip it and leave a
-#: scenario that passes while guarding nothing — which is why the `fragments`
-#: check on the engine's own error file carries the guard rather than the
-#: audit asserts alone.
+#: only when HEATING dominates. Before D-32's symmetric Kiva preparation,
+#: office loads with the classification overridden gave zone 1 a 2.31x and
+#: zone 3 a 5.77x heating/cooling design-flow ratio. Kiva changed the ground
+#: load and reduced the maximum to 4.53x, but deleting only D-106's sizing
+#: marker still produces `Bad starting values for UA` in both editions. The
+#: focused engine test pins the maximum above 4x, and the `fragments` check on
+#: the engine's own error file guards the frozen scenario rather than relying
+#: on audit assertions alone.
 #: `winter_design_temp_c` is NOT here: Fable's `306` found it has no runtime
 #: consumer at all, and the scenario without it is byte-identical. Issue #113's
 #: witness passes it, and I had attributed the heating dominance to it — the
@@ -796,13 +799,12 @@ SYSTEM_25_SCENARIOS = [
      ]},
 
     # The HEATING-dominated companion, which IS the #113 regression guard.
-    # Proven rather than assumed: with `_apply_reference_fan_coil_sizing`
-    # stubbed to return, this exact call produces the issue's own two Severes —
-    # `Calculation of cooling coil design UA failed for coil COIL COOLING
-    # WATER 2` and `... WATER 4`, both `Bad starting values for UA` — and its
-    # `audit.json` and `audit.txt` bytes both move. `report.json` and
-    # `observations.json` do NOT move, which is why the audit files carry this
-    # scenario and the asserts below name the entry directly.
+    # Proven rather than assumed: with only D-106's marker loop deleted while
+    # its audit entry remains, this exact post-Kiva call produces the issue's
+    # `Calculation of cooling coil design UA failed` Severe for COIL COOLING
+    # WATER 4 and `Bad starting values for UA` in both editions. The audit and
+    # sizing report do NOT expose that Severe, so the engine fragment below is
+    # the behavior witness.
     #
     # It needs the API path: the classification override and the office
     # space-type tagging cannot both be expressed through the CLI, which
@@ -827,8 +829,8 @@ SYSTEM_25_SCENARIOS = [
      # Fable's `306` proved the consequence: keep the D-106 audit entry and
      # delete only the physics (the marking loop, or the
      # `apply_workspace_contracts` call site) and this scenario passed with
-     # ZERO problems while `eplusout.err` carried the issue's own two UA
-     # Severes. My own mutation had stubbed the whole function, which removes
+     # ZERO problems while `eplusout.err` carried the issue's UA Severe. My
+     # own mutation had stubbed the whole function, which removes
      # the entry too — so it proved the asserts detect a missing LOG LINE, not
      # a missing correction.
      "fragments": {"reference_sizing/run/eplusout.err": {
