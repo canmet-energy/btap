@@ -573,6 +573,14 @@ def determination(result, rep):
     if rep.get("annual") is False:
         return "NO DETERMINATION - run period shortened"
     if result.compliant is None:
+        # A run can reach `compliant is None` having simulated a full year:
+        # `--ground-model simple` establishes no building energy target per
+        # 8.4.1.1.(1), so there is nothing to compare against. Saying "no
+        # annual simulation" there is simply false, and the report carries the
+        # real reason — so render it rather than the default assumption.
+        block = rep.get("no_determination")
+        if block:
+            return f"NO DETERMINATION - {block['reason']}"
         return "NO DETERMINATION - no annual simulation"
     verdict = "COMPLIANT" if result.compliant else "NOT COMPLIANT"
     # 8.4.x.9.(5) is not implemented for a multi-energy serving system, so the
@@ -596,6 +604,19 @@ def verdict_block(result, rep):
             "  year. The comparison above is arithmetic only.", "",
             "  VERDICT: NO DETERMINATION", rule])
     if result.compliant is None:
+        block = rep.get("no_determination")
+        if block:
+            # A full year WAS simulated; what is missing is the target, so
+            # "run with --simulate annual" would be useless advice. The report
+            # carries both the reason and what would fix it.
+            lines = ["", "  *** NOT A CODE-COMPLIANT DETERMINATION ***",
+                     f"  {block['reason'].capitalize()} "
+                     f"({block.get('article', '')}).".rstrip(". ") + ".",
+                     "  The energies above are DIAGNOSTIC only.", ""]
+            fix = block.get("what_would_fix_it")
+            if fix:
+                lines += [f"  Fix: {fix}", ""]
+            return "\n".join(lines + ["  VERDICT: NO DETERMINATION", rule])
         return "\n".join([
             "", f"  VERDICT: NO DETERMINATION (simulate: {rep.get('simulate')})",
             "  Run with --simulate annual for an 8.4.1.2 determination.", rule])

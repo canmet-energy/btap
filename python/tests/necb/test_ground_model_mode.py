@@ -87,6 +87,80 @@ class TestGroundModelSimpleMakesNoDetermination(unittest.TestCase):
                             codes_cli.verdict_exit(result))
 
 
+class TestTheRefusalIsRenderedHonestly(unittest.TestCase):
+    """Every surface a human reads must give the REAL reason.
+
+    All three said "no annual simulation" / "no annual run" for a run that
+    simulated a full year, because each inferred the cause from
+    `compliant is None` instead of reading the recorded reason. The real one
+    lived only in `report.json` and nothing rendered it. Found by Fable on
+    PR #133; no SDK needed, these are renderers.
+    """
+
+    REPORT = {
+        "annual": True, "simulate": "annual",
+        "compliance_determination": "no_determination",
+        "compliant": None,
+        "no_determination": {
+            "reason": "building energy target not established",
+            "article": "8.4.1.1.(1)",
+            "ruling": "D-32",
+            "what_would_fix_it": "re-run without --ground-model simple",
+        },
+    }
+
+    def _result(self):
+        from types import SimpleNamespace
+
+        return SimpleNamespace(compliant=None, report=self.REPORT)
+
+    def test_the_one_line_determination_names_the_target(self):
+        from btap.codes import cli
+
+        line = cli.determination(self._result(), self.REPORT)
+        self.assertIn("building energy target not established", line)
+        self.assertNotIn("no annual simulation", line)
+
+    def test_the_verdict_block_names_the_target_and_the_real_fix(self):
+        from btap.codes import cli
+
+        block = cli.verdict_block(self._result(), self.REPORT)
+        self.assertIn("building energy target not established".capitalize(),
+                      block)
+        self.assertIn("8.4.1.1.(1)", block)
+        self.assertIn("re-run without --ground-model simple", block)
+        self.assertIn("DIAGNOSTIC only", block)
+        self.assertNotIn("Run with --simulate annual", block)
+
+    def test_the_html_badge_names_the_target(self):
+        """The report is the AHJ-facing artifact, so the badge beside the
+        verdict is where a wrong reason does the most damage."""
+        from btap.codes.report import sections
+
+        html = str(sections.verdict_banner({"report": self.REPORT}))
+        self.assertIn("building energy target not established", html)
+        self.assertNotIn("no annual run", html)
+
+    def test_the_html_badge_still_says_no_annual_run_when_that_is_why(self):
+        """Control: the default survives for the case it describes."""
+        from btap.codes.report import sections
+
+        html = str(sections.verdict_banner(
+            {"report": {"compliant": None, "simulate": "none"}}))
+        self.assertIn("no annual run", html)
+
+    def test_an_ordinary_unsized_run_still_says_no_annual_simulation(self):
+        """The CONTROL: the old message is still right when it IS the reason,
+        so the fix reads the report rather than replacing the default."""
+        from types import SimpleNamespace
+
+        from btap.codes import cli
+
+        rep = {"annual": True, "simulate": "none", "compliant": None}
+        line = cli.determination(SimpleNamespace(compliant=None, report=rep), rep)
+        self.assertIn("no annual simulation", line)
+
+
 @needs_sdk
 class TestGroundModelSimpleStillRunsWhereNoStripApplies(unittest.TestCase):
     def test_simple_is_an_ordinary_run_in_a_full_area_climate(self):

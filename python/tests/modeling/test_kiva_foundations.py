@@ -307,6 +307,105 @@ class TestKivaCreation(unittest.TestCase):
 
 
 @needs_sdk
+class TestDefaultedConstructions(unittest.TestCase):
+    """A DEFAULTED construction does not survive the boundary flip.
+
+    A surface whose construction comes from a DefaultConstructionSet has no
+    construction at all once its boundary condition reads `Foundation`: the
+    default set maps Ground but not Foundation, so `construction()` returns
+    None — and returns the object again if the boundary is reverted.
+
+    Nothing refuses it. `kiva_blockers` ran while the surface was still
+    `Ground`, and the forward translator writes `BuildingSurface:Detailed` with
+    a BLANK Construction Name and emits NO error. EnergyPlus then reports
+    `Missing required property 'construction_name'` and FATALS, which the
+    pipeline attributes to the SUBMITTED model — the misattribution the
+    architecture exists to prevent.
+
+    Found by Fable on PR #133. 587 of the 588 ground floors in the shipped
+    archetypes are defaulted, and six of them took a foundation without also
+    taking an explicit construction clone, making their archetypes
+    unsimulatable. Every corpus fixture carries a CP02 layer and so gets a
+    clone, which is why 2273 tests, 56 scenarios and five green CI jobs were
+    all blind to it.
+    """
+
+    def _defaulted_slab(self):
+        import openstudio
+
+        model = openstudio.model.Model()
+        construction = _concrete(model)
+        floor = _slab(model, "Slab", 0.0, 0.0)   # NO explicit construction
+        space = floor.space().get()
+        default_set = openstudio.model.DefaultConstructionSet(model)
+        surfaces = openstudio.model.DefaultSurfaceConstructions(model)
+        surfaces.setFloorConstruction(construction)
+        default_set.setDefaultGroundContactSurfaceConstructions(surfaces)
+        space.setDefaultConstructionSet(default_set)
+        return model, floor
+
+    def test_the_sdk_really_drops_a_defaulted_construction_on_the_flip(self):
+        """The CONTROL: without the fix this is what happens, so a reader can
+        see the hazard is real rather than taking the guard on trust."""
+        from btap._compat import opt
+
+        model, floor = self._defaulted_slab()
+        self.assertTrue(floor.isConstructionDefaulted())
+        self.assertIsNotNone(opt(floor.construction()))
+
+        floor.setOutsideBoundaryCondition("Foundation")
+        self.assertIsNone(opt(floor.construction()),
+                          "if this ever stops being None the pin below is "
+                          "no longer needed")
+        floor.setOutsideBoundaryCondition("Ground")
+        self.assertIsNotNone(opt(floor.construction()))
+
+    def test_creating_a_foundation_keeps_the_defaulted_construction(self):
+        from btap._compat import opt
+        from btap.modeling.envelope import foundations
+
+        model, floor = self._defaulted_slab()
+        before = opt(floor.construction()).nameString()
+
+        result = foundations.create_kiva_foundation(model, floor)
+
+        self.assertTrue(result["created"], result["refusals"])
+        self.assertEqual("Foundation", floor.outsideBoundaryCondition())
+        kept = opt(floor.construction())
+        self.assertIsNotNone(
+            kept, "a Foundation surface with no construction FATALS in "
+                  "EnergyPlus with 'Missing required property construction_name'")
+        self.assertEqual(before, kept.nameString())
+        self.assertFalse(floor.isConstructionDefaulted(),
+                         "the resolved construction must be pinned explicitly, "
+                         "because the default set cannot resolve Foundation")
+
+    def test_a_refused_write_hands_the_construction_back_to_the_default_set(self):
+        """The pin is part of the attempt, so the rollback must undo it: a
+        refused call leaves no explicit assignment the caller did not have."""
+        import unittest.mock
+
+        from btap.modeling.envelope import foundations
+
+        model, floor = self._defaulted_slab()
+
+        def created_then_discarded(surface, perimeter_m):
+            surface.createSurfacePropertyExposedFoundationPerimeter(
+                "TotalExposedPerimeter", perimeter_m)
+            return "injected: the SDK discarded the value"
+
+        with unittest.mock.patch.object(
+                foundations, "_write_exposed_perimeter",
+                side_effect=created_then_discarded):
+            result = foundations.create_kiva_foundation(model, floor)
+
+        self.assertFalse(result["created"])
+        self.assertEqual("Ground", floor.outsideBoundaryCondition())
+        self.assertTrue(floor.isConstructionDefaulted(),
+                        "the surface must go back to being defaulted")
+
+
+@needs_sdk
 class TestKivaRefusals(unittest.TestCase):
     def test_walls_exceeding_the_perimeter_are_refused(self):
         """E11, measured by Fable on #121: paired walls longer than the exposed

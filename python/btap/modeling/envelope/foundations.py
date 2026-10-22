@@ -426,6 +426,34 @@ def create_kiva_foundation(model, floor, walls=(), *, perimeter_m=None, name=Non
         for surface in [floor] + walls
     }
 
+    # PIN A DEFAULTED CONSTRUCTION BEFORE THE FLIP. A surface whose
+    # construction is resolved through a DefaultConstructionSet has no
+    # construction at all once its boundary condition reads `Foundation`,
+    # because the default set maps Ground but not Foundation: `construction()`
+    # goes from the resolved object to None, and back again if the boundary is
+    # reverted. Nothing refuses it — `kiva_blockers` ran while the surface was
+    # still `Ground`, and the forward translator emits
+    # `BuildingSurface:Detailed` with a BLANK Construction Name and NO error.
+    # EnergyPlus then says `Missing required property 'construction_name'` and
+    # FATALS, which the pipeline attributes to the submitted model.
+    #
+    # Measured by Fable on PR #133: 587 of the 588 ground floors in the shipped
+    # archetypes are defaulted, and the six that took a foundation without also
+    # taking an explicit construction clone — Office and Office-Small, Surface
+    # 40 and Surface 221 — each lost their construction and made their
+    # archetype unsimulatable. Every corpus fixture carries a CP02 layer and so
+    # gets an explicit clone, which is why nothing in 2273 tests, 56 scenarios
+    # or five green CI jobs saw it.
+    pinned = []
+    for surface in [floor] + walls:
+        if not surface.isConstructionDefaulted():
+            continue
+        resolved = opt(surface.construction())
+        if resolved is None:
+            continue
+        surface.setConstruction(resolved)
+        pinned.append(surface)
+
     attached = []
     for surface in [floor] + walls:
         # ORDER IS LOAD-BEARING: the boundary condition first, because
@@ -457,6 +485,10 @@ def create_kiva_foundation(model, floor, walls=(), *, perimeter_m=None, name=Non
         for surface in [floor] + walls:
             surface.setOutsideBoundaryCondition(
                 original_conditions[surface.nameString()])
+        # Hand the defaulted surfaces back to their default set, so a refused
+        # call leaves no explicit assignment the caller did not have.
+        for surface in pinned:
+            surface.resetConstruction()
         return {"created": False, "foundation": None, "floor": floor.nameString(),
                 "walls": [], "perimeter_m": perimeter_m, "refusals": refusals}
 
