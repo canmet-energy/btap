@@ -7,22 +7,22 @@
  "proposed": {
   "mechanical_cooling": true,
   "clean_run": true,
-  "total_site_kwh": 2544.4,
-  "electricity_kwh": 1558.3,
-  "natural_gas_kwh": 983.3,
+  "total_site_kwh": 2702.8,
+  "electricity_kwh": 1616.7,
+  "natural_gas_kwh": 1086.1,
   "district_heating_kwh": 0.0,
   "district_cooling_kwh": 0.0,
   "end_uses_kwh": {
-   "heating": 1208.3,
-   "cooling": 11.1,
-   "fans": 44.4,
-   "pumps": 122.2,
+   "heating": 1363.9,
+   "cooling": 8.3,
+   "fans": 47.2,
+   "pumps": 125.0,
    "interior_lighting": 375.0,
    "interior_equipment": 472.2,
    "water_systems": 311.1
   },
   "floor_area_m2": 800.0,
-  "eui_kwh_per_m2": 3.2,
+  "eui_kwh_per_m2": 3.4,
   "unmet_occupied_hours": {
    "heating": 0.0,
    "cooling": 0.0
@@ -52,22 +52,22 @@
  },
  "reference": {
   "clean_run": true,
-  "total_site_kwh": 2872.2,
-  "electricity_kwh": 2561.1,
+  "total_site_kwh": 2966.7,
+  "electricity_kwh": 2655.6,
   "natural_gas_kwh": 311.1,
   "district_heating_kwh": 0.0,
   "district_cooling_kwh": 0.0,
   "end_uses_kwh": {
-   "heating": 1111.1,
+   "heating": 1191.7,
    "cooling": 5.6,
-   "fans": 683.3,
+   "fans": 694.4,
    "pumps": 0.0,
    "interior_lighting": 263.9,
    "interior_equipment": 472.2,
    "water_systems": 311.1
   },
   "floor_area_m2": 800.0,
-  "eui_kwh_per_m2": 3.6,
+  "eui_kwh_per_m2": 3.7,
   "unmet_occupied_hours": {
    "heating": 0.0,
    "cooling": 0.0
@@ -96,7 +96,7 @@
   }
  },
  "capacity_iterations": [],
- "percent_of_target": 88.6,
+ "percent_of_target": 91.1,
  "tier": 1,
  "annual": false,
  "ahj_applied": [
@@ -116,6 +116,8 @@
  "ahj_register": "docs/NECB_AHJ_QUESTIONS.md",
  "compliant": true,
  "warnings": [
+  "the pipeline's PROPOSED copy replaces known CP02 carpet-pad no-mass layers with the pinned thin-carpet material needed by Kiva; thermal resistance and submitted absorptances are preserved, while the sourced carpet heat capacity is disclosed",
+  "ordinary perimeter-strip floors that could NOT take a Kiva foundation keep the simple Ground boundary condition \u2014 the 1.2 m strip of 3.2.3.3.(3) is not representable and those slabs stay as modeled in BOTH proposed and reference",
   "UNRESOLVED: the heating equipment serving this group uses MORE THAN ONE ENERGY TYPE. 8.4.4.9.(5) requires the reference heating capacities to follow the proposed energy-type allocation, and this tool does NOT compute or enforce that allocation \u2014 it elects ONE energy type for the group. Whether the reference happens to match the proposed allocation is therefore NOT VERIFIED here, in either direction, and a passing annual result is not evidence that it does",
   "UNRESOLVED: the heating equipment serving this group uses MORE THAN ONE ENERGY TYPE. 8.4.4.9.(5) requires the reference heating capacities to follow the proposed energy-type allocation, and this tool does NOT compute or enforce that allocation \u2014 it elects ONE energy type for the group. Whether the reference happens to match the proposed allocation is therefore NOT VERIFIED here, in either direction, and a passing annual result is not evidence that it does",
   "UNRESOLVED: the heating equipment serving this group uses MORE THAN ONE ENERGY TYPE. 8.4.4.9.(5) requires the reference heating capacities to follow the proposed energy-type allocation, and this tool does NOT compute or enforce that allocation \u2014 it elects ONE energy type for the group. Whether the reference happens to match the proposed allocation is therefore NOT VERIFIED here, in either direction, and a passing annual result is not evidence that it does",
@@ -143,7 +145,7 @@
   "Supply Air Systems (airflow rates, fan specs) \u2014 partial. Applied: block supply airflow comes from zone sizing. Gaps: the greater-of criteria at the 21/11 C supply-air deltas are not explicitly enforced",
   "Supply Air Systems (airflow rates, fan specs) \u2014 not implemented. Gaps: the identical-fan-power fallback for secondaries failing 5.2.3.1.(1)(b) is not modeled",
   "Supply Air Systems (airflow rates, fan specs) \u2014 not implemented. Gaps: the exemption for equipment whose fan energy is included in the Tables 5.2.12.1 minimum performance is not modeled",
-  "5 ground floors have NO Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m insulated strip required by 3.2.3.3.(3) is not representable and those slabs are left AS MODELLED, so the prescribed perimeter insulation is NOT applied",
+  "1 ground floors have NO Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m insulated strip required by 3.2.3.3.(3) is not representable and those slabs are left AS MODELLED, so the prescribed perimeter insulation is NOT applied",
   "8 conditioned-to-conditioned interzone assemblies left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
   "thermal bridging not requested \u2014 applied U-values are clear-field; NECB 3.1.1.7 requires EFFECTIVE transmittance (pass thermal_bridging:)",
   "proposed infiltration total 0 L/s DEVIATES from the untested 8.4.3.3.(3) default 607 L/s by -100% \u2014 only a 3.2.4.2 airtightness test justifies a different value",

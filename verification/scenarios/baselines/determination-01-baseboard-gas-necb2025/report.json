@@ -7,71 +7,71 @@
  "proposed": {
   "mechanical_cooling": false,
   "clean_run": true,
-  "total_site_kwh": 117908.3,
-  "electricity_kwh": 40097.2,
-  "natural_gas_kwh": 77811.1,
+  "total_site_kwh": 118269.4,
+  "electricity_kwh": 40041.7,
+  "natural_gas_kwh": 78225.0,
   "district_heating_kwh": 0.0,
   "district_cooling_kwh": 0.0,
   "end_uses_kwh": {
-   "heating": 63591.7,
+   "heating": 64000.0,
    "cooling": 0.0,
    "fans": 0.0,
-   "pumps": 1013.9,
+   "pumps": 958.3,
    "interior_lighting": 16775.0,
    "interior_equipment": 22311.1,
-   "water_systems": 14219.4
+   "water_systems": 14227.8
   },
   "floor_area_m2": 800.0,
-  "eui_kwh_per_m2": 147.4,
+  "eui_kwh_per_m2": 147.8,
   "unmet_occupied_hours": {
-   "heating": 41.75,
-   "cooling": 1709.75
+   "heating": 47.75,
+   "cooling": 2029.75
   },
   "zone_unmet_occupied_hours": {
    "THERMAL ZONE 1": {
-    "heating": 0.25,
-    "cooling": 1452.75
+    "heating": 0.75,
+    "cooling": 1897.75
    },
    "THERMAL ZONE 2": {
-    "heating": 0.5,
-    "cooling": 1241.25
+    "heating": 2.75,
+    "cooling": 1682.0
    },
    "THERMAL ZONE 3": {
-    "heating": 0.5,
-    "cooling": 965.25
+    "heating": 3.75,
+    "cooling": 1365.5
    },
    "THERMAL ZONE 4": {
-    "heating": 0.5,
-    "cooling": 1340.75
+    "heating": 2.25,
+    "cooling": 1722.25
    },
    "THERMAL ZONE 5": {
-    "heating": 41.75,
-    "cooling": 880.75
+    "heating": 47.75,
+    "cooling": 1152.75
    }
   },
-  "ghg_kg_co2e": 16716.7
+  "ghg_kg_co2e": 16790.0
  },
  "reference": {
   "clean_run": true,
-  "total_site_kwh": 148038.9,
-  "electricity_kwh": 61041.7,
-  "natural_gas_kwh": 86994.4,
+  "total_site_kwh": 150566.7,
+  "electricity_kwh": 63052.8,
+  "natural_gas_kwh": 87511.1,
   "district_heating_kwh": 0.0,
   "district_cooling_kwh": 0.0,
   "end_uses_kwh": {
-   "heating": 72722.2,
-   "cooling": 2619.4,
-   "fans": 24977.8,
-   "pumps": 383.3,
+   "heating": 73233.3,
+   "cooling": 4466.7,
+   "fans": 25080.6,
+   "pumps": 447.2,
    "interior_lighting": 9402.8,
    "interior_equipment": 22311.1,
-   "water_systems": 14275.0
+   "water_systems": 14277.8
   },
   "floor_area_m2": 800.0,
-  "eui_kwh_per_m2": 185.0,
+  "eui_kwh_per_m2": 188.2,
   "unmet_occupied_hours": {
    "heating": 0.0,
-   "cooling": 4.75
+   "cooling": 10.5
   },
   "zone_unmet_occupied_hours": {
    "THERMAL ZONE 1": {
@@ -80,25 +80,25 @@
    },
    "THERMAL ZONE 2": {
     "heating": 0.0,
-    "cooling": 1.25
+    "cooling": 3.25
    },
    "THERMAL ZONE 3": {
     "heating": 0.0,
-    "cooling": 0.75
+    "cooling": 1.25
    },
    "THERMAL ZONE 4": {
     "heating": 0.0,
-    "cooling": 0.5
+    "cooling": 3.25
    },
    "THERMAL ZONE 5": {
     "heating": 0.0,
-    "cooling": 1.75
+    "cooling": 2.25
    }
   },
-  "ghg_kg_co2e": 19628.3
+  "ghg_kg_co2e": 19840.3
  },
  "capacity_iterations": [],
- "percent_of_target": 79.6,
+ "percent_of_target": 78.5,
  "tier": 1,
  "annual": true,
  "ahj_applied": [
@@ -138,7 +138,7 @@
     "article": "8.4.5.9.(3); 8.4.2.10.(2)",
     "target": "Thermal Zone 1",
     "detail": "zone dispatch: the rooftop air terminal runs before the baseboard",
-    "entry_index": 29
+    "entry_index": 32
    },
    {
     "id": "AHJ-15",
@@ -147,7 +147,7 @@
     "article": "8.4.5.9.(3); 8.4.2.10.(2)",
     "target": "Thermal Zone 2",
     "detail": "zone dispatch: the rooftop air terminal runs before the baseboard",
-    "entry_index": 36
+    "entry_index": 39
    },
    {
     "id": "AHJ-15",
@@ -156,7 +156,7 @@
     "article": "8.4.5.9.(3); 8.4.2.10.(2)",
     "target": "Thermal Zone 3",
     "detail": "zone dispatch: the rooftop air terminal runs before the baseboard",
-    "entry_index": 43
+    "entry_index": 46
    },
    {
     "id": "AHJ-15",
@@ -165,7 +165,7 @@
     "article": "8.4.5.9.(3); 8.4.2.10.(2)",
     "target": "Thermal Zone 4",
     "detail": "zone dispatch: the rooftop air terminal runs before the baseboard",
-    "entry_index": 50
+    "entry_index": 53
    },
    {
     "id": "AHJ-15",
@@ -174,7 +174,7 @@
     "article": "8.4.5.9.(3); 8.4.2.10.(2)",
     "target": "Thermal Zone 5",
     "detail": "zone dispatch: the rooftop air terminal runs before the baseboard",
-    "entry_index": 57
+    "entry_index": 60
    },
    {
     "id": "AHJ-14",
@@ -183,7 +183,7 @@
     "article": "NECB 2025 Table 5.2.12.1.-N; 8.4.6.2.",
     "target": "Primary Boiler",
     "detail": "boiler efficiency applied",
-    "entry_index": 215
+    "entry_index": 222
    },
    {
     "id": "AHJ-14",
@@ -192,7 +192,7 @@
     "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
     "target": "CoilHeatingGasMultiStage_gas",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 237
+    "entry_index": 244
    },
    {
     "id": "AHJ-14",
@@ -201,7 +201,7 @@
     "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
     "target": "CoilHeatingGasMultiStage_gas 1",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 238
+    "entry_index": 245
    },
    {
     "id": "AHJ-14",
@@ -210,7 +210,7 @@
     "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
     "target": "CoilHeatingGasMultiStage_gas 2",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 239
+    "entry_index": 246
    },
    {
     "id": "AHJ-14",
@@ -219,7 +219,7 @@
     "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
     "target": "CoilHeatingGasMultiStage_gas 3",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 240
+    "entry_index": 247
    },
    {
     "id": "AHJ-14",
@@ -228,16 +228,18 @@
     "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
     "target": "CoilHeatingGasMultiStage_gas 4",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 241
+    "entry_index": 248
    }
   ]
  },
  "ghg": {
-  "percent_of_ghg_target": 85.2,
+  "percent_of_ghg_target": 84.6,
   "level": "E"
  },
  "compliant": true,
  "warnings": [
+  "the pipeline's PROPOSED copy replaces known CP02 carpet-pad no-mass layers with the pinned thin-carpet material needed by Kiva; thermal resistance and submitted absorptances are preserved, while the sourced carpet heat capacity is disclosed",
+  "ordinary perimeter-strip floors that could NOT take a Kiva foundation keep the simple Ground boundary condition \u2014 the 1.2 m strip of 3.2.3.3.(3) is not representable and those slabs stay as modeled in BOTH proposed and reference",
   "Purchased Energy \u2014 partial. Applied: purchased HEATING is represented by a gas-fired modulating boiler ((1)(a)) via the energy-type election. Gaps: the (1)(b) capacity-ratio adjustment is sizing-time and not enforced",
   "Purchased Energy \u2014 partial. Applied: purchased COOLING forces an air-cooled electric chiller ((2)(a)) via the chw_source config. Gaps: the (2)(b) capacity-ratio adjustment is sizing-time and not enforced",
   "Purchased Energy \u2014 partial. Applied: operating schedules carry over to the representing equipment by clone. Gaps: priority-of-use and other operational characteristics of the purchased supply are not explicitly modelled",
@@ -260,7 +262,7 @@
   "Supply Air Systems (airflow rates, fan specs) \u2014 partial. Applied: block supply airflow comes from zone sizing. Gaps: the greater-of criteria at the 21/11 C supply-air deltas are not explicitly enforced",
   "Supply Air Systems (airflow rates, fan specs) \u2014 not implemented. Gaps: the identical-fan-power fallback for secondaries failing 5.2.3.1.(1)(b) is not modeled",
   "Supply Air Systems (airflow rates, fan specs) \u2014 not implemented. Gaps: the exemption for equipment whose fan energy is included in the Tables 5.2.12.1 minimum performance is not modeled",
-  "5 ground floors have NO Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m insulated strip required by 3.2.3.3.(3) is not representable and those slabs are left AS MODELLED, so the prescribed perimeter insulation is NOT applied",
+  "1 ground floors have NO Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m insulated strip required by 3.2.3.3.(3) is not representable and those slabs are left AS MODELLED, so the prescribed perimeter insulation is NOT applied",
   "8 conditioned-to-conditioned interzone assemblies left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
   "thermal bridging not requested \u2014 applied U-values are clear-field; NECB 3.1.1.7 requires EFFECTIVE transmittance (pass thermal_bridging:)",
   "proposed infiltration total 0 L/s DEVIATES from the untested 8.4.3.3.(3) default 607 L/s by -100% \u2014 only a 3.2.4.2 airtightness test justifies a different value",

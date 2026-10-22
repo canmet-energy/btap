@@ -7,91 +7,91 @@
  "proposed": {
   "mechanical_cooling": true,
   "clean_run": true,
-  "total_site_kwh": 121613.9,
-  "electricity_kwh": 86858.3,
-  "natural_gas_kwh": 34758.3,
+  "total_site_kwh": 128919.4,
+  "electricity_kwh": 84450.0,
+  "natural_gas_kwh": 44469.4,
   "district_heating_kwh": 0.0,
   "district_cooling_kwh": 0.0,
   "end_uses_kwh": {
-   "heating": 46541.7,
-   "cooling": 7011.1,
-   "fans": 13116.7,
-   "pumps": 1775.0,
+   "heating": 53816.7,
+   "cooling": 9741.7,
+   "fans": 10572.2,
+   "pumps": 1597.2,
    "interior_lighting": 16775.0,
    "interior_equipment": 22311.1,
-   "water_systems": 14086.1
+   "water_systems": 14105.6
   },
   "floor_area_m2": 800.0,
-  "eui_kwh_per_m2": 152.0,
+  "eui_kwh_per_m2": 161.1,
   "unmet_occupied_hours": {
-   "heating": 488.5,
-   "cooling": 262.0
+   "heating": 513.25,
+   "cooling": 401.5
   },
   "zone_unmet_occupied_hours": {
    "THERMAL ZONE 1": {
     "heating": 0.0,
-    "cooling": 9.75
+    "cooling": 84.75
    },
    "THERMAL ZONE 2": {
-    "heating": 332.25,
-    "cooling": 164.5
+    "heating": 373.25,
+    "cooling": 81.25
    },
    "THERMAL ZONE 3": {
-    "heating": 459.5,
-    "cooling": 12.25
+    "heating": 479.5,
+    "cooling": 2.75
    },
    "THERMAL ZONE 4": {
-    "heating": 338.25,
-    "cooling": 87.75
+    "heating": 303.5,
+    "cooling": 235.5
    },
    "THERMAL ZONE 5": {
-    "heating": 262.5,
+    "heating": 247.0,
     "cooling": 0.0
    }
   }
  },
  "reference": {
   "clean_run": true,
-  "total_site_kwh": 184244.4,
-  "electricity_kwh": 70505.6,
-  "natural_gas_kwh": 113738.9,
+  "total_site_kwh": 184633.3,
+  "electricity_kwh": 72230.6,
+  "natural_gas_kwh": 112402.8,
   "district_heating_kwh": 0.0,
   "district_cooling_kwh": 0.0,
   "end_uses_kwh": {
-   "heating": 100000.0,
-   "cooling": 2844.4,
-   "fans": 32969.4,
-   "pumps": 1241.7,
+   "heating": 98661.1,
+   "cooling": 4913.9,
+   "fans": 32680.6,
+   "pumps": 1186.1,
    "interior_lighting": 9402.8,
    "interior_equipment": 22311.1,
-   "water_systems": 14127.8
+   "water_systems": 14130.6
   },
   "floor_area_m2": 800.0,
-  "eui_kwh_per_m2": 230.3,
+  "eui_kwh_per_m2": 230.8,
   "unmet_occupied_hours": {
    "heating": 0.0,
-   "cooling": 231.25
+   "cooling": 566.75
   },
   "zone_unmet_occupied_hours": {
    "THERMAL ZONE 1": {
     "heating": 0.0,
-    "cooling": 34.0
+    "cooling": 186.0
    },
    "THERMAL ZONE 2": {
     "heating": 0.0,
-    "cooling": 154.75
+    "cooling": 266.75
    },
    "THERMAL ZONE 3": {
     "heating": 0.0,
-    "cooling": 3.0
+    "cooling": 1.5
    },
    "THERMAL ZONE 4": {
     "heating": 0.0,
-    "cooling": 41.75
+    "cooling": 187.25
    },
    "THERMAL ZONE 5": {
     "heating": 0.0,
-    "cooling": 5.0
+    "cooling": 13.75
    }
   }
  },
@@ -103,8 +103,7 @@
      "mode": "zonal",
      "zones": {
       "THERMAL ZONE 2": {
-       "heating_sizing_factor": 1.625,
-       "cooling_sizing_factor": 1.25
+       "heating_sizing_factor": 1.625
       },
       "THERMAL ZONE 3": {
        "heating_sizing_factor": 1.625,
@@ -124,12 +123,12 @@
    },
    "unmet_after": {
     "proposed": {
-     "heating": 467.0,
-     "cooling": 481.75
+     "heating": 497.5,
+     "cooling": 601.0
     },
     "reference": {
      "heating": 0.0,
-     "cooling": 231.25
+     "cooling": 566.75
     }
    }
   },
@@ -140,75 +139,35 @@
      "mode": "zonal",
      "zones": {
       "THERMAL ZONE 2": {
-       "heating_sizing_factor": 2.031,
-       "cooling_sizing_factor": 1.599
+       "heating_sizing_factor": 3.25
       },
       "THERMAL ZONE 3": {
-       "heating_sizing_factor": 2.031,
-       "cooling_sizing_factor": 1.51
+       "heating_sizing_factor": 2.031
       },
       "THERMAL ZONE 4": {
-       "heating_sizing_factor": 2.031,
-       "cooling_sizing_factor": 2.009
+       "heating_sizing_factor": 2.031
       },
       "THERMAL ZONE 5": {
        "heating_sizing_factor": 2.031
       }
      },
-     "heating_sizing_factor": 2.031,
-     "cooling_sizing_factor": 2.009
+     "heating_sizing_factor": 3.25
     }
    },
    "unmet_after": {
     "proposed": {
-     "heating": 478.25,
-     "cooling": 318.75
+     "heating": 513.25,
+     "cooling": 401.5
     },
     "reference": {
      "heating": 0.0,
-     "cooling": 231.25
-    }
-   }
-  },
-  {
-   "iteration": 3,
-   "bumped": {
-    "proposed": {
-     "mode": "zonal",
-     "zones": {
-      "THERMAL ZONE 2": {
-       "heating_sizing_factor": 2.539,
-       "cooling_sizing_factor": 1.746
-      },
-      "THERMAL ZONE 3": {
-       "heating_sizing_factor": 2.539,
-       "cooling_sizing_factor": 2.708
-      },
-      "THERMAL ZONE 4": {
-       "heating_sizing_factor": 2.539,
-       "cooling_sizing_factor": 2.691
-      },
-      "THERMAL ZONE 5": {
-       "heating_sizing_factor": 2.539
-      }
-     },
-     "heating_sizing_factor": 2.539,
-     "cooling_sizing_factor": 2.708
+     "cooling": 566.75
     }
    },
-   "unmet_after": {
-    "proposed": {
-     "heating": 488.5,
-     "cooling": 262.0
-    },
-    "reference": {
-     "heating": 0.0,
-     "cooling": 231.25
-    }
-   }
+   "stalled": true
   }
  ],
- "percent_of_target": 66.0,
+ "percent_of_target": 69.8,
  "tier": 2,
  "annual": true,
  "ahj_applied": [
@@ -245,7 +204,7 @@
   "ahj_register": "docs/NECB_AHJ_QUESTIONS.md",
   "ahj_must_approve": [
    "AHJ-1 (alternative-solution): a single-fuel reference is a NON-CONFORMING substitution \u2014 an ALTERNATIVE SOLUTION, which the text DECIDES and this tool does not meet \u2014 accepting it means accepting an explicitly identified non-conforming substitution. Applies to: Thermal Zone 1,Thermal Zone 2,Thermal Zone 3,Thermal Zone 4,Thermal Zone 5 \u2014 UNRESOLVED: the heating equipment serving this group uses MORE THAN ONE ENERGY TYPE. 8.4.4.9.(5) requires the reference heating capacities to follow the proposed energy-type allocation, and this tool does NOT compute or enforce that allocation \u2014 it elects ONE energy type for the group. Whether the reference happens to match the proposed allocation is therefore NOT VERIFIED here, in either direction, and a passing annual result is not evidence that it does",
-   "AHJ-2 (referral): the annual-energy basis (2)(g) compares, and an irreconcilable Article 13 case \u2014 an INTERPRETATION the acceptable-solution text does not settle. Applies to: Thermal Zone 1,Thermal Zone 2,Thermal Zone 3,Thermal Zone 4,Thermal Zone 5 \u2014 auxiliary heating energy type ELECTED from the proposed run's simulated period: the terminal/aux energy type with the largest energy use over that period is NaturalGas (110.08 GJ delivered), and the heat pump's 55.2% share exceeds the 33% proviso ((h) inapplicable: the source is classified air/water/ground)",
+   "AHJ-2 (referral): the annual-energy basis (2)(g) compares, and an irreconcilable Article 13 case \u2014 an INTERPRETATION the acceptable-solution text does not settle. Applies to: Thermal Zone 1,Thermal Zone 2,Thermal Zone 3,Thermal Zone 4,Thermal Zone 5 \u2014 auxiliary heating energy type ELECTED from the proposed run's simulated period: the terminal/aux energy type with the largest energy use over that period is NaturalGas (117.97 GJ delivered), and the heat pump's 52.3% share exceeds the 33% proviso ((h) inapplicable: the source is classified air/water/ground)",
    "AHJ-14 (referral): which part-load class a reference boiler or furnace takes \u2014 an INTERPRETATION the acceptable-solution text does not settle. Applies to: Primary Boiler, Coil Heating Gas 1, Coil Heating Gas 2, Coil Heating Gas 3, Coil Heating Gas 4, Coil Heating Gas 5 \u2014 each of the 6 choices above makes this same unresolved election; the conditions list carries what was established at each one"
   ],
   "conditions": [
@@ -255,8 +214,8 @@
     "title": "the annual-energy basis (2)(g) compares, and an irreconcilable Article 13 case",
     "article": "8.4.4.13.(2)(g)(i)",
     "target": "Thermal Zone 1,Thermal Zone 2,Thermal Zone 3,Thermal Zone 4,Thermal Zone 5",
-    "detail": "auxiliary heating energy type ELECTED from the proposed run's simulated period: the terminal/aux energy type with the largest energy use over that period is NaturalGas (110.08 GJ delivered), and the heat pump's 55.2% share exceeds the 33% proviso ((h) inapplicable: the source is classified air/water/ground)",
-    "entry_index": 13
+    "detail": "auxiliary heating energy type ELECTED from the proposed run's simulated period: the terminal/aux energy type with the largest energy use over that period is NaturalGas (117.97 GJ delivered), and the heat pump's 52.3% share exceeds the 33% proviso ((h) inapplicable: the source is classified air/water/ground)",
+    "entry_index": 16
    },
    {
     "id": "AHJ-1",
@@ -265,7 +224,7 @@
     "article": "8.4.4.9.(5)",
     "target": "Thermal Zone 1,Thermal Zone 2,Thermal Zone 3,Thermal Zone 4,Thermal Zone 5",
     "detail": "UNRESOLVED: the heating equipment serving this group uses MORE THAN ONE ENERGY TYPE. 8.4.4.9.(5) requires the reference heating capacities to follow the proposed energy-type allocation, and this tool does NOT compute or enforce that allocation \u2014 it elects ONE energy type for the group. Whether the reference happens to match the proposed allocation is therefore NOT VERIFIED here, in either direction, and a passing annual result is not evidence that it does",
-    "entry_index": 14
+    "entry_index": 17
    },
    {
     "id": "AHJ-14",
@@ -274,7 +233,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
     "target": "Primary Boiler",
     "detail": "boiler efficiency applied",
-    "entry_index": 218
+    "entry_index": 225
    },
    {
     "id": "AHJ-14",
@@ -283,7 +242,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "Coil Heating Gas 1",
     "detail": "gas heating coil efficiency applied",
-    "entry_index": 246
+    "entry_index": 253
    },
    {
     "id": "AHJ-14",
@@ -292,7 +251,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "Coil Heating Gas 2",
     "detail": "gas heating coil efficiency applied",
-    "entry_index": 247
+    "entry_index": 254
    },
    {
     "id": "AHJ-14",
@@ -301,7 +260,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "Coil Heating Gas 3",
     "detail": "gas heating coil efficiency applied",
-    "entry_index": 248
+    "entry_index": 255
    },
    {
     "id": "AHJ-14",
@@ -310,7 +269,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "Coil Heating Gas 4",
     "detail": "gas heating coil efficiency applied",
-    "entry_index": 249
+    "entry_index": 256
    },
    {
     "id": "AHJ-14",
@@ -319,12 +278,14 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "Coil Heating Gas 5",
     "detail": "gas heating coil efficiency applied",
-    "entry_index": 250
+    "entry_index": 257
    }
   ]
  },
  "compliant": false,
  "warnings": [
+  "the pipeline's PROPOSED copy replaces known CP02 carpet-pad no-mass layers with the pinned thin-carpet material needed by Kiva; thermal resistance and submitted absorptances are preserved, while the sourced carpet heat capacity is disclosed",
+  "ordinary perimeter-strip floors that could NOT take a Kiva foundation keep the simple Ground boundary condition \u2014 the 1.2 m strip of 3.2.3.3.(3) is not representable and those slabs stay as modeled in BOTH proposed and reference",
   "UNRESOLVED: the heating equipment serving this group uses MORE THAN ONE ENERGY TYPE. 8.4.4.9.(5) requires the reference heating capacities to follow the proposed energy-type allocation, and this tool does NOT compute or enforce that allocation \u2014 it elects ONE energy type for the group. Whether the reference happens to match the proposed allocation is therefore NOT VERIFIED here, in either direction, and a passing annual result is not evidence that it does",
   "Purchased Energy \u2014 partial. Applied: purchased HEATING is represented by a gas-fired modulating boiler ((1)(a)) via the energy-type election. Gaps: the (1)(b) capacity-ratio adjustment is sizing-time and not enforced",
   "Purchased Energy \u2014 partial. Applied: purchased COOLING forces an air-cooled electric chiller ((2)(a)) via the chw_source config. Gaps: the (2)(b) capacity-ratio adjustment is sizing-time and not enforced",
@@ -348,7 +309,7 @@
   "Supply Air Systems (airflow rates, fan specs) \u2014 partial. Applied: block supply airflow comes from zone sizing. Gaps: the greater-of criteria at the 21/11 C supply-air deltas are not explicitly enforced",
   "Supply Air Systems (airflow rates, fan specs) \u2014 not implemented. Gaps: the identical-fan-power fallback for secondaries failing 5.2.3.1.(1)(b) is not modeled",
   "Supply Air Systems (airflow rates, fan specs) \u2014 not implemented. Gaps: the exemption for equipment whose fan energy is included in the Tables 5.2.12.1 minimum performance is not modeled",
-  "5 ground floors have NO Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m insulated strip required by 3.2.3.3.(3) is not representable and those slabs are left AS MODELLED, so the prescribed perimeter insulation is NOT applied",
+  "1 ground floors have NO Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m insulated strip required by 3.2.3.3.(3) is not representable and those slabs are left AS MODELLED, so the prescribed perimeter insulation is NOT applied",
   "8 conditioned-to-conditioned interzone assemblies left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
   "thermal bridging not requested \u2014 applied U-values are clear-field; NECB 3.1.1.7 requires EFFECTIVE transmittance (pass thermal_bridging:)",
   "proposed infiltration total 0 L/s DEVIATES from the untested 8.4.3.3.(3) default 607 L/s by -100% \u2014 only a 3.2.4.2 airtightness test justifies a different value",
@@ -367,12 +328,13 @@
   "model object named 'DXCOOL-REF-COOLEIRFT' does not state this edition's BiQuadratic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-COOLEIRFT (D-89)'",
   "model object named 'DXCOOL-REF-COOLPLFFPLR' does not state this edition's Cubic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-COOLPLFFPLR (D-89)'",
   "model object named 'DXHEAT-REF-PLFFPLR' does not state this edition's Cubic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXHEAT-REF-PLFFPLR (D-89)'",
-  "CoilHeatingDXMultiSpeed_ashp 68kBtu/hr 3.3COPH: staged cooling capacity unavailable \u2014 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
+  "CoilHeatingDXMultiSpeed_ashp 69kBtu/hr 3.3COPH: staged cooling capacity unavailable \u2014 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
   "CoilHeatingDXMultiSpeed_ashp 1 34kBtu/hr 7.4HSPF: staged cooling capacity unavailable \u2014 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
-  "CoilHeatingDXMultiSpeed_ashp 2 68kBtu/hr 3.3COPH: staged cooling capacity unavailable \u2014 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
+  "CoilHeatingDXMultiSpeed_ashp 2 69kBtu/hr 3.3COPH: staged cooling capacity unavailable \u2014 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
   "CoilHeatingDXMultiSpeed_ashp 3 34kBtu/hr 7.4HSPF: staged cooling capacity unavailable \u2014 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
-  "CoilHeatingDXMultiSpeed_ashp 4 13kBtu/hr 7.4HSPF: staged cooling capacity unavailable \u2014 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
-  "8.4.1.2.(5): unmet-hours limits still not met after 3 capacity increase(s) \u2014 the building remains non-compliant; raise max_capacity_iterations, increase capacity_step, or fix the design (no hard-sized capacity was detected among boilers, chillers, baseboards, gas and electric coils and single-speed DX cooling coils (hydronic coils, DX heating coils and staged coils are not checked)).",
+  "CoilHeatingDXMultiSpeed_ashp 4 14kBtu/hr 7.4HSPF: staged cooling capacity unavailable \u2014 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
+  "capacity iteration 2 produced no unmet-hours improvement \u2014 the failing equipment is not responding to sizing-factor increases (no hard-sized capacity was detected among boilers, chillers, baseboards, gas and electric coils and single-speed DX cooling coils (hydronic coils, DX heating coils and staged coils are not checked), so a hard-sized staged coil, equipment the building does not have, or a limit sizing factors do not move); stopping",
+  "8.4.1.2.(5): unmet-hours limits still not met after 2 capacity increase(s) \u2014 the building remains non-compliant; raise max_capacity_iterations, increase capacity_step, or fix the design (no hard-sized capacity was detected among boilers, chillers, baseboards, gas and electric coils and single-speed DX cooling coils (hydronic coils, DX heating coils and staged coils are not checked)).",
   "INFORMATIONAL AND CONDITIONAL: 3 register question(s) requiring approval by the authority having jurisdiction were raised by this run's modelling choices, so the verdict below is NOT a Code-compliance determination. AHJ-2 (referral); AHJ-1 (alternative-solution); AHJ-14 (referral); AHJ-14 (referral); AHJ-14 (referral); AHJ-14 (referral); AHJ-14 (referral); AHJ-14 (referral)",
   "Determination of Compliance \u2014 partial. Applied: The pipeline computes the (2) annual-energy verdict (proposed vs reference building). On the reference-building path, the (3)/(4) verdicts read each building\u2019s Facility unmet_occupied_hours row; that path does not yet evaluate the zone rows per thermal block, and (4) is vacuous when the proposed building has no mechanical cooling. The sentence-(5) capacity auto-iteration raises each failing zone\u2019s Sizing:Zone factors where zone data attributes the Facility failure, secant-targeted from that zone\u2019s own (factor, unmet-hours) history across rounds, with a global SizingParameters fallback when it cannot, and hard-sized-equipment stall detection.. Gaps: On the reference-building path, sentences (3) and (4) read each building\u2019s Facility row instead of evaluating every thermal block, so a block that exceeds its own limit can pass when the Facility-level comparison passes.",
   "Calculation Methods \u2014 partial. Applied: the energy model accounts for the annual energy use of what the model contains. Gaps: elevators/escalators ((1)(j)) and other loads absent from the model are not added by the pipeline"

@@ -7,13 +7,13 @@
  "proposed": {
   "mechanical_cooling": false,
   "clean_run": true,
-  "total_site_kwh": 2725.0,
-  "electricity_kwh": 877.8,
-  "natural_gas_kwh": 1847.2,
+  "total_site_kwh": 2880.6,
+  "electricity_kwh": 880.6,
+  "natural_gas_kwh": 2002.8,
   "district_heating_kwh": 0.0,
   "district_cooling_kwh": 0.0,
   "end_uses_kwh": {
-   "heating": 1536.1,
+   "heating": 1691.7,
    "cooling": 0.0,
    "fans": 0.0,
    "pumps": 33.3,
@@ -22,19 +22,19 @@
    "water_systems": 311.1
   },
   "floor_area_m2": 800.0,
-  "eui_kwh_per_m2": 3.4,
+  "eui_kwh_per_m2": 3.6,
   "unmet_occupied_hours": {
-   "heating": 0.75,
-   "cooling": 13.5
+   "heating": 1.0,
+   "cooling": 11.75
   },
   "zone_unmet_occupied_hours": {
    "THERMAL ZONE 1": {
     "heating": 0.0,
-    "cooling": 13.5
+    "cooling": 11.75
    },
    "THERMAL ZONE 2": {
     "heating": 0.0,
-    "cooling": 0.5
+    "cooling": 0.0
    },
    "THERMAL ZONE 3": {
     "heating": 0.0,
@@ -45,29 +45,29 @@
     "cooling": 0.0
    },
    "THERMAL ZONE 5": {
-    "heating": 0.75,
+    "heating": 1.0,
     "cooling": 0.0
    }
   }
  },
  "reference": {
   "clean_run": true,
-  "total_site_kwh": 3138.9,
-  "electricity_kwh": 1188.9,
-  "natural_gas_kwh": 1950.0,
+  "total_site_kwh": 3241.7,
+  "electricity_kwh": 1194.4,
+  "natural_gas_kwh": 2047.2,
   "district_heating_kwh": 0.0,
   "district_cooling_kwh": 0.0,
   "end_uses_kwh": {
-   "heating": 1638.9,
+   "heating": 1736.1,
    "cooling": 5.6,
-   "fans": 416.7,
+   "fans": 422.2,
    "pumps": 5.6,
    "interior_lighting": 263.9,
    "interior_equipment": 472.2,
    "water_systems": 311.1
   },
   "floor_area_m2": 800.0,
-  "eui_kwh_per_m2": 3.9,
+  "eui_kwh_per_m2": 4.1,
   "unmet_occupied_hours": {
    "heating": 0.0,
    "cooling": 0.0
@@ -96,7 +96,7 @@
   }
  },
  "capacity_iterations": [],
- "percent_of_target": 86.8,
+ "percent_of_target": 88.9,
  "tier": 1,
  "annual": false,
  "ahj_applied": [
@@ -116,6 +116,8 @@
  "ahj_register": "docs/NECB_AHJ_QUESTIONS.md",
  "compliant": true,
  "warnings": [
+  "the pipeline's PROPOSED copy replaces known CP02 carpet-pad no-mass layers with the pinned thin-carpet material needed by Kiva; thermal resistance and submitted absorptances are preserved, while the sourced carpet heat capacity is disclosed",
+  "ordinary perimeter-strip floors that could NOT take a Kiva foundation keep the simple Ground boundary condition \u2014 the 1.2 m strip of 3.2.3.3.(3) is not representable and those slabs stay as modeled in BOTH proposed and reference",
   "Purchased Energy \u2014 partial. Applied: purchased HEATING is represented by a gas-fired modulating boiler ((1)(a)) via the energy-type election. Gaps: the (1)(b) capacity-ratio adjustment is sizing-time and not enforced",
   "Purchased Energy \u2014 partial. Applied: purchased COOLING forces an air-cooled electric chiller ((2)(a)) via the chw_source config. Gaps: the (2)(b) capacity-ratio adjustment is sizing-time and not enforced",
   "Purchased Energy \u2014 partial. Applied: operating schedules carry over to the representing equipment by clone. Gaps: priority-of-use and other operational characteristics of the purchased supply are not explicitly modelled",
@@ -138,7 +140,7 @@
   "Supply Air Systems (airflow rates, fan specs) \u2014 partial. Applied: block supply airflow comes from zone sizing. Gaps: the greater-of criteria at the 21/11 C supply-air deltas are not explicitly enforced",
   "Supply Air Systems (airflow rates, fan specs) \u2014 not implemented. Gaps: the identical-fan-power fallback for secondaries failing 5.2.3.1.(1)(b) is not modeled",
   "Supply Air Systems (airflow rates, fan specs) \u2014 not implemented. Gaps: the exemption for equipment whose fan energy is included in the Tables 5.2.12.1 minimum performance is not modeled",
-  "5 ground floors have NO Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m insulated strip required by 3.2.3.3.(3) is not representable and those slabs are left AS MODELLED, so the prescribed perimeter insulation is NOT applied",
+  "1 ground floors have NO Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m insulated strip required by 3.2.3.3.(3) is not representable and those slabs are left AS MODELLED, so the prescribed perimeter insulation is NOT applied",
   "8 conditioned-to-conditioned interzone assemblies left unchanged because an intended temperature difference greater than 10 C is NOT established from the model",
   "thermal bridging not requested \u2014 applied U-values are clear-field; NECB 3.1.1.7 requires EFFECTIVE transmittance (pass thermal_bridging:)",
   "proposed infiltration total 0 L/s DEVIATES from the untested 8.4.3.3.(3) default 607 L/s by -100% \u2014 only a 3.2.4.2 airtightness test justifies a different value",
