@@ -69,6 +69,26 @@ class CodePath(Protocol):
         """The climate facts the rules need, ``{'hdd': ...}`` (NECB: Table
         C-1 by nearest city, or the ``.stat`` file)."""
 
+    def prepare_model(self, run) -> None:
+        """Anything this code must change about the PROPOSED model before it is
+        simulated at all — representation, never performance.
+
+        Called after the weather and climate are known and BEFORE the proposed
+        sizing run, because both of the proposed's runs and the reference
+        (which is a CLONE of the proposed) have to see the same model. NECB's
+        implementation switches ground-contact floors to the EnergyPlus Kiva
+        foundation model so the proposed and the reference are compared under
+        the SAME ground physics.
+
+        This is the one hook that edits the caller's model, so it is held to a
+        strict rule: it may change how an assembly is REPRESENTED and must not
+        change what it does. NECB's preserves every construction's resistance
+        exactly. Correcting a proposed model's PERFORMANCE remains out of
+        scope — the gates refuse what cannot be used, and everything past them
+        is disclosure.
+
+        Optional: a family that needs nothing here defines nothing."""
+
     def prepare_annual(self, run) -> None:
         """Anything that must be set up BEFORE the proposed's annual run —
         output variables the determination will read back (NECB: the
@@ -194,6 +214,7 @@ def run(model, *, code="necb2020", weather=None, building=None,
     try:
         compliance._load_and_validate(state)  # 1. input model in, gates passed
         _attach_weather_and_hdd(state)   # 2. weather + the family's climate
+        _prepare_model(state)            # 2b. the family's model preparation
         _size_proposed(state)            # 3. proposed sizing run
         state.report = _base_report(state)  # (the report rebinding — see above)
         _proposed_annual(state)          # 4. proposed annual (D-52: BEFORE the determination)
@@ -233,6 +254,18 @@ def _attach_weather_and_hdd(run):
 
 # 3. size the PROPOSED building (selection thresholds + efficiencies + costing
 #    all need capacities; the domain packages never simulate)
+# 2b. the family's chance to change the PROPOSED model before anything is
+#     simulated. It sits before the sizing run deliberately: the proposed's two
+#     runs and the reference (a clone of the proposed) must all see one model,
+#     and a model prepared after sizing would size against different physics
+#     than it runs against. `getattr` because the hook is optional — a family
+#     with nothing to prepare defines nothing rather than an empty function.
+def _prepare_model(run):
+    prepare = getattr(run.path, "prepare_model", None)
+    if prepare is not None:
+        prepare(run)
+
+
 def _size_proposed(run):
     opts = run.opts
     audit = run.audit

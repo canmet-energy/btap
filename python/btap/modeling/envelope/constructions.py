@@ -262,3 +262,116 @@ def fenestration_visible_transmittance(construction) -> float:
         if standard is not None:
             return _to_float(standard.visibleTransmittanceatNormalIncidence())
     return 0.60
+
+
+# A plausible conductivity for the soft finish layers (carpet pad, underlay)
+# that are modelled massless in the DOE prototypes, so a mass-equivalent
+# replacement gets a believable thickness rather than an arbitrary one.
+# 13 mm at R-0.2165 for CP02 CARPET PAD, the layer that blocks every shipped
+# archetype's slab.
+FINISH_CONDUCTIVITY_W_MK = 0.06
+# Light, like the carpet pad it replaces: ~1.3 kg/m2 at 13 mm, against the
+# 228 kg/m2 of a 100 mm concrete slab, so the added mass is under 1%.
+FINISH_DENSITY_KG_M3 = 100.0
+FINISH_SPECIFIC_HEAT_J_KGK = 1200.0
+
+
+def kiva_legal(model, surface):
+    """Make `surface`'s construction legal for an EnergyPlus Foundation
+    boundary, PRESERVING its resistance exactly. Returns a dict describing what
+    changed, or None when nothing had to.
+
+    EnergyPlus refuses a Foundation surface whose construction carries any
+    no-mass layer, and every shipped archetype's slab does: `CP02 CARPET PAD`,
+    massless at R-0.2165, blocks 582 of 588 ground floors. Each such layer is
+    replaced by a StandardOpaqueMaterial at the SAME thermal resistance, given
+    a plausible finish conductivity so the thickness is believable and a low
+    density so the added thermal mass stays under 1% of the slab's.
+
+    The construction is CLONED when it is also used by surfaces that are not
+    being converted, so a shared construction cannot be changed out from under
+    them. The shipped archetypes do not need that — their slab construction is
+    used by ground floors only — but a model that shares one would otherwise
+    have its walls silently altered.
+
+    R is preserved, so this changes how the assembly is REPRESENTED, not how
+    much heat it resists. It is the symmetry requirement for comparing a
+    proposed and a reference under the same ground model, not a correction to
+    the proposed.
+    """
+    construction = opt(surface.construction())
+    if construction is None:
+        return None
+    layered = opt(construction.to_LayeredConstruction())
+    if layered is None:
+        return None
+
+    massless_layers = [
+        (index, layer) for index, layer in enumerate(layered.layers())
+        if opt(layer.to_MasslessOpaqueMaterial()) is not None
+        or opt(layer.to_AirGap()) is not None
+    ]
+    if not massless_layers:
+        return None
+
+    before_r = None
+    conductance = opt(layered.thermalConductance())
+    if conductance is not None and conductance > 0:
+        before_r = 1.0 / conductance
+
+    # Only clone when another surface would be affected.
+    others = [
+        s for s in model.getSurfaces()
+        if s.handle() != surface.handle()
+        and (lambda c: c is not None and c.handle() == construction.handle())(
+            opt(s.construction()))
+    ]
+    target = layered
+    cloned = False
+    if others:
+        target = layered.clone(model).to_LayeredConstruction().get()
+        target.setName(f"{layered.nameString()} (Kiva)")
+        surface.setConstruction(target)
+        cloned = True
+        massless_layers = [
+            (index, layer) for index, layer in enumerate(target.layers())
+            if opt(layer.to_MasslessOpaqueMaterial()) is not None
+            or opt(layer.to_AirGap()) is not None
+        ]
+
+    replaced = []
+    for index, layer in massless_layers:
+        massless = opt(layer.to_MasslessOpaqueMaterial())
+        resistance = (massless.thermalResistance() if massless is not None
+                      else opt(layer.to_AirGap()).thermalResistance())
+        thickness = FINISH_CONDUCTIVITY_W_MK * resistance
+        replacement = openstudio.model.StandardOpaqueMaterial(
+            model, "MediumSmooth", thickness, FINISH_CONDUCTIVITY_W_MK,
+            FINISH_DENSITY_KG_M3, FINISH_SPECIFIC_HEAT_J_KGK)
+        replacement.setName(
+            f"{layer.nameString()} (mass-equivalent, "
+            f"R-{ruby_str(ruby_round(resistance, 4))})")
+        if not target.setLayer(index, replacement):
+            replacement.remove()
+            raise RuntimeError(
+                f"could not replace massless layer {index} of "
+                f"{target.nameString()!r}")
+        replaced.append({
+            "layer": layer.nameString(),
+            "resistance_m2k_w": resistance,
+            "thickness_m": thickness,
+            "added_mass_kg_m2": thickness * FINISH_DENSITY_KG_M3,
+        })
+
+    after_r = None
+    conductance = opt(target.thermalConductance())
+    if conductance is not None and conductance > 0:
+        after_r = 1.0 / conductance
+
+    return {
+        "construction": target.nameString(),
+        "cloned": cloned,
+        "replaced": replaced,
+        "resistance_before_m2k_w": before_r,
+        "resistance_after_m2k_w": after_r,
+    }

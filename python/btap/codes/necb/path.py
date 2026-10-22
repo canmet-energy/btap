@@ -121,6 +121,107 @@ def climate(run):
                                   audit=run.audit)}
 
 
+def prepare_model(run):
+    """Phase 2b — switch ground-contact floors to the EnergyPlus Kiva
+    foundation model, on the PROPOSED, before anything is simulated.
+
+    Why the proposed and not only the reference. 3.2.3.3.(3) prescribes a 1.2 m
+    insulated strip at the slab perimeter, and a floor on the simple `Ground`
+    boundary condition cannot carry it: EnergyPlus gives such a floor ONE
+    monthly temperature under the whole slab (18 C by default — no shipped
+    archetype sets `Site:GroundTemperature:BuildingSurface`), so the model has
+    no slab edge to insulate. Kiva solves a 2D soil domain and does.
+
+    Applying Kiva to the reference ALONE would make the 8.4.1.2 comparison
+    measure two things at once. Measured on a bare 10x10 slab in Toronto, the
+    floor's contribution to the reference is 9,900 kWh on `Ground` and 9,058
+    kWh on Kiva with the strip — but only 203 kWh of that 842 kWh gap is the
+    strip. The other 639 kWh (76%) is the ground MODEL, and charging it to the
+    submitter would penalise them for having used the ordinary boundary
+    condition. With both sides on Kiva the comparison carries the 203 kWh the
+    Code actually prescribes. phylroy's direction, 2026-10-22: compare apples
+    to apples.
+
+    What this costs the proposed. EnergyPlus refuses a Foundation surface whose
+    construction holds any no-mass layer, and `CP02 CARPET PAD` — massless,
+    R-0.2165 — blocks 582 of the 588 ground floors in the shipped archetypes.
+    Each such layer is replaced by a mass-equivalent StandardOpaqueMaterial at
+    the IDENTICAL resistance: measured across all 26 archetypes, 588 of 588
+    floors become eligible with a worst-case resistance change of exactly
+    0.0 m2K/W and 0.6-1.3 kg/m2 of added mass against a slab's 228. On a full
+    2,694 m2 archetype the method change moves total site energy by -1.7%.
+
+    A floor that cannot take Kiva is left alone and named. The common case is
+    an interior slab with no exposed edge (7 of 23 on that archetype), which
+    has no slab edge to solve and correctly keeps the simple boundary.
+    """
+    from btap._compat import sorted_by_name
+    from btap.modeling.envelope import constructions as modeling_constructions
+    from btap.modeling.envelope import foundations
+
+    proposed = run.proposed
+    audit = run.audit
+    floors = [s for s in sorted_by_name(proposed.getSurfaces())
+              if s.surfaceType() == "Floor"
+              and s.outsideBoundaryCondition() in ("Ground", "Foundation")]
+    if not floors:
+        return
+
+    with audit.with_building("input model"):
+        converted = []
+        for surface in floors:
+            if opt(surface.adjacentFoundation()) is not None:
+                continue   # the model already brought its own foundation
+            change = modeling_constructions.kiva_legal(proposed, surface)
+            if change is not None:
+                converted.append({"surface": surface.nameString(), **change})
+
+        created = []
+        refused = []
+        for surface in floors:
+            if opt(surface.adjacentFoundation()) is not None:
+                continue
+            result = foundations.create_kiva_foundation(proposed, surface)
+            if result["created"]:
+                created.append({"floor": result["floor"],
+                                "exposed_perimeter_m": result["perimeter_m"]})
+            else:
+                refused.append({"floor": result["floor"],
+                                "reasons": result["refusals"]})
+
+        if converted:
+            # Never silent: this EDITS the submitted model, so it is stated with
+            # the resistance on both sides for a reader to check.
+            audit.warn(
+                "prepare",
+                "the PROPOSED model's ground-floor constructions were changed to "
+                "carry the Kiva foundation model — EnergyPlus refuses a no-mass "
+                "layer on a Foundation surface, so each massless layer was "
+                "replaced by a mass-equivalent material at the IDENTICAL thermal "
+                "resistance; this changes how the slab is REPRESENTED, not what "
+                "it resists",
+                inputs={"floors": len(converted), "surfaces": converted},
+                article="3.2.3.3.(3)", ruling="D-32")
+        if created:
+            audit.decision(
+                "prepare",
+                "proposed and reference will both use the EnergyPlus Kiva "
+                "foundation model on ground-contact floors, so the 8.4.1.2 "
+                "comparison isolates the prescribed perimeter insulation "
+                "instead of also carrying a ground-model difference",
+                inputs={"floors": len(created), "foundations": created},
+                article="3.2.3.3.(3)", ruling="D-32")
+        if refused:
+            audit.warn(
+                "prepare",
+                "ground floors that could NOT take a Kiva foundation keep the "
+                "simple Ground boundary condition — the 1.2 m strip of "
+                "3.2.3.3.(3) is not representable on them and those slabs stay "
+                "as modelled in BOTH the proposed and the reference",
+                inputs={"floors": len(refused), "surfaces": refused},
+                article="3.2.3.3.(3)", ruling="D-32")
+
+
 def prepare_annual(run):
     """Phase 4 (before the pipeline's EnergyPlus call): when the proposed
     carries a heat pump, request the per-equipment delivered-heat variables
