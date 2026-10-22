@@ -118,7 +118,8 @@ def run(argv, out=None, err=None):
 def parse(argv, out, err):
     """:return: (options, None) or (None, early exit code)"""
     o = {"code": DEFAULT_CODE, "simulate": "annual", "report_html": True,
-         "backend": "local", "report_options": {}, "necb_loads": {}}
+         "backend": "local", "report_options": {}, "necb_loads": {},
+         "ground_model": "kiva"}
     parser = build_parser()
     try:
         namespace, rest = parser.parse_known_args(list(argv))
@@ -203,6 +204,15 @@ def build_parser():
                         "System 5 for them")
     p.add_argument("--simulate", choices=["annual", "sizing", "none"],
                    default="annual", help="annual (default), sizing, or none")
+    p.add_argument("--ground-model", choices=["kiva", "simple"], default="kiva",
+                   dest="ground_model",
+                   help="ground heat transfer for slab-on-grade and basement "
+                        "floors: kiva (default) solves a 2D soil domain on BOTH "
+                        "the proposed and the reference, which is what makes "
+                        "the 3.2.3.3.(3) perimeter strip representable; simple "
+                        "keeps each floor's Ground boundary condition, under "
+                        "which the strip cannot be applied and every ground "
+                        "floor is compared against itself")
     p.add_argument("--quick", action="store_true",
                    help="one-week run period - NOT a code determination")
     p.add_argument("--backend", choices=["local", "remote"], default="local",
@@ -251,7 +261,7 @@ def _collect(o, namespace):
     for key in ("epw", "ddy", "hdd", "city", "run_dir", "code", "storeys",
                 "refrigerated_zones",
                 "simulate", "quick", "backend", "report_html", "json", "quiet",
-                "space_type", "space_type_map", "costs_csv"):
+                "space_type", "space_type_map", "costs_csv", "ground_model"):
         if ns.get(key) is not None:
             o[key] = ns[key]
     o["list_cities"] = bool(ns.get("list_cities"))
@@ -347,6 +357,8 @@ def compliance_kwargs(o):
     loads = necb_loads(o)
     if loads:
         kw["necb_loads"] = loads
+    if o.get("ground_model"):
+        kw["ground_model"] = o["ground_model"]
     return model_argument(o), kw
 
 

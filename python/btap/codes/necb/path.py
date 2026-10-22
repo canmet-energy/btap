@@ -161,6 +161,43 @@ def prepare_model(run):
     if not floors:
         return
 
+    # `--ground-model simple` declines the common method. Sol's 286 ruling, and
+    # the reason matters: the proposed is EXEMPT from the 1.2 m strip by
+    # 3.4.1.2.(1), which carries only Article 3.2.1.1 and Subsection 3.2.4 onto
+    # the performance path, so declining is not an omission on the proposed
+    # side. What it costs is the REFERENCE — a simple `Ground` floor has no slab
+    # edge for the strip that 8.4.1.1.(1) requires the target to account for, so
+    # no building energy target is established and 8.4.1.2.(2) has nothing to
+    # compare against. The run therefore makes NO determination: not compliant,
+    # not non-compliant, and NOT conditional, because conditional means an
+    # authority can approve it and a known-invalid target is not approvable.
+    #
+    # Reached only here, AFTER the extent gate and the applicability filter, so
+    # `simple` still determines normally in a full-area climate or on a model
+    # with no ordinary perimeter floor. Deliberately not a parser rejection.
+    if run.opts.get("ground_model", "kiva") != "kiva":
+        run.state["target_not_established"] = {
+            "reason": "ground_model_simple_on_perimeter_strip",
+            "ground_model": run.opts.get("ground_model"),
+            "floors": [surface.nameString() for surface in floors],
+        }
+        with audit.with_building("input model"):
+            audit.warn(
+                "prepare",
+                "NO BUILDING ENERGY TARGET can be established — ground-model "
+                "mode is SIMPLE, so the reference's ground-contact floors keep "
+                "a Ground boundary condition, which gives the whole slab one "
+                "monthly temperature and no slab edge on which to apply the "
+                "1.2 m perimeter strip that 8.4.1.1.(1) requires the target to "
+                "account for; the proposed is EXEMPT from that strip under "
+                "3.4.1.2.(1), so this is a defect in the TARGET, not in the "
+                "submitted building, and no determination is made",
+                inputs={"ground_model": run.opts.get("ground_model"),
+                        "floors": len(floors),
+                        "surfaces": [s.nameString() for s in floors]},
+                article="8.4.1.1.(1)", ruling="D-32")
+        return
+
     measured = foundations.exposed_perimeters(proposed, floors)
     with audit.with_building("input model"):
         converted = []
@@ -298,6 +335,37 @@ def determine(run):
     _score_ghg(run)                   # 8. 2025 Part 11 GHG (needs province_state)
     _cost_both(run)                   # 9. optional costing of both models
     _supplement_eui(run)              # 10. optional 2025 archetype-EUI verdict
+
+    # A target that was never established yields NO determination, whatever the
+    # comparison computed. The reference is still built, sized and run, because
+    # the mode is retained for diagnostics and both energies are the useful
+    # output — but `compliant` is None, which `cli.verdict_exit` already maps to
+    # EXIT["no_determination"] = 6, the code `--quick` and `--simulate sizing`
+    # already use. The override is LAST so no later phase can undo it.
+    blocked = run.state.get("target_not_established")
+    if blocked is not None:
+        run.compliant = None
+        run.report["compliance_determination"] = "no_determination"
+        run.report["no_determination"] = {
+            "reason": "building energy target not established",
+            "article": "8.4.1.1.(1)",
+            "ruling": "D-32",
+            "detail": blocked,
+            "what_would_fix_it": (
+                "re-run without --ground-model simple; the default kiva mode "
+                "gives the reference a slab edge on which 3.2.3.3.(3)'s 1.2 m "
+                "strip can be applied, which is what 8.4.1.1.(1) requires the "
+                "target to account for"
+            ),
+        }
+        run.audit.warn(
+            "compliance",
+            "NO DETERMINATION — the building energy target was not established "
+            "per 8.4.1.1.(1), so the 8.4.1.2.(2) comparison has no valid basis; "
+            "the energies below are DIAGNOSTIC only and are neither a pass nor "
+            "a fail, and this is deliberately NOT a conditional result",
+            inputs=blocked, article="8.4.1.1.(1)", ruling="D-32")
+
     return Verdict(compliant=run.compliant, report=run.report)
 
 
