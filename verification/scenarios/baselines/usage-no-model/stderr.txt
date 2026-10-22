@@ -21,6 +21,17 @@ options:
                         System 5 for them
   --simulate {annual,sizing,none}
                         annual (default), sizing, or none
+  --ground-model {kiva,simple}
+                        ground heat transfer for slab-on-grade and basement
+                        floors. kiva (default) solves a 2D soil domain on BOTH
+                        the proposed and the reference, which is what gives
+                        the reference a slab edge for the 3.2.3.3.(3)
+                        perimeter strip that 8.4.1.1.(1) requires the energy
+                        target to account for. simple keeps each floor's
+                        Ground boundary condition and is DIAGNOSTIC ONLY:
+                        where that strip applies it establishes no energy
+                        target, so the run makes NO determination (exit 6)
+                        rather than a pass or a fail
   --quick               one-week run period - NOT a code determination
   --backend {local,remote}
                         local (default) or remote

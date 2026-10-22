@@ -207,12 +207,15 @@ def build_parser():
     p.add_argument("--ground-model", choices=["kiva", "simple"], default="kiva",
                    dest="ground_model",
                    help="ground heat transfer for slab-on-grade and basement "
-                        "floors: kiva (default) solves a 2D soil domain on BOTH "
-                        "the proposed and the reference, which is what makes "
-                        "the 3.2.3.3.(3) perimeter strip representable; simple "
-                        "keeps each floor's Ground boundary condition, under "
-                        "which the strip cannot be applied and every ground "
-                        "floor is compared against itself")
+                        "floors. kiva (default) solves a 2D soil domain on "
+                        "BOTH the proposed and the reference, which is what "
+                        "gives the reference a slab edge for the 3.2.3.3.(3) "
+                        "perimeter strip that 8.4.1.1.(1) requires the energy "
+                        "target to account for. simple keeps each floor's "
+                        "Ground boundary condition and is DIAGNOSTIC ONLY: "
+                        "where that strip applies it establishes no energy "
+                        "target, so the run makes NO determination (exit 6) "
+                        "rather than a pass or a fail")
     p.add_argument("--quick", action="store_true",
                    help="one-week run period - NOT a code determination")
     p.add_argument("--backend", choices=["local", "remote"], default="local",
