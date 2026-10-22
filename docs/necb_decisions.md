@@ -1337,14 +1337,37 @@ prescriptive strip; the reference clone receives the 1.2 m strip. This makes
 the 8.4.1.2 annual-energy comparison carry the prescribed assembly difference
 without also charging the proposed for a different ground algorithm.
 
-This is calculation-method normalization under Articles 8.4.2.1, 8.4.2.2,
-8.4.2.4 and 8.4.2.8, not correction of the proposed building's performance.
+The allocation comes directly from the Code. Article 3.4.1.2.(1), identical
+in NECB 2020 and 2025, says that notwithstanding the performance path only
+Article 3.2.1.1 and Subsection 3.2.4 continue to apply to the proposed
+envelope. Article 3.2.3.3 is not in that list, so its perimeter strip is not a
+requirement of the proposed building. Separately, Article 8.4.1.1.(1) requires
+the building energy target to account for building components in accordance
+with the Section 3.2 prescriptive requirements. The strip therefore belongs
+in the reference target and not in the proposed. Article 8.4.1.2.(2) compares
+the resulting annual energies.
+
+Using one ground solver on both sides is calculation-method normalization
+under Articles 8.4.2.1, 8.4.2.2, 8.4.2.4 and 8.4.2.8, not correction of the
+proposed building's performance.
 It is deliberately narrower than "put Kiva on every ground floor." Zone 8 and
 embedded floors already take the full-area construction path and remain on
 their submitted ground method; unresolved embedded-system applicability also
 remains untouched rather than being guessed into the ordinary-floor branch.
 An ineligible perimeter-strip floor stays as modeled in both buildings and
 warns.
+
+A `simple` ground-model choice is not a second compliance method on a branch
+where the reference requires the perimeter strip. The simple `Ground`
+boundary has no slab edge on which to apply 3.2.3.3.(3), so selecting it
+leaves the 8.4.1.1.(1) building energy target unestablished. The text is not
+ambiguous, and an operator's deliberate omission is not by itself an
+alternative solution with demonstrated equivalent performance. No AHJ
+register entry or conditional verdict applies. If exposed for diagnostics,
+`simple` must return no determination (`compliant = null`, CLI exit 6) with an
+explicit reason; it may produce a determination only where no perimeter strip
+must be represented, such as the full-area branch or a model with no
+applicable ordinary perimeter floor.
 
 For the known `CP02 CARPET PAD` no-mass representation, the compatibility
 conversion uses the pinned oracle's thin-carpet properties: conductivity

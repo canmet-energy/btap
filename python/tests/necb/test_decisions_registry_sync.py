@@ -114,7 +114,7 @@ STRUCTURED_RUNTIME_SHA256 = {
     "D-27": "25dfea7660112851261febd2cfe2c44eb2a54014d372a636afae08def6c58d07",
     "D-28": "39659f04a161b019ad9b4982ba1ef651d093661e469816ff410a2ef42571badc",
     "D-31": "18b9646d43dd3508a9c11625c1891e0b93c98da1f73884b6bf15ce6bbef55fca",
-    "D-32": "8b4de9fb740d738a6c8dc899d53e7bc4d9a75ccd4447e2fe36836c9db950474c",
+    "D-32": "708e15c0913fdc1aa94f7d94fad5ef236597070f751d34a2b0c07f2d9c64b6f9",
     "D-34": "9635c9859756a364f52688cf44de2f9f3e4b1103c73143881d4f883721ea9c05",
     "D-35": "a2aa95aa01f059f12d48400a402ad19dc9b638499e49bd145816ca06e7e22ebe",
     "D-37": "2b200a5bafaeb8bd4fcc344cd84762cfe08c5d1c25adac02facef0a680e079bd",
@@ -589,8 +589,8 @@ STRUCTURED_REQUIREMENTS = {
     ),
     "ground_heat_transfer_method_symmetry": (
         "Common ground heat-transfer method for the proposed/reference comparison",
-        ("8.4.1.2.(2)",),
-        ("8.4.1.2.(2)",),
+        ("3.4.1.2.(1)", "8.4.1.1.(1)", "8.4.1.2.(2)"),
+        ("3.4.1.2.(1)", "8.4.1.1.(1)", "8.4.1.2.(2)"),
     ),
     "heat_pump_capacity_alignment": (
         "Reference heat-pump heating capacity aligned to cooling capacity",

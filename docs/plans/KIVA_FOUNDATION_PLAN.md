@@ -249,7 +249,10 @@ pipeline's proposed and reference copies before sizing. Reference-only Kiva
 would make the 8.4.1.2 comparison carry two changes: the prescribed perimeter
 strip and a change of ground solver. Symmetric Kiva is calculation-method
 normalization under 8.4.2.1, 8.4.2.2, 8.4.2.4 and 8.4.2.8, not a correction of
-the submitted building:
+the submitted building. Article 3.4.1.2.(1) carries only 3.2.1.1 and 3.2.4
+onto the proposed performance path, so the proposed does not owe the strip;
+8.4.1.1.(1) requires the reference target to account for Section 3.2, so the
+reference does:
 
 - the caller's model is never mutated;
 - the proposed copy retains its submitted slab-field thermal resistance and
@@ -274,6 +277,15 @@ An EPW is not an equivalent substitute. It does not uniquely prescribe the
 monthly `Site:GroundTemperature:BuildingSurface` series without another
 depth/model choice, and a simple `Ground` boundary still cannot represent the
 2-D perimeter strip.
+
+A future `--ground-model simple` flag is diagnostic only on the
+perimeter-strip branch. Because it cannot represent 3.2.3.3.(3), it fails to
+establish the building energy target required by 8.4.1.1.(1) and must return
+`compliant = null` / CLI exit 6 rather than a conditional or ordinary
+determination. This is not an AHJ referral: the acceptable-solution text
+decides the requirement. Nor is the bare flag an alternative solution:
+nothing demonstrates equivalent performance. The restriction does not apply
+where no strip is required, including the full-area branch.
 
 ## Phase 4 — the witness, and the freeze
 

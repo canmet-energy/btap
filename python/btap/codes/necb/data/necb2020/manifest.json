@@ -1267,6 +1267,14 @@
           "code": "necb",
           "edition": "2020",
           "division": "B",
+          "section_number": "3.4.1.2",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2020",
+          "division": "B",
           "section_number": "A-8.4.4.4.(1)",
           "include_sentences": false
         },
@@ -1385,6 +1393,13 @@
           "table_number": "5.2.12.1.-O"
         },
         {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2020",
+          "division": "B",
+          "table_number": "5.2.12.1.-I"
+        },
+        {
           "tool": "get_section",
           "code": "necb",
           "edition": "2020",
@@ -1424,13 +1439,6 @@
           "include_sentences": false
         },
         {
-          "tool": "get_table",
-          "code": "necb",
-          "edition": "2020",
-          "division": "B",
-          "table_number": "5.2.12.1.-I"
-        },
-        {
           "tool": "get_section",
           "code": "necb",
           "edition": "2020",
@@ -1440,7 +1448,7 @@
         }
       ],
       "source_revision": null,
-      "source_sha256": "7da3440fb1ee91f8b58dec6ee7427f925bd0426f4725ffc35b609ac78ca1d296",
+      "source_sha256": "e37ba93c8570d781188afeb9b25584eea1ce8c560ac240a8a0b96455f57bb496",
       "source_artifacts": [
         {
           "path": "coverage/articles_8_4.json",
@@ -1448,15 +1456,15 @@
         },
         {
           "path": "provenance/provisions.result.json",
-          "sha256": "36578c1381965f71d8c2b338970c52ad7398a824811c82d7f78116218d3626be"
+          "sha256": "ab20b315551a404314d3fb0ac5ac3fd39a81a73385a957e43f728594d2fcd235"
         }
       ],
       "extractor": "python/scripts/fetch_necb_provisions.py",
-      "retrieved": "2026-10-14",
+      "retrieved": "2026-10-22",
       "method": "generated",
       "source_verification": "archived",
       "note": "The retained provisions.result.json is the exact bounded set of authorized MCP tool results. source_artifacts is the canonical two-input descriptor and also pins coverage/articles_8_4.json, which supplies Section 8.4 structure and table-note identities without duplicating that cache.",
-      "result_sha256": "a7f2ee125c7bd2f4ac670e2a7a877437c876b1619013e11f8fd8c3a05fd940d2"
+      "result_sha256": "677a7da94c38941f3c6b937a7f112b08fb62d109e7d9837e40d2230c9910a99b"
     }
   }
 }

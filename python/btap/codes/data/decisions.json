@@ -1369,7 +1369,7 @@
         "necb2020",
         "necb2025"
       ],
-      "summary": "A warehouse residual was traced to insulating the full slab area to the table value in climate zones where the printed table prescribes only a perimeter strip and sets no maximum for the slab field. The transform keeps the modelled slab field in those zones and adds the strip through the foundation model; the coldest zone keeps its full-area requirement. For an ordinary perimeter-strip floor submitted with the simple Ground boundary, the performance path applies the same Kiva ground-heat-transfer method to proposed and reference before sizing so the energy comparison isolates the prescribed strip rather than also carrying a ground-model change. Ineligible floors remain as modeled with an audited warning.",
+      "summary": "A warehouse residual was traced to insulating the full slab area to the table value in climate zones where the printed table prescribes only a perimeter strip and sets no maximum for the slab field. The transform keeps the modelled slab field in those zones and adds the strip through the foundation model; the coldest zone keeps its full-area requirement. Article 3.4.1.2 exempts the proposed performance-path assembly from that prescriptive strip, while Article 8.4.1.1 requires it in the reference target. For an eligible ordinary perimeter-strip floor submitted with the simple Ground boundary, the tool therefore applies the same Kiva ground-heat-transfer method to proposed and reference before sizing, then adds the strip only to the reference. A simple-ground mode that cannot represent the strip does not establish a building energy target and cannot emit a determination.",
       "requirements": [
         {
           "id": "ground_floor_insulation_extent",
@@ -1399,13 +1399,15 @@
         {
           "id": "ground_heat_transfer_method_symmetry",
           "label": "Common ground heat-transfer method for the proposed/reference comparison",
-          "decided": "An eligible ordinary floor in a perimeter-strip climate uses Kiva in both proposed and reference before sizing; full-area, embedded and unresolved floors are not normalized into this branch.",
+          "decided": "The proposed is exempt from the prescriptive perimeter strip while the reference target must include it; an eligible ordinary floor therefore uses Kiva in both buildings before sizing and receives the strip only in the reference.",
           "sources": [
             {
               "code": "necb",
               "edition": "2020",
               "role": "governing",
               "references": [
+                "3.4.1.2.(1)",
+                "8.4.1.1.(1)",
                 "8.4.1.2.(2)"
               ]
             },
@@ -1414,6 +1416,8 @@
               "edition": "2025",
               "role": "governing",
               "references": [
+                "3.4.1.2.(1)",
+                "8.4.1.1.(1)",
                 "8.4.1.2.(2)"
               ]
             }
