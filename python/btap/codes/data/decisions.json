@@ -1369,12 +1369,12 @@
         "necb2020",
         "necb2025"
       ],
-      "summary": "A warehouse residual was traced to insulating the full slab area to the table value in climate zones where the printed table prescribes only a perimeter strip and sets no maximum for the slab field. The transform keeps the modelled slab field in those zones and adds the strip through the foundation model; the coldest zone keeps its full-area requirement. Article 3.4.1.2 exempts the proposed performance-path assembly from that prescriptive strip, while Article 8.4.1.1 requires it in the reference target. For an eligible ordinary perimeter-strip floor submitted with the simple Ground boundary, the tool therefore applies the same Kiva ground-heat-transfer method to proposed and reference before sizing, then adds the strip only to the reference. A simple-ground mode that cannot represent the strip does not establish a building energy target and cannot emit a determination.",
+      "summary": "A warehouse residual was traced to insulating the full slab area to the table value in climate zones where the printed table prescribes a minimum 1.2 m perimeter extent and sets no maximum for the slab field. The coldest zone keeps its full-area requirement. Article 3.4.1.2 exempts the proposed performance-path assembly from that prescriptive treatment, while Article 8.4.1.1 requires it in the reference target. Kiva is the higher-fidelity symmetric default where supported. A simple-Ground reference instead uses a declared uniform equivalent-UA approximation based on exposed perimeter, and a better-than-table submitted slab is not degraded. Valid whole-foundation factor methods are preserved but emit no determination until a validated NECB translation exists. Preflight is limited to method-neutral model defects that prevent any lawful reference representation.",
       "requirements": [
         {
           "id": "ground_floor_insulation_extent",
           "label": "Ground-floor insulation extent by climate zone",
-          "decided": "Zones 4 through 7B retain the modeled slab field and apply the table value over a 1.2 m perimeter strip, while zone 8 applies its full-area value; an ineligible strip warns.",
+          "decided": "Zones 4 through 7B retain the modeled slab field and apply the table value over a minimum 1.2 m perimeter extent, physically through Kiva or by a disclosed equivalent-UA approximation for simple Ground, while zone 8 applies its full-area value; only method-neutral input defects reject at preflight, and a confirmed zero-edge floor has a zero strip fraction.",
           "sources": [
             {
               "code": "necb",
@@ -1382,6 +1382,7 @@
               "role": "governing",
               "references": [
                 "Table 3.2.3.1",
+                "3.2.3.3.(1)",
                 "3.2.3.3.(3)"
               ]
             },
@@ -1391,6 +1392,7 @@
               "role": "governing",
               "references": [
                 "Table 3.2.3.1",
+                "3.2.3.3.(1)",
                 "3.2.3.3.(3)"
               ]
             }
@@ -1399,7 +1401,7 @@
         {
           "id": "ground_heat_transfer_method_symmetry",
           "label": "Common ground heat-transfer method for the proposed/reference comparison",
-          "decided": "The proposed is exempt from the prescriptive perimeter strip while the reference target must include it; an eligible ordinary floor therefore uses Kiva in both buildings before sizing and receives the strip only in the reference.",
+          "decided": "On the reference-building path, the proposed is exempt from the prescriptive ground-floor treatment while the reference target must include it; both buildings retain a common ground method, with symmetric Kiva where supported, symmetric simple Ground plus an equivalent-UA reference target otherwise, and explicit no-determination for an untranslated whole-foundation factor method.",
           "sources": [
             {
               "code": "necb",

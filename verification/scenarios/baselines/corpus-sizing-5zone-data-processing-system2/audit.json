@@ -718,7 +718,7 @@
   },
   "article": "8.4.1.2.(2)",
   "ruling": "D-32",
-  "building": "input model",
+  "building": "proposed building",
   "level": "warning"
  },
  {
@@ -747,26 +747,28 @@
   },
   "article": "8.4.1.2.(2)",
   "ruling": "D-32",
-  "building": "input model",
+  "building": "proposed building",
   "level": "decision"
  },
  {
   "step": "prepare",
-  "action": "ordinary perimeter-strip floors that could NOT take a Kiva foundation keep the simple Ground boundary condition \u2014 the 1.2 m strip of 3.2.3.3.(3) is not representable and those slabs stay as modeled in BOTH proposed and reference",
+  "action": "1 ordinary ground-contact floor(s) have a measured zero exposed edge; their strip-area fraction is zero, so no Kiva foundation or reference construction change applies",
   "inputs": {
    "floors": 1,
    "surfaces": [
     {
      "floor": "Surface 25",
+     "boundary_condition": "Ground",
+     "exposed_perimeter_m": 0.0,
      "reasons": [
-      "'Surface 25' has an exposed perimeter of 0.000 m; a Kiva floor needs exposed slab edge"
+      "measured exposed perimeter is zero"
      ]
     }
    ]
   },
   "article": "3.2.3.3.(3)",
   "ruling": "D-32",
-  "building": "input model",
+  "building": "proposed building",
   "level": "warning"
  },
  {
@@ -2344,17 +2346,30 @@
  },
  {
   "step": "prescriptive",
-  "action": "1 ground floors have NO Kiva foundation in a perimeter-strip zone \u2014 the 1.2 m insulated strip required by 3.2.3.3.(3) is not representable and those slabs are left AS MODELLED, so the prescribed perimeter insulation is NOT applied",
+  "action": "1 simple-Ground floor(s) represent the 1.2 m minimum perimeter extent through a uniform equivalent UA; strip area is approximated as exposed perimeter x 1.2 m, capped at floor area, and is NOT an exact geometric band",
   "inputs": {
    "floors": 1,
    "surfaces": [
-    "Surface 25"
+    {
+     "floor": "Surface 25",
+     "exposed_perimeter_m": 0.0,
+     "floor_area_m2": 335.1396,
+     "strip_width_m": 1.2,
+     "strip_area_approx_m2": 0.0,
+     "strip_area_fraction": 0.0,
+     "field_u_overall_w_m2k": 2.192889,
+     "table_u_overall_w_m2k": 0.757,
+     "strip_u_overall_w_m2k": 0.757,
+     "equivalent_u_overall_w_m2k": 2.192889,
+     "target_u_construction_w_m2k": 3.401383,
+     "construction_changed": false
+    }
    ]
   },
   "article": "3.2.3.3.(3)",
   "ruling": "D-32",
   "building": "reference building",
-  "level": "warning"
+  "level": "decision"
  },
  {
   "step": "prescriptive",
@@ -2653,7 +2668,7 @@
  },
  {
   "step": "coverage",
-  "action": "Thermal characteristics and insulation extent of floors in contact with the ground \u2014 partial. Applied: Sentence (3): ordinary floors use the zone-conditional extent (zone 8 full-area; zones 4-7B retain the slab field and receive a 1.2 m Kiva perimeter strip, with a warning when no foundation can carry it). Sentence (4): its prescribed transmittance and full-area action are implemented once applicability is established. Applicability is established from an internal-source ground-floor construction; a supported radiant object's surface view is derived from that construction and supplies equipment attribution rather than independent evidence. The inventory is taken before reference-HVAC teardown. Detected embedded floors receive the Table 3.2.3.1 target over their full area in every climate zone, while an indicated floor-radiant topology whose served surface is unresolved warns and is not guessed into Sentence (3). Sentence (5): for detected embedded floors, the required Kiva depth is the tallest adjoining Foundation-wall height in that floor's thermal zone plus the final floor thickness; an exterior-insulation exception is measured against that same wall-top-to-floor-bottom depth, otherwise the floor insulation is continued vertically to it. Mixed wall heights and an exposed-perimeter remainder of at least 0.001 m warn because one Kiva field over-insulates shorter or zero-wall-height remainder instances. Foundation objects shared by multiple floors warn about cross-contamination; same-zone sharing is additionally reported by EnergyPlus as a Severe input error, and BTAP classifies the run as not clean. EnergyPlus 25.2 rejects the internal-source/Foundation pairing used as applicability evidence, so that detected input also receives a surface-specific warning. An unrepresentable continuation warns.. Gaps: Sentence (5)'s vertical perimeter continuation is not yet applied or verified for ordinary Sentence (3) floors. EnergyPlus 25.2 rejects an internal-source construction on a Foundation surface, so the detected embedded-floor/Kiva input warns and its assigned continuation cannot be annual-verified without replacing the input representation. Mixed-height and engine-significant partial-perimeter inputs warn because their one Kiva depth can over-insulate shorter or zero-wall-height remainder instances. Shared-Foundation inputs warn because their fields can cross-contaminate instances, and same-zone sharing is an EnergyPlus Severe input error. Semi-heated applicability under Sentence (2) remains caller-supplied through the HDD input rather than inferred from model classification; an embedded component represented without inspectable internal-source construction evidence cannot be inferred.",
+  "action": "Thermal characteristics and insulation extent of floors in contact with the ground \u2014 partial. Applied: Sentence (3): ordinary floors use the zone-conditional extent (zone 8 full-area; zones 4-7B retain the slab field). A supported Kiva floor receives the physical 1.2 m interior-horizontal strip. Simple Ground uses D-32's disclosed uniform equivalent-UA approximation with strip area min(floor area, exposed perimeter x 1.2 m), Ustrip=min(Ufield,Utable), consistent film handling and a zero fraction for confirmed zero edge; the later reference lightweight rebuild retains that conductance and supplies dynamic mass. Valid simple constructions that cannot be converted to Kiva fall back to that method. Method-neutral missing geometry, adjacency or usable construction facts preflight-fail before sizing. Valid whole-foundation factor methods are preserved but explicitly produce no determination pending a validated NECB translation. Sentence (4): its prescribed transmittance and full-area action are implemented once applicability is established. Applicability is established from an internal-source ground-floor construction; a supported radiant object's surface view is derived from that construction and supplies equipment attribution rather than independent evidence. The inventory is taken before reference-HVAC teardown. Detected embedded floors receive the Table 3.2.3.1 target over their full area in every climate zone, while an indicated floor-radiant topology whose served surface is unresolved warns and is not guessed into Sentence (3). Sentence (5): for detected embedded floors, the required Kiva depth is the tallest adjoining Foundation-wall height in that floor's thermal zone plus the final floor thickness; an exterior-insulation exception is measured against that same wall-top-to-floor-bottom depth, otherwise the floor insulation is continued vertically to it. Mixed wall heights and an exposed-perimeter remainder of at least 0.001 m warn because one Kiva field over-insulates shorter or zero-wall-height remainder instances. Foundation objects shared by multiple floors warn about cross-contamination; same-zone sharing is additionally reported by EnergyPlus as a Severe input error, and BTAP classifies the run as not clean. EnergyPlus 25.2 rejects the internal-source/Foundation pairing used as applicability evidence, so that detected input also receives a surface-specific warning. An unrepresentable continuation warns.. Gaps: The simple-Ground equivalent-UA area is an approximation, not an exact geometric band: overlapping corners and partially exposed edge locations are unavailable. No validated NECB F-factor or other whole-foundation-factor applier exists, so those valid methods produce no determination. Sentence (5)'s vertical perimeter continuation is not yet applied or verified for ordinary Sentence (3) floors. EnergyPlus 25.2 rejects an internal-source construction on a Foundation surface, so the detected embedded-floor/Kiva input warns and its assigned continuation cannot be annual-verified without replacing the input representation. Mixed-height and engine-significant partial-perimeter inputs warn because their one Kiva depth can over-insulate shorter or zero-wall-height remainder instances. Shared-Foundation inputs warn because their fields can cross-contaminate instances, and same-zone sharing is an EnergyPlus Severe input error. Semi-heated applicability under Sentence (2) remains caller-supplied through the HDD input rather than inferred from model classification; an embedded component represented without inspectable internal-source construction evidence cannot be inferred.",
   "inputs": {
    "status": "partial",
    "decisions_citing": 6,
@@ -2661,6 +2676,8 @@
     "python/btap/codes/necb/envelope/rules.py#ground_floor_extent",
     "python/btap/codes/necb/envelope/prescriptive.py#_embedded_floor_inventory",
     "python/btap/codes/necb/envelope/prescriptive.py#_assign_ground_floor",
+    "python/btap/codes/necb/envelope/prescriptive.py#_apply_simple_ground_equivalent",
+    "python/btap/codes/necb/path.py#prepare_model",
     "python/btap/codes/necb/path.py#build_reference"
    ]
   },

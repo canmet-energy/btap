@@ -58,6 +58,18 @@
    "uses": 2,
    "authority": "Issue #73 (Sol, 2026-10-16)",
    "reason": "The same requirement applies when the supported remote backend is selected. Remote.execute is the concrete orchestration path that prepares, submits, polls and downloads that EnergyPlus run, so both concrete execution paths are named rather than presenting the default local path as the only implementation."
+  },
+  {
+   "ref": "python/btap/codes/necb/envelope/prescriptive.py#_apply_simple_ground_equivalent",
+   "uses": 2,
+   "authority": "D-32 (Sol, phylroy-approved method-neutral correction, 2026-10-23)",
+   "reason": "Both editions' 3.2.3.3 coverage rows now name the implementation that turns the submitted slab field and measured exposed perimeter into D-32's disclosed equivalent-UA reference construction. This is a new realization of the existing requirement, not an R-B rename, so it is recorded as an addition rather than rewriting either historical migration ledger."
+  },
+  {
+   "ref": "python/btap/codes/necb/path.py#prepare_model",
+   "uses": 2,
+   "authority": "D-32 (Sol, phylroy-approved method-neutral correction, 2026-10-23)",
+   "reason": "Both editions' 3.2.3.3 coverage rows now name the phase-2b call site that measures the exposed perimeter before either model changes, gates only method-neutral input defects, applies symmetric Kiva where supported, and hands the same measurements to the reference equivalent-UA applier."
   }
  ]
 }

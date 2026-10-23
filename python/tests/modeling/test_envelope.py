@@ -48,6 +48,22 @@ class TestOpaqueAtConductance(unittest.TestCase):
         self.assertAlmostEqual(base_conductance, opt(base.thermalConductance()), places=6,
                                msg="deep copy — the base construction must not move")
 
+    def test_discriminator_prevents_continuous_targets_from_aliasing(self):
+        from btap._compat import opt
+        from btap.modeling.envelope import constructions
+
+        model, base = self.model_with_wall_construction()
+        first = constructions.opaque_at_conductance(
+            model, base, 0.27801, name_discriminator="Floor A")
+        second = constructions.opaque_at_conductance(
+            model, base, 0.27804, name_discriminator="Floor B")
+
+        self.assertNotEqual(first.handle(), second.handle())
+        self.assertAlmostEqual(
+            0.27801, opt(first.thermalConductance()), delta=1e-10)
+        self.assertAlmostEqual(
+            0.27804, opt(second.thermalConductance()), delta=1e-10)
+
     def test_fenestration_builds_a_shared_simple_glazing(self):
         import openstudio
 

@@ -1,17 +1,20 @@
-# Creating Kiva foundations, so 3.2.3.3.(3) is representable
+# Ground-floor method symmetry and Kiva foundations
 
-**Status:** phases 1 and 2 landed; phase 3 adjudicated 2026-10-22. The largest
-single warning class in the 28-archetype sweep, and the only one that is
-compliance-material rather than diagnostic.
+**Status:** phases 1 and 2 landed; phase 3 was corrected to the method-neutral
+D-32 disposition on 2026-10-23. Kiva is the higher-fidelity default, simple
+Ground uses a declared equivalent-UA reference target, and untranslated
+whole-foundation factors are an explicit tool limitation.
 
-## The gap, measured
+## The original gap, measured
 
-`btap/codes/necb/envelope/prescriptive.py:203` states it plainly:
+Before the Kiva implementation, `btap/codes/necb/envelope/prescriptive.py`
+stated:
 
 > Nothing in this package creates Kiva foundations, so the condition is a
 > property of the INPUT model
 
-`FoundationKiva(` appears in no product file — only in four test fixtures. So
+`FoundationKiva(` then appeared in no product file — only in four test
+fixtures. So
 when a ground floor in a perimeter-strip zone has no `adjacentFoundation`,
 the aggregated warning at line 254 fires:
 
@@ -43,7 +46,7 @@ When a Kiva foundation IS present the product already:
   by multiple floor surfaces, quoting the engine's own
   "only one floor per Foundation:Kiva Object allowed".
 
-**Only the creation half is missing.** The scope is therefore narrower than
+**Only the creation half was missing.** The scope was therefore narrower than
 "port a Kiva subsystem": it is the write path, plus the one computation we have
 never needed because we only ever read the property.
 
@@ -242,63 +245,76 @@ It sets NO insulation. NECB's strip is `btap.codes.necb`'s to prescribe and
 `_apply_ground_strip` already does it, so this keeps the D-77 direction intact
 and puts no `article=` in `btap.modeling`.
 
-## Phase 3 — adjudicated: one method on both sides
+## Phase 3 — corrected: preserve the method, express the Code target within it
 
-D-32 now requires the same EnergyPlus Kiva ground-heat-transfer method on the
-pipeline's proposed and reference copies before sizing. Reference-only Kiva
-would make the 8.4.1.2 comparison carry two changes: the prescribed perimeter
-strip and a change of ground solver. Symmetric Kiva is calculation-method
-normalization under 8.4.2.1, 8.4.2.2, 8.4.2.4 and 8.4.2.8, not a correction of
-the submitted building. Article 3.4.1.2.(1) carries only 3.2.1.1 and 3.2.4
-onto the proposed performance path, so the proposed does not owe the strip;
-8.4.1.1.(1) requires the reference target to account for Section 3.2, so the
-reference does:
+Article 3.2.3.3.(1) sets the overall thermal-transmittance target and Sentence
+(3) sets a minimum placement extent: not less than 1.2 m from the perimeter or
+over the full area. Kiva is not indispensable to compliance. It remains the
+higher-fidelity default because it resolves the concentrated slab-edge loss,
+and it is applied symmetrically before sizing wherever the submitted
+simple-Ground floor can be converted without invented properties.
 
-- the caller's model is never mutated;
-- the proposed copy retains its submitted slab-field thermal resistance and
-  receives no prescribed perimeter insulation;
-- the reference inherits that Kiva foundation and then receives D-32's 1.2 m
-  strip.
+For a simple-Ground floor, both proposed and reference remain simple. The
+reference uses this declared approximation:
 
-This ruling is deliberately narrower than "put Kiva on every ground floor."
-It applies only to ordinary floors in the perimeter-strip branch. Full-area
-climates remain on the existing full-area construction path. Detected embedded
-floors and unresolved embedded-system cases remain on D-105's path. Floors with
-invalid topology, no exposed perimeter, or an unsupported material
-representation remain unchanged and visibly refused.
+```text
+Astrip = min(Afloor, exposed_perimeter * 1.2 m)
+f = Astrip / Afloor
+Ustrip = min(Ufield, Utable)
+Ueq = f * Ustrip + (1 - f) * Ufield
+```
 
-Kiva cannot translate a massless layer. The one known fixture representation,
-`CP02 CARPET PAD`, is converted on each eligible floor's private construction
-using the pinned oracle's thin-carpet properties while preserving resistance
-and submitted absorptances. Unknown no-mass layers and air gaps are not guessed.
-The conversion adds sourced carpet heat capacity and is disclosed as such.
+The area is an approximation, not an exact geometric band; overlapping corner
+regions and the location of partially exposed edges are unavailable. All U
+values use one overall-U basis and the interior film is handled consistently
+when converting `Ueq` to construction conductance. `min(Ufield, Utable)`
+protects a better-than-prescriptive submitted slab. A confirmed zero edge gives
+`f = 0` and no reference conductance change. The normal reference lightweight
+rebuild follows and keeps that conductance while supplying mass and dynamic
+response; this is not a massless scalar replacement.
 
-An EPW is not an equivalent substitute. It does not uniquely prescribe the
-monthly `Site:GroundTemperature:BuildingSurface` series without another
-depth/model choice, and a simple `Ground` boundary still cannot represent the
-2-D perimeter strip.
+The caller's model is never mutated. Article 3.4.1.2.(1) exempts the proposed
+performance-path assembly from the prescriptive treatment, while 8.4.1.1.(1)
+requires it in the reference target. Under symmetric Kiva, only the reference
+receives physical perimeter insulation. Under symmetric simple Ground, only
+the reference receives the equivalent-UA construction.
 
-A future `--ground-model simple` flag is diagnostic only on the
-perimeter-strip branch. Because it cannot represent 3.2.3.3.(3), it fails to
-establish the building energy target required by 8.4.1.1.(1) and must return
-`compliant = null` / CLI exit 6 rather than a conditional or ordinary
-determination. This is not an AHJ referral: the acceptable-solution text
-decides the requirement. Nor is the bare flag an alternative solution:
-nothing demonstrates equivalent performance. The restriction does not apply
-where no strip is required, including the full-area branch.
+Phase 2b preflight is method-neutral. It gates missing/non-finite geometry or
+perimeter, a parentless floor, missing or unusable simple-Ground construction,
+a `Foundation` boundary without its object, and an exact co-planar counterpart
+that proves a false Ground adjacency. Absolute elevation alone is not a
+defect. Unknown no-mass layers and air gaps remain valid simple-Ground inputs;
+if Kiva cannot translate them, the run falls back to symmetric simple Ground.
+The known `CP02 CARPET PAD` conversion remains available for Kiva and preserves
+resistance and absorptances.
 
-## Phase 4 — the witness, and the freeze
+`GroundFCfactorMethod` cannot use the area blend. EnergyPlus F-factor describes
+whole floor-plus-soil heat transfer per exposed perimeter, not NECB assembly
+U, so `U * area / perimeter` is not a valid conversion. The submitted method
+is preserved and the diagnostic lifecycle completes, but no determination is
+emitted (exit 6) until a validated NECB F-factor applier exists. This is a tool
+gap, not an input defect or AHJ referral. The same interim disposition applies
+to other unsupported whole-foundation preprocessors.
 
-A Kiva foundation changes the solved soil domain, so it moves energy. Expect
-all 56 scenarios, and expect NUMERIC movement — unlike every re-freeze in the
-last three days, this one legitimately changes results, which makes the
-before/after diff the review surface rather than a formality.
+The NECB 2025 Article 8.4.4 archetype-EUI alternate path returns before the
+reference lifecycle's `prepare_model` phase. It builds no reference target, so
+the method-symmetry ruling does not apply there and the proposed retains its
+submitted ground method. Sensitivity of that absolute EUI metric to its ground
+model is a separate question.
+The reference-path `--eui-supplement` does not bypass `prepare_model`; it
+receives the already ground-prepared proposed model (Kiva where supported,
+otherwise the retained submitted method) and any normalized rerun clones that
+prepared model.
 
-The witness must be at the call site and mutated: deleting the neutral
-pipeline's `prepare_model` call must make a real compliance determination lose
-its proposed and reference Kiva foundations, while the full-area control stays
-green. The witness also checks that only the reference has the 1.2 m strip and
-that a zero-perimeter floor is refused before its construction changes.
+## Phase 4 — witnesses and freeze
+
+The production-call witness checks the reference construction's calculated
+`Ueq`, not an audit string. Separate controls pin symmetric Kiva, a
+better-than-table slab, the measured-zero waiver, air-gap fallback, valid
+F-factor no-determination, full-area treatment, and method-neutral preflight.
+The phase-2b perimeter map is witnessed at the actual reference-envelope call.
+Behavior-only mutations must fail those named tests while their controls stay
+green.
 #128's lesson applies, that a scenario reaching the SELECTION is not one
 reaching the FAILURE. For E11 specifically the witness is a model whose walls
 exceed the perimeter, which must be refused rather than reaching EnergyPlus.
@@ -307,12 +323,13 @@ exceed the perimeter, which must be refused rather than reaching EnergyPlus.
 
 - **No vendored archetype table**, for the provenance reason above.
 - **No submitted-model repair and no reference-only ground method.** The
-  pipeline's private proposed copy and its reference use the same Kiva method;
-  only the reference receives NECB's strip.
-- **No `openstudio-mcp` dependency** — a server, BSD, useful as a reference
-  and a source of ported code, not as an import.
-- **No change to `_apply_ground_strip` or the D-105 trio.** Both already work
-  when a foundation exists; this plan is about making it exist.
+  pipeline's private proposed copy and its reference use a common method; only
+  the reference receives NECB's physical Kiva strip or equivalent-UA target.
+- **No `openstudio-mcp` dependency** — it is a server and useful as a
+  reference/source of attributed ported code, not as a product import.
+- **No change to the D-105 embedded-floor trio.** The simple-Ground
+  approximation is an additional ordinary-floor realization beside the
+  existing `_apply_ground_strip`.
 
 ## Attribution
 

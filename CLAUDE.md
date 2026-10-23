@@ -70,9 +70,11 @@ unless a moved link itself is wrong.
 ## The input model is GATED, and the gate is fatal
 
 A proposed model that lacks what NECB requires to build a reference is
-REFUSED before any transform runs. It does not warn and continue. Three gates
-in `btap/codes/necb/path.py#validate` raise `compliance.PreflightError`, which
-the CLI maps to `EXIT["preflight"] = 3`, and all three run inside
+REFUSED before simulation. It does not warn and continue. Three phase-1 gates
+in `btap/codes/necb/path.py#validate` run before any transform; a fourth,
+climate-dependent gate runs in phase 2b after HDD resolution but before model
+preparation or sizing. All raise `compliance.PreflightError`, which the CLI
+maps to `EXIT["preflight"] = 3`, and all stamp
 `audit.with_building("input model")` so the trail shows the gate ran:
 
 - **Structural absence** (`pipeline._validate_input_model`): no spaces, zones
@@ -93,13 +95,33 @@ the CLI maps to `EXIT["preflight"] = 3`, and all three run inside
   unresolvable type yields a reference identical to the proposed for that
   space: the allowance is waived and the proposed is compared against itself.
   You cannot certify a building whose reference silently failed to build.
+- **Any required ground-floor target whose method-neutral inputs are
+  indeterminate** (`path.prepare_model`): after HDD selects the ordinary
+  perimeter branch, every applicable reference-envelope floor is inventoried
+  before any floor is changed. Missing or non-finite geometry/perimeter,
+  missing or unusable simple-Ground construction, a parentless floor, or an
+  exact co-planar counterpart proving a false Ground adjacency is fatal
+  because no lawful reference representation can be derived. Absolute
+  elevation alone is not a defect. A finite measured zero gives a zero strip
+  fraction. The model check runs independently of the selected mode, so
+  `--ground-model simple` cannot bypass an OSM defect; floors outside the
+  reference envelope are not gated.
+
+  Kiva is the higher-fidelity symmetric default where supported. A valid
+  simple-Ground floor that Kiva cannot translate (including unknown no-mass or
+  air-gap layers) remains simple on both sides; the reference uses D-32's
+  declared equivalent-UA approximation and can establish a normal target.
+  Valid `GroundFCfactorMethod` input is a tool limitation, not an input defect:
+  it is preserved, the diagnostic lifecycle completes, and the run emits no
+  determination (`compliant = null`, exit 6) until a validated NECB F-factor
+  applier exists. Do not tell the submitter to replace a valid method.
 
 **Do not plan around this gate as though it were missing.** A draft of
-`docs/plans/PROPOSED_CHARACTERIZATION_PLAN.md` proposed adding exactly these
-checks and asked whether the tool should flag bad proposed inputs — a question
-the architecture had already answered. Run an untagged archetype through
-`btap-compliance` and read the exit code before concluding anything about
-input validation.
+`docs/plans/PROPOSED_CHARACTERIZATION_PLAN.md` proposed adding the three
+phase-1 checks and asked whether the tool should flag bad proposed inputs — a
+question the architecture had already answered. Run an untagged archetype
+through `btap-compliance` and read the exit code before concluding anything
+about input validation.
 
 The architecture that follows from it: **required inputs are fatal; everything
 past the gate is DISCLOSURE.** The performance path does not check a proposed
@@ -108,9 +130,9 @@ energy comparison and assembly-by-assembly pass/fail is the prescriptive
 path's job. So a characterization of the proposed records values and citations
 and emits no verdict — but the tool still refuses to run without what it needs.
 
-Relaxing any of the three into a warning is an adjudicated change, not a
-convenience: each exists because the silent-success path it replaces produced
-a determination that looked valid.
+Relaxing any gate into a warning is an adjudicated change, not a convenience:
+each exists because the silent-success path it replaces produced a
+determination that looked valid.
 
 ## A proposed FATAL stops the run; a proposed SEVERE does not
 

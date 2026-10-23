@@ -120,17 +120,22 @@ def material_conductance(material) -> float:
     return math.inf
 
 
-def opaque_at_conductance(model, construction, conductance):
+def opaque_at_conductance(
+        model, construction, conductance, *, name_discriminator=None):
     """Opaque construction at a target CONSTRUCTION conductance, W/(m2.K) —
     legacy-exact port of BTAP customize_opaque_construction: reuse by name,
     deep-copy, insulation-layer solve via SDK setConductance, layer-trimming
     fallback when the non-insulation layers alone exceed the target
     resistance."""
     base = re.sub(r":.*\Z", "", construction.nameString())
+    if name_discriminator is not None:
+        base = f"{base} {name_discriminator}"
     # Names are keys for humans and legacy costing matchers; the
     # full-precision value lives in the material (setConductance below uses
-    # the unrounded `conductance`). NECB table U-values are separated by far
-    # more than 1e-4 W/(m2.K), so 4dp display names cannot collide.
+    # the unrounded `conductance`). The optional discriminator is required for
+    # continuously varying targets such as D-32's floor-specific equivalent U;
+    # discrete NECB table values are separated far enough for the legacy 4dp
+    # display name.
     name = f"{base}:U-{ruby_str(ruby_round(conductance, 4))}"
     internal_source = opt(construction.to_ConstructionWithInternalSource())
     existing = opt(
@@ -278,6 +283,34 @@ def _kiva_carpet(layer):
     if material is None or not _CP02_CARPET_PAD.fullmatch(material.nameString()):
         return None
     return material
+
+
+def kiva_legalization_blockers(surface):
+    """Reasons ``surface`` cannot be made Kiva-legal without guessed physics.
+
+    This is the read-only counterpart to :func:`kiva_legal`. An empty list
+    means the assigned construction already uses standard opaque materials or
+    every nonstandard layer is the specifically sourced CP02 carpet pad.
+    """
+    construction = opt(surface.construction())
+    if construction is None:
+        return ["no construction assigned"]
+    layered = opt(construction.to_LayeredConstruction())
+    if layered is None:
+        return ["construction is not a layered construction"]
+    layers = layered.layers()
+    if not layers:
+        return ["construction has no layers"]
+
+    blockers = []
+    for layer in layers:
+        if (opt(layer.to_StandardOpaqueMaterial()) is None
+                and _kiva_carpet(layer) is None):
+            blockers.append(
+                f"construction layer '{layer.nameString()}' is not a standard "
+                "opaque material and has no sourced Kiva-compatible "
+                "replacement")
+    return blockers
 
 
 def kiva_legal(model, surface):

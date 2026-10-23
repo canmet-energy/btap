@@ -277,20 +277,26 @@ class TestForwardingFunctionsAreExecuted(unittest.TestCase):
 
         foundations.create_kiva_foundation = refuse
         try:
-            necb_path.prepare_model(SimpleNamespace(
+            run = SimpleNamespace(
                 proposed=proposed,
                 audit=AuditLog(),
                 ruleset=codes.resolve("necb2020"),
                 hdd=3890,
                 state={},
-                # `prepare_model` reads the ground-model mode, so the double
-                # has to carry it; the default keeps this test on the Kiva path
-                # it is about.
                 opts={"ground_model": "kiva"},
-            ))
+            )
+            necb_path.prepare_model(run)
         finally:
             foundations.create_kiva_foundation = original
 
+        fallbacks = [
+            entry for entry in run.audit.entries
+            if "otherwise valid simple-Ground floors" in entry.get("action", "")
+        ]
+        self.assertEqual(1, len(fallbacks))
+        self.assertTrue(all(
+            "forced post-conversion refusal" in row["reasons"]
+            for row in fallbacks[0]["inputs"]["surfaces"]))
         self.assertEqual(
             construction_handles,
             {str(obj.handle()) for obj in proposed.getLayeredConstructions()},
@@ -483,7 +489,8 @@ class TestForwardingFunctionsAreExecuted(unittest.TestCase):
                 run = SimpleNamespace(
                     opts=opts, audit=AuditLog(), proposed=object(),
                     proposed_annual_data=None,
-                    ruleset=codes.resolve('necb2020'), hdd=3890)
+                    ruleset=codes.resolve('necb2020'), hdd=3890,
+                    state={'ground_floor_perimeters': {}})
                 seen.clear()
                 necb_path.build_reference(run)
                 with self.subTest(simulate=simulate):
@@ -507,6 +514,7 @@ class TestForwardingFunctionsAreExecuted(unittest.TestCase):
 
         calls = []
         sentinel = object()
+        perimeter_sentinel = {"Floor 1": 12.5}
         proposed = object()
         reference = object()
 
@@ -529,7 +537,8 @@ class TestForwardingFunctionsAreExecuted(unittest.TestCase):
         def reference_envelope(model, ruleset, **kwargs):
             calls.append((
                 'envelope', model, ruleset.id,
-                kwargs['embedded_floor_inventory']))
+                kwargs['embedded_floor_inventory'],
+                kwargs['ground_floor_perimeters']))
 
         envelope.prescriptive._embedded_floor_inventory = inventory
         hvac.reference._reference_hvac = reference_hvac
@@ -549,6 +558,7 @@ class TestForwardingFunctionsAreExecuted(unittest.TestCase):
             ruleset=codes.resolve('necb2020'),
             hdd=3890,
             reference=None,
+            state={'ground_floor_perimeters': perimeter_sentinel},
         )
         try:
             necb_path.build_reference(run)
@@ -564,7 +574,8 @@ class TestForwardingFunctionsAreExecuted(unittest.TestCase):
         self.assertEqual('inventory', calls[0][0])
         self.assertEqual('hvac', calls[1][0])
         self.assertEqual(
-            ('envelope', reference, 'necb2020', sentinel), calls[2])
+            ('envelope', reference, 'necb2020', sentinel,
+             perimeter_sentinel), calls[2])
         self.assertIs(reference, run.reference)
 
 

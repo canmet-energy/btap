@@ -1,6 +1,6 @@
-"""P3 gate (standalone half): prescriptive application sets every envelope
-surface to its NECB maximum U; FDWR/SRR mutators hit their limits; audit
-narrates everything.
+"""P3 gate (standalone half): prescriptive application sets each envelope
+surface to its NECB target and extent; FDWR/SRR mutators hit their limits;
+audit narrates everything.
 
 Port of btap-necb/test/test_envelope_prescriptive.rb.
 """
@@ -112,9 +112,8 @@ class TestPrescriptive(unittest.TestCase):
                 self.assertAlmostEqual(0.15942, c.thermalConductance().get(),
                                        delta=1e-4, msg=surface.nameString())
         # Table 3.2.3.1 floors row below zone 8 prescribes only a 1.2 m
-        # perimeter strip (3.2.3.3.(3)) — the slab field carries NO maximum
-        # (D-32). The fixture's plain-Ground floors can't carry a Kiva strip:
-        # constructions stay untouched and the gap is warned.
+        # minimum extent. Plain Ground represents that through D-32's uniform
+        # equivalent UA; a measured-zero floor has fraction zero and stays put.
         ground = [s for s in model.getSurfaces()
                   if s.isGroundSurface() and s.surfaceType() == 'Floor']
         self.assertTrue(ground)
@@ -123,17 +122,27 @@ class TestPrescriptive(unittest.TestCase):
         # surfaces of a temporary (Ruby's `load_raw_fixture.getSurfaces`)
         # segfaults the moment CPython collects it mid-comprehension.
         pristine = load_raw_fixture()
-        before = {s.nameString(): s.construction().get().nameString()
+        before = {
+            s.nameString(): (
+                s.construction().get().to_LayeredConstruction().get()
+                .thermalConductance().get())
                   for s in pristine.getSurfaces()
                   if s.isGroundSurface() and s.surfaceType() == 'Floor'}
-        for surface in ground:
-            self.assertEqual(before[surface.nameString()],
-                             surface.construction().get().nameString(),
-                             f'{surface.nameString()}: strip-zone slab field left as modeled')
+        after = {
+            surface.nameString(): (
+                surface.construction().get().to_LayeredConstruction().get()
+                .thermalConductance().get())
+            for surface in ground
+        }
+        self.assertLess(after["Surface 7"], before["Surface 7"])
+        self.assertAlmostEqual(
+            after["Surface 25"], before["Surface 25"], delta=1e-9)
         self.assertTrue(
-            any(w.get('article') == '3.2.3.3.(3)' and w.get('ruling') == 'D-32'
-                for w in audit.warnings),
-            'no-Kiva strip zone warns that the strip is not representable')
+            any(e.get('article') == '3.2.3.3.(3)'
+                and e.get('ruling') == 'D-32'
+                and 'uniform equivalent UA' in e.get('action', '')
+                for e in audit.entries),
+            'plain Ground must receive the equivalent-UA transform')
         self.assertTrue(any(e['step'] == 'prescriptive'
                             and '3.2.2.2' in str(e.get('article', ''))
                             for e in audit.entries))
@@ -838,25 +847,8 @@ class TestPrescriptive(unittest.TestCase):
                          'the paired boundary is disclosed once, not once per face')
         self.assertIn('greater than 10 C', disclosures[0]['action'])
 
-    def test_missing_Kiva_floors_are_ONE_warning_that_names_every_floor(self):
-        """The largest warning class across 26 archetypes — 588 of them — and
-        unlike a diagnostic this one is compliance-material.
-
-        3.2.3.3.(3) prescribes a 1.2 m insulated perimeter strip. Without a
-        Kiva foundation it is not representable and the slab is left AS
-        MODELLED, so prescribed insulation is NOT applied. Nothing in this
-        package creates Kiva foundations, so the condition is a property of the
-        input model.
-
-        It was emitted per surface — about 22 per model — which buried the
-        finding in copies of itself, next to 194 copies of a capacity warning
-        that was false. Aggregating keeps it prominent and legible: one
-        warning, the count, and every floor named in `inputs`.
-
-        The existing `test_ground_floor_strip_vs_full_area` is the control: it
-        asserts the article and ruling still appear, and it passes either way,
-        which is why it could not catch the repetition.
-        """
+    def test_simple_ground_equivalent_ua_is_one_decision_naming_every_floor(self):
+        """The approximation is disclosed once without losing floor inputs."""
         from btap.audit import AuditLog
 
         model = load_raw_fixture()
@@ -868,24 +860,28 @@ class TestPrescriptive(unittest.TestCase):
                    and not s.adjacentFoundation().is_initialized()]
         self.assertTrue(no_kiva, 'the fixture must exercise the no-Kiva path')
 
-        strip = [w for w in audit.warnings
-                 if w.get('article') == '3.2.3.3.(3)'
-                 and w.get('ruling') == 'D-32'
-                 and 'Kiva' in w['action']]
+        strip = [
+            entry for entry in audit.entries
+            if entry.get('article') == '3.2.3.3.(3)'
+            and entry.get('ruling') == 'D-32'
+            and 'uniform equivalent UA' in entry['action']
+        ]
         self.assertEqual(
             1, len(strip),
-            f'{len(no_kiva)} floors without a Kiva foundation must be ONE '
-            f'warning, not one each; got {len(strip)}')
+            f'{len(no_kiva)} simple floors must be ONE decision; got '
+            f'{len(strip)}')
 
         inputs = strip[0].get('inputs') or {}
         self.assertEqual(len(no_kiva), inputs.get('floors'),
                          'the count is stated so a reader need not tally')
-        self.assertEqual(sorted(no_kiva), sorted(inputs.get('surfaces') or []),
-                         'every floor is still named — aggregating a MATERIAL '
-                         'gap must not lose which slabs it applies to')
-        self.assertIn('NOT applied', strip[0]['action'],
-                      'the consequence is stated: prescribed insulation is '
-                      'not applied to those slabs')
+        self.assertEqual(
+            sorted(no_kiva),
+            sorted(row['floor'] for row in inputs.get('surfaces') or []),
+            'every floor is named with its actual equivalent-UA inputs')
+        self.assertIn('NOT an exact geometric band', strip[0]['action'])
+        self.assertFalse(any(
+            'NO Kiva foundation' in warning.get('action', '')
+            for warning in audit.warnings))
 
     def test_many_interzone_pairs_are_disclosed_in_ONE_warning(self):
         """90 identical sentences is one fact told ninety times.

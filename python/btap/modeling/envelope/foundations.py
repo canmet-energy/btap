@@ -4,8 +4,8 @@ edge is exposed, and the ordered write that attaches one.
 Code-agnostic, like everything in `btap.modeling`: this module decides WHICH
 surfaces CAN carry a foundation and writes the objects. It sets no insulation
 and carries no `article=` — NECB's 1.2 m perimeter strip (3.2.3.3.(3)) is
-`btap.codes.necb.envelope`'s to prescribe, and it already does, via
-`_apply_ground_strip`, once a foundation exists.
+`btap.codes.necb.envelope`'s to prescribe, physically through Kiva or through
+its declared simple-Ground equivalent-UA approximation.
 
 Ported with attribution from `canmet-energy/openstudio-mcp` (SWR 26-035,
 `mcp_server/skills/geometry/kiva_eligibility.py` and `kiva_apply.py`) at
@@ -178,6 +178,52 @@ def _duplicate_footprints(edges_by_floor) -> list:
     names = sorted(keyed)
     return [(a, b) for index, a in enumerate(names) for b in names[index + 1:]
             if keyed[a] == keyed[b]]
+
+
+def coincident_surfaces(model, floors) -> list[dict]:
+    """Ground floors with an exact co-planar counterpart elsewhere in the model.
+
+    Absolute elevation is not evidence that a ``Ground`` boundary is wrong:
+    model coordinates can be shifted arbitrarily. A second surface with the
+    same world-coordinate polygon is evidence. Such a pair describes an
+    interzone adjacency while one face still claims ground contact.
+    """
+    reported = {surface.nameString(): surface for surface in floors}
+
+    def polygon_key(surface):
+        vertices = world_vertices(surface)
+        if vertices is None:
+            return None
+        return tuple(sorted(
+            (round(vertex.x(), 3), round(vertex.y(), 3), round(vertex.z(), 3))
+            for vertex in vertices
+        ))
+
+    keys = {}
+    for surface in sorted_by_name(model.getSurfaces()):
+        if surface.surfaceType() not in ("Floor", "RoofCeiling"):
+            continue
+        key = polygon_key(surface)
+        if key is not None:
+            keys.setdefault(key, []).append(surface)
+
+    conflicts = []
+    for name, floor in sorted(reported.items()):
+        key = polygon_key(floor)
+        if key is None:
+            continue
+        matches = [
+            {
+                "surface": other.nameString(),
+                "surface_type": other.surfaceType(),
+                "boundary_condition": other.outsideBoundaryCondition(),
+            }
+            for other in keys.get(key, [])
+            if other.handle() != floor.handle()
+        ]
+        if matches:
+            conflicts.append({"floor": name, "coincident_surfaces": matches})
+    return conflicts
 
 
 def exposed_perimeters(model, floors) -> dict:

@@ -94,11 +94,15 @@ def test_manifest_inventory_and_every_code_ref_resolves():
     # retired and replaced by both concrete execution paths, Local.execute and
     # Remote.execute. The historical R7 ledger stays frozen; the retirement
     # and two additions record the correction.
+    #
+    # 323 -> 327 under D-32's method-neutral correction: both editions'
+    # 3.2.3.3 rows gained the phase-2b inventory and equivalent-UA application
+    # surfaces. The four uses are additions, not historical R-B renames.
     assert sum(len(articles) for _path, articles in manifests) == 241
 
     refs = code_refs(manifests)
     assert len(refs) > 60
-    assert len(refs) == 323
+    assert len(refs) == 327
     assert all(not re.match(r"^btap-[^/]+/lib/", ref) for ref in refs)
 
     for manifest, articles in manifests:

@@ -122,22 +122,152 @@ def climate(run):
                                   audit=run.audit)}
 
 
-def prepare_model(run):
-    """Phase 2b — put eligible ordinary perimeter-strip floors on Kiva.
-
-    This is method symmetry, not a proposed-envelope correction. A simple
-    ``Ground`` floor has no slab edge on which the reference can place
-    3.2.3.3.(3)'s 1.2 m strip. Kiva supplies that edge, and applying the same
-    ground method to proposed and reference prevents the 8.4.1.2 comparison
-    from also carrying an unrelated ground-algorithm difference. The proposed
-    keeps its submitted slab-field resistance and receives no strip here.
-
-    Scope is deliberately narrow: full-area climates, detected embedded
-    floors and unresolved embedded-system applicability do not need this
-    method change and stay on their submitted boundary condition. A floor that
-    fails Kiva eligibility likewise stays unchanged and is named.
-    """
+def _ordinary_ground_floors(model, inventory, prescriptive):
     from btap._compat import sorted_by_name
+
+    return [
+        surface for surface in sorted_by_name(model.getSurfaces())
+        if surface.surfaceType() == "Floor"
+        and prescriptive.boundary_of(surface) == "ground"
+        and inventory.status(surface.nameString()) == "ordinary"
+        and (
+            opt(surface.space()) is None
+            or prescriptive.inside_envelope(surface.space().get())
+        )
+    ]
+
+
+def _ground_floor_input_defects(model, floors, measured, foundations):
+    coincident = {
+        row["floor"]: row["coincident_surfaces"]
+        for row in foundations.coincident_surfaces(model, floors)
+    }
+    defects = []
+    for surface in floors:
+        name = surface.nameString()
+        boundary = surface.outsideBoundaryCondition()
+        perimeter = measured["perimeters"].get(name)
+        reasons = []
+        if name in coincident:
+            reasons.append(
+                "the Ground claim contradicts an exact co-planar surface: "
+                + ", ".join(
+                    f"{row['surface']!r} ({row['surface_type']}, boundary "
+                    f"{row['boundary_condition']!r})"
+                    for row in coincident[name]
+                ))
+        if perimeter is None:
+            reasons.append(f"could not measure the exposed perimeter of {name!r}")
+        elif not math.isfinite(perimeter):
+            reasons.append(
+                f"exposed perimeter for {name!r} is {perimeter}, which is not "
+                "a finite length")
+
+        if reasons:
+            defects.append({
+                "floor": name,
+                "boundary_condition": boundary,
+                "exposed_perimeter_m": perimeter,
+                "reasons": reasons,
+            })
+            continue
+
+        # A confirmed zero edge has a zero strip fraction. Construction
+        # compatibility is immaterial because no reference change is needed.
+        if perimeter <= foundations.TOLERANCE_M:
+            continue
+
+        if boundary == "Foundation":
+            if opt(surface.adjacentFoundation()) is None:
+                reasons.append(
+                    "boundary condition 'Foundation' has no adjacent "
+                    "FoundationKiva object")
+        elif boundary == "Ground":
+            reasons.extend(foundations.kiva_blockers(
+                surface, check_layers=False))
+            construction = opt(surface.construction())
+            layered = (
+                None if construction is None
+                else opt(construction.to_LayeredConstruction())
+            )
+            conductance = (
+                None if layered is None
+                else opt(layered.thermalConductance())
+            )
+            if construction is None:
+                reasons.append("no construction assigned")
+            elif layered is None:
+                reasons.append(
+                    "construction is not layered, so its slab-field U cannot "
+                    "be established")
+            elif (conductance is None or not math.isfinite(conductance)
+                  or conductance <= 0):
+                reasons.append(
+                    f"construction conductance {conductance!r} is not a "
+                    "finite positive value")
+            area = float(surface.grossArea())
+            if not math.isfinite(area) or area <= 0:
+                reasons.append(
+                    f"floor area {area!r} m2 is not a finite positive area")
+        elif boundary not in (
+                "GroundFCfactorMethod", "GroundSlabPreprocessorAverage"):
+            reasons.append(
+                f"boundary condition {boundary!r} is not a supported ground "
+                "method")
+
+        if reasons:
+            defects.append({
+                "floor": name,
+                "boundary_condition": boundary,
+                "exposed_perimeter_m": perimeter,
+                "reasons": reasons,
+            })
+    return defects
+
+
+def _record_ground_method_limit(run, floors):
+    if not floors:
+        return
+    blocked = {
+        "reason": "ground_method_not_supported",
+        "ground_model": run.opts.get("ground_model", "kiva"),
+        "floors": [row["floor"] for row in floors],
+        "surfaces": floors,
+    }
+    run.state["target_not_established"] = blocked
+    with run.audit.with_building(None):
+        run.audit.warn(
+            "prepare",
+            "NO BUILDING ENERGY TARGET can be established for one or more "
+            "valid submitted foundation methods because BTAP has no validated "
+            "translation from NECB assembly U-values and insulation extent "
+            "to their whole-foundation factors; the methods are preserved "
+            "and any completed energies are diagnostic",
+            inputs=blocked, article="8.4.1.1.(1)", ruling="D-32")
+
+
+def _rollback_kiva_conversion(model, surface, original_construction):
+    converted = opt(surface.construction())
+    surface.setConstruction(original_construction)
+    if converted is None or converted.handle() == original_construction.handle():
+        return
+    layered = opt(converted.to_LayeredConstruction())
+    layers = list(layered.layers()) if layered is not None else []
+    converted.remove()
+    for layer in layers:
+        if layer.directUseCount() == 0:
+            layer.remove()
+
+
+def prepare_model(run):
+    """Phase 2b — validate method-neutral slab facts, then normalize methods.
+
+    Kiva remains the higher-fidelity symmetric method. A valid simple-Ground
+    floor that Kiva cannot represent stays simple on both sides; the reference
+    uses D-32's equivalent-UA approximation. Whole-foundation factor methods
+    are preserved but withhold the determination until a validated NECB
+    translation exists.
+    """
     from btap.codes.necb import envelope
     from btap.codes.necb.envelope.rules import _ground_floor_extent
     from btap.modeling.envelope import constructions as modeling_constructions
@@ -145,138 +275,188 @@ def prepare_model(run):
 
     proposed = run.proposed
     audit = run.audit
+    mode = run.opts.get("ground_model", "kiva")
     inventory = envelope.prescriptive._embedded_floor_inventory(proposed)
     run.state["embedded_floor_inventory"] = inventory
+    floors = _ordinary_ground_floors(
+        proposed, inventory, envelope.prescriptive)
+    run.state["ground_floor_perimeters"] = {}
+    method_limits = [
+        {
+            "floor": surface.nameString(),
+            "boundary_condition": surface.outsideBoundaryCondition(),
+            "reason": (
+                "a validated NECB reference applier for this whole-foundation "
+                "method is not implemented"
+            ),
+        }
+        for surface in floors
+        if surface.outsideBoundaryCondition() in (
+            "GroundFCfactorMethod", "GroundSlabPreprocessorAverage")
+    ]
+
     extent = _ground_floor_extent(
         ruleset=run.ruleset, hdd=run.hdd, embedded_system=False)
     if extent["extent"] != "perimeter_strip":
+        _record_ground_method_limit(run, method_limits)
         return
-
-    floors = [
-        surface for surface in sorted_by_name(proposed.getSurfaces())
-        if surface.surfaceType() == "Floor"
-        and surface.outsideBoundaryCondition() == "Ground"
-        and inventory.status(surface.nameString()) == "ordinary"
-    ]
     if not floors:
         return
 
-    # `--ground-model simple` declines the common method. Sol's 286 ruling, and
-    # the reason matters: the proposed is EXEMPT from the 1.2 m strip by
-    # 3.4.1.2.(1), which carries only Article 3.2.1.1 and Subsection 3.2.4 onto
-    # the performance path, so declining is not an omission on the proposed
-    # side. What it costs is the REFERENCE — a simple `Ground` floor has no slab
-    # edge for the strip that 8.4.1.1.(1) requires the target to account for, so
-    # no building energy target is established and 8.4.1.2.(2) has nothing to
-    # compare against. The run therefore makes NO determination: not compliant,
-    # not non-compliant, and NOT conditional, because conditional means an
-    # authority can approve it and a known-invalid target is not approvable.
-    #
-    # Reached only here, AFTER the extent gate and the applicability filter, so
-    # `simple` still determines normally in a full-area climate or on a model
-    # with no ordinary perimeter floor. Deliberately not a parser rejection.
-    if run.opts.get("ground_model", "kiva") != "kiva":
-        run.state["target_not_established"] = {
-            "reason": "ground_model_simple_on_perimeter_strip",
-            "ground_model": run.opts.get("ground_model"),
-            "floors": [surface.nameString() for surface in floors],
-        }
-        with audit.with_building("input model"):
-            audit.warn(
-                "prepare",
-                "NO BUILDING ENERGY TARGET can be established — ground-model "
-                "mode is SIMPLE, so the reference's ground-contact floors keep "
-                "a Ground boundary condition, which gives the whole slab one "
-                "monthly temperature and no slab edge on which to apply the "
-                "1.2 m perimeter strip that 8.4.1.1.(1) requires the target to "
-                "account for; the proposed is EXEMPT from that strip under "
-                "3.4.1.2.(1), so this is a defect in the TARGET, not in the "
-                "submitted building, and no determination is made",
-                inputs={"ground_model": run.opts.get("ground_model"),
-                        "floors": len(floors),
-                        "surfaces": [s.nameString() for s in floors]},
-                article="8.4.1.1.(1)", ruling="D-32")
-        return
-
     measured = foundations.exposed_perimeters(proposed, floors)
-    with audit.with_building("input model"):
-        converted = []
-        created = []
-        refused = []
+    run.state["ground_floor_perimeters"] = dict(measured["perimeters"])
+    defects = _ground_floor_input_defects(
+        proposed, floors, measured, foundations)
+    if defects:
+        with audit.with_building("input model"):
+            _raise_ground_strip_preflight(audit, mode, defects)
+    method_limits = [
+        row for row in method_limits
+        if measured["perimeters"][row["floor"]] > foundations.TOLERANCE_M
+    ]
+
+    converted = []
+    created = []
+    zero_edge = []
+    fallbacks = []
+    if mode == "kiva":
         for surface in floors:
+            if surface.outsideBoundaryCondition() != "Ground":
+                continue
             name = surface.nameString()
-            perimeter = measured["perimeters"].get(name)
-            reasons = foundations.kiva_blockers(
-                surface, check_layers=False)
-            if perimeter is None:
-                reasons.append(
-                    f"could not measure the exposed perimeter of {name!r}")
-            elif not math.isfinite(perimeter):
-                reasons.append(
-                    f"exposed perimeter for {name!r} is {perimeter}, which is "
-                    "not a finite length")
-            elif perimeter <= foundations.TOLERANCE_M:
-                reasons.append(
-                    f"{name!r} has an exposed perimeter of {perimeter:.3f} m; "
-                    "a Kiva floor needs exposed slab edge")
-            if reasons:
-                refused.append({"floor": name, "reasons": reasons})
+            perimeter = measured["perimeters"][name]
+            if perimeter <= foundations.TOLERANCE_M:
+                zero_edge.append({
+                    "floor": name,
+                    "boundary_condition": "Ground",
+                    "exposed_perimeter_m": perimeter,
+                    "reasons": ["measured exposed perimeter is zero"],
+                })
+                continue
+
+            blockers = modeling_constructions.kiva_legalization_blockers(
+                surface)
+            if blockers:
+                fallbacks.append({
+                    "floor": name,
+                    "boundary_condition": "Ground",
+                    "exposed_perimeter_m": perimeter,
+                    "reasons": blockers,
+                })
                 continue
 
             original_construction = opt(surface.construction())
             change = modeling_constructions.kiva_legal(proposed, surface)
             result = foundations.create_kiva_foundation(
                 proposed, surface, perimeter_m=perimeter)
-            if result["created"]:
-                if change is not None:
-                    converted.append({"surface": name, **change})
-                created.append({"floor": result["floor"],
-                                "exposed_perimeter_m": result["perimeter_m"]})
-            else:
+            if not result["created"]:
                 if change is not None and original_construction is not None:
-                    converted_construction = opt(surface.construction())
-                    surface.setConstruction(original_construction)
-                    if (converted_construction is not None
-                            and converted_construction.handle()
-                            != original_construction.handle()):
-                        layered = opt(
-                            converted_construction.to_LayeredConstruction())
-                        converted_layers = (
-                            list(layered.layers()) if layered is not None else [])
-                        converted_construction.remove()
-                        for layer in converted_layers:
-                            if layer.directUseCount() == 0:
-                                layer.remove()
-                refused.append({"floor": result["floor"],
-                                "reasons": result["refusals"]})
+                    _rollback_kiva_conversion(
+                        proposed, surface, original_construction)
+                fallbacks.append({
+                    "floor": name,
+                    "boundary_condition": surface.outsideBoundaryCondition(),
+                    "exposed_perimeter_m": perimeter,
+                    "reasons": result["refusals"],
+                })
+                continue
+            if change is not None:
+                converted.append({"surface": name, **change})
+            created.append({
+                "floor": result["floor"],
+                "exposed_perimeter_m": result["perimeter_m"],
+            })
 
-        if converted:
+    if converted:
+        audit.warn(
+            "prepare",
+            "the pipeline's PROPOSED copy replaces known CP02 carpet-pad "
+            "no-mass layers with the pinned thin-carpet material needed by "
+            "Kiva; thermal resistance and submitted absorptances are "
+            "preserved, while the sourced carpet heat capacity is disclosed",
+            inputs={"floors": len(converted), "surfaces": converted},
+            article="8.4.1.2.(2)", ruling="D-32")
+    if created:
+        audit.decision(
+            "prepare",
+            "eligible ordinary perimeter-strip floors use the EnergyPlus "
+            "Kiva ground method in BOTH proposed and reference before sizing, "
+            "so the 8.4.1.2 comparison isolates the prescribed strip instead "
+            "of also carrying a ground-model difference",
+            inputs={"floors": len(created), "foundations": created},
+            article="8.4.1.2.(2)", ruling="D-32")
+    if mode == "simple":
+        simple = [
+            surface.nameString() for surface in floors
+            if surface.outsideBoundaryCondition() == "Ground"
+        ]
+        if simple:
+            with audit.with_building(None):
+                audit.decision(
+                    "prepare",
+                    "simple Ground retained on the proposed and reference; "
+                    "the reference applies D-32's uniform equivalent-UA "
+                    "approximation for the 1.2 m minimum extent",
+                    inputs={"floors": len(simple), "surfaces": simple,
+                            "ground_model": mode},
+                    article="8.4.1.2.(2)", ruling="D-32")
+    if fallbacks:
+        with audit.with_building(None):
             audit.warn(
                 "prepare",
-                "the pipeline's PROPOSED copy replaces known CP02 carpet-pad "
-                "no-mass layers with the pinned thin-carpet material needed by "
-                "Kiva; thermal resistance and submitted absorptances are "
-                "preserved, while the sourced carpet heat capacity is disclosed",
-                inputs={"floors": len(converted), "surfaces": converted},
+                "Kiva was requested but one or more otherwise valid simple-"
+                "Ground floors cannot be converted without inventing physical "
+                "properties; those floors retain simple Ground on both sides "
+                "and the reference uses the equivalent-UA approximation",
+                inputs={"floors": len(fallbacks), "surfaces": fallbacks},
                 article="8.4.1.2.(2)", ruling="D-32")
-        if created:
-            audit.decision(
-                "prepare",
-                "eligible ordinary perimeter-strip floors use the EnergyPlus "
-                "Kiva ground method in BOTH proposed and reference before "
-                "sizing, so the 8.4.1.2 comparison isolates the prescribed "
-                "strip instead of also carrying a ground-model difference",
-                inputs={"floors": len(created), "foundations": created},
-                article="8.4.1.2.(2)", ruling="D-32")
-        if refused:
-            audit.warn(
-                "prepare",
-                "ordinary perimeter-strip floors that could NOT take a Kiva "
-                "foundation keep the simple Ground boundary condition — the "
-                "1.2 m strip of 3.2.3.3.(3) is not representable and those "
-                "slabs stay as modeled in BOTH proposed and reference",
-                inputs={"floors": len(refused), "surfaces": refused},
-                article="3.2.3.3.(3)", ruling="D-32")
+    if zero_edge:
+        audit.warn(
+            "prepare",
+            f"{len(zero_edge)} ordinary ground-contact floor(s) have a "
+            "measured zero exposed edge; their strip-area fraction is zero, "
+            "so no Kiva foundation or reference construction change applies",
+            inputs={"floors": len(zero_edge), "surfaces": zero_edge},
+            article="3.2.3.3.(3)", ruling="D-32")
+
+    _record_ground_method_limit(run, method_limits)
+
+
+def _raise_ground_strip_preflight(audit, mode, unrepresented):
+    blocked = {
+        "reason": "ground_input_defect",
+        "ground_model": mode,
+        "floors": [row["floor"] for row in unrepresented],
+        "surfaces": unrepresented,
+    }
+    audit.warn(
+        "prepare",
+        "PREFLIGHT FAILED — the building energy target cannot be established: "
+        "one or more ordinary ground-contact floors with an exposed or "
+        "unmeasurable slab edge has method-neutral geometry, adjacency or "
+        "construction data from which no lawful reference representation can "
+        "be derived; 8.4.1.1.(1) requires a complete building energy target",
+        inputs=blocked, article="8.4.1.1.(1)", ruling="D-32")
+    details = []
+    for row in unrepresented:
+        perimeter = row["exposed_perimeter_m"]
+        perimeter_text = (
+            "unmeasurable"
+            if perimeter is None
+            else f"{perimeter!r} m"
+        )
+        details.append(
+            f"  - {row['floor']!r}: boundary "
+            f"{row['boundary_condition']!r}, exposed perimeter "
+            f"{perimeter_text}; {'; '.join(row['reasons'])}")
+    raise compliance.PreflightError(
+        "ground-strip pre-flight FAILED: the reference target cannot derive "
+        f"a lawful ground representation for {len(unrepresented)} floor(s):\n"
+        + "\n".join(details)
+        + "\nFix: correct each listed floor's boundary, parent space, geometry "
+          "or missing/unusable construction. Correct a false Ground tag to "
+          "its real adjacency instead of inventing a foundation; choosing a "
+          "different BTAP ground mode cannot repair an input defect.")
 
 
 def prepare_annual(run):
@@ -336,12 +516,10 @@ def determine(run):
     _cost_both(run)                   # 9. optional costing of both models
     _supplement_eui(run)              # 10. optional 2025 archetype-EUI verdict
 
-    # A target that was never established yields NO determination, whatever the
-    # comparison computed. The reference is still built, sized and run, because
-    # the mode is retained for diagnostics and both energies are the useful
-    # output — but `compliant` is None, which `cli.verdict_exit` already maps to
-    # EXIT["no_determination"] = 6, the code `--quick` and `--simulate sizing`
-    # already use. The override is LAST so no later phase can undo it.
+    # Unsupported whole-foundation methods run through the complete diagnostic
+    # lifecycle, but cannot establish the target until a validated NECB
+    # factor translation exists. Apply this LAST so no later phase can restore
+    # a verdict.
     blocked = run.state.get("target_not_established")
     if blocked is not None:
         _refuse_determination(run, blocked)
@@ -457,7 +635,8 @@ def build_reference(run):
             reference, ruleset, hdd=run.hdd,
             actual_roof_absorptance_used=opts["actual_roof_absorptance_used"],
             thermal_bridging=opts["thermal_bridging"], audit=audit,
-            embedded_floor_inventory=embedded_floor_inventory)
+            embedded_floor_inventory=embedded_floor_inventory,
+            ground_floor_perimeters=run.state["ground_floor_perimeters"])
         # daylighting: tells reference_lighting whether (5)-(12) are covered
         # by the separate daylighting transform below — it shouts the gap only
         # when they are not.
@@ -2630,46 +2809,32 @@ def _inspect(value):
 
 
 def _refuse_determination(run, blocked):
-    """Turn a run whose TARGET was never established into no determination.
-
-    Named rather than inlined in `determine` because it carries a contract
-    worth driving directly: a run that WOULD have been conditional must have
-    its conditional reason block CLEARED, and the only way to witness that is
-    to hand this function a report which already has one. Through `determine`
-    alone the clearing was unwitnessed — every available fixture is
-    unconditional, so the assertion passed against a report that never held
-    the block. Fable's `133` re-review found the consequence.
-    """
+    """Withhold a verdict while preserving the diagnostic run outputs."""
     run.compliant = None
     run.report["compliance_determination"] = "no_determination"
-    # A target that was never established cannot be CONDITIONAL on
-    # anything, so the conditional reason block must go rather than sit
-    # beside the refusal. Fable's `133` re-review: it survived, so
-    # `ahj_appendix` read its `ahj_ids` and told an authority "YES — this
-    # run's determination is conditional on it" for AHJ-1, AHJ-2 and
-    # AHJ-14 while the badge beside it said UNDETERMINED. The report is the
-    # AHJ-facing artifact and it contradicted itself.
-    #
-    # `ahj_applied` is deliberately KEPT: those dispositions really were
-    # applied to runtime choices during the run, which stays true whether
-    # or not a determination came out of it.
+    # A target that was never established cannot also be conditional. Keep
+    # `ahj_applied`: those dispositions really did apply to choices made
+    # during the diagnostic run even though no determination resulted.
     run.report.pop("compliance_determination_reason", None)
+    unsupported_method = blocked.get("reason") == "ground_method_not_supported"
     run.report["no_determination"] = {
         "reason": "building energy target not established",
         "article": "8.4.1.1.(1)",
         "ruling": "D-32",
         "detail": blocked,
         "what_would_fix_it": (
-            "re-run without --ground-model simple; the default kiva mode "
-            "gives the reference a slab edge on which 3.2.3.3.(3)'s 1.2 m "
-            "strip can be applied, which is what 8.4.1.1.(1) requires the "
-            "target to account for"
+            "BTAP needs a validated NECB reference applier for the submitted "
+            "whole-foundation factor method; the submitter is not required "
+            "to replace a valid foundation method"
+            if unsupported_method else
+            "correct the target-establishment limitation recorded above"
         ),
     }
     run.audit.warn(
         "compliance",
-        "NO DETERMINATION — the building energy target was not established "
-        "per 8.4.1.1.(1), so the 8.4.1.2.(2) comparison has no valid basis; "
-        "the energies below are DIAGNOSTIC only and are neither a pass nor "
-        "a fail, and this is deliberately NOT a conditional result",
+        "NO DETERMINATION — BTAP has no validated NECB reference applier for "
+        "the submitted whole-foundation factor method, so the building energy "
+        "target required by 8.4.1.1.(1) is not established; any completed "
+        "energies are DIAGNOSTIC only and are neither a pass nor a fail, and "
+        "this is deliberately NOT a conditional result",
         inputs=blocked, article="8.4.1.1.(1)", ruling="D-32")

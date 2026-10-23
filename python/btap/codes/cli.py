@@ -208,14 +208,14 @@ def build_parser():
                    dest="ground_model",
                    help="ground heat transfer for slab-on-grade and basement "
                         "floors. kiva (default) solves a 2D soil domain on "
-                        "BOTH the proposed and the reference, which is what "
-                        "gives the reference a slab edge for the 3.2.3.3.(3) "
-                        "perimeter strip that 8.4.1.1.(1) requires the energy "
-                        "target to account for. simple keeps each floor's "
-                        "Ground boundary condition and is DIAGNOSTIC ONLY: "
-                        "where that strip applies it establishes no energy "
-                        "target, so the run makes NO determination (exit 6) "
-                        "rather than a pass or a fail")
+                             "BOTH proposed and reference where the submitted "
+                             "construction supports it; the reference receives the "
+                             "physical 3.2.3.3.(3) perimeter treatment. simple "
+                             "keeps each Ground boundary on both sides and applies "
+                             "a disclosed uniform equivalent-UA approximation to "
+                             "the reference. Valid F-factor methods are preserved "
+                             "but currently yield NO determination (exit 6) because "
+                             "BTAP has no validated NECB factor translation")
     p.add_argument("--quick", action="store_true",
                    help="one-week run period - NOT a code determination")
     p.add_argument("--backend", choices=["local", "remote"], default="local",
@@ -573,11 +573,7 @@ def determination(result, rep):
     if rep.get("annual") is False:
         return "NO DETERMINATION - run period shortened"
     if result.compliant is None:
-        # A run can reach `compliant is None` having simulated a full year:
-        # `--ground-model simple` establishes no building energy target per
-        # 8.4.1.1.(1), so there is nothing to compare against. Saying "no
-        # annual simulation" there is simply false, and the report carries the
-        # real reason — so render it rather than the default assumption.
+        # An explicit reason outranks the usual no-annual-simulation default.
         block = rep.get("no_determination")
         if block:
             return f"NO DETERMINATION - {block['reason']}"
@@ -606,9 +602,7 @@ def verdict_block(result, rep):
     if result.compliant is None:
         block = rep.get("no_determination")
         if block:
-            # A full year WAS simulated; what is missing is the target, so
-            # "run with --simulate annual" would be useless advice. The report
-            # carries both the reason and what would fix it.
+            # The report carries both the explicit reason and its real fix.
             lines = ["", "  *** NOT A CODE-COMPLIANT DETERMINATION ***",
                      f"  {block['reason'].capitalize()} "
                      f"({block.get('article', '')}).".rstrip(". ") + ".",
@@ -695,7 +689,8 @@ def preflight_help(err_obj, o, err):
     print("ERROR: the model was REJECTED before any simulation ran.", file=err)
     print("", file=err)
     print(str(err_obj), file=err)  # already carries per-type did-you-mean hints
-    if not (o.get("space_type") or o.get("space_type_map")):
+    if ("space type(s) do not resolve" in str(err_obj)
+            and not (o.get("space_type") or o.get("space_type_map"))):
         print("", file=err)
         print("Fix: tag each space type with standardsBuildingType + "
               "standardsSpaceType", file=err)

@@ -1,27 +1,17 @@
-"""`--ground-model simple` makes no determination where the strip applies.
+"""Method-neutral ground preparation, equivalent UA and factor-method limits."""
 
-Sol's 286 ruling, and the reason matters: the proposed building is EXEMPT from
-3.2.3.3.(3)'s 1.2 m perimeter strip, because 3.4.1.2.(1) carries only Article
-3.2.1.1 and Subsection 3.2.4 onto the performance path. So declining the
-common ground method is not an omission on the proposed side.
-
-What it costs is the REFERENCE. 8.4.1.1.(1) requires the building energy
-target to account for Section 3.2's prescriptive requirements, and a floor on
-the simple `Ground` boundary has no slab edge on which to put the strip. No
-valid target means 8.4.1.2.(2) has nothing to compare against, so the run makes
-NO determination — not compliant, not non-compliant, and deliberately NOT
-conditional, which would launder a known-invalid target into something that
-looks approvable.
-
-The ruling is applicability-narrow, which is what the second test pins: where
-no strip needs representing, `simple` is an ordinary run.
-"""
-
+import io
+import json
+import math
 import tempfile
 import unittest
+from pathlib import Path
+from types import SimpleNamespace
 
+from btap.audit import AuditLog
 from btap.codes import cli as codes_cli
-from btap.codes import compliance
+from btap.codes import compliance, pipeline, resolve
+from btap.codes.necb import path as necb_path
 from tests.necb.support import needs_sdk, proposed_with_hvac, zone_types_for
 
 STRIP_HDD = 3890      # Toronto — below full_area_min_hdd (7000)
@@ -37,273 +27,586 @@ def _run(model, *, ground_model, hdd):
             run_dir=run_dir)
 
 
+def _path_run(model, *, ground_model="kiva", hdd=STRIP_HDD):
+    return SimpleNamespace(
+        proposed=model,
+        audit=AuditLog(),
+        ruleset=resolve("necb2020"),
+        hdd=hdd,
+        state={},
+        opts={"ground_model": ground_model},
+    )
+
+
+def _unknown_massless_floors(model, names):
+    import openstudio
+
+    names = set(names)
+    floors = [surface for surface in model.getSurfaces()
+              if surface.nameString() in names]
+    if {surface.nameString() for surface in floors} != names:
+        raise AssertionError(f"fixture floors not found: {sorted(names)}")
+    material = openstudio.model.MasslessOpaqueMaterial(model)
+    material.setName("Unknown Kiva finish")
+    material.setThermalResistance(0.2)
+    construction = openstudio.model.Construction(model)
+    construction.setName("Unsupported Kiva construction")
+    construction.setLayers([material])
+    for floor in floors:
+        floor.setConstruction(construction)
+
+
+def _air_gap_floors(model, names):
+    import openstudio
+
+    names = set(names)
+    floors = [surface for surface in model.getSurfaces()
+              if surface.nameString() in names]
+    if {surface.nameString() for surface in floors} != names:
+        raise AssertionError(f"fixture floors not found: {sorted(names)}")
+    air = openstudio.model.AirGap(model)
+    air.setName("Legitimate slab air gap")
+    air.setThermalResistance(0.2)
+    concrete = openstudio.model.StandardOpaqueMaterial(
+        model, "MediumRough", 0.1, 1.8, 2300.0, 900.0)
+    construction = openstudio.model.Construction(model)
+    construction.setName("Slab with air gap")
+    construction.setLayers([air, concrete])
+    for floor in floors:
+        floor.setConstruction(construction)
+
+
+def _unusable_ground_construction(model, name="Surface 7"):
+    import openstudio
+
+    floor = model.getSurfaceByName(name).get()
+    construction = openstudio.model.ConstructionAirBoundary(model)
+    construction.setName("Not a lawful ground slab construction")
+    floor.setConstruction(construction)
+    return floor
+
+
+def _valid_f_factor_floor(model, name="Surface 7"):
+    import openstudio
+
+    floor = model.getSurfaceByName(name).get()
+    construction = openstudio.model.FFactorGroundFloorConstruction(model)
+    construction.setName("Valid F-factor ground floor")
+    construction.setFFactor(0.7)
+    construction.setArea(floor.grossArea())
+    construction.setPerimeterExposed(40.0)
+    floor.setConstruction(construction)
+    floor.setOutsideBoundaryCondition("GroundFCfactorMethod")
+    return floor
+
+
+def _space_less_floor(model):
+    import openstudio
+
+    points = openstudio.Point3dVector()
+    for x, y in ((100.0, 0.0), (110.0, 0.0),
+                 (110.0, 10.0), (100.0, 10.0)):
+        points.append(openstudio.Point3d(x, y, 0.0))
+    surface = openstudio.model.Surface(points, model)
+    surface.setName("Parentless Ground Floor")
+    surface.setSurfaceType("Floor")
+    surface.setOutsideBoundaryCondition("Ground")
+    source = model.getSurfaceByName("Surface 7").get()
+    surface.setConstruction(source.construction().get())
+    return surface
+
+
 @needs_sdk
-class TestGroundModelSimpleMakesNoDetermination(unittest.TestCase):
-    def test_simple_establishes_no_target_in_a_perimeter_strip_climate(self):
-        result = _run(proposed_with_hvac(), ground_model="simple", hdd=STRIP_HDD)
+class TestGroundStripPreflight(unittest.TestCase):
+    def test_model_defect_refuses_before_sizing_even_in_simple_mode(self):
+        model = proposed_with_hvac()
+        _unusable_ground_construction(model)
+        original = pipeline._size_proposed
+        sizing_called = []
 
-        self.assertIsNone(result.compliant,
-                          "a run with no valid target cannot be compliant OR "
-                          "non-compliant")
-        self.assertEqual("no_determination",
-                         result.report.get("compliance_determination"))
-        block = result.report.get("no_determination")
-        self.assertIsNotNone(block, "the refusal must state itself in the report")
-        self.assertEqual("building energy target not established",
-                         block["reason"])
-        self.assertEqual("8.4.1.1.(1)", block["article"])
-        self.assertEqual("D-32", block["ruling"])
-        self.assertIn("ground_model_simple_on_perimeter_strip",
-                      block["detail"]["reason"])
-        self.assertTrue(block["detail"]["floors"],
-                        "the floors that caused it must be named")
+        def must_not_size(run):
+            sizing_called.append(run)
+            self.fail("the ground-strip gate must run before proposed sizing")
 
-    def test_it_is_NOT_a_conditional_result(self):
-        """Conditional means an authority can approve it. An invalid target is
-        not approvable, so the two must never be confused."""
-        result = _run(proposed_with_hvac(), ground_model="simple", hdd=STRIP_HDD)
+        pipeline._size_proposed = must_not_size
+        try:
+            with self.assertRaises(compliance.PreflightError) as caught:
+                _run(model, ground_model="simple", hdd=STRIP_HDD)
+        finally:
+            pipeline._size_proposed = original
 
-        self.assertEqual("no_determination",
-                         result.report.get("compliance_determination"))
-        self.assertNotEqual("conditional",
-                            result.report.get("compliance_determination"))
-        for key in ("conditions", "ahj_must_approve", "ahj_ids",
-                    "if_not_approved"):
-            self.assertNotIn(key, result.report,
-                             f"{key} belongs to a conditional result, which "
-                             f"this is not")
+        self.assertEqual([], sizing_called)
+        self.assertIn("ground-strip pre-flight FAILED", str(caught.exception))
+        self.assertIn("Surface 7", str(caught.exception))
+        self.assertIn("slab-field U cannot be established",
+                      str(caught.exception))
 
-    def test_the_exit_code_is_no_determination_not_a_verdict(self):
-        """`cli.verdict_exit` already maps compliant=None to 6, the code
-        `--quick` and `--simulate sizing` use. This pins that the refusal
-        travels through it rather than printing a pass or a fail."""
-        result = _run(proposed_with_hvac(), ground_model="simple", hdd=STRIP_HDD)
+    def test_cli_maps_the_gate_to_exit_3_without_space_type_advice(self):
+        import openstudio
 
-        self.assertEqual(codes_cli.EXIT["no_determination"],
-                         codes_cli.verdict_exit(result))
-        self.assertNotEqual(codes_cli.EXIT["compliant"],
-                            codes_cli.verdict_exit(result))
-        self.assertNotEqual(codes_cli.EXIT["not_compliant"],
-                            codes_cli.verdict_exit(result))
+        model = proposed_with_hvac()
+        _unusable_ground_construction(model)
+        with tempfile.TemporaryDirectory(prefix="ground-gate-cli-") as tmp:
+            osm = Path(tmp, "input.osm")
+            model.save(openstudio.path(str(osm)), True)
+            out, err = io.StringIO(), io.StringIO()
 
+            exit_code = codes_cli.run([
+                str(osm), "--simulate", "none", "--hdd", str(STRIP_HDD),
+                "--storeys", "1", "--ground-model", "kiva",
+                "--no-report", "--quiet", "-o", str(Path(tmp, "run")),
+            ], out=out, err=err)
 
-class TestTheRefusalIsRenderedHonestly(unittest.TestCase):
-    """Every surface a human reads must give the REAL reason.
+            self.assertEqual(codes_cli.EXIT["preflight"], exit_code)
+            self.assertIn("REJECTED before any simulation ran", err.getvalue())
+            self.assertIn("Surface 7", err.getvalue())
+            self.assertNotIn("--space-type", err.getvalue(),
+                             "ground geometry must not receive the unrelated "
+                             "space-type repair advice")
+            report = json.loads(
+                Path(tmp, "run", "report.json").read_text(encoding="utf-8"))
+            self.assertEqual({}, report)
 
-    All three said "no annual simulation" / "no annual run" for a run that
-    simulated a full year, because each inferred the cause from
-    `compliant is None` instead of reading the recorded reason. The real one
-    lived only in `report.json` and nothing rendered it. Found by Fable on
-    PR #133; no SDK needed, these are renderers.
-    """
+    def test_the_failure_is_recorded_against_the_input_model(self):
+        model = proposed_with_hvac()
+        _unusable_ground_construction(model)
+        with tempfile.TemporaryDirectory(prefix="ground-gate-audit-") as run_dir:
+            with self.assertRaises(compliance.PreflightError):
+                compliance.performance_compliance(
+                    model, code="necb2020", simulate="none", hdd=STRIP_HDD,
+                    ground_model="kiva",
+                    building={"storeys": 1,
+                              "zone_types": zone_types_for(model)},
+                    run_dir=run_dir)
 
-    REPORT = {
-        "annual": True, "simulate": "annual",
-        "compliance_determination": "no_determination",
-        "compliant": None,
-        "no_determination": {
-            "reason": "building energy target not established",
-            "article": "8.4.1.1.(1)",
-            "ruling": "D-32",
-            "what_would_fix_it": "re-run without --ground-model simple",
-        },
-    }
+            entries = json.loads(
+                Path(run_dir, "audit.json").read_text(encoding="utf-8"))
+        failures = [
+            entry for entry in entries
+            if entry.get("step") == "prepare"
+            and entry.get("ruling") == "D-32"
+            and "PREFLIGHT FAILED" in entry.get("action", "")
+        ]
+        self.assertEqual(1, len(failures))
+        self.assertEqual("input model", failures[0].get("building"))
+        self.assertEqual(["Surface 7"],
+                         failures[0]["inputs"]["floors"])
 
-    def _result(self):
-        from types import SimpleNamespace
-
-        return SimpleNamespace(compliant=None, report=self.REPORT)
-
-    def test_the_one_line_determination_names_the_target(self):
-        from btap.codes import cli
-
-        line = cli.determination(self._result(), self.REPORT)
-        self.assertIn("building energy target not established", line)
-        self.assertNotIn("no annual simulation", line)
-
-    def test_the_verdict_block_names_the_target_and_the_real_fix(self):
-        from btap.codes import cli
-
-        block = cli.verdict_block(self._result(), self.REPORT)
-        self.assertIn("building energy target not established".capitalize(),
-                      block)
-        self.assertIn("8.4.1.1.(1)", block)
-        self.assertIn("re-run without --ground-model simple", block)
-        self.assertIn("DIAGNOSTIC only", block)
-        self.assertNotIn("Run with --simulate annual", block)
-
-    def test_the_html_badge_names_the_target(self):
-        """The report is the AHJ-facing artifact, so the badge beside the
-        verdict is where a wrong reason does the most damage."""
-        from btap.codes.report import sections
-
-        html = str(sections.verdict_banner({"report": self.REPORT}))
-        self.assertIn("building energy target not established", html)
-        self.assertNotIn("no annual run", html)
-
-    def test_the_html_badge_still_says_no_annual_run_when_that_is_why(self):
-        """Control: the default survives for the case it describes."""
-        from btap.codes.report import sections
-
-        html = str(sections.verdict_banner(
-            {"report": {"compliant": None, "simulate": "none"}}))
-        self.assertIn("no annual run", html)
-
-    def test_a_CONDITIONAL_building_does_not_ship_a_contradictory_appendix(self):
-        """The AHJ appendix is the fourth surface, and the one that mattered.
-
-        `"no_determination"` is a TRUTHY string, so the appendix's
-        "no determination to be conditional on" branch — added for Fable's
-        earlier finding, which guarded `--simulate none` — was walked straight
-        past, and the row fell through to "YES — this run's determination is
-        conditional on it". Meanwhile the badge beside it said UNDETERMINED.
-        The report is the AHJ-facing artifact and it contradicted itself, for
-        AHJ-1, AHJ-2 and AHJ-14, on any building that would have been
-        conditional — four of the six frozen determinations.
-
-        The sibling tests could not see this: their fixture is never
-        conditional, so `conditional_ids` was always empty and the fall-through
-        was unreachable. This one supplies the conditional state the others
-        lack, which is the whole point of it.
-        """
-        from btap.codes.report import sections
-
-        report = dict(self.REPORT)
-        # Exactly what a conditional run writes, left in place beside the
-        # refusal — the state the override now clears.
-        report["compliance_determination_reason"] = {
-            "ahj_ids": ["AHJ-1", "AHJ-2", "AHJ-14"],
-            "condition": "approval by the authority having jurisdiction",
-            "ahj_must_approve": ["AHJ-1: ...", "AHJ-2: ...", "AHJ-14: ..."],
+    def test_all_floors_are_checked_before_any_floor_is_changed(self):
+        model = proposed_with_hvac()
+        _unusable_ground_construction(model, "Surface 19")
+        before = {
+            surface.nameString(): str(surface.construction().get().handle())
+            for surface in model.getSurfaces()
+            if surface.surfaceType() == "Floor"
+            and surface.outsideBoundaryCondition() == "Ground"
         }
-        # AHJ-1 is `alternative-solution` and AHJ-2 is `referral`, so both are
-        # approval-required and reach the bearing branch. Entries that actually
-        # CITE them are required or `fired` is empty and no row renders at all,
-        # which would make this assertion vacuous.
-        ctx = {"report": report,
-               "audit_entries": [{"ahj": "AHJ-1"}, {"ahj": "AHJ-2"}]}
-        html = str(sections.ahj_appendix(ctx))
 
-        self.assertIn("AHJ-1", html, "the row must exist for its bearing to "
-                                     "be worth asserting")
-        self.assertNotIn("conditional on it", html,
-                         "a run that established no target cannot be "
-                         "conditional on anything")
-        self.assertIn("reached no determination", html)
+        with self.assertRaises(compliance.PreflightError):
+            necb_path.prepare_model(_path_run(model))
 
-    def test_the_refusal_clears_a_REAL_conditional_reason_block(self):
-        """Defence in depth, and the half that was unwitnessed.
+        self.assertEqual([], list(model.getFoundationKivas()))
+        self.assertEqual(
+            before,
+            {
+                surface.nameString(): str(surface.construction().get().handle())
+                for surface in model.getSurfaces()
+                if surface.surfaceType() == "Floor"
+                and surface.outsideBoundaryCondition() == "Ground"
+            },
+            "a later invalid floor must be found before an earlier floor's "
+            "construction is converted",
+        )
 
-        Asserting the absence of the block after an ordinary run proves
-        nothing, because every available fixture is unconditional and the block
-        was never written. So this builds one with the REAL `_set_conditional`
-        and hands it to the refusal, which is the only way to see the clearing
-        happen.
-        """
-        from btap.audit import AuditLog
-        from btap.codes.necb import path as necb_path
-        from tests.necb.support import real_conditional_report
 
-        report = real_conditional_report(
-            [{"id": "AHJ-1", "status": "alternative-solution",
-              "title": "t", "article": "8.4.1.2.(2)", "target": "Boiler",
-              "account": "a"}])
-        self.assertIn("compliance_determination_reason", report,
-                      "the fixture must START conditional or this test is "
-                      "vacuous")
+@needs_sdk
+class TestSimpleGroundModeEstablishesTarget(unittest.TestCase):
+    def test_simple_applies_the_equivalent_ua_at_the_real_reference_call_site(self):
+        from btap.modeling.envelope import constructions
 
-        class _Run:
-            pass
+        result = _run(proposed_with_hvac(), ground_model="simple",
+                      hdd=STRIP_HDD)
 
-        run = _Run()
-        run.report = report
-        run.audit = AuditLog()
-        run.compliant = True
-        necb_path._refuse_determination(run, {"reason": "x", "floors": ["F"]})
+        self.assertIsNone(result.compliant)
+        self.assertNotIn("compliance_determination", result.report)
+        self.assertNotIn("no_determination", result.report)
+        self.assertEqual([], list(result.proposed_model.getFoundationKivas()))
+        self.assertEqual([], list(result.reference_model.getFoundationKivas()))
+
+        proposed = result.proposed_model.getSurfaceByName("Surface 7").get()
+        reference = result.reference_model.getSurfaceByName("Surface 7").get()
+        field_c = (
+            proposed.construction().get().to_LayeredConstruction().get()
+            .thermalConductance().get())
+        film_r = constructions.film_r("floor", "ground")
+        field_u = 1.0 / ((1.0 / field_c) + film_r)
+        fraction = min(1.0, 40.0 * 1.2 / proposed.grossArea())
+        strip_u = min(field_u, 0.757)
+        expected_u = fraction * strip_u + (1.0 - fraction) * field_u
+        expected_c = 1.0 / ((1.0 / expected_u) - film_r)
+        reference_c = (
+            reference.construction().get().to_LayeredConstruction().get()
+            .thermalConductance().get())
+        self.assertAlmostEqual(expected_c, reference_c, delta=1e-6)
+
+        mode_entries = [
+            entry for entry in result.audit.entries
+            if entry.get("step") == "prepare"
+            and "equivalent-UA approximation" in entry.get("action", "")
+        ]
+        self.assertEqual(1, len(mode_entries))
+        self.assertIsNone(
+            mode_entries[0].get("building"),
+            "a method selection must not be attributed to the input model")
+
+    def test_cli_simple_exit_6_is_only_because_simulation_was_skipped(self):
+        import openstudio
+
+        model = proposed_with_hvac()
+        with tempfile.TemporaryDirectory(prefix="ground-simple-cli-") as tmp:
+            osm = Path(tmp, "input.osm")
+            model.save(openstudio.path(str(osm)), True)
+            out, err = io.StringIO(), io.StringIO()
+
+            exit_code = codes_cli.run([
+                str(osm), "--simulate", "none", "--hdd", str(STRIP_HDD),
+                "--storeys", "1", "--ground-model", "simple",
+                "--no-report", "--quiet", "-o", str(Path(tmp, "run")),
+            ], out=out, err=err)
+
+            self.assertEqual(codes_cli.EXIT["no_determination"], exit_code)
+            self.assertNotEqual(codes_cli.EXIT["preflight"], exit_code)
+            self.assertNotIn("REJECTED before any simulation ran",
+                             err.getvalue())
+            report = json.loads(
+                Path(tmp, "run", "report.json").read_text(encoding="utf-8"))
+            self.assertNotIn("compliance_determination", report)
+            self.assertNotIn("no_determination", report)
+
+    def test_better_than_table_slab_is_not_made_worse(self):
+        from btap.modeling.envelope import constructions
+
+        model = proposed_with_hvac()
+        floor = model.getSurfaceByName("Surface 7").get()
+        original = floor.construction().get().to_LayeredConstruction().get()
+        target_c = 1.0 / (
+            (1.0 / 0.5) - constructions.film_r("floor", "ground"))
+        floor.setConstruction(
+            constructions.opaque_at_conductance(model, original, target_c))
+
+        result = _run(model, ground_model="simple", hdd=STRIP_HDD)
+        proposed = result.proposed_model.getSurfaceByName("Surface 7").get()
+        reference = result.reference_model.getSurfaceByName("Surface 7").get()
+        proposed_c = (
+            proposed.construction().get().to_LayeredConstruction().get()
+            .thermalConductance().get())
+        reference_c = (
+            reference.construction().get().to_LayeredConstruction().get()
+            .thermalConductance().get())
+        self.assertAlmostEqual(target_c, proposed_c, delta=1e-9)
+        self.assertAlmostEqual(proposed_c, reference_c, delta=1e-9)
+        row = next(
+            row
+            for entry in result.audit.entries
+            if "uniform equivalent UA" in entry.get("action", "")
+            for row in entry["inputs"]["surfaces"]
+            if row["floor"] == "Surface 7"
+        )
+        self.assertFalse(row["construction_changed"])
+        self.assertEqual(
+            row["field_u_overall_w_m2k"],
+            row["strip_u_overall_w_m2k"])
+
+    def test_measured_zero_has_fraction_zero_and_no_reference_change(self):
+        result = _run(proposed_with_hvac(), ground_model="simple",
+                      hdd=STRIP_HDD)
+
+        zero_proposed = result.proposed_model.getSurfaceByName("Surface 25").get()
+        zero_reference = result.reference_model.getSurfaceByName("Surface 25").get()
+        positive_proposed = result.proposed_model.getSurfaceByName("Surface 7").get()
+        positive_reference = result.reference_model.getSurfaceByName("Surface 7").get()
+
+        def conductance(surface):
+            return (
+                surface.construction().get().to_LayeredConstruction().get()
+                .thermalConductance().get())
+
+        self.assertAlmostEqual(
+            conductance(zero_proposed), conductance(zero_reference), delta=1e-9)
+        self.assertNotAlmostEqual(
+            conductance(positive_proposed), conductance(positive_reference),
+            delta=1e-6)
+        row = next(
+            row
+            for entry in result.audit.entries
+            if "uniform equivalent UA" in entry.get("action", "")
+            for row in entry["inputs"]["surfaces"]
+            if row["floor"] == "Surface 25"
+        )
+        self.assertEqual(0.0, row["strip_area_fraction"])
+        self.assertFalse(row["construction_changed"])
+
+    def test_factor_method_override_preserves_diagnostic_energies(self):
+        report = {
+            "proposed": {"total_site_kwh": 120.0},
+            "reference": {"total_site_kwh": 100.0},
+            "compliance_determination": "conditional",
+            "compliance_determination_reason": {"ahj_ids": ["AHJ-1"]},
+        }
+        run = SimpleNamespace(
+            compliant=True, report=report, audit=AuditLog())
+
+        necb_path._refuse_determination(
+            run, {"reason": "ground_method_not_supported",
+                  "ground_model": "kiva", "floors": ["Floor 1"]})
 
         self.assertIsNone(run.compliant)
+        self.assertEqual(120.0, report["proposed"]["total_site_kwh"])
+        self.assertEqual(100.0, report["reference"]["total_site_kwh"])
         self.assertEqual("no_determination",
                          report["compliance_determination"])
         self.assertNotIn("compliance_determination_reason", report)
-        self.assertIn("no_determination", report)
+        self.assertIn("DIAGNOSTIC only", run.audit.entries[-1]["action"])
+        self.assertIn(
+            "submitter is not required",
+            report["no_determination"]["what_would_fix_it"])
 
-    def test_an_ordinary_unsized_run_still_says_no_annual_simulation(self):
-        """The CONTROL: the old message is still right when it IS the reason,
-        so the fix reads the report rather than replacing the default."""
-        from types import SimpleNamespace
 
-        from btap.codes import cli
+@needs_sdk
+class TestGroundStripPreflightScope(unittest.TestCase):
+    def test_simple_is_ordinary_where_the_full_area_requirement_applies(self):
+        result = _run(proposed_with_hvac(), ground_model="simple",
+                      hdd=FULL_AREA_HDD)
 
-        rep = {"annual": True, "simulate": "none", "compliant": None}
-        line = cli.determination(SimpleNamespace(compliant=None, report=rep), rep)
-        self.assertIn("no annual simulation", line)
+        self.assertIsNotNone(result.reference_model)
+        self.assertEqual([], list(result.proposed_model.getFoundationKivas()))
+
+    def test_kiva_prepares_the_exposed_floors_and_waives_confirmed_zero_edge(self):
+        result = _run(proposed_with_hvac(), ground_model="kiva", hdd=STRIP_HDD)
+
+        self.assertTrue(list(result.proposed_model.getFoundationKivas()))
+        self.assertTrue(any(
+            entry.get("step") == "prepare"
+            and "measured zero exposed edge" in entry.get("action", "")
+            and entry.get("inputs", {}).get("floors") == 1
+            for entry in result.audit.entries
+        ), "the measured-zero interior tile remains unchanged and disclosed")
+        interior = result.proposed_model.getSurfaceByName("Surface 25").get()
+        self.assertEqual("Ground", interior.outsideBoundaryCondition())
+        self.assertFalse(interior.adjacentFoundation().is_initialized())
+
+    def test_unconditioned_floor_matches_the_reference_envelope_scope(self):
+        model = proposed_with_hvac()
+        floor = model.getSurfaceByName("Surface 7").get()
+        space = floor.space().get()
+        space.setPartofTotalFloorArea(False)
+        self.assertTrue(
+            floor.setOutsideBoundaryCondition("GroundFCfactorMethod"))
+
+        result = _run(model, ground_model="kiva", hdd=STRIP_HDD)
+
+        prepared = result.proposed_model.getSurfaceByName("Surface 7").get()
+        self.assertEqual("GroundFCfactorMethod",
+                         prepared.outsideBoundaryCondition())
+        self.assertFalse(prepared.adjacentFoundation().is_initialized())
+        self.assertNotIn("no_determination", result.report)
+
+
+@needs_sdk
+class TestEveryInvalidMeasurementIsRefused(unittest.TestCase):
+    def test_unknown_massless_layer_falls_back_to_simple_on_both_sides(self):
+        model = proposed_with_hvac()
+        _unknown_massless_floors(model, ["Surface 7"])
+
+        result = _run(model, ground_model="kiva", hdd=STRIP_HDD)
+
+        proposed = result.proposed_model.getSurfaceByName("Surface 7").get()
+        reference = result.reference_model.getSurfaceByName("Surface 7").get()
+        self.assertEqual("Ground", proposed.outsideBoundaryCondition())
+        self.assertEqual("Ground", reference.outsideBoundaryCondition())
+        self.assertNotIn("no_determination", result.report)
+        fallback = [
+            entry for entry in result.audit.entries
+            if "otherwise valid simple-Ground floors" in entry.get("action", "")
+        ]
+        self.assertEqual(1, len(fallback))
+        self.assertEqual(
+            ["Surface 7"],
+            [row["floor"] for row in fallback[0]["inputs"]["surfaces"]])
+
+    def test_all_kiva_incompatibilities_are_reported_together(self):
+        model = proposed_with_hvac()
+        names = ["Surface 1", "Surface 7", "Surface 13", "Surface 19"]
+        _unknown_massless_floors(model, names)
+
+        result = _run(model, ground_model="kiva", hdd=STRIP_HDD)
+
+        fallback = next(
+            entry for entry in result.audit.entries
+            if "otherwise valid simple-Ground floors" in entry.get("action", "")
+        )
+        self.assertEqual(
+            sorted(names),
+            sorted(row["floor"] for row in fallback["inputs"]["surfaces"]))
+
+    def test_air_gap_is_legal_for_the_simple_fallback(self):
+        model = proposed_with_hvac()
+        _air_gap_floors(model, ["Surface 7"])
+
+        result = _run(model, ground_model="kiva", hdd=STRIP_HDD)
+
+        proposed = result.proposed_model.getSurfaceByName("Surface 7").get()
+        reference = result.reference_model.getSurfaceByName("Surface 7").get()
+        self.assertEqual("Ground", proposed.outsideBoundaryCondition())
+        self.assertEqual("Ground", reference.outsideBoundaryCondition())
+        proposed_c = (
+            proposed.construction().get().to_LayeredConstruction().get()
+            .thermalConductance().get())
+        reference_c = (
+            reference.construction().get().to_LayeredConstruction().get()
+            .thermalConductance().get())
+        self.assertLess(reference_c, proposed_c)
+
+    def test_valid_f_factor_method_runs_but_withholds_the_determination(self):
+        for hdd in (STRIP_HDD, FULL_AREA_HDD):
+            with self.subTest(hdd=hdd):
+                model = proposed_with_hvac()
+                _valid_f_factor_floor(model)
+
+                result = _run(model, ground_model="kiva", hdd=hdd)
+
+                self.assertEqual(
+                    "GroundFCfactorMethod",
+                    result.proposed_model.getSurfaceByName(
+                        "Surface 7").get().outsideBoundaryCondition())
+                self.assertEqual(
+                    "GroundFCfactorMethod",
+                    result.reference_model.getSurfaceByName(
+                        "Surface 7").get().outsideBoundaryCondition())
+                self.assertEqual(
+                    "no_determination",
+                    result.report["compliance_determination"])
+                block = result.report["no_determination"]
+                self.assertEqual(
+                    "ground_method_not_supported",
+                    block["detail"]["reason"])
+                self.assertEqual(["Surface 7"], block["detail"]["floors"])
+                self.assertIn(
+                    "submitter is not required",
+                    block["what_would_fix_it"])
+
+    def test_cli_maps_valid_f_factor_to_exit_6_not_preflight(self):
+        import openstudio
+
+        model = proposed_with_hvac()
+        _valid_f_factor_floor(model)
+        with tempfile.TemporaryDirectory(prefix="ground-factor-cli-") as tmp:
+            osm = Path(tmp, "input.osm")
+            model.save(openstudio.path(str(osm)), True)
+            out, err = io.StringIO(), io.StringIO()
+
+            exit_code = codes_cli.run([
+                str(osm), "--simulate", "none", "--hdd", str(STRIP_HDD),
+                "--storeys", "1", "--ground-model", "kiva",
+                "--no-report", "--quiet", "-o", str(Path(tmp, "run")),
+            ], out=out, err=err)
+
+            self.assertEqual(codes_cli.EXIT["no_determination"], exit_code)
+            self.assertNotIn("REJECTED before any simulation ran",
+                             err.getvalue())
+            report = json.loads(
+                Path(tmp, "run", "report.json").read_text(encoding="utf-8"))
+            self.assertEqual(
+                "ground_method_not_supported",
+                report["no_determination"]["detail"]["reason"])
+
+    def test_zero_edge_waives_even_a_kiva_incompatible_air_gap(self):
+        model = proposed_with_hvac()
+        _air_gap_floors(model, ["Surface 25"])
+
+        result = _run(model, ground_model="kiva", hdd=STRIP_HDD)
+
+        zero = result.proposed_model.getSurfaceByName("Surface 25").get()
+        self.assertEqual("Ground", zero.outsideBoundaryCondition())
+        self.assertFalse(zero.adjacentFoundation().is_initialized())
+        self.assertNotIn("no_determination", result.report)
+        self.assertTrue(
+            result.proposed_model.getSurfaceByName(
+                "Surface 7").get().adjacentFoundation().is_initialized())
+
+    def test_absolute_elevation_alone_is_not_an_input_defect(self):
+        model = proposed_with_hvac()
+        floor = model.getSurfaceByName("Surface 7").get()
+        floor.space().get().setZOrigin(4.055)
+
+        run = _path_run(model)
+        necb_path.prepare_model(run)
+
+        self.assertTrue(floor.adjacentFoundation().is_initialized())
+
+    def test_exact_coplanar_counterpart_is_a_contradictory_adjacency(self):
+        import openstudio
+
+        model = proposed_with_hvac()
+        floor = model.getSurfaceByName("Surface 7").get()
+        counterpart = openstudio.model.Surface(floor.vertices(), model)
+        counterpart.setName("Surface 7 counterpart")
+        counterpart.setSurfaceType("RoofCeiling")
+        counterpart.setSpace(floor.space().get())
+        counterpart.setConstruction(floor.construction().get())
+
+        with self.assertRaises(compliance.PreflightError) as caught:
+            necb_path.prepare_model(_path_run(model))
+
+        self.assertIn("Surface 7 counterpart", str(caught.exception))
+        self.assertIn("exact co-planar surface", str(caught.exception))
+
+    def test_space_less_floor_is_unmeasurable_not_zero(self):
+        model = proposed_with_hvac()
+        _space_less_floor(model)
+
+        with self.assertRaises(compliance.PreflightError) as caught:
+            necb_path.prepare_model(_path_run(model))
+
+        self.assertIn("Parentless Ground Floor", str(caught.exception))
+        self.assertIn("could not measure the exposed perimeter",
+                      str(caught.exception))
+
+    def test_nonfinite_perimeter_is_unmeasurable_not_zero(self):
+        from btap.modeling.envelope import foundations
+
+        model = proposed_with_hvac()
+        original = foundations.exposed_perimeters
+
+        def with_nan(candidate_model, floors):
+            measured = original(candidate_model, floors)
+            measured["perimeters"]["Surface 7"] = math.nan
+            return measured
+
+        foundations.exposed_perimeters = with_nan
+        try:
+            with self.assertRaises(compliance.PreflightError) as caught:
+                necb_path.prepare_model(_path_run(model))
+        finally:
+            foundations.exposed_perimeters = original
+
+        self.assertIn("Surface 7", str(caught.exception))
+        self.assertIn("not a finite length", str(caught.exception))
+        self.assertEqual([], list(model.getFoundationKivas()))
 
 
 class TestTheModeIsValidatedAtTheBoundary(unittest.TestCase):
-    """Everything downstream asks `!= "kiva"`, so an unvalidated value makes a
-    typo, a None or a capitalised "Kiva" silently select `simple` — and refuse
-    to determine. A wrong mode is an argument error, not a verdict.
-
-    The CLI cannot deliver a bad value (argparse `choices=` rejects it first),
-    so the API is the only route that had the bug and the only route this
-    pins. Fable flagged the validator as fixed-but-untested.
-    """
-
     def test_the_two_modes_are_accepted(self):
-        from btap.codes import pipeline
-
         for mode in ("kiva", "simple"):
             self.assertEqual(mode, pipeline._ground_model(mode))
 
     def test_anything_else_raises_rather_than_meaning_simple(self):
-        from btap.codes import pipeline
-
         for bad in (None, "Kiva", "KIVA", "", "nonsense", 0, True):
             with self.subTest(value=bad):
                 with self.assertRaises(ValueError) as caught:
                     pipeline._ground_model(bad)
                 self.assertIn("ground_model must be one of",
                               str(caught.exception))
-
-
-@needs_sdk
-class TestGroundModelSimpleStillRunsWhereNoStripApplies(unittest.TestCase):
-    def test_simple_is_an_ordinary_run_in_a_full_area_climate(self):
-        """At or above 7000 HDD the floor takes 3.2.3.3.(4)'s FULL-AREA value,
-        applied as an ordinary construction change with no Kiva involved. The
-        target is established either way, so `simple` must not refuse here —
-        the ruling is applicability-narrow, not a global rejection.
-        """
-        result = _run(proposed_with_hvac(), ground_model="simple",
-                      hdd=FULL_AREA_HDD)
-
-        self.assertNotIn("no_determination", result.report)
-        self.assertNotEqual("no_determination",
-                            result.report.get("compliance_determination"))
-
-    def test_kiva_establishes_a_target_in_the_same_strip_climate(self):
-        """The control for the first test: same model, same climate, default
-        mode, and the refusal does not fire."""
-        result = _run(proposed_with_hvac(), ground_model="kiva", hdd=STRIP_HDD)
-
-        self.assertNotIn("no_determination", result.report)
-        self.assertNotEqual("no_determination",
-                            result.report.get("compliance_determination"))
-
-    def test_simple_leaves_the_proposed_model_untouched(self):
-        """Declining the method must also decline the construction surgery."""
-        model = proposed_with_hvac()
-        floor = next(s for s in model.getSurfaces()
-                     if s.surfaceType() == "Floor"
-                     and s.outsideBoundaryCondition() == "Ground")
-        name = floor.nameString()
-
-        result = _run(model, ground_model="simple", hdd=STRIP_HDD)
-
-        prepared = result.proposed_model.getSurfaceByName(name).get()
-        self.assertEqual("Ground", prepared.outsideBoundaryCondition())
-        self.assertFalse(prepared.adjacentFoundation().is_initialized())
-        self.assertEqual(0, len(result.proposed_model.getFoundationKivas()))
 
 
 if __name__ == "__main__":

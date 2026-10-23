@@ -128,12 +128,9 @@ def verdict_banner(ctx):
     if _dig(report, "ghg", "level"):
         badges.append(Html.badge(f"GHG LEVEL {_dig(report, 'ghg', 'level')}", "ghg"))
     if report.get("compliant") is None:
-        # "no annual run" is the usual cause but not the only one: a
-        # `--ground-model simple` run simulates a full year and still
-        # establishes no building energy target, so the badge reads the
-        # recorded reason when there is one. The article is NOT written here —
-        # this renderer is inventoried for hard-coded article literals — so the
-        # badge carries the reason text and the body carries the citation.
+        # "no annual run" is the usual cause; an explicit recorded reason
+        # outranks that default. The article is NOT written here — this
+        # renderer is inventoried for hard-coded article literals.
         reason = (report.get("no_determination") or {}).get("reason")
         badges.append(Html.badge(
             f"UNDETERMINED ({reason})" if reason
@@ -891,12 +888,8 @@ def ahj_appendix(ctx):
                 # Every `--report-html` run of an ordinary gas building short
                 # of annual reached that.
                 # The explicit label is checked beside the falsy case because
-                # `"no_determination"` is a TRUTHY string: a `--ground-model
-                # simple` run sets it and walked straight past this branch into
-                # the conditional one. Defence in depth — the determination also
-                # drops its reason block now — because this renderer is the
-                # AHJ-facing surface and must not infer a verdict from an
-                # absence.
+                # `"no_determination"` is a TRUTHY string. The AHJ-facing
+                # renderer must not infer a verdict from an absence.
                 bearing = ("not applicable — this run reached no "
                            "determination")
             elif ident in conditional_ids:
