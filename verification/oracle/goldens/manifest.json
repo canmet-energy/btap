@@ -1,11 +1,11 @@
 {
   "legacy_ref": "f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
-  "exported": "2026-08-28",
+  "exported": "2026-10-23",
   "files": {
     "envelope_lookups.json": "7bc82a2efe07ea04f86d254a5ecdd1b2af841c6fab254f434452f5c9a468aeb2",
     "envelope_prescriptive.json": "c401970a45ffaa6e4e8f09d23914919d20a365c3edea0870be48abe1015db208",
     "envelope_u_table.json": "5c7d6836e43b2b6b8b714a965b96c5682acb01ac5c649f19f46a490f66491a49",
-    "costing_envelope.json": "2b4a5fd293b65a5210e3eeb21ce11c76f21d6ca0af9692b1ab0bad95ba2ca28e",
+    "costing_envelope.json": "3631e5e3faac1482e4f1fb242c549eede2e5d42ccd1944f3c6db338fbeb67d11",
     "loads_schedules.json": "7d9df19da881572b24a5707a9acbc0169d38353cab50fb11e1c446a3d15e26fa",
     "loads_apply.json": "dbf41d2801ae96bfb7e48cb0675392975852d65fed6672cd91bc1ba99f28785d",
     "loads_merged_tables.json": "5c4cadb8048c1aacbc944f4fde1c07180e4b48ee0f21db695a9a3b75cc02490f",
@@ -15,14 +15,14 @@
     "shw.json": "148b775cc5a13a82c67d8cafa3ec1976a24e971d51c43f5f286df751d0a05311"
   },
   "prep_provenance": {
-    "commit": "dde44e588e5e3c370e5222e26920ef990e4838aa",
+    "commit": "21882dd7db533e6a0a3b684ce5bbbe6c9bbd7a8c",
     "dirty": false,
     "canonical": true,
     "allow_dirty_override": false,
-    "oracle_prep_sha256": "34de0b1bfe87165f77ae70ac7ce3d72ad6395409f46589973cab95e302864eb4",
-    "request_manifest_sha256": "1a82a048e2e3c21ba0f4a01d40dc139b4334349dccb1a29295ea36e26c1dbcbe",
+    "oracle_prep_sha256": "5734e3bfb702641ca57af367425aacab669c59b152000d78612ab914f6e8de1d",
+    "request_manifest_sha256": "914c88458e9808fff74bac9755281b48b8346741c39dd319999bf25b36de468d",
     "seed_sha256": "532d43e6fedb08425f4bb0450c7f2bb1219d53f1db74d4ba09f8db6d39c38aed",
-    "seed": "btap.modeling.hvac data 5ZoneNoHVAC.osm",
+    "seed": "verification/oracle/fixtures/5ZoneNoHVAC.osm",
     "openstudio": {
       "sdk_version": "3.11.0",
       "build_sha": "241b8abb4d"

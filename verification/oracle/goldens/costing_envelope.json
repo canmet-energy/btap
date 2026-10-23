@@ -137,19 +137,19 @@
   "priced_table": "vendored placeholder costs.csv (btap-costing data/); licensed values never frozen",
   "tbd_rsi": {
     "surfaces": {
-      "Surface 1": 0.45445268868859323,
+      "Surface 1": 0.7221243433440911,
       "Surface 12": 6.408871819846698,
-      "Surface 13": 0.45445268868859323,
+      "Surface 13": 0.7221243433440911,
       "Surface 14": 3.7734755958912367,
       "Surface 18": 6.408871819846698,
-      "Surface 19": 0.45445268868859323,
+      "Surface 19": 0.6797543591660362,
       "Surface 2": 3.7734755958912367,
       "Surface 20": 3.7734755958912367,
       "Surface 24": 6.408871819846698,
       "Surface 25": 0.45445268868859323,
       "Surface 30": 6.408871819846698,
       "Surface 6": 6.408871819846698,
-      "Surface 7": 0.45445268868859323,
+      "Surface 7": 0.6797543591660362,
       "Surface 8": 3.7734755958912367
     },
     "sub_surfaces": {
