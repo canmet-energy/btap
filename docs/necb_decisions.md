@@ -1360,24 +1360,36 @@ perimeter-strip floor may stay as modeled only when its exposed slab edge is
 confirmed to be zero, because then there is no strip segment for that floor.
 Missing and non-finite perimeter measurements are not zero.
 
-The target-validity test is the resulting representation, not the mode name.
-A `simple` ground-model choice is not a second compliance method on a branch
-where the reference requires the perimeter strip: each exposed simple
-`Ground` floor lacks a slab edge on which to apply 3.2.3.3.(3). The same
-defect occurs in `kiva` mode when an unknown material, unsupported topology,
-`GroundFCfactorMethod` boundary or other blocker leaves an applicable exposed
-floor without Kiva. Either way, the 8.4.1.1.(1) building energy target is
-unestablished. The climate-dependent fact is unavailable to phase-1
-validation, so phase 2b performs a read-only inventory of every applicable
-floor after HDD resolution and before changing any floor. If any required
-strip is unrepresentable, it raises `compliance.PreflightError`; the CLI exits
-3 before proposed sizing or annual simulation and names every offending floor
-and repair. The text is not ambiguous, and neither an operator's deliberate
-omission nor a failed conversion is by itself an alternative solution with
-demonstrated equivalent performance. No AHJ register entry or conditional
-verdict applies. The gate does not apply where no perimeter strip must be
+The target-validity test is the resulting representation, but the disposition
+depends on why it is absent. The climate-dependent fact is unavailable to
+phase-1 validation, so phase 2b first performs a read-only inventory of every
+applicable floor after HDD resolution and before changing any floor. That
+inventory tests the submitted boundary, parent space, geometry, perimeter and
+construction for a usable Kiva representation independently of the requested
+ground mode. An unknown material, unsupported topology,
+`GroundFCfactorMethod` boundary, missing or non-finite perimeter, or other
+model condition that prevents the required strip is an input defect the
+submitter can repair. It raises `compliance.PreflightError`; the CLI exits 3
+before proposed sizing or annual simulation and names every offending floor
+and repair. Selecting `simple` does not bypass that gate.
+
+An otherwise eligible model explicitly run with `simple` is different. The
+submitted OSM can support the strip, but the requested mode deliberately
+creates no Kiva foundation on which to place it. Blaming the file at preflight
+would misattribute a limitation of the call. The tool therefore retains
+`simple` as a diagnostic mode: it continues through the requested lifecycle;
+a full run builds, sizes and simulates both buildings and reports their
+energies as diagnostic. It then sets `compliant = null`,
+`compliance_determination = "no_determination"` and CLI exit 6. It is neither a
+pass/fail determination nor a conditional result; rerunning with `kiva`
+establishes the target without requiring an OSM repair.
+
+The acceptable-solution text decides the strip requirement, so neither case
+is an AHJ referral or an alternative solution. The preflight gate and
+diagnostic restriction do not apply where no perimeter strip must be
 represented, such as the full-area branch, a model with no applicable ordinary
-perimeter floor, or a floor whose exposed perimeter is confirmed to be zero.
+perimeter floor, a floor outside the reference envelope, or a floor whose
+exposed perimeter is confirmed to be zero.
 
 This preparation belongs only to the reference-building lifecycle. The NECB
 2025 Article 8.4.4 archetype-EUI alternate path returns before
@@ -1405,7 +1417,10 @@ slab edge on which to place the strip.
 - **Correction ruling/when:** phylroy directed an apples-to-apples comparison
   on 2026-10-22; Sol adjudicated the perimeter-strip-only scope and method
   boundary on 2026-10-22, then narrowed target validity to the resulting
-  strip representation after Fable's PR #133 review on 2026-10-23.
+  strip representation after Fable's PR #133 review on 2026-10-23. phylroy
+  then limited preflight attribution to OSM input defects on 2026-10-23:
+  model-fixable blockers gate even in `simple`, while mode-only omission is a
+  completed diagnostic run with no determination.
 
 <a id="d-33"></a>
 

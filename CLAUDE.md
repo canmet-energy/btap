@@ -99,10 +99,18 @@ maps to `EXIT["preflight"] = 3`, and all stamp
   (`path.prepare_model`): after HDD selects the ordinary perimeter-strip
   branch, every applicable reference-envelope floor is inventoried before any
   floor is changed. A positive, missing or non-finite exposed perimeter
-  without a usable Kiva representation is fatal because 8.4.1.1.(1)'s target
-  would omit 3.2.3.3.(3)'s required strip. A finite measured zero is the only
-  waiver. `--ground-model simple` is rejected on the same branch; full-area
-  climates and floors outside the reference envelope are not.
+  whose submitted boundary, parent space, geometry or construction cannot
+  support Kiva is fatal because 8.4.1.1.(1)'s target would omit
+  3.2.3.3.(3)'s required strip. A finite measured zero is the only waiver.
+  The model check runs independently of the selected mode, so
+  `--ground-model simple` cannot bypass an OSM defect; full-area climates and
+  floors outside the reference envelope are not gated.
+
+  `--ground-model simple` on an otherwise Kiva-eligible model is a limitation
+  of the REQUEST, not an input defect. It completes the requested diagnostic
+  lifecycle, retains any computed energies, emits no determination
+  (`compliant = null`) and exits 6. Rerun with `kiva` to establish the target;
+  do not tell the submitter to repair a valid file.
 
 **Do not plan around this gate as though it were missing.** A draft of
 `docs/plans/PROPOSED_CHARACTERIZATION_PLAN.md` proposed adding the three

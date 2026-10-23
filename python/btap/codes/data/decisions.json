@@ -1369,12 +1369,12 @@
         "necb2020",
         "necb2025"
       ],
-      "summary": "A warehouse residual was traced to insulating the full slab area to the table value in climate zones where the printed table prescribes only a perimeter strip and sets no maximum for the slab field. The transform keeps the modelled slab field in those zones and adds the strip through the foundation model; the coldest zone keeps its full-area requirement. Article 3.4.1.2 exempts the proposed performance-path assembly from that prescriptive strip, while Article 8.4.1.1 requires it in the reference target. For an eligible ordinary perimeter-strip floor submitted with the simple Ground boundary, the tool therefore applies the same Kiva ground-heat-transfer method to proposed and reference before sizing, then adds the strip only to the reference. A required exposed strip that cannot be represented is a fatal proposed-input preflight error before sizing or simulation.",
+      "summary": "A warehouse residual was traced to insulating the full slab area to the table value in climate zones where the printed table prescribes only a perimeter strip and sets no maximum for the slab field. The transform keeps the modelled slab field in those zones and adds the strip through the foundation model; the coldest zone keeps its full-area requirement. Article 3.4.1.2 exempts the proposed performance-path assembly from that prescriptive strip, while Article 8.4.1.1 requires it in the reference target. For an eligible ordinary perimeter-strip floor submitted with the simple Ground boundary, the tool therefore applies the same Kiva ground-heat-transfer method to proposed and reference before sizing, then adds the strip only to the reference. A submitted boundary, geometry or construction that cannot support a required exposed strip is a fatal proposed-input preflight error. An otherwise eligible model explicitly run with the simple ground mode completes for diagnostic energies but emits no determination.",
       "requirements": [
         {
           "id": "ground_floor_insulation_extent",
           "label": "Ground-floor insulation extent by climate zone",
-          "decided": "Zones 4 through 7B retain the modeled slab field and apply the table value over a 1.2 m perimeter strip, while zone 8 applies its full-area value; an exposed or unmeasurable strip that cannot be represented is rejected at preflight, while a confirmed zero-edge floor needs no strip segment.",
+          "decided": "Zones 4 through 7B retain the modeled slab field and apply the table value over a 1.2 m perimeter strip, while zone 8 applies its full-area value; an exposed or unmeasurable strip blocked by the submitted model is rejected at preflight, an otherwise eligible model explicitly run in simple mode is diagnostic only, and a confirmed zero-edge floor needs no strip segment.",
           "sources": [
             {
               "code": "necb",

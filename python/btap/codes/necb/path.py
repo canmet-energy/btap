@@ -123,7 +123,7 @@ def climate(run):
 
 
 def prepare_model(run):
-    """Phase 2b — gate then put ordinary perimeter-strip floors on Kiva.
+    """Phase 2b — gate input defects, then prepare the ground method.
 
     This is method symmetry, not a proposed-envelope correction. A simple
     ``Ground`` floor has no slab edge on which the reference can place
@@ -136,9 +136,12 @@ def prepare_model(run):
     floors and unresolved embedded-system applicability do not need this
     method change and stay on their submitted boundary condition. Before any
     floor is changed, every applicable floor is checked. A positive or
-    unmeasurable exposed edge without a usable Kiva representation is a
-    proposed-input preflight failure: the reference target cannot include its
-    required strip, so no simulation is allowed to start.
+    unmeasurable exposed edge whose submitted boundary, parent space, geometry
+    or construction cannot support Kiva is a proposed-input preflight failure:
+    the reference target cannot include its required strip, so no simulation
+    is allowed to start. Choosing ``simple`` for an otherwise eligible model is
+    a request limitation instead: the diagnostic run completes, but no
+    determination is emitted because that mode does not establish the target.
     """
     from btap._compat import sorted_by_name
     from btap.codes.necb import envelope
@@ -171,7 +174,7 @@ def prepare_model(run):
     measured = foundations.exposed_perimeters(proposed, floors)
     mode = run.opts.get("ground_model", "kiva")
     with audit.with_building("input model"):
-        unrepresented = []
+        input_defects = []
         for surface in floors:
             name = surface.nameString()
             perimeter = measured["perimeters"].get(name)
@@ -193,11 +196,7 @@ def prepare_model(run):
                     "is not a finite length")
 
             boundary = surface.outsideBoundaryCondition()
-            if mode != "kiva":
-                reasons.append(
-                    f"ground-model mode {mode!r} creates no Kiva foundation "
-                    "on which the perimeter strip can be represented")
-            elif boundary != "Ground":
+            if boundary != "Ground":
                 reasons.append(
                     f"boundary condition {boundary!r} has no Kiva foundation "
                     "and cannot be converted by this path")
@@ -209,15 +208,15 @@ def prepare_model(run):
 
             if not reasons:
                 continue
-            unrepresented.append({
+            input_defects.append({
                 "floor": name,
                 "boundary_condition": boundary,
                 "exposed_perimeter_m": perimeter,
                 "reasons": reasons,
             })
 
-        if unrepresented:
-            _raise_ground_strip_preflight(audit, mode, unrepresented)
+        if input_defects:
+            _raise_ground_strip_preflight(audit, mode, input_defects)
 
         converted = []
         created = []
@@ -309,6 +308,49 @@ def prepare_model(run):
                 inputs={"floors": len(refused), "surfaces": refused},
                 article="3.2.3.3.(3)", ruling="D-32")
 
+        if mode != "kiva":
+            unrepresented = []
+            for surface in floors:
+                name = surface.nameString()
+                perimeter = measured["perimeters"].get(name)
+                if (perimeter is not None and math.isfinite(perimeter)
+                        and perimeter <= foundations.TOLERANCE_M):
+                    continue
+                if opt(surface.adjacentFoundation()) is not None:
+                    continue
+                unrepresented.append({
+                    "floor": name,
+                    "boundary_condition":
+                        surface.outsideBoundaryCondition(),
+                    "exposed_perimeter_m": perimeter,
+                    "reasons": [
+                        f"ground-model mode {mode!r} was requested and creates "
+                        "no Kiva foundation on which the perimeter strip can "
+                        "be represented"
+                    ],
+                })
+
+            if unrepresented:
+                blocked = {
+                    "reason": "ground_strip_unrepresented",
+                    "ground_model": mode,
+                    "floors": [row["floor"] for row in unrepresented],
+                    "surfaces": unrepresented,
+                }
+                run.state["target_not_established"] = blocked
+                with audit.with_building(None):
+                    audit.warn(
+                        "prepare",
+                        "NO BUILDING ENERGY TARGET can be established for the "
+                        "requested diagnostic ground mode — "
+                        "--ground-model simple intentionally creates no Kiva "
+                        "foundations on which the reference can represent "
+                        "3.2.3.3.(3)'s 1.2 m perimeter strip; 8.4.1.1.(1) "
+                        "requires the target to account for that strip, so "
+                        "any energies computed by the completed diagnostic "
+                        "run are not a determination",
+                        inputs=blocked, article="8.4.1.1.(1)", ruling="D-32")
+
 
 def _raise_ground_strip_preflight(audit, mode, unrepresented):
     blocked = {
@@ -342,11 +384,11 @@ def _raise_ground_strip_preflight(audit, mode, unrepresented):
         "ground-strip pre-flight FAILED: the reference target cannot represent "
         f"the required perimeter strip on {len(unrepresented)} floor(s):\n"
         + "\n".join(details)
-        + "\nFix: use the Kiva ground mode (ground_model='kiva' / "
-          "--ground-model kiva) and correct each listed floor's boundary, "
-          "parent space, geometry, or construction so a Kiva foundation can "
-          "represent every required exposed strip. Correct a false Ground tag "
-          "to its real adjacency instead of inventing a foundation.")
+        + "\nFix: correct each listed floor's boundary, parent space, geometry, "
+          "or construction so it can take a Kiva foundation, then use the Kiva "
+          "ground mode (ground_model='kiva' / --ground-model kiva). Correct a "
+          "false Ground tag to its real adjacency instead of inventing a "
+          "foundation.")
 
 
 def prepare_annual(run):
@@ -405,6 +447,14 @@ def determine(run):
     _score_ghg(run)                   # 8. 2025 Part 11 GHG (needs province_state)
     _cost_both(run)                   # 9. optional costing of both models
     _supplement_eui(run)              # 10. optional 2025 archetype-EUI verdict
+
+    # `simple` is retained as a diagnostic mode. It runs through the complete
+    # reference lifecycle so both energies remain useful, but an exposed strip
+    # left unrepresented means there is no valid target and therefore no
+    # determination. Apply this LAST so no later phase can restore a verdict.
+    blocked = run.state.get("target_not_established")
+    if blocked is not None:
+        _refuse_determination(run, blocked)
 
     return Verdict(compliant=run.compliant, report=run.report)
 
@@ -2687,3 +2737,32 @@ def suggest_space_types(name, catalog):
 def _inspect(value):
     """Ruby ``#inspect`` for the pre-flight message: nil / "quoted"."""
     return "nil" if value is None else f'"{value}"'
+
+
+def _refuse_determination(run, blocked):
+    """Withhold a verdict while preserving the diagnostic run outputs."""
+    run.compliant = None
+    run.report["compliance_determination"] = "no_determination"
+    # A target that was never established cannot also be conditional. Keep
+    # `ahj_applied`: those dispositions really did apply to choices made
+    # during the diagnostic run even though no determination resulted.
+    run.report.pop("compliance_determination_reason", None)
+    run.report["no_determination"] = {
+        "reason": "building energy target not established",
+        "article": "8.4.1.1.(1)",
+        "ruling": "D-32",
+        "detail": blocked,
+        "what_would_fix_it": (
+            "rerun with the kiva ground mode so each otherwise eligible "
+            "exposed slab edge receives a foundation on which the reference "
+            "can apply 3.2.3.3.(3)'s 1.2 m strip"
+        ),
+    }
+    run.audit.warn(
+        "compliance",
+        "NO DETERMINATION — the requested simple ground mode did not establish "
+        "the building energy target required by 8.4.1.1.(1), so the "
+        "8.4.1.2.(2) comparison has no valid basis; any completed energies are "
+        "DIAGNOSTIC only and are neither a pass nor a fail, and this is "
+        "deliberately NOT a conditional result",
+        inputs=blocked, article="8.4.1.1.(1)", ruling="D-32")

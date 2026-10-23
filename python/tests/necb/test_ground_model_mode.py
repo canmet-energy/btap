@@ -1,10 +1,11 @@
-"""Preflight refusal when a required reference ground strip is unrepresentable.
+"""Ground-strip input gate and diagnostic simple-mode behavior.
 
 The proposed building is exempt from 3.2.3.3.(3)'s perimeter strip, but the
 8.4.1.1.(1) building energy target must include it. Phase 2b is the first point
 that knows the climate-dependent extent. It therefore inventories every
-applicable floor without mutating any of them and rejects the input before
-sizing when a positive or unmeasurable exposed edge cannot take Kiva.
+applicable floor without mutating any of them. A model defect that prevents
+Kiva rejects the input before sizing. An otherwise valid model explicitly run
+with ``simple`` completes for diagnostic energies but emits no determination.
 """
 
 import io
@@ -81,7 +82,9 @@ def _space_less_floor(model):
 
 @needs_sdk
 class TestGroundStripPreflight(unittest.TestCase):
-    def test_simple_refuses_before_sizing_in_a_perimeter_strip_climate(self):
+    def test_model_defect_refuses_before_sizing_even_in_simple_mode(self):
+        model = proposed_with_hvac()
+        _unknown_massless_floors(model, ["Surface 7"])
         original = pipeline._size_proposed
         sizing_called = []
 
@@ -92,15 +95,15 @@ class TestGroundStripPreflight(unittest.TestCase):
         pipeline._size_proposed = must_not_size
         try:
             with self.assertRaises(compliance.PreflightError) as caught:
-                _run(proposed_with_hvac(), ground_model="simple",
-                     hdd=STRIP_HDD)
+                _run(model, ground_model="simple", hdd=STRIP_HDD)
         finally:
             pipeline._size_proposed = original
 
         self.assertEqual([], sizing_called)
         self.assertIn("ground-strip pre-flight FAILED", str(caught.exception))
-        self.assertIn("ground-model mode 'simple'", str(caught.exception))
         self.assertIn("Surface 7", str(caught.exception))
+        self.assertIn("no sourced Kiva-compatible replacement",
+                      str(caught.exception))
 
     def test_cli_maps_the_gate_to_exit_3_without_space_type_advice(self):
         import openstudio
@@ -178,6 +181,83 @@ class TestGroundStripPreflight(unittest.TestCase):
             "a later invalid floor must be found before an earlier floor's "
             "construction is converted",
         )
+
+
+@needs_sdk
+class TestSimpleGroundModeIsDiagnostic(unittest.TestCase):
+    def test_simple_completes_but_establishes_no_target_in_a_strip_climate(self):
+        result = _run(proposed_with_hvac(), ground_model="simple",
+                      hdd=STRIP_HDD)
+
+        self.assertIsNone(result.compliant)
+        self.assertEqual("no_determination",
+                         result.report.get("compliance_determination"))
+        block = result.report.get("no_determination")
+        self.assertIsNotNone(block)
+        self.assertEqual("building energy target not established",
+                         block["reason"])
+        self.assertEqual("8.4.1.1.(1)", block["article"])
+        self.assertEqual("D-32", block["ruling"])
+        self.assertEqual("simple", block["detail"]["ground_model"])
+        self.assertTrue(block["detail"]["floors"])
+        self.assertEqual([], list(result.proposed_model.getFoundationKivas()))
+        mode_entries = [
+            entry for entry in result.audit.entries
+            if entry.get("step") == "prepare"
+            and "requested diagnostic ground mode" in entry.get("action", "")
+        ]
+        self.assertEqual(1, len(mode_entries))
+        self.assertIsNone(
+            mode_entries[0].get("building"),
+            "a request limitation must not be attributed to the input model")
+
+    def test_cli_maps_simple_to_exit_6_not_preflight(self):
+        import openstudio
+
+        model = proposed_with_hvac()
+        with tempfile.TemporaryDirectory(prefix="ground-simple-cli-") as tmp:
+            osm = Path(tmp, "input.osm")
+            model.save(openstudio.path(str(osm)), True)
+            out, err = io.StringIO(), io.StringIO()
+
+            exit_code = codes_cli.run([
+                str(osm), "--simulate", "none", "--hdd", str(STRIP_HDD),
+                "--storeys", "1", "--ground-model", "simple",
+                "--no-report", "--quiet", "-o", str(Path(tmp, "run")),
+            ], out=out, err=err)
+
+            self.assertEqual(codes_cli.EXIT["no_determination"], exit_code)
+            self.assertNotEqual(codes_cli.EXIT["preflight"], exit_code)
+            self.assertNotIn("REJECTED before any simulation ran",
+                             err.getvalue())
+            report = json.loads(
+                Path(tmp, "run", "report.json").read_text(encoding="utf-8"))
+            self.assertEqual("no_determination",
+                             report["compliance_determination"])
+            self.assertEqual("building energy target not established",
+                             report["no_determination"]["reason"])
+
+    def test_late_override_preserves_diagnostic_energies(self):
+        report = {
+            "proposed": {"total_site_kwh": 120.0},
+            "reference": {"total_site_kwh": 100.0},
+            "compliance_determination": "conditional",
+            "compliance_determination_reason": {"ahj_ids": ["AHJ-1"]},
+        }
+        run = SimpleNamespace(
+            compliant=True, report=report, audit=AuditLog())
+
+        necb_path._refuse_determination(
+            run, {"reason": "ground_strip_unrepresented",
+                  "ground_model": "simple", "floors": ["Floor 1"]})
+
+        self.assertIsNone(run.compliant)
+        self.assertEqual(120.0, report["proposed"]["total_site_kwh"])
+        self.assertEqual(100.0, report["reference"]["total_site_kwh"])
+        self.assertEqual("no_determination",
+                         report["compliance_determination"])
+        self.assertNotIn("compliance_determination_reason", report)
+        self.assertIn("DIAGNOSTIC only", run.audit.entries[-1]["action"])
 
 
 @needs_sdk
