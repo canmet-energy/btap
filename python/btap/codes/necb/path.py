@@ -135,7 +135,9 @@ def prepare_model(run):
     Scope is deliberately narrow: full-area climates, detected embedded
     floors and unresolved embedded-system applicability do not need this
     method change and stay on their submitted boundary condition. A floor that
-    fails Kiva eligibility likewise stays unchanged and is named.
+    fails Kiva eligibility likewise stays unchanged and is named. If it has an
+    exposed slab edge, however, the reference target is not established and
+    the completed diagnostic run cannot emit a determination.
     """
     from btap._compat import sorted_by_name
     from btap.codes.necb import envelope
@@ -155,100 +157,70 @@ def prepare_model(run):
     floors = [
         surface for surface in sorted_by_name(proposed.getSurfaces())
         if surface.surfaceType() == "Floor"
-        and surface.outsideBoundaryCondition() == "Ground"
+        and envelope.prescriptive.boundary_of(surface) == "ground"
         and inventory.status(surface.nameString()) == "ordinary"
     ]
     if not floors:
         return
 
-    # `--ground-model simple` declines the common method. Sol's 286 ruling, and
-    # the reason matters: the proposed is EXEMPT from the 1.2 m strip by
-    # 3.4.1.2.(1), which carries only Article 3.2.1.1 and Subsection 3.2.4 onto
-    # the performance path, so declining is not an omission on the proposed
-    # side. What it costs is the REFERENCE — a simple `Ground` floor has no slab
-    # edge for the strip that 8.4.1.1.(1) requires the target to account for, so
-    # no building energy target is established and 8.4.1.2.(2) has nothing to
-    # compare against. The run therefore makes NO determination: not compliant,
-    # not non-compliant, and NOT conditional, because conditional means an
-    # authority can approve it and a known-invalid target is not approvable.
-    #
-    # Reached only here, AFTER the extent gate and the applicability filter, so
-    # `simple` still determines normally in a full-area climate or on a model
-    # with no ordinary perimeter floor. Deliberately not a parser rejection.
-    if run.opts.get("ground_model", "kiva") != "kiva":
-        run.state["target_not_established"] = {
-            "reason": "ground_model_simple_on_perimeter_strip",
-            "ground_model": run.opts.get("ground_model"),
-            "floors": [surface.nameString() for surface in floors],
-        }
-        with audit.with_building("input model"):
-            audit.warn(
-                "prepare",
-                "NO BUILDING ENERGY TARGET can be established — ground-model "
-                "mode is SIMPLE, so the reference's ground-contact floors keep "
-                "a Ground boundary condition, which gives the whole slab one "
-                "monthly temperature and no slab edge on which to apply the "
-                "1.2 m perimeter strip that 8.4.1.1.(1) requires the target to "
-                "account for; the proposed is EXEMPT from that strip under "
-                "3.4.1.2.(1), so this is a defect in the TARGET, not in the "
-                "submitted building, and no determination is made",
-                inputs={"ground_model": run.opts.get("ground_model"),
-                        "floors": len(floors),
-                        "surfaces": [s.nameString() for s in floors]},
-                article="8.4.1.1.(1)", ruling="D-32")
-        return
-
     measured = foundations.exposed_perimeters(proposed, floors)
+    mode = run.opts.get("ground_model", "kiva")
     with audit.with_building("input model"):
         converted = []
         created = []
         refused = []
-        for surface in floors:
-            name = surface.nameString()
-            perimeter = measured["perimeters"].get(name)
-            reasons = foundations.kiva_blockers(
-                surface, check_layers=False)
-            if perimeter is None:
-                reasons.append(
-                    f"could not measure the exposed perimeter of {name!r}")
-            elif not math.isfinite(perimeter):
-                reasons.append(
-                    f"exposed perimeter for {name!r} is {perimeter}, which is "
-                    "not a finite length")
-            elif perimeter <= foundations.TOLERANCE_M:
-                reasons.append(
-                    f"{name!r} has an exposed perimeter of {perimeter:.3f} m; "
-                    "a Kiva floor needs exposed slab edge")
-            if reasons:
-                refused.append({"floor": name, "reasons": reasons})
-                continue
+        if mode == "kiva":
+            for surface in floors:
+                if surface.outsideBoundaryCondition() != "Ground":
+                    continue
+                name = surface.nameString()
+                perimeter = measured["perimeters"].get(name)
+                reasons = foundations.kiva_blockers(
+                    surface, check_layers=False)
+                if perimeter is None:
+                    reasons.append(
+                        f"could not measure the exposed perimeter of {name!r}")
+                elif not math.isfinite(perimeter):
+                    reasons.append(
+                        f"exposed perimeter for {name!r} is {perimeter}, which "
+                        "is not a finite length")
+                elif perimeter <= foundations.TOLERANCE_M:
+                    reasons.append(
+                        f"{name!r} has an exposed perimeter of {perimeter:.3f} "
+                        "m; a Kiva floor needs exposed slab edge")
+                if reasons:
+                    refused.append({"floor": name, "reasons": reasons})
+                    continue
 
-            original_construction = opt(surface.construction())
-            change = modeling_constructions.kiva_legal(proposed, surface)
-            result = foundations.create_kiva_foundation(
-                proposed, surface, perimeter_m=perimeter)
-            if result["created"]:
-                if change is not None:
-                    converted.append({"surface": name, **change})
-                created.append({"floor": result["floor"],
-                                "exposed_perimeter_m": result["perimeter_m"]})
-            else:
-                if change is not None and original_construction is not None:
-                    converted_construction = opt(surface.construction())
-                    surface.setConstruction(original_construction)
-                    if (converted_construction is not None
-                            and converted_construction.handle()
-                            != original_construction.handle()):
-                        layered = opt(
-                            converted_construction.to_LayeredConstruction())
-                        converted_layers = (
-                            list(layered.layers()) if layered is not None else [])
-                        converted_construction.remove()
-                        for layer in converted_layers:
-                            if layer.directUseCount() == 0:
-                                layer.remove()
-                refused.append({"floor": result["floor"],
-                                "reasons": result["refusals"]})
+                original_construction = opt(surface.construction())
+                change = modeling_constructions.kiva_legal(proposed, surface)
+                result = foundations.create_kiva_foundation(
+                    proposed, surface, perimeter_m=perimeter)
+                if result["created"]:
+                    if change is not None:
+                        converted.append({"surface": name, **change})
+                    created.append({
+                        "floor": result["floor"],
+                        "exposed_perimeter_m": result["perimeter_m"],
+                    })
+                else:
+                    if change is not None and original_construction is not None:
+                        converted_construction = opt(surface.construction())
+                        surface.setConstruction(original_construction)
+                        if (converted_construction is not None
+                                and converted_construction.handle()
+                                != original_construction.handle()):
+                            layered = opt(
+                                converted_construction.to_LayeredConstruction())
+                            converted_layers = (
+                                list(layered.layers())
+                                if layered is not None else [])
+                            converted_construction.remove()
+                            for layer in converted_layers:
+                                if layer.directUseCount() == 0:
+                                    layer.remove()
+                    refused.append({"floor": result["floor"],
+                                    "reasons": result["refusals"]})
 
         if converted:
             audit.warn(
@@ -277,6 +249,51 @@ def prepare_model(run):
                 "slabs stay as modeled in BOTH proposed and reference",
                 inputs={"floors": len(refused), "surfaces": refused},
                 article="3.2.3.3.(3)", ruling="D-32")
+
+        refused_by_name = {row["floor"]: row["reasons"] for row in refused}
+        unrepresented = []
+        for surface in floors:
+            name = surface.nameString()
+            perimeter = measured["perimeters"].get(name)
+            if (perimeter is not None and math.isfinite(perimeter)
+                    and perimeter <= foundations.TOLERANCE_M):
+                # No exposed slab edge means there is no strip segment for this
+                # floor. It may be unable to take Kiva, but it does not leave a
+                # Section 3.2 component out of the reference target.
+                continue
+            if opt(surface.adjacentFoundation()) is not None:
+                continue
+            reasons = list(refused_by_name.get(name, []))
+            if not reasons:
+                boundary = surface.outsideBoundaryCondition()
+                reasons.append(
+                    f"boundary condition {boundary!r} has no Kiva foundation "
+                    "on which the perimeter strip can be represented")
+            unrepresented.append({
+                "floor": name,
+                "boundary_condition": surface.outsideBoundaryCondition(),
+                "exposed_perimeter_m": perimeter,
+                "reasons": reasons,
+            })
+
+        if unrepresented:
+            blocked = {
+                "reason": "ground_strip_unrepresented",
+                "ground_model": mode,
+                "floors": [row["floor"] for row in unrepresented],
+                "surfaces": unrepresented,
+            }
+            run.state["target_not_established"] = blocked
+            audit.warn(
+                "prepare",
+                "NO BUILDING ENERGY TARGET can be established — one or more "
+                "ordinary ground-contact floors with an exposed or "
+                "unmeasurable slab edge have no Kiva foundation on which the "
+                "reference can represent 3.2.3.3.(3)'s 1.2 m perimeter strip; "
+                "8.4.1.1.(1) requires the target to account for that strip, "
+                "while the proposed is EXEMPT from it under 3.4.1.2.(1), so "
+                "this is a defect in the TARGET and no determination is made",
+                inputs=blocked, article="8.4.1.1.(1)", ruling="D-32")
 
 
 def prepare_annual(run):
@@ -2660,10 +2677,10 @@ def _refuse_determination(run, blocked):
         "ruling": "D-32",
         "detail": blocked,
         "what_would_fix_it": (
-            "re-run without --ground-model simple; the default kiva mode "
-            "gives the reference a slab edge on which 3.2.3.3.(3)'s 1.2 m "
-            "strip can be applied, which is what 8.4.1.1.(1) requires the "
-            "target to account for"
+            "use the kiva ground mode and resolve every listed floor's Kiva "
+            "representation condition so each exposed slab edge can receive "
+            "3.2.3.3.(3)'s 1.2 m strip, which is what 8.4.1.1.(1) requires "
+            "the target to account for"
         ),
     }
     run.audit.warn(

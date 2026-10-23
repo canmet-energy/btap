@@ -265,7 +265,11 @@ It applies only to ordinary floors in the perimeter-strip branch. Full-area
 climates remain on the existing full-area construction path. Detected embedded
 floors and unresolved embedded-system cases remain on D-105's path. Floors with
 invalid topology, no exposed perimeter, or an unsupported material
-representation remain unchanged and visibly refused.
+representation remain unchanged and visibly refused. A confirmed zero exposed
+perimeter needs no strip segment. Any positive or unmeasurable exposed
+perimeter left without Kiva means the 8.4.1.1 building energy target was not
+established, regardless of whether `simple` was selected or `kiva` preparation
+was attempted; that completed run is diagnostic and cannot determine.
 
 Kiva cannot translate a massless layer. The one known fixture representation,
 `CP02 CARPET PAD`, is converted on each eligible floor's private construction
@@ -278,14 +282,23 @@ monthly `Site:GroundTemperature:BuildingSurface` series without another
 depth/model choice, and a simple `Ground` boundary still cannot represent the
 2-D perimeter strip.
 
-A future `--ground-model simple` flag is diagnostic only on the
-perimeter-strip branch. Because it cannot represent 3.2.3.3.(3), it fails to
-establish the building energy target required by 8.4.1.1.(1) and must return
+`--ground-model simple` is diagnostic only when it leaves an exposed strip
+unrepresented. Because it cannot represent 3.2.3.3.(3), it then fails to
+establish the building energy target required by 8.4.1.1.(1) and returns
 `compliant = null` / CLI exit 6 rather than a conditional or ordinary
-determination. This is not an AHJ referral: the acceptable-solution text
-decides the requirement. Nor is the bare flag an alternative solution:
-nothing demonstrates equivalent performance. The restriction does not apply
-where no strip is required, including the full-area branch.
+determination. The same result follows from an unsuccessful Kiva preparation
+or a ground boundary such as `GroundFCfactorMethod` that carries no Kiva
+foundation. This is not an AHJ referral: the acceptable-solution text decides
+the requirement. Nor is a mode choice or failed conversion an alternative
+solution: nothing demonstrates equivalent performance. The restriction does
+not apply where no strip is required, including the full-area branch and a
+confirmed zero-edge floor.
+
+The NECB 2025 Article 8.4.4 archetype-EUI alternate path returns before the
+reference lifecycle's `prepare_model` phase. It builds no reference target, so
+the method-symmetry ruling does not apply there and the proposed retains its
+submitted ground method. Sensitivity of that absolute EUI metric to its ground
+model is a separate question.
 
 ## Phase 4 — the witness, and the freeze
 

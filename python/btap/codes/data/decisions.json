@@ -1374,7 +1374,7 @@
         {
           "id": "ground_floor_insulation_extent",
           "label": "Ground-floor insulation extent by climate zone",
-          "decided": "Zones 4 through 7B retain the modeled slab field and apply the table value over a 1.2 m perimeter strip, while zone 8 applies its full-area value; an ineligible strip warns.",
+          "decided": "Zones 4 through 7B retain the modeled slab field and apply the table value over a 1.2 m perimeter strip, while zone 8 applies its full-area value; an exposed or unmeasurable strip left unrepresented prevents a determination, while a confirmed zero-edge floor needs no strip segment.",
           "sources": [
             {
               "code": "necb",
@@ -1399,7 +1399,7 @@
         {
           "id": "ground_heat_transfer_method_symmetry",
           "label": "Common ground heat-transfer method for the proposed/reference comparison",
-          "decided": "The proposed is exempt from the prescriptive perimeter strip while the reference target must include it; an eligible ordinary floor therefore uses Kiva in both buildings before sizing and receives the strip only in the reference.",
+          "decided": "On the reference-building path, the proposed is exempt from the prescriptive perimeter strip while the reference target must include it; an eligible ordinary floor therefore uses Kiva in both buildings before sizing and receives the strip only in the reference.",
           "sources": [
             {
               "code": "necb",

@@ -1355,19 +1355,35 @@ embedded floors already take the full-area construction path and remain on
 their submitted ground method; unresolved embedded-system applicability also
 remains untouched rather than being guessed into the ordinary-floor branch.
 An ineligible perimeter-strip floor stays as modeled in both buildings and
-warns.
+warns. That warning is allowed to continue to a determination only when the
+floor is confirmed to have no exposed slab edge, because then there is no
+strip segment for that floor. If its exposed perimeter is positive or cannot
+be measured and no Kiva foundation remains after preparation, the reference
+has omitted a required Section 3.2 component and the completed run is
+diagnostic only.
 
+The target-validity test is the resulting representation, not the mode name.
 A `simple` ground-model choice is not a second compliance method on a branch
-where the reference requires the perimeter strip. The simple `Ground`
-boundary has no slab edge on which to apply 3.2.3.3.(3), so selecting it
-leaves the 8.4.1.1.(1) building energy target unestablished. The text is not
-ambiguous, and an operator's deliberate omission is not by itself an
+where the reference requires the perimeter strip: each exposed simple
+`Ground` floor lacks a slab edge on which to apply 3.2.3.3.(3). The same
+defect occurs in `kiva` mode when an unknown material, unsupported topology,
+`GroundFCfactorMethod` boundary or other blocker leaves an applicable exposed
+floor without Kiva. Either way, the 8.4.1.1.(1) building energy target is
+unestablished and the run returns no determination (`compliant = null`, CLI
+exit 6) with an explicit reason. The text is not ambiguous, and neither an
+operator's deliberate omission nor a failed conversion is by itself an
 alternative solution with demonstrated equivalent performance. No AHJ
-register entry or conditional verdict applies. If exposed for diagnostics,
-`simple` must return no determination (`compliant = null`, CLI exit 6) with an
-explicit reason; it may produce a determination only where no perimeter strip
-must be represented, such as the full-area branch or a model with no
-applicable ordinary perimeter floor.
+register entry or conditional verdict applies. A determination remains
+possible where no perimeter strip must be represented, such as the full-area
+branch, a model with no applicable ordinary perimeter floor, or a floor whose
+exposed perimeter is confirmed to be zero.
+
+This preparation belongs only to the reference-building lifecycle. The NECB
+2025 Article 8.4.4 archetype-EUI alternate path returns before
+`prepare_model`, builds no reference building or 8.4.1.1 building energy
+target, and therefore retains the proposed model's submitted ground method.
+That exclusion is deliberate; it makes no ruling about how sensitive the
+alternate path's absolute EUI metric may be to its ground model.
 
 For the known `CP02 CARPET PAD` no-mass representation, the compatibility
 conversion uses the pinned oracle's thin-carpet properties: conductivity
@@ -1383,7 +1399,8 @@ slab edge on which to place the strip.
 
 - **Correction ruling/when:** phylroy directed an apples-to-apples comparison
   on 2026-10-22; Sol adjudicated the perimeter-strip-only scope and method
-  boundary on 2026-10-22.
+  boundary on 2026-10-22, then narrowed target validity to the resulting
+  strip representation after Fable's PR #133 review on 2026-10-23.
 
 <a id="d-33"></a>
 

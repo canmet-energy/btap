@@ -1,4 +1,4 @@
-"""`--ground-model simple` makes no determination where the strip applies.
+"""No determination when a required ground strip remains unrepresented.
 
 Sol's 286 ruling, and the reason matters: the proposed building is EXEMPT from
 3.2.3.3.(3)'s 1.2 m perimeter strip, because 3.4.1.2.(1) carries only Article
@@ -6,10 +6,11 @@ Sol's 286 ruling, and the reason matters: the proposed building is EXEMPT from
 common ground method is not an omission on the proposed side.
 
 What it costs is the REFERENCE. 8.4.1.1.(1) requires the building energy
-target to account for Section 3.2's prescriptive requirements, and a floor on
-the simple `Ground` boundary has no slab edge on which to put the strip. No
-valid target means 8.4.1.2.(2) has nothing to compare against, so the run makes
-NO determination — not compliant, not non-compliant, and deliberately NOT
+target to account for Section 3.2's prescriptive requirements. A floor on the
+simple `Ground` boundary has no slab edge on which to put the strip, and a
+Kiva-mode floor that fails preparation reaches the same target state. No valid
+target means 8.4.1.2.(2) has nothing to compare against, so the run makes NO
+determination — not compliant, not non-compliant, and deliberately NOT
 conditional, which would launder a known-invalid target into something that
 looks approvable.
 
@@ -37,6 +38,24 @@ def _run(model, *, ground_model, hdd):
             run_dir=run_dir)
 
 
+def _unknown_massless_floors(model, names):
+    import openstudio
+
+    names = set(names)
+    floors = [surface for surface in model.getSurfaces()
+              if surface.nameString() in names]
+    if {surface.nameString() for surface in floors} != names:
+        raise AssertionError(f"fixture floors not found: {sorted(names)}")
+    material = openstudio.model.MasslessOpaqueMaterial(model)
+    material.setName("Unknown Kiva finish")
+    material.setThermalResistance(0.2)
+    construction = openstudio.model.Construction(model)
+    construction.setName("Unsupported Kiva construction")
+    construction.setLayers([material])
+    for floor in floors:
+        floor.setConstruction(construction)
+
+
 @needs_sdk
 class TestGroundModelSimpleMakesNoDetermination(unittest.TestCase):
     def test_simple_establishes_no_target_in_a_perimeter_strip_climate(self):
@@ -53,7 +72,7 @@ class TestGroundModelSimpleMakesNoDetermination(unittest.TestCase):
                          block["reason"])
         self.assertEqual("8.4.1.1.(1)", block["article"])
         self.assertEqual("D-32", block["ruling"])
-        self.assertIn("ground_model_simple_on_perimeter_strip",
+        self.assertIn("ground_strip_unrepresented",
                       block["detail"]["reason"])
         self.assertTrue(block["detail"]["floors"],
                         "the floors that caused it must be named")
@@ -105,7 +124,8 @@ class TestTheRefusalIsRenderedHonestly(unittest.TestCase):
             "reason": "building energy target not established",
             "article": "8.4.1.1.(1)",
             "ruling": "D-32",
-            "what_would_fix_it": "re-run without --ground-model simple",
+            "what_would_fix_it": (
+                "use kiva and resolve each listed floor's representation"),
         },
     }
 
@@ -128,7 +148,7 @@ class TestTheRefusalIsRenderedHonestly(unittest.TestCase):
         self.assertIn("building energy target not established".capitalize(),
                       block)
         self.assertIn("8.4.1.1.(1)", block)
-        self.assertIn("re-run without --ground-model simple", block)
+        self.assertIn("resolve each listed floor", block)
         self.assertIn("DIAGNOSTIC only", block)
         self.assertNotIn("Run with --simulate annual", block)
 
@@ -282,13 +302,19 @@ class TestGroundModelSimpleStillRunsWhereNoStripApplies(unittest.TestCase):
                             result.report.get("compliance_determination"))
 
     def test_kiva_establishes_a_target_in_the_same_strip_climate(self):
-        """The control for the first test: same model, same climate, default
-        mode, and the refusal does not fire."""
+        """A confirmed zero-edge interior tile needs no strip and does not
+        invalidate the four exposed floors that were prepared successfully."""
         result = _run(proposed_with_hvac(), ground_model="kiva", hdd=STRIP_HDD)
 
         self.assertNotIn("no_determination", result.report)
         self.assertNotEqual("no_determination",
                             result.report.get("compliance_determination"))
+        self.assertTrue(any(
+            entry.get("step") == "prepare"
+            and "could NOT take a Kiva foundation" in entry.get("action", "")
+            and entry.get("inputs", {}).get("floors") == 1
+            for entry in result.audit.entries
+        ), "the control must retain its one zero-perimeter refusal")
 
     def test_simple_leaves_the_proposed_model_untouched(self):
         """Declining the method must also decline the construction surgery."""
@@ -304,6 +330,58 @@ class TestGroundModelSimpleStillRunsWhereNoStripApplies(unittest.TestCase):
         self.assertEqual("Ground", prepared.outsideBoundaryCondition())
         self.assertFalse(prepared.adjacentFoundation().is_initialized())
         self.assertEqual(0, len(result.proposed_model.getFoundationKivas()))
+
+
+@needs_sdk
+class TestTheTargetDependsOnRepresentationNotTheMode(unittest.TestCase):
+    def test_one_exposed_floor_refused_by_kiva_makes_no_determination(self):
+        model = proposed_with_hvac()
+        _unknown_massless_floors(model, ["Surface 7"])
+
+        result = _run(model, ground_model="kiva", hdd=STRIP_HDD)
+
+        self.assertIsNone(result.compliant)
+        block = result.report.get("no_determination")
+        self.assertIsNotNone(
+            block, "an unrepresented required strip invalidates the target "
+                   "even when other floors prepared successfully")
+        self.assertEqual("ground_strip_unrepresented",
+                         block["detail"]["reason"])
+        self.assertEqual(["Surface 7"], block["detail"]["floors"])
+        self.assertEqual("kiva", block["detail"]["ground_model"])
+
+    def test_all_exposed_floors_refused_by_kiva_make_no_determination(self):
+        model = proposed_with_hvac()
+        _unknown_massless_floors(
+            model, ["Surface 1", "Surface 7", "Surface 13", "Surface 19"])
+
+        result = _run(model, ground_model="kiva", hdd=STRIP_HDD)
+
+        self.assertIsNone(result.compliant)
+        block = result.report.get("no_determination")
+        self.assertIsNotNone(block)
+        self.assertCountEqual(
+            ["Surface 1", "Surface 7", "Surface 13", "Surface 19"],
+            block["detail"]["floors"])
+        self.assertTrue(all(
+            surface["exposed_perimeter_m"] > 0
+            for surface in block["detail"]["surfaces"]))
+
+    def test_f_factor_floor_without_kiva_also_leaves_the_target_unestablished(self):
+        model = proposed_with_hvac()
+        floor = model.getSurfaceByName("Surface 7").get()
+        self.assertTrue(
+            floor.setOutsideBoundaryCondition("GroundFCfactorMethod"))
+
+        result = _run(model, ground_model="kiva", hdd=STRIP_HDD)
+
+        self.assertIsNone(result.compliant)
+        block = result.report.get("no_determination")
+        self.assertIsNotNone(block)
+        self.assertEqual(["Surface 7"], block["detail"]["floors"])
+        self.assertEqual(
+            "GroundFCfactorMethod",
+            block["detail"]["surfaces"][0]["boundary_condition"])
 
 
 if __name__ == "__main__":
