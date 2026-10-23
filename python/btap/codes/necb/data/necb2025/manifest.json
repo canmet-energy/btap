@@ -136,7 +136,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "This edition states the door requirements in their own Table 3.2.2.4. Re-verified 2026-08-02 against the post-hbix-fix extraction (D-61). The performance-path articles this file cites are in Subsection 8.4.5.",
-      "result_sha256": "e36dc9c396bc752dea6769d6b2534efbdc0bebbb686d521a35bf5f0c062bc81e"
+      "result_sha256": "9eb72350e156a270a922858e1583fe69377d70753ec52162b563c8ba2fe07521"
     },
     "reference_rules.json": {
       "source": "mcp:necb:2025",
