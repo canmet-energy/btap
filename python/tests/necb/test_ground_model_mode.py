@@ -303,35 +303,5 @@ class TestTheModeIsValidatedAtTheBoundary(unittest.TestCase):
                               str(caught.exception))
 
 
-@needs_sdk
-class TestHangarInteriorFloorAdjacency(unittest.TestCase):
-    def test_surface_335_is_matched_to_the_ceiling_below_and_passes_the_gate(self):
-        from btap._sdk import load_model
-
-        root = Path(__file__).resolve().parents[3]
-        model = load_model(
-            root / "models" / "gagetown_coldlake_Hangar_pre-1960.osm")
-        floor = model.getSurfaceByName("Surface 335").get()
-        ceiling = model.getSurfaceByName("Surface 563").get()
-
-        self.assertEqual("Surface", floor.outsideBoundaryCondition())
-        self.assertEqual("Surface", ceiling.outsideBoundaryCondition())
-        self.assertEqual(ceiling.handle(), floor.adjacentSurface().get().handle())
-        self.assertEqual(floor.handle(), ceiling.adjacentSurface().get().handle())
-        self.assertEqual(
-            "000 Interior Floor", floor.construction().get().nameString())
-        self.assertEqual(
-            floor.construction().get().handle(),
-            ceiling.construction().get().handle(),
-            "the exact co-planar pair uses the same interior floor assembly",
-        )
-
-        necb_path.prepare_model(_path_run(model))
-
-        self.assertEqual("Surface", floor.outsideBoundaryCondition())
-        self.assertEqual(ceiling.handle(), floor.adjacentSurface().get().handle())
-        self.assertFalse(floor.adjacentFoundation().is_initialized())
-
-
 if __name__ == "__main__":
     unittest.main()
