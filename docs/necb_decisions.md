@@ -1353,14 +1353,12 @@ proposed building's performance.
 It is deliberately narrower than "put Kiva on every ground floor." Zone 8 and
 embedded floors already take the full-area construction path and remain on
 their submitted ground method; unresolved embedded-system applicability also
-remains untouched rather than being guessed into the ordinary-floor branch.
-An ineligible perimeter-strip floor stays as modeled in both buildings and
-warns. That warning is allowed to continue to a determination only when the
-floor is confirmed to have no exposed slab edge, because then there is no
-strip segment for that floor. If its exposed perimeter is positive or cannot
-be measured and no Kiva foundation remains after preparation, the reference
-has omitted a required Section 3.2 component and the completed run is
-diagnostic only.
+remains untouched rather than being guessed into the ordinary-floor branch,
+and floors outside the reference envelope are excluded by the same
+`inside_envelope` test as the reference transform. An ineligible
+perimeter-strip floor may stay as modeled only when its exposed slab edge is
+confirmed to be zero, because then there is no strip segment for that floor.
+Missing and non-finite perimeter measurements are not zero.
 
 The target-validity test is the resulting representation, not the mode name.
 A `simple` ground-model choice is not a second compliance method on a branch
@@ -1369,14 +1367,17 @@ where the reference requires the perimeter strip: each exposed simple
 defect occurs in `kiva` mode when an unknown material, unsupported topology,
 `GroundFCfactorMethod` boundary or other blocker leaves an applicable exposed
 floor without Kiva. Either way, the 8.4.1.1.(1) building energy target is
-unestablished and the run returns no determination (`compliant = null`, CLI
-exit 6) with an explicit reason. The text is not ambiguous, and neither an
-operator's deliberate omission nor a failed conversion is by itself an
-alternative solution with demonstrated equivalent performance. No AHJ
-register entry or conditional verdict applies. A determination remains
-possible where no perimeter strip must be represented, such as the full-area
-branch, a model with no applicable ordinary perimeter floor, or a floor whose
-exposed perimeter is confirmed to be zero.
+unestablished. The climate-dependent fact is unavailable to phase-1
+validation, so phase 2b performs a read-only inventory of every applicable
+floor after HDD resolution and before changing any floor. If any required
+strip is unrepresentable, it raises `compliance.PreflightError`; the CLI exits
+3 before proposed sizing or annual simulation and names every offending floor
+and repair. The text is not ambiguous, and neither an operator's deliberate
+omission nor a failed conversion is by itself an alternative solution with
+demonstrated equivalent performance. No AHJ register entry or conditional
+verdict applies. The gate does not apply where no perimeter strip must be
+represented, such as the full-area branch, a model with no applicable ordinary
+perimeter floor, or a floor whose exposed perimeter is confirmed to be zero.
 
 This preparation belongs only to the reference-building lifecycle. The NECB
 2025 Article 8.4.4 archetype-EUI alternate path returns before
@@ -1384,6 +1385,10 @@ This preparation belongs only to the reference-building lifecycle. The NECB
 target, and therefore retains the proposed model's submitted ground method.
 That exclusion is deliberate; it makes no ruling about how sensitive the
 alternate path's absolute EUI metric may be to its ground model.
+The reference-path `--eui-supplement` is different: it runs later in the same
+reference lifecycle and receives the already Kiva-prepared proposed model, so
+both its as-specified check and any normalized rerun start from that common
+ground method.
 
 For the known `CP02 CARPET PAD` no-mass representation, the compatibility
 conversion uses the pinned oracle's thin-carpet properties: conductivity

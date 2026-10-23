@@ -277,20 +277,22 @@ class TestForwardingFunctionsAreExecuted(unittest.TestCase):
 
         foundations.create_kiva_foundation = refuse
         try:
-            necb_path.prepare_model(SimpleNamespace(
-                proposed=proposed,
-                audit=AuditLog(),
-                ruleset=codes.resolve("necb2020"),
-                hdd=3890,
-                state={},
-                # `prepare_model` reads the ground-model mode, so the double
-                # has to carry it; the default keeps this test on the Kiva path
-                # it is about.
-                opts={"ground_model": "kiva"},
-            ))
+            with self.assertRaises(compliance.PreflightError) as caught:
+                necb_path.prepare_model(SimpleNamespace(
+                    proposed=proposed,
+                    audit=AuditLog(),
+                    ruleset=codes.resolve("necb2020"),
+                    hdd=3890,
+                    state={},
+                    # `prepare_model` reads the ground-model mode, so the double
+                    # has to carry it; the default keeps this test on the Kiva
+                    # path it is about.
+                    opts={"ground_model": "kiva"},
+                ))
         finally:
             foundations.create_kiva_foundation = original
 
+        self.assertIn("forced post-conversion refusal", str(caught.exception))
         self.assertEqual(
             construction_handles,
             {str(obj.handle()) for obj in proposed.getLayeredConstructions()},

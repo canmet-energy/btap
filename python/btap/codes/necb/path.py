@@ -123,7 +123,7 @@ def climate(run):
 
 
 def prepare_model(run):
-    """Phase 2b — put eligible ordinary perimeter-strip floors on Kiva.
+    """Phase 2b — gate then put ordinary perimeter-strip floors on Kiva.
 
     This is method symmetry, not a proposed-envelope correction. A simple
     ``Ground`` floor has no slab edge on which the reference can place
@@ -134,10 +134,11 @@ def prepare_model(run):
 
     Scope is deliberately narrow: full-area climates, detected embedded
     floors and unresolved embedded-system applicability do not need this
-    method change and stay on their submitted boundary condition. A floor that
-    fails Kiva eligibility likewise stays unchanged and is named. If it has an
-    exposed slab edge, however, the reference target is not established and
-    the completed diagnostic run cannot emit a determination.
+    method change and stay on their submitted boundary condition. Before any
+    floor is changed, every applicable floor is checked. A positive or
+    unmeasurable exposed edge without a usable Kiva representation is a
+    proposed-input preflight failure: the reference target cannot include its
+    required strip, so no simulation is allowed to start.
     """
     from btap._compat import sorted_by_name
     from btap.codes.necb import envelope
@@ -159,6 +160,10 @@ def prepare_model(run):
         if surface.surfaceType() == "Floor"
         and envelope.prescriptive.boundary_of(surface) == "ground"
         and inventory.status(surface.nameString()) == "ordinary"
+        and (
+            opt(surface.space()) is None
+            or envelope.prescriptive.inside_envelope(surface.space().get())
+        )
     ]
     if not floors:
         return
@@ -166,6 +171,54 @@ def prepare_model(run):
     measured = foundations.exposed_perimeters(proposed, floors)
     mode = run.opts.get("ground_model", "kiva")
     with audit.with_building("input model"):
+        unrepresented = []
+        for surface in floors:
+            name = surface.nameString()
+            perimeter = measured["perimeters"].get(name)
+            if (perimeter is not None and math.isfinite(perimeter)
+                    and perimeter <= foundations.TOLERANCE_M):
+                # A confirmed zero exposed edge has no strip segment to
+                # represent. Missing and non-finite measurements are not zero.
+                continue
+            if opt(surface.adjacentFoundation()) is not None:
+                continue
+
+            reasons = []
+            if perimeter is None:
+                reasons.append(
+                    f"could not measure the exposed perimeter of {name!r}")
+            elif not math.isfinite(perimeter):
+                reasons.append(
+                    f"exposed perimeter for {name!r} is {perimeter}, which "
+                    "is not a finite length")
+
+            boundary = surface.outsideBoundaryCondition()
+            if mode != "kiva":
+                reasons.append(
+                    f"ground-model mode {mode!r} creates no Kiva foundation "
+                    "on which the perimeter strip can be represented")
+            elif boundary != "Ground":
+                reasons.append(
+                    f"boundary condition {boundary!r} has no Kiva foundation "
+                    "and cannot be converted by this path")
+            else:
+                reasons.extend(foundations.kiva_blockers(
+                    surface, check_layers=False))
+                reasons.extend(
+                    modeling_constructions.kiva_legalization_blockers(surface))
+
+            if not reasons:
+                continue
+            unrepresented.append({
+                "floor": name,
+                "boundary_condition": boundary,
+                "exposed_perimeter_m": perimeter,
+                "reasons": reasons,
+            })
+
+        if unrepresented:
+            _raise_ground_strip_preflight(audit, mode, unrepresented)
+
         converted = []
         created = []
         refused = []
@@ -219,8 +272,14 @@ def prepare_model(run):
                             for layer in converted_layers:
                                 if layer.directUseCount() == 0:
                                     layer.remove()
-                    refused.append({"floor": result["floor"],
-                                    "reasons": result["refusals"]})
+                    _raise_ground_strip_preflight(
+                        audit, mode, [{
+                            "floor": result["floor"],
+                            "boundary_condition":
+                                surface.outsideBoundaryCondition(),
+                            "exposed_perimeter_m": perimeter,
+                            "reasons": result["refusals"],
+                        }])
 
         if converted:
             audit.warn(
@@ -250,50 +309,44 @@ def prepare_model(run):
                 inputs={"floors": len(refused), "surfaces": refused},
                 article="3.2.3.3.(3)", ruling="D-32")
 
-        refused_by_name = {row["floor"]: row["reasons"] for row in refused}
-        unrepresented = []
-        for surface in floors:
-            name = surface.nameString()
-            perimeter = measured["perimeters"].get(name)
-            if (perimeter is not None and math.isfinite(perimeter)
-                    and perimeter <= foundations.TOLERANCE_M):
-                # No exposed slab edge means there is no strip segment for this
-                # floor. It may be unable to take Kiva, but it does not leave a
-                # Section 3.2 component out of the reference target.
-                continue
-            if opt(surface.adjacentFoundation()) is not None:
-                continue
-            reasons = list(refused_by_name.get(name, []))
-            if not reasons:
-                boundary = surface.outsideBoundaryCondition()
-                reasons.append(
-                    f"boundary condition {boundary!r} has no Kiva foundation "
-                    "on which the perimeter strip can be represented")
-            unrepresented.append({
-                "floor": name,
-                "boundary_condition": surface.outsideBoundaryCondition(),
-                "exposed_perimeter_m": perimeter,
-                "reasons": reasons,
-            })
 
-        if unrepresented:
-            blocked = {
-                "reason": "ground_strip_unrepresented",
-                "ground_model": mode,
-                "floors": [row["floor"] for row in unrepresented],
-                "surfaces": unrepresented,
-            }
-            run.state["target_not_established"] = blocked
-            audit.warn(
-                "prepare",
-                "NO BUILDING ENERGY TARGET can be established — one or more "
-                "ordinary ground-contact floors with an exposed or "
-                "unmeasurable slab edge have no Kiva foundation on which the "
-                "reference can represent 3.2.3.3.(3)'s 1.2 m perimeter strip; "
-                "8.4.1.1.(1) requires the target to account for that strip, "
-                "while the proposed is EXEMPT from it under 3.4.1.2.(1), so "
-                "this is a defect in the TARGET and no determination is made",
-                inputs=blocked, article="8.4.1.1.(1)", ruling="D-32")
+def _raise_ground_strip_preflight(audit, mode, unrepresented):
+    blocked = {
+        "reason": "ground_strip_unrepresented",
+        "ground_model": mode,
+        "floors": [row["floor"] for row in unrepresented],
+        "surfaces": unrepresented,
+    }
+    audit.warn(
+        "prepare",
+        "PREFLIGHT FAILED — the building energy target cannot be established: "
+        "one or more ordinary ground-contact floors with an exposed or "
+        "unmeasurable slab edge have no Kiva foundation on which the reference "
+        "can represent 3.2.3.3.(3)'s 1.2 m perimeter strip; 8.4.1.1.(1) "
+        "requires the target to account for that strip, while the proposed is "
+        "exempt from it under 3.4.1.2.(1)",
+        inputs=blocked, article="8.4.1.1.(1)", ruling="D-32")
+    details = []
+    for row in unrepresented:
+        perimeter = row["exposed_perimeter_m"]
+        perimeter_text = (
+            "unmeasurable"
+            if perimeter is None
+            else f"{perimeter!r} m"
+        )
+        details.append(
+            f"  - {row['floor']!r}: boundary "
+            f"{row['boundary_condition']!r}, exposed perimeter "
+            f"{perimeter_text}; {'; '.join(row['reasons'])}")
+    raise compliance.PreflightError(
+        "ground-strip pre-flight FAILED: the reference target cannot represent "
+        f"the required perimeter strip on {len(unrepresented)} floor(s):\n"
+        + "\n".join(details)
+        + "\nFix: use the Kiva ground mode (ground_model='kiva' / "
+          "--ground-model kiva) and correct each listed floor's boundary, "
+          "parent space, geometry, or construction so a Kiva foundation can "
+          "represent every required exposed strip. Correct a false Ground tag "
+          "to its real adjacency instead of inventing a foundation.")
 
 
 def prepare_annual(run):
@@ -352,16 +405,6 @@ def determine(run):
     _score_ghg(run)                   # 8. 2025 Part 11 GHG (needs province_state)
     _cost_both(run)                   # 9. optional costing of both models
     _supplement_eui(run)              # 10. optional 2025 archetype-EUI verdict
-
-    # A target that was never established yields NO determination, whatever the
-    # comparison computed. The reference is still built, sized and run, because
-    # the mode is retained for diagnostics and both energies are the useful
-    # output — but `compliant` is None, which `cli.verdict_exit` already maps to
-    # EXIT["no_determination"] = 6, the code `--quick` and `--simulate sizing`
-    # already use. The override is LAST so no later phase can undo it.
-    blocked = run.state.get("target_not_established")
-    if blocked is not None:
-        _refuse_determination(run, blocked)
 
     return Verdict(compliant=run.compliant, report=run.report)
 
@@ -2644,49 +2687,3 @@ def suggest_space_types(name, catalog):
 def _inspect(value):
     """Ruby ``#inspect`` for the pre-flight message: nil / "quoted"."""
     return "nil" if value is None else f'"{value}"'
-
-
-def _refuse_determination(run, blocked):
-    """Turn a run whose TARGET was never established into no determination.
-
-    Named rather than inlined in `determine` because it carries a contract
-    worth driving directly: a run that WOULD have been conditional must have
-    its conditional reason block CLEARED, and the only way to witness that is
-    to hand this function a report which already has one. Through `determine`
-    alone the clearing was unwitnessed — every available fixture is
-    unconditional, so the assertion passed against a report that never held
-    the block. Fable's `133` re-review found the consequence.
-    """
-    run.compliant = None
-    run.report["compliance_determination"] = "no_determination"
-    # A target that was never established cannot be CONDITIONAL on
-    # anything, so the conditional reason block must go rather than sit
-    # beside the refusal. Fable's `133` re-review: it survived, so
-    # `ahj_appendix` read its `ahj_ids` and told an authority "YES — this
-    # run's determination is conditional on it" for AHJ-1, AHJ-2 and
-    # AHJ-14 while the badge beside it said UNDETERMINED. The report is the
-    # AHJ-facing artifact and it contradicted itself.
-    #
-    # `ahj_applied` is deliberately KEPT: those dispositions really were
-    # applied to runtime choices during the run, which stays true whether
-    # or not a determination came out of it.
-    run.report.pop("compliance_determination_reason", None)
-    run.report["no_determination"] = {
-        "reason": "building energy target not established",
-        "article": "8.4.1.1.(1)",
-        "ruling": "D-32",
-        "detail": blocked,
-        "what_would_fix_it": (
-            "use the kiva ground mode and resolve every listed floor's Kiva "
-            "representation condition so each exposed slab edge can receive "
-            "3.2.3.3.(3)'s 1.2 m strip, which is what 8.4.1.1.(1) requires "
-            "the target to account for"
-        ),
-    }
-    run.audit.warn(
-        "compliance",
-        "NO DETERMINATION — the building energy target was not established "
-        "per 8.4.1.1.(1), so the 8.4.1.2.(2) comparison has no valid basis; "
-        "the energies below are DIAGNOSTIC only and are neither a pass nor "
-        "a fail, and this is deliberately NOT a conditional result",
-        inputs=blocked, article="8.4.1.1.(1)", ruling="D-32")

@@ -264,12 +264,14 @@ This ruling is deliberately narrower than "put Kiva on every ground floor."
 It applies only to ordinary floors in the perimeter-strip branch. Full-area
 climates remain on the existing full-area construction path. Detected embedded
 floors and unresolved embedded-system cases remain on D-105's path. Floors with
-invalid topology, no exposed perimeter, or an unsupported material
-representation remain unchanged and visibly refused. A confirmed zero exposed
-perimeter needs no strip segment. Any positive or unmeasurable exposed
-perimeter left without Kiva means the 8.4.1.1 building energy target was not
-established, regardless of whether `simple` was selected or `kiva` preparation
-was attempted; that completed run is diagnostic and cannot determine.
+invalid topology or an unsupported material representation are inventoried
+before any conversion. A confirmed zero exposed perimeter needs no strip
+segment. Any positive, missing or non-finite exposed perimeter that cannot take
+Kiva means the 8.4.1.1 building energy target cannot be established,
+regardless of whether `simple` was selected or `kiva` preparation was
+attempted; phase 2b raises `compliance.PreflightError` before sizing or
+simulation. Floors outside the reference envelope are excluded by the same
+`inside_envelope` predicate the reference transform uses.
 
 Kiva cannot translate a massless layer. The one known fixture representation,
 `CP02 CARPET PAD`, is converted on each eligible floor's private construction
@@ -282,23 +284,25 @@ monthly `Site:GroundTemperature:BuildingSurface` series without another
 depth/model choice, and a simple `Ground` boundary still cannot represent the
 2-D perimeter strip.
 
-`--ground-model simple` is diagnostic only when it leaves an exposed strip
+`--ground-model simple` is invalid when it leaves an exposed strip
 unrepresented. Because it cannot represent 3.2.3.3.(3), it then fails to
-establish the building energy target required by 8.4.1.1.(1) and returns
-`compliant = null` / CLI exit 6 rather than a conditional or ordinary
-determination. The same result follows from an unsuccessful Kiva preparation
-or a ground boundary such as `GroundFCfactorMethod` that carries no Kiva
-foundation. This is not an AHJ referral: the acceptable-solution text decides
-the requirement. Nor is a mode choice or failed conversion an alternative
-solution: nothing demonstrates equivalent performance. The restriction does
-not apply where no strip is required, including the full-area branch and a
-confirmed zero-edge floor.
+establish the building energy target required by 8.4.1.1.(1) and is rejected
+at preflight / CLI exit 3 before sizing. The same result follows from an
+ineligible Kiva preparation or a ground boundary such as
+`GroundFCfactorMethod` that carries no Kiva foundation. This is not an AHJ
+referral: the acceptable-solution text decides the requirement. Nor is a mode
+choice or failed conversion an alternative solution: nothing demonstrates
+equivalent performance. The restriction does not apply where no strip is
+required, including the full-area branch and a confirmed zero-edge floor.
 
 The NECB 2025 Article 8.4.4 archetype-EUI alternate path returns before the
 reference lifecycle's `prepare_model` phase. It builds no reference target, so
 the method-symmetry ruling does not apply there and the proposed retains its
 submitted ground method. Sensitivity of that absolute EUI metric to its ground
 model is a separate question.
+The reference-path `--eui-supplement` does not bypass `prepare_model`; it
+receives the already Kiva-prepared proposed model and any normalized rerun
+clones that prepared model.
 
 ## Phase 4 — the witness, and the freeze
 
@@ -307,11 +311,13 @@ all 56 scenarios, and expect NUMERIC movement — unlike every re-freeze in the
 last three days, this one legitimately changes results, which makes the
 before/after diff the review surface rather than a formality.
 
-The witness must be at the call site and mutated: deleting the neutral
-pipeline's `prepare_model` call must make a real compliance determination lose
-its proposed and reference Kiva foundations, while the full-area control stays
-green. The witness also checks that only the reference has the 1.2 m strip and
-that a zero-perimeter floor is refused before its construction changes.
+The witnesses must be at the call site and mutated: bypassing the phase-2b
+gate must reach the proposed-sizing call, while the full-area control stays
+green. Separate cases prove that a confirmed zero perimeter is the only
+waiver, and that missing and non-finite values refuse rather than being treated
+as zero. The successful-path witness also checks that only the reference has
+the 1.2 m strip and that a zero-perimeter floor is refused before its
+construction changes.
 #128's lesson applies, that a scenario reaching the SELECTION is not one
 reaching the FAILURE. For E11 specifically the witness is a model whose walls
 exceed the perimeter, which must be refused rather than reaching EnergyPlus.

@@ -451,6 +451,14 @@ DETERMINATION_SCENARIOS = [
     # coil and a hot-water baseboard, so there IS auxiliary heating energy for
     # (2)(g) to weigh — `aux_by_fuel` non-empty is the precondition the branch
     # returns early on.
+    #
+    # D-32 Kiva re-freeze provenance: this scenario's +15.6% proposed-heating
+    # movement was NOT a direct perimeter-strip load consequence. The changed
+    # ground solution altered D-43's capacity-search trajectory: three rounds
+    # became two, Zone 2 lost its cooling-factor bump, and the second round
+    # stalled at proposed 513.25 heating / 401.5 cooling unmet hours while the
+    # reference retained 566.75 cooling unmet hours. The exact baseline freezes
+    # all of that; the assertions below make the stall witness explicit.
     {"id": "determination-04-16-ashp-supp-aux-election-annual",
      "lane": "parity", "kind": "cli", "replaces": [],
      "argv": ["<CORPUS>/16-ashp-electric-supp-hw-baseboard.osm",
@@ -477,6 +485,10 @@ DETERMINATION_SCENARIOS = [
          {"op": "json_equals", "file": "report.json",
           "path": "compliance_determination_reason.ahj_ids",
           "value": ["AHJ-1", "AHJ-2", "AHJ-14"]},
+         {"op": "json_equals", "file": "report.json",
+          "path": "capacity_iterations.1.iteration", "value": 2},
+         {"op": "json_equals", "file": "report.json",
+          "path": "capacity_iterations.1.stalled", "value": True},
      ]},
 
     # GUARD 7 for AHJ-10. The corpus-none scenario for sample 19 is useful
@@ -633,15 +645,15 @@ VERDICT_SCENARIOS = [
 ]
 
 UNCOVERED = [
-    {"branch": "8.4.1.2.(5) capacity-iteration FAILURE path",
-     "why": "nothing of it is frozen: the failure sub-branches (failed "
-            "bump, stall detection, post-bump nonconvergence, cap "
-            "exhaustion) AND the zero-iteration warning all require a "
-            "real annual run engineered to fail unmet hours; no CLI flag "
-            "exposes max_capacity_iterations",
-     "witness": "the converged/empty path only — the annual scenarios "
-                "freeze capacity_iterations: []; the failure branches "
-                "remain covered ONLY by existing unit tests",
+    {"branch": "8.4.1.2.(5) capacity-iteration FAILURE paths other than "
+               "stall detection",
+     "why": "the failed-bump, post-bump nonconvergence, cap-exhaustion and "
+            "zero-iteration-warning branches require a real annual run "
+            "engineered to reach each state; no CLI flag exposes "
+            "max_capacity_iterations",
+     "witness": "determination-04 now freezes the D-43 stall branch at "
+                "capacity_iterations[1].stalled = true; the other failure "
+                "branches remain covered only by existing unit tests",
      "option": "a future API-level scenario (parity lane) is a named "
                "OPTION, not a witness; nothing is frozen unless it "
                "appears in this manifest"},
@@ -652,6 +664,13 @@ UNCOVERED = [
 #: sees what closed a gap and, precisely, what the closure does and does not
 #: claim.
 NEWLY_COVERED = [
+    {"branch": "8.4.1.2.(5) capacity-iteration stall detection",
+     "covered_by": "the exact annual report carries two capacity iterations; "
+                   "the second has stalled = true and the warning explains "
+                   "that unmet hours did not improve",
+     "scenario": "determination-04-16-ashp-supp-aux-election-annual",
+     "limits": "failed-bump, post-bump nonconvergence, cap exhaustion and "
+               "the zero-iteration warning remain unfrozen"},
     {"branch": "full-year determination (exits 0/1 through a real annual "
                "run)",
      "covered_by": "API pipeline execution of a full-year determination, "

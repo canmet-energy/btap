@@ -37,11 +37,14 @@ from btap.simulation import runner
 class PreflightError(ValueError):
     """Raised when the INPUT MODEL is rejected before any simulation runs:
     space types that do not resolve against the NECB catalog, an
-    undeterminable above-ground storey count, no thermostats, no geometry.
+    undeterminable above-ground storey count, no thermostats, no geometry, or
+    a required reference ground strip that cannot be represented from the
+    submitted floor geometry and construction.
     Distinct from every other ValueError the pipeline raises (bad weather
     paths, unresolvable HDD) because the fix is different — the caller must
-    repair the MODEL, not the call. Subclasses ValueError (Ruby: a subclass
-    of ArgumentError) so existing handlers keep working unchanged."""
+    repair the model (or select the viable Kiva ground mode), not retry the
+    same run. Subclasses ValueError (Ruby: a subclass of ArgumentError) so
+    existing handlers keep working unchanged."""
 
 
 @dataclass

@@ -280,6 +280,34 @@ def _kiva_carpet(layer):
     return material
 
 
+def kiva_legalization_blockers(surface):
+    """Reasons ``surface`` cannot be made Kiva-legal without guessed physics.
+
+    This is the read-only counterpart to :func:`kiva_legal`. An empty list
+    means the assigned construction already uses standard opaque materials or
+    every nonstandard layer is the specifically sourced CP02 carpet pad.
+    """
+    construction = opt(surface.construction())
+    if construction is None:
+        return ["no construction assigned"]
+    layered = opt(construction.to_LayeredConstruction())
+    if layered is None:
+        return ["construction is not a layered construction"]
+    layers = layered.layers()
+    if not layers:
+        return ["construction has no layers"]
+
+    blockers = []
+    for layer in layers:
+        if (opt(layer.to_StandardOpaqueMaterial()) is None
+                and _kiva_carpet(layer) is None):
+            blockers.append(
+                f"construction layer '{layer.nameString()}' is not a standard "
+                "opaque material and has no sourced Kiva-compatible "
+                "replacement")
+    return blockers
+
+
 def kiva_legal(model, surface):
     """Make `surface`'s construction legal for an EnergyPlus Foundation
     boundary, PRESERVING its resistance exactly. Returns a dict describing what

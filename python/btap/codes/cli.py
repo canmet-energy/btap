@@ -573,11 +573,7 @@ def determination(result, rep):
     if rep.get("annual") is False:
         return "NO DETERMINATION - run period shortened"
     if result.compliant is None:
-        # A run can reach `compliant is None` having simulated a full year:
-        # `--ground-model simple` establishes no building energy target per
-        # 8.4.1.1.(1), so there is nothing to compare against. Saying "no
-        # annual simulation" there is simply false, and the report carries the
-        # real reason — so render it rather than the default assumption.
+        # An explicit reason outranks the usual no-annual-simulation default.
         block = rep.get("no_determination")
         if block:
             return f"NO DETERMINATION - {block['reason']}"
@@ -606,9 +602,7 @@ def verdict_block(result, rep):
     if result.compliant is None:
         block = rep.get("no_determination")
         if block:
-            # A full year WAS simulated; what is missing is the target, so
-            # "run with --simulate annual" would be useless advice. The report
-            # carries both the reason and what would fix it.
+            # The report carries both the explicit reason and its real fix.
             lines = ["", "  *** NOT A CODE-COMPLIANT DETERMINATION ***",
                      f"  {block['reason'].capitalize()} "
                      f"({block.get('article', '')}).".rstrip(". ") + ".",
@@ -695,7 +689,8 @@ def preflight_help(err_obj, o, err):
     print("ERROR: the model was REJECTED before any simulation ran.", file=err)
     print("", file=err)
     print(str(err_obj), file=err)  # already carries per-type did-you-mean hints
-    if not (o.get("space_type") or o.get("space_type_map")):
+    if ("space type(s) do not resolve" in str(err_obj)
+            and not (o.get("space_type") or o.get("space_type_map"))):
         print("", file=err)
         print("Fix: tag each space type with standardsBuildingType + "
               "standardsSpaceType", file=err)

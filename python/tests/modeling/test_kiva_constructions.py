@@ -49,6 +49,15 @@ class TestKivaCompatibleConstructions(unittest.TestCase):
         converted_floor = _floor(model, original, "Converted")
         untouched_floor = _floor(model, original, "Untouched")
 
+        self.assertEqual(
+            [], constructions.kiva_legalization_blockers(converted_floor),
+            "the read-only preflight must recognize the same sourced carpet "
+            "that the writer can replace",
+        )
+        self.assertEqual(
+            original.handle(), converted_floor.construction().get().handle(),
+            "eligibility inspection must not clone or assign a construction",
+        )
         change = constructions.kiva_legal(model, converted_floor)
 
         self.assertIsNotNone(change)
@@ -108,6 +117,13 @@ class TestKivaCompatibleConstructions(unittest.TestCase):
                 construction = _construction(model, finish)
                 floor = _floor(model, construction)
 
+                blockers = constructions.kiva_legalization_blockers(floor)
+                self.assertTrue(blockers)
+                self.assertTrue(
+                    any("no sourced Kiva-compatible replacement" in reason
+                        for reason in blockers),
+                    blockers,
+                )
                 self.assertIsNone(constructions.kiva_legal(model, floor))
                 self.assertEqual(
                     construction.handle(), floor.construction().get().handle())
