@@ -595,6 +595,147 @@ class TestEveryInvalidMeasurementIsRefused(unittest.TestCase):
         self.assertEqual([], list(model.getFoundationKivas()))
 
 
+@needs_sdk
+class TestZeroEdgeFactorFloorDoesNotContradictItself(unittest.TestCase):
+    """The audit and the report must agree about whether a target exists.
+
+    A zero-edge `GroundFCfactorMethod` floor was reported both ways at once:
+    `path.py#prepare_model` filtered it out as zero-edge and the run
+    determined normally, while the reference pass appended it to
+    `unsupported_ground_methods` BEFORE looking at the perimeter and warned
+    that "the building energy target is NOT established by this transform".
+    Fable's `299`, LOW.
+
+    A measured zero exposed edge means 3.2.3.3.(3) prescribes no strip
+    segment for that floor, so the missing F-factor translation costs the
+    target nothing. The rule mirrors `prepare_model` exactly — an ABSENT or
+    non-finite measurement is not a measured zero and still reports.
+    """
+
+    @staticmethod
+    def _unsupported_method_warnings(result):
+        """ONLY the reference transform's warning.
+
+        `path.py#prepare_model` emits its own "no validated ... foundation
+        method" line, so a loose filter matches that instead and is blind to
+        the code under test — with it, waiving EVERY perimeter still passed.
+        "retain a submitted foundation method" is unique to
+        `prescriptive.py`'s warning.
+        """
+        return [w for w in (result.report.get("warnings") or [])
+                if "retain a submitted foundation method" in w]
+
+    def _fixture(self, *, factor_floor):
+
+        model = proposed_with_hvac()
+        # Surface 25 is the fixture's interior floor: fully enclosed by its
+        # neighbours, so its measured exposed perimeter is zero.
+        floor = model.getSurfaceByName("Surface 25").get()
+        if factor_floor:
+            floor.setOutsideBoundaryCondition("GroundFCfactorMethod")
+        return model, floor
+
+    def test_a_zero_edge_factor_floor_reports_no_unestablished_target(self):
+        model, _floor = self._fixture(factor_floor=True)
+        result = _run(model, ground_model="kiva", hdd=STRIP_HDD)
+
+        # Assert on the SPECIFIC warning, not a substring: "NOT established"
+        # also appears in the interzone temperature-difference warnings that
+        # every run of this fixture emits, so a broad match passes or fails
+        # for reasons unrelated to ground methods.
+        self.assertEqual([], self._unsupported_method_warnings(result))
+        self.assertNotEqual("no_determination",
+                            result.report.get("compliance_determination"))
+
+    def test_an_ABSENT_measurement_is_not_a_measured_zero(self):
+        """`None` was claimed to report and never checked.
+
+        The code comment and D-32 both say an absent measurement is not a
+        measured zero and still reports, but nothing exercised it: mutating
+        the condition to `perimeter is None or (...)` passed 26/26. That
+        matters because absent is exactly what an embedded floor's perimeter
+        is in the pipeline's dict, so the mutation would have exempted every
+        embedded factor floor silently. Fable's `300`.
+        """
+        from btap.audit import AuditLog
+        from btap.codes import resolve
+        from btap.codes.necb.envelope import prescriptive
+
+        model, floor = self._fixture(factor_floor=True)
+        audit = AuditLog()
+        unsupported = []
+        prescriptive._assign_ground_floor(
+            model, floor, resolve("necb2020"), STRIP_HDD, True, {}, audit,
+            prescriptive._embedded_floor_inventory(model),
+            ground_floor_perimeters={},      # the floor's key is ABSENT
+            simple_ground_applied=[],
+            unsupported_ground_methods=unsupported)
+
+        self.assertEqual(1, len(unsupported),
+                         "an unmeasurable edge is not proof of zero and must "
+                         "still report the unsupported method")
+        self.assertEqual("Surface 25", unsupported[0]["floor"])
+
+    def test_an_EMBEDDED_zero_edge_factor_floor_is_NOT_exempt(self):
+        """The exemption's rationale is strip-only, so it needs the extent gate.
+
+        3.2.3.3.(3) prescribes no strip segment for a zero-edge floor — but an
+        EMBEDDED floor takes full area under 3.2.3.3.(4)(b) whatever its edge
+        measures, and there the missing applier DOES cost the target. Keying
+        only on the perimeter exempted it with a rationale that does not apply.
+
+        The embedded case is the one that reaches this: a full-area CLIMATE
+        leaves `ground_floor_perimeters` empty, so the perimeter is absent and
+        the floor reports anyway. An embedded floor in a STRIP climate has its
+        perimeter measured while its extent is already full area. Fable's
+        `300`, probe D.
+        """
+        from btap.audit import AuditLog
+        from btap.codes import resolve
+        from btap.codes.necb.envelope import prescriptive
+        from tests.necb.test_envelope_prescriptive import (
+            embedded_ground_floor_model,
+        )
+
+        model, floor, _foundation, _radiant = embedded_ground_floor_model()
+        floor.setOutsideBoundaryCondition("GroundFCfactorMethod")
+        inventory = prescriptive._embedded_floor_inventory(model)
+        self.assertEqual("embedded", inventory.status(floor.nameString()))
+
+        unsupported = []
+        prescriptive._assign_ground_floor(
+            model, floor, resolve("necb2020"), STRIP_HDD, True, {}, AuditLog(),
+            inventory,
+            # measured zero, as an interior embedded slab would be
+            ground_floor_perimeters={floor.nameString(): 0.0},
+            simple_ground_applied=[],
+            unsupported_ground_methods=unsupported)
+
+        self.assertEqual(
+            1, len(unsupported),
+            "an embedded floor is insulated over its FULL AREA, so a zero "
+            "exposed edge does not excuse the missing applier")
+
+    def test_an_EXPOSED_factor_floor_still_reports(self):
+        """The control. Without it this test could pass by never reporting at
+        all, and the unsupported-method disclosure is the thing we rely on."""
+
+        model = proposed_with_hvac()
+        floor = next(s for s in model.getSurfaces()
+                     if s.surfaceType() == "Floor"
+                     and s.outsideBoundaryCondition() == "Ground"
+                     and s.nameString() != "Surface 25")
+        floor.setOutsideBoundaryCondition("GroundFCfactorMethod")
+        result = _run(model, ground_model="kiva", hdd=STRIP_HDD)
+
+        self.assertEqual("no_determination",
+                         result.report.get("compliance_determination"),
+                         "an exposed factor floor has a strip segment BTAP "
+                         "cannot represent, so it must still refuse")
+        self.assertNotEqual([], self._unsupported_method_warnings(result),
+                            "and it must still SAY so")
+
+
 class TestTheModeIsValidatedAtTheBoundary(unittest.TestCase):
     def test_the_two_modes_are_accepted(self):
         for mode in ("kiva", "simple"):

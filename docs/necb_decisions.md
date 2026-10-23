@@ -1393,7 +1393,28 @@ not evidence: model coordinates may be shifted. Unknown no-mass materials and
 air gaps are valid in layered simple-Ground constructions and are not input
 defects merely because Kiva cannot accept them. A Kiva write or conversion
 limitation likewise falls back to symmetric simple Ground rather than blaming
-the submitted model. A genuine method-neutral defect raises
+the submitted model.
+
+Two limits of that attribution are recorded rather than left to be
+rediscovered (Fable, review of PR #134). **The co-planar test is exact**: a
+counterpart matching to three decimal places in world coordinates proves the
+contradiction, but a false `Ground` tag whose counterpart is offset even a
+centimetre is not detected and proceeds to a determination. That is
+deliberate — a tolerance wide enough to catch near-misses would also convict
+legitimately stacked assemblies, and convicting a valid model is the worse
+error. **A `Foundation` boundary with no foundation object is treated as a
+defect** although EnergyPlus accepts a blank reference and silently applies
+its own default Kiva settings. The defect classification is chosen because a
+reference built on engine defaults is not a reference this tool can account
+for under 8.4.1.1.(1); the submitter can repair it by attaching a foundation
+or reverting the boundary.
+
+A floor on an unsupported whole-foundation method whose exposed edge measures
+a **confirmed zero** is exempt from the method limitation entirely: 3.2.3.3.(3)
+prescribes no strip segment for it, so the absent applier costs the target
+nothing. Without that exemption the reference transform warned that the target
+was not established while the run determined normally — the audit and the
+report contradicted each other on one floor. A genuine method-neutral defect raises
 `compliance.PreflightError`; the CLI exits 3 before sizing or simulation and
 names every offending floor. Selecting `simple` cannot bypass such a defect.
 

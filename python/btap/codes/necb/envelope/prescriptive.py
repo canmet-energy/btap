@@ -512,6 +512,41 @@ def _assign_ground_floor(model, surface, ruleset, hdd, include_films, cache, aud
         ruleset=ruleset, hdd=hdd, embedded_system=embedded)
     condition = surface.outsideBoundaryCondition()
     if condition in ("GroundFCfactorMethod", "GroundSlabPreprocessorAverage"):
+        # A MEASURED zero exposed edge means 3.2.3.3.(3) prescribes no strip
+        # segment for this floor at all, so the missing translation costs the
+        # target nothing and must not be reported as though it did. Without
+        # this, `path.py#prepare_model` filtered the same floor out as
+        # zero-edge and let the run determine, while this pass warned that
+        # "the building energy target is NOT established by this transform" —
+        # the audit and the report contradicted each other on one floor.
+        # Fable's `299`, LOW. The test mirrors prepare_model's rule exactly:
+        # `<= Foundations.TOLERANCE_M`, and an absent or non-finite
+        # measurement is NOT a measured zero and still reports.
+        # The extent gate is NOT redundant with the perimeter. The rationale
+        # below — "3.2.3.3.(3) prescribes no perimeter-strip segment" — is
+        # true only in the STRIP branch. An embedded floor takes `full_area`
+        # under 3.2.3.3.(4)(b) whatever its edge measures, and there the
+        # missing applier DOES cost the target. Without this check, reaching
+        # `prescriptive.apply` directly (which measures embedded floors too)
+        # exempted an embedded zero-edge factor floor with a strip rationale
+        # that does not apply to it. Fable's `300`.
+        perimeter = ground_floor_perimeters.get(name)
+        if (extent["extent"] == "perimeter_strip"
+                and perimeter is not None and math.isfinite(perimeter)
+                and perimeter <= Foundations.TOLERANCE_M):
+            audit.info(
+                "prescriptive",
+                f"ground floor on the {condition} method has a measured zero "
+                "exposed edge, so 3.2.3.3.(3) prescribes no perimeter-strip "
+                "segment for it and the unsupported-method limitation does "
+                "not affect the building energy target",
+                target=name,
+                inputs={"boundary_condition": condition,
+                        "exposed_perimeter_m": perimeter,
+                        "zero_tolerance_m": Foundations.TOLERANCE_M,
+                        "extent": extent["extent"]},
+                article="3.2.3.3.(3)", ruling="D-32")
+            return
         unsupported_ground_methods.append({
             "floor": name,
             "boundary_condition": condition,
