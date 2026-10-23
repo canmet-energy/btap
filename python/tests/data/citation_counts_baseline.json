@@ -32,8 +32,8 @@
       "warn": 10
     },
     "8.4.1.2": {
-      "cited": 13,
-      "warn": 8
+      "cited": 14,
+      "warn": 9
     },
     "8.4.4.7": {
       "cited": 6,
@@ -110,8 +110,8 @@
       "warn": 10
     },
     "8.4.1.2": {
-      "cited": 13,
-      "warn": 8
+      "cited": 14,
+      "warn": 9
     },
     "8.4.5.7": {
       "cited": 6,
@@ -164,6 +164,7 @@
     "Re-baselined 2026-10-22 for D-32's ground-method symmetry correction. The pre-sizing NECB hook adds two literal `8.4.1.2.(2)` audit sites: one WARNING discloses the sourced CP02 no-mass-to-thin-carpet conversion and one decision records Kiva on both proposed and reference so the annual-energy comparison carries the prescribed strip rather than a solver change. The shared code is scanner-visible in both editions, so each edition's 8.4.1.2 count rises from cited 12/warn 7 to cited 13/warn 8 and the Section 8.4 total moves 222 -> 226. No existing citation is lost.",
     "Re-baselined 2026-10-22 for `--ground-model`. Both editions gain `8.4.1.1: {'warn': 2}`, taking the total from 226 to 230. The two new sites are the `--ground-model simple` refusal: `necb/path.py#prepare_model` records that no building energy target can be established, and `#determine` records that no determination is therefore made. Both cite `8.4.1.1.(1)`, which is the article that requires the target to account for Section 3.2's prescriptive requirements \u2014 the obligation `simple` cannot satisfy, because a floor on the simple `Ground` boundary has no slab edge for 3.2.3.3.(3)'s 1.2 m strip. They are WARN sites, not decisions, because the run is refusing rather than ruling. Nothing is lost: no existing count moves, and 8.4.1.1 was newly indexed in both editions' provision caches by Sol's `5c0a445e` for D-32's `ground_heat_transfer_method_symmetry` requirement, so the citation validates against the snapshot.",
     "Re-baselined 2026-10-23 for phylroy's preflight direction on D-32. The phase-2b `8.4.1.1.(1)` warning remains and now raises `PreflightError` before sizing; the second warning in `determine` is deleted because an invalid target no longer builds, sizes and simulates before being overridden. Each edition therefore moves from `8.4.1.1: {'warn': 2}` to `{'warn': 1}`, taking the Section 8.4 total from 230 to 228. This is an intentional removal of an unreachable late path, not a loss of the gate: the real pipeline witness fails if the preflight raise is replaced with a return while the full-area control remains green.",
-    "Re-baselined 2026-10-23 for phylroy's correction distinguishing OSM defects from request limitations. The model-fixable phase-2b gate remains unchanged, including when `simple` is selected. An otherwise Kiva-eligible model explicitly run with `simple` now completes for diagnostic output: `prepare_model` records that the requested mode leaves the target unestablished, and `determine` withholds the verdict last. Those two diagnostic `8.4.1.1.(1)` warning sites sit beside the retained input-preflight warning, so each edition moves from `8.4.1.1: {'warn': 1}` to `{'warn': 3}`, taking the Section 8.4 total from 228 to 232. The two call-site mutations are independent: bypassing the input gate reaches proposed sizing while the valid-simple control stays green; bypassing the late withholding loses the explicit no-determination block while the invalid-model gate stays green."
+    "Re-baselined 2026-10-23 for phylroy's correction distinguishing OSM defects from request limitations. The model-fixable phase-2b gate remains unchanged, including when `simple` is selected. An otherwise Kiva-eligible model explicitly run with `simple` now completes for diagnostic output: `prepare_model` records that the requested mode leaves the target unestablished, and `determine` withholds the verdict last. Those two diagnostic `8.4.1.1.(1)` warning sites sit beside the retained input-preflight warning, so each edition moves from `8.4.1.1: {'warn': 1}` to `{'warn': 3}`, taking the Section 8.4 total from 228 to 232. The two call-site mutations are independent: bypassing the input gate reaches proposed sizing while the valid-simple control stays green; bypassing the late withholding loses the explicit no-determination block while the invalid-model gate stays green.",
+    "Re-baselined 2026-10-23 for D-32's approved method-neutral correction. Simple Ground now establishes the reference target through the declared equivalent-UA approximation, and a valid simple-Ground floor that cannot be translated to Kiva falls back to that same symmetric method. The explicit simple-mode decision and the Kiva-fallback warning are two new `8.4.1.2.(2)` source sites, one cited and one warn in each edition. Both editions therefore move from cited 13/warn 8 to cited 14/warn 9, taking the Section 8.4 total from 232 to 236. No existing citation is lost."
   ]
 }

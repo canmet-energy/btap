@@ -76,9 +76,9 @@ class CodePath(Protocol):
         Called after the weather and climate are known and BEFORE the proposed
         sizing run, because both of the proposed's runs and the reference
         (which is a CLONE of the proposed) have to see the same model. NECB's
-        implementation switches eligible ordinary perimeter-strip floors to
-        the EnergyPlus Kiva foundation model so proposed and reference are
-        compared under the SAME ground physics.
+        implementation uses symmetric Kiva where supported, retains symmetric
+        simple Ground otherwise, and inventories the data the reference needs
+        for its equivalent-UA ground-floor target.
 
         The hook edits the pipeline's cloned proposed, never the caller's model.
         A calculation-method change can move simulated energy, so the boundary

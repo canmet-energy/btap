@@ -56,11 +56,13 @@ def apply(model, *, code, hdd=None, actual_roof_absorptance_used=False,
           thermal_bridging=None, audit=None):
     return _apply(model, resolve(code), hdd=hdd,
                   actual_roof_absorptance_used=actual_roof_absorptance_used,
-                  thermal_bridging=thermal_bridging, audit=audit)
+                  thermal_bridging=thermal_bridging, audit=audit,
+                  ground_floor_perimeters=None)
 
 
 def _apply(model, ruleset, *, hdd=None, actual_roof_absorptance_used=False,
-           thermal_bridging=None, audit=None, embedded_floor_inventory=None):
+           thermal_bridging=None, audit=None, embedded_floor_inventory=None,
+           ground_floor_perimeters):
     """The 8.4.4.3/.4 envelope transform against ONE resolved edition — the
     reference subsection, the prescriptive pass under it and the coverage
     emission all read the same :class:`btap.codes.Ruleset` (Stage 6)."""
@@ -73,7 +75,8 @@ def _apply(model, ruleset, *, hdd=None, actual_roof_absorptance_used=False,
     # 1. prescriptive Section 3.2 on the reference (no window rebuild here)
     Prescriptive._apply(model, ruleset=ruleset, hdd=hdd,
                        thermal_bridging=thermal_bridging, audit=audit,
-                       embedded_floor_inventory=embedded_floor_inventory)
+                       embedded_floor_inventory=embedded_floor_inventory,
+                       ground_floor_perimeters=ground_floor_perimeters)
     audit.decision("reference", "reference envelope meets prescriptive Section 3.2",
                    inputs={"hdd": hdd}, article=f"{prefix}.1.(2)")
 
@@ -263,7 +266,7 @@ def _apply_lightweight_construction(model, ruleset, hdd, prefix, audit):
         # Foundation-boundary surfaces (massless there is a hard E+ fatal), so
         # ONE material now serves every boundary.
         kiva = surface.outsideBoundaryCondition() == "Foundation"
-        key = (surface_class, boundary, ruby_round(conductance, 5),
+        key = (surface_class, boundary, conductance,
                ruby_round(solar, 4), ruby_round(thermal, 4), ruby_round(visible, 4))
         if key not in cache:
             t = LIGHTWEIGHT_THICKNESS_M
@@ -508,4 +511,5 @@ def reference_envelope(model, *, code, hdd=None, actual_roof_absorptance_used=Fa
     """Facade: reference envelope IN PLACE on the caller's clone."""
     return _apply(model, resolve(code), hdd=hdd,
                   actual_roof_absorptance_used=actual_roof_absorptance_used,
-                  thermal_bridging=thermal_bridging, audit=audit)
+                  thermal_bridging=thermal_bridging, audit=audit,
+                  ground_floor_perimeters=None)

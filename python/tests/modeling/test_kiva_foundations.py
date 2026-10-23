@@ -204,6 +204,36 @@ class TestExposedPerimeter(unittest.TestCase):
             [{"floor": "Twin A", "duplicates": ["Twin B"]},
              {"floor": "Twin B", "duplicates": ["Twin A"]}])
 
+    def test_only_a_coplanar_counterpart_not_absolute_elevation_is_a_conflict(self):
+        import openstudio
+
+        from btap.modeling.envelope import foundations
+
+        model = openstudio.model.Model()
+        construction = _concrete(model)
+        elevated = _slab(
+            model, "Elevated Ground", 0.0, 0.0, construction=construction,
+            elevation=4.055)
+        self.assertEqual(
+            [], foundations.coincident_surfaces(model, [elevated]),
+            "model coordinates may be shifted; elevation alone proves nothing")
+
+        counterpart = _slab(
+            model, "Interior Counterpart", 0.0, 0.0,
+            construction=construction, elevation=4.055, boundary="Surface")
+        self.assertEqual(
+            [{
+                "floor": "Elevated Ground",
+                "coincident_surfaces": [{
+                    "surface": "Interior Counterpart",
+                    "surface_type": "Floor",
+                    "boundary_condition": "Outdoors",
+                }],
+            }],
+            foundations.coincident_surfaces(model, [elevated]),
+        )
+        self.assertNotEqual(elevated.handle(), counterpart.handle())
+
     def test_a_space_less_surface_is_reported_not_crashed(self):
         """`Surface.exposedPerimeter()` SEGFAULTS without a parent Space.
 

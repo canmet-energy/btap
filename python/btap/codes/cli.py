@@ -208,14 +208,14 @@ def build_parser():
                    dest="ground_model",
                    help="ground heat transfer for slab-on-grade and basement "
                         "floors. kiva (default) solves a 2D soil domain on "
-                        "BOTH the proposed and the reference, which is what "
-                        "gives the reference a slab edge for the 3.2.3.3.(3) "
-                        "perimeter strip that 8.4.1.1.(1) requires the energy "
-                        "target to account for. simple keeps each floor's "
-                        "Ground boundary condition and is DIAGNOSTIC ONLY: "
-                        "where that strip applies it establishes no energy "
-                        "target, so the run makes NO determination (exit 6) "
-                        "rather than a pass or a fail")
+                             "BOTH proposed and reference where the submitted "
+                             "construction supports it; the reference receives the "
+                             "physical 3.2.3.3.(3) perimeter treatment. simple "
+                             "keeps each Ground boundary on both sides and applies "
+                             "a disclosed uniform equivalent-UA approximation to "
+                             "the reference. Valid F-factor methods are preserved "
+                             "but currently yield NO determination (exit 6) because "
+                             "BTAP has no validated NECB factor translation")
     p.add_argument("--quick", action="store_true",
                    help="one-week run period - NOT a code determination")
     p.add_argument("--backend", choices=["local", "remote"], default="local",

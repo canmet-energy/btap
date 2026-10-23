@@ -95,22 +95,26 @@ maps to `EXIT["preflight"] = 3`, and all stamp
   unresolvable type yields a reference identical to the proposed for that
   space: the allowance is waived and the proposed is compared against itself.
   You cannot certify a building whose reference silently failed to build.
-- **Any required exposed GROUND STRIP that cannot be represented**
-  (`path.prepare_model`): after HDD selects the ordinary perimeter-strip
-  branch, every applicable reference-envelope floor is inventoried before any
-  floor is changed. A positive, missing or non-finite exposed perimeter
-  whose submitted boundary, parent space, geometry or construction cannot
-  support Kiva is fatal because 8.4.1.1.(1)'s target would omit
-  3.2.3.3.(3)'s required strip. A finite measured zero is the only waiver.
-  The model check runs independently of the selected mode, so
-  `--ground-model simple` cannot bypass an OSM defect; full-area climates and
-  floors outside the reference envelope are not gated.
+- **Any required ground-floor target whose method-neutral inputs are
+  indeterminate** (`path.prepare_model`): after HDD selects the ordinary
+  perimeter branch, every applicable reference-envelope floor is inventoried
+  before any floor is changed. Missing or non-finite geometry/perimeter,
+  missing or unusable simple-Ground construction, a parentless floor, or an
+  exact co-planar counterpart proving a false Ground adjacency is fatal
+  because no lawful reference representation can be derived. Absolute
+  elevation alone is not a defect. A finite measured zero gives a zero strip
+  fraction. The model check runs independently of the selected mode, so
+  `--ground-model simple` cannot bypass an OSM defect; floors outside the
+  reference envelope are not gated.
 
-  `--ground-model simple` on an otherwise Kiva-eligible model is a limitation
-  of the REQUEST, not an input defect. It completes the requested diagnostic
-  lifecycle, retains any computed energies, emits no determination
-  (`compliant = null`) and exits 6. Rerun with `kiva` to establish the target;
-  do not tell the submitter to repair a valid file.
+  Kiva is the higher-fidelity symmetric default where supported. A valid
+  simple-Ground floor that Kiva cannot translate (including unknown no-mass or
+  air-gap layers) remains simple on both sides; the reference uses D-32's
+  declared equivalent-UA approximation and can establish a normal target.
+  Valid `GroundFCfactorMethod` input is a tool limitation, not an input defect:
+  it is preserved, the diagnostic lifecycle completes, and the run emits no
+  determination (`compliant = null`, exit 6) until a validated NECB F-factor
+  applier exists. Do not tell the submitter to replace a valid method.
 
 **Do not plan around this gate as though it were missing.** A draft of
 `docs/plans/PROPOSED_CHARACTERIZATION_PLAN.md` proposed adding the three

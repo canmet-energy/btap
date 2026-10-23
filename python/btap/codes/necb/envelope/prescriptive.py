@@ -1,7 +1,7 @@
 """Prescriptive Section 3.2 application (port of btap-necb's
-envelope/prescriptive.rb): set every exterior/ground surface and subsurface to
-its Table 3.2.2.x/3.2.3.1 maximum U at the building's HDD, and optionally
-rebuild fenestration to the 3.2.1.4 FDWR/SRR limits.
+envelope/prescriptive.rb): apply the Table 3.2.2.x/3.2.3.1 target and extent
+for exterior/ground surfaces and subsurfaces at the building's HDD, and
+optionally rebuild fenestration to the 3.2.1.4 FDWR/SRR limits.
 
 Application is by HARD ASSIGNMENT of deep-copied constructions (one copy per
 unique construction x target, legacy naming/reuse conventions preserved) —
@@ -30,6 +30,7 @@ changing, so a literal was wrong on every 2025 run (Sol, applicability review).
 
 from __future__ import annotations
 
+import math
 from collections import defaultdict
 from dataclasses import dataclass, field
 
@@ -47,6 +48,7 @@ from btap.codes.necb.envelope.rules import (
     _max_u,
 )
 from btap.modeling.envelope import constructions as Constructions
+from btap.modeling.envelope import foundations as Foundations
 
 SUBSURFACE_CLASS = {
     "FixedWindow": "window", "OperableWindow": "window", "GlassDoor": "window",
@@ -162,7 +164,7 @@ def apply(model, *, code, hdd=None, apply_fdwr=False, apply_srr=False,
 
 def _apply(model, ruleset, *, hdd=None, apply_fdwr=False, apply_srr=False,
            include_films=True, thermal_bridging=None, audit=None,
-           embedded_floor_inventory=None):
+           embedded_floor_inventory=None, ground_floor_perimeters=None):
     """The prescriptive pass over ONE resolved edition: the surface loop and
     every table lookup under it read the same :class:`btap.codes.Ruleset`
     rather than re-resolving the edition per surface (Stage 6)."""
@@ -175,6 +177,19 @@ def _apply(model, ruleset, *, hdd=None, apply_fdwr=False, apply_srr=False,
         if embedded_floor_inventory is None
         else embedded_floor_inventory
     )
+    if ground_floor_perimeters is None:
+        strip_extent = _ground_floor_extent(
+            ruleset=ruleset, hdd=hdd, embedded_system=False)
+        if strip_extent["extent"] == "perimeter_strip":
+            ground_floor_perimeters = Foundations.exposed_perimeters(
+                model,
+                [
+                    surface for surface in model.getSurfaces()
+                    if _is_ground_floor(surface)
+                ],
+            )["perimeters"]
+        else:
+            ground_floor_perimeters = {}
 
     audit.info("prescriptive", "film convention",
                value=("code-literal: table U treated as overall transmittance incl. air "
@@ -195,15 +210,8 @@ def _apply(model, ruleset, *, hdd=None, apply_fdwr=False, apply_srr=False,
     # told an AHJ reader one fact ninety times and crowded out the rest of the
     # trail. One warning carries the count and every pair.
     interzone_unchanged = []
-    # 3.2.3.3.(3)'s 1.2 m insulated perimeter strip needs a Kiva foundation to
-    # be representable. Where there is none the slab is left AS MODELLED —
-    # prescribed insulation NOT applied — so unlike a diagnostic this one is
-    # compliance-material and must stay prominent. It was emitted per surface:
-    # 588 times across 26 archetypes, ~22 per model, which buried the finding
-    # in copies of itself. Nothing in this package creates Kiva foundations,
-    # so the condition is a property of the INPUT model, stated once with
-    # every floor named.
-    kiva_missing = []
+    simple_ground_applied = []
+    unsupported_ground_methods = []
     for surface in sorted_by_name(model.getSurfaces()):
         surface_class = SURFACE_CLASS.get(surface.surfaceType())
         if surface_class is None:
@@ -226,7 +234,10 @@ def _apply(model, ruleset, *, hdd=None, apply_fdwr=False, apply_srr=False,
         if boundary == "ground" and surface_class == "floor":
             _assign_ground_floor(
                 model, surface, ruleset, hdd, include_films, cache, audit,
-                embedded_floor_inventory, kiva_missing)
+                embedded_floor_inventory,
+                ground_floor_perimeters=ground_floor_perimeters,
+                simple_ground_applied=simple_ground_applied,
+                unsupported_ground_methods=unsupported_ground_methods)
         else:
             _assign_surface(model, surface, surface_class, boundary, ruleset, hdd,
                             include_films, cache, audit)
@@ -248,14 +259,27 @@ def _apply(model, ruleset, *, hdd=None, apply_fdwr=False, apply_srr=False,
             if sub_class == "skylight" and skylight_construction is None:
                 skylight_construction = construction
 
-    if kiva_missing:
+    if simple_ground_applied:
+        audit.decision(
+            "prescriptive",
+            f"{len(simple_ground_applied)} simple-Ground floor(s) represent "
+            "the 1.2 m minimum perimeter extent through a uniform equivalent "
+            "UA; strip area is approximated as exposed perimeter x 1.2 m, "
+            "capped at floor area, and is NOT an exact geometric band",
+            inputs={"floors": len(simple_ground_applied),
+                    "surfaces": simple_ground_applied},
+            article="3.2.3.3.(3)", ruling="D-32",
+        )
+
+    if unsupported_ground_methods:
         audit.warn(
             "prescriptive",
-            f"{len(kiva_missing)} ground floors have NO Kiva foundation in a "
-            "perimeter-strip zone — the 1.2 m insulated strip required by "
-            "3.2.3.3.(3) is not representable and those slabs are left AS "
-            "MODELLED, so the prescribed perimeter insulation is NOT applied",
-            inputs={"floors": len(kiva_missing), "surfaces": kiva_missing},
+            f"{len(unsupported_ground_methods)} ground floor(s) retain a "
+            "submitted foundation method for which BTAP has no validated "
+            "NECB reference applier; the building energy target is NOT "
+            "established by this transform",
+            inputs={"floors": len(unsupported_ground_methods),
+                    "surfaces": unsupported_ground_methods},
             article="3.2.3.3.(3)", ruling="D-32",
         )
 
@@ -456,16 +480,16 @@ def _assign_surface(model, surface, surface_class, boundary, ruleset, hdd,
 
 
 def _assign_ground_floor(model, surface, ruleset, hdd, include_films, cache, audit,
-                         embedded_floor_inventory, kiva_missing=None):
+                         embedded_floor_inventory, *,
+                         ground_floor_perimeters,
+                         simple_ground_applied,
+                         unsupported_ground_methods):
     """Table 3.2.3.1 floors row is zone-conditional: zone 8 prescribes the
     table U over the FULL slab area; zones 4-7B prescribe it only within a
     1.2 m perimeter strip (3.2.3.3.(3)) and leave the slab field without a
-    maximum. Full-area zones retarget the construction like any other surface;
-    strip zones keep the modeled slab and represent the strip with the Kiva
-    foundation's interior horizontal insulation. (Legacy OSut archetypes model
-    the bare slab and OMIT the strip; the old BTAP path applied the strip U
-    over the full area — both simplifications diverge from the printed table,
-    see D-32.)"""
+    maximum. Full-area zones retarget layered constructions directly. In strip
+    zones Kiva carries the physical band where available; simple Ground uses
+    the declared equivalent-UA approximation in D-32."""
     name = surface.nameString()
     status = embedded_floor_inventory.status(name)
     evidence = embedded_floor_inventory.evidence.get(name, [])
@@ -486,6 +510,19 @@ def _assign_ground_floor(model, surface, ruleset, hdd, include_films, cache, aud
     embedded = status == "embedded"
     extent = _ground_floor_extent(
         ruleset=ruleset, hdd=hdd, embedded_system=embedded)
+    condition = surface.outsideBoundaryCondition()
+    if condition in ("GroundFCfactorMethod", "GroundSlabPreprocessorAverage"):
+        unsupported_ground_methods.append({
+            "floor": name,
+            "boundary_condition": condition,
+            "extent": extent["extent"],
+            "reason": (
+                "BTAP has no validated translation from the NECB assembly U "
+                "and placement extent to this whole-foundation method"
+            ),
+        })
+        return
+
     if extent["extent"] == "full_area":
         construction = _assign_surface(
             model, surface, "floor", "ground", ruleset, hdd,
@@ -506,8 +543,105 @@ def _assign_ground_floor(model, surface, ruleset, hdd, include_films, cache, aud
                 surface, construction, audit)
         return
 
-    _apply_ground_strip(model, surface, ruleset, hdd, include_films,
-                        extent["width_m"], cache, audit, kiva_missing)
+    if surface.adjacentFoundation().is_initialized():
+        _apply_ground_strip(model, surface, ruleset, hdd, include_films,
+                            extent["width_m"], cache, audit)
+        return
+
+    if condition == "Ground":
+        _apply_simple_ground_equivalent(
+            model, surface, ruleset, hdd, include_films, extent["width_m"],
+            ground_floor_perimeters.get(name), cache, simple_ground_applied,
+            unsupported_ground_methods)
+        return
+
+    unsupported_ground_methods.append({
+        "floor": name,
+        "boundary_condition": condition,
+        "extent": extent["extent"],
+        "reason": "the ground boundary has no attached Kiva foundation",
+    })
+
+
+def _apply_simple_ground_equivalent(
+        model, surface, ruleset, hdd, include_films, width_m, perimeter_m,
+        cache, applied, unsupported):
+    """Apply D-32's uniform equivalent UA without replacing slab dynamics."""
+    name = surface.nameString()
+    construction = opt(surface.construction())
+    layered = (
+        None if construction is None
+        else opt(construction.to_LayeredConstruction())
+    )
+    conductance = (
+        None if layered is None
+        else opt(layered.thermalConductance())
+    )
+    area_m2 = float(surface.grossArea())
+    invalid = []
+    if layered is None:
+        invalid.append("surface has no layered construction")
+    if conductance is None or not math.isfinite(conductance) or conductance <= 0:
+        invalid.append(
+            f"construction conductance is {conductance!r}, not a finite "
+            "positive value")
+    if not math.isfinite(area_m2) or area_m2 <= 0:
+        invalid.append(
+            f"floor area is {area_m2!r} m2, not a finite positive area")
+    if (perimeter_m is None or not math.isfinite(perimeter_m)
+            or perimeter_m < 0):
+        invalid.append(
+            f"exposed perimeter is {perimeter_m!r}, not a finite "
+            "non-negative length")
+    if invalid:
+        unsupported.append({
+            "floor": name,
+            "boundary_condition": surface.outsideBoundaryCondition(),
+            "extent": "perimeter_strip",
+            "reason": "; ".join(invalid),
+        })
+        return
+
+    effective_perimeter = (
+        0.0 if perimeter_m <= Foundations.TOLERANCE_M else perimeter_m)
+    strip_area_m2 = min(area_m2, effective_perimeter * width_m)
+    fraction = strip_area_m2 / area_m2
+    film_r = (
+        Constructions.film_r("floor", "ground") if include_films else 0.0)
+    u_field = 1.0 / ((1.0 / conductance) + film_r)
+    u_table = _max_u(
+        ruleset=ruleset, surface="floor", boundary="ground", hdd=hdd)
+    u_strip = min(u_field, u_table)
+    u_equivalent = fraction * u_strip + (1.0 - fraction) * u_field
+    target_conductance = 1.0 / ((1.0 / u_equivalent) - film_r)
+
+    changed = not math.isclose(
+        target_conductance, conductance, rel_tol=1e-10, abs_tol=1e-10)
+    if changed:
+        key = (
+            str(construction.handle()), "floor", "ground",
+            "simple-equivalent-ua", target_conductance,
+        )
+        if key not in cache:
+            cache[key] = Constructions.opaque_at_conductance(
+                model, layered, target_conductance,
+                name_discriminator=f"D32 {name}")
+        surface.setConstruction(cache[key])
+
+    applied.append({
+        "floor": name,
+        "exposed_perimeter_m": ruby_round(effective_perimeter, 4),
+        "floor_area_m2": ruby_round(area_m2, 4),
+        "strip_width_m": width_m,
+        "strip_area_approx_m2": ruby_round(strip_area_m2, 4),
+        "strip_area_fraction": ruby_round(fraction, 6),
+        "field_u_overall_w_m2k": ruby_round(u_field, 6),
+        "table_u_overall_w_m2k": ruby_round(u_table, 6),
+        "strip_u_overall_w_m2k": ruby_round(u_strip, 6),
+        "equivalent_u_overall_w_m2k": ruby_round(u_equivalent, 6),
+        "target_u_construction_w_m2k": ruby_round(target_conductance, 6),
+        "construction_changed": changed,
+    })
 
 
 def _construction_thickness(construction):
@@ -793,21 +927,11 @@ def _apply_embedded_floor_perimeter(surface, construction, audit):
 
 
 def _apply_ground_strip(model, surface, ruleset, hdd, include_films, width_m,
-                        cache, audit, kiva_missing=None):
+                        cache, audit):
     kiva = opt(surface.adjacentFoundation())
     if kiva is None:
-        # `is None` keeps a direct caller warning per surface rather than
-        # dropping a material disclosure; the loop passes a list and reports
-        # once with every floor named.
-        if kiva_missing is None:
-            audit.warn("prescriptive",
-                       "ground floor without a Kiva foundation in a perimeter-strip zone — "
-                       "the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled",
-                       target=surface.nameString(),
-                       article="3.2.3.3.(3)", ruling="D-32")
-        else:
-            kiva_missing.append(surface.nameString())
-        return
+        raise RuntimeError(
+            f"{surface.nameString()} has no adjacent Kiva foundation")
 
     u = _max_u(ruleset=ruleset, surface="floor", boundary="ground", hdd=hdd)
     target = (1.0 / ((1.0 / u) - Constructions.film_r("floor", "ground"))
