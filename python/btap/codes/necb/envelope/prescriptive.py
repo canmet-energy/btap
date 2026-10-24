@@ -271,16 +271,78 @@ def _apply(model, ruleset, *, hdd=None, apply_fdwr=False, apply_srr=False,
             article="3.2.3.3.(3)", ruling="D-32",
         )
 
-    if unsupported_ground_methods:
+    # SPLIT BY WHICH SENTENCE GOVERNS, because one hard-coded citation cannot
+    # serve mixed statuses. 3.2.3.3.(3) applies only to floors with NO
+    # embedded heating or cooling system — it EXPRESSLY EXCLUDES an embedded
+    # floor — so citing it for a known embedded entry cited an article that
+    # does not reach the floor it was attached to. An embedded floor's
+    # obligation is 3.2.3.3.(4)'s full area in every climate zone, adjudicated
+    # by D-105 (Sol, `307`).
+    #
+    # `unresolved` NEVER REACHES HERE, which is why only two groups exist and
+    # why Sol recorded that this adjudication establishes no frozen delta: the
+    # `status == "unresolved"` branch above returns at its own D-105 warning
+    # before the factor branch can append anything. That matters because Sol
+    # ruled `unresolved` is a TOOL EVIDENCE STATE and not a third Code
+    # category — the Code offers only "no embedded system, (3) controls" or
+    # "embedded, (4) controls" — so it must never be described as though (4)
+    # were known to apply. `test_an_unresolved_floor_never_reaches_this_
+    # warning` pins the early return: if it is ever removed, an unresolved
+    # floor would silently inherit the Sentence (3) citation that Sol's
+    # reasoning forbids, and that must surface as a failure.
+    # Classified HERE from the inventory rather than carried on each entry,
+    # so the audit payload is unchanged and no frozen baseline moves — Sol
+    # recorded that this adjudication establishes no frozen delta.
+    embedded_rows = [
+        row for row in unsupported_ground_methods
+        if embedded_floor_inventory.status(row["floor"]) == "embedded"]
+    ordinary_rows = [
+        row for row in unsupported_ground_methods
+        if embedded_floor_inventory.status(row["floor"]) != "embedded"]
+
+    # TWO EXPLICIT CALLS, because `article=` and `ruling=` must be LITERALS.
+    # A loop over (key, article, ruling) tuples made both computed, and
+    # `test_decisions_registry` scans this source with `ast` — it collects a
+    # citation only from an `ast.Constant`, because that static inventory is
+    # what proves every `kind: runtime` decision is cited by product code. A
+    # computed `ruling=` is invisible to it, so D-105's citation here would
+    # not count. Both that test and `test_a_dynamic_swap_is_caught` refused
+    # the loop, correctly.
+    #
+    # NOT about the 8.4 coverage document: that is scoped to Section 8.4 and
+    # carries no 3.2.3.3 rows at all, and `citation_counts_baseline.json`
+    # does not track Section 3.2 either. The literal buys the static ruling
+    # inventory, not a coverage row — checked rather than assumed, because
+    # the first version of this comment claimed the coverage document.
+    if ordinary_rows:
         audit.warn(
             "prescriptive",
-            f"{len(unsupported_ground_methods)} ground floor(s) retain a "
+            f"{len(ordinary_rows)} ground floor(s) retain a "
             "submitted foundation method for which BTAP has no validated "
             "NECB reference applier; the building energy target is NOT "
             "established by this transform",
-            inputs={"floors": len(unsupported_ground_methods),
-                    "surfaces": unsupported_ground_methods},
+            inputs={"floors": len(ordinary_rows), "surfaces": ordinary_rows},
             article="3.2.3.3.(3)", ruling="D-32",
+        )
+
+    if embedded_rows:
+        audit.warn(
+            "prescriptive",
+            f"{len(embedded_rows)} ground floor(s) retain a "
+            "submitted foundation method for which BTAP has no validated "
+            "NECB reference applier; the building energy target is NOT "
+            "established by this transform",
+            inputs={"floors": len(embedded_rows), "surfaces": embedded_rows},
+            # BOTH rulings, because this one entry makes both claims and a
+            # ruling attaches to the runtime choice the entry states. D-105
+            # governs WHY this floor has a full-area requirement; D-32 governs
+            # the rest of the same action — the submitted whole-foundation
+            # method is retained, BTAP has no validated applier for it, and
+            # the target is not established by this transform. D-105 contains
+            # no whole-foundation translation or no-determination ruling, and
+            # the separate prepare/compliance entries that also fire D-32 do
+            # NOT repair the local attribution (Sol, `309`).
+            article="3.2.3.3.(4)", ruling="D-32 D-105",
         )
 
     if interzone_unchanged:
