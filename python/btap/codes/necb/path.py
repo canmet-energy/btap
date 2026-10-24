@@ -122,6 +122,27 @@ def climate(run):
                                   audit=run.audit)}
 
 
+def _ground_class_floors(model, prescriptive):
+    """Every in-envelope ground-class floor, embedded status disregarded.
+
+    `_ordinary_ground_floors` below is for the perimeter-strip machinery, which
+    legitimately skips embedded floors. This one is for questions that apply to
+    any ground floor regardless of what is embedded in it — whether a reference
+    can be built in the submitted method at all.
+    """
+    from btap._compat import sorted_by_name
+
+    return [
+        surface for surface in sorted_by_name(model.getSurfaces())
+        if surface.surfaceType() == "Floor"
+        and prescriptive.boundary_of(surface) == "ground"
+        and (
+            opt(surface.space()) is None
+            or prescriptive.inside_envelope(surface.space().get())
+        )
+    ]
+
+
 def _ordinary_ground_floors(model, inventory, prescriptive):
     from btap._compat import sorted_by_name
 
@@ -281,16 +302,27 @@ def prepare_model(run):
     floors = _ordinary_ground_floors(
         proposed, inventory, envelope.prescriptive)
     run.state["ground_floor_perimeters"] = {}
+    # The method limitation is NOT restricted to ordinary floors. `floors`
+    # excludes embedded and unresolved-embedded floors because they need no
+    # perimeter strip — but whether a reference can be built in the SUBMITTED
+    # method at all is a different question, and 8.4.1.1.(1) asks it of every
+    # ground floor. An embedded floor's requirement is 3.2.3.3.(4)(b) full-area
+    # insulation; if BTAP cannot express that in the submitted method, the
+    # target omits a required component exactly as it does for an ordinary
+    # floor. Built from every ground-class floor in the envelope, so an
+    # exposed embedded factor floor no longer gets a verdict in silence.
+    # Fable's `300`, attributed to #134.
     method_limits = [
         {
             "floor": surface.nameString(),
             "boundary_condition": surface.outsideBoundaryCondition(),
+            "embedded_status": inventory.status(surface.nameString()),
             "reason": (
                 "a validated NECB reference applier for this whole-foundation "
                 "method is not implemented"
             ),
         }
-        for surface in floors
+        for surface in _ground_class_floors(proposed, envelope.prescriptive)
         if surface.outsideBoundaryCondition() in (
             "GroundFCfactorMethod", "GroundSlabPreprocessorAverage")
     ]
@@ -301,6 +333,15 @@ def prepare_model(run):
         _record_ground_method_limit(run, method_limits)
         return
     if not floors:
+        # The method limitation must STILL be recorded here. `floors` is the
+        # ORDINARY list, while `method_limits` is now built from every
+        # ground-class floor, so a model whose ground floors are all embedded
+        # or unresolved has an empty `floors` and a non-empty limitation at
+        # once. Returning without recording gave that model a verdict in
+        # silence while the prescriptive pass warned the target was not
+        # established — the contradiction this change exists to remove, by the
+        # one route it did not test. Fable's `302`, probe B4.
+        _record_ground_method_limit(run, method_limits)
         return
 
     measured = foundations.exposed_perimeters(proposed, floors)
@@ -310,9 +351,27 @@ def prepare_model(run):
     if defects:
         with audit.with_building("input model"):
             _raise_ground_strip_preflight(audit, mode, defects)
+    # Only a floor whose prescribed treatment IS the strip can be excused by a
+    # zero edge. An embedded floor takes full area under 3.2.3.3.(4)(b)
+    # whatever its edge measures, so it stays on the list — the same
+    # distinction `prescriptive._assign_ground_floor` draws. A floor absent
+    # from `measured` was never measured and is not a measured zero.
+    # Drop a floor ONLY when all three hold: its prescribed treatment is the
+    # strip, its edge was actually measured, and that measurement is a zero.
+    #
+    # Each clause carries weight. An embedded floor takes full area under
+    # 3.2.3.3.(4)(b), so a zero edge excuses nothing — and it is never in
+    # `measured` anyway, because that is computed from ordinary floors alone,
+    # so a `.get(..., 0.0)` default would silently treat every embedded floor
+    # as zero-edge. And an ABSENT measurement is not a measured zero: the same
+    # distinction `prescriptive._assign_ground_floor` draws, which Fable's Z3
+    # mutation caught there.
+    perimeters = measured["perimeters"]
     method_limits = [
         row for row in method_limits
-        if measured["perimeters"][row["floor"]] > foundations.TOLERANCE_M
+        if not (row["embedded_status"] == "ordinary"
+                and row["floor"] in perimeters
+                and perimeters[row["floor"]] <= foundations.TOLERANCE_M)
     ]
 
     converted = []
