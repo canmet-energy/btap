@@ -20,6 +20,8 @@
     "17-vav-hw-reheat",
     "18-vav-hw-subset-reheat",
     "19-corner-block-5storey",
-    "20-humidified-psz"
+    "20-humidified-psz",
+    "21-ground-f-factor",
+    "22-ground-f-factor-all-non-ordinary"
   ]
 }

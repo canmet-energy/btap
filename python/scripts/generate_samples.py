@@ -181,6 +181,145 @@ _humidified.after_build = True
 # optional callable is model-level setup the plain SAMPLES tuple cannot express.
 #
 #   (slug, catalog system, article + what to look for, setup(model) | None)
+def _ground_f_factor(model):
+    """A ground floor submitted on the F-factor method.
+
+    NO other sample carries a whole-foundation method other than simple
+    `Ground`, and the frozen corpus therefore never selected the branch where
+    BTAP has no validated NECB reference applier at all.
+
+    What this sample covers, exactly: the branch SELECTION and the
+    `no_determination` emission. Its factor floor is `ordinary` and the seed's
+    four other ground floors keep the ordinary list non-empty, so it does NOT
+    exercise the embedded or all-embedded routes that the two silent-verdict
+    defects of 9454b902 lived on — Fable witnessed both reverts leaving this
+    scenario green (`303`). Sample 22 is the one shaped for those.
+
+    `Construction:FfactorGroundFloor` carries no layers: EnergyPlus derives an
+    effective U from F, area and exposed perimeter, soil and both films
+    included. That is why it cannot be reconciled with NECB's assembly U by
+    unit inspection alone, and why the reference applier is still open work.
+    F = 1.26 W/m-K is an uninsulated unheated slab, and the area and exposed
+    perimeter are the floor's own measured values, so the sample simulates
+    coherently rather than merely parsing.
+
+    The run emits NO determination (`compliant = null`, exit 6) by design.
+    That is the disclosure under 8.4.1.1.(1), not a failure of the sample.
+    """
+    import openstudio  # local, as everywhere else in this script
+
+    from btap._compat import sorted_by_name
+    from btap.modeling.envelope import foundations
+
+    grounds = [s for s in sorted_by_name(model.getSurfaces())
+               if s.surfaceType() == "Floor"
+               and s.outsideBoundaryCondition() == "Ground"]
+    if not grounds:
+        raise SystemExit("f-factor sample: the seed has no simple-Ground floor")
+
+    floor = grounds[0]
+    # MEASURED, not assumed. `4*sqrt(area)` treats every floor as a square:
+    # Surface 1 is a perimeter-zone trapezoid whose total perimeter is 43.8 m
+    # and whose EXPOSED edge is 20.0 m, so the square assumption declared
+    # 33.6 m and overstated slab edge loss by 68% against the sample's own
+    # geometry. EnergyPlus derives the slab U from F*P/A, so that is a physics
+    # error, not a cosmetic one. Measured here while the floor is still simple
+    # `Ground`, because that is what `exposed_perimeters` reads. Fable's `303`.
+    perimeter = foundations.exposed_perimeters(
+        model, [floor])["perimeters"][floor.nameString()]
+    construction = openstudio.model.FFactorGroundFloorConstruction(model)
+    construction.setName("Slab-on-grade F-factor construction")
+    construction.setFFactor(1.26)
+    construction.setArea(floor.grossArea())
+    construction.setPerimeterExposed(perimeter)
+    floor.setConstruction(construction)
+    floor.setOutsideBoundaryCondition("GroundFCfactorMethod")
+
+
+def _ground_f_factor_all_non_ordinary(model):
+    """Every ground floor non-ordinary, the F-factor floor among them.
+
+    Sample 21 covers the branch selection; this covers the two routes the
+    silent-verdict defects of `9454b902` actually lived on, both of which
+    needed the ORDINARY list to be empty or the limitation to be built from it:
+
+    - `method_limits` built from the ordinary floors only, which dropped a
+      non-ordinary factor floor entirely;
+    - `if not floors: return` running before the only remaining record site,
+      which dropped the limitation for a model with no ordinary ground floor.
+
+    Fable witnessed both reverts leaving sample 21 GREEN and this shape
+    catching both (`303`).
+
+    A factor floor can NEVER be `embedded`: `Construction:FfactorGroundFloor`
+    carries no layers, so it cannot be a `ConstructionWithInternalSource` and
+    no radiant unit resolves it. It reaches `unresolved` instead, through a
+    floor-radiant unit on its zone that names no surfaces. The other four
+    ground floors take a genuine internal-source construction and are
+    `embedded`. So this is a PIPELINE-level shape — the statuses are what the
+    inventory derives, not a slab anyone pours — and it is here to hold the
+    inventory's branches, not to teach a construction detail.
+
+    One consequence worth knowing: the ForwardTranslator DROPS a surface-less
+    floor-radiant unit with no warning, so the `unresolved` status exists in
+    the OSM only and no IDF carries it (Fable, `303`).
+    """
+    import openstudio  # local, as everywhere else in this script
+
+    from btap._compat import sorted_by_name
+    from btap.modeling.envelope import foundations
+
+    grounds = [s for s in sorted_by_name(model.getSurfaces())
+               if s.surfaceType() == "Floor"
+               and s.outsideBoundaryCondition() == "Ground"]
+    if len(grounds) < 2:
+        raise SystemExit(
+            "all-non-ordinary f-factor sample: the seed needs several "
+            "simple-Ground floors, so that the ORDINARY list ends up empty")
+
+    factor_floor, rest = grounds[0], grounds[1:]
+
+    # The others: genuinely embedded. The insulation layer is required — the
+    # reference applier raises "no insulation layer identifiable" on a
+    # single-layer slab, so a bare internal-source construction would make the
+    # sample ungenerable rather than embedded.
+    embedded = openstudio.model.ConstructionWithInternalSource(model)
+    embedded.setName("Embedded slab with internal source")
+    slab = openstudio.model.StandardOpaqueMaterial(
+        model, "MediumRough", 0.1, 1.8, 2300, 900)
+    insulation = openstudio.model.StandardOpaqueMaterial(
+        model, "Smooth", 0.05, 0.035, 30, 1200)
+    insulation.setName("Embedded slab insulation")
+    embedded.setLayers([slab, insulation])
+    embedded.setSourcePresentAfterLayerNumber(1)
+    embedded.setTemperatureCalculationRequestedAfterLayerNumber(1)
+    for surface in rest:
+        surface.setConstruction(embedded)
+
+    # The factor floor: measured first, as in `_ground_f_factor`.
+    perimeter = foundations.exposed_perimeters(
+        model, [factor_floor])["perimeters"][factor_floor.nameString()]
+    construction = openstudio.model.FFactorGroundFloorConstruction(model)
+    construction.setName("Slab-on-grade F-factor construction")
+    construction.setFFactor(1.26)
+    construction.setArea(factor_floor.grossArea())
+    construction.setPerimeterExposed(perimeter)
+    factor_floor.setConstruction(construction)
+    factor_floor.setOutsideBoundaryCondition("GroundFCfactorMethod")
+
+    # ...and `unresolved`, via a radiant unit that resolves no surfaces.
+    radiant = openstudio.model.ZoneHVACLowTemperatureRadiantElectric(
+        model, model.alwaysOnDiscreteSchedule(),
+        model.alwaysOnDiscreteSchedule())
+    radiant.setName("Floor radiant naming no surfaces")
+    radiant.setRadiantSurfaceType("Floors")
+    zone = factor_floor.space().get().thermalZone()
+    if not zone.is_initialized():
+        raise SystemExit("all-non-ordinary f-factor sample: factor floor has "
+                         "no thermal zone to carry the radiant unit")
+    radiant.addToThermalZone(zone.get())
+
+
 STRESS_CASES = (
     ("13-district-heating",
      "DOAS with fan coil air-cooled chiller with district hot water",
@@ -249,6 +388,22 @@ STRESS_CASES = (
      "on a single served zone this model reaches BOTH branches — the rebuild "
      "for that loop and the refusal for the zonally-served remainder.",
      _humidified),
+    ("21-ground-f-factor",
+     "Baseboard gas boiler",
+     "8.4.1.1.(1)/D-32 — a ground floor on `GroundFCfactorMethod`, the one "
+     "whole-foundation method with no validated NECB reference applier. The "
+     "run emits NO determination rather than a verdict, and this is the only "
+     "sample reaching that branch with an ORDINARY factor floor: it covers "
+     "the selection and the refusal, not the embedded routes sample 22 "
+     "carries.",
+     _ground_f_factor),
+    ("22-ground-f-factor-all-non-ordinary",
+     "Baseboard gas boiler",
+     "8.4.1.1.(1)/D-32 — every ground floor non-ordinary with the F-factor "
+     "floor among them, so the ORDINARY list is EMPTY. The two routes "
+     "9454b902's silent-verdict defects lived on; sample 21 stays green under "
+     "both reverts and this one does not.",
+     _ground_f_factor_all_non_ordinary),
 )
 
 #: DF-17's discriminating sample, and the reason it is hand-built rather than

@@ -228,7 +228,16 @@ GUARD7_CORPUS_SEAL = ("python-only:first frozen as a guard-7 corpus addition —
                       "authored after the Ruby product retired; no "
                       "cross-language attestation exists for this sample")
 
+FACTOR_METHOD_SEAL = (
+    "python-only:first frozen to cover the whole-foundation method branch — "
+    "no sample carried a method other than simple Ground, so the corpus "
+    "never selected the no-applier path and two silent-verdict defects "
+    "shipped through it; authored after the Ruby product retired, so no "
+    "cross-language attestation exists for this sample")
+
 POST_R6_PYTHON_LANE_SEALS = {
+    "21-ground-f-factor": FACTOR_METHOD_SEAL,
+    "22-ground-f-factor-all-non-ordinary": FACTOR_METHOD_SEAL,
     "17-vav-hw-reheat": DF17_SEAL,
     "18-vav-hw-subset-reheat": DF17_SEAL,
     "19-corner-block-5storey": GUARD7_CORPUS_SEAL,
