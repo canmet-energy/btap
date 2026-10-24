@@ -731,12 +731,24 @@ class Remote(Backend):
             return "the configured endpoint"
 
 
+#: A SOCKET timeout, so it bounds the connect and each individual read rather
+#: than the whole transfer — `put_bytes` uploads a model and `get_bytes`
+#: downloads results, and neither should be capped by a request budget. It
+#: exists for the same reason as `engine.DOWNLOAD_STALL_TIMEOUT_S`: without
+#: it, a socket that accepts and stops delivering blocks forever, and
+#: `Remote._poll` would then never reach its own `timeout_seconds`. Found as
+#: the sibling of issue #105 by Fable (`305` F6) — the module had exactly two
+#: untimed `urlopen` calls and fixing one would have left the other.
+HTTP_STALL_TIMEOUT_S = 60.0
+
+
 class Http:
     """The default transport (urllib). Isolated so tests never touch the
     network; the seam is four methods wide, deliberately not a mock library."""
 
-    def __init__(self, api_key):
+    def __init__(self, api_key, timeout=HTTP_STALL_TIMEOUT_S):
         self._api_key = api_key
+        self._timeout = timeout
 
     def post_json(self, url, body):
         return json.loads(self._request("POST", url, body=json.dumps(body).encode(),
@@ -765,7 +777,7 @@ class Http:
             req.add_header("Content-Type", "application/json")
         for name, value in (headers or {}).items():
             req.add_header(name, value)
-        with urllib.request.urlopen(req) as res:
+        with urllib.request.urlopen(req, timeout=self._timeout) as res:
             if not 200 <= res.status < 300:
                 raise RuntimeError(f"HTTP {res.status}")
             data = res.read()

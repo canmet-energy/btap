@@ -42,6 +42,7 @@ import sys
 import tarfile
 import tempfile
 import time
+import urllib.error
 import urllib.request
 import zipfile
 from pathlib import Path
@@ -426,15 +427,87 @@ def _install_archive(archive: Path, version: str) -> None:
     _extract_atomically(archive, cache_dir(version))
 
 
+#: Bounds the gap between BYTES, not the whole transfer. `urlopen(timeout=)`
+#: is a socket timeout: it applies to the connect and to each individual read,
+#: so a slow-but-progressing 230 MB download never trips it while a socket
+#: that has stopped delivering trips it in this many seconds. Sizing it as a
+#: total download budget would be the wrong reading and would abort honest
+#: slow networks.
+#:
+#: It exists because `urlopen` with NO timeout blocks forever on a stalled
+#: socket WHILE HOLDING the provision lock, so every other process waits the
+#: full `PROVISION_LOCK_TIMEOUT_S` and is then told "there IS a live holder —
+#: find and stop it", which is true and useless: the holder is alive and stuck
+#: on a socket. 60 s is far longer than any legitimate inter-chunk gap and far
+#: shorter than the 900 s lie it replaces (issue #105, found by Fable `219`).
+DOWNLOAD_STALL_TIMEOUT_S = 60.0
+
+#: A stalled socket is usually transient, and the lock is held for the whole
+#: of this, so the retries must be few and the timeout short enough that
+#: ATTEMPTS * TIMEOUT stays well inside `PROVISION_LOCK_TIMEOUT_S` — otherwise
+#: the fix reintroduces the symptom with extra steps.
+DOWNLOAD_ATTEMPTS = 3
+
+
+def _fetch_with_stall_timeout(url: str, dest: Path) -> None:
+    """Download `url` to `dest`, refusing to wait forever on a dead socket.
+
+    Raises `EngineError` naming the URL and the stall when every attempt
+    times out — the holder's OWN diagnosis, so the waiters' lock-timeout
+    message is no longer the only thing a stuck provision produces.
+    """
+    for attempt in range(1, DOWNLOAD_ATTEMPTS + 1):
+        try:
+            with urllib.request.urlopen(
+                    url, timeout=DOWNLOAD_STALL_TIMEOUT_S) as response, \
+                    dest.open("wb") as out:
+                shutil.copyfileobj(response, out)
+            return
+        except (TimeoutError, urllib.error.URLError) as e:
+            # Caught BEFORE the OSError handler below, which these subclass:
+            # that handler blames TLS interception, which a stall is not.
+            #
+            # TWO exception shapes, because the timeout is PHASE-DEPENDENT.
+            # `AbstractHTTPHandler.do_open` wraps `h.request()` in
+            # `except OSError: raise URLError(err)` and leaves
+            # `h.getresponse()` outside it, so a stall during TCP connect or
+            # the TLS handshake arrives as `URLError(reason=TimeoutError)`
+            # while a stall before headers or mid-body arrives raw. Catching
+            # only the raw form gave the connect and handshake cases ONE
+            # attempt and the TLS-interception message — and the handshake
+            # case is exactly what an intercepting corporate proxy produces
+            # (Fable's `305` F1, measured against real sockets).
+            #
+            # A `URLError` that is NOT a timeout — 404, reset, DNS failure —
+            # is re-raised for the OSError handler, whose advice fits it.
+            stalled = isinstance(e, TimeoutError) or isinstance(
+                getattr(e, "reason", None), TimeoutError)
+            if not stalled:
+                raise
+            if attempt == DOWNLOAD_ATTEMPTS:
+                raise EngineError(
+                    f"downloading {url} STALLED: no data for "
+                    f"{DOWNLOAD_STALL_TIMEOUT_S:.0f}s on each of "
+                    f"{DOWNLOAD_ATTEMPTS} attempts. The provision lock was "
+                    "held throughout, so other processes waiting on "
+                    "EnergyPlus were blocked by this. Download the archive "
+                    "yourself and set BTAP_ENERGYPLUS_ARCHIVE to the file, "
+                    "or point BTAP_ENERGYPLUS at an existing install."
+                ) from e
+            continue
+
+
 def _download_and_install(version: str) -> None:
     asset, sha256 = _pinned_asset(version)
     url = f"{_DOWNLOAD_BASE}/v{version}/{asset}"
     tmp_fd, tmp_name = tempfile.mkstemp(suffix=Path(asset).suffix)
+    # Closed immediately and reopened BY PATH per attempt: a retry needs a
+    # truncating open, and an fd consumed by the first attempt cannot give one.
+    os.close(tmp_fd)
     tmp = Path(tmp_name)
     try:
         try:
-            with urllib.request.urlopen(url) as response, open(tmp_fd, "wb") as out:
-                shutil.copyfileobj(response, out)
+            _fetch_with_stall_timeout(url, tmp)
         except OSError as e:
             raise EngineError(
                 f"could not download {url} ({e}). On a network that intercepts TLS, download "
