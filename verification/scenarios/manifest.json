@@ -2,7 +2,7 @@
  "version": 2,
  "spec_sha256": "f7d5cb76db9e77c526024a6545047ba19f6517332372b39242c64682168be76c",
  "provenance": {
-  "commit": "d52b61c3cbbc5b30ea146101aa50aa64f3696aa0",
+  "commit": "2b45d6f6c170d4ce71df798ec72afe7132373c11",
   "dirty": false,
   "openstudio_cli": "3.11.0+241b8abb4d",
   "producer": {
@@ -19,7 +19,7 @@
   "producer_scope": "this invocation only; see each scenario's `produced_by` for the baseline that bears it",
   "active_seals": {
    "python-only:post-handoff": 31,
-   "python-only": 27
+   "python-only": 29
   },
   "retired_seals": {
    "ruby": 29,
@@ -37,9 +37,9 @@
   "sample_manifest_sha256": "9e5ca39d0ae89ccc439d7d9ea92cb5b001e2136debe18960623d5fcf16e848b0"
  },
  "counts": {
-  "python": 38,
+  "python": 39,
   "verify": 8,
-  "parity": 12
+  "parity": 13
  },
  "scenarios": [
   {
@@ -1311,8 +1311,8 @@
    },
    "seal": "python-only:first frozen to cover the whole-foundation method branch \u2014 no sample carried a method other than simple Ground, so the corpus never selected the no-applier path and two silent-verdict defects shipped through it; authored after the Ruby product retired, so no cross-language attestation exists for this sample",
    "baseline_sha256": {
-    "audit.json": "25e766592c03baed9bbc7559aa89d5a761f7c3b71a1c7f08703b3f047caadd30",
-    "audit.txt": "3f475136ed2141a1084fa62c65b05512080aebf7945426eea6d3acde27d28eb0",
+    "audit.json": "0b192ba3fcd170bc04a87589f7e5f47000f4f16d4f2e8b7fb63ddf16d5025241",
+    "audit.txt": "af5a286f43174cc698915c7c12c57c94e00c18dee6e811dacc267d85ba3f395e",
     "report.json": "0024a85d66b57ca65721eb1456cb2ef6ecfc37cd0bc343403effdcd37160df9f",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "16f3217061110983ea94f07badfd8d263f8ebb98f4aa8499ae39bed6fe675a6d"
@@ -2105,6 +2105,135 @@
     "report.json": "00054dad5f4c3e9b7632a46cf64d4fa87ff3eb99b7bdf50d318ce170b19d3be8",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "d95659ffb5341908526d14529867fd93084b1224f37e44f4cf1773adfcaec0ee"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
+   }
+  },
+  {
+   "id": "corpus-annual-21-ground-f-factor",
+   "lane": "parity",
+   "kind": "cli",
+   "replaces": [
+    "B3",
+    "B4",
+    "B7"
+   ],
+   "argv": [
+    "<CORPUS>/21-ground-f-factor.osm",
+    "--simulate",
+    "annual",
+    "--quick",
+    "--epw",
+    "<EPW>",
+    "--hdd",
+    "3890",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "python-only:first frozen to cover the whole-foundation method branch \u2014 no sample carried a method other than simple Ground, so the corpus never selected the no-applier path and two silent-verdict defects shipped through it; authored after the Ruby product retired, so no cross-language attestation exists for this sample",
+   "asserts": [
+    {
+     "op": "json_gt",
+     "file": "report.json",
+     "path": "proposed.total_site_kwh",
+     "value": 0
+    },
+    {
+     "op": "json_exists",
+     "file": "report.json",
+     "path": "proposed.unmet_occupied_hours"
+    }
+   ],
+   "baseline_sha256": {
+    "audit.json": "af6c806581817dd621003d9498508d0c93169f39dde3c63e012963912b65b42f",
+    "audit.txt": "6cdcf2bb98ad43b7af7c070258be14590c5247de60aab790f086b9a901fd7bdf",
+    "report.json": "a725e2ed8fafebd92cce6b7c88e9c70ead18f747d44e4af3ee165918bf13f1ec",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "7da392c022ae94f02c968272cbc0c74b7db6a0aaa0fc09f0d51622e344f26e2e"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
+   }
+  },
+  {
+   "id": "corpus-none-21-ground-f-factor-hdd7200",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [
+    "B1",
+    "B2"
+   ],
+   "argv": [
+    "<CORPUS>/21-ground-f-factor.osm",
+    "--simulate",
+    "none",
+    "--hdd",
+    "3890",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>",
+    "--hdd",
+    "7200"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "python-only:first frozen to cover the whole-foundation method branch \u2014 no sample carried a method other than simple Ground, so the corpus never selected the no-applier path and two silent-verdict defects shipped through it; authored after the Ruby product retired, so no cross-language attestation exists for this sample",
+   "baseline_sha256": {
+    "audit.json": "4db707caff18ee4e3713e543e7ef854731595481e4a1c09595e7ec28abdb3f01",
+    "audit.txt": "11a115ace396e4f45dad0ce291f56ab4bc00400d50a547671a940716d778f3c5",
+    "report.json": "9471ad17e37ec5f05f21d11847d85983963846035fa75150b252ae9688ffe882",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "0cdb50237c8918205c5b0fae13d23699ecaef07ea2ee405f644aaabc4b0572a8"
    },
    "produced_by": {
     "producer": {

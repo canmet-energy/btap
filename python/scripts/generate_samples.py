@@ -260,9 +260,20 @@ def _ground_f_factor_all_non_ordinary(model):
     inventory derives, not a slab anyone pours — and it is here to hold the
     inventory's branches, not to teach a construction detail.
 
-    One consequence worth knowing: the ForwardTranslator DROPS a surface-less
-    floor-radiant unit with no warning, so the `unresolved` status exists in
-    the OSM only and no IDF carries it (Fable, `303`).
+    The radiant unit must hold the LAST equipment priority, which takes the
+    priority calls below AND `after_build = True`. An earlier version of this
+    docstring claimed the sample could not simulate and that this was inherent
+    and unfixable. It is neither: it sizes and runs a full year with zero
+    Severes and `unresolved` intact. The claim came from testing the wrong
+    knob — detaching the unit, which changes the status — and from a priority
+    call that was a silent no-op because the mutator ran before the catalog
+    system existed (Fable, `304`).
+
+    No IDF carries the radiant unit either way — the translator always drops a
+    surface-less one — so `unresolved` is a status the OSM asserts and the
+    simulation never sees. That is what makes this a pipeline-level shape, and
+    it is why the simulated result is a valid NECB run rather than a model of
+    a radiant floor.
     """
     import openstudio  # local, as everywhere else in this script
 
@@ -313,12 +324,53 @@ def _ground_f_factor_all_non_ordinary(model):
         model.alwaysOnDiscreteSchedule())
     radiant.setName("Floor radiant naming no surfaces")
     radiant.setRadiantSurfaceType("Floors")
-    zone = factor_floor.space().get().thermalZone()
-    if not zone.is_initialized():
+    zone_opt = factor_floor.space().get().thermalZone()
+    if not zone_opt.is_initialized():
         raise SystemExit("all-non-ordinary f-factor sample: factor floor has "
                          "no thermal zone to carry the radiant unit")
-    radiant.addToThermalZone(zone.get())
+    zone = zone_opt.get()
+    radiant.addToThermalZone(zone)
+    # GIVE THE RADIANT UNIT THE LAST PRIORITY, or the sample does not
+    # simulate. The ForwardTranslator always drops a surface-less radiant
+    # unit; if it held priority 1 the surviving baseboard keeps
+    # `Zone Equipment Cooling/Heating Sequence 1 = 2`, which points past the
+    # end of a now one-item list, and E+ raises
+    # `invalid zone_equipment_cooling_sequence=[2]` twice and then
+    # `Fatal: GetZoneEquipmentData: Errors found`.
+    #
+    # `after_build = True` below is what makes this work, and is the whole
+    # fix: run BEFORE the catalog system and the zone holds only the radiant,
+    # so "last" is 1, the baseboard arrives at 2, and the ordering is exactly
+    # the broken one. The priority call is not optional decoration — it is
+    # also not sufficient on its own.
+    #
+    # It is the ORDER, not the attachment. Detaching also clears the Fatal,
+    # but `_embedded_floor_inventory` skips equipment whose `thermalZone()` is
+    # empty, so an unattached unit leaves the floor `ordinary` and destroys
+    # the only status this sample exists to carry (Fable, `304`).
+    last = len(zone.equipment())
+    if not zone.setCoolingPriority(radiant, last):
+        raise SystemExit("all-non-ordinary f-factor sample: could not give the "
+                         "radiant unit the last cooling priority")
+    if not zone.setHeatingPriority(radiant, last):
+        raise SystemExit("all-non-ordinary f-factor sample: could not give the "
+                         "radiant unit the last heating priority")
+    # Assert the ORDER, not just that the setters returned true: the sample is
+    # worthless if the surviving equipment is not first, and a silent no-op
+    # here produced an exit-4 sample once already.
+    order = [e.handle() for e in zone.equipmentInHeatingOrder()]
+    if order and order[-1] != radiant.handle():
+        raise SystemExit("all-non-ordinary f-factor sample: the radiant unit "
+                         "is not last in the heating order, so dropping it "
+                         "will leave a sequence gap and E+ will refuse")
 
+
+# Like `_humidified`, this one needs the catalog system to EXIST first: the
+# radiant unit must take the LAST equipment priority, and until the baseboard
+# is built the zone holds only the radiant, so "last" is 1 and the radiant
+# ends up FIRST — the translator then drops it and leaves the baseboard
+# pointing at sequence 2 of a one-item list, which is the exit-4 sample.
+_ground_f_factor_all_non_ordinary.after_build = True
 
 STRESS_CASES = (
     ("13-district-heating",
@@ -402,7 +454,9 @@ STRESS_CASES = (
      "8.4.1.1.(1)/D-32 — every ground floor non-ordinary with the F-factor "
      "floor among them, so the ORDINARY list is EMPTY. The two routes "
      "9454b902's silent-verdict defects lived on; sample 21 stays green under "
-     "both reverts and this one does not.",
+     "both reverts and this one does not. The floor-radiant unit takes the "
+     "last equipment priority, so the model still sizes and runs a full year "
+     "cleanly once the translator drops it.",
      _ground_f_factor_all_non_ordinary),
 )
 
