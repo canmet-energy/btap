@@ -82,12 +82,33 @@ class TestFreezeSealTransition(unittest.TestCase):
         #      `heating-dominated` covers the FAILURE, and needs the api kind
         #      because the CLI's one-space-type-for-every-space flag cannot
         #      make the loads and the classification disagree
-        #   = 25
+        #   2  the whole-foundation METHOD branch, which the corpus never
+        #      selected either: every sample carried simple `Ground`, so no
+        #      frozen scenario reached the path where BTAP has no validated
+        #      NECB reference applier. TWO silent-verdict defects shipped
+        #      through that hole in one day — `method_limits` built from the
+        #      ordinary floors only, and `if not floors: return` dropping the
+        #      limitation for a model with no ordinary ground floor — each
+        #      with a green suite and a green full dispatch behind it.
+        #      It takes BOTH samples, and 21 alone would have been a false
+        #      reassurance: `21-ground-f-factor` has an ORDINARY factor floor
+        #      and covers the branch SELECTION and the refusal — breaking the
+        #      `GroundFCfactorMethod` detection by one tuple entry fails it
+        #      alone — but it stays GREEN under both defect reverts, because
+        #      its factor floor is in the ordinary list and the seed's other
+        #      four keep that list non-empty (Fable, `303`).
+        #      `22-ground-f-factor-all-non-ordinary` is the shape that does
+        #      catch them: the factor floor `unresolved` and the other four
+        #      `embedded`, so the ordinary list is EMPTY and the early return
+        #      is reached. A factor floor can never BE embedded — no layers,
+        #      so no internal-source construction — which is why 22 is a
+        #      pipeline-level shape rather than a slab anyone pours
+        #   = 27
         #
         # This enumeration was ALREADY one behind before sample 09: it listed
         # 4+4+2+4 = 14 beside an assertion of 15, having never recorded sample
         # 11. A provenance narrative that does not add up is not provenance.
-        self.assertEqual({"python-only:post-handoff": 31, "python-only": 25}, active)
+        self.assertEqual({"python-only:post-handoff": 31, "python-only": 27}, active)
         self.assertEqual({"ruby": 29, "ruby-api": 2}, retired)
         self.assertEqual({
             "commit": "85ab14352677093e24038d933cf1071e5b03431a",

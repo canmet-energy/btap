@@ -199,7 +199,7 @@ class TestGenerateSamples(unittest.TestCase):
                          "exactly — a missing sample and an extra one are both defects")
         self.assertEqual(expected, on_disk,
                          "every manifest slug must exist on disk as a .osm, and nothing else")
-        self.assertEqual(20, len(expected), "the corpus is 20 samples")
+        self.assertEqual(22, len(expected), "the corpus is 22 samples")
 
     def test_every_sample_reloads_through_the_sdk_with_zones(self):
         # model.save() reports nothing about whether the bytes it wrote can be
@@ -316,9 +316,77 @@ class TestGenerateSamples(unittest.TestCase):
                               {pl.loadDistributionScheme() for pl in model.getPlantLoops()},
                               "the staging must be real, not nominal")
 
+    def test_the_f_factor_perimeter_is_the_floors_MEASURED_exposed_edge(self):
+        """Nothing in the frozen corpus witnesses this value.
+
+        `Construction:FfactorGroundFloor` has four fields and EnergyPlus
+        derives the slab U from F*P/A, so `PerimeterExposed` is load-bearing
+        physics. It reaches no audit entry and no report key, which is why
+        samples 21 and 22 froze BYTE-IDENTICALLY before and after the value
+        was corrected from `4*sqrt(area)` (33.589 m, a square assumption) to
+        the floor's measured exposed edge (20.0 m) — a 68% overstatement of
+        edge loss that the whole corpus could not see. Fable's `303`, F2.
+        """
+        from btap._sdk import load_model
+        from btap.modeling.envelope import foundations
+
+        checked = []
+        for slug, _, _ in self.built:
+            model = load_model(str(self.out / f"{slug}.osm"))
+            constructions = model.getFFactorGroundFloorConstructions()
+            if not constructions:
+                continue
+            floors = [s for s in model.getSurfaces()
+                      if s.surfaceType() == "Floor"
+                      and s.outsideBoundaryCondition()
+                      == "GroundFCfactorMethod"]
+            self.assertEqual(
+                len(constructions), len(floors),
+                f"{slug}: one F-factor construction per F-factor floor")
+            for floor in floors:
+                # Pair through the FLOOR's own construction, never
+                # `constructions[0]`. Indexing the model's list asserts only
+                # that SOME F-factor construction has the right numbers:
+                # deleting `floor.setConstruction(...)` leaves the floor with
+                # no construction at all and an empty IDF `Construction Name`
+                # — an EnergyPlus fatal — and every test here still passed,
+                # with the frozen scenario reproducing its baseline. Fable's
+                # `303` addendum, Q2.
+                assigned = floor.construction()
+                self.assertTrue(
+                    assigned.is_initialized(),
+                    f"{slug}: {floor.nameString()} has NO construction, which "
+                    "writes a blank Construction Name and is an E+ fatal")
+                f_factor = assigned.get().to_FFactorGroundFloorConstruction()
+                self.assertTrue(
+                    f_factor.is_initialized(),
+                    f"{slug}: {floor.nameString()} is on "
+                    "GroundFCfactorMethod but its construction is "
+                    f"{assigned.get().nameString()!r}, not an F-factor one")
+                construction = f_factor.get()
+
+                measured = foundations.exposed_perimeters(
+                    model, [floor])["perimeters"][floor.nameString()]
+                declared = construction.perimeterExposed()
+                self.assertAlmostEqual(
+                    measured, declared, places=3,
+                    msg=f"{slug}: declared {declared} m against a measured "
+                        f"exposed edge of {measured} m — EnergyPlus uses this "
+                        "directly as F*P/A")
+                self.assertAlmostEqual(
+                    floor.grossArea(), construction.area(), places=3,
+                    msg=f"{slug}: the declared area is not the floor's")
+                checked.append(slug)
+
+        self.assertEqual(
+            ["21-ground-f-factor", "22-ground-f-factor-all-non-ordinary"],
+            sorted(checked),
+            "both factor-method samples must be reached, or this test passes "
+            "by finding nothing")
+
     def test_the_shipped_readme_is_written(self):
         readme = (self.out / "README.txt").read_text(encoding="utf-8")
-        self.assertIn("Sample models — 20 files, one building", readme)
+        self.assertIn("Sample models — 22 files, one building", readme)
         for slug, _, _ in self.built:
             self.assertIn(slug, readme, f"{slug} is missing from the shipped README")
 
