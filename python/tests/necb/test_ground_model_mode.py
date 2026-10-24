@@ -736,6 +736,189 @@ class TestZeroEdgeFactorFloorDoesNotContradictItself(unittest.TestCase):
                             "and it must still SAY so")
 
 
+@needs_sdk
+class TestEmbeddedFloorsReachTheMethodLimit(unittest.TestCase):
+    """Whether a reference can be built in the SUBMITTED method is asked of
+    every ground floor, not only ordinary ones.
+
+    `_ordinary_ground_floors` skips embedded and unresolved-embedded floors
+    because they need no perimeter strip — correct for the strip machinery,
+    wrong for `method_limits`. An exposed embedded `GroundFCfactorMethod`
+    floor got a verdict in silence while the reference transform separately
+    warned the target was not established: the same audit-versus-report
+    contradiction, by a different route. Fable's `300`, attributed to #134.
+
+    An embedded floor's requirement is 3.2.3.3.(4)(b) full-area insulation, so
+    a zero edge does NOT excuse it — only a floor whose prescribed treatment
+    is the strip can be excused that way.
+    """
+
+    @staticmethod
+    def _embedded_construction(model):
+        """A construction the inventory reads as embedded WITHOUT ambiguity.
+
+        `_embedded_floor_inventory` recognises `ConstructionWithInternalSource`
+        on the surface directly. A `ZoneHVACLowTemperatureRadiantElectric`
+        added to the zone resolves no surfaces, so it files the floor under
+        `unresolved` instead — which is what the first version of these tests
+        actually built, while naming itself embedded and citing full-area
+        insulation. Fable's `302`, finding 2.
+        """
+        import openstudio
+
+        construction = openstudio.model.ConstructionWithInternalSource(model)
+        construction.setName("Embedded slab with internal source")
+        slab = openstudio.model.StandardOpaqueMaterial(
+            model, "MediumRough", 0.1, 1.8, 2300, 900)
+        insulation = openstudio.model.StandardOpaqueMaterial(
+            model, "Smooth", 0.05, 0.035, 30, 1200)
+        insulation.setName("Embedded slab insulation")
+        construction.setLayers([slab, insulation])
+        construction.setSourcePresentAfterLayerNumber(1)
+        construction.setTemperatureCalculationRequestedAfterLayerNumber(1)
+        return construction
+
+    @classmethod
+    def _model(cls, *, embedded, factor, floor_name=None, all_embedded=False):
+        model = proposed_with_hvac()
+        grounds = [s for s in model.getSurfaces()
+                   if s.surfaceType() == "Floor"
+                   and s.outsideBoundaryCondition() == "Ground"]
+        floor = (model.getSurfaceByName(floor_name).get() if floor_name
+                 else grounds[0])
+        if embedded:
+            construction = cls._embedded_construction(model)
+            for surface in (grounds if all_embedded else [floor]):
+                surface.setConstruction(construction)
+        if factor:
+            floor.setOutsideBoundaryCondition("GroundFCfactorMethod")
+        return model, floor
+
+    @staticmethod
+    def _method_warnings(result):
+        return [w for w in (result.report.get("warnings") or [])
+                if "valid submitted foundation" in w]
+
+    def test_an_embedded_factor_floor_reaches_the_method_limit(self):
+        model, floor = self._model(embedded=True, factor=True)
+        from btap.codes.necb.envelope import prescriptive
+        self.assertEqual(
+            "embedded",
+            prescriptive._embedded_floor_inventory(model).status(
+                floor.nameString()),
+            "the fixture must be GENUINELY embedded — `unresolved` reaches the "
+            "same filter outcome by a different branch and would not exercise "
+            "the 3.2.3.3.(4)(b) rationale these tests cite")
+
+        result = _run(model, ground_model="kiva", hdd=STRIP_HDD)
+        self.assertEqual("no_determination",
+                         result.report.get("compliance_determination"))
+        self.assertEqual(1, len(self._method_warnings(result)))
+
+    def test_an_EMBEDDED_ZERO_EDGE_factor_floor_is_not_excused(self):
+        """Isolates the full-area carve-out in the zero-edge filter.
+
+        Without a case that is embedded AND zero-edge AND factor, dropping
+        that carve-out fails the same test as reverting the floor list, so
+        neither mutation can be told apart. An embedded floor takes full area
+        under 3.2.3.3.(4)(b), so a zero exposed edge excuses nothing.
+        """
+        from btap.codes.necb.envelope import prescriptive
+
+        # Surface 25 is the fixture's fully-enclosed interior floor, so its
+        # measured exposed perimeter is zero.
+        model, floor = self._model(embedded=True, factor=True,
+                                  floor_name="Surface 25")
+        self.assertEqual(
+            "embedded",
+            prescriptive._embedded_floor_inventory(model).status(
+                floor.nameString()))
+
+        result = _run(model, ground_model="kiva", hdd=STRIP_HDD)
+        self.assertEqual("no_determination",
+                         result.report.get("compliance_determination"),
+                         "a zero edge excuses only a floor whose prescribed "
+                         "treatment IS the strip")
+        self.assertEqual(1, len(self._method_warnings(result)))
+
+    def test_a_model_with_NO_ordinary_ground_floor_still_reports(self):
+        """`if not floors: return` dropped the limitation entirely.
+
+        `floors` is the ordinary list; `method_limits` is built from every
+        ground-class floor. So a model whose ground floors are ALL embedded
+        has an empty `floors` and a non-empty limitation at the same time, and
+        the early return skipped the only remaining record site. Measured
+        before the fix: no `no_determination` block, zero method warnings, and
+        one audit entry saying the target was NOT established — this change's
+        own contradiction, by the route it did not test. Fable's `302`, B4.
+        """
+        from btap.codes.necb.envelope import prescriptive
+
+        model, floor = self._model(embedded=True, factor=True,
+                                   all_embedded=True)
+        inventory = prescriptive._embedded_floor_inventory(model)
+        grounds = [s for s in model.getSurfaces()
+                   if s.surfaceType() == "Floor"
+                   and prescriptive.boundary_of(s) == "ground"]
+        self.assertEqual(
+            {"embedded"},
+            {inventory.status(s.nameString()) for s in grounds},
+            "every ground floor must be embedded, or an ordinary one keeps "
+            "`floors` non-empty and the early return is never reached")
+
+        result = _run(model, ground_model="kiva", hdd=STRIP_HDD)
+        self.assertIn("no_determination", result.report or {},
+                      "no ordinary ground floor must not mean no disclosure")
+        self.assertEqual(1, len(self._method_warnings(result)))
+
+    def test_an_UNRESOLVED_embedded_factor_floor_also_reports(self):
+        """The other non-ordinary status, named for what it is.
+
+        A floor-radiant object that resolves no surfaces leaves the floor
+        `unresolved` rather than `embedded`. It reaches the same filter
+        outcome by a different branch, which is why the first version of these
+        tests passed while exercising this status under the embedded name.
+        Pinned separately so each branch has its own witness.
+        """
+        import openstudio
+
+        from btap.codes.necb.envelope import prescriptive
+
+        model, floor = self._model(embedded=False, factor=True)
+        radiant = openstudio.model.ZoneHVACLowTemperatureRadiantElectric(
+            model, model.alwaysOnDiscreteSchedule(),
+            model.alwaysOnDiscreteSchedule())
+        radiant.setRadiantSurfaceType("Floors")
+        radiant.addToThermalZone(floor.space().get().thermalZone().get())
+        self.assertEqual(
+            "unresolved",
+            prescriptive._embedded_floor_inventory(model).status(
+                floor.nameString()))
+
+        result = _run(model, ground_model="kiva", hdd=STRIP_HDD)
+        self.assertEqual(1, len(self._method_warnings(result)))
+
+    def test_an_embedded_floor_with_a_SUPPORTED_method_stays_quiet(self):
+        """Control: being embedded is not itself a method limitation."""
+        model, _floor = self._model(embedded=True, factor=False)
+        result = _run(model, ground_model="kiva", hdd=STRIP_HDD)
+
+        self.assertNotEqual("no_determination",
+                            result.report.get("compliance_determination"))
+        self.assertEqual([], self._method_warnings(result))
+
+    def test_an_ORDINARY_zero_edge_factor_floor_is_still_excused(self):
+        """Control for the other direction: the zero-edge exemption survives
+        for the floors whose prescribed treatment really is the strip."""
+        model, _floor = self._model(embedded=False, factor=True,
+                                    floor_name="Surface 25")
+        result = _run(model, ground_model="kiva", hdd=STRIP_HDD)
+
+        self.assertNotEqual("no_determination",
+                            result.report.get("compliance_determination"))
+        self.assertEqual([], self._method_warnings(result))
+
+
 class TestTheModeIsValidatedAtTheBoundary(unittest.TestCase):
     def test_the_two_modes_are_accepted(self):
         for mode in ("kiva", "simple"):
