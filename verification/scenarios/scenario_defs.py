@@ -170,7 +170,8 @@ def edition_of(code):
     return match.group(1)
 
 
-def _corpus(slug, tier, lane, *, code=DEFAULT_CODE, extra=(), seal=None):
+def _corpus(slug, tier, lane, *, code=DEFAULT_CODE, extra=(), seal=None,
+            id_suffix=""):
     sim = (["--simulate", "annual", "--quick"] if tier == "annual"
            else ["--simulate", tier])
     epw = [] if tier == "none" else ["--epw", "<EPW>"]
@@ -180,8 +181,10 @@ def _corpus(slug, tier, lane, *, code=DEFAULT_CODE, extra=(), seal=None):
     # implicit, so only a non-default edition appears in argv.
     selector = [] if code == DEFAULT_CODE else ["--code", code]
     scenario = {
-        "id": (f"corpus-{tier}-{slug}" if code == DEFAULT_CODE
-               else f"corpus-{tier}-{slug}-{code}"),
+        # `id_suffix` distinguishes a VARIANT of the same slug and tier — a
+        # different climate, say — which would otherwise collide.
+        "id": ((f"corpus-{tier}-{slug}" if code == DEFAULT_CODE
+                else f"corpus-{tier}-{slug}-{code}") + id_suffix),
         "lane": lane, "kind": "cli",
         "replaces": ["B1", "B2"] if tier != "annual" else ["B3", "B4", "B7"],
         "argv": [model, *sim, *epw, *args, *selector, "-o", "<RUN_DIR>", *extra],
@@ -258,6 +261,34 @@ def corpus_scenarios(slugs):
             for s in DF17_SIZING_SUBSET]
     out += [_corpus(s, "annual", "parity", seal=MULTI_ENERGY_SEAL)
             for s in MULTI_ENERGY_ANNUAL_SUBSET]
+
+    # The refusal's `run.compliant = None` does nothing under `none`, because
+    # nothing computes a verdict there either way — the field and the refusal
+    # COINCIDE on that tier. Removing it is invisible to every scenario above.
+    # On a full year the 8.4.1.2 comparison runs regardless and wins the
+    # field: sample 21's proposed is 2916.7 kWh against a 3280.6 kWh
+    # reference, so the report reads `compliant: true` beside
+    # `compliance_determination: no_determination` — a verdict and a refusal
+    # to give one, in the same report. The comparator sees it as `null` vs
+    # `true`. ~20 s of EnergyPlus; this is the ONLY tier where that field is
+    # load-bearing (Fable's `303`, F3/M9).
+    #
+    # Sample 21, NOT 22: sample 22's `unresolved` status requires the
+    # floor-radiant unit to be attached to the zone (an unattached one reads
+    # `ordinary`), and the ForwardTranslator drops the surface-less unit while
+    # leaving it in the `ZoneHVAC:EquipmentList`, so E+ fails with
+    # "GetZoneEquipmentData: Errors found" and the proposed never sizes. That
+    # is inherent to the shape, not a defect in the sample.
+    out += [_corpus("21-ground-f-factor", "annual", "parity",
+                    seal=FACTOR_METHOD_SEAL)]
+
+    # The full-area early return records the limitation too, and HDD 3890
+    # never reaches it — the climate selects the strip branch for every
+    # scenario above, so dropping that record is invisible. At 7200 the same
+    # sample takes the other route (Fable's `303`, F3/M5).
+    out += [_corpus("21-ground-f-factor", "none", "python",
+                    seal=FACTOR_METHOD_SEAL, extra=["--hdd", "7200"],
+                    id_suffix="-hdd7200")]
     return out
 
 

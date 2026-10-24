@@ -103,12 +103,31 @@ class TestFreezeSealTransition(unittest.TestCase):
         #      is reached. A factor floor can never BE embedded — no layers,
         #      so no internal-source construction — which is why 22 is a
         #      pipeline-level shape rather than a slab anyone pours
-        #   = 27
+        #   2  the two tiers on which the refusal's own fields are
+        #      load-bearing and the `none` tier is blind. `corpus-annual-21-`
+        #      `ground-f-factor` is the only scenario where
+        #      `run.compliant = None` does anything: under `none` nothing
+        #      computes a verdict either way, so the field and the refusal
+        #      COINCIDE and removing it is invisible, while on a full year the
+        #      8.4.1.2 comparison runs regardless and reports
+        #      `compliant: true` beside `no_determination` — 2916.7 kWh
+        #      proposed against a 3280.6 kWh reference. `corpus-none-21-`
+        #      `ground-f-factor-hdd7200` takes the FULL-AREA early return,
+        #      which records the limitation too and which HDD 3890 never
+        #      reaches. Sample 21 carries both because sample 22 cannot
+        #      simulate when these were authored — its radiant unit held the
+        #      FIRST equipment priority, and the translator drops a
+        #      surface-less unit, so the surviving baseboard pointed past the
+        #      end of the list and E+ refused. That was a defect in the
+        #      sample, not an inevitability: it now sizes and runs a full year
+        #      cleanly, so an annual scenario on 22 is available and would
+        #      cover the embedded routes too (Fable, `303` F3 and `304` F1)
+        #   = 29
         #
         # This enumeration was ALREADY one behind before sample 09: it listed
         # 4+4+2+4 = 14 beside an assertion of 15, having never recorded sample
         # 11. A provenance narrative that does not add up is not provenance.
-        self.assertEqual({"python-only:post-handoff": 31, "python-only": 27}, active)
+        self.assertEqual({"python-only:post-handoff": 31, "python-only": 29}, active)
         self.assertEqual({"ruby": 29, "ruby-api": 2}, retired)
         self.assertEqual({
             "commit": "85ab14352677093e24038d933cf1071e5b03431a",
