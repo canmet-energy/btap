@@ -935,3 +935,99 @@ class TestTheModeIsValidatedAtTheBoundary(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@needs_sdk
+class TestTheMethodLimitCitationMatchesTheGOVERNINGSentence(unittest.TestCase):
+    """One hard-coded citation cannot serve mixed embedded statuses.
+
+    `3.2.3.3.(3)` applies only to floors with NO embedded heating or cooling
+    system — it EXPRESSLY EXCLUDES an embedded floor — so the aggregate
+    "no validated NECB reference applier" warning cited an article that did
+    not reach the floor it was attached to. An embedded floor's obligation is
+    `3.2.3.3.(4)`'s full area in every climate zone, adjudicated by D-105
+    (Sol, `307`).
+    """
+
+    @staticmethod
+    def _model(kind):
+        import openstudio
+
+        model = proposed_with_hvac()
+        grounds = [s for s in model.getSurfaces()
+                   if s.surfaceType() == "Floor"
+                   and s.outsideBoundaryCondition() == "Ground"]
+        floor = grounds[0]
+        if kind == "embedded":
+            source = openstudio.model.ConstructionWithInternalSource(model)
+            source.setName("Embedded slab with internal source")
+            slab = openstudio.model.StandardOpaqueMaterial(
+                model, "MediumRough", 0.1, 1.8, 2300, 900)
+            insulation = openstudio.model.StandardOpaqueMaterial(
+                model, "Smooth", 0.05, 0.035, 30, 1200)
+            source.setLayers([slab, insulation])
+            source.setSourcePresentAfterLayerNumber(1)
+            source.setTemperatureCalculationRequestedAfterLayerNumber(1)
+            floor.setConstruction(source)
+        elif kind == "unresolved":
+            radiant = openstudio.model.ZoneHVACLowTemperatureRadiantElectric(
+                model, model.alwaysOnDiscreteSchedule(),
+                model.alwaysOnDiscreteSchedule())
+            radiant.setRadiantSurfaceType("Floors")
+            radiant.addToThermalZone(floor.space().get().thermalZone().get())
+        floor.setOutsideBoundaryCondition("GroundFCfactorMethod")
+        return model, floor
+
+    @staticmethod
+    def _citations(result):
+        return [(e.get("article"), e.get("ruling")) for e in result.audit.entries
+                if "retain a submitted foundation method" in str(e.get("action", ""))]
+
+    def test_an_ORDINARY_factor_floor_cites_sentence_3(self):
+        model, _floor = self._model("ordinary")
+        result = _run(model, ground_model="kiva", hdd=STRIP_HDD)
+
+        self.assertEqual([("3.2.3.3.(3)", "D-32")], self._citations(result))
+
+    def test_an_EMBEDDED_factor_floor_cites_sentence_4_and_D_105(self):
+        """Sentence (3) excludes this floor, so it must not be cited for it."""
+        from btap.codes.necb.envelope import prescriptive
+
+        model, floor = self._model("embedded")
+        self.assertEqual(
+            "embedded",
+            prescriptive._embedded_floor_inventory(model).status(
+                floor.nameString()),
+            "the fixture must be GENUINELY embedded or this proves nothing")
+
+        result = _run(model, ground_model="kiva", hdd=STRIP_HDD)
+        # BOTH rulings: D-105 for the full-area requirement, D-32 for the
+        # method limitation the same entry also asserts (Sol, `309`).
+        self.assertEqual(
+            [("3.2.3.3.(4)", "D-32 D-105")], self._citations(result))
+
+    def test_an_unresolved_floor_never_reaches_this_warning(self):
+        """Pins the early return the two-group split depends on.
+
+        Sol ruled `unresolved` is a tool evidence state, NOT a third Code
+        category, so it must never be described as though Sentence (4) were
+        known to apply. It is safe today only because the
+        `status == "unresolved"` branch returns at its own D-105 warning
+        before the factor branch appends anything. If that return is removed,
+        an unresolved floor would silently inherit the Sentence (3) citation
+        Sol's reasoning forbids — so this fails rather than letting it.
+        """
+        from btap.codes.necb.envelope import prescriptive
+
+        model, floor = self._model("unresolved")
+        self.assertEqual(
+            "unresolved",
+            prescriptive._embedded_floor_inventory(model).status(
+                floor.nameString()))
+
+        result = _run(model, ground_model="kiva", hdd=STRIP_HDD)
+        self.assertEqual(
+            [], self._citations(result),
+            "an unresolved floor must not reach the method-limit warning at "
+            "all; if it does, its citation is an open question for Sol and "
+            "not Sentence (3) by default")
