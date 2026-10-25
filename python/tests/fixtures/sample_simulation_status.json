@@ -1,0 +1,181 @@
+{
+ "schema": 1,
+ "samples": [
+  {
+   "name": "01-baseboard-gas",
+   "status": "ok",
+   "severe": 0,
+   "fatal": 0,
+   "completed": true,
+   "exit": 6
+  },
+  {
+   "name": "02-psz-gas-dx",
+   "status": "ok",
+   "severe": 0,
+   "fatal": 0,
+   "completed": true,
+   "exit": 6
+  },
+  {
+   "name": "03-vav-reheat-chiller",
+   "status": "ok",
+   "severe": 0,
+   "fatal": 0,
+   "completed": true,
+   "exit": 6
+  },
+  {
+   "name": "04-fancoil-chiller",
+   "status": "ok",
+   "severe": 0,
+   "fatal": 0,
+   "completed": true,
+   "exit": 6
+  },
+  {
+   "name": "05-ptac-electric",
+   "status": "ok",
+   "severe": 0,
+   "fatal": 0,
+   "completed": true,
+   "exit": 6
+  },
+  {
+   "name": "06-unit-heaters-gas",
+   "status": "ok",
+   "severe": 0,
+   "fatal": 0,
+   "completed": true,
+   "exit": 6
+  },
+  {
+   "name": "07-furnace-forced-air",
+   "status": "ok",
+   "severe": 0,
+   "fatal": 0,
+   "completed": true,
+   "exit": 6
+  },
+  {
+   "name": "08-vrf",
+   "status": "ok",
+   "severe": 0,
+   "fatal": 0,
+   "completed": true,
+   "exit": 6
+  },
+  {
+   "name": "09-water-source-hp",
+   "status": "ok",
+   "severe": 0,
+   "fatal": 0,
+   "completed": true,
+   "exit": 6
+  },
+  {
+   "name": "10-ashp-pthp",
+   "status": "ok",
+   "severe": 0,
+   "fatal": 0,
+   "completed": true,
+   "exit": 6
+  },
+  {
+   "name": "11-staged-boilers-gas-lead",
+   "status": "ok",
+   "severe": 0,
+   "fatal": 0,
+   "completed": true,
+   "exit": 6
+  },
+  {
+   "name": "12-staged-boilers-electric-lead",
+   "status": "ok",
+   "severe": 0,
+   "fatal": 0,
+   "completed": true,
+   "exit": 6
+  },
+  {
+   "name": "13-district-heating",
+   "status": "ok",
+   "severe": 0,
+   "fatal": 0,
+   "completed": true,
+   "exit": 6
+  },
+  {
+   "name": "14-general-2storey",
+   "status": "ok",
+   "severe": 0,
+   "fatal": 0,
+   "completed": true,
+   "exit": 6
+  },
+  {
+   "name": "15-general-3storey",
+   "status": "ok",
+   "severe": 0,
+   "fatal": 0,
+   "completed": true,
+   "exit": 6
+  },
+  {
+   "name": "16-ashp-electric-supp-hw-baseboard",
+   "status": "ok",
+   "severe": 0,
+   "fatal": 0,
+   "completed": true,
+   "exit": 6
+  },
+  {
+   "name": "17-vav-hw-reheat",
+   "status": "ok",
+   "severe": 0,
+   "fatal": 0,
+   "completed": true,
+   "exit": 6
+  },
+  {
+   "name": "18-vav-hw-subset-reheat",
+   "status": "ok",
+   "severe": 0,
+   "fatal": 0,
+   "completed": true,
+   "exit": 6
+  },
+  {
+   "name": "19-corner-block-5storey",
+   "status": "ok",
+   "severe": 0,
+   "fatal": 0,
+   "completed": true,
+   "exit": 6
+  },
+  {
+   "name": "20-humidified-psz",
+   "status": "ok",
+   "severe": 0,
+   "fatal": 0,
+   "completed": true,
+   "exit": 6
+  },
+  {
+   "name": "21-ground-f-factor",
+   "status": "ok",
+   "severe": 0,
+   "fatal": 0,
+   "completed": true,
+   "exit": 6
+  },
+  {
+   "name": "22-ground-f-factor-all-non-ordinary",
+   "status": "ok",
+   "severe": 0,
+   "fatal": 0,
+   "completed": true,
+   "exit": 6
+  }
+ ]
+}

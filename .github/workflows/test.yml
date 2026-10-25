@@ -251,6 +251,19 @@ jobs:
           PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
             /opt/btap-ci/venv/bin/python \
             python/scripts/simulate_all_systems.py --check
+      # The catalogue sweep above proves a SYSTEM on the shared bare fixture.
+      # It cannot prove the GENERATED SAMPLE — that system built onto a seed,
+      # with NECB loads and sample-specific setup applied — which is the gap
+      # issue #68 lived in for three weeks while `FPFC MAU DX Coils with
+      # Scroll Chiller` read `severe: 0` in the catalogue verdict and two
+      # SHIPPED samples carried a design-UA Severe. Serial, 22 models at
+      # ~12 s each, about four and a half minutes (D-107).
+      - name: The authored-sample sizing sweep, re-run and diffed
+        run: |
+          PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
+            BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
+            /opt/btap-ci/venv/bin/python \
+            python/scripts/simulate_all_samples.py --check
       - name: Coverage summary
         if: always()
         working-directory: python

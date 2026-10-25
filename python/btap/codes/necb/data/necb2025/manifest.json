@@ -1613,10 +1613,18 @@
           "division": "B",
           "section_number": "A-8.4.5.14.(2)",
           "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "5.2.1.1",
+          "include_sentences": false
         }
       ],
       "source_revision": null,
-      "source_sha256": "5b4f3496183aa121f7a6977bdce8a9b2c11ca14250367e45c07283c7e75f7fe0",
+      "source_sha256": "a975a18995d8d6384bfda1ed1080e676349049632e3d190a5dea86699607cd9e",
       "source_artifacts": [
         {
           "path": "coverage/articles_8_4.json",
@@ -1624,15 +1632,15 @@
         },
         {
           "path": "provenance/provisions.result.json",
-          "sha256": "cf3f8446f4d4a163425cb21ad3327825d9179860ac7cc44d97e8dca5088aaf91"
+          "sha256": "ca3894f733926276580e2ce8149fd538d3ec7d0a927f61199301f77e284f9f6d"
         }
       ],
       "extractor": "python/scripts/fetch_necb_provisions.py",
-      "retrieved": "2026-10-22",
+      "retrieved": "2026-10-25",
       "method": "generated",
       "source_verification": "archived",
       "note": "The retained provisions.result.json is the exact bounded set of authorized MCP tool results. source_artifacts is the canonical two-input descriptor and also pins coverage/articles_8_4.json, which supplies Section 8.4 structure and table-note identities without duplicating that cache.",
-      "result_sha256": "7c14f05323609d25b941a7b3828da023e3c0a3c074b3248e886432430de35b44"
+      "result_sha256": "28600e642ff20f7393a76abcc7b5c6196febda9368fef423a397037c8c112b1c"
     }
   }
 }

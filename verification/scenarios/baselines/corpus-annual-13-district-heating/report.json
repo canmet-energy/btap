@@ -6,7 +6,7 @@
  "simulate": "annual",
  "proposed": {
   "mechanical_cooling": true,
-  "clean_run": false,
+  "clean_run": true,
   "total_site_kwh": 4363.9,
   "electricity_kwh": 2005.6,
   "natural_gas_kwh": 311.1,

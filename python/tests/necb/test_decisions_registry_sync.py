@@ -69,7 +69,7 @@ MIGRATED_IDS = (
     "D-90", "D-91", "D-92", "D-93", "D-97", "D-99", "D-100", "D-101",
     "D-102",
 )
-NATIVE_STRUCTURED_IDS = ("D-104", "D-105", "D-106")
+NATIVE_STRUCTURED_IDS = ("D-104", "D-105", "D-106", "D-107")
 STRUCTURED_IDS = MIGRATED_IDS + NATIVE_STRUCTURED_IDS
 #: Phase D decisions moved from `unverified` to the structured form; the other
 #: 23 migrated decisions are Phase C's. D-104 through D-106 are native
@@ -159,6 +159,7 @@ STRUCTURED_RUNTIME_SHA256 = {
     "D-104": "299cd43f2f4707a8cfc7aaa84f85fe06bd24148f8dc8e59768d8246517cac983",
     "D-105": "8afd3dccafa72a5564f0bd71a9e68a656b87b3aa2f58f47aa3bb91124f9837dc",
     "D-106": "1d80c9ebe30ce530f75b2a62cea7377a8b2cf3d3f41730cdcb0323a42fecad1f",
+    "D-107": "de2848c0ccdf358671d615810418cbd5f42245fb47900fa5cab0e69ecfd96367",
 }
 #: Each structured decision's requirement keys in AUTHORED order, as the
 #: sources record them. Phase C's 23 had them in legacy front matter; Phase
@@ -340,6 +341,7 @@ STRUCTURED_KEYS = {
     "D-104": ("vrf_minimum_when_electrical_phase_is_unknown",),
     "D-105": ("embedded_ground_floor_insulation",),
     "D-106": ("reference_fan_coil_mode_specific_airflow",),
+    "D-107": ("authored_sample_fan_coil_sizing",),
 }
 #: Each structured requirement as the sources record it: its label, then its
 #: NECB 2020 and NECB 2025 citations in authored order. A requirement the
@@ -351,6 +353,11 @@ STRUCTURED_KEYS = {
 #: provision grammar would otherwise refuse as an alias. A key shared by
 #: several decisions appears once: it is one requirement.
 STRUCTURED_REQUIREMENTS = {
+    "authored_sample_fan_coil_sizing": (
+        "Mode-specific water-coil sizing in repository-authored sample models",
+        ("5.2.1.1.(1)", "8.4.2.10.(2)", "8.4.2.10.(5)", "8.4.3.1.(2)(c)"),
+        ("5.2.1.1.(1)", "8.4.2.10.(2)", "8.4.2.10.(5)", "8.4.3.1.(2)(c)"),
+    ),
     "air_leakage_conditioned_enclosure_area": (
         "Building-envelope area used to normalize modeled air leakage",
         ("3.2.4.2.(1)(c)", "8.4.2.9.(2)"),
@@ -1671,10 +1678,10 @@ class TestTheCommittedProvisionView(unittest.TestCase):
     #: have two; one of those records is D-60's related 2020 comparison.
     #: REQUIREMENTS counts instances, including a shared key once per decision
     #: that uses it.
-    STRUCTURED, ESTABLISHED, HELD, INCLUDED, OMITTED = 68, 0, 3, 71, 35
-    SOURCE_ROWS = 238
-    GOVERNING_ROWS = 237
-    REQUIREMENTS = 127
+    STRUCTURED, ESTABLISHED, HELD, INCLUDED, OMITTED = 69, 0, 3, 72, 35
+    SOURCE_ROWS = 240
+    GOVERNING_ROWS = 239
+    REQUIREMENTS = 128
 
     @classmethod
     def setUpClass(cls):
