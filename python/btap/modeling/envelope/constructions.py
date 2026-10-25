@@ -66,6 +66,218 @@ def film_r_interzone(surface) -> float:
     return 0.0
 
 
+#: The fixed layer's name. EXPORTED because the tests need to find that layer
+#: and both alternatives are worse: matching by position breaks silently when
+#: the layer order changes (which `318` A2 did), and matching by density or
+#: thickness matches whatever else happens to share them (Fable, `318`).
+BOARD_LAYER_NAME = "Seed Interior Board"
+
+#: ORDINARY 16 mm gypsum board, as an interior finish layer, with textbook
+#: material properties and nothing else behind them. Every quantity stands on
+#: its own as a real material a supplier would sell.
+#:
+#: An earlier version used NECB Note A-8.4.4.4.(1)'s wood-frame worked
+#: example instead. Sol refused it (`320`) on two grounds, and both are worth
+#: keeping written down. The Note's numbers were SELECTED for a reference
+#: approximation, so putting them on a synthetic authoring placeholder — one
+#: applied indiscriminately to walls, roofs, floors and ground contact —
+#: implied an NECB identity this object does not have. And the layer was not
+#: even the Note's assembly: it combined the example's WHOLE-ASSEMBLY areal
+#: mass and heat capacity with the FRAMING PATH's resistance and called the
+#: three one homogeneous material.
+#:
+#: The broader rule, which is the reason this comment is long: copying rule
+#: values rather than importing their owner is still a semantic dependency
+#: when those values decide simulation physics. The D-77 boundary is about
+#: NECB knowledge, not only about Python imports, so restating the constants
+#: did not make the dependency allowed — it only made it invisible to
+#: `lint-imports`.
+#: These are EnergyPlus's own shipped `G01 16mm gypsum board`
+#: (`DataSets/ASHRAE_2005_HOF_Materials.idf`) to the digit, except that the
+#: thickness is 16 mm rather than the dataset's 15.9 mm, which makes
+#: `BOARD_R_SI` exactly 0.1. The roughness matches the record too, because
+#: "to the digit except thickness" has to be true of everything else or it is
+#: not worth writing (Sol, `322`). Cited at all because the lesson of this
+#: file is that a number with no derivation behind it is a liability.
+BOARD_THICKNESS_M = 0.016
+BOARD_CONDUCTIVITY_W_MK = 0.16
+BOARD_DENSITY_KG_M3 = 800.0
+BOARD_SPECIFIC_HEAT_J_KGK = 1090.0
+#: Derived, not declared: 0.1 m2K/W. The guard below is twice this.
+BOARD_R_SI = BOARD_THICKNESS_M / BOARD_CONDUCTIVITY_W_MK
+#: Sub-surface types that are OPAQUE and must not receive glazing. Everything
+#: else an OpenStudio model can carry here is fenestration.
+OPAQUE_SUB_SURFACE_TYPES = frozenset({"Door", "OverheadDoor"})
+
+#: Glass-fibre batt, for the layer whose THICKNESS the retargeter varies.
+BATT_CONDUCTIVITY_W_MK = 0.04
+BATT_DENSITY_KG_M3 = 12.0
+BATT_SPECIFIC_HEAT_J_KGK = 840.0
+
+
+def seed_set(model, *, opaque_r_si=2.0, window_u_si=2.5,
+             window_shgc=0.4, window_vt=0.5):
+    """Give every surface a construction, so envelope work has one to RETARGET.
+
+    Wizard and bar output carries NO constructions, and every downstream
+    envelope pass — `opaque_at_conductance`, `fenestration_at_conductance`,
+    the NECB prescriptive and reference transforms — retargets an EXISTING
+    construction rather than creating one. So an authored model needs a seed
+    set before any of them will run, which `btap/modeling/README.md` has
+    documented as a precondition while the only implementation lived on a test
+    class (`tests/modeling/test_bar.py`). The documented chain therefore could
+    not be started from the shipped wheel at all (issue #143).
+
+    Deliberately POOR insulation. The seed exists to be improved on, so a
+    default R-2 opaque and a U-2.5 window make a later envelope pass visibly
+    change something; seeding at a plausible target would hide whether the
+    transform ran at all. Pass your own values for a different starting
+    point.
+
+    THE OPAQUE CONSTRUCTION HAS TWO LAYERS, and that is the whole design.
+
+    A single calibrated layer looks simpler and is wrong, because
+    `opaque_at_conductance` solves a target with
+    `LayeredConstruction.setConductance`, which on a lone
+    `StandardOpaqueMaterial` grows its THICKNESS. Retargeting a one-layer seed
+    therefore scales its mass linearly with the target R: measured, a seeded
+    roof improved to U-0.156 became a 0.48 m slab at 130 kg/m2 and
+    149 kJ/(m2.K), four times the mass it started with (Fable, `318` F1).
+    Asking for more RESISTANCE and silently getting four times the MASS is
+    incoherent on its own terms: the caller named one property and a
+    different one moved.
+
+    So the seed separates the two jobs. A fixed board layer carries the heat
+    capacity, and a batt layer carries the resistance;
+    `find_and_set_insulation_layer` picks the batt because its resistance is
+    the larger, the solver grows only that, and the construction's mass stays
+    put while its resistance goes wherever the caller asks.
+
+    THE LAYERS CARRY REAL THERMAL MASS, and must. A
+    `MasslessOpaqueMaterial` was the obvious choice for a placeholder and is
+    wrong twice over:
+
+    - EnergyPlus REFUSES a massless layer on a `Foundation` surface, so a
+      massless seed makes the default `ground_model="kiva"` path unreachable.
+      `foundations.create_kiva_foundation` returns `created: False` with
+      "is not a standard opaque material", and the ground floor silently never
+      becomes a Kiva foundation. Measured, not predicted — the first version of
+      this function had exactly that defect;
+    - zero mass is not a neutral placeholder. It removes the envelope's heat
+      capacity from the simulation entirely, so a seeded model's results are
+      not merely approximate but wrong in a known direction — no stored heat
+      means no damping and no lag.
+
+    One edge is NOT guarded, and the numbers are given because an earlier
+    version of this paragraph asserted the callers never reach it and was
+    WRONG. A target at or above `1 / BOARD_R_SI` — 10 W/(m2.K) — is worse
+    than the board alone: just under it the batt goes to zero thickness, at
+    exactly 10 the solver raises, and above it the board itself is trimmed
+    away and the heat capacity goes with it.
+
+    The largest target any caller in this repository passes is the NECB
+    zone-4 door, 3.11 W/(m2.K) construction-only, so 10 is clear by a factor
+    of about three. That margin is the reason this is a documented edge and
+    not a guard. It is also a REGRESSION FIXED BY ACCIDENT: with the earlier,
+    thicker fixed layer the same edge sat at 1.637, BELOW almost every door
+    target, so retargeting a seeded door through the prescriptive path
+    silently returned a construction with no mass layer at all (Fable, `318`
+    addendum 3, measured against the previous head). The witness below pins
+    the margin so that a future change to the board cannot quietly close it
+    again.
+
+    THIS IS A SYNTHETIC SEED, not an archetype and not a code-backed
+    assembly. Its only job is to be present and improvable, so that a later
+    envelope pass has something to retarget. A caller who needs a particular
+    real assembly supplies one.
+
+    ONE opaque construction serves walls, roofs, floors and ground contact,
+    which is safe because every retargeting entry point deep-copies and reuses
+    by name — `opaque_at_conductance` creates `<name>:U-x.xxxx` from the seed
+    and assigns the copy, so retargeting a wall cannot alter a roof that
+    shares the seed. A richer per-surface-type set is a separate feature, not a
+    precondition for the chain.
+
+    Constructions are assigned DIRECTLY rather than through a
+    `DefaultConstructionSet`. Direct assignment leaves
+    `surface.isConstructionDefaulted()` false, which keeps the seed out of the
+    defaulted-construction interaction that `envelope/foundations.py` has to
+    pin around when a surface's construction resolves through a set. An
+    archetype-realistic default set is a reasonable future addition and would
+    exercise that path on purpose.
+
+    Returns the two constructions it created, opaque first.
+    """
+    # THE FLOOR IS TWICE THE BOARD'S RESISTANCE, not once. The batt must
+    # out-resist the board for `find_and_set_insulation_layer` to pick it, and
+    # the batt only carries `opaque_r_si - BOARD_R_SI`. An earlier version
+    # guarded at ONE times the fixed layer's resistance, which left a whole
+    # band where the picker chose the FIXED layer and retargeting grew that
+    # to 1.4 m — worse than the one-layer defect the two layers replaced
+    # (Fable, `318` A1). The comparison is strict, so the tie is refused
+    # rather than left to scan order. At this floor both conductances are
+    # exactly 10.0 and SCAN ORDER would decide; at the previous, larger floor
+    # they differed by float noise and the noise decided. Either way the
+    # outcome is not a property anyone should have to reason about, which is
+    # why `<=` refuses it outright.
+    if opaque_r_si <= 2 * BOARD_R_SI:
+        raise ValueError(
+            f"opaque_r_si must exceed {2 * BOARD_R_SI} m2K/W — twice the "
+            f"board layer's own {BOARD_R_SI} — so the batt layer out-resists "
+            f"it and the retargeter grows the batt rather than the board; "
+            f"got {opaque_r_si}")
+
+    # The board layer is FIXED: it carries the heat capacity and the
+    # retargeter must not grow it. Declared directly, because each property
+    # is a property of gypsum board and not derived from anything else.
+    board = openstudio.model.StandardOpaqueMaterial(
+        model, "MediumSmooth", BOARD_THICKNESS_M, BOARD_CONDUCTIVITY_W_MK,
+        BOARD_DENSITY_KG_M3, BOARD_SPECIFIC_HEAT_J_KGK)
+    board.setName(BOARD_LAYER_NAME)
+
+    # The batt layer carries the resistance and is the one the solver grows,
+    # because its resistance is the larger of the two.
+    batt_thickness = (opaque_r_si - BOARD_R_SI) * BATT_CONDUCTIVITY_W_MK
+    batt = openstudio.model.StandardOpaqueMaterial(
+        model, "Rough", batt_thickness, BATT_CONDUCTIVITY_W_MK,
+        BATT_DENSITY_KG_M3, BATT_SPECIFIC_HEAT_J_KGK)
+    batt.setName(
+        f"Seed Batt R-{ruby_str(ruby_round(opaque_r_si - BOARD_R_SI, 2))}")
+
+    opaque = openstudio.model.Construction(model)
+    opaque.setName("Seed Opaque")
+    # BATT OUTSIDE, FRAME INSIDE. EnergyPlus reads the first layer as the
+    # OUTSIDE one, so board-then-batt put the mass on the weather and soil
+    # side of the insulation, decoupled from the zone it is there to damp —
+    # the opposite of the point (Fable, `318` A2). The solver and Kiva are
+    # indifferent to the order; the physics is not.
+    opaque.setLayers([batt, board])
+
+    glazing = openstudio.model.SimpleGlazing(model)
+    glazing.setUFactor(window_u_si)
+    glazing.setSolarHeatGainCoefficient(window_shgc)
+    glazing.setVisibleTransmittance(window_vt)
+    glazing.setName(f"Seed Glazing U-{ruby_str(ruby_round(window_u_si, 2))}")
+    window = openstudio.model.Construction(model)
+    window.setName("Seed Window")
+    window.setLayers([glazing])
+
+    for surface in model.getSurfaces():
+        surface.setConstruction(opaque)
+    for sub_surface in model.getSubSurfaces():
+        # A DOOR IS NOT GLAZING, and getting this wrong is silent. The
+        # OpenStudio forward translator rewrites a sub-surface that carries a
+        # fenestration construction — "SubSurface 'X' uses fenestration
+        # construction, changing SubSurfaceType to GlassDoor" — so seeding
+        # every sub-surface with glazing turned a submitter's opaque door into
+        # a glass one, with nothing in the audit to show it (Fable, `318` F2).
+        if sub_surface.subSurfaceType() in OPAQUE_SUB_SURFACE_TYPES:
+            sub_surface.setConstruction(opaque)
+        else:
+            sub_surface.setConstruction(window)
+    return opaque, window
+
+
 def deep_copy(model, construction):
     """Clone the construction AND every layer material (a bare
     LayeredConstruction#clone shares material objects, so solving one

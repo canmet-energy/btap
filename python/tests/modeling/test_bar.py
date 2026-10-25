@@ -15,27 +15,6 @@ RATIOS = {('Space Function', 'Office enclosed > 25 m2'): 0.7,
 @needs_sdk
 class TestBar(unittest.TestCase):
 
-    # Wizard/bar output has no constructions; downstream envelope work retargets
-    # EXISTING ones, so authored models need a seed set first.
-    def seed_constructions(self, model):
-        import openstudio
-        opaque = openstudio.model.MasslessOpaqueMaterial(model, 'MediumSmooth', 2.0)
-        opaque.setName('Seed R-2')
-        construction = openstudio.model.Construction(model)
-        construction.setName('Seed Opaque')
-        construction.setLayers([opaque])
-        glazing = openstudio.model.SimpleGlazing(model)
-        glazing.setUFactor(2.5)
-        glazing.setSolarHeatGainCoefficient(0.4)
-        glazing.setVisibleTransmittance(0.5)
-        window = openstudio.model.Construction(model)
-        window.setName('Seed Window')
-        window.setLayers([glazing])
-        for s in model.getSurfaces():
-            s.setConstruction(construction)
-        for s in model.getSubSurfaces():
-            s.setConstruction(window)
-
     def test_ratio_true_slicing_and_tagging(self):
         import btap.modeling as modeling
         from btap.audit import AuditLog
@@ -118,9 +97,13 @@ class TestBar(unittest.TestCase):
 
         model = modeling.bar(space_type_ratios=RATIOS, length=50.0, width=20.0,
                              num_stories_above_grade=2, wwr=0.4)
-        # wizard output carries no constructions; the envelope pass retargets existing ones
-        self.seed_constructions(model)
         audit = AuditLog()
+        # Wizard output carries no constructions and the envelope pass
+        # retargets EXISTING ones, so the chain needs a seed set first. This
+        # used to call a helper defined on this test class, which meant the
+        # documented chain could not be started from the shipped wheel at all
+        # (issue #143). It is the public facade now, and the audit records it.
+        modeling.seed_constructions(model, audit=audit)
         necb_loads.apply_loads(model, code='necb2020', audit=audit)
         necb_lighting.apply_lights(model, code='necb2020', audit=audit)
         necb_shw.apply_shw(model, code='necb2020', fuel='NaturalGas', audit=audit)
