@@ -207,11 +207,37 @@ P3 — whether generation is reported separately from consumption — and it is
 sharper for a solar wall, which produces electricity AND preheated air from
 one device.
 
-**Peak reduction** needs no new EnergyPlus output for a peak VALUE and time:
-read `DemandEndUseComponentsSummary`. It needs timeseries for anything
-dispatch-shaped. A peak metric should be added BEFORE any storage object,
-because a battery whose peak reduction cannot be measured is untestable —
-the instrument before the experiment.
+**Peak reduction** splits into two things that this audit first conflated.
+
+A peak VALUE and its time need no new output: read
+`DemandEndUseComponentsSummary`. That is enough for a compliance-style report
+line and almost nothing else.
+
+Peak reduction RESEARCH needs the profile, and the reason is the **load
+duration curve** — hourly load sorted descending against hours, which phylroy
+named as the way to understand peaks. A peak number cannot distinguish a
+needle from a plateau, and that distinction is the whole question:
+
+- how many hours sit near the peak decides whether shaving is cheap or
+  expensive;
+- the AREA above a threshold is the energy a battery must hold, so storage
+  sizing reads off the curve rather than off the peak;
+- the curve's knee is where a demand charge stops being worth chasing.
+
+An LDC is pure post-processing on hourly data — one sort, no new simulation
+output — and it **cannot be built from `DemandEndUseComponentsSummary` at
+all**, which gives one number and one timestamp.
+
+Campus has the input and not the curve. `extract_timeseries` produces
+`BUILDING|Total Electricity Demand [W]` hourly, and `reports/base_energy.py`
+scales each archetype's `W/m2` intensity by real building areas to roll up a
+whole-base hourly load — which is an LDC's input at campus scale. No load
+duration curve exists in that repo (searched by content and by filename), so
+it is a genuine gap in the toolchain rather than something to reuse.
+
+So the instrument still comes before the experiment — a battery whose peak
+reduction cannot be measured is untestable — but the instrument is the hourly
+profile and a curve over it, not the tabular peak.
 
 **Operational resilience** is further along than expected. The three
 resilience reports are already produced, and `unmet_occupied_hours` is already
@@ -246,6 +272,12 @@ citations of its own.
 report/table/column name so a rename fails loudly. Peak W and time of peak per
 fuel per end use. No simulation-lane change.
 
+Worth stating plainly: **M1 is cheap and is a dead end for the research.** It
+gives a reportable number from data already on disk, which is worth having,
+but it supports no load duration curve, no shed estimate and no storage
+sizing. If peak REDUCTION is the goal rather than peak reporting, M3 is the
+item that matters and M1 is a by-product of having the hourly data anyway.
+
 **M2 — a resilience reader.** The same mechanism over
 `AnnualThermalResilienceSummary`: hours of safety for cold and heat events
 first, since those answer the survivability question directly.
@@ -260,9 +292,11 @@ is the one number nobody has.
 report; needed by PV, solar wall and battery alike, and an adjudication before
 it is a coding question.
 
-M1 and M2 are small, need no new dependency and no re-run, and unblock
-measurement for two of the three themes. M3 is the only item with a cost worth
-arguing about.
+M1 and M2 are small, need no new dependency and no re-run, and give
+reportable numbers for two of the three themes. But M1 answers "what was the
+peak", not "how much of it can be removed" — so if the research question is
+reduction, the order inverts and M3 leads, with M1 falling out of the same
+data for free.
 
 ## What this audit did not establish
 
