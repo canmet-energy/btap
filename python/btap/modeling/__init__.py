@@ -200,6 +200,52 @@ def create_from_footprint(*, geojson=None, points=None, height_m=None, storeys=N
     return model
 
 
+def seed_constructions(model, *, opaque_r_si=2.0, window_u_si=2.5,
+                       window_shgc=0.4, window_vt=0.5, audit=None):
+    """Give every surface a construction, so envelope work has one to retarget.
+
+        model = modeling.bar(space_type_ratios=…, audit=audit)
+        modeling.seed_constructions(model, audit=audit)
+
+    Wizard and bar output carries no constructions, and every downstream
+    envelope pass retargets an EXISTING one. `btap/modeling/README.md` has
+    documented that precondition since the port while the only implementation
+    was a method on a test class, so the documented authoring chain could not
+    be started from the shipped wheel (issue #143).
+
+    Defaults are deliberately poor — R-2 opaque, U-2.5 glazing — so a later
+    envelope pass visibly improves on them. See
+    `envelope.constructions.seed_set` for why one opaque construction is safe
+    for every surface type and why assignment is direct rather than through a
+    `DefaultConstructionSet`.
+
+    THIS IS A SYNTHETIC SEED, not an archetype and not a code-backed
+    assembly: one ordinary 16 mm gypsum board plus a low-density batt, on
+    every wall, roof, floor and ground-contact surface alike. Its only job is
+    to be present and improvable. A caller who needs a particular real
+    assembly supplies one, and ENERGY RESULTS FROM AN UNREPLACED SEED ARE NOT
+    REPRESENTATIVE of a real proposed building. Stated here rather than only
+    in the primitive because this is the docstring a caller actually reads
+    (Sol, `322`).
+    """
+    audit = audit or AuditLog()
+
+    from btap.modeling.envelope import constructions
+
+    opaque, window = constructions.seed_set(
+        model, opaque_r_si=opaque_r_si, window_u_si=window_u_si,
+        window_shgc=window_shgc, window_vt=window_vt)
+    audit.decision("envelope", "seed construction set assigned",
+                   inputs={"opaque_r_si": opaque_r_si,
+                           "window_u_si": window_u_si,
+                           "window_shgc": window_shgc,
+                           "window_vt": window_vt,
+                           "surfaces": len(model.getSurfaces()),
+                           "sub_surfaces": len(model.getSubSurfaces())},
+                   value=f"{opaque.nameString()} / {window.nameString()}")
+    return model
+
+
 def apply_wwr(model, wwr=None, audit=None, **bins):
     """Cut windows into every exterior wall to a caller-chosen window-to-wall
     ratio. NO default and no code knowledge — for the NECB maximum use

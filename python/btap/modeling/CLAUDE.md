@@ -195,6 +195,41 @@ sits beside its consumer without shipping in an SDK-only distribution
   Stock work is bulk: a 28-storey record is 336 real spaces without it and 36
   with, for the same loads and envelope.
 
+## A COPIED rule value is still a dependency
+
+The D-77 contract says this package is generic authoring with no NECB
+anywhere, and `lint-imports` enforces the IMPORT half of that. The other half
+has no linter: **restating an NECB value as a local constant is still a
+semantic dependency when that value decides simulation physics.** It only
+makes the dependency invisible.
+
+This is not hypothetical. `envelope/constructions.py`'s seed construction
+once carried NECB Note A-8.4.4.4.(1)'s wood-frame worked example — 40.8 kg/m2
+and 45.5 kJ/(m2.K) — as its fixed layer's mass. The reasoning felt sound at
+each step: the seed needs real mass, those are published values for a
+lightweight assembly, and the contract forbids importing them so they were
+retyped with the Note named in a comment. Sol refused it (`320`) on two
+grounds worth remembering:
+
+- the Note's numbers were SELECTED for a reference-building approximation,
+  so putting them on a synthetic authoring placeholder — applied
+  indiscriminately to walls, roofs, floors and ground contact, and
+  deliberately non-compliant — implies an NECB identity the object does not
+  have; and
+- the layer was not even the Note's assembly. It combined the example's
+  WHOLE-ASSEMBLY areal mass and heat capacity with the FRAMING PATH's
+  resistance and treated the three as one homogeneous material.
+
+The replacement is ordinary 16 mm gypsum board, whose every property stands
+alone as a real material. `BOARD_R_SI` is DERIVED from thickness and
+conductivity rather than declared, and
+`tests/modeling/test_seed_constructions.py` pins that, because a declared
+resistance is exactly where a borrowed code value would reappear.
+
+**So:** when a generic default needs a physical number, justify it as physics
+and name no article. If the only defensible value you can find is one the Code
+publishes, that is a signal the default belongs to a code layer instead.
+
 ## Tests
 
 ```bash

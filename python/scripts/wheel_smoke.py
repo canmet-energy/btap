@@ -115,6 +115,45 @@ def run_checks() -> int:
     check("catalog_html() renders real diagrams (the regression this gate exists for)",
           catalog_html_is_real)
 
+    def documented_chain_starts_from_the_wheel():
+        """`btap/modeling/README.md` documents an authoring chain whose first
+        precondition is a seed construction set. Until issue #143 the only
+        implementation was a method on a test class, so the chain could be
+        started from a repository checkout and NOT from the installed
+        distribution — exactly the class of defect this gate exists for."""
+        model = modeling.create(shape="rectangle", length=30.0, width=20.0,
+                                storeys=2)
+        modeling.apply_wwr(model, wwr=0.4)
+        modeling.seed_constructions(model)
+        surfaces = model.getSurfaces()
+        sub_surfaces = model.getSubSurfaces()
+        assert surfaces, "wizard produced no surfaces"
+        assert sub_surfaces, "apply_wwr produced no sub-surfaces to seed"
+        bare = [s.nameString() for s in surfaces
+                if not s.construction().is_initialized()]
+        assert not bare, f"{len(bare)} surfaces left with no construction"
+        bare_sub = [s.nameString() for s in sub_surfaces
+                    if not s.construction().is_initialized()]
+        assert not bare_sub, (
+            f"{len(bare_sub)} sub-surfaces left with no construction")
+        # The point of the seed is that a retargeting pass can now run.
+        #
+        # The DOWNCAST is required and is a real edge in this API:
+        # `surface.construction()` yields a `ConstructionBase`, which has no
+        # `.layers`, so passing it straight to `opaque_at_conductance` raises
+        # `AttributeError: 'ConstructionBase' object has no attribute
+        # 'layers'`. This gate caught exactly that in its own first version.
+        # Recorded as friction on issue #143 rather than fixed here, because
+        # `opaque_at_conductance` is a legacy-exact port and widening what it
+        # accepts is a behaviour change, not a smoke-test concern.
+        from btap.modeling.envelope import constructions
+        seeded = surfaces[0].construction().get().to_Construction().get()
+        retargeted = constructions.opaque_at_conductance(model, seeded, 0.21)
+        assert retargeted.nameString() != seeded.nameString(), (
+            "retargeting returned the seed itself rather than a copy")
+    check("the documented authoring chain starts from the installed wheel",
+          documented_chain_starts_from_the_wheel)
+
     def bad_seed_is_loud():
         try:
             modeling.catalog_html(fixture="/nonexistent/seed.osm")
