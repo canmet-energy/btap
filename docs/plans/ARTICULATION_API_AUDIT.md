@@ -36,6 +36,43 @@ by its full dotted path.
 This is the one item on this list that blocks a documented workflow, and it is
 the cheapest to close.
 
+**CLOSED** by `3c39e7d9` (PR #144): `modeling.seed_constructions` is a public
+audited facade, the test-local helper is gone, and `scripts/wheel_smoke.py`
+runs the documented chain's first step from OUTSIDE the checkout against a
+built wheel.
+
+### What skipping the precondition actually does
+
+Recorded here because that commit's own message and PR description say
+something FALSE, and a commit message cannot be corrected: they state that the
+full chain "DUMPS CORE on unseeded surfaces". **It does not.** Measured on the
+documented chain with the seed omitted, `faulthandler` enabled:
+
+    unseeded surfaces: 144 of 144
+    loads... lighting... shw... build_system... prescriptive...
+    SURVIVED the whole chain, exit 0
+    AFTER: 144 of 144 still bare, 0 constructions in the model
+
+and `apply_prescriptive` warns once per skipped surface:
+
+    [warning] Surface 102    | surface has no layered construction — skipped
+    [warning] Sub Surface 22 | subsurface has no layered construction — skipped
+
+71 `prescriptive` audit entries, most of them those. That is the architecture
+working as documented — warnings are never silent, and everything past the
+preflight gate is disclosure.
+
+The claim came from conflating two real but separate observations: the chain
+completing at 0-of-54 surfaces in an early probe, and a genuine SIGSEGV in the
+new test file's own unguarded `.to_StandardOpaqueMaterial().get()` under
+mutation (issue #141's mechanism, diagnosed and fixed in the same PR). The
+crash was real; it was in the tests, not in the chain.
+
+So there is no refusal to add here. Whether the authoring API should REFUSE a
+model it cannot retarget, rather than warn per surface, is a genuine design
+question — but an ordinary one, and `performance_compliance` already gates its
+own entry point in `codes/necb/path.py`.
+
 ## Domain-by-domain
 
 | domain | author it? | apply NECB to it? | legacy reference |
@@ -100,7 +137,7 @@ PV or natural ventilation, where the NECB-lineage code is already on disk.
 
 ## Proposed order
 
-**P1 — seed a construction set.** Promote `seed_constructions` out of
+**P1 — seed a construction set. DONE, `3c39e7d9`.** Promote `seed_constructions` out of
 `tests/modeling/test_bar.py` into `btap.modeling.envelope` and export it.
 Closes the one documented-workflow blocker. Small, and it needs a test that
 the DOCUMENTED chain runs end to end from the wheel, which is what nothing
