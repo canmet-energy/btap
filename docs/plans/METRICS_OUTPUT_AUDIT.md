@@ -81,7 +81,79 @@ when the report, table or column name moves. `_district`'s own comment records
 that OpenStudio renamed district accessors across versions; tabular report
 names can move the same way.
 
-## What is genuinely absent: timeseries
+## Timeseries: OFF by default, and a solved problem next door
+
+An earlier version of this section called timeseries "genuinely absent" and
+proposed designing the request list. Both were wrong, and phylroy corrected
+both: hourly output has to be TURNED ON, the `.rdd`/`.mdd` files say what is
+available, and `canmet-energy/campus` already does all of it by default.
+
+**I audited availability without reading the files that declare it.** Every
+run already writes them:
+
+```text
+eplusout.rdd   540 lines — every output VARIABLE this model can report
+eplusout.mdd   198 lines — every METER, including:
+                 Output:Meter,Electricity:Facility,hourly;      [J]
+                 Output:Meter,ElectricityNet:Facility,hourly;   [J]
+                 Output:Meter,ElectricityNet:Plant,hourly;      [J]
+```
+
+`ElectricityNet:Facility` matters beyond this section: EnergyPlus already
+distinguishes net from gross, so M4's generation axis has a meter waiting for
+it rather than a calculation to invent.
+
+### The reference implementation is `canmet-energy/campus`
+
+`src/resources/buildings/measures/AddReportingOutputs/measure.py` is a
+117-line measure that requests, by default:
+
+- **13 hourly METERS** — `Electricity:Facility`, then per end use
+  (`InteriorLights`, `ExteriorLights`, `InteriorEquipment`, `Heating`,
+  `Cooling`, `Fans`, `Pumps`, `HeatRejection`, `WaterSystems`), plus
+  `NaturalGas:Facility`, `Heating:NaturalGas`, `WaterSystems:NaturalGas`;
+- **30 hourly VARIABLES** — zone sensible heating/cooling energy and rate, the
+  four setpoint-not-met variables, the full zone air heat balance
+  decomposition (surface convection, outdoor air transfer, internal
+  convective, interzone, system air, system convective, air energy storage),
+  the infiltration sensible and latent splits, OA mass flow, site drybulb and
+  humidity ratio, windows transmitted solar, internal total and latent gains;
+- `Output:SQLite` SimpleAndTabular and `OutputControl:ReportingTolerances`.
+
+`src/buildings/sim/extract_timeseries.py` (566 lines) is the consumer, and it
+settles the destination question this audit had left open. It reads the SQL
+with **`sqlite3` in read-only URI mode** — `sqlite3.connect(f"file:{p}?mode=ro",
+uri=True)` — into pandas, and writes
+`output/database/timeseries/model=<name>/data.parquet`: wide, float32, zstd,
+hourly `DatetimeIndex`, one column per series as `"<KeyValue>|<Name> [<Units>]"`.
+
+It then layers DERIVED building-level loads under a `BUILDING` key —
+`Space Heating Thermal Load [W]`, `Service Water Heating Load [W]`,
+`Total Heating Thermal Load [W]`, **`Total Electricity Demand [W]`**,
+`Total Site Energy [W]` — plus `[W/m2]` intensities normalised by Net
+Conditioned Building Area, which makes them archetype-portable, with the
+electricity and gas end-use breakdowns that drive its stacked charts.
+
+So two corrections to this audit's own claims:
+
+- **"`btap` has no precedent for querying the SQL directly" is wrong at the
+  toolchain level.** The precedent is `sqlite3` + pandas in campus, not the
+  SDK accessors. The named-wrapper caution below still holds for column names,
+  but the approach is established rather than novel.
+- **`BUILDING|Total Electricity Demand [W]` hourly IS peak information**, and a
+  better route for research than `DemandEndUseComponentsSummary`: a profile
+  gives the peak, the time, the duration, the shape and the shed, while the
+  tabular report gives one number and one timestamp.
+
+### What that leaves for this package
+
+A real question rather than a task: **should `canmet-btap` produce hourly
+output at all, or does campus remain the hourly consumer with this package
+supplying the model?** Campus is derived from `bluesky` and carries the CFB
+Gagetown archetypes, so it already owns an hourly pipeline end to end. The
+answer determines whether M3 below is a feature here or a pointer to there.
+
+## What a bare `simulation.run` does today
 
 ```text
 ReportData            0 rows
@@ -90,17 +162,25 @@ Time                  0 rows
 availableTimeSeries   0 names
 ```
 
-Nothing requests an `Output:Variable` or `Output:Meter` at any sub-annual
-frequency. `runner.request_run_period_variables` exists but sets
-`setReportingFrequency("RunPeriod")` — a single summed value per variable, by
-design, for the rule-verification lane.
+Nothing in THIS package requests an `Output:Variable` or `Output:Meter` at any
+sub-annual frequency, which is why the measurement above is empty.
+`runner.request_run_period_variables` sets `setReportingFrequency("RunPeriod")`
+— a single summed value per variable, by design, for the rule-verification
+lane. The only hourly request in product code is
+`hvac/systems/hp_plant_fancoils.py`'s `District Heating/Cooling Water Rate`,
+for downstream GLHX sizing.
 
-So anything needing a PROFILE rather than a peak — load shifting against a
-tariff window, battery dispatch, hour-by-hour islanding — needs hourly or
-timestep meters requested before the run. That is the only part of the three
-research themes that requires new simulation-lane work, and it has a cost:
-hourly meters on a large model inflate the SQL, which the frozen-scenario
-corpus and the CI artifact budget both feel.
+The cost that remains real: hourly meters inflate the SQL, which the
+frozen-scenario corpus and the CI artifact budget both feel. Campus runs 13
+meters and 30 variables by default on its archetypes, so the cost is evidently
+tolerable at that scale — but it has not been measured against our frozen
+corpus, and that measurement is the actual work in M3.
+
+One more place hourly data may already be arriving and being discarded:
+`backends.py:331` records that a completed REMOTE job returns **17 artifacts**,
+and line 632 downloads exactly `("eplusout.sql", "eplusout.err")`. The 17
+names are not recorded anywhere — only their keys — so whether a CSV or meter
+file is among them is unknown and worth one look.
 
 ## What we read today
 
@@ -170,9 +250,11 @@ fuel per end use. No simulation-lane change.
 `AnnualThermalResilienceSummary`: hours of safety for cold and heat events
 first, since those answer the survivability question directly.
 
-**M3 — sub-annual meters, scoped.** `Output:Meter` at hourly frequency,
-requested explicitly and off by default, with the SQL-size cost measured
-before it goes anywhere near the frozen corpus.
+**M3 — sub-annual meters, IF this package should own them.** Not a design
+task: campus's `AddReportingOutputs` is the request list and
+`extract_timeseries` is the reader, both working. The work is deciding
+ownership, then measuring the SQL-size cost against the frozen corpus — which
+is the one number nobody has.
 
 **M4 — the generation axis and its adjudication.** Net versus gross in the
 report; needed by PV, solar wall and battery alike, and an adjudication before
@@ -184,12 +266,13 @@ arguing about.
 
 ## What this audit did not establish
 
-Whether the research themes need a report at all, or whether a researcher
-would rather have a dataframe. Everything above assumes the existing
-`report.json` is the destination, which is a compliance artifact with a
-compliance shape; `compliance_determination`, the citation axes and the
-preflight gates may all be wrong for a research run. That is a product
-question, not a measurement.
+Whether the research themes want a report at all is now ANSWERED, and not by
+this audit: campus writes partitioned Parquet with derived building-level
+loads and `W/m2` intensities, which is what a researcher uses. The open
+question is narrower — whether a compliance artifact and a research dataset
+should come from one pipeline at all, given `report.json` carries
+`compliance_determination`, three citation axes and the preflight gates, none
+of which a research run wants.
 
 Nor whether an outage event can be expressed with the authoring API as it
 stands. That needs the schedules work the articulation audit lists as P2, and
