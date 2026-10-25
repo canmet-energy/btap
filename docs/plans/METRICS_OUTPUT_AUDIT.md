@@ -1,0 +1,313 @@
+# Metrics and output audit — what a run already produces, and what we read
+
+Companion to [ARTICULATION_API_AUDIT.md](ARTICULATION_API_AUDIT.md), which
+measured what a user can AUTHOR. This one measures what a finished simulation
+makes AVAILABLE and what the package actually reads back. It was prompted by
+phylroy's statement that the next stage of NECB research may include
+electrification, peak reduction and operational resilience — two of which
+need output axes the articulation audit never looked at.
+
+Every number below was measured on one real run: the `proposed_with_hvac`
+fixture, Toronto CWEC2020, run period 1–7 July, through `simulation.run`.
+
+## The headline: peak and resilience data are ALREADY in every SQL we write
+
+The articulation audit's companion claim — that "peak reduction has nothing" —
+was **wrong**, and wrong in the same shape as the segfault claim it sits
+beside: it measured what we COLLECT and reported it as what EXISTS.
+
+`backends.py` requests `Output:SQLite, SimpleAndTabular` and
+`Output:Table:SummaryReports, AllSummary`. That produces **29 tabular
+reports**, of which three matter here and none is read:
+
+| report | rows | carries |
+|---|---|---|
+| `DemandEndUseComponentsSummary` | 448 | coincident PEAK demand per end use per fuel, **plus the time of peak** |
+| `AnnualThermalResilienceSummary` | 486 | Hours of Safety for Cold/Heat Events, Heat Index, Humidex, Unmet Degree-Hours, Discomfort-weighted Exceedance |
+| `CO2ResilienceSummary` / `VisualResilienceSummary` | 9 / 12 | CO2 and illuminance level hours |
+
+Measured samples from that one week:
+
+```text
+DemandEndUseComponentsSummary / End Uses
+  Time of Peak        Electricity   03-JUL-07:30
+  Interior Lighting   Electricity   6975.02 W
+  Interior Equipment  Electricity   4185.01 W
+
+AnnualThermalResilienceSummary
+  Hours of Safety for Cold Events   168.00
+```
+
+"Hours of Safety for Cold/Heat Events" is the operational-resilience metric a
+passive-survivability study asks for, and it costs nothing to produce because
+we already produce it.
+
+## How to read it: the escape hatch already exists
+
+`SqlFile` has **no tabular accessor** — this is why the data looked absent.
+Its typed readers cover annual energy and end uses only, and
+`peakEnergyDemandByMonth`, the one peak-shaped method, returns EMPTY on our
+SQL because it reads monthly meter tables that `AllSummary` does not populate.
+
+But `SqlFile` does expose arbitrary SQL:
+
+```text
+execAndReturnFirstDouble / FirstInt / FirstString
+execAndReturnVectorOfDouble / OfInt / OfString
+execute
+```
+
+Measured on the existing attached `SqlFile` object, no new dependency:
+
+```python
+sql.execAndReturnFirstDouble(
+    "SELECT Value FROM TabularDataWithStrings WHERE "
+    "ReportName='DemandEndUseComponentsSummary' AND TableName='End Uses' "
+    "AND RowName='Interior Lighting' AND ColumnName='Electricity'")
+# -> 6975.02
+```
+
+**No new output request, no re-run, no new dependency, and no change to the
+simulation lane.** A peak reader and a resilience reader are new FUNCTIONS
+beside `energy_results`, not new infrastructure.
+
+One caveat, and it is a real one: `btap` has no precedent for querying the SQL
+directly. `runner.py` uses only typed accessors
+(`totalSiteEnergy`, `electricityTotalEndUses`, `_end_use`, `_district`). Hand
+-written SQL against table and column NAMES is positional access by another
+route — the same class of fragility as `setDouble(7, …)` for the BIPVT PV
+coverage fraction — so each query wants a named wrapper and a test that fails
+when the report, table or column name moves. `_district`'s own comment records
+that OpenStudio renamed district accessors across versions; tabular report
+names can move the same way.
+
+## Timeseries: OFF by default, and a solved problem next door
+
+An earlier version of this section called timeseries "genuinely absent" and
+proposed designing the request list. Both were wrong, and phylroy corrected
+both: hourly output has to be TURNED ON, the `.rdd`/`.mdd` files say what is
+available, and `canmet-energy/campus` already does all of it by default.
+
+**I audited availability without reading the files that declare it.** Every
+run already writes them:
+
+```text
+eplusout.rdd   540 lines — every output VARIABLE this model can report
+eplusout.mdd   198 lines — every METER, including:
+                 Output:Meter,Electricity:Facility,hourly;      [J]
+                 Output:Meter,ElectricityNet:Facility,hourly;   [J]
+                 Output:Meter,ElectricityNet:Plant,hourly;      [J]
+```
+
+`ElectricityNet:Facility` matters beyond this section: EnergyPlus already
+distinguishes net from gross, so M4's generation axis has a meter waiting for
+it rather than a calculation to invent.
+
+### The reference implementation is `canmet-energy/campus`
+
+`src/resources/buildings/measures/AddReportingOutputs/measure.py` is a
+117-line measure that requests, by default:
+
+- **13 hourly METERS** — `Electricity:Facility`, then per end use
+  (`InteriorLights`, `ExteriorLights`, `InteriorEquipment`, `Heating`,
+  `Cooling`, `Fans`, `Pumps`, `HeatRejection`, `WaterSystems`), plus
+  `NaturalGas:Facility`, `Heating:NaturalGas`, `WaterSystems:NaturalGas`;
+- **30 hourly VARIABLES** — zone sensible heating/cooling energy and rate, the
+  four setpoint-not-met variables, the full zone air heat balance
+  decomposition (surface convection, outdoor air transfer, internal
+  convective, interzone, system air, system convective, air energy storage),
+  the infiltration sensible and latent splits, OA mass flow, site drybulb and
+  humidity ratio, windows transmitted solar, internal total and latent gains;
+- `Output:SQLite` SimpleAndTabular and `OutputControl:ReportingTolerances`.
+
+`src/buildings/sim/extract_timeseries.py` (566 lines) is the consumer, and it
+settles the destination question this audit had left open. It reads the SQL
+with **`sqlite3` in read-only URI mode** — `sqlite3.connect(f"file:{p}?mode=ro",
+uri=True)` — into pandas, and writes
+`output/database/timeseries/model=<name>/data.parquet`: wide, float32, zstd,
+hourly `DatetimeIndex`, one column per series as `"<KeyValue>|<Name> [<Units>]"`.
+
+It then layers DERIVED building-level loads under a `BUILDING` key —
+`Space Heating Thermal Load [W]`, `Service Water Heating Load [W]`,
+`Total Heating Thermal Load [W]`, **`Total Electricity Demand [W]`**,
+`Total Site Energy [W]` — plus `[W/m2]` intensities normalised by Net
+Conditioned Building Area, which makes them archetype-portable, with the
+electricity and gas end-use breakdowns that drive its stacked charts.
+
+So two corrections to this audit's own claims:
+
+- **"`btap` has no precedent for querying the SQL directly" is wrong at the
+  toolchain level.** The precedent is `sqlite3` + pandas in campus, not the
+  SDK accessors. The named-wrapper caution below still holds for column names,
+  but the approach is established rather than novel.
+- **`BUILDING|Total Electricity Demand [W]` hourly IS peak information**, and a
+  better route for research than `DemandEndUseComponentsSummary`: a profile
+  gives the peak, the time, the duration, the shape and the shed, while the
+  tabular report gives one number and one timestamp.
+
+### What that leaves for this package
+
+A real question rather than a task: **should `canmet-btap` produce hourly
+output at all, or does campus remain the hourly consumer with this package
+supplying the model?** Campus is derived from `bluesky` and carries the CFB
+Gagetown archetypes, so it already owns an hourly pipeline end to end. The
+answer determines whether M3 below is a feature here or a pointer to there.
+
+## What a bare `simulation.run` does today
+
+```text
+ReportData            0 rows
+ReportDataDictionary  0 rows
+Time                  0 rows
+availableTimeSeries   0 names
+```
+
+Nothing in THIS package requests an `Output:Variable` or `Output:Meter` at any
+sub-annual frequency, which is why the measurement above is empty.
+`runner.request_run_period_variables` sets `setReportingFrequency("RunPeriod")`
+— a single summed value per variable, by design, for the rule-verification
+lane. The only hourly request in product code is
+`hvac/systems/hp_plant_fancoils.py`'s `District Heating/Cooling Water Rate`,
+for downstream GLHX sizing.
+
+The cost that remains real: hourly meters inflate the SQL, which the
+frozen-scenario corpus and the CI artifact budget both feel. Campus runs 13
+meters and 30 variables by default on its archetypes, so the cost is evidently
+tolerable at that scale — but it has not been measured against our frozen
+corpus, and that measurement is the actual work in M3.
+
+One more place hourly data may already be arriving and being discarded:
+`backends.py:331` records that a completed REMOTE job returns **17 artifacts**,
+and line 632 downloads exactly `("eplusout.sql", "eplusout.err")`. The 17
+names are not recorded anywhere — only their keys — so whether a CSV or meter
+file is among them is unknown and worth one look.
+
+## What we read today
+
+`runner.energy_results` returns annual-or-run-period site energy: `total_site_kwh`,
+`electricity_kwh`, `natural_gas_kwh`, `district_heating_kwh`,
+`district_cooling_kwh`, an `end_uses_kwh` breakdown of seven categories,
+`floor_area_m2` and `eui_kwh_per_m2`. Plus `unmet_occupied_hours` and
+`zone_unmet_occupied_hours`, which `compliance.py` already puts in each report
+section.
+
+That set is shaped by exactly one question — the 8.4.1.2 annual energy
+comparison — which is correct for compliance and insufficient for all three
+research themes.
+
+## By theme
+
+**Electrification** is the best served. Per-fuel annual totals and the end-use
+breakdown already exist, so a fuel-switching comparison is reportable today.
+What is missing is a GENERATION axis: no `GeneratorPhotovoltaic`,
+`ElectricLoadCenter*` or solar-collector object is authored by this package, so
+there is nothing on-site to report, and `energy_results` has no net-vs-gross
+distinction. That is the same adjudication the articulation audit flagged for
+P3 — whether generation is reported separately from consumption — and it is
+sharper for a solar wall, which produces electricity AND preheated air from
+one device.
+
+**Peak reduction** splits into two things that this audit first conflated.
+
+A peak VALUE and its time need no new output: read
+`DemandEndUseComponentsSummary`. That is enough for a compliance-style report
+line and almost nothing else.
+
+Peak reduction RESEARCH needs the profile, and the reason is the **load
+duration curve** — hourly load sorted descending against hours, which phylroy
+named as the way to understand peaks. A peak number cannot distinguish a
+needle from a plateau, and that distinction is the whole question:
+
+- how many hours sit near the peak decides whether shaving is cheap or
+  expensive;
+- the AREA above a threshold is the energy a battery must hold, so storage
+  sizing reads off the curve rather than off the peak;
+- the curve's knee is where a demand charge stops being worth chasing.
+
+An LDC is pure post-processing on hourly data — one sort, no new simulation
+output — and it **cannot be built from `DemandEndUseComponentsSummary` at
+all**, which gives one number and one timestamp.
+
+Campus has the input and not the curve. `extract_timeseries` produces
+`BUILDING|Total Electricity Demand [W]` hourly, and `reports/base_energy.py`
+scales each archetype's `W/m2` intensity by real building areas to roll up a
+whole-base hourly load — which is an LDC's input at campus scale. No load
+duration curve exists in that repo (searched by content and by filename), so
+it is a genuine gap in the toolchain rather than something to reuse.
+
+So the instrument still comes before the experiment — a battery whose peak
+reduction cannot be measured is untestable — but the instrument is the hourly
+profile and a curve over it, not the tabular peak.
+
+**Operational resilience** is further along than expected. The three
+resilience reports are already produced, and `unmet_occupied_hours` is already
+read and reported. A resilience study can start from existing data. What it
+cannot do yet is model the EVENT — an outage is a schedule and availability
+problem (equipment unavailable for a window), which is authoring work in
+`btap.modeling`, not an output gap.
+
+## Where this code belongs
+
+phylroy's direction is that this is a research tool that will eventually
+support new codes. The existing layering already carries that without
+amendment:
+
+- technologies — PV, battery, thermal storage, natural ventilation, solar
+  wall — are generic authoring, so `btap.modeling`;
+- metrics — peak, resilience readers — are generic result reading, so
+  `btap.simulation`;
+- when a code edition or family adopts any of it, a `btap.codes.<family>`
+  layer cites it from above.
+
+That is D-77 as written. The research work is not throwaway and not a parallel
+stack: it is the substrate a future code layer reads. Which raises the bar,
+because code written for research that a code layer will later cite needs the
+same discipline as the compliance path even though it carries no AuditLog or
+citations of its own.
+
+## Proposed order
+
+**M1 — a peak reader.** `DemandEndUseComponentsSummary` through
+`execAndReturnFirstDouble`, named wrappers per metric, a test pinning each
+report/table/column name so a rename fails loudly. Peak W and time of peak per
+fuel per end use. No simulation-lane change.
+
+Worth stating plainly: **M1 is cheap and is a dead end for the research.** It
+gives a reportable number from data already on disk, which is worth having,
+but it supports no load duration curve, no shed estimate and no storage
+sizing. If peak REDUCTION is the goal rather than peak reporting, M3 is the
+item that matters and M1 is a by-product of having the hourly data anyway.
+
+**M2 — a resilience reader.** The same mechanism over
+`AnnualThermalResilienceSummary`: hours of safety for cold and heat events
+first, since those answer the survivability question directly.
+
+**M3 — sub-annual meters, IF this package should own them.** Not a design
+task: campus's `AddReportingOutputs` is the request list and
+`extract_timeseries` is the reader, both working. The work is deciding
+ownership, then measuring the SQL-size cost against the frozen corpus — which
+is the one number nobody has.
+
+**M4 — the generation axis and its adjudication.** Net versus gross in the
+report; needed by PV, solar wall and battery alike, and an adjudication before
+it is a coding question.
+
+M1 and M2 are small, need no new dependency and no re-run, and give
+reportable numbers for two of the three themes. But M1 answers "what was the
+peak", not "how much of it can be removed" — so if the research question is
+reduction, the order inverts and M3 leads, with M1 falling out of the same
+data for free.
+
+## What this audit did not establish
+
+Whether the research themes want a report at all is now ANSWERED, and not by
+this audit: campus writes partitioned Parquet with derived building-level
+loads and `W/m2` intensities, which is what a researcher uses. The open
+question is narrower — whether a compliance artifact and a research dataset
+should come from one pipeline at all, given `report.json` carries
+`compliance_determination`, three citation axes and the preflight gates, none
+of which a research run wants.
+
+Nor whether an outage event can be expressed with the authoring API as it
+stands. That needs the schedules work the articulation audit lists as P2, and
+was not probed here.
