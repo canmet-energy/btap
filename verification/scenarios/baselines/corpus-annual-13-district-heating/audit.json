@@ -190,10 +190,10 @@
  {
   "step": "compliance",
   "target": "proposed_annual",
-  "action": "annual EnergyPlus run complete \u2014 NOT CLEAN (see eplusout.err)",
+  "action": "annual EnergyPlus run complete",
   "inputs": {
    "run_period": "1/1-1/7 (SHORTENED)",
-   "clean_run": false,
+   "clean_run": true,
    "total_site_kwh": 4364,
    "unmet_heating_h": 0.5,
    "unmet_cooling_h": 0.0

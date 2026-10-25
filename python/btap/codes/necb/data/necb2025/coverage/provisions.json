@@ -4,7 +4,7 @@
     "family": "necb",
     "id": "necb2025"
   },
-  "generated": "2026-10-22",
+  "generated": "2026-10-25",
   "provisions": {
     "1.1.1.1": {
       "children_complete": true,
@@ -2718,6 +2718,36 @@
       ],
       "kind": "clause",
       "parent": "4.2.3.1.(6)",
+      "status": "present",
+      "title": null
+    },
+    "5.2.1.1": {
+      "children_complete": true,
+      "citation": "5.2.1.1",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:5.2.1.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "article",
+      "parent": null,
+      "status": "present",
+      "title": "Load Calculations"
+    },
+    "5.2.1.1.(1)": {
+      "children_complete": true,
+      "citation": "5.2.1.1.(1)",
+      "division": "B",
+      "evidence": [
+        {
+          "record": "get_section:necb:2025:B:5.2.1.1",
+          "source": "mcp"
+        }
+      ],
+      "kind": "sentence",
+      "parent": "5.2.1.1",
       "status": "present",
       "title": null
     },
@@ -9580,8 +9610,8 @@
     "mcp": {
       "kind": "authorized-mcp-payload",
       "path": "provenance/provisions.result.json",
-      "retrieved": "2026-10-22",
-      "sha256": "cf3f8446f4d4a163425cb21ad3327825d9179860ac7cc44d97e8dca5088aaf91"
+      "retrieved": "2026-10-25",
+      "sha256": "ca3894f733926276580e2ce8149fd538d3ec7d0a927f61199301f77e284f9f6d"
     },
     "section-8.4": {
       "kind": "existing-authorized-cache",

@@ -572,9 +572,46 @@ def seed(code="necb2020"):
     return model
 
 
+def _mark_fan_coils_for_mode_specific_sizing(model) -> int:
+    """Author D-107's sizing contract onto every fan coil in a SAMPLE.
+
+    A `ZoneHVAC:FourPipeFanCoil`'s maximum supply air is sized on the LARGER
+    of its heating and cooling design flows, while its cold water flow follows
+    the zone COOLING load. In a heating-dominated zone those disagree, and
+    EnergyPlus is then asked for a UA that reconciles a heating-sized airflow
+    with a cooling-sized water flow. Measured on sample 04's Thermal Zone 3:
+    14506 W air-side against 6892 W of water at the 6 K loop delta-T, 2.10x
+    infeasible, so the solver substitutes a UA and continues (issue #68).
+
+    The correction is D-106's already-proven primitive, applied here at
+    AUTHORING time: keep the unit maximum at the larger mode and rate each
+    water coil at its own mode's design airflow, through EnergyPlus's native
+    `DesignSpecification:ZoneHVAC:Sizing` with unity fractions. Design loads
+    and water flows are unchanged, so no cooling reserve is added — which is
+    why this survives 8.4.4.8.(2)'s oversizing cap and raising the chilled
+    water flow would not (Sol, `313`).
+
+    SCOPE, and it is the point: this marks models THIS REPOSITORY AUTHORS,
+    never a submitted OSM. Marking a submitter's own fan coil would re-size
+    their building, which is the babysitting phylroy's 2026-10-21 ruling
+    forbids. Authoring a clean source artifact is not that.
+    """
+    # A repository script may import `btap.simulation`; product `btap.modeling`
+    # may NOT (D-77 package direction), which is why the marking lives here
+    # rather than in the fan-coil builder.
+    from btap.simulation.translation import mark_fan_coil_for_mode_specific_sizing
+
+    marked = 0
+    for fan_coil in model.getZoneHVACFourPipeFanCoils():
+        mark_fan_coil_for_mode_specific_sizing(fan_coil)
+        marked += 1
+    return marked
+
+
 def save(model, out: Path, slug: str) -> int:
     import openstudio
 
+    _mark_fan_coils_for_mode_specific_sizing(model)
     path = out / f"{slug}.osm"
     model.save(openstudio.path(str(path)), True)
     return path.stat().st_size

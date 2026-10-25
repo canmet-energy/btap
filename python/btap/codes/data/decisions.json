@@ -4349,6 +4349,47 @@
           ]
         }
       ]
+    },
+    {
+      "id": "D-107",
+      "title": "Authored sample fan coils carry the mode-specific sizing contract",
+      "kind": "process",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ],
+      "summary": "Every fan coil in a sample model this repository authors is marked before that sample is saved, so its cooling coil rates at the cooling design airflow; the compliance pipeline does not infer or add the marker to fan coils in an unmarked submitted model, and a marker already authored into the input remains effective.",
+      "requirements": [
+        {
+          "id": "authored_sample_fan_coil_sizing",
+          "label": "Mode-specific water-coil sizing in repository-authored sample models",
+          "decided": "Every fan coil in a repository-authored sample is marked before that sample is saved, so a heating-dominated zone's cooling coil rates at its own mode's design airflow rather than the heating mode's. The pipeline adds no marker to an unmarked submitted model, and an authored marker in an input stays effective.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "5.2.1.1.(1)",
+                "8.4.2.10.(2)",
+                "8.4.2.10.(5)",
+                "8.4.3.1.(2)(c)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "5.2.1.1.(1)",
+                "8.4.2.10.(2)",
+                "8.4.2.10.(5)",
+                "8.4.3.1.(2)(c)"
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }
