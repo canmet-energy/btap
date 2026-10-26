@@ -196,11 +196,65 @@ That splits the cost by the ASK, and the split is the design:
   envelope-vs-infiltration-vs-internal decomposition, which is a different
   analysis from anything peak or resilience asks for.
 
-So M3 wants TIERS, not a switch: meters by default or near-default, zone
-variables explicitly opt-in, and the corpus cost stated per tier rather than
-as one blended figure. An earlier version of this section said hourly output
-"cannot be on by default" on the strength of the 62.86x number alone, which
-attributed the zone variables' cost to the electricity profile.
+So M3 wants TIERS, not a switch. An earlier version of this section said
+hourly output "cannot be on by default" on the strength of the 62.86x number
+alone, which attributed the zone variables' cost to the electricity profile.
+
+### The tiers, by REQUIREMENT
+
+phylroy's stated needs (2026-10-26) determine the split. Grouping the request
+list by what each requirement reads, rather than by which repo asked for it:
+
+**Tier 1 — meters only. ~5x baseline, and it covers four of the five needs.**
+
+    Electricity:Facility
+    InteriorLights / ExteriorLights / InteriorEquipment  (:Electricity)
+    Heating / Cooling / Fans / Pumps / HeatRejection / WaterSystems
+    NaturalGas:Facility, Heating:NaturalGas, WaterSystems:NaturalGas
+    Heating:EnergyTransfer, Cooling:EnergyTransfer
+
+| requirement | what it reads |
+|---|---|
+| load-reduction measures | per-end-use hourly — lights, fans, pumps, equipment |
+| peak reduction, load duration curve | `Electricity:Facility` hourly |
+| district energy | `Heating:EnergyTransfer` hourly |
+| cogeneration resilience | heat AND power on one index — the coincidence is the measured quantity, since a CHP unit is heat-led or electric-led and whether it carries critical load through an outage depends on the hour-by-hour ratio |
+
+**Tier 2 — a few per-zone variables.** `Zone Mean Air Temperature` and the four
+setpoint-not-met variables: what a free-float outage case reads, and what
+unmet-hours needs. Five variables times zone count. Not yet measured.
+
+**Tier 3 — the heat-balance decomposition. The 62.86x case, 93% of the cost.**
+The seven `Zone Air Heat Balance *` variables plus the infiltration splits,
+latent terms and humidity ratios. These answer WHY a load is what it is —
+envelope versus infiltration versus internal versus interzone — which none of
+the five requirements above asks. Load-reduction analysis needs the end-use
+profile to measure a reduction, not the attribution of the underlying load.
+
+### District energy's heat load costs ONE METER
+
+`Heating:EnergyTransfer` is a single meter, and it equals the sum of the
+per-zone `Zone Air System Sensible Heating Energy` variables exactly — tested
+on two systems with different air-side topology:
+
+| system | 1 meter | sum of 5 zone variables | ratio |
+|---|---:|---:|---:|
+| Baseboard gas boiler (no air handler) | 34.3 MWh | 34.3 MWh | 1.0000 |
+| Built-up VAV, HW coil, scroll chiller, HW baseboards | 37.1 MWh | 37.1 MWh | 1.0000 |
+
+So the district-energy heat profile does not need the expensive tier. Two
+caveats, because two systems are evidence and not proof across 102:
+
+- campus's derived `Space Heating Thermal Load` adds a **ventilation OA
+  preheat** term to its zone-variable sum. On both systems tested the single
+  meter already matched without it, but a DOAS-style system with a DEDICATED
+  preheat coil conditioning outdoor air before it reaches a zone is the case
+  that could diverge, and it was not tested;
+- the multipliers above were measured on the baseboard fixture. The VAV
+  fixture's SQL is larger at baseline because a more complex system writes
+  bigger tabular reports — its 14-series run came to 6.03 MiB — so the
+  portable figure is roughly **0.2 MiB per hourly series per year**, not the
+  ratio.
 
 One more place hourly data may already be arriving and being discarded:
 `backends.py:331` records that a completed REMOTE job returns **17 artifacts**,
