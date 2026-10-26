@@ -87,6 +87,112 @@ on ambient state.
   after idle. Retry with backoff before concluding the service is down —
   submit is deployed separately from the read/upload endpoints.
 
+## Two filters that are not optional on an hourly read
+
+`_hourly_rows` carries both, and each was learned by measurement:
+
+- **`EnvironmentType = 3`** — the D-56 trap `run_period_sums` already
+  documents. Three sizing periods inflated an annual total by 1.8% on the
+  reference fixture, and only the filtered figure reconciles to the tabular
+  End Uses row.
+- **`ReportingFrequency = 'Hourly'`** — subtler and worse. The same variable
+  NAME can be reported at two frequencies in one run, because
+  `request_run_period_variables` exists for the NECB 8.4.4.13.(2)(g) election.
+  Without this clause the query also matched the RunPeriod rows, whose
+  Month/Day/Hour are NULL, and in SQLite `NULL || 'x'` is NULL — so the read
+  did not return junk, it returned **nothing**. A boiler series present as
+  8832 hourly rows read back as zero hours. Every column is `COALESCE`d for
+  the same reason.
+
+Both are mutation-tested in `tests/simulation/test_hourly_layer.py`: removing
+either fails named tests against a green control.
+
+## `Heating:EnergyTransfer` is a ZONE-SIDE NET term — and it does NOT exclude baseboards
+
+An earlier version of this section said it excluded hydronic baseboards. That
+was FALSE and the false reason was in five places (Fable, `323` 3). It is the
+facility sum of `Zone Air System Sensible Heating Energy`; on a baseboard-only
+system the meter, `Baseboard:EnergyTransfer` and the summed variable are all
+33.40 MWh.
+
+The gap that justifies reading the plant is REHEAT AND VENTILATION-AIR
+HEATING — plant heat that offsets cooling or conditions outdoor air and never
+arrives as net zone sensible heating. A VAV with NO baseboards shows it at
+2.17x. The ratio runs 0.98 to 2.17 across catalogue systems, so an assertion
+of the form `plant > zone * 1.5` is a property of a FIXTURE, not of the
+physics; the general statement is directional.
+
+`hourly_hot_water_plant_heat` is the hot-water plant's delivery, NOT the
+building's heat load: electric baseboards carried 35.83 MWh past the boilers
+on one catalogue sibling. A model with electric or heat-pump heating reads a
+fraction of its heating from it.
+
+## Three silent-empty paths, and what replaced the guesses
+
+An unrequested name, a misspelt name, a request skipped by a stale
+idempotency check, a variable with no matching object (five district-hot-water
+systems have no boiler; three have ELECTRIC boilers so the gas fuel variable
+is empty) and a model with no SQL all returned `{'index': [], 'values': []}`
+identically. So:
+
+- idempotency keys on `(name, frequency)` in all three request helpers. Keyed
+  on name alone, a pre-existing MONTHLY meter made `request_hourly_meters`
+  report success while the hourly read came back as zero hours;
+- `request_hourly_plant_variables` exists so the documented recipe requests
+  what it reads;
+- `hourly_series` REFUSES a multi-key name rather than summing, and refuses a
+  name containing a quote rather than escaping it. The escaping was correct
+  SQLite and untestable: a malformed literal and a correct query for an absent
+  name both return empty, so dropping it passed every test TWICE — once
+  against a test written specifically for it, whose quote was in a zone key
+  and therefore in the result rather than the query;
+- a name the model NEVER REQUESTED hourly raises `KeyError` naming
+  `hourly_names(model)`. A name it DID request and that had nothing to report
+  returns empty, because that is a real answer — `ExteriorLights:Electricity`
+  is in tier 1 and EnergyPlus creates no meter for an end use a building does
+  not have. The first version raised on every absence and made iterating
+  tier 1 impossible; the boundary test found it.
+
+## `OutputMeter` defaults to `meterFileOnly` — and that broke CI, not local
+
+`request_hourly_meters` sets `setMeterFileOnly(False)` on every meter it
+touches, and it must. `OutputMeter` defaults to `meterFileOnly = True`, which
+the forward translator emits as `Output:Meter:MeterFileOnly` — the `.mtr`
+file. Whether that data ALSO reaches the SQL `ReportData` the hourly readers
+use is BUILD-DEPENDENT: it did on the devcontainer and did not on the
+`verify` CI image, so the first version of this layer passed the local suite
+SIX TIMES and failed `verify` with `8760 != 0`. `Output:Meter` always reaches
+the SQL.
+
+It also keeps ONE METER PER NAME, raising a coarser existing request to hourly
+instead of adding a sibling. Two `OutputMeter` objects with the same name at
+different frequencies are legal and translate to two IDF lines, but which is
+honoured is NOT deterministic — `verify` ran the engine class on two xdist
+workers (each re-runs `setUpClass`, so each simulated) and one honoured the
+hourly request while `gw28` honoured a monthly sibling.
+
+**Testing this needed `TestRequestHelpers`, a fresh `Model()` and ONE call.**
+The engine class calls `request_hourly_meters` twice to assert idempotency,
+and the second call takes the UPGRADE branch — which REPAIRED what a mutated
+CREATE branch had left broken, so the mutation passed all 25 engine tests. An
+idempotency fixture and a correctness fixture cannot be the same fixture: the
+second call is a repair opportunity. Asserting only `Electricity:Facility`
+failed for a different reason — it is the one with a monthly sibling, so it
+takes the upgrade branch and leaves the other twelve unobserved.
+
+## The fixture carries four deliberate oddities
+
+Each exists because without it a mutation passes. Do not tidy them:
+
+- a zone named `Thermal Zone 1|X` — a pipe used to truncate the key and read
+  8760 plausible zeros;
+- a zone named `Bob's Zone` — a quoted KEY must round-trip through the result;
+- a MONTHLY `Electricity:Facility` request — a name-only idempotency check
+  skipped the hourly one and reported success;
+- a MONTHLY-ONLY `Cooling:EnergyTransfer` request — without a name reported at
+  a non-hourly frequency ONLY, `hourly_names` filtered and unfiltered return
+  the same set, and dropping its frequency filter passes every test.
+
 ## Tests
 
 ```bash
