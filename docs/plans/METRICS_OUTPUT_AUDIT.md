@@ -211,13 +211,13 @@ list by what each requirement reads, rather than by which repo asked for it:
     InteriorLights / ExteriorLights / InteriorEquipment  (:Electricity)
     Heating / Cooling / Fans / Pumps / HeatRejection / WaterSystems
     NaturalGas:Facility, Heating:NaturalGas, WaterSystems:NaturalGas
-    Heating:EnergyTransfer, Cooling:EnergyTransfer
+    Boiler Heating Energy (variable, one series per boiler)
 
 | requirement | what it reads |
 |---|---|
 | load-reduction measures | per-end-use hourly — lights, fans, pumps, equipment |
 | peak reduction, load duration curve | `Electricity:Facility` hourly |
-| district energy | `Heating:EnergyTransfer` hourly |
+| district energy | `Boiler Heating Energy` hourly — see below, and NOT `Heating:EnergyTransfer` |
 | cogeneration resilience | heat AND power on one index — the coincidence is the measured quantity, since a CHP unit is heat-led or electric-led and whether it carries critical load through an outage depends on the hour-by-hour ratio |
 
 **Tier 2 — a few per-zone variables.** `Zone Mean Air Temperature` and the four
@@ -231,30 +231,58 @@ envelope versus infiltration versus internal versus interzone — which none of
 the five requirements above asks. Load-reduction analysis needs the end-use
 profile to measure a reduction, not the attribution of the underlying load.
 
-### District energy's heat load costs ONE METER
+### District energy: model it as a BOILER, and read the BOILER
 
-`Heating:EnergyTransfer` is a single meter, and it equals the sum of the
-per-zone `Zone Air System Sensible Heating Energy` variables exactly — tested
-on two systems with different air-side topology:
+phylroy's modelling call (2026-10-26): represent the district-energy
+connection as a boiler, so one model serves both the DE case and the
+on-site-boiler case rather than modelling the building twice. The building-side
+load is identical either way, and the comparison becomes two READINGS of one
+run instead of a difference between two runs — which also removes the chance
+of an unintended geometry or load difference between variants.
 
-| system | 1 meter | sum of 5 zone variables | ratio |
-|---|---:|---:|---:|
-| Baseboard gas boiler (no air handler) | 34.3 MWh | 34.3 MWh | 1.0000 |
-| Built-up VAV, HW coil, scroll chiller, HW baseboards | 37.1 MWh | 37.1 MWh | 1.0000 |
+One object then gives both answers:
 
-So the district-energy heat profile does not need the expensive tier. Two
-caveats, because two systems are evidence and not proof across 102:
+    Boiler Heating Energy       the DE's hourly delivery obligation
+    Boiler NaturalGas Energy    the same building as an on-site boiler
 
-- campus's derived `Space Heating Thermal Load` adds a **ventilation OA
-  preheat** term to its zone-variable sum. On both systems tested the single
-  meter already matched without it, but a DOAS-style system with a DEDICATED
-  preheat coil conditioning outdoor air before it reaches a zone is the case
-  that could diverge, and it was not tested;
-- the multipliers above were measured on the baseboard fixture. The VAV
-  fixture's SQL is larger at baseline because a more complex system writes
-  bigger tabular reports — its 14-series run came to 6.03 MiB — so the
-  portable figure is roughly **0.2 MiB per hourly series per year**, not the
-  ratio.
+**`Heating:EnergyTransfer` IS NOT THE BUILDING'S HEAT LOAD, and an earlier
+version of this section recommended it for district energy.** It would have
+undersized by about half. Measured on the built-up VAV with hot-water coil,
+scroll chiller and hot-water baseboards:
+
+| series | MWh | what it is |
+|---|---:|---|
+| `Heating:EnergyTransfer` | 37.1 | air-system heating as delivered to zones |
+| `Baseboard:EnergyTransfer` | 36.6 | the hydronic baseboards — a SEPARATE meter |
+| `HeatingCoils:EnergyTransfer` | 44.1 | coil output, before zone delivery |
+| **`Boilers:EnergyTransfer`** | **77.7** | the plant |
+| **`Boiler Heating Energy`** | **77.7** | agrees, per boiler |
+| **`Plant Supply Side Heating Demand Rate`** (HW loop) | **77.7** | agrees, per loop |
+
+Three independent plant-side series agree at 77.7 MWh. The zone-side figure
+misses the baseboards entirely, and `37.1 + 36.6 = 73.7` leaves about 4 MWh
+(5%) of pump heat and loop losses up to the plant total — which a district
+system must also deliver.
+
+**How the wrong recommendation survived a check.** I had verified that
+`Heating:EnergyTransfer` equals the sum of the per-zone
+`Zone Air System Sensible Heating Energy` variables exactly, on two systems
+(34.3 vs 34.3, and 37.1 vs 37.1), and concluded the single cheap meter was
+sufficient. Both series are air-system-only, so they agree with each other and
+NEITHER is the heat load. An equivalence between two quantities says nothing
+about whether either answers the question — the same shape as this document's
+other corrected claims.
+
+The cost conclusion is unchanged and the series is still cheap: one variable
+per boiler, measured at 4.15 MiB for the whole probe. Two caveats remain:
+
+- a model with several boilers needs them summed, and a lead/lag pair reports
+  the idle one as zero (`SECONDARY BOILER` was 0.0 here), so a reader must
+  aggregate rather than take the first;
+- the multipliers earlier in this section were measured on the baseboard
+  fixture. A more complex system writes bigger tabular reports at baseline, so
+  the portable figure is roughly **0.2 MiB per hourly series per year** rather
+  than the ratio.
 
 One more place hourly data may already be arriving and being discarded:
 `backends.py:331` records that a completed REMOTE job returns **17 artifacts**,
