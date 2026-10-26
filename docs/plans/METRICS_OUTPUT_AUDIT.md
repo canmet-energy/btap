@@ -112,7 +112,7 @@ it rather than a calculation to invent.
   (`InteriorLights`, `ExteriorLights`, `InteriorEquipment`, `Heating`,
   `Cooling`, `Fans`, `Pumps`, `HeatRejection`, `WaterSystems`), plus
   `NaturalGas:Facility`, `Heating:NaturalGas`, `WaterSystems:NaturalGas`;
-- **30 hourly VARIABLES** — zone sensible heating/cooling energy and rate, the
+- **28 hourly VARIABLES** — zone sensible heating/cooling energy and rate, the
   four setpoint-not-met variables, the full zone air heat balance
   decomposition (surface convection, outdoor air transfer, internal
   convective, interzone, system air, system convective, air energy storage),
@@ -170,11 +170,37 @@ lane. The only hourly request in product code is
 `hvac/systems/hp_plant_fancoils.py`'s `District Heating/Cooling Water Rate`,
 for downstream GLHX sizing.
 
-The cost that remains real: hourly meters inflate the SQL, which the
-frozen-scenario corpus and the CI artifact budget both feel. Campus runs 13
-meters and 30 variables by default on its archetypes, so the cost is evidently
-tolerable at that scale — but it has not been measured against our frozen
-corpus, and that measurement is the actual work in M3.
+### The cost, MEASURED
+
+The one number nobody had. Annual runs of the `proposed_with_hvac` fixture
+(5 zones), Toronto CWEC2020, identical model, `eplusout.sql` size:
+
+| request | meters | MiB | vs baseline |
+|---|---:|---:|---:|
+| baseline (what we ship today) | 0 | 0.72 | 1.00x |
+| `Electricity:Facility` only | 1 | 1.36 | **1.89x** |
+| all 13 campus meters | 13 | 3.39 | **4.70x** |
+| + campus's 28 zone variables | 13 | 45.43 | **62.86x** |
+
+**The 28 zone variables are 42.04 of the 45.43 MiB — 93% of the total.**
+
+That splits the cost by the ASK, and the split is the design:
+
+- **an hourly electricity profile is nearly free.** +0.64 MiB buys the whole
+  LDC, the peak, its time, its duration and the shed. Across the 56-scenario
+  frozen corpus, all 13 meters would be roughly 190 MiB of generated SQL
+  against about 40 MiB today — a real but ordinary increase;
+- **the zone-level heat balance is what costs.** Those 28 variables are
+  per-zone, so they scale with zone count, and at 2.5 GiB across the corpus
+  they cannot be a default. They also serve campus's
+  envelope-vs-infiltration-vs-internal decomposition, which is a different
+  analysis from anything peak or resilience asks for.
+
+So M3 wants TIERS, not a switch: meters by default or near-default, zone
+variables explicitly opt-in, and the corpus cost stated per tier rather than
+as one blended figure. An earlier version of this section said hourly output
+"cannot be on by default" on the strength of the 62.86x number alone, which
+attributed the zone variables' cost to the electricity profile.
 
 One more place hourly data may already be arriving and being discarded:
 `backends.py:331` records that a completed REMOTE job returns **17 artifacts**,
