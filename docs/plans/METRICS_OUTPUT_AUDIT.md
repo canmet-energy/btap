@@ -281,8 +281,16 @@ per boiler, measured at 4.15 MiB for the whole probe. Two caveats remain:
   aggregate rather than take the first;
 - the multipliers earlier in this section were measured on the baseboard
   fixture. A more complex system writes bigger tabular reports at baseline, so
-  the portable figure is roughly **0.2 MiB per hourly series per year** rather
-  than the ratio.
+  the portable figure is PER SERIES rather than the ratio — and that figure is
+  **~0.35 MiB per hourly series per weather year**, not the 0.2 an earlier
+  version of this line claimed. Fable measured it independently at 11, 12 and
+  59 series — 0.345, 0.347, 0.346 — flat, and independent of zone count,
+  because each series is 8832 `ReportData` rows at about 18.4 B plus two
+  indexes that roughly double it. My 0.2 came from dividing `(3.39 − 1.36)` by
+  12, which charges the first series' `Time` table to the other eleven.
+  `btap/simulation/README.md` carries the corrected figure, and tier 2 is
+  `5 × zones` series, so a 50-zone building pays roughly 90 MiB for tier 2
+  alone.
 
 One more place hourly data may already be arriving and being discarded:
 `backends.py:331` records that a completed REMOTE job returns **17 artifacts**,
