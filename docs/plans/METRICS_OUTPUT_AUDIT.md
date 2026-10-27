@@ -112,7 +112,7 @@ it rather than a calculation to invent.
   (`InteriorLights`, `ExteriorLights`, `InteriorEquipment`, `Heating`,
   `Cooling`, `Fans`, `Pumps`, `HeatRejection`, `WaterSystems`), plus
   `NaturalGas:Facility`, `Heating:NaturalGas`, `WaterSystems:NaturalGas`;
-- **30 hourly VARIABLES** — zone sensible heating/cooling energy and rate, the
+- **28 hourly VARIABLES** — zone sensible heating/cooling energy and rate, the
   four setpoint-not-met variables, the full zone air heat balance
   decomposition (surface convection, outdoor air transfer, internal
   convective, interzone, system air, system convective, air energy storage),
@@ -170,11 +170,127 @@ lane. The only hourly request in product code is
 `hvac/systems/hp_plant_fancoils.py`'s `District Heating/Cooling Water Rate`,
 for downstream GLHX sizing.
 
-The cost that remains real: hourly meters inflate the SQL, which the
-frozen-scenario corpus and the CI artifact budget both feel. Campus runs 13
-meters and 30 variables by default on its archetypes, so the cost is evidently
-tolerable at that scale — but it has not been measured against our frozen
-corpus, and that measurement is the actual work in M3.
+### The cost, MEASURED
+
+The one number nobody had. Annual runs of the `proposed_with_hvac` fixture
+(5 zones), Toronto CWEC2020, identical model, `eplusout.sql` size:
+
+| request | meters | MiB | vs baseline |
+|---|---:|---:|---:|
+| baseline (what we ship today) | 0 | 0.72 | 1.00x |
+| `Electricity:Facility` only | 1 | 1.36 | **1.89x** |
+| all 13 campus meters | 13 | 3.39 | **4.70x** |
+| + campus's 28 zone variables | 13 | 45.43 | **62.86x** |
+
+**The 28 zone variables are 42.04 of the 45.43 MiB — 93% of the total.**
+
+That splits the cost by the ASK, and the split is the design:
+
+- **an hourly electricity profile is nearly free.** +0.64 MiB buys the whole
+  LDC, the peak, its time, its duration and the shed. Across the 56-scenario
+  frozen corpus, all 13 meters would be roughly 190 MiB of generated SQL
+  against about 40 MiB today — a real but ordinary increase;
+- **the zone-level heat balance is what costs.** Those 28 variables are
+  per-zone, so they scale with zone count, and at 2.5 GiB across the corpus
+  they cannot be a default. They also serve campus's
+  envelope-vs-infiltration-vs-internal decomposition, which is a different
+  analysis from anything peak or resilience asks for.
+
+So M3 wants TIERS, not a switch. An earlier version of this section said
+hourly output "cannot be on by default" on the strength of the 62.86x number
+alone, which attributed the zone variables' cost to the electricity profile.
+
+### The tiers, by REQUIREMENT
+
+phylroy's stated needs (2026-10-26) determine the split. Grouping the request
+list by what each requirement reads, rather than by which repo asked for it:
+
+**Tier 1 — meters only. ~5x baseline, and it covers four of the five needs.**
+
+    Electricity:Facility
+    InteriorLights / ExteriorLights / InteriorEquipment  (:Electricity)
+    Heating / Cooling / Fans / Pumps / HeatRejection / WaterSystems
+    NaturalGas:Facility, Heating:NaturalGas, WaterSystems:NaturalGas
+    Boiler Heating Energy (variable, one series per boiler)
+
+| requirement | what it reads |
+|---|---|
+| load-reduction measures | per-end-use hourly — lights, fans, pumps, equipment |
+| peak reduction, load duration curve | `Electricity:Facility` hourly |
+| district energy | `Boiler Heating Energy` hourly — see below, and NOT `Heating:EnergyTransfer` |
+| cogeneration resilience | heat AND power on one index — the coincidence is the measured quantity, since a CHP unit is heat-led or electric-led and whether it carries critical load through an outage depends on the hour-by-hour ratio |
+
+**Tier 2 — a few per-zone variables.** `Zone Mean Air Temperature` and the four
+setpoint-not-met variables: what a free-float outage case reads, and what
+unmet-hours needs. Five variables times zone count. Not yet measured.
+
+**Tier 3 — the heat-balance decomposition. The 62.86x case, 93% of the cost.**
+The seven `Zone Air Heat Balance *` variables plus the infiltration splits,
+latent terms and humidity ratios. These answer WHY a load is what it is —
+envelope versus infiltration versus internal versus interzone — which none of
+the five requirements above asks. Load-reduction analysis needs the end-use
+profile to measure a reduction, not the attribution of the underlying load.
+
+### District energy: model it as a BOILER, and read the BOILER
+
+phylroy's modelling call (2026-10-26): represent the district-energy
+connection as a boiler, so one model serves both the DE case and the
+on-site-boiler case rather than modelling the building twice. The building-side
+load is identical either way, and the comparison becomes two READINGS of one
+run instead of a difference between two runs — which also removes the chance
+of an unintended geometry or load difference between variants.
+
+One object then gives both answers:
+
+    Boiler Heating Energy       the DE's hourly delivery obligation
+    Boiler NaturalGas Energy    the same building as an on-site boiler
+
+**`Heating:EnergyTransfer` IS NOT THE BUILDING'S HEAT LOAD, and an earlier
+version of this section recommended it for district energy.** It would have
+undersized by about half. Measured on the built-up VAV with hot-water coil,
+scroll chiller and hot-water baseboards:
+
+| series | MWh | what it is |
+|---|---:|---|
+| `Heating:EnergyTransfer` | 37.1 | air-system heating as delivered to zones |
+| `Baseboard:EnergyTransfer` | 36.6 | the hydronic baseboards — a SEPARATE meter |
+| `HeatingCoils:EnergyTransfer` | 44.1 | coil output, before zone delivery |
+| **`Boilers:EnergyTransfer`** | **77.7** | the plant |
+| **`Boiler Heating Energy`** | **77.7** | agrees, per boiler |
+| **`Plant Supply Side Heating Demand Rate`** (HW loop) | **77.7** | agrees, per loop |
+
+Three independent plant-side series agree at 77.7 MWh. The zone-side figure
+misses the baseboards entirely, and `37.1 + 36.6 = 73.7` leaves about 4 MWh
+(5%) of pump heat and loop losses up to the plant total — which a district
+system must also deliver.
+
+**How the wrong recommendation survived a check.** I had verified that
+`Heating:EnergyTransfer` equals the sum of the per-zone
+`Zone Air System Sensible Heating Energy` variables exactly, on two systems
+(34.3 vs 34.3, and 37.1 vs 37.1), and concluded the single cheap meter was
+sufficient. Both series are air-system-only, so they agree with each other and
+NEITHER is the heat load. An equivalence between two quantities says nothing
+about whether either answers the question — the same shape as this document's
+other corrected claims.
+
+The cost conclusion is unchanged and the series is still cheap: one variable
+per boiler, measured at 4.15 MiB for the whole probe. Two caveats remain:
+
+- a model with several boilers needs them summed, and a lead/lag pair reports
+  the idle one as zero (`SECONDARY BOILER` was 0.0 here), so a reader must
+  aggregate rather than take the first;
+- the multipliers earlier in this section were measured on the baseboard
+  fixture. A more complex system writes bigger tabular reports at baseline, so
+  the portable figure is PER SERIES rather than the ratio — and that figure is
+  **~0.35 MiB per hourly series per weather year**, not the 0.2 an earlier
+  version of this line claimed. Fable measured it independently at 11, 12 and
+  59 series — 0.345, 0.347, 0.346 — flat, and independent of zone count,
+  because each series is 8832 `ReportData` rows at about 18.4 B plus two
+  indexes that roughly double it. My 0.2 came from dividing `(3.39 − 1.36)` by
+  12, which charges the first series' `Time` table to the other eleven.
+  `btap/simulation/README.md` carries the corrected figure, and tier 2 is
+  `5 × zones` series, so a 50-zone building pays roughly 90 MiB for tier 2
+  alone.
 
 One more place hourly data may already be arriving and being discarded:
 `backends.py:331` records that a completed REMOTE job returns **17 artifacts**,
