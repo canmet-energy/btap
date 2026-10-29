@@ -30,6 +30,7 @@ FAMILIES = {
     'zone_ervs': ('zone_ervs', 'ZoneErvs'),
     'chilled_beams': ('chilled_beams', 'ChilledBeams'),
     'dual_duct': ('dual_duct', 'DualDuctVAV'),
+    'crah': ('crah', 'Crah'),
 }
 
 

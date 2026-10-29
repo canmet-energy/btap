@@ -207,6 +207,15 @@
         "necb2020",
         "necb2025"
       ]
+    },
+    {
+      "id": "AHJ-23",
+      "title": "A bare DX coil does not say whether the equipment is unitary",
+      "status": "tool-gap",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ]
     }
   ]
 }

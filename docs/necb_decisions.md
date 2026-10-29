@@ -156,6 +156,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-105** — Embedded ground-floor systems require full-area insulation _(runtime)_
 - **D-106** — Reference fan-coil water coils size at mode-specific airflow _(runtime)_
 - **D-107** — Authored sample fan coils carry the mode-specific sizing contract _(process)_
+- **D-108** — Bare loop DX is not evidence of unitary equipment; the residential identity branch needs an equipment-class fact _(runtime)_
 
 <!-- TOC END -->
 
@@ -8448,3 +8449,158 @@ marks every fan coil in `save()`, and
 sizes with a Severe or Fatal error. The catalogue sweep proves a SYSTEM on the
 shared bare fixture and cannot prove the generated sample, which is the gap
 issue #68 lived in for three weeks.
+
+<a id="d-108"></a>
+
+## D-108 — Direct expansion is a mechanism, not an equipment class
+
+Table 8.4.4.7.-A's Residential/Accommodation row (identical text in NECB 2025's
+Table 8.4.5.7.-A) makes the reference IDENTICAL to the proposed only for a
+closed list of cooling equipment — "an air-cooled unitary, packaged terminal or
+room air conditioner (or heat pumps), or fan coils" — and sends everything else
+to through-the-wall systems. Article 8.4.4.7.(1) admits no other exception
+beyond Sentence (2)'s ≤10% area merge and Sentence (4)'s heat-pump redirect.
+
+D-58 replaced a name-based test for that branch with a fact-based one, which
+was the right correction and stands. But among the facts it counted was
+`loop_dx_cooling` on a no-reheat constant-volume shape, and that is not an
+equipment-class fact:
+
+- **Unitary is broader than one package.** Both editions' Table 5.2.12.1.-A
+  lists split-system AND single-package equipment under "air-cooled unitary",
+  and Division A 1.4.1.2 defines nothing that would make a DX coil unitary by
+  itself. So neither zone count nor package count narrows the term — an earlier
+  reading of this decision's gap proposed a single-zone test and was wrong.
+- **The evidence is destroyed before the classifier sees it.**
+  `coils.supply_components` REPLACES an `AirLoopHVACUnitarySystem` (and either
+  unitary heat-pump wrapper) with the coils inside it. It must, or a staged
+  reference system's coils are unfindable. A certified packaged unit and a
+  field-erected built-up DX coil therefore produce the same
+  `loop_dx_cooling = True`, and nothing downstream can separate them:
+  `_structural_family_guess` reads zone count and terminals, which are topology
+  rather than identity.
+
+The consequence was not theoretical. `DOAS ventilation only` — whose own
+catalogue comment calls it "the ventilation half" of the DOAS composites —
+qualified for the identity branch on its make-up-air tempering coil, so its
+residential reference was its own proposed system and the 8.4.1.2 comparison
+for those blocks compared the proposed against itself.
+
+### What is recorded now
+
+Two facts in `btap.modeling.hvac.classify`, both generic descriptions of the
+OSM rather than NECB judgements, because the NECB meaning belongs in
+`btap.codes`:
+
+- `packaged_unitary` — a unitary container was found on the RAW supply path,
+  before the flattener unwraps it. This is positive evidence of factory-packaged
+  equipment and is read from the model, never from a catalogue row: the feature
+  this serves takes ANY osm, and a model from outside this library has no row to
+  declare anything. A design firm's rooftop unit is normally modelled as exactly
+  the container in question.
+- `ventilation_sized` — `SizingSystem` names the ventilation requirement as
+  the load to size on AND all outdoor air in both cooling and heating. All
+  three fields: the sizing basis alone states an intent and does not prove the
+  loop is 100% outdoor air, so concluding from it that the coil only tempers
+  make-up air claims more than the field carries (Sol, `329`). Every DOAS
+  profile in `data/sizing.json` sets all three. Note the reach honestly: this
+  SDK defaults both outdoor-air flags to TRUE, so the conjunction bites only
+  where a modeller set one false (Fable, `331`); it is a guard against a
+  recirculating loop sized on its ventilation requirement, not a strong
+  positive test for a dedicated outdoor-air unit. D-48 already drew this
+  equipment boundary for unitary staging.
+- `declared_equipment_class` — what the model SAYS its equipment is, as an
+  `AdditionalProperties` feature on the air loop
+  (`btap.modeling.hvac.equipment_class`). This is the only route that works
+  for a model this library did not build, and it is deliberately not
+  BTAP-specific: our builders declare it where a catalogue row names real
+  equipment, and any other tool or submitter can write the same key. It
+  survives the OSM round trip and forward-translates to nothing, so declaring
+  it changes no simulation result. A declaration is positive in BOTH
+  directions — `built_up` and `evaporative` are not Table -A identities, so
+  declaring either sends the block to `otherwise` rather than to the
+  inference, because the model answered the question and the answer was no.
+
+In `btap.codes.necb.hvac.reference`, a ventilation-sized loop is refused the
+identity branch, and `packaged_unitary` with DX cooling is accepted on it. The
+bare-DX predicate is RETAINED below both as the DIAGNOSTIC fallback, labelled
+as the inference it is: direct expansion is overwhelmingly packaged equipment
+in practice while built-up central-station systems use chilled water, so the
+inference is sound far more often than not.
+
+**It does not support a determination.** An earlier draft of this decision
+argued that withholding one was worse than inferring, on the ground that exit 6
+would refuse a large share of ordinary submissions. Sol rejected that (`329`),
+and the rejection is right: the inferred branch selects `copy_proposed`, so a
+genuinely built-up DX residential system has its reference copied from ITSELF
+and the 8.4.1.2 comparison compares the proposed against itself. A disclosure
+accurately stating that the class is unknown does not change the verdict that
+follows it, and a normal determination would present a target the
+implementation knows it did not establish. Where the inference selected a
+residential reference, the run completes diagnostically — both models prepared,
+energies reported — and then `compliant = null`,
+`compliance_determination = "no_determination"`, exit 6. That refusal shares
+its mechanism with D-32's ground-method case and NOT its citation, which is why
+`_refuse_determination` now carries one article and ruling per cause.
+
+### Two more shipped rows, and the guess that let them through
+
+`_structural_family_guess` calls ANY single-zone air loop with a non-reheat
+terminal `packaged_single_zone`, and that guess was positive evidence for this
+branch. It is a ZONE COUNT, which is the thing this decision holds cannot
+establish an equipment class, so it is no longer read as one. A loop it
+describes may still qualify through the inference above — the difference is
+that it is then labelled as inferred.
+
+Removing it corrected two more shipped rows, both evaporative:
+`Direct evap coolers with no heat` and `Direct evap coolers with baseboard
+electric` move from `copy_proposed` to `through_the_wall` in both editions. A
+direct evaporative cooler has no refrigeration cycle; it is not an air-cooled
+unitary, a packaged-terminal or room air conditioner, a heat pump or a fan
+coil, so Table -A's `otherwise` applies. The authored allow-list already
+excluded `evap_cooler` deliberately — the zone-count guess was admitting it
+past that exclusion, which is the clearest evidence that the guess was doing
+work it could not support.
+
+Fable found the same guess defeating the ventilation exclusion for a ONE-ZONE
+block, where the exclusion sat behind it and never ran. Every other fixture in
+the suite and every row of the selection matrix uses five zones, so nothing
+could tell zone count from equipment class; the regression test is a one-zone
+build, and it asserts the guess is still produced so the fix cannot pass by
+accident of the guess changing.
+
+The remaining gap is a tool gap, not an ambiguity in the Code: the Code decides
+the branch cleanly and the implementation lacks a reliable fact. It is
+registered as `AHJ-23` with status `tool-gap`, which sets no run conditional —
+exit 6 follows from failing to establish the target, not from needing an
+authority's approval.
+
+The ordering is load-bearing. The Code-listed zonal-equipment test runs BEFORE
+the ventilation exclusion, because Table -A names fan coils and heat pumps
+outright: a DOAS-plus-fan-coil composite is ventilation-sized AND qualifies
+through its zonal equipment. Hoisting the exclusion turns every such composite
+into through-the-wall, which is why
+`tests/modeling/test_equipment_class_facts.py` pins the order with a subTest
+per zonal unit.
+
+### What supersedes what
+
+D-58's principle — that this branch is decided from facts and not from family
+names — stands, and its three defect classes stand, because they were real.
+Only its inclusion of `loop_dx_cooling` as a qualifying equipment fact is
+superseded, and its family allow-list is reinterpreted: it is positive shortcut
+evidence for equipment the Code names, not an exhaustive list whose omissions
+veto anything. D-58 is not rewritten; it made its claim honestly on the
+evidence then available, and the matrix it built is what caught this.
+
+### How it was found
+
+A Campus reconstruction row (#152) of family `furnace` with cooling became the
+first such row to reach the bare-DX predicate, and phylroy asked why
+`copy_proposed` was being chosen at all. The first answer offered was that the
+behaviour was consistent with fourteen shipped rows and 48 of 102 adjudicated
+golden entries — which was consistency, not conformance. phylroy's reply, that
+the NECB code is what decides which reference system applies, sent the question
+to Table 8.4.4.7.-A, where the closed list is printed. Sol ruled the zone-count
+reading out (`325`) and then withdrew the packaged premise his own ruling had
+rested on (`327`).

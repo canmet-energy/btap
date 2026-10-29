@@ -42,6 +42,13 @@ class VentilationQuantifier:
         # no AHU/media cost data exists (legacy never costed evap);
         # ducts/diffusers still costed
         'evap_cooler': 'distribution_only',
+        # Same reason, different equipment: a computer-room air handler is
+        # specialised cooling-only equipment and the legacy database has no line
+        # for one. Costing it as a sys-3 packaged single-zone unit would invent a
+        # price from the nearest-looking row, so the AHU is left uncosted and the
+        # distribution is costed as usual. Give it a sys type when real CRAH cost
+        # data exists, not before.
+        'crah': 'distribution_only',
     }
 
     # single-run supply duct systems (legacy: x1 for sys 1/4 — no return duct)
@@ -94,10 +101,18 @@ class VentilationQuantifier:
 
             total_flow_m3s += flow
             if sys_type == 'distribution_only':
+                # The reason differs by family and the warning must not assert
+                # one for both: legacy HAD an evaporative cooler and declined to
+                # cost it, while it had no computer-room air handler at all, so
+                # "legacy never costed it either" is false for `crah` (Fable,
+                # PR #153 review). State the fact — no unit-cost line — and what
+                # was done instead, which over-costs nothing but DOES cost the
+                # distribution at the sys-3 duct allowance.
                 self.warnings.append(
-                    f"family '{family}' ({air_loop.nameString()}): no unit-cost data "
-                    "for the air handler/media exists (legacy never costed it "
-                    "either); distribution costed")
+                    f"family '{family}' ({air_loop.nameString()}): the costing "
+                    "database has no unit-cost line for this air handler or its "
+                    "media, so neither is costed; its distribution is costed at "
+                    "the sys-3 duct allowance")
                 sys_type_i = 3
             else:
                 sys_type_i = sys_type

@@ -252,7 +252,7 @@
    "terminal": "cv"
   },
   "value": "doas",
-  "evidence": "air loop name resolves to catalog entry 'DOAS ventilation only'; cooled: OS_Coil_Cooling_DX_SingleSpeed on DOAS ventilation only; heated: OS_Coil_Heating_Electric on DOAS ventilation only",
+  "evidence": "air loop name resolves to catalog entry 'DOAS ventilation only'; DOAS ventilation only is sized on the ventilation requirement with all outdoor air in cooling and heating, so its coils temper make-up air; cooled: OS_Coil_Cooling_DX_SingleSpeed on DOAS ventilation only; heated: OS_Coil_Heating_Electric on DOAS ventilation only",
   "building": "reference building",
   "level": "decision"
  },

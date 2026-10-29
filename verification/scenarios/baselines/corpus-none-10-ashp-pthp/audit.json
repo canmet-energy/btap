@@ -192,7 +192,7 @@
    "terminal": "cv"
   },
   "value": "doas_pthp",
-  "evidence": "air loop name resolves to catalog entry 'hs11_ashp_pthp'; cooled: OS_Coil_Cooling_DX_SingleSpeed on hs11_ashp_pthp; heated: OS_Coil_Heating_DX_SingleSpeed on hs11_ashp_pthp; heated: OS_Coil_Heating_Electric on hs11_ashp_pthp",
+  "evidence": "air loop name resolves to catalog entry 'hs11_ashp_pthp'; hs11_ashp_pthp is sized on the ventilation requirement with all outdoor air in cooling and heating, so its coils temper make-up air; cooled: OS_Coil_Cooling_DX_SingleSpeed on hs11_ashp_pthp; heated: OS_Coil_Heating_DX_SingleSpeed on hs11_ashp_pthp; heated: OS_Coil_Heating_Electric on hs11_ashp_pthp",
   "building": "reference building",
   "level": "decision"
  },

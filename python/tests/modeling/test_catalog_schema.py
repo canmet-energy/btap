@@ -45,11 +45,12 @@ FAMILY_KEYS = {
     'fan_coils': ['chiller_type', 'comment', 'family', 'fan_coil_type',
                   'mau_cooling_type', 'mau_heating_coil_type', 'name', 'needs_boiler',
                   'needs_chiller', 'sizing', 'sys_abbr'],
-    'furnace': ['cooling', 'family', 'heating', 'name', 'needs_boiler', 'origin',
-                'ventilation'],
+    'furnace': ['comment', 'cooling', 'equipment_class', 'family', 'heating',
+                'heating_type', 'name', 'needs_boiler', 'origin', 'per_zone',
+                'reheat', 'ventilation'],
     'mau_ptac': ['baseboard_type', 'comment', 'family', 'mau_heating_coil_type', 'name',
-                 'needs_boiler', 'origin', 'reference_hp', 'sizing', 'supp_htg_fuel',
-                 'sys_abbr'],
+                 'needs_boiler', 'origin', 'ptac_heating_type', 'reference_hp',
+                 'sizing', 'supp_htg_fuel', 'sys_abbr'],
     # 'heat_source' is the reference-ASHP marker (was: heating_coil_type 'DX').
     'psz': ['baseboard_type', 'boiler_fuel', 'comment', 'family', 'heat_source',
             'heating_coil_type', 'name', 'needs_boiler', 'origin', 'per_zone', 'sizing',
@@ -69,6 +70,10 @@ FAMILY_KEYS = {
     'vrf': ['comment', 'family', 'name', 'needs_boiler', 'origin', 'zone_ventilation'],
     'wshp': ['boiler_fuel', 'comment', 'family', 'name', 'needs_boiler', 'origin',
              'sizing', 'ventilation'],
+    'crah': ['chiller_type', 'chw_source', 'comment', 'cooling', 'cooling_type',
+             'crah_maximum_humidity_ratio', 'crah_supply_air_temperature',
+             'family', 'heating', 'name', 'needs_boiler', 'needs_chiller',
+             'origin', 'sizing', 'sys_abbr', 'ventilation'],
     'zone_ervs': ['comment', 'family', 'name', 'needs_boiler', 'origin'],
     'zone_terminal': ['baseboard_type', 'boiler_fuel', 'comment', 'family',
                       'heating_type', 'name', 'needs_boiler', 'origin', 'unit_type'],
@@ -84,7 +89,13 @@ ENUMS = {
     'chiller_type': ['Scroll', 'Centrifugal', 'Rotary Screw', 'Reciprocating'],
     'mau_cooling_type': ['DX', 'Hydronic'],  # DX IS a real coil type here — cooling
     'unit_type': ['ptac', 'pthp', 'window_ac'],
-    'origin': ['cbecs', 'generic', 'necb_ecm', 'necb_reference_hp'],
+    'origin': ['cbecs', 'campus', 'generic', 'necb_ecm', 'necb_reference_hp'],
+    #: Mirrors `btap.modeling.hvac.equipment_class.VALUES`. A row declares this
+    #: only where it names real equipment; an absent key means the class is not
+    #: established and the selector says so rather than inferring silently.
+    'equipment_class': ['air_cooled_unitary', 'packaged_terminal',
+                        'room_air_conditioner', 'heat_pump', 'fan_coil',
+                        'built_up', 'evaporative'],
     'beam_type': ['Active', 'Passive'],
     'erv_heat_exchanger_type': ['Plate', 'Rotary'],
     'erv_frost_control_type': [

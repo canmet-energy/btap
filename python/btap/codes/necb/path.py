@@ -246,6 +246,33 @@ def _ground_floor_input_defects(model, floors, measured, foundations):
     return defects
 
 
+def _record_inferred_equipment_class(run, assignments):
+    """A residential reference COPIED from the proposed on an inference.
+
+    Table 8.4.4.7.-A makes the reference identical to the proposed only for a
+    closed list of cooling equipment. Where the model carries no equipment-class
+    fact, `_residential_compatible_cooling` infers one from a bare DX coil — a
+    sound prior, and not evidence about THIS equipment. A built-up DX
+    residential system would then have its reference copied from itself, so the
+    8.4.1.2 comparison compares the proposed against itself and still returns a
+    normal verdict.
+
+    Sol ruled (`327`, `329`) that disclosure does not establish the target: the
+    diagnostic run continues and reports energies, but the DETERMINATION is
+    withheld. The warning at the selection site already names each block; this
+    records the one fact the verdict phase needs.
+    """
+    inferred = [a for a in assignments
+                if getattr(a, "equipment_class_inferred", False)]
+    if not inferred:
+        return
+    record_target_not_established(run, {
+        "reason": "equipment_class_not_established",
+        "blocks": sorted({zone for a in inferred for zone in a.zones}),
+        "action": "copy_proposed",
+    })
+
+
 def _record_ground_method_limit(run, floors):
     if not floors:
         return
@@ -255,7 +282,7 @@ def _record_ground_method_limit(run, floors):
         "floors": [row["floor"] for row in floors],
         "surfaces": floors,
     }
-    run.state["target_not_established"] = blocked
+    record_target_not_established(run, blocked)
     with run.audit.with_building(None):
         run.audit.warn(
             "prepare",
@@ -579,9 +606,9 @@ def determine(run):
     # lifecycle, but cannot establish the target until a validated NECB
     # factor translation exists. Apply this LAST so no later phase can restore
     # a verdict.
-    blocked = run.state.get("target_not_established")
-    if blocked is not None:
-        _refuse_determination(run, blocked)
+    causes = run.state.get("target_not_established")
+    if causes:
+        _refuse_determination(run, causes, run.ruleset.id)
 
     return Verdict(compliant=run.compliant, report=run.report)
 
@@ -690,6 +717,7 @@ def build_reference(run):
             # keeps the capacity warnings instead of losing them.
             sizing_follows=opts.get("simulate", "none") != "none")
         reference = reference_result.model
+        _record_inferred_equipment_class(run, reference_result.assignments)
         envelope.reference._apply(
             reference, ruleset, hdd=run.hdd,
             actual_roof_absorptance_used=opts["actual_roof_absorptance_used"],
@@ -2867,33 +2895,138 @@ def _inspect(value):
     return "nil" if value is None else f'"{value}"'
 
 
-def _refuse_determination(run, blocked):
-    """Withhold a verdict while preserving the diagnostic run outputs."""
+#: What each way of failing to establish the target cites and tells the
+#: submitter, per CODE ID. Keyed by the `reason` a recording site puts in its
+#: cause record, then by code id.
+#:
+#: This started as D-32's ground-method case with one hardcoded article. A
+#: second cause arrived, and then Sol found the citation was 2020's for a 2025
+#: run too (`331`): the same requirement is `8.4.4.7.(1)` in NECB 2020 and
+#: `8.4.5.7.(1)` in NECB 2025, and a table's suffix moves with it. The refusal
+#: MECHANISM is shared; the citation is per cause AND per edition.
+_NO_DETERMINATION_CAUSES = {
+    "ground_method_not_supported": {
+        "reason": "building energy target not established",
+        "what_would_fix_it": (
+            "BTAP needs a validated NECB reference applier for the submitted "
+            "whole-foundation factor method; the submitter is not required "
+            "to replace a valid foundation method"),
+        "warning": (
+            "NO DETERMINATION — BTAP has no validated NECB reference applier "
+            "for the submitted whole-foundation factor method, so the building "
+            "energy target required by {article_no} is not established"),
+        "necb2020": {"article": "8.4.1.1.(1)", "ruling": "D-32"},
+        "necb2025": {"article": "8.4.1.1.(1)", "ruling": "D-32"},
+    },
+    "equipment_class_not_established": {
+        "reason": "reference system not established for a residential block",
+        "ahj": "AHJ-23",
+        "what_would_fix_it": (
+            "declare the cooling equipment's class on the air loop, or model "
+            "it so the class is visible — a unitary container for packaged "
+            "equipment, or the zonal units {table} names; a bare DX coil on a "
+            "constant-volume loop does not say whether the equipment is "
+            "unitary, and the reference was copied from the proposed on an "
+            "INFERENCE that it is"),
+        "warning": (
+            "NO DETERMINATION — a residential reference was selected by "
+            "COPYING the proposed system, on an inference that a bare DX coil "
+            "is unitary equipment. {table} reserves that copy for a closed "
+            "list of equipment, and the model does not establish that this is "
+            "on it"),
+        "necb2020": {"article": "8.4.4.7.(1)", "table": "Table 8.4.4.7.-A"},
+        "necb2025": {"article": "8.4.5.7.(1)", "table": "Table 8.4.5.7.-A"},
+    },
+}
+
+#: The tail every no-determination warning carries.
+_DIAGNOSTIC_TAIL = (
+    "; any completed energies are DIAGNOSTIC only and are neither a pass nor "
+    "a fail, and this is deliberately NOT a conditional result")
+
+
+def record_target_not_established(run, cause):
+    """ACCUMULATE a cause rather than overwrite the previous one.
+
+    Both recording sites used to assign `run.state['target_not_established']`
+    directly, and `build_reference` runs after `prepare_model`, so a model with
+    an unsupported foundation method AND a residential bare-DX inference lost
+    the ground cause entirely: the report cited only D-108, `what_would_fix_it`
+    named only the equipment class, and a submitter who fixed that would re-run
+    into a refusal nobody had mentioned. Both reviewers found it independently
+    (Sol, `331`; Fable witnessed the repro).
+
+    Keyed by `reason` so a cause recorded twice does not duplicate.
+    """
+    causes = run.state.setdefault("target_not_established", {})
+    causes[cause["reason"]] = cause
+
+
+def _refuse_determination(run, causes, code):
+    """Withhold a verdict while preserving the diagnostic run outputs.
+
+    The run still prepares both models, simulates and reports energies. What
+    is withheld is the VERDICT: a determination would present a target the
+    implementation knows it did not establish. This is deliberately NOT a
+    conditional result — nothing here needs an authority's approval.
+
+    EVERY cause is reported. `causes` is the accumulated map, so a model that
+    fails to establish its target in two independent ways says both, and a
+    submitter who fixes one is not ambushed by the other on the next run.
+    """
     run.compliant = None
     run.report["compliance_determination"] = "no_determination"
     # A target that was never established cannot also be conditional. Keep
     # `ahj_applied`: those dispositions really did apply to choices made
     # during the diagnostic run even though no determination resulted.
     run.report.pop("compliance_determination_reason", None)
-    unsupported_method = blocked.get("reason") == "ground_method_not_supported"
-    run.report["no_determination"] = {
-        "reason": "building energy target not established",
-        "article": "8.4.1.1.(1)",
-        "ruling": "D-32",
-        "detail": blocked,
-        "what_would_fix_it": (
-            "BTAP needs a validated NECB reference applier for the submitted "
-            "whole-foundation factor method; the submitter is not required "
-            "to replace a valid foundation method"
-            if unsupported_method else
-            "correct the target-establishment limitation recorded above"
-        ),
-    }
-    run.audit.warn(
-        "compliance",
-        "NO DETERMINATION — BTAP has no validated NECB reference applier for "
-        "the submitted whole-foundation factor method, so the building energy "
-        "target required by 8.4.1.1.(1) is not established; any completed "
-        "energies are DIAGNOSTIC only and are neither a pass nor a fail, and "
-        "this is deliberately NOT a conditional result",
-        inputs=blocked, article="8.4.1.1.(1)", ruling="D-32")
+
+    ordered = [causes[reason] for reason in sorted(causes)]
+    blocks = []
+    for cause in ordered:
+        spec = _NO_DETERMINATION_CAUSES[cause["reason"]]
+        edition = spec[code]
+        block = {
+            "reason": spec["reason"],
+            "article": edition["article"],
+            "ruling": edition.get("ruling", "D-108"),
+            "detail": cause,
+            "what_would_fix_it": spec["what_would_fix_it"].format(
+                table=edition.get("table", "")),
+        }
+        if spec.get("ahj"):
+            block["ahj"] = spec["ahj"]
+        blocks.append(block)
+
+    # The FIRST cause stays at the top level so every existing reader — the
+    # CLI, the HTML report, the frozen baselines — keeps working unchanged,
+    # with `causes` carrying the full list beside it. Both renderers read the
+    # block generically (Fable checked), so a list presents correctly.
+    run.report["no_determination"] = dict(blocks[0])
+    run.report["no_determination"]["causes"] = blocks
+
+    # ONE warning per cause, with citations LITERAL per cause AND per edition.
+    # `test_ahj_citations` and `test_decisions_registry` walk the source for
+    # `ruling=`/`ahj=` keyword literals, so reading them from the table would
+    # be invisible to both — the D-100 defect, where a citation the walker
+    # cannot see never resolves and never reaches the report appendix.
+    for cause in ordered:
+        spec = _NO_DETERMINATION_CAUSES[cause["reason"]]
+        # `article_no`, not `article`: the citation scanner counts an `article=`
+        # keyword as a citation site, and a .format() placeholder is not one —
+        # the real citations are the literals on the audit calls below. A false
+        # entry in that inventory is the same kind of defect as a missing one.
+        text = spec["warning"].format(
+            article_no=spec[code]["article"],
+            table=spec[code].get("table", ""))
+        if cause["reason"] == "ground_method_not_supported":
+            run.audit.warn("compliance", text + _DIAGNOSTIC_TAIL,
+                           inputs=cause, article="8.4.1.1.(1)", ruling="D-32")
+        elif code == "necb2025":
+            run.audit.warn("compliance", text + _DIAGNOSTIC_TAIL,
+                           inputs=cause, article="8.4.5.7.(1)", ruling="D-108",
+                           ahj="AHJ-23")
+        else:
+            run.audit.warn("compliance", text + _DIAGNOSTIC_TAIL,
+                           inputs=cause, article="8.4.4.7.(1)", ruling="D-108",
+                           ahj="AHJ-23")

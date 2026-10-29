@@ -602,14 +602,25 @@ def verdict_block(result, rep):
     if result.compliant is None:
         block = rep.get("no_determination")
         if block:
-            # The report carries both the explicit reason and its real fix.
-            lines = ["", "  *** NOT A CODE-COMPLIANT DETERMINATION ***",
-                     f"  {block['reason'].capitalize()} "
-                     f"({block.get('article', '')}).".rstrip(". ") + ".",
-                     "  The energies above are DIAGNOSTIC only.", ""]
-            fix = block.get("what_would_fix_it")
-            if fix:
-                lines += [f"  Fix: {fix}", ""]
+            # EVERY cause, not just the first. A model can fail to establish
+            # its target in more than one way, and printing one of them is the
+            # ambush the accumulation exists to prevent: a submitter fixes what
+            # the terminal named, re-runs, and meets a refusal nobody mentioned
+            # (Fable, third review of PR #153 — report.json and the audit
+            # already carried both, the terminal did not). `causes` is absent
+            # from a report written before it existed, so the top-level block
+            # stands in for a single cause.
+            causes = block.get("causes") or [block]
+            lines = ["", "  *** NOT A CODE-COMPLIANT DETERMINATION ***"]
+            for cause in causes:
+                lines.append(
+                    f"  {cause['reason'].capitalize()} "
+                    f"({cause.get('article', '')}).".rstrip(". ") + ".")
+            lines += ["  The energies above are DIAGNOSTIC only.", ""]
+            for cause in causes:
+                fix = cause.get("what_would_fix_it")
+                if fix:
+                    lines += [f"  Fix: {fix}", ""]
             return "\n".join(lines + ["  VERDICT: NO DETERMINATION", rule])
         return "\n".join([
             "", f"  VERDICT: NO DETERMINATION (simulate: {rep.get('simulate')})",

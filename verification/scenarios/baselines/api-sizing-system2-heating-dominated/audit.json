@@ -798,7 +798,7 @@
    "terminal": "cv"
   },
   "value": "psz",
-  "evidence": "air loop name resolves to catalog entry 'PSZ RTU Gas and DX Coils and Hot Water Baseboard'; cooled: OS_Coil_Cooling_DX_SingleSpeed on PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1; heated: OS_Coil_Heating_Gas on PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
+  "evidence": "air loop name resolves to catalog entry 'PSZ RTU Gas and DX Coils and Hot Water Baseboard'; PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1 declares equipment_class 'air_cooled_unitary'; cooled: OS_Coil_Cooling_DX_SingleSpeed on PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1; heated: OS_Coil_Heating_Gas on PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
   "building": "reference building",
   "level": "decision"
  },

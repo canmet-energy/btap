@@ -683,6 +683,13 @@
       "origin": "cbecs"
     },
     {
+      "name": "Hot water unit heaters",
+      "family": "unit_heaters",
+      "heating_type": "Hot Water",
+      "needs_boiler": true,
+      "origin": "campus"
+    },
+    {
       "name": "PSZ-AC with electric baseboard heat",
       "family": "psz",
       "sys_abbr": "psz_ac",
@@ -897,6 +904,15 @@
       "comment": "NECB reference heat pump sys1: 100% OA MAU with ASHP DX coils, CAV reheat terminals (fuel from name), baseboards"
     },
     {
+      "name": "PSZ MAU Hot Water with water-heated PTAC",
+      "family": "mau_ptac",
+      "mau_heating_coil_type": "Hot Water",
+      "ptac_heating_type": "Hot Water",
+      "needs_boiler": true,
+      "sizing": "necb_mau_ptac",
+      "origin": "campus"
+    },
+    {
       "name": "Forced air furnace",
       "family": "furnace",
       "heating": true,
@@ -904,6 +920,39 @@
       "ventilation": true,
       "needs_boiler": false,
       "origin": "cbecs"
+    },
+    {
+      "name": "Shared hot water heating-only air handler",
+      "family": "furnace",
+      "heating": true,
+      "cooling": false,
+      "ventilation": true,
+      "heating_type": "Hot Water",
+      "per_zone": false,
+      "needs_boiler": true,
+      "origin": "campus"
+    },
+    {
+      "name": "Shared furnace with DX cooling and no outdoor air",
+      "family": "furnace",
+      "heating": true,
+      "cooling": true,
+      "ventilation": false,
+      "per_zone": false,
+      "needs_boiler": false,
+      "origin": "campus"
+    },
+    {
+      "name": "Shared hot water air handler with water reheat",
+      "family": "furnace",
+      "heating": true,
+      "cooling": false,
+      "ventilation": true,
+      "heating_type": "Hot Water",
+      "reheat": "Hot Water",
+      "per_zone": false,
+      "needs_boiler": true,
+      "origin": "campus"
     },
     {
       "name": "Residential AC with baseboard electric",
@@ -916,7 +965,8 @@
           "config": {
             "heating": false,
             "cooling": true,
-            "ventilation": false
+            "ventilation": false,
+            "equipment_class": "air_cooled_unitary"
           }
         },
         {
@@ -1264,6 +1314,23 @@
           }
         }
       ]
+    },
+    {
+      "name": "Recirculating CRAH chilled water with humidity control",
+      "family": "crah",
+      "cooling_type": "Hydronic",
+      "cooling": true,
+      "heating": false,
+      "ventilation": false,
+      "needs_chiller": true,
+      "needs_boiler": false,
+      "chiller_type": "Scroll",
+      "chw_source": "air_cooled",
+      "crah_supply_air_temperature": 13.0,
+      "crah_maximum_humidity_ratio": 0.009,
+      "sys_abbr": "crah",
+      "origin": "campus",
+      "comment": "cooling-only computer-room air handler; recirculates room air and holds a humidity ceiling"
     }
   ]
 }

@@ -34,7 +34,8 @@ class MauPtac(BaseSystem):
         self.apply_system_sizing(air_loop)
 
         fan = openstudio.model.FanConstantVolume(model, always_on)
-        fan.setName(f"{self.config['sys_abbr']} MAU Supply Fan")
+        fan.setName(f"{self.config.get('sys_abbr', 'mau_ptac')} "
+                    f"MAU Supply Fan")
 
         if reference_hp:
             htg_coil = coils.dx_heating_single_speed(
@@ -77,7 +78,8 @@ class MauPtac(BaseSystem):
                     model, always_on, rh_coil)
                 air_loop.addBranchForZone(zone, terminal.to_StraightComponent())
             else:
-                self._add_ptac(model, zone, always_on, always_off)
+                self._add_ptac(model, zone, always_on, always_off,
+                               hw_loop=hw_loop)
                 diffuser = openstudio.model.AirTerminalSingleDuctUncontrolled(
                     model, always_on)
                 air_loop.addBranchForZone(zone, diffuser.to_StraightComponent())
@@ -93,7 +95,7 @@ class MauPtac(BaseSystem):
                 htg_part = 'ashp>c-e'
         naming.apply(namer, air_loop,
                      system_name=self.config['name'],
-                     sys_abbr=self.config['sys_abbr'],
+                     sys_abbr=self.config.get('sys_abbr', 'mau_ptac'),
                      # legacy sys1 ref-HP reads 'mixed'
                      sys_oa='mixed' if reference_hp else 'doas',
                      parts={
@@ -108,11 +110,29 @@ class MauPtac(BaseSystem):
                      suffix=None)
         return [air_loop]
 
-    def _add_ptac(self, model, zone, always_on, always_off):
+    def _add_ptac(self, model, zone, always_on, always_off, *, hw_loop=None):
         """PTAC with DX cooling (NECB curves), an always-off electric heating section
         (heating is the baseboards' job), and effectively zero outdoor air (the MAU
-        ventilates). Port of NECB add_ptac_dx_cooling with zero_outdoor_air = true."""
-        htg_coil = openstudio.model.CoilHeatingElectric(model, always_off)
+        ventilates). Port of NECB add_ptac_dx_cooling with zero_outdoor_air = true.
+
+        `ptac_heating_type` makes that heating section ACTIVE — issue #152
+        requirement 5, 18 water-heated PTACs across three Office vintages. The
+        default is None, which keeps the always-off electric coil the NECB port
+        requires, so no shipped row changes. Set to 'Hot Water' and the coil
+        becomes a `CoilHeatingWater` on the system's hot-water loop, scheduled
+        always-on, because a disabled section cannot reconstruct a PTAC that
+        really heats.
+
+        Optional baseboards need nothing here: `baseboards.add` already treats
+        a missing `baseboard_type` as "no baseboards" and raises on anything it
+        does not recognise, so a row simply omits the key."""
+        ptac_heating_type = self.config.get('ptac_heating_type')
+        if ptac_heating_type:
+            htg_coil = coils.heating_coil(model, ptac_heating_type, always_on,
+                                          hw_loop=hw_loop)
+            htg_coil.setName(f"{zone.nameString()} PTAC Htg Coil")
+        else:
+            htg_coil = openstudio.model.CoilHeatingElectric(model, always_off)
         clg_coil = coils.dx_cooling_single_speed(
             model, always_on, name=f"{zone.nameString()} PTAC DX Clg Coil")
 

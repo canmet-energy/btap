@@ -226,8 +226,8 @@ usefully, for each partial article's specific gap.
 ## Decisions and assumptions
 
 Where the code needs interpreting, the interpretation is written down rather than
-buried in the source. **107 decisions** are recorded in
-**[necb_decisions.md](docs/necb_decisions.md)** — 59 of them
+buried in the source. **108 decisions** are recorded in
+**[necb_decisions.md](docs/necb_decisions.md)** — 60 of them
 active at runtime, tagging the audit entries they govern.
 
 A decision records what the code says, how we read it, what we rejected, and why.
@@ -237,7 +237,7 @@ energy is represented.
 
 The HTML report's **"Decisions and assumptions applied"** appendix lists the ones
 that actually fired in *your* run — so a reviewer sees the judgement calls that
-affected this building, not all 107.
+affected this building, not all 108.
 
 ---
 

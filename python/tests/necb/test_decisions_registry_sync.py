@@ -69,7 +69,7 @@ MIGRATED_IDS = (
     "D-90", "D-91", "D-92", "D-93", "D-97", "D-99", "D-100", "D-101",
     "D-102",
 )
-NATIVE_STRUCTURED_IDS = ("D-104", "D-105", "D-106", "D-107")
+NATIVE_STRUCTURED_IDS = ("D-104", "D-105", "D-106", "D-107", "D-108")
 STRUCTURED_IDS = MIGRATED_IDS + NATIVE_STRUCTURED_IDS
 #: Phase D decisions moved from `unverified` to the structured form; the other
 #: 23 migrated decisions are Phase C's. D-104 through D-106 are native
@@ -160,6 +160,7 @@ STRUCTURED_RUNTIME_SHA256 = {
     "D-105": "8afd3dccafa72a5564f0bd71a9e68a656b87b3aa2f58f47aa3bb91124f9837dc",
     "D-106": "1d80c9ebe30ce530f75b2a62cea7377a8b2cf3d3f41730cdcb0323a42fecad1f",
     "D-107": "de2848c0ccdf358671d615810418cbd5f42245fb47900fa5cab0e69ecfd96367",
+    "D-108": "8e367e940bb45cc1d181d9d3f0711071c21ef672825e5d362804d02592139f5a",
 }
 #: Each structured decision's requirement keys in AUTHORED order, as the
 #: sources record them. Phase C's 23 had them in legacy front matter; Phase
@@ -342,6 +343,7 @@ STRUCTURED_KEYS = {
     "D-105": ("embedded_ground_floor_insulation",),
     "D-106": ("reference_fan_coil_mode_specific_airflow",),
     "D-107": ("authored_sample_fan_coil_sizing",),
+    "D-108": ("residential_compatible_cooling_identity",),
 }
 #: Each structured requirement as the sources record it: its label, then its
 #: NECB 2020 and NECB 2025 citations in authored order. A requirement the
@@ -1030,6 +1032,7 @@ SHARED_KEY_USERS = {
     "plant_peak_pumping_flow": ("D-92", "D-93"),
     "prescriptive_pump_power_ceiling": ("D-38", "D-92", "D-93", "D-97"),
     "reference_conformity": ("D-99", "D-100"),
+    "residential_compatible_cooling_identity": ("D-58", "D-108"),
     "reference_hydronic_pump_power": (
         "D-27", "D-38", "D-92", "D-93", "D-97"),
     "reference_photocontrol_evaluation": ("D-51", "D-57"),
@@ -1678,10 +1681,10 @@ class TestTheCommittedProvisionView(unittest.TestCase):
     #: have two; one of those records is D-60's related 2020 comparison.
     #: REQUIREMENTS counts instances, including a shared key once per decision
     #: that uses it.
-    STRUCTURED, ESTABLISHED, HELD, INCLUDED, OMITTED = 69, 0, 3, 72, 35
-    SOURCE_ROWS = 240
-    GOVERNING_ROWS = 239
-    REQUIREMENTS = 128
+    STRUCTURED, ESTABLISHED, HELD, INCLUDED, OMITTED = 70, 0, 3, 73, 35
+    SOURCE_ROWS = 242
+    GOVERNING_ROWS = 241
+    REQUIREMENTS = 129
 
     @classmethod
     def setUpClass(cls):

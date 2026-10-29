@@ -11,7 +11,7 @@ which were measured, not reasoned, and are expensive to rediscover.
 
 - `geometry/` — footprint wizards, the bar engine, measured footprints,
   plan/render tooling
-- `hvac/` — the 102-system catalog + builders (`systems/`, `components/`,
+- `hvac/` — the 108-system catalog + builders (`systems/`, `components/`,
   `data/`), classify, teardown, naming, canonical, validation
 - `envelope/` — constructions machinery and the exposed-surface census
 

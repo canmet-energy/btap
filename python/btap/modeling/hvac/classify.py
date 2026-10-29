@@ -33,7 +33,7 @@ from __future__ import annotations
 import re
 
 from btap._compat import opt, sorted_by_name
-from btap.modeling.hvac import catalog
+from btap.modeling.hvac import catalog, equipment_class
 from btap.modeling.hvac.components import coils
 from btap.modeling.hvac.systems.plant_loops import DISTRICT_HEATING_TYPES
 
@@ -247,6 +247,10 @@ def _air_loop_group(air_loop, plant_by_name, audit):
     _recognize_gem_name(group, air_loop, audit)
     _outdoor_air_facts(group, air_loop, audit)
 
+    # Two equipment-IDENTITY facts, read from the RAW supply path and the sizing
+    # object because `coils.supply_components` below is lossy by design.
+    _equipment_class_facts(group, air_loop)
+
     # coils.supply_components descends into AirLoopHVACUnitarySystem containers
     # (staged NECB reference systems) — otherwise a staged sys 3/4 reads as an
     # air loop with no coils at all.
@@ -270,6 +274,74 @@ def _air_loop_group(air_loop, plant_by_name, audit):
             value=group['family'] or group['family_guess'],
             evidence='; '.join(group['evidence']))
     return group
+
+
+def _equipment_class_facts(group, air_loop):
+    """Whether the loop's cooling is PACKAGED equipment, and whether it is a
+    VENTILATION system rather than a zone-cooling one.
+
+    Both are generic modelling facts about the OSM, not NECB judgements — the
+    code-side meaning (Table 8.4.4.7.-A's "air-cooled unitary" branch) lives in
+    `btap.codes`. They exist because the facts a classifier needs here are
+    DESTROYED by the time the coil scan runs:
+
+    - `coils.supply_components` REPLACES an AirLoopHVACUnitarySystem (or either
+      unitary heat-pump wrapper) with the coils inside it, which it must do to
+      find a staged reference system's coils at all. A real packaged unit and a
+      field-erected built-up DX coil then both read as `loop_dx_cooling`, and
+      nothing downstream can tell them apart: `_structural_family_guess` reads
+      zone count and terminals, which are not equipment identity.
+    - A ventilation system's coil TEMPERS make-up air; it is not the equipment
+      that cools the space. `SizingSystem` records that intent directly, and a
+      bare coil scan cannot see it.
+
+    An arbitrary OSM is exactly where this matters. A model we authored is
+    recognized by its loop NAME (`_recognize_gem_name`), so it carries its
+    family regardless; a model from anywhere else has only its structure, and
+    the standard OpenStudio way to model a packaged rooftop unit is the very
+    container the flattener unwraps.
+    """
+    # A DECLARED class outranks everything inferred from topology, and is the
+    # only route that works for a model this library did not build: see
+    # `equipment_class` for why a loop name and a zone count do not.
+    group['declared_equipment_class'] = equipment_class.read(air_loop)
+    if group['declared_equipment_class'] is not None:
+        group['evidence'].append(
+            f"{air_loop.nameString()} declares equipment_class "
+            f"{group['declared_equipment_class']!r}")
+
+    for comp in air_loop.supplyComponents():
+        for caster in ('to_AirLoopHVACUnitarySystem',
+                       'to_AirLoopHVACUnitaryHeatPumpAirToAir',
+                       'to_AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed'):
+            if not hasattr(comp, caster):
+                continue
+            if getattr(comp, caster)().is_initialized():
+                group['packaged_unitary'] = True
+                group['evidence'].append(
+                    f"{comp.iddObjectType().valueName()} container on "
+                    f"{air_loop.nameString()} (packaged equipment)")
+                break
+        if group['packaged_unitary']:
+            break
+
+    # THREE fields, not one. `typeofLoadtoSizeOn` alone states the sizing BASIS
+    # and does not prove the loop is all outdoor air, so concluding "its coil
+    # only tempers make-up air" from it is a stronger claim than the field
+    # carries (Sol, `329`). Every DOAS profile in `data/sizing.json` sets all
+    # three, and `BaseSystem.apply_system_sizing` writes all three onto
+    # SizingSystem, so the conjunction is available wherever the weaker proxy
+    # was. A 100%-OA loop sized on Sensible is NOT caught here and falls to the
+    # inference below with its warning, which is the honest outcome.
+    sizing = air_loop.sizingSystem()
+    if (sizing.typeofLoadtoSizeOn() == 'VentilationRequirement'
+            and sizing.allOutdoorAirinCooling()
+            and sizing.allOutdoorAirinHeating()):
+        group['ventilation_sized'] = True
+        group['evidence'].append(
+            f"{air_loop.nameString()} is sized on the ventilation requirement "
+            f"with all outdoor air in cooling and heating, so its coils temper "
+            f"make-up air")
 
 
 def _recognize_gem_name(group, air_loop, audit):
@@ -300,6 +372,8 @@ def _base_group(zone_names, air_loop_name):
             'heat_pump': False, 'heat_pump_sources': [], 'heat_pump_source_loops': [],
             'terminal_type': 'none',
             'zonal_units': [], 'loop_dx_cooling': False,
+            'packaged_unitary': False, 'ventilation_sized': False,
+            'declared_equipment_class': None,
             'design_cooling_kw': 0.0, 'cooling_capacity_complete': True,
             'dcv': False, 'system_outdoor_air_method': None,
             'evidence': []}
