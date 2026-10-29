@@ -4390,6 +4390,41 @@
           ]
         }
       ]
+    },
+    {
+      "id": "D-108",
+      "title": "Bare loop DX is not evidence of unitary equipment; the residential identity branch needs an equipment-class fact",
+      "kind": "runtime",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ],
+      "summary": "Decided 2026-10-27. D-58 replaced a name-based residential compatible-cooling test with facts, which was right, but counted `loop_dx_cooling` on a no-reheat CV shape as one of those facts. Direct expansion is a heat-transfer mechanism, not an equipment class: Part 5 puts split-system AND single-package equipment under 'air-cooled unitary', and `coils.supply_components` has already replaced any unitary container with its children by the time the classifier runs, so a certified packaged unit and a field-erected built-up DX coil are indistinguishable. Three generic facts are recorded instead — a packaged-unitary container on the raw supply path, a loop sized on the ventilation requirement with all outdoor air, and an equipment class the model declares — and a ventilation-sized loop no longer reaches the identity branch at all. `DOAS ventilation only` moves from copy_proposed to through_the_wall for residential blocks in both editions.",
+      "requirements": [
+        {
+          "id": "residential_compatible_cooling_identity",
+          "label": "Residential reference identity for compatible proposed cooling",
+          "decided": "The identity branch requires an equipment-class fact. Code-listed zonal equipment and a packaged-unitary container establish it; a bare DX coil on a constant-volume loop does not, and a loop sized on the ventilation requirement with all its air from outdoors is excluded because its coil tempers make-up air rather than cooling the space; and a class the model DECLARES is read in both directions.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "Table 8.4.4.7.-A"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "Table 8.4.5.7.-A"
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }

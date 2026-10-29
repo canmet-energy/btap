@@ -71,6 +71,11 @@ class Assignment:
     energy_type: str | None = None
     action: str | None = None
     articles: list = field(default_factory=list)
+    #: True when this assignment's `copy_proposed` rests on the bare-DX
+    #: INFERENCE rather than on observed equipment (D-108, AHJ-23). It travels
+    #: on the assignment because the verdict is withheld in `path.py`, which
+    #: has no view of the group facts by then.
+    equipment_class_inferred: bool = False
     #: ``{block: action}`` for every selection assignment this one absorbed.
     #: The merge keys on ``[catalog_name, config]`` and NOT on ``action``,
     #: deliberately — adding action would split one Note (2) common ventilation
@@ -499,15 +504,43 @@ def _residential_assignment(group, category, selection, articles, audit):
                        target=','.join(group['zones']), article=res['article'])
         return Assignment(zones=list(group['zones']), category=category, reference_system=1,
                           action='build', articles=articles)
-    if group['cooled'] and _residential_compatible_cooling(group):
+    # Table -A's identity branch reads "heated AS WELL AS being cooled with
+    # [the list]". BOTH conditions, and the heated one was missing: a
+    # cooling-only block carrying listed equipment took the copy, where the
+    # printed text sends it to `otherwise` (Sol, `331`). The heated-only branch
+    # above already handles the other asymmetry, so this is the pair that was
+    # never tested together.
+    route = (_residential_cooling_route(group)
+             if (group['heated'] and group['cooled']) else None)
+    if route is not None:
+        # WHICH route qualified is the thing an AHJ reader needs, because one of
+        # them is an inference. It comes FROM the predicate rather than being
+        # recomputed here: the two expressions drifted apart once already, and
+        # only one weakly-covered test noticed (Fable, `331`).
+        inferred = route == 'inferred'
         audit.decision('selection', 'residential with compatible cooling -> reference identical to proposed',
                        target=','.join(group['zones']),
                        inputs={'zonal_units': group.get('zonal_units'),
                                'loop_dx_cooling': group.get('loop_dx_cooling'),
+                               'packaged_unitary': group.get('packaged_unitary'),
+                               'equipment_class': ('inferred from bare DX'
+                                                   if inferred else 'observed'),
+                               'route': route,
                                'family': group.get('family') or group.get('family_guess')},
-                       article=res['article'], ruling='D-58')
+                       article=res['article'], ruling='D-58 D-108',
+                       ahj='AHJ-23' if inferred else None)
+        if inferred:
+            audit.warn(
+                'selection',
+                'residential reference IDENTITY rests on an INFERENCE: a bare DX '
+                'coil does not establish unitary equipment',
+                target=','.join(group['zones']),
+                inputs={'loop_dx_cooling': True,
+                        'terminal_type': group.get('terminal_type')},
+                article=res['article'], ruling='D-108', ahj='AHJ-23')
         return Assignment(zones=list(group['zones']), category=category, reference_system=None,
-                          action='copy_proposed', articles=articles)
+                          action='copy_proposed', articles=articles,
+                          equipment_class_inferred=inferred)
     audit.decision('selection', 'residential otherwise -> through-the-wall systems',
                    target=','.join(group['zones']),
                    inputs={'zonal_units': group.get('zonal_units'),
@@ -518,6 +551,24 @@ def _residential_assignment(group, category, selection, articles, audit):
                       action='through_the_wall', articles=articles)
 
 
+def _is_heat_pump(group):
+    """Is this group's equipment a heat pump, by EITHER route?
+
+    The characterized boolean comes from detecting heat-pump coils and plant.
+    A serialized `heat_pump` declaration says the same thing about equipment
+    the topology may not reveal, and it is accepted as positive evidence for
+    Table 8.4.4.7.-A's identity branch — so it cannot simultaneously be
+    ignored by Article 13.
+
+    Reading only the boolean let a declared-only heat pump SKIP the D-34
+    redirect and reach the identity branch, which returned `copy_proposed`
+    where D-37 requires the conservative ASHP reference (Sol, `333`, exercised
+    at `460faf6a`). One predicate, used everywhere the question is asked.
+    """
+    return bool(group.get('heat_pump')) or (
+        group.get('declared_equipment_class') == 'heat_pump')
+
+
 def _heat_pump_redirects(group):
     """D-37 (A2 ruled, phylroy 2026-07-28): the printed 8.4.4.13 split, with the
     boundary from Note A-8.4.4.13 — a water-LOOP heat pump (internal loop; aux
@@ -526,9 +577,11 @@ def _heat_pump_redirects(group):
     ASHP reference per sentence (2). A detected heat pump with no source evidence
     keeps the redirect (pre-D-37 behavior — the conservative reading when the
     source loop is unclassifiable)."""
-    if not group.get('heat_pump'):
+    if not _is_heat_pump(group):
         return False
 
+    # A DECLARED-only heat pump has no source evidence, so it takes the same
+    # conservative redirect as a detected one whose source is unclassifiable.
     sources = group.get('heat_pump_sources') or []
     if not sources:
         return True
@@ -553,24 +606,119 @@ def _heat_pump_redirects(group):
 #  * DOAS + fan-coil composites cool their zones with fan coils but carry a
 #    'doas'/'composite' family.
 # The facts: zones cooled by packaged-terminal/room units or fan coils
-# ('zonal_units'), or by the loop's own DX on a no-reheat constant-volume
-# single-package shape ('loop_dx_cooling').
-COMPATIBLE_RESIDENTIAL_FAMILIES = ('psz', 'mau_ptac', 'zone_terminal', 'fan_coils',
-                                   'wshp', 'vrf')
+# ('zonal_units'), or by the loop's own DX on a no-reheat constant-volume shape
+# ('loop_dx_cooling').
+#
+# D-108 narrowed this further. A family allow-list — `psz`, `mau_ptac`,
+# `zone_terminal`, `fan_coils`, `wshp`, `vrf` — used to be a positive route,
+# and it is GONE rather than retained unused: `family` is resolved from an air
+# loop's NAME against this repository's catalogue, so reading it as an
+# equipment fact made the determination depend on who authored the model
+# (Sol, `331`). The Code's own list is recorded in D-108 and in
+# `_residential_cooling_route`'s comments, which is where a reader looking for
+# it should land; a tuple in the source invites being used as a shortcut again.
 COMPATIBLE_ZONAL_UNITS = ('ptac', 'pthp', 'fan_coil', 'vrf_terminal', 'wshp')
+
+#: Declared equipment classes (`btap.modeling.hvac.equipment_class`) that ARE
+#: one of Table -A's printed identities. This mapping is the NECB meaning of a
+#: generic modelling fact, which is why it lives here and not beside the
+#: declaration: another code family reads the same declarations its own way.
+#: `built_up` and `evaporative` are deliberately absent — a declaration of
+#: either is positive evidence that the branch does NOT apply.
+DECLARED_COMPATIBLE_CLASSES = ('air_cooled_unitary', 'packaged_terminal',
+                               'room_air_conditioner', 'heat_pump', 'fan_coil')
 
 
 def _residential_compatible_cooling(group):
-    if group.get('family_guess') in ('zonal_heat_cool', 'packaged_single_zone'):
-        return True
-    if (str(group.get('family')) in COMPATIBLE_RESIDENTIAL_FAMILIES
-            or str(group.get('family_guess')) in COMPATIBLE_RESIDENTIAL_FAMILIES):
-        return True
-    if any(u in COMPATIBLE_ZONAL_UNITS for u in (group.get('zonal_units') or [])):
-        return True
+    """Does the proposed carry one of Table -A's cooling identities at all?
 
-    return (group.get('air_loop') is not None and group.get('loop_dx_cooling') is True
-            and group.get('terminal_type') in ('none', 'cv'))
+    A thin wrapper over `_residential_cooling_route` for callers and tests that
+    only need the yes/no. The BRANCH also requires the block to be heated, and
+    that prerequisite lives at the call site because it is a thermal-mode
+    condition rather than an equipment one.
+    """
+    return _residential_cooling_route(group) is not None
+
+
+def _residential_cooling_route(group):
+    # ORDER IS LOAD-BEARING, and these three comments say why each step sits
+    # where it does. Fable found the first version of this function had the
+    # ventilation exclusion FOURTH, behind two clauses that return True, so a
+    # ONE-ZONE ventilation-only block still qualified: `_structural_family_guess`
+    # calls any single-zone no-reheat loop `packaged_single_zone`, and that
+    # matched before the exclusion was reached. The matrix fixture has five
+    # zones, so nothing in the suite could see it (`PR #153` review).
+
+    # FIRST, the equipment Table -A NAMES. Fan coils, packaged-terminal and room
+    # units and heat pumps qualify however the air loop is sized, which is why
+    # the DOAS-plus-fan-coil and DOAS-plus-WSHP composites keep the copy.
+    if any(u in COMPATIBLE_ZONAL_UNITS for u in (group.get('zonal_units') or [])):
+        return 'zonal_units'
+
+    # THEN the exclusion, because Table -A's identity branch asks what the space
+    # is COOLED WITH. A loop sized on the ventilation requirement with all its
+    # air from outdoors TEMPERS make-up air, so its coil is not the equipment
+    # that cools the space and no later clause may read it as such — D-48 draws
+    # the same boundary for unitary staging. Nothing below this line can revive
+    # a ventilation system, which is the property the one-zone defect broke.
+    if group.get('ventilation_sized') is True:
+        return None
+
+    # POSITIVE evidence: the loop carries a factory-packaged unitary container, so
+    # "air-cooled unitary" is an observed equipment fact rather than an inference.
+    # Part 5's Table 5.2.12.1.-A puts split-system AND single-package equipment
+    # under that heading, so neither zone count nor package count narrows it.
+    if (group.get('packaged_unitary') is True
+            and group.get('loop_dx_cooling') is True):
+        return 'packaged_unitary'
+
+    # A DECLARED class, which is what the submitted model SAYS its equipment is.
+    # Positive in both directions: a declaration of `built_up` or `evaporative`
+    # is not on `DECLARED_COMPATIBLE_CLASSES`, so it falls through to
+    # `otherwise` rather than reaching the inference — the model answered the
+    # question, and the answer was no.
+    declared = group.get('declared_equipment_class')
+    if declared is not None:
+        return ('declared' if declared in DECLARED_COMPATIBLE_CLASSES else None)
+
+    # NEITHER the catalogue-resolved `family` NOR the structural `family_guess`
+    # is positive evidence any more, and removing them is the whole point.
+    #
+    # `classify._recognize_gem_name` resolves an air loop's NAME against this
+    # repository's catalogue and writes `family`. Reading that as an equipment
+    # fact made the determination depend on WHO AUTHORED THE MODEL: two OSMs
+    # with identical bare-DX topology got different answers because one loop
+    # kept a BTAP name — a named `psz` was "observed" and got an ordinary
+    # verdict, the same loop with its name scrubbed was "inferred" and exited 6
+    # (Sol, `331`). A name is not a fact about the building.
+    #
+    # `family_guess` is structural but still not an equipment identity:
+    # `packaged_single_zone` is a zone count, and `zonal_heat_cool` only
+    # restates the `zonal_units` test above less precisely — every zonal entry
+    # with a cooling role already carries a Code-listed kind, so it qualified
+    # nothing on its own (Fable's census: 33 of 33 zonal routes).
+    #
+    # What remains is what D-108 and AHJ-23 say it is: Code-listed zonal
+    # equipment, or a serialized unitary container. Everything else reaches the
+    # inference below and is LABELLED as inferred.
+
+    # A BARE DX coil on a no-reheat constant-volume loop. Nothing in the model
+    # distinguishes certified unitary equipment from a field-erected built-up DX
+    # system here — `coils.supply_components` has already replaced any container
+    # with its children — so this is an INFERENCE, not an equipment fact (Sol,
+    # `327`). It is retained as the DIAGNOSTIC fallback because direct expansion
+    # is overwhelmingly packaged equipment in practice while built-up
+    # central-station systems use chilled water, so the inference is sound far
+    # more often than not — but it does NOT support a determination. An earlier
+    # version of this comment argued that withholding one was worse than
+    # inferring; Sol rejected that (`329`) and the rejection is right, because
+    # a built-up DX residential system would have its reference copied from
+    # ITSELF and receive a full verdict. `path.py` withholds the determination
+    # wherever this route selected a residential reference.
+    if (group.get('air_loop') is not None and group.get('loop_dx_cooling') is True
+            and group.get('terminal_type') in ('none', 'cv')):
+        return 'inferred'
+    return None
 
 
 # ---- finalize: heat-pump override, energy type, catalog name ----
@@ -648,7 +796,7 @@ def _finalize(assignment, group, definitions, selection, facts, audit,
                        value='hp', article=hp_rule['article'], ruling='D-37')
         assignment.reference_system = 'hp'
         assignment.articles.append(hp_rule['article'])
-    elif group.get('heat_pump') and not _heat_pump_redirects(group):
+    elif _is_heat_pump(group) and not _heat_pump_redirects(group):
         audit.decision('selection',
                        f"water-loop heat pump — "
                        f"{_selection_table_citation(selection)} selection retained "

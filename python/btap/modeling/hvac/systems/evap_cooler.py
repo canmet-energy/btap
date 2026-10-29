@@ -9,6 +9,7 @@ from __future__ import annotations
 import openstudio
 
 from btap._compat import sorted_by_name
+from btap.modeling.hvac import equipment_class
 from btap.modeling.hvac.systems.base_system import BaseSystem
 
 
@@ -19,6 +20,13 @@ class EvapCooler(BaseSystem):
         air_loops = []
         for zone in sorted_by_name(zones):
             air_loop = openstudio.model.AirLoopHVAC(model)
+            # Declared POSITIVELY, not left undeclared. A direct evaporative
+            # cooler has no refrigeration cycle, so NECB Table 8.4.4.7.-A's
+            # residential identity branch — air-cooled unitary, packaged
+            # terminal or room AC, heat pumps, fan coils — cannot reach it. An
+            # undeclared loop would fall through to an inference instead, and
+            # this is a fact the catalogue row knows for certain.
+            equipment_class.declare(air_loop, 'evaporative')
             air_loop.setName(f"{self.config['name']} | {zone.nameString()}")
 
             fan = openstudio.model.FanConstantVolume(model, always_on)

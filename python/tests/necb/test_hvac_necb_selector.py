@@ -14,14 +14,30 @@ from btap.modeling.hvac import catalog
 
 def group(zones=None, heated=True, cooled=True, heat_fuels=None,
           heat_pump=False, heat_pump_sources=None, cooling_kw=10.0,
-          family=None, family_guess=None):
+          family=None, family_guess=None, zonal_units=None,
+          declared_equipment_class=None):
+    """A characterized zone group.
+
+    `zonal_units` and `declared_equipment_class` carry the EQUIPMENT, and a
+    residential fixture that needs Table 8.4.4.7.-A's identity branch must set
+    one of them. `family` no longer qualifies anything: it is resolved from an
+    air loop's NAME against our catalogue, so reading it as an equipment fact
+    made the answer depend on who authored the model (D-108; Sol, `331`). Real
+    `zone_terminal` and `wshp` builds carry `['ptac']` / `['pthp']` / `['wshp']`
+    here, which is why no catalogue row's assignment changed when the family
+    route was removed — only synthetic fixtures using the shortcut did.
+    """
     return {'zones': zones or ['Z1'], 'air_loop': 'L1', 'family': family,
             'catalog_name': None, 'family_guess': family_guess,
             'heated': heated, 'cooled': cooled,
             'heating_energy_types': ['NaturalGas'] if heat_fuels is None else heat_fuels,
             'cooling_energy_types': ['Electricity'] if cooled else [],
             'heat_pump': heat_pump, 'heat_pump_sources': heat_pump_sources or [],
-            'terminal_type': 'none', 'design_cooling_kw': cooling_kw, 'evidence': []}
+            'terminal_type': 'none', 'design_cooling_kw': cooling_kw,
+            'zonal_units': zonal_units or [], 'loop_dx_cooling': False,
+            'packaged_unitary': False, 'ventilation_sized': False,
+            'declared_equipment_class': declared_equipment_class,
+            'evidence': []}
 
 
 def facts_for(*groups):
@@ -104,7 +120,10 @@ class TestNecbSelector(unittest.TestCase):
     #  terminal or room air conditioner (or heat pumps), or fan coils, the reference ...
     #  shall be modeled as being identical to that of the proposed building or space"
     def test_residential_compatible_cooling_copies_proposed(self):
-        a = select([group(family='zone_terminal')], {'Z1': 'Hotel/Motel - rooms'})[0]
+        # A packaged-terminal unit, carried as the EQUIPMENT a real
+        # `zone_terminal` build puts in the model rather than as a family name.
+        a = select([group(family='zone_terminal', zonal_units=['ptac'])],
+                   {'Z1': 'Hotel/Motel - rooms'})[0]
         self.assertEqual('copy_proposed', a.action)
         self.assertIsNone(a.catalog_name)
 
@@ -147,7 +166,8 @@ class TestNecbSelector(unittest.TestCase):
     # heat pump, so it falls to the Table -A residential rules — and 'wshp' is
     # compatible cooling -> reference identical to proposed.
     def test_residential_water_loop_hp_copies_proposed(self):
-        a = select([group(heat_pump=True, heat_pump_sources=['water_loop'], family='wshp')],
+        a = select([group(heat_pump=True, heat_pump_sources=['water_loop'],
+                          family='wshp', zonal_units=['wshp'])],
                    {'Z1': 'Multi-unit residential'})[0]
         self.assertEqual('copy_proposed', a.action)
 

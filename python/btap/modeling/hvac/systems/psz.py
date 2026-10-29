@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import openstudio
 
-from btap.modeling.hvac import naming
+from btap.modeling.hvac import equipment_class, naming
 from btap.modeling.hvac.components import coils
 from btap.modeling.hvac.systems import baseboards
 from btap.modeling.hvac.systems.base_system import BaseSystem
@@ -137,6 +137,16 @@ class PSZ(BaseSystem):
             htg_coil.addToNode(supply_inlet_node)
             clg_coil.addToNode(supply_inlet_node)
         oa_system.addToNode(supply_inlet_node)
+
+        # PSZ is "packaged single zone": the catalogue row names factory-made
+        # unitary equipment, so the model SAYS so rather than leaving a reader
+        # to infer it from a bare DX coil on a CV loop — which describes a
+        # field-erected built-up system just as well. Declared on the loop, it
+        # survives the OSM round trip, forward-translates to nothing, and is
+        # readable by any consumer including one that never saw this catalogue.
+        # Part 5's Table 5.2.12.1.-A puts packaged AND matched split equipment
+        # under "air-cooled unitary", which is what a PSZ with a DX coil is.
+        equipment_class.declare(air_loop, 'air_cooled_unitary')
 
         # Single-zone reheat setpoint manager tracking the control zone.
         spm = openstudio.model.SetpointManagerSingleZoneReheat(model)

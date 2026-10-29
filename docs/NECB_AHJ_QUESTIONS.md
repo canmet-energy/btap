@@ -103,6 +103,7 @@ nonconformity with 8.4.x.9.(6)(e).
 | AHJ-20 | System 5's chilled-water loop is a 7 °C comfort loop | tool-gap | necb2020, necb2025 | no |
 | AHJ-21 | the archetype-EUI path applies no capacity increase under sentence (5) | tool-gap | necb2025 | no |
 | AHJ-22 | cooling-tower capacity equations replaced by the engine Merkel model | alternative-solution | necb2020, necb2025 | yes, where a reference cooling tower is present |
+| AHJ-23 | Table 8.4.x.7.-A residential identity branch | tool-gap | necb2020, necb2025 | no |
 
 ---
 
@@ -1154,3 +1155,64 @@ cites D-07 and this entry on every affected condenser loop, and makes the run
 conditional on the authority accepting the substitution. Closing the entry
 requires a reference-tower representation that applies the six prescribed
 equations, followed by a new freeze of affected scenarios.
+
+## AHJ-23 — A bare DX coil does not say whether the equipment is unitary
+
+**Article.** Table 8.4.4.7.-A (NECB 2020) and Table 8.4.5.7.-A (NECB 2025),
+Residential/Accommodation row, identity branch. Related: Table 5.2.12.1.-A,
+which is what shows the term's breadth.
+
+**Status: `tool-gap`, NOT a referral.** The Code decides this branch cleanly:
+cooling by "an air-cooled unitary, packaged terminal or room air conditioner
+(or heat pumps), or fan coils" makes the reference identical to the proposed,
+and anything else takes through-the-wall systems. No authority needs to
+reinterpret that. What is missing is a reliable equipment-identity FACT on our
+side, which is implementable — so calling it a referral would launder a defect
+as an ambiguity. It sets no run conditional.
+
+**Established by.** Sol, `327`, correcting the premise of his own `325`
+after phylroy asked why a shared furnace with DX cooling was being given
+`copy_proposed` at all, and pointed out that the NECB code is what decides
+which reference system applies.
+
+**What is indeterminate.** Whether a bare `Coil:Cooling:DX*` on a
+constant-volume air loop belongs to certified unitary equipment or to a
+field-erected built-up system. Part 5's Table 5.2.12.1.-A puts split-system AND
+single-package equipment under "air-cooled unitary", so the term is broader than
+one physical package and narrower than "anything with direct expansion". The
+model does not carry the difference: `coils.supply_components` replaces an
+`AirLoopHVACUnitarySystem` with its children before any classifier runs — which
+it must, or a staged reference system's coils cannot be found at all — and a
+matched split unit may legitimately be modelled with bare components anyway, so
+the container's absence proves nothing either.
+
+**What the tool does meanwhile.** Three-valued in effect, with the third value
+resolved by inference rather than refusal:
+
+1. Code-listed zonal equipment (`ptac`, `pthp`, `fan_coil`, `vrf_terminal`,
+   `wshp`) or a `packaged_unitary` container establishes the branch positively;
+2. a `ventilation_sized` loop is excluded — its coil tempers make-up air, the
+   boundary D-48 already drew;
+3. a bare DX coil on a no-reheat constant-volume loop is INFERRED to be
+   packaged equipment, because direct expansion is overwhelmingly packaged in
+   practice while built-up central-station systems use chilled water. That
+   inference drives the DIAGNOSTIC build only.
+
+**Where a reader meets it at runtime.** Twice, and the second is the one that
+matters. In the selection audit trail, for a residential block whose group
+carries `loop_dx_cooling` with neither a `packaged_unitary` container nor
+Code-listed zonal equipment: `equipment_class: "inferred from bare DX"` with a
+warning. And then in the result, because a reference selected that way does not
+support a determination — the run reports both models' energies and sets
+`compliant = null`, `compliance_determination = "no_determination"`, exit 6
+(Sol, `327`, `329`). An accurate disclosure does not establish a target, and a
+normal verdict would present one the tool knows it did not establish.
+
+This entry is a `tool-gap`, so the exit 6 is NOT a conditional result and no
+authority's approval changes it. Closing the gap restores an ordinary verdict.
+
+**To close it.** Carry an explicit equipment-class fact through the flattener
+rather than inferring it: preserve the container identity that
+`supply_components` discards, and read an independently declared equipment
+class where a model states one. Positive evidence then covers the cases that
+are currently inferred, and only a genuinely bare topology remains.

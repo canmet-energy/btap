@@ -26,7 +26,30 @@
     }
    ]
   },
-  "what_would_fix_it": "BTAP needs a validated NECB reference applier for the submitted whole-foundation factor method; the submitter is not required to replace a valid foundation method"
+  "what_would_fix_it": "BTAP needs a validated NECB reference applier for the submitted whole-foundation factor method; the submitter is not required to replace a valid foundation method",
+  "causes": [
+   {
+    "reason": "building energy target not established",
+    "article": "8.4.1.1.(1)",
+    "ruling": "D-32",
+    "detail": {
+     "reason": "ground_method_not_supported",
+     "ground_model": "kiva",
+     "floors": [
+      "Surface 1"
+     ],
+     "surfaces": [
+      {
+       "floor": "Surface 1",
+       "boundary_condition": "GroundFCfactorMethod",
+       "embedded_status": "unresolved",
+       "reason": "a validated NECB reference applier for this whole-foundation method is not implemented"
+      }
+     ]
+    },
+    "what_would_fix_it": "BTAP needs a validated NECB reference applier for the submitted whole-foundation factor method; the submitter is not required to replace a valid foundation method"
+   }
+  ]
  },
  "compliant": null,
  "warnings": [

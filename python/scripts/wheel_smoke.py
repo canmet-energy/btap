@@ -76,8 +76,8 @@ def run_checks() -> int:
         assert rules, "necb loads rules are empty"
         from btap.modeling.hvac import catalog
         rows = catalog.rows()
-        assert len(rows) == 102, f"catalog has {len(rows)} systems, expected 102"
-    check("packaged data loads (necb rules + the 102-system catalog)", data_loads)
+        assert len(rows) == 108, f"catalog has {len(rows)} systems, expected 108"
+    check("packaged data loads (necb rules + the 108-system catalog)", data_loads)
 
     def coverage_reference_loads():
         from btap.codes import coverage

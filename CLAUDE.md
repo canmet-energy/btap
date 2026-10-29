@@ -170,8 +170,8 @@ their submission, which is the babysitting this rule forbids.
 The corollary for OUR OWN artifacts is the opposite. A sample we author and
 ship should be clean, because shipping one with a known Severe teaches the
 wrong thing. `scripts/simulate_all_systems.py` enforces exactly that for the
-catalogue — `SEVERE_RE`, `is_clean()`, status `simulation_error`, and 102 of
-102 systems currently `ok` with `severe: 0`. It gates the CATALOGUE on the
+catalogue — `SEVERE_RE`, `is_clean()`, status `simulation_error`, and 108 of
+108 systems currently `ok` with `severe: 0`. It gates the CATALOGUE on the
 shared fixture, so a shipped sample model is a separate artifact and is NOT
 covered by it: `packaging/windows/samples/04-fancoil-chiller.osm` and
 `13-district-heating.osm` each carry one `Coil:Cooling:Water` UA Severe

@@ -6,7 +6,7 @@ simulates. Four engines: the footprint wizards and the bar engine (verbatim
 ports from openstudio-standards), a 3D viewer (ported from
 canmet-energy/campus) and a per-storey 2D floor-plan renderer — plus, since
 the by-nature refactor (D-77), the **HVAC authoring machinery**: the
-102-system topology catalog, `build_system` / `replace_system`, the system
+108-system topology catalog, `build_system` / `replace_system`, the system
 builders, coil/curve/schedule components, `classify.characterize`,
 teardown, and the envelope authoring pieces (constructions, the
 exposed-surface census).
@@ -16,7 +16,7 @@ exposed-surface census).
 ```
 btap/modeling/
   geometry/   wizards, bar engine, footprints, plans, 3D render
-  hvac/       102-system catalog + builders (systems/, components/, data/)
+  hvac/       108-system catalog + builders (systems/, components/, data/)
   envelope/   constructions + surface census
 ```
 

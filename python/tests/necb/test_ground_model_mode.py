@@ -357,8 +357,11 @@ class TestSimpleGroundModeEstablishesTarget(unittest.TestCase):
             compliant=True, report=report, audit=AuditLog())
 
         necb_path._refuse_determination(
-            run, {"reason": "ground_method_not_supported",
-                  "ground_model": "kiva", "floors": ["Floor 1"]})
+            run,
+            {"ground_method_not_supported": {
+                "reason": "ground_method_not_supported",
+                "ground_model": "kiva", "floors": ["Floor 1"]}},
+            "necb2020")
 
         self.assertIsNone(run.compliant)
         self.assertEqual(120.0, report["proposed"]["total_site_kwh"])

@@ -95,9 +95,26 @@ def primary_part(row):
     if family == 'furnace':
         h = row.get('heating', True)
         c = row.get('cooling', False)
+        # `per_zone` defaults TRUE for this family (see systems/furnace.py),
+        # so the shipped rows keep the names they had. The scope word is in
+        # the name because `catalog.py` raises on a canonical-name collision
+        # and a shared row would otherwise read identically to its per-zone
+        # sibling — the collision is the guard that forces this to be honest.
+        scope = 'per-zone' if row.get('per_zone', True) else 'shared'
+        heat = fuel(row.get('heating_type', 'Gas'))
         if h and c:
-            return 'per-zone furnace with DX cooling'
-        return 'per-zone gas furnace' if h else 'per-zone central AC'
+            return (f'{scope} furnace with DX cooling' if heat == 'gas'
+                    else f'{scope} {heat} air handler with DX cooling')
+        if h:
+            # `reheat` has to appear: two rows differing only by their terminal
+            # would otherwise derive the same canonical name, and `catalog.py`
+            # raises on that collision.
+            rh = fuel(row.get('reheat')) if row.get('reheat') else None
+            tail = f' with {rh} reheat' if rh else ''
+            if heat == 'gas' and not rh:
+                return f'{scope} gas furnace'
+            return f'{scope} {heat} heating-only air handler{tail}'
+        return f'{scope} central AC'
     if family == 'evap_cooler':
         return 'per-zone direct evaporative coolers'
     if family == 'wshp':
@@ -127,6 +144,20 @@ def primary_part(row):
         return f"four-pipe fan coils on a {plant}{air}"
     if family == 'zone_ervs':
         return 'zone energy recovery ventilators'
+    if family == 'crah':
+        # The cooling medium and the humidity control both go in the name. The
+        # medium because a chilled-water and a DX room unit are different
+        # equipment, and the humidity cap because a CRAH that holds a dewpoint
+        # is not interchangeable with one that only holds a dry-bulb — and
+        # `catalog.py` raises on a canonical-name collision, so a row that
+        # differs only in those cannot be added until the name says so.
+        # No DX branch: `Crah.preflight` refuses `cooling_type: DX`, because a
+        # humidity ceiling needs water-coil control. A name for a shape the
+        # builder cannot build is dead code that reads as support (Fable,
+        # PR #153 review).
+        air = 'with outdoor air' if row.get('ventilation') else 'recirculating'
+        return (f"{air} cooling-only chilled water computer-room air handler "
+                f"with humidity control")
     if family == 'composite':
         from btap.modeling.hvac import catalog  # composites recurse through the registry
         parts = []

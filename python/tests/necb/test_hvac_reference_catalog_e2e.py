@@ -1,6 +1,6 @@
 """Serial EnergyPlus gate for catalog proposed-to-reference generation.
 
-The proposed catalog sweep already runs all 102 inputs. This module exercises
+The proposed catalog sweep already runs all 108 inputs. This module exercises
 the other side of the boundary: full compliance sizing of every modern input
 and one representative of each remaining D-58 assignment signature, in both
 supported editions. All 24 pipelines stay in one test method so this module

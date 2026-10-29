@@ -13,7 +13,7 @@ heat-pump rules. D-58 establishes the corresponding 2025 provisions and
 governs both code ids; see docs/necb_decisions.md.
 
 Default run: a representative subset (every family + every special-rule shape).
-FULL_MATRIX=1 runs all 102. The golden is NEVER regenerated from Python — the
+FULL_MATRIX=1 runs all 108. The golden is NEVER regenerated from Python — the
 Ruby suite's UPDATE_GOLDEN escape hatch is deliberately not ported (D-79: the
 adjudicated matrix is the shared contract both ports read).
 
