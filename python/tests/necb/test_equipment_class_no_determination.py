@@ -307,3 +307,147 @@ class TestTheTERMINALNamesEveryCause(unittest.TestCase):
         text = cli.verdict_block(SimpleNamespace(compliant=None), rep)
         self.assertIn("8.4.1.1.(1)", text)
         self.assertIn(self.GROUND["what_would_fix_it"], text)
+
+
+def _registered_necb_ids():
+    """The NECB code ids `_refuse_determination` can actually be called with.
+
+    `btap_codes.code_ids()` is cross-FAMILY and `_NO_DETERMINATION_CAUSES` is
+    NECB-only, so checking the raw list would demand an NECB table entry for
+    another family's id the day Stage 9 registers one (Fable). Filtered here
+    rather than hardcoded, so the guard keeps discovering editions.
+    """
+    import btap.codes as btap_codes
+
+    return {code_id for code_id in btap_codes.code_ids()
+            if btap_codes.resolve(code_id).family == 'necb'}
+
+
+class TestEveryRegisteredEditionHasARefusalCitation(unittest.TestCase):
+    """`_NO_DETERMINATION_CAUSES` must move when an edition is registered.
+
+    `_refuse_determination` indexes `spec[code]` directly, so a code id absent
+    from the table raises `KeyError` inside `determine` — at the moment a
+    verdict is being WITHHELD, which is the worst place to fail: the run has
+    already decided it cannot certify, and the submitter would get a traceback
+    instead of the reason.
+
+    Checked against the editions DISCOVERED through `btap.codes.code_ids()`
+    rather than a list written here, for the reason CLAUDE.md gives for the
+    decisions registry: a check against a hardcoded list goes stale silently,
+    and the next edition is exactly when it would matter (#156).
+    """
+
+    def test_each_cause_covers_every_registered_code_id(self):
+        from btap.codes.necb.path import _NO_DETERMINATION_CAUSES
+
+        registered = _registered_necb_ids()
+        self.assertTrue(registered, 'precondition: some code id is registered')
+
+        for reason, spec in sorted(_NO_DETERMINATION_CAUSES.items()):
+            with self.subTest(reason=reason):
+                covered = {k for k in spec if k in registered}
+                self.assertEqual(
+                    registered, covered,
+                    f"cause {reason!r} has no citation for "
+                    f"{sorted(registered - covered)}; _refuse_determination "
+                    f"would KeyError while withholding a determination")
+
+    def test_each_covered_edition_carries_an_article(self):
+        """A key alone is not enough — the entry has to say what it cites, and
+        `what_would_fix_it`/`warning` interpolate `{table}` for the
+        equipment-class cause."""
+        from btap.codes import provisions
+        from btap.codes.necb.path import _NO_DETERMINATION_CAUSES
+
+        registered = _registered_necb_ids()
+        for reason, spec in sorted(_NO_DETERMINATION_CAUSES.items()):
+            for code in sorted(registered):
+                with self.subTest(reason=reason, code=code):
+                    self.assertIn('article', spec[code])
+                    self.assertTrue(spec[code]['article'])
+                    # VALIDITY, not merely non-emptiness. Fable set the ground
+                    # cause's 2025 article to `8.4.9.9.(9)` and the whole
+                    # module stayed green: presence is the cheap property and
+                    # correctness is the one this guard claims. `check_citation`
+                    # is offline and reads the edition's OWN snapshot.
+                    self.assertEqual(
+                        'present',
+                        provisions.check_citation(code, spec[code]['article']).status,
+                        f"{reason}/{code} cites "
+                        f"{spec[code]['article']!r}, which that edition's own "
+                        f"provisions snapshot does not record")
+                    needs_table = '{table}' in (
+                        spec.get('what_would_fix_it', '')
+                        + spec.get('warning', ''))
+                    if needs_table:
+                        self.assertTrue(
+                            spec[code].get('table'),
+                            f"{reason}/{code} interpolates a table name and "
+                            f"has none, so the text would read with a hole")
+                        # The table check catches the swap in BOTH directions,
+                        # where the article check alone cannot: `8.4.5.7.(1)` is
+                        # a real NECB 2020 article (service water heating), so
+                        # a 2025 number in the 2020 slot reads as `present`.
+                        self.assertEqual(
+                            'present',
+                            provisions.check_citation(
+                                code, spec[code]['table']).status,
+                            f"{reason}/{code} names {spec[code]['table']!r}, "
+                            f"which belongs to another edition")
+
+    def test_the_AUDIT_citation_matches_the_table_for_every_edition(self):
+        """The table moving is NECESSARY and NOT SUFFICIENT.
+
+        The audit `warn` calls carry LITERAL citations, by design — the
+        decision and AHJ walkers parse source for `ruling=`/`ahj=` keywords, so
+        a dict lookup there would be invisible (D-100's failure mode). But that
+        means the literals are a SECOND thing that must move per edition, and
+        they are chosen by `if ground / elif code == 'necb2025' / else`.
+
+        Add a third edition to `_NO_DETERMINATION_CAUSES` — exactly what the
+        test above demands — and the report block cites it correctly while the
+        audit falls through to the `else` and cites NECB 2020's article. Fable
+        measured that at `4fd126fa`: report `8.4.6.7.(1)`, audit
+        `8.4.4.7.(1)`. It is Sol's `331` finding resurfacing one surface over,
+        and the test above could not see it because it never drove the refusal.
+
+        So this drives the real function for every registered id and compares
+        the two surfaces to each other, which needs no hardcoded expectation.
+        """
+        from types import SimpleNamespace
+
+        from btap.audit import AuditLog
+        from btap.codes.necb import path as necb_path
+        from btap.codes.necb.path import _NO_DETERMINATION_CAUSES
+
+        detail = {
+            'ground_method_not_supported': {
+                'reason': 'ground_method_not_supported',
+                'ground_model': 'kiva', 'floors': ['Floor 1']},
+            'equipment_class_not_established': {
+                'reason': 'equipment_class_not_established',
+                'blocks': ['Zone 1'], 'action': 'copy_proposed'},
+        }
+
+        for code in sorted(_registered_necb_ids()):
+            for reason, spec in sorted(_NO_DETERMINATION_CAUSES.items()):
+                with self.subTest(code=code, reason=reason):
+                    run = SimpleNamespace(compliant=True, report={},
+                                          audit=AuditLog())
+                    necb_path._refuse_determination(
+                        run, {reason: detail[reason]}, code)
+
+                    warnings = [w for w in run.audit.warnings
+                                if 'NO DETERMINATION' in str(w.get('action'))]
+                    self.assertEqual(1, len(warnings))
+                    self.assertEqual(
+                        spec[code]['article'], warnings[0].get('article'),
+                        f"{reason}/{code}: the report block cites "
+                        f"{spec[code]['article']} and the AUDIT cites "
+                        f"{warnings[0].get('article')} — the literal branch "
+                        f"did not move with the table")
+                    self.assertEqual(
+                        spec[code]['article'],
+                        run.report['no_determination']['article'],
+                        'and the report block agrees with its own table entry')

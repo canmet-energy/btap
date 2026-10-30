@@ -93,6 +93,13 @@ ENUMS = {
     #: Mirrors `btap.modeling.hvac.equipment_class.VALUES`. A row declares this
     #: only where it names real equipment; an absent key means the class is not
     #: established and the selector says so rather than inferring silently.
+    #: Kept LITERAL like every other vocabulary here, so a reviewer reading the
+    #: schema sees what a row may say — and asserted equal to
+    #: `equipment_class.VALUES` by `test_the_equipment_class_enum_matches_its_source`,
+    #: because the two drifting apart fails in the dangerous direction: a value
+    #: removed from VALUES is still accepted here, so a row declares a class
+    #: that `equipment_class.declare` then REFUSES at build time, turning a
+    #: schema gate into a runtime error (#157).
     'equipment_class': ['air_cooled_unitary', 'packaged_terminal',
                         'room_air_conditioner', 'heat_pump', 'fan_coil',
                         'built_up', 'evaporative'],
@@ -108,6 +115,32 @@ ENUMS = {
 
 
 class TestCatalogSchema(unittest.TestCase):
+    def test_the_equipment_class_enum_matches_its_source(self):
+        """The schema's closed vocabulary IS `equipment_class.VALUES`.
+
+        A row's `equipment_class` is handed to
+        `btap.modeling.hvac.equipment_class.declare`, which refuses anything
+        outside `VALUES` — deliberately, so a typo cannot read as "no
+        declaration" and fall back to inference. The schema therefore has to
+        admit exactly that set, and the failure is asymmetric:
+
+        - ADD to `VALUES` and this schema rejects a row using it, which at
+          least fails loudly at the gate;
+        - REMOVE from `VALUES` and this schema still accepts the row, so the
+          catalogue passes its own lint and `declare` raises during the build.
+
+        Asserted rather than derived because every vocabulary in `ENUMS` is
+        literal on purpose: a reviewer reads the schema to see what is allowed.
+        """
+        from btap.modeling.hvac import equipment_class
+
+        self.assertEqual(
+            sorted(equipment_class.VALUES),
+            sorted(ENUMS['equipment_class']),
+            "the catalogue schema and equipment_class.VALUES have drifted; a "
+            "value in one and not the other is accepted by the gate and "
+            "refused by the builder, or the reverse")
+
     def test_every_family_has_an_allowlist(self):
         families = sorted({r['family'] for r in ROWS})
         self.assertEqual(
