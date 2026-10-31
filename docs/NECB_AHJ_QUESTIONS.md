@@ -1211,6 +1211,15 @@ normal verdict would present one the tool knows it did not establish.
 This entry is a `tool-gap`, so the exit 6 is NOT a conditional result and no
 authority's approval changes it. Closing the gap restores an ordinary verdict.
 
+**What a submitter can do about it now.** Declare the class. README's
+"If you get exit 6" section names the `equipment_class`
+`AdditionalProperties` feature, its seven accepted values and how to set it;
+`btap.modeling.hvac.equipment_class` is the implementation. The declaration
+is ordinary OpenStudio metadata, survives the OSM round trip, and
+forward-translates to nothing, so it changes no simulation result. Modelling
+the equipment so its class is visible — a unitary container, or the zonal
+units Table 8.4.4.7.-A names — needs no declaration at all.
+
 **To close it.** Carry an explicit equipment-class fact through the flattener
 rather than inferring it: preserve the container identity that
 `supply_components` discards, and read an independently declared equipment

@@ -249,7 +249,7 @@ def _air_loop_group(air_loop, plant_by_name, audit):
 
     # Two equipment-IDENTITY facts, read from the RAW supply path and the sizing
     # object because `coils.supply_components` below is lossy by design.
-    _equipment_class_facts(group, air_loop)
+    _equipment_class_facts(group, air_loop, audit)
 
     # coils.supply_components descends into AirLoopHVACUnitarySystem containers
     # (staged NECB reference systems) — otherwise a staged sys 3/4 reads as an
@@ -276,7 +276,7 @@ def _air_loop_group(air_loop, plant_by_name, audit):
     return group
 
 
-def _equipment_class_facts(group, air_loop):
+def _equipment_class_facts(group, air_loop, audit):
     """Whether the loop's cooling is PACKAGED equipment, and whether it is a
     VENTILATION system rather than a zone-cooling one.
 
@@ -309,6 +309,22 @@ def _equipment_class_facts(group, air_loop):
         group['evidence'].append(
             f"{air_loop.nameString()} declares equipment_class "
             f"{group['declared_equipment_class']!r}")
+    else:
+        # A declaration we cannot read is NOT the same as no declaration, and
+        # staying silent about the difference sends the author back to retype
+        # the value they already typed: the run refuses for the same reason and
+        # nothing says a declaration was seen (Fable, PR #161 review).
+        # `read` cannot raise — anyone may set the feature directly, and a
+        # vocabulary we do not know is not grounds to refuse a model — so this
+        # is a WARNING naming both the value and the accepted set.
+        raw = equipment_class.read_raw(air_loop)
+        if raw is not None and audit is not None:
+            audit.warn(
+                'characterize',
+                f"equipment_class {raw!r} on {air_loop.nameString()} is NOT a "
+                f"recognized value, so it is read as NO declaration",
+                target=air_loop.nameString(),
+                inputs={'declared': raw, 'accepted': list(equipment_class.VALUES)})
 
     for comp in air_loop.supplyComponents():
         for caster in ('to_AirLoopHVACUnitarySystem',

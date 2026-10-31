@@ -1570,8 +1570,10 @@ load-bearing notes were retrieved [READ, MCP 2026-07-28] and dispositioned:
    and its example assemblies are light FRAME constructions — wood-frame
    40.8 kg/m2 / 45.5 kJ/(m2.K), steel-frame 33.9 / 35.3. The reference
    rebuild now uses one StandardOpaqueMaterial calibrated to the wood-frame
-   example (0.15 m; density and cp derived; conductivity from the target
-   resistance) instead of a MasslessOpaqueMaterial. Bonus: one material now
+   example (0.15 m DECLARED equivalent-layer thickness — the note states the
+   assembly's overall mass and heat capacity, and gives COMPONENT thicknesses
+   only, which sum to 156 mm; density and cp derived; conductivity from the
+   target resistance) instead of a MasslessOpaqueMaterial. Bonus: one material now
    serves every boundary — the Kiva special case collapses (regular
    materials are Kiva-legal). Test pin updated to assert the note's mass
    and heat capacity. The single-calibrated-layer stands in for the note's
