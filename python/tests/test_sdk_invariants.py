@@ -150,7 +150,15 @@ class TestNoUncheckedOptionalGet(unittest.TestCase):
             "except BaseException as e:\n"
             "    print('RAISED', type(e).__name__, flush=True)\n"
         )
-        out = subprocess.run([sys.executable, "-I", "-c", probe],
+        # NO `-I`: the `verify` job's interpreter gets the SDK from
+        # PYTHONPATH (/usr/local/openstudio-3.11.0/Python), and isolated mode
+        # ignores PYTHONPATH, so `import openstudio` would fail there and the
+        # probe would die before reaching `.get()`. The BEFORE assertion below
+        # would catch that as a failure rather than a false pass, but the lane
+        # would be red for the wrong reason. The sibling probe above omits
+        # `-I` for the same reason. (Fable, review of this PR; reproduced with
+        # `PYTHONPATH=<sdk> /usr/bin/python3 -I -c 'import openstudio'`.)
+        out = subprocess.run([sys.executable, "-c", probe],
                              capture_output=True, text=True, check=False)
         self.assertIn("BEFORE", out.stdout,
                       "the probe did not reach the .get() call at all, so this "
