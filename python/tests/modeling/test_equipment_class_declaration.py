@@ -116,6 +116,44 @@ class TestTheClassifierReadsIt(unittest.TestCase):
         self.assertEqual({'air_cooled_unitary'}, declared)
 
 
+class TestThePszDeclarationFollowsItsHeatSource(unittest.TestCase):
+    """#154: the eight reference-ASHP rows build a heat pump, so they say so.
+
+    No NECB result differs today — topology establishes the heat pump and
+    Article 8.4.4.13's redirect precedes any identity use — which is why this
+    needs its own test: reverting the conditional changed nothing any other
+    test could see.
+    """
+
+    @staticmethod
+    def _declared(name):
+        model = load_fixture()
+        build_system(model, name, sorted_zones(model))
+        return {equipment_class.read(loop)
+                for loop in model.getAirLoopHVACs()}
+
+    def test_every_reference_ASHP_row_declares_heat_pump(self):
+        from btap.modeling.hvac import catalog
+
+        rows = [r['name'] for r in catalog.rows()
+                if r.get('family') == 'psz' and r.get('heat_source') == 'ashp']
+        self.assertEqual(8, len(rows), 'precondition: the eight ASHP rows')
+        for name in rows:
+            with self.subTest(row=name):
+                self.assertEqual({'heat_pump'}, self._declared(name))
+
+    def test_an_ordinary_psz_row_still_declares_air_cooled_unitary(self):
+        """The control: the conditional must not have flipped every row."""
+        from btap.modeling.hvac import catalog
+
+        rows = [r['name'] for r in catalog.rows()
+                if r.get('family') == 'psz' and not r.get('heat_source')]
+        self.assertTrue(rows)
+        for name in rows[:3]:
+            with self.subTest(row=name):
+                self.assertEqual({'air_cooled_unitary'}, self._declared(name))
+
+
 if __name__ == '__main__':
     unittest.main()
 

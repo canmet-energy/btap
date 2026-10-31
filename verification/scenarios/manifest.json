@@ -2,7 +2,7 @@
  "version": 2,
  "spec_sha256": "f7d5cb76db9e77c526024a6545047ba19f6517332372b39242c64682168be76c",
  "provenance": {
-  "commit": "cfc589daacaac562da844edc9824f7806d623e12",
+  "commit": "0ba18f75003e23320579e232e6972d1d5e1973e8",
   "dirty": false,
   "openstudio_cli": "3.11.0+241b8abb4d",
   "producer": {
@@ -981,8 +981,8 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "e8366350876a227ac02d317c5292481eb279d6a92888468e025797dd1c1d61f7",
-    "audit.txt": "890dffe6f2b34dc57c1c22c3116daf0af3c40d410d0c42b07fb0be6f07f6a5f5",
+    "audit.json": "9764eccdc6bbda67eb62e9f950f4a158bf5a5bb9bff0674cae135c14bb1322d0",
+    "audit.txt": "e7ac29469e2628ab527bd72e22794f1b289ed116e784b5f63a501c66ec616ad2",
     "report.json": "9be733e071deb379e0074eb8d63722d5804afeab57631d2e4f12364e442cf78e",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "67affdbc4844ecf4a3184b9d647e050ec47b68c6b568f8aa6593c6eedd7227c4"
@@ -3091,8 +3091,8 @@
     }
    ],
    "baseline_sha256": {
-    "audit.json": "3d8eefc1a19b3eddf6d7b74428ac1afe8b3ee32e25aa59be34299b32273ad9da",
-    "audit.txt": "4c6f851344d2071185fd532fc7be595598e5788e10a7e1ed0b4b95ab661c5c74",
+    "audit.json": "005ae35e4059076c908fc819ef154d07729c2d786c954a591bef0befcbcc53c3",
+    "audit.txt": "f6e69377ad49b7e2218649ad97d5b23f5c283ba5f2a19d0d076c64549cd0da8d",
     "report.json": "afb52de315a8c861607a2c7d05ea7811056d956439afbf020af163a7e96a56ee",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "3b26d60ba7e243ae8cc6f7a08cb883788794b2e17e05c6ab03f32edd4fda8a2a"

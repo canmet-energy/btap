@@ -251,7 +251,7 @@
    "terminal": "cv"
   },
   "value": "psz",
-  "evidence": "air loop name resolves to catalog entry 'PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard'; PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 1 declares equipment_class 'air_cooled_unitary'; cooled: OS_Coil_Cooling_DX_SingleSpeed on PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 1; heated: OS_Coil_Heating_DX_SingleSpeed on PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 1; heated: OS_Coil_Heating_Electric on PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 1",
+  "evidence": "air loop name resolves to catalog entry 'PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard'; PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 1 declares equipment_class 'heat_pump'; cooled: OS_Coil_Cooling_DX_SingleSpeed on PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 1; heated: OS_Coil_Heating_DX_SingleSpeed on PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 1; heated: OS_Coil_Heating_Electric on PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 1",
   "building": "reference building",
   "level": "decision"
  },
