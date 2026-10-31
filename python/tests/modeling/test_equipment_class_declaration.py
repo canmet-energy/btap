@@ -118,3 +118,80 @@ class TestTheClassifierReadsIt(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class TestAnUnrecognizedDeclarationIsNotSilent(unittest.TestCase):
+    """"No declaration" and "a declaration we cannot read" are different.
+
+    `read` cannot raise on an unknown value — the convention is open, and a
+    vocabulary from another tool is not grounds to refuse a model. But treating
+    the two cases identically sends whoever wrote the feature back to retype
+    the value they already typed: the run refuses for the same reason, with the
+    same message, and nothing says a declaration was even seen.
+
+    Fable found this while checking whether README's instructions could be
+    followed verbatim (PR #161). The README had promised that a typo "cannot
+    read as nothing declared", which was true of `declare()` and false of the
+    raw `setFeature` call the README itself showed.
+    """
+
+    @staticmethod
+    def _characterize(value):
+        from btap.audit import AuditLog
+
+        model = load_fixture()
+        build_system(model, 'Shared furnace with DX cooling and no outdoor air',
+                     sorted_zones(model))
+        if value is not None:
+            for loop in model.getAirLoopHVACs():
+                loop.additionalProperties().setFeature(
+                    equipment_class.FEATURE, value)
+        audit = AuditLog()
+        facts = classify.characterize(model, audit=audit)
+        warnings = [w for w in audit.warnings
+                    if 'equipment_class' in str(w.get('action'))]
+        group = next(g for g in facts['zone_groups']
+                     if g.get('air_loop') is not None)
+        return group, warnings
+
+    def test_an_unrecognized_value_WARNS_and_names_what_is_accepted(self):
+        group, warnings = self._characterize('air_cooled_unitry')
+
+        self.assertIsNone(group['declared_equipment_class'],
+                          'it still reads as no declaration — the model is not '
+                          'refused over a vocabulary we do not know')
+        self.assertEqual(1, len(warnings))
+        self.assertIn('air_cooled_unitry', str(warnings[0]['action']),
+                      'the warning quotes the value, so the author sees their '
+                      'own typo rather than guessing')
+        self.assertIn('air_cooled_unitary',
+                      warnings[0]['inputs']['accepted'],
+                      'and lists what it would have accepted')
+
+    def test_a_RECOGNIZED_value_warns_about_nothing(self):
+        group, warnings = self._characterize('air_cooled_unitary')
+        self.assertEqual('air_cooled_unitary',
+                         group['declared_equipment_class'])
+        self.assertEqual([], warnings)
+
+    def test_NO_declaration_warns_about_nothing_either(self):
+        """The divergent control. Without this, a warning on every undeclared
+        loop would look identical to a warning on a typo — and most loops
+        carry no declaration at all, so that would be noise on nearly
+        every run."""
+        group, warnings = self._characterize(None)
+        self.assertIsNone(group['declared_equipment_class'])
+        self.assertEqual([], warnings)
+
+    def test_read_raw_tells_the_two_cases_apart(self):
+        import openstudio
+
+        model = openstudio.model.Model()
+        loop = openstudio.model.AirLoopHVAC(model)
+        self.assertIsNone(equipment_class.read_raw(loop))
+
+        loop.additionalProperties().setFeature(
+            equipment_class.FEATURE, 'something_else')
+        self.assertEqual('something_else', equipment_class.read_raw(loop))
+        self.assertIsNone(equipment_class.read(loop),
+                          'read() still refuses to guess')

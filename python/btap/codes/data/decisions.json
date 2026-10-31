@@ -1487,7 +1487,7 @@
         {
           "id": "reference_envelope_lightweight_mass",
           "label": "Thermal mass of the reference building's envelope assemblies",
-          "decided": "Lightweight means light-frame rather than massless; opaque reference assemblies use one calibrated layer with the note's wood-frame example mass, heat capacity and thickness, with the approximation disclosed.",
+          "decided": "Lightweight means light-frame rather than massless; opaque reference assemblies use one calibrated layer carrying the note's wood-frame example overall mass and heat capacity at a declared equivalent-layer thickness, with the approximation disclosed.",
           "sources": [
             {
               "code": "necb",

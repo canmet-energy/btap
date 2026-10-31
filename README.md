@@ -141,7 +141,7 @@ Useful if you are scripting this over many models:
 | `3` | the model was rejected before any simulation ran — see below |
 | `4` | the simulation failed |
 | `5` | internal error |
-| `6` | no determination made (`--quick`, or `--simulate sizing`/`none`) |
+| `6` | no determination made — you did not ask for an annual run (`--quick`, `--simulate sizing`/`none`), or the tool could not establish the reference it would compare against: see below |
 
 ### If you get exit 3: space types
 
@@ -158,6 +158,86 @@ built by hand in the OpenStudio Application usually do not. Two ways forward:
 - let the tool apply NECB space-use loads for you:
   `--space-type "Space Function/Office enclosed > 25 m2"` for a uniform
   building, or `--space-type-map mymap.json` for a per-space mapping.
+
+### If you get exit 6: the reference could not be established
+
+Exit 6 is not a failure and not a verdict — it means no determination was
+made. Most often that is simply because you did not ask for an annual run.
+
+But the tool also returns 6 when it ran both models and still cannot stand
+behind a comparison, and then the report says which. Article 8.4.1.2 compares
+your building against a reference building; where the reference cannot be
+derived from what your model states, a pass or a fail would be a number
+without a target behind it. The report's `no_determination` block names every
+reason, and the terminal prints each one with its own fix.
+
+Two reasons exist today.
+
+**"reference system not established for a residential block."** NECB Table
+8.4.4.7.-A models the reference identically to the proposed where a
+residential space is heated *and* cooled by one of a closed list of equipment
+types — an air-cooled unitary, a packaged terminal or room air conditioner, a
+heat pump, or fan coils — and sends anything else to through-the-wall systems.
+A bare DX cooling coil on a constant-volume air loop does not say which it is:
+the same objects describe a packaged rooftop unit and a field-erected built-up
+system. Rather than guess and hand you a verdict resting on the guess, the
+tool reports the energies and withholds the determination.
+
+Two ways forward:
+
+- **model the equipment so its class is visible.** A packaged unit modelled as
+  an `AirLoopHVACUnitarySystem`, or the zonal units the table names
+  (`ZoneHVAC:PackagedTerminalAirConditioner`,
+  `ZoneHVAC:PackagedTerminalHeatPump`, a four-pipe fan coil, a water-source
+  heat pump), are read directly and need no declaration; or
+- **declare the class.** Set an `AdditionalProperties` feature named
+  `equipment_class` on the air loop. It is an ordinary OpenStudio feature, it
+  survives saving and reloading the OSM, and it does not reach EnergyPlus — so
+  declaring changes nothing about how your own model simulates. (It does change
+  which reference building the tool builds to compare against, which is the
+  whole point.)
+
+  ```python
+  # Python bindings — additionalProperties() is a method call
+  air_loop.additionalProperties().setFeature("equipment_class",
+                                             "air_cooled_unitary")
+  ```
+
+  ```ruby
+  # Ruby drops the parentheses
+  air_loop.additionalProperties.setFeature("equipment_class",
+                                           "air_cooled_unitary")
+  ```
+
+  The accepted values, which name a physical equipment class rather than any
+  one code's wording:
+
+  | value | what it means |
+  |---|---|
+  | `air_cooled_unitary` | factory-made packaged OR matched split equipment |
+  | `packaged_terminal` | a packaged terminal air conditioner or heat pump |
+  | `room_air_conditioner` | a room or through-the-wall unit |
+  | `heat_pump` | any heat pump — note this sends the reference to Article 8.4.4.13's air-source heat-pump rule rather than copying your system |
+  | `fan_coil` | a fan-coil unit |
+  | `built_up` | field-erected, central-station equipment |
+  | `evaporative` | evaporative cooling |
+
+  A declaration answers in **both** directions: `built_up` or `evaporative`
+  tells the tool the identity branch does not apply, which is an answer rather
+  than a silence.
+
+  A value outside this table reads as **no** declaration — the convention is
+  open, so a vocabulary the tool does not know is not grounds to refuse your
+  model. It does not fail silently, though: the run warns that it saw a
+  declaration it could not read and lists what it accepts, so a typo says so
+  instead of sending you back to retype the same value.
+
+**"building energy target not established."** Your model uses a
+whole-foundation method — `GroundFCfactorMethod` or
+`GroundSlabPreprocessorAverage` — that this tool cannot yet translate into an
+NECB reference. Your input is valid and you should **not** replace it; the
+limitation is ours. See `docs/NECB_AHJ_QUESTIONS.md` (AHJ-23 and D-32) and
+`docs/necb_decisions.md` for the full reasoning behind both.
 
 ---
 

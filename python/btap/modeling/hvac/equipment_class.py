@@ -78,9 +78,25 @@ def read(air_loop):
     An UNRECOGNIZED value reads as None rather than raising: a model from
     another tool may use a vocabulary we do not know, and the honest response
     to that is to treat the class as undeclared, not to refuse the model.
+
+    Use `read_raw` to tell "no declaration" from "a declaration we do not
+    recognize" — they are the same to this function and VERY different to the
+    person who wrote the feature.
+    """
+    value = read_raw(air_loop)
+    return value if value in VALUES else None
+
+
+def read_raw(air_loop):
+    """Whatever the feature says, recognized or not, or None if it is absent.
+
+    `declare` refuses a value outside `VALUES`, but a model does not have to
+    come through `declare`: anyone may set the `AdditionalProperties` feature
+    directly, which is the point of the convention. A typo then reads as "no
+    declaration" and the run refuses for the same reason it refused before,
+    with nothing saying a declaration was present and unrecognized — so the
+    author retypes the value they already typed (Fable, PR #161 review).
+    `classify` warns on exactly that difference.
     """
     feature = air_loop.additionalProperties().getFeatureAsString(FEATURE)
-    if not feature.is_initialized():
-        return None
-    value = feature.get()
-    return value if value in VALUES else None
+    return feature.get() if feature.is_initialized() else None
