@@ -76,28 +76,48 @@ def opt(optional):
     ``x.is_initialized ? x.get : nil``). None passes through.
 
     ALWAYS route through this rather than calling ``.get()`` directly. The
-    Python bindings do not fail the way Ruby does, and they fail in THREE
-    different ways depending on the optional's type (measured on OpenStudio
-    3.11.0, one subprocess per type; pinned by
-    ``tests/test_sdk_invariants.py``):
+    Python bindings do not fail the way Ruby does, and the way they fail
+    depends on the optional's type AND on what the process has already done.
+    Measured on OpenStudio 3.11.0, one fresh subprocess per case:
 
-    - ``OptionalModel`` and ``OptionalTime`` RETURN A DEFAULT-CONSTRUCTED
-      object instead of raising, so a failed ``Model.load`` flows onward
-      silently as a model with no spaces and no zones;
-    - ``OptionalDouble``, ``OptionalString`` and ``OptionalInt`` raise
-      ``SystemError`` and leave the C-level error indicator set, which
-      surfaces on a LATER, unrelated call as a spurious ``SystemError``
-      there (issue #141 is one of those);
-    - every OTHER ``openstudio.model.Optional*`` — 615 of the namespace's 617
-      — SEGFAULTS THE INTERPRETER on the spot. Not a later call: that one.
-      This is the family a failed ``to_X()`` cast returns.
+    - ``openstudio.model.Optional*`` for a MODEL OBJECT — 615 of that
+      namespace's 617 names — SEGFAULTS the interpreter. Not a raise, not a
+      later call: that one, immediately, and it takes the whole process (and
+      in a test run, the whole xdist worker) with it. This is the family a
+      failed ``to_X()`` cast returns, and also what ``.thermalZone()``,
+      ``.construction()``, ``.spaceType()`` and the other optional accessors
+      return. History makes no difference: it crashes from a fresh
+      interpreter and after the type has been constructed.
+    - ``OptionalModel``, ``OptionalScheduleType`` and the value optionals
+      (``OptionalDouble``, ``OptionalString``, ``OptionalInt``) return a
+      DEFAULT-CONSTRUCTED object the FIRST time, and raise ``SystemError``
+      (caused by ``RuntimeError: Optional not initialized``) from then on
+      — per class, per process. ``Model()`` is enough to flip
+      ``OptionalModel``: after it, ``Model.load(bad)`` then ``.get()`` raises, where in
+      a fresh interpreter it returns an empty model. Constructing a
+      DIFFERENT class does not flip it.
 
-    Note which way round that is. ``OptionalModel`` and ``OptionalScheduleType``
-    are the ONLY two survivors in the whole namespace, so the benign case
-    documented first is the rare exception, not the representative one. Reading
-    ``OptionalModel``'s silent empty model as how optionals behave, and
-    treating the raisers as the hazard to guard, gets it backwards: the
-    unguarded ``.get()`` that matters is a cast, and a cast crashes.
+    So "it returns an empty model" and "it raises" are the same behaviour at
+    two points in a process's life, not two different types. A failed
+    ``Model.load(...)`` whose result is unwrapped flows onward silently as a model with no spaces
+    and no zones only while no ``Model()`` has been constructed yet — which
+    is exactly the order the packaged catalog report ran in, and how it came
+    to emit 97 "diagram unavailable" cards from a wheel instead of one clear
+    error.
+
+    What it does NOT do, contrary to what this docstring claimed from D-79
+    until #164: the raising case does not leave the C-level error indicator
+    set for a later call to trip over. CPython chains the ``RuntimeError`` as
+    ``__cause__`` and clears it; ``PyErr_Occurred()`` reads clear afterwards
+    and the next SDK call succeeds. Issue #141 was not stale residue — it was
+    a predecessor in the same xdist worker having constructed a ``Model()``.
+
+    Why the two groups differ is a hypothesis, not a measured fact: SWIG wraps
+    a non-default-constructible ``T`` in a ``SwigValueWrapper<T>`` whose
+    pointer is null when the assignment never ran, and copying it dereferences
+    null, while a default-constructible ``T`` leaves a real object to return
+    alongside the pending error. Treat that as the reason it is plausible
+    rather than as something checked at the C level.
 
     Ruby raises cleanly in all of these. See D-79.
     """

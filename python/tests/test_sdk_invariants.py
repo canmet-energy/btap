@@ -1,25 +1,35 @@
 """SDK-binding invariants, enforced mechanically rather than documented.
 
 D-79 records that ``.get()`` on an unchecked SDK Optional is unsafe in the
-Python bindings in a way it is not in Ruby:
+Python bindings in a way it is not in Ruby. Measured on 3.11.0 (#164), the
+behaviour splits by whether the wrapped type is default-constructible, and for
+one group it also depends on what the PROCESS has already done:
 
-- ``OptionalModel.get()`` on an EMPTY optional RETURNS AN EMPTY MODEL rather
-  than raising, so an unreadable path flows onward as a model with no spaces
-  and no zones and fails much later, misleadingly. This is exactly how the
-  packaged catalog report came to emit 97 "diagram unavailable" cards from a
-  wheel instead of one clear error.
-- ``OptionalDouble``/``OptionalString``/``OptionalInt.get()`` raise
-  ``SystemError`` AND leave the C-level error indicator set, which surfaces on
-  a later, unrelated call as a spurious ``SystemError`` THERE. Issue #141 was
-  one of those: a probe in ``tests/modeling/test_catalog_report.py`` kept
-  failing under some xdist worker layouts because a predecessor in its worker
-  had left the indicator set.
-- every OTHER ``openstudio.model.Optional*.get()`` SEGFAULTS the interpreter
-  on the spot — 615 of the namespace's 617 on 3.11.0, swept one subprocess per
-  type. This is what a failed ``to_X()`` cast returns, and it is strictly
-  worse than the ``SystemError`` family: there is no later call to surface it.
-  ``OptionalModel`` and ``OptionalScheduleType`` are the only two survivors,
-  so the benign first bullet is the exception rather than the rule.
+- every ``openstudio.model.Optional*`` naming a MODEL OBJECT — 615 of that
+  namespace's 617 — SEGFAULTS the interpreter, from a fresh process and after
+  the type has been constructed alike. A crash takes the xdist worker with it
+  and reports as a lost node, not as a failure. This is what a failed
+  ``to_X()`` cast returns, and what ``.thermalZone()``, ``.construction()``
+  and the other optional accessors return.
+- ``OptionalModel``, ``OptionalScheduleType`` and the value optionals
+  (``OptionalDouble``, ``OptionalString``, ``OptionalInt``) return a
+  DEFAULT-CONSTRUCTED object the first time and raise ``SystemError`` from
+  then on, per class and per process. Constructing a ``Model()`` is enough to
+  flip ``OptionalModel``.
+
+The silent-empty-model hazard is therefore the FIRST call's behaviour, not a
+property of the type: ``Model.load(bad).get()`` yields an empty model in a
+fresh interpreter and raises once anything has built a ``Model()``. That is
+how the packaged catalog report emitted 97 "diagram unavailable" cards.
+
+Issue #141 is the same fact seen from the other side. A probe in
+``tests/modeling/test_catalog_report.py`` asserted the empty-model behaviour
+IN-PROCESS, so it passed or failed according to whether a predecessor in its
+xdist worker had constructed a ``Model()`` — which nearly every SDK test does.
+It was NOT stale error-indicator residue, which is what this file and
+``btap._compat.opt`` both claimed before #164: the raise clears the indicator
+(CPython chains the ``RuntimeError`` as ``__cause__``), and ``PyErr_Occurred``
+reads clear afterwards.
 
 Stating that in a docstring is not enough — the rule was written down and
 then violated four times by copy-paste within a day. This test makes it
@@ -95,7 +105,8 @@ class TestNoUncheckedOptionalGet(unittest.TestCase):
             "print('ZONES', len(model.getThermalZones()), flush=True)\n"
         )
         out = subprocess.run([sys.executable, "-c", probe],
-                             capture_output=True, text=True, check=False)
+                             capture_output=True, text=True, check=False,
+                             timeout=120)
         self.assertIn("GOT_MODEL", out.stdout,
                       ".get() on an empty optional RAISED — the documented "
                       "hazard no longer holds; revisit the load_model "
@@ -106,12 +117,11 @@ class TestNoUncheckedOptionalGet(unittest.TestCase):
         # ZONES carries what the catalog report actually reads. It used to be
         # asserted by a SECOND, IN-PROCESS copy of this probe in
         # tests/modeling/test_catalog_report.py, which issue #141 caught
-        # failing under some xdist layouts: a PRIOR test in the same worker
-        # left the C error indicator set, and this `.get()` then surfaced that
-        # residue as `SystemError: OptionalModel_get returned a result with an
-        # exception set` rather than its own result. The test was vulnerable to
-        # the very trap it documented. Here the subprocess has no predecessor,
-        # so the probe observes its own call.
+        # failing under some xdist layouts. The cause was not residue from a
+        # predecessor's error: it was a predecessor having constructed a
+        # `Model()`, after which `OptionalModel.get()` RAISES in that process
+        # instead of returning an empty model. A subprocess has constructed
+        # none, so it sees the first-call behaviour this test is about.
         self.assertIn("ZONES 0", out.stdout,
                       "empty optional yielded a model WITH zones — the trap "
                       "the catalog report depends on has changed. stdout: "
@@ -137,6 +147,7 @@ class TestNoUncheckedOptionalGet(unittest.TestCase):
         except ImportError:
             self.skipTest("needs the openstudio wheel")
 
+        import signal
         import subprocess
         import sys
         probe = (
@@ -159,7 +170,8 @@ class TestNoUncheckedOptionalGet(unittest.TestCase):
         # `-I` for the same reason. (Fable, review of this PR; reproduced with
         # `PYTHONPATH=<sdk> /usr/bin/python3 -I -c 'import openstudio'`.)
         out = subprocess.run([sys.executable, "-c", probe],
-                             capture_output=True, text=True, check=False)
+                             capture_output=True, text=True, check=False,
+                             timeout=120)
         self.assertIn("BEFORE", out.stdout,
                       "the probe did not reach the .get() call at all, so this "
                       f"test proves nothing. stderr: {out.stderr[:300]}")
@@ -171,9 +183,68 @@ class TestNoUncheckedOptionalGet(unittest.TestCase):
                          "a ModelObject optional RAISED instead of crashing — "
                          "the SDK may have been fixed. Revisit the opt() "
                          f"docstring and D-79. stdout: {out.stdout[:200]}")
-        self.assertLess(out.returncode, 0,
-                        "expected death by signal (negative returncode); got "
-                        f"{out.returncode}. stdout: {out.stdout[:200]}")
+        # SIGSEGV specifically, not merely "a signal": the docstring claims a
+        # segfault, and all 615 of the crashing family die with -11. A test
+        # that accepted any signal would also pass on a SIGABRT or an external
+        # kill, neither of which is what is being documented.
+        self.assertEqual(-signal.SIGSEGV, out.returncode,
+                         "expected death by SIGSEGV; got "
+                         f"{out.returncode}. stdout: {out.stdout[:200]}")
+
+    def test_constructing_a_Model_flips_OptionalModel_to_RAISING(self):
+        """The fact that actually explains #141, pinned.
+
+        `opt()` and this file both described the hazard as a stale C error
+        indicator left by a raising `.get()` for a later call to trip over.
+        That is not what happens — the raise clears the indicator. What
+        happens is that the FIRST `.get()` on an empty default-constructible
+        optional returns a default object and every later one raises, per
+        class and per process. So `Model.load(bad)` unwrapped is silent in a
+        fresh interpreter and raises once anything has built a `Model()`,
+        which nearly every SDK test does.
+
+        Two probes in ONE subprocess each, because the claim is about what a
+        process has already done and in-process ordering is the whole point.
+        The control matters as much as the subject: without it, a probe that
+        raised for some unrelated reason would look like proof.
+        """
+        try:
+            import openstudio  # noqa: F401
+        except ImportError:
+            self.skipTest("needs the openstudio wheel")
+
+        import subprocess
+        import sys
+
+        def probe(construct_first):
+            body = (
+                "import openstudio\n"
+                + ("openstudio.model.Model()\n" if construct_first else "")
+                + "empty = openstudio.model.Model.load("
+                  "openstudio.path('/nonexistent.osm'))\n"
+                  "assert not empty.is_initialized()\n"
+                  "try:\n"
+                  "    m = empty.get()\n"
+                  "    print('NO_RAISE', len(m.getSpaces()), flush=True)\n"
+                  "except SystemError as e:\n"
+                  "    print('RAISED', type(e.__cause__).__name__, flush=True)\n"
+            )
+            out = subprocess.run([sys.executable, "-c", body],
+                                 capture_output=True, text=True, check=False,
+                                 timeout=120)
+            self.assertEqual(0, out.returncode,
+                             f"probe died: {out.stderr[-300:]}")
+            return out.stdout
+
+        self.assertIn("NO_RAISE 0", probe(construct_first=False),
+                      "CONTROL: in a fresh interpreter the empty optional must "
+                      "still yield an empty model — if this changed, the "
+                      "silent-flow hazard is gone and D-79 can be revisited")
+        self.assertIn("RAISED RuntimeError", probe(construct_first=True),
+                      "after a Model() has been constructed, the SAME call "
+                      "must raise SystemError caused by RuntimeError. This is "
+                      "the #141 mechanism; if it stops holding, the subprocess "
+                      "isolation in this file is no longer needed")
 
     def test_the_checked_loader_names_the_path(self):
         from btap._sdk import load_model

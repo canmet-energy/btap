@@ -327,18 +327,21 @@ class TestSeedModelContracts(unittest.TestCase):
         self.assertIn("/nonexistent/seed.osm", str(ctx.exception),
                       "the error must name the path it could not read")
 
-    # The third contract — that `.get()` on an empty OptionalModel yields an
-    # EMPTY model rather than raising, which is why an unreadable seed must be
-    # refused explicitly above — lives in
-    # tests/test_sdk_invariants.py::test_the_documented_hazard_still_holds,
-    # which probes it in a SUBPROCESS and asserts ZONES 0.
+    # The SDK behaviour that makes the contract above necessary — that
+    # unwrapping an empty OptionalModel yields an EMPTY model rather than
+    # raising, so an unreadable seed must be refused explicitly — is not a
+    # contract of this module and is not asserted here. It lives in
+    # tests/test_sdk_invariants.py, which probes it in a SUBPROCESS.
     #
-    # It was asserted here too, in-process, until issue #141: a prior test in
-    # the same xdist worker left the C error indicator set, and this `.get()`
-    # surfaced that residue as a SystemError instead of its own result, failing
-    # under some worker layouts and naming an unrelated module. Probing the
-    # hazard in the same interpreter as other tests is exactly what the hazard
-    # breaks, so the surviving copy is the isolated one.
+    # It WAS asserted here, in-process, until issue #141. The cause was not
+    # what that issue and `opt()` both assumed (a stale C error indicator left
+    # by a predecessor): it is that the first unwrap of an empty
+    # default-constructible optional returns a default object and every later
+    # one raises, per class and per process. So this probe's result depended on
+    # whether a predecessor in its xdist worker had constructed a `Model()` —
+    # which nearly every SDK test does — and the worker layout shifts whenever
+    # tests are added anywhere. An in-process probe cannot observe a
+    # first-call behaviour; only the isolated copy can.
 
 
 if __name__ == '__main__':

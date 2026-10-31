@@ -9,6 +9,12 @@ import openstudio
 
 DATA_PATH = Path(__file__).parent.parent / 'data' / 'curves.json'
 
+#: Stamped on curves this module builds, so the per-model lookup finds OURS by
+#: provenance rather than by name. A name lookup cannot: when a foreign curve
+#: already holds the name, the SDK renames ours on creation, the next lookup
+#: misses it and builds another one every call.
+BUILT_BY = 'btap_curve'
+
 _data = None
 
 
@@ -44,12 +50,31 @@ def defrost_eir_ft(model):
     :return: openstudio.model.CurveBiquadratic, shared per model
     """
     name = 'DEFROST-EIR-FT'
-    existing = next((c for c in model.getCurves() if c.nameString() == name), None)
+    # Find OURS by the BUILT_BY stamp, not by name. Matching on the name alone
+    # and then casting was an unguarded `.get()` on the crashing Optional
+    # family: a proposed model carrying a curve of this exact name but another
+    # type (a CurveCubic, say) SEGFAULTED the interpreter here — verified, not
+    # theorised. The tool takes any OSM file from any source, so a foreign
+    # curve holding this name is a reachable input. Found by Fable reviewing
+    # #164.
+    #
+    # Filtering the name lookup by type as well would stop the crash and then
+    # leak: the SDK renames ours when the name is taken, so the next call would
+    # not find it and would build another curve every time. The stamp survives
+    # the rename. A foreign same-named curve is left alone rather than refused
+    # — this curve is built FOR the reference, and refusing would babysit a
+    # proposed model over a name collision.
+    existing = next(
+        (c for c in model.getCurves()
+         if c.additionalProperties().getFeatureAsString(BUILT_BY).is_initialized()
+         and c.additionalProperties().getFeatureAsString(BUILT_BY).get() == name
+         and c.to_CurveBiquadratic().is_initialized()), None)
     if existing is not None:
         return existing.to_CurveBiquadratic().get()
 
     curve = openstudio.model.CurveBiquadratic(model)
     curve.setName(name)
+    curve.additionalProperties().setFeature(BUILT_BY, name)
     curve.setCoefficient1Constant(1.0)
     for setter in (curve.setCoefficient2x, curve.setCoefficient3xPOW2,
                    curve.setCoefficient4y, curve.setCoefficient5yPOW2,
