@@ -1,35 +1,36 @@
 """SDK-binding invariants, enforced mechanically rather than documented.
 
 D-79 records that ``.get()`` on an unchecked SDK Optional is unsafe in the
-Python bindings in a way it is not in Ruby. Measured on 3.11.0 (#164), the
-behaviour splits by whether the wrapped type is default-constructible, and for
-one group it also depends on what the PROCESS has already done:
+Python bindings in a way it is not in Ruby. Measured on 3.11.0 (#164),
+unwrapping an EMPTY optional has three possible outcomes and the choice is not
+a stable function of the type:
 
-- every ``openstudio.model.Optional*`` naming a MODEL OBJECT — 615 of that
-  namespace's 617 — SEGFAULTS the interpreter, from a fresh process and after
-  the type has been constructed alike. A crash takes the xdist worker with it
-  and reports as a lost node, not as a failure. This is what a failed
-  ``to_X()`` cast returns, and what ``.thermalZone()``, ``.construction()``
-  and the other optional accessors return.
-- ``OptionalModel``, ``OptionalScheduleType`` and the value optionals
-  (``OptionalDouble``, ``OptionalString``, ``OptionalInt``) return a
-  DEFAULT-CONSTRUCTED object the first time and raise ``SystemError`` from
-  then on, per class and per process. Constructing a ``Model()`` is enough to
-  flip ``OptionalModel``.
+- SEGFAULT, for 615 of the 617 ``Optional*`` names in ``openstudio.model`` —
+  every NON-DEFAULT-CONSTRUCTIBLE one. Mostly model objects, but 23 wrap
+  other value types (``ClimateZone``, ``ViewFactor``, ``ScheduleTypeKey``, …),
+  so the dividing line is constructibility and not being a ``ModelObject``. History-independent. A crash takes the
+  xdist worker with it and reports as a lost node, not a failure. This is what
+  a failed ``to_X()`` cast returns and what the optional accessors
+  (``.thermalZone()``, ``.construction()``, …) return.
+- ``SystemError`` caused by ``RuntimeError: Optional not initialized``. The
+  value optionals do this on their first call.
+- a DEFAULT-CONSTRUCTED object, silently. ``OptionalModel`` and
+  ``OptionalScheduleType`` do this in a fresh interpreter — the behaviour
+  behind the catalog report's 97 "diagram unavailable" cards.
 
-The silent-empty-model hazard is therefore the FIRST call's behaviour, not a
-property of the type: ``Model.load(bad).get()`` yields an empty model in a
-fresh interpreter and raises once anything has built a ``Model()``. That is
-how the packaged catalog report emitted 97 "diagram unavailable" cards.
+Which of the last two a default-constructible optional gives depends on the
+process's history, per class. This file pins the two sequences that ANCHOR the
+hazard and deliberately does not pin the rest: two attempts to state a general
+rule for the ordering (#164) each described behaviour the SDK does not have,
+so the documented position is "state-dependent, never rely on it".
 
-Issue #141 is the same fact seen from the other side. A probe in
-``tests/modeling/test_catalog_report.py`` asserted the empty-model behaviour
-IN-PROCESS, so it passed or failed according to whether a predecessor in its
-xdist worker had constructed a ``Model()`` — which nearly every SDK test does.
-It was NOT stale error-indicator residue, which is what this file and
-``btap._compat.opt`` both claimed before #164: the raise clears the indicator
-(CPython chains the ``RuntimeError`` as ``__cause__``), and ``PyErr_Occurred``
-reads clear afterwards.
+Issue #141 was one instance. A probe in
+``tests/modeling/test_catalog_report.py`` asserted the fresh-interpreter
+behaviour IN-PROCESS, where a predecessor in its xdist worker had constructed
+a ``Model()``. It was NOT stale error-indicator residue, which is what this
+file and ``btap._compat.opt`` both claimed before #164 — the raising case
+clears the indicator. Residue is real but comes from a SURVIVING unwrap, and
+then lands on an unrelated call.
 
 Stating that in a docstring is not enough — the rule was written down and
 then violated four times by copy-paste within a day. This test makes it
@@ -245,6 +246,61 @@ class TestNoUncheckedOptionalGet(unittest.TestCase):
                       "must raise SystemError caused by RuntimeError. This is "
                       "the #141 mechanism; if it stops holding, the subprocess "
                       "isolation in this file is no longer needed")
+
+    def test_a_value_optional_RAISES_on_its_very_first_call(self):
+        """The third family, pinned — and not where I first put it.
+
+        `opt()` grouped the value optionals with `OptionalModel` as
+        "returns a default the first time", which is simply false: they raise
+        immediately in a fresh interpreter. Pinned in a subprocess so "first
+        call" means it, and so a crash cannot take the runner down with it.
+        """
+        try:
+            import openstudio  # noqa: F401
+        except ImportError:
+            self.skipTest("needs the openstudio wheel")
+
+        import subprocess
+        import sys
+        probe = (
+            "import openstudio\n"
+            "for name in ('OptionalDouble', 'OptionalString', 'OptionalInt'):\n"
+            "    try:\n"
+            "        getattr(openstudio, name)().get()\n"
+            "        print(name, 'NO_RAISE', flush=True)\n"
+            "    except SystemError as e:\n"
+            "        print(name, 'RAISED',\n"
+            "              type(e.__cause__).__name__, flush=True)\n"
+        )
+        out = subprocess.run([sys.executable, "-c", probe],
+                             capture_output=True, text=True, check=False,
+                             timeout=120)
+        self.assertEqual(0, out.returncode,
+                         f"probe died: {out.stderr[-300:]}")
+        for name in ('OptionalDouble', 'OptionalString', 'OptionalInt'):
+            self.assertIn(f"{name} RAISED RuntimeError", out.stdout,
+                          f"{name} must raise on its FIRST unwrap in a fresh "
+                          f"interpreter. stdout: {out.stdout[:300]}")
+
+    # The residue trap is deliberately NOT pinned, and that is a finding
+    # rather than an omission.
+    #
+    # D-79 said the RAISING unwrap leaves the C error indicator set. It does
+    # not. A SURVIVING one can: after `g M g` — unwrap, construct a Model,
+    # unwrap again — a plain `openstudio.path()` raises SystemError with no
+    # connection to any optional. That is real, and it is why an unguarded
+    # `.get()` is hard to diagnose.
+    #
+    # But it is not reliably observable. Measured over 24 runs of each shape:
+    # driven by a parent process with `-c`, 24/24 poisoned; the identical
+    # source run as a script FILE, 7/10 poisoned and 3/10 clean; and under
+    # pytest, clean. A test asserting it would fail intermittently depending
+    # on how the suite was invoked — which is precisely the defect class
+    # issue #141 was, and writing a second one to document the first would be
+    # absurd. The four invariants pinned in this file were each confirmed
+    # 24/24 deterministic before being pinned.
+    #
+    # If you need to see it, the sequence above reproduces it by hand.
 
     def test_the_checked_loader_names_the_path(self):
         from btap._sdk import load_model

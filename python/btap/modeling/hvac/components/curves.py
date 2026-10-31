@@ -7,6 +7,8 @@ from pathlib import Path
 
 import openstudio
 
+from btap._compat import opt
+
 DATA_PATH = Path(__file__).parent.parent / 'data' / 'curves.json'
 
 #: Stamped on curves this module builds, so the per-model lookup finds OURS by
@@ -64,10 +66,16 @@ def defrost_eir_ft(model):
     # the rename. A foreign same-named curve is left alone rather than refused
     # — this curve is built FOR the reference, and refusing would babysit a
     # proposed model over a name collision.
+    # `hasAdditionalProperties()` first, because `additionalProperties()`
+    # CREATES an OS:AdditionalProperties object when the curve has none. A
+    # model with five foreign curves went from 0 to 6 of them after one
+    # lookup — a read that mutates the model. They do not forward-translate,
+    # so no frozen output moved and nothing failed; it was still wrong, and
+    # unpinned. (Fable, second review of #164.)
     existing = next(
         (c for c in model.getCurves()
-         if c.additionalProperties().getFeatureAsString(BUILT_BY).is_initialized()
-         and c.additionalProperties().getFeatureAsString(BUILT_BY).get() == name
+         if c.hasAdditionalProperties()
+         and opt(c.additionalProperties().getFeatureAsString(BUILT_BY)) == name
          and c.to_CurveBiquadratic().is_initialized()), None)
     if existing is not None:
         return existing.to_CurveBiquadratic().get()

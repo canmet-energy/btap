@@ -73,6 +73,40 @@ class TestDefrostCurveLookup(unittest.TestCase):
                     'three calls built more than one curve — the lookup is '
                     'not finding what it previously created')
 
+    def test_the_lookup_does_not_mutate_the_curves_it_inspects(self):
+        """A read must not write. `additionalProperties()` CREATES the object.
+
+        The stamp-keyed lookup walks every curve in the model, and in this SDK
+        `additionalProperties()` materialises an `OS:AdditionalProperties` for
+        any object that has none. A model with five foreign curves went from 0
+        to 6 of them after a single lookup. Those objects do not
+        forward-translate, so nothing failed and no frozen output moved — which
+        is exactly why this needs a test rather than trust.
+
+        Asserted as a COUNT including our own curve's one stamp, so a lookup
+        that stopped stamping entirely would fail here too rather than look
+        tidier.
+        """
+        import openstudio
+
+        from btap.modeling.hvac.components import curves
+        model, _ = self._model(collide=True)
+        for index in range(5):
+            foreign = openstudio.model.CurveCubic(model)
+            foreign.setName(f'foreign-curve-{index}')
+        self.assertEqual(
+            0, len(model.getAdditionalPropertiess()),
+            'precondition: no curve may carry AdditionalProperties yet, or '
+            'this test cannot see the accessor creating them')
+
+        curves.defrost_eir_ft(model)
+        curves.defrost_eir_ft(model)
+
+        self.assertEqual(
+            1, len(model.getAdditionalPropertiess()),
+            'the lookup created AdditionalProperties on curves it only read — '
+            'guard the stamp read with hasAdditionalProperties()')
+
     def test_the_curve_it_builds_is_the_flat_one(self):
         """Guards the fix against a lookup that returns the wrong curve.
 
