@@ -145,8 +145,20 @@ class PSZ(BaseSystem):
         # survives the OSM round trip, forward-translates to nothing, and is
         # readable by any consumer including one that never saw this catalogue.
         # Part 5's Table 5.2.12.1.-A puts packaged AND matched split equipment
-        # under "air-cooled unitary", which is what a PSZ with a DX coil is.
-        equipment_class.declare(air_loop, 'air_cooled_unitary')
+        # under "air-cooled unitary", which is what a PSZ with a DX coil is —
+        # EXCEPT on the reference-ASHP branch, where the row names a heat pump
+        # and the declaration should say the most specific thing it knows.
+        #
+        # This produces no different NECB result today: topology positively
+        # establishes the heat pump (`heat_pump=True`, sources `['air']`),
+        # `_is_heat_pump` sees it, and Article 8.4.4.13's redirect precedes any
+        # Table 8.4.4.7.-A identity use, where `heat_pump` is on the Code's
+        # list anyway. It is corrected because the vocabulary is PUBLIC and
+        # single-valued: a consumer treating the declaration as exhaustive
+        # would read these eight rows as unitary air conditioners, and Part 5
+        # treats heat pumps distinctly (#154; Sol, `335` item 1).
+        equipment_class.declare(
+            air_loop, 'heat_pump' if reference_hp else 'air_cooled_unitary')
 
         # Single-zone reheat setpoint manager tracking the control zone.
         spm = openstudio.model.SetpointManagerSingleZoneReheat(model)
