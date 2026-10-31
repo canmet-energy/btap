@@ -327,16 +327,21 @@ class TestSeedModelContracts(unittest.TestCase):
         self.assertIn("/nonexistent/seed.osm", str(ctx.exception),
                       "the error must name the path it could not read")
 
-    def test_empty_optional_never_reaches_get(self):
-        # Guards the root cause: OptionalModel.get() on an EMPTY optional
-        # returns an empty Model rather than raising (Ruby raises), and
-        # .get() on other empty Optionals raises SystemError while leaving
-        # the C error indicator set — which can segfault a later call.
-        import openstudio
-        empty = openstudio.model.Model.load(openstudio.path("/nonexistent.osm"))
-        self.assertFalse(empty.is_initialized())
-        self.assertEqual(0, len(empty.get().getThermalZones()),
-                         "documents the trap: .get() yields an EMPTY model, no raise")
+    # The SDK behaviour that makes the contract above necessary — that
+    # unwrapping an empty OptionalModel yields an EMPTY model rather than
+    # raising, so an unreadable seed must be refused explicitly — is not a
+    # contract of this module and is not asserted here. It lives in
+    # tests/test_sdk_invariants.py, which probes it in a SUBPROCESS.
+    #
+    # It WAS asserted here, in-process, until issue #141. The cause was not
+    # what that issue and `opt()` both assumed (a stale C error indicator left
+    # by a predecessor): it is that the first unwrap of an empty
+    # default-constructible optional returns a default object and every later
+    # one raises, per class and per process. So this probe's result depended on
+    # whether a predecessor in its xdist worker had constructed a `Model()` —
+    # which nearly every SDK test does — and the worker layout shifts whenever
+    # tests are added anywhere. An in-process probe cannot observe a
+    # first-call behaviour; only the isolated copy can.
 
 
 if __name__ == '__main__':
