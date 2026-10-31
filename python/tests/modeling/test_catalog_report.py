@@ -327,16 +327,18 @@ class TestSeedModelContracts(unittest.TestCase):
         self.assertIn("/nonexistent/seed.osm", str(ctx.exception),
                       "the error must name the path it could not read")
 
-    def test_empty_optional_never_reaches_get(self):
-        # Guards the root cause: OptionalModel.get() on an EMPTY optional
-        # returns an empty Model rather than raising (Ruby raises), and
-        # .get() on other empty Optionals raises SystemError while leaving
-        # the C error indicator set — which can segfault a later call.
-        import openstudio
-        empty = openstudio.model.Model.load(openstudio.path("/nonexistent.osm"))
-        self.assertFalse(empty.is_initialized())
-        self.assertEqual(0, len(empty.get().getThermalZones()),
-                         "documents the trap: .get() yields an EMPTY model, no raise")
+    # The third contract — that `.get()` on an empty OptionalModel yields an
+    # EMPTY model rather than raising, which is why an unreadable seed must be
+    # refused explicitly above — lives in
+    # tests/test_sdk_invariants.py::test_the_documented_hazard_still_holds,
+    # which probes it in a SUBPROCESS and asserts ZONES 0.
+    #
+    # It was asserted here too, in-process, until issue #141: a prior test in
+    # the same xdist worker left the C error indicator set, and this `.get()`
+    # surfaced that residue as a SystemError instead of its own result, failing
+    # under some worker layouts and naming an unrelated module. Probing the
+    # hazard in the same interpreter as other tests is exactly what the hazard
+    # breaks, so the surviving copy is the isolated one.
 
 
 if __name__ == '__main__':

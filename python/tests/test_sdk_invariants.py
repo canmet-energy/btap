@@ -8,9 +8,18 @@ Python bindings in a way it is not in Ruby:
   and no zones and fails much later, misleadingly. This is exactly how the
   packaged catalog report came to emit 97 "diagram unavailable" cards from a
   wheel instead of one clear error.
-- ``OptionalDouble``/``OptionalString.get()`` raise ``SystemError`` AND leave
-  the C-level error indicator set, which can segfault the interpreter on a
-  later, unrelated call.
+- ``OptionalDouble``/``OptionalString``/``OptionalInt.get()`` raise
+  ``SystemError`` AND leave the C-level error indicator set, which surfaces on
+  a later, unrelated call as a spurious ``SystemError`` THERE. Issue #141 was
+  one of those: a probe in ``tests/modeling/test_catalog_report.py`` kept
+  failing under some xdist worker layouts because a predecessor in its worker
+  had left the indicator set.
+- every OTHER ``openstudio.model.Optional*.get()`` SEGFAULTS the interpreter
+  on the spot — 615 of the namespace's 617 on 3.11.0, swept one subprocess per
+  type. This is what a failed ``to_X()`` cast returns, and it is strictly
+  worse than the ``SystemError`` family: there is no later call to surface it.
+  ``OptionalModel`` and ``OptionalScheduleType`` are the only two survivors,
+  so the benign first bullet is the exception rather than the rule.
 
 Stating that in a docstring is not enough — the rule was written down and
 then violated four times by copy-paste within a day. This test makes it
@@ -83,6 +92,7 @@ class TestNoUncheckedOptionalGet(unittest.TestCase):
             "model = empty.get()\n"  # would raise here if the SDK were fixed
             "print('GOT_MODEL', flush=True)\n"
             "print('SPACES', len(model.getSpaces()), flush=True)\n"
+            "print('ZONES', len(model.getThermalZones()), flush=True)\n"
         )
         out = subprocess.run([sys.executable, "-c", probe],
                              capture_output=True, text=True, check=False)
@@ -93,6 +103,69 @@ class TestNoUncheckedOptionalGet(unittest.TestCase):
         self.assertIn("SPACES 0", out.stdout,
                       "empty optional yielded a populated model — invariant "
                       f"changed. stdout: {out.stdout[:200]}")
+        # ZONES carries what the catalog report actually reads. It used to be
+        # asserted by a SECOND, IN-PROCESS copy of this probe in
+        # tests/modeling/test_catalog_report.py, which issue #141 caught
+        # failing under some xdist layouts: a PRIOR test in the same worker
+        # left the C error indicator set, and this `.get()` then surfaced that
+        # residue as `SystemError: OptionalModel_get returned a result with an
+        # exception set` rather than its own result. The test was vulnerable to
+        # the very trap it documented. Here the subprocess has no predecessor,
+        # so the probe observes its own call.
+        self.assertIn("ZONES 0", out.stdout,
+                      "empty optional yielded a model WITH zones — the trap "
+                      "the catalog report depends on has changed. stdout: "
+                      f"{out.stdout[:200]}")
+
+    def test_a_model_object_optional_CRASHES_rather_than_raising(self):
+        """The third family, and the worst: `.get()` kills the process.
+
+        `OptionalModel` returns an empty model and `OptionalDouble` raises, so
+        it would be reasonable to assume the rest merely raise too. They do
+        not: 615 of the 617 `Optional*` names in `openstudio.model` segfault
+        the interpreter immediately, swept one subprocess per type on 3.11.0.
+        `OptionalModel` and `OptionalScheduleType` are the only survivors.
+
+        This is the family a FAILED `to_X()` cast returns, which is why the
+        rule is `opt()` and not "check the ones that raise". Asserting the
+        crash is the point: if a future SDK release makes these raise, this
+        test fails and the hazard can be downgraded deliberately instead of
+        being carried forever as folklore.
+        """
+        try:
+            import openstudio  # noqa: F401
+        except ImportError:
+            self.skipTest("needs the openstudio wheel")
+
+        import subprocess
+        import sys
+        probe = (
+            "import openstudio\n"
+            "opt = openstudio.model.OptionalAirLoopHVAC()\n"
+            "assert not opt.is_initialized()\n"
+            "print('BEFORE', flush=True)\n"
+            "try:\n"
+            "    opt.get()\n"
+            "    print('NO_RAISE', flush=True)\n"
+            "except BaseException as e:\n"
+            "    print('RAISED', type(e).__name__, flush=True)\n"
+        )
+        out = subprocess.run([sys.executable, "-I", "-c", probe],
+                             capture_output=True, text=True, check=False)
+        self.assertIn("BEFORE", out.stdout,
+                      "the probe did not reach the .get() call at all, so this "
+                      f"test proves nothing. stderr: {out.stderr[:300]}")
+        # A segfault leaves the returncode negative (-signal) and prints
+        # neither marker. Assert the ABSENCE of both markers together with the
+        # abnormal exit, so a clean raise cannot pass as a crash.
+        self.assertNotIn("NO_RAISE", out.stdout, out.stdout[:200])
+        self.assertNotIn("RAISED", out.stdout,
+                         "a ModelObject optional RAISED instead of crashing — "
+                         "the SDK may have been fixed. Revisit the opt() "
+                         f"docstring and D-79. stdout: {out.stdout[:200]}")
+        self.assertLess(out.returncode, 0,
+                        "expected death by signal (negative returncode); got "
+                        f"{out.returncode}. stdout: {out.stdout[:200]}")
 
     def test_the_checked_loader_names_the_path(self):
         from btap._sdk import load_model

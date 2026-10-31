@@ -76,12 +76,30 @@ def opt(optional):
     ``x.is_initialized ? x.get : nil``). None passes through.
 
     ALWAYS route through this rather than calling ``.get()`` directly. The
-    Python bindings do not fail the way Ruby does: ``OptionalModel.get()`` on
-    an EMPTY optional RETURNS AN EMPTY MODEL instead of raising (so a failed
-    ``Model.load`` flows onward silently), while ``OptionalDouble``/
-    ``OptionalString`` raise ``SystemError`` and leave the C-level error
-    indicator set, which can segfault the interpreter on a later unrelated
-    call. Ruby raises cleanly in all of these. See D-79.
+    Python bindings do not fail the way Ruby does, and they fail in THREE
+    different ways depending on the optional's type (measured on OpenStudio
+    3.11.0, one subprocess per type; pinned by
+    ``tests/test_sdk_invariants.py``):
+
+    - ``OptionalModel`` and ``OptionalTime`` RETURN A DEFAULT-CONSTRUCTED
+      object instead of raising, so a failed ``Model.load`` flows onward
+      silently as a model with no spaces and no zones;
+    - ``OptionalDouble``, ``OptionalString`` and ``OptionalInt`` raise
+      ``SystemError`` and leave the C-level error indicator set, which
+      surfaces on a LATER, unrelated call as a spurious ``SystemError``
+      there (issue #141 is one of those);
+    - every OTHER ``openstudio.model.Optional*`` — 615 of the namespace's 617
+      — SEGFAULTS THE INTERPRETER on the spot. Not a later call: that one.
+      This is the family a failed ``to_X()`` cast returns.
+
+    Note which way round that is. ``OptionalModel`` and ``OptionalScheduleType``
+    are the ONLY two survivors in the whole namespace, so the benign case
+    documented first is the rare exception, not the representative one. Reading
+    ``OptionalModel``'s silent empty model as how optionals behave, and
+    treating the raisers as the hazard to guard, gets it backwards: the
+    unguarded ``.get()`` that matters is a cast, and a cast crashes.
+
+    Ruby raises cleanly in all of these. See D-79.
     """
     if optional is None:
         return None
