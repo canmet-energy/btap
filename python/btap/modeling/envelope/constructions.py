@@ -283,12 +283,31 @@ def deep_copy(model, construction):
     LayeredConstruction#clone shares material objects, so solving one
     construction's insulation would mutate every other construction using the
     same material — port of the legacy construction_deep_copy). Internal-source
-    constructions retain their source location and tube spacing."""
+    constructions retain their source location and tube spacing.
+
+    Normalized through ``_as_layered`` because this is PUBLIC and the raw path
+    below CRASHES: ``clone(model).to_Construction()`` is empty for a layerless
+    construction, and ``.get()`` on an empty ``OptionalConstruction`` segfaults
+    rather than raising (the family measured in #164). Verified — an
+    air-boundary construction passed here dumped core. Normalizing only the two
+    retargeting entry points left this trap one call deeper, which is exactly
+    the objection the review raised."""
+    construction = _as_layered(construction)
     internal_source = opt(construction.to_ConstructionWithInternalSource())
+    # Through `opt()`, not `.get()`. `_as_layered` above makes the cast
+    # succeed for every input this function now accepts, so these are
+    # belt-and-braces — but an unguarded `.get()` on an empty one SEGFAULTS
+    # rather than raising (#164), and a guard that only holds while a
+    # precondition elsewhere holds is the shape that turns a future edit into
+    # a lost xdist worker instead of a failure.
     if internal_source is None:
-        copy = construction.clone(model).to_Construction().get()
+        copy = opt(construction.clone(model).to_Construction())
     else:
-        copy = construction.clone(model).to_ConstructionWithInternalSource().get()
+        copy = opt(construction.clone(model).to_ConstructionWithInternalSource())
+    if copy is None:
+        raise TypeError(
+            f"clone of {construction.nameString()!r} did not survive its own "
+            f"downcast; this should be unreachable after _as_layered")
     copy.setName(construction.nameString())
     copy.setLayers([layer.clone(model).to_Material().get()
                     for layer in construction.layers()])
@@ -349,20 +368,53 @@ def _as_layered(construction):
     legacy-exact ports and their contracts stay as they are. This widens only
     what the two public retargeting functions ACCEPT, which breaks no caller.
 
-    ``to_ConstructionWithInternalSource`` is tried first so an internal-source
-    construction keeps its own type — ``opaque_at_conductance`` branches on it.
+    A surface's ``Construction Name`` can name SIX types (the
+    ``ConstructionNames`` reference group of the OpenStudio 3.11.0 IDD), and
+    only two of them carry layers:
+
+    ===================================  =======  ==============================
+    IDD object                           layers?  downcasts via
+    ===================================  =======  ==============================
+    ``OS:Construction``                  yes      ``to_Construction``
+    ``OS:Construction:InternalSource``   yes      ``to_ConstructionWithInternalSource``
+    ``OS:Construction:AirBoundary``      no       —
+    ``OS:Construction:CfactorUndergroundWall``  no  —
+    ``OS:Construction:FfactorGroundFloor``      no  —
+    ``OS:Construction:WindowDataFile``   no       —
+    ===================================  =======  ==============================
+
+    ``to_LayeredConstruction`` is the one cast that covers both layered types
+    and refuses all four layerless ones — verified against the table above.
+    The first version of this tried ``to_ConstructionWithInternalSource`` then
+    ``to_Construction``, with a docstring claiming the order let an
+    internal-source construction keep its type. That reason was wrong: the two
+    are SIBLINGS under ``LayeredConstruction``, so the casts are disjoint and
+    the order preserved nothing (Fable, review of #143). ``foundations.py``
+    and two helpers in this module already used the single cast.
     """
     if hasattr(construction, 'layers'):
         return construction
-    for cast in ('to_ConstructionWithInternalSource', 'to_Construction'):
-        caster = getattr(construction, cast, None)
-        candidate = None if caster is None else opt(caster())
-        if candidate is not None:
-            return candidate
+    caster = getattr(construction, 'to_LayeredConstruction', None)
+    layered = None if caster is None else opt(caster())
+    if layered is not None:
+        return layered
+    # One of the four layerless types. C-factor and F-factor constructions are
+    # the interesting case: D-32 and the ground-model gate treat a valid
+    # `GroundFCfactorMethod` input as a TOOL LIMITATION rather than an input
+    # defect, so a submitter must not be told to replace one. Refusing to
+    # retarget it here is consistent with that — there are no layers to solve —
+    # and the message says so rather than implying the model is wrong.
+    # `nameString()` only exists on an SDK object, and this path is reached by
+    # whatever the caller passed — including None or a str, where asking for a
+    # name raises AttributeError and buries the real problem.
+    name = getattr(construction, 'nameString', lambda: '<not an SDK object>')()
     raise TypeError(
-        f"{type(construction).__name__} {construction.nameString()!r} is not "
-        f"a layered construction, so there are no layers to retarget. Pass a "
-        f"Construction or a ConstructionBase that downcasts to one.")
+        f"{type(construction).__name__} {name!r} carries "
+        f"no layers, so there is nothing to retarget. Only OS:Construction and "
+        f"OS:Construction:InternalSource are layered; air-boundary, "
+        f"window-data-file, C-factor and F-factor constructions describe their "
+        f"performance directly. A C- or F-factor construction reaching here is "
+        f"a known tool limitation, not a defect in the model.")
 
 
 def opaque_at_conductance(

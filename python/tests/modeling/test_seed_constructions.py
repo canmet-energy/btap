@@ -533,10 +533,6 @@ class TestSeedConstructionsSimulate(unittest.TestCase):
                 f"EnergyPlus must accept a stack we author; first: {first}")
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 @needs_sdk
 class TestRetargetingAcceptsWhatTheSdkReturns(unittest.TestCase):
     """#143: the documented chain reads a surface's construction and retargets.
@@ -596,16 +592,96 @@ class TestRetargetingAcceptsWhatTheSdkReturns(unittest.TestCase):
                          'reuse-by-name must still return the SAME object, not '
                          'a second copy, when called the two ways')
 
-    def test_something_with_no_layers_at_all_says_so(self):
-        """The error must name the problem, not die on an attribute."""
+    def test_every_layerless_construction_type_says_so(self):
+        """All the layerless types, taken from the IDD rather than memory.
+
+        A surface's `Construction Name` can name six types (the
+        `ConstructionNames` reference group, OpenStudio 3.11.0 IDD) and only
+        `OS:Construction` and `OS:Construction:InternalSource` carry layers.
+        The first version of this test covered `ConstructionAirBoundary` alone,
+        because that is the one I happened to think of; the rest came from
+        asking the IDD what a surface can actually point at.
+        """
+        import openstudio
+
+        from btap.modeling.envelope import constructions
+        model, _, _ = self._seeded()
+        layerless = (
+            ('air boundary', openstudio.model.ConstructionAirBoundary),
+            ('C-factor wall',
+             openstudio.model.CFactorUndergroundWallConstruction),
+            ('F-factor floor',
+             openstudio.model.FFactorGroundFloorConstruction),
+        )
+        for label, cls in layerless:
+            with self.subTest(construction=label):
+                construction = cls(model)
+                construction.setName(f'a {label} has no layers')
+                self.assertFalse(
+                    hasattr(construction, 'layers'),
+                    'precondition: this type must NOT carry layers, or the '
+                    'test is not exercising the refusal at all')
+                with self.assertRaises(TypeError) as ctx:
+                    constructions.opaque_at_conductance(
+                        model, construction, 0.21)
+                self.assertIn('carries no layers', str(ctx.exception))
+                self.assertIn(f'a {label} has no layers', str(ctx.exception),
+                              'the error must name the offending construction')
+
+    def test_the_C_and_F_factor_refusal_does_not_blame_the_model(self):
+        """D-32 territory: a valid F-factor input is a TOOL limitation.
+
+        `btap/codes/necb/path.py` preserves a valid `GroundFCfactorMethod`
+        floor and emits no determination rather than telling the submitter to
+        replace it. A retargeting refusal must not contradict that by reading
+        as "your model is wrong".
+        """
+        import openstudio
+
+        from btap.modeling.envelope import constructions
+        model, _, _ = self._seeded()
+        ffactor = openstudio.model.FFactorGroundFloorConstruction(model)
+        with self.assertRaises(TypeError) as ctx:
+            constructions.opaque_at_conductance(model, ffactor, 0.21)
+        self.assertIn('tool limitation', str(ctx.exception),
+                      'the refusal must name itself as a tool limitation, '
+                      'consistent with how the ground-model gate treats a '
+                      'valid F-factor floor')
+
+    def test_deep_copy_refuses_a_layerless_construction_instead_of_crashing(self):
+        """`deep_copy` is public, and its raw path CRASHES.
+
+        `clone(model).to_Construction()` is empty for a layerless
+        construction, and `.get()` on that segfaults rather than raising — the
+        family measured in #164. This is the trap one call deeper than the
+        retargeting entry points, and it is why normalizing only those two was
+        not enough: a caller reaching `deep_copy` directly got a core dump.
+        """
         import openstudio
 
         from btap.modeling.envelope import constructions
         model, _, _ = self._seeded()
         airwall = openstudio.model.ConstructionAirBoundary(model)
-        airwall.setName('an air boundary has no layers')
+        airwall.setName('deep_copy must refuse this')
         with self.assertRaises(TypeError) as ctx:
-            constructions.opaque_at_conductance(model, airwall, 0.21)
-        self.assertIn('not a layered construction', str(ctx.exception))
-        self.assertIn('an air boundary has no layers', str(ctx.exception),
-                      'the error must name the offending construction')
+            constructions.deep_copy(model, airwall)
+        self.assertIn('carries no layers', str(ctx.exception))
+        self.assertIn('deep_copy must refuse this', str(ctx.exception))
+
+    def test_deep_copy_still_copies_a_real_construction(self):
+        """Widening what it refuses must not change what it does."""
+        from btap._compat import opt
+        from btap.modeling.envelope import constructions
+        model, wall, _ = self._seeded()
+        original = opt(wall.construction().get().to_Construction())
+        self.assertIsNotNone(original, 'precondition: a layered seed')
+        copy = constructions.deep_copy(model, original)
+        self.assertNotEqual(original.handle(), copy.handle(), 'a real copy')
+        self.assertEqual(len(original.layers()), len(copy.layers()))
+        self.assertNotEqual(original.layers()[0].handle(),
+                            copy.layers()[0].handle(),
+                            'layers must be cloned too, not shared')
+
+
+if __name__ == "__main__":
+    unittest.main()

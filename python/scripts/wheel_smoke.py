@@ -136,18 +136,23 @@ def run_checks() -> int:
                     if not s.construction().is_initialized()]
         assert not bare_sub, (
             f"{len(bare_sub)} sub-surfaces left with no construction")
-        # The point of the seed is that a retargeting pass can now run.
+        # The point of the seed is that a retargeting pass can now run — and
+        # it runs on what the SDK HANDS YOU, with no downcast.
         #
-        # The DOWNCAST is required and is a real edge in this API:
-        # `surface.construction()` yields a `ConstructionBase`, which has no
-        # `.layers`, so passing it straight to `opaque_at_conductance` raises
-        # `AttributeError: 'ConstructionBase' object has no attribute
-        # 'layers'`. This gate caught exactly that in its own first version.
-        # Recorded as friction on issue #143 rather than fixed here, because
-        # `opaque_at_conductance` is a legacy-exact port and widening what it
-        # accepts is a behaviour change, not a smoke-test concern.
+        # This gate used to write `.construction().get().to_Construction()
+        # .get()` here, because `surface.construction()` yields a
+        # `ConstructionBase` with no `.layers` and `opaque_at_conductance`
+        # raised `AttributeError` on it. That was recorded as friction on
+        # issue #143 and has since been fixed at the public entry points, so
+        # the gate passes the base object deliberately: if the normalization
+        # regresses, the INSTALLED WHEEL is where it shows. Keeping the manual
+        # downcast would have left this gate unable to witness the fix.
         from btap.modeling.envelope import constructions
-        seeded = surfaces[0].construction().get().to_Construction().get()
+        seeded = surfaces[0].construction().get()
+        assert not hasattr(seeded, 'layers'), (
+            "surface.construction() is expected to yield a layerless "
+            "ConstructionBase here; if it now has layers, this check no "
+            "longer exercises the normalization it exists for")
         retargeted = constructions.opaque_at_conductance(model, seeded, 0.21)
         assert retargeted.nameString() != seeded.nameString(), (
             "retargeting returned the seed itself rather than a copy")

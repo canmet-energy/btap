@@ -142,23 +142,42 @@ class TestBar(unittest.TestCase):
         # test pins it. It did not: every compliance test in the suite starts
         # from an authored OSM archetype, so a GEOMETRY-AUTHORED model had
         # never been taken through a determination (#143). `simulate='none'`
-        # runs the whole pipeline — the four preflight gates, reference
-        # construction, costing — without EnergyPlus, which is what lets this
-        # live in the default lane. What it proves is that a model this package
-        # built from nothing but ratios satisfies what the code layer REQUIRES:
-        # resolvable space types, a determinable storey count, thermostats
-        # everywhere, and ground-floor targets it can derive.
+        # exercises the whole pipeline without EnergyPlus, which is what lets
+        # this live in the default lane.
+        #
+        # What it proves is that a model built from nothing but space-type
+        # ratios PASSES what the code layer requires — resolvable space types,
+        # a determinable storey count, thermostats everywhere, derivable
+        # ground-floor targets. It does NOT pin that those gates exist; that
+        # belongs to `tests/necb`, and deleting the phase-1 gate calls leaves
+        # this test green (checked). The distinction matters: a reader who
+        # takes this for gate coverage would be wrong.
         import tempfile
 
         from btap.codes import compliance
 
+        run_dir = tempfile.TemporaryDirectory(prefix='full-family-')
+        self.addCleanup(run_dir.cleanup)
         result = compliance.performance_compliance(
             model, code='necb2020', simulate='none', hdd=3890,
-            run_dir=tempfile.mkdtemp(prefix='full-family-'))
+            run_dir=run_dir.name)
+
         self.assertIsNotNone(result.reference_model,
                              'the chain must reach a built reference model')
         self.assertTrue(result.report, 'and emit a report')
-        self.assertEqual('necb2020', result.report['code'])
+        # `report['code']` comes from the ruleset and is model-independent, so
+        # it witnesses nothing on its own. These two do: no verdict is emitted
+        # without a simulation, and the REFERENCE side actually ran.
+        self.assertIsNone(
+            result.compliant,
+            "simulate='none' must emit no verdict — if this ever carries one, "
+            'nobody should read this test as a determination')
+        reference_steps = {e['step'] for e in result.audit.entries
+                           if e.get('building') == 'reference building'}
+        self.assertIn(
+            'build', reference_steps,
+            'the reference building must have been BUILT on this path, not '
+            f'merely allocated. reference steps seen: {sorted(reference_steps)}')
 
 
 if __name__ == '__main__':
