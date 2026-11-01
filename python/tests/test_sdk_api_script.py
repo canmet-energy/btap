@@ -15,6 +15,7 @@ These tests pin the lookups, not the SDK: a figure that moves with an SDK
 version is asserted as a floor or a relationship, never as an exact count.
 """
 
+import os
 import re
 import subprocess
 import sys
@@ -36,6 +37,12 @@ def needs_sdk_files(test):
     """
     present = (SDK / 'Python').is_dir() and (
         SDK / 'include/openstudio/model').is_dir()
+    if not present and os.environ.get('BTAP_ENGINE_REQUIRED'):
+        # The `verify` lane runs on the CI image, which HAS the tree — review
+        # of #170 noted that a skip there would be vacuous green if a future
+        # base image dropped `include/`. Where the engine is declared
+        # required, an absent tree is a failure, not a skip.
+        return test
     return unittest.skipUnless(
         present, f'needs the SDK file tree under {SDK}')(test)
 
@@ -154,6 +161,17 @@ class TestOptionalFamilies(unittest.TestCase):
         rows = re.findall(r'^\s+(crash|raise|default)\s+(\w+)\(\) -> '
                           r'optional<([^>]*)>', out.stdout, re.M)
         self.assertTrue(rows, f'--list must print rows: {out.stdout[:200]}')
+
+        # The POSITIVE half, which this test lacked until review: inverting the
+        # worst-case rule so `raise` beat `crash` left all nine tests green,
+        # because checking only that crash rows are justified never asserts
+        # that a mixed row IS crash. A test rewritten to pass is exactly where
+        # to look for that.
+        self.assertIn(
+            ('crash', 'getViewFactor'), {(f, m) for f, m, _ in rows},
+            'getViewFactor() wraps ViewFactor AND double, so the worst-case '
+            'rule must classify it crash. If this fails, the rule has been '
+            f'inverted or the method renamed. Rows: {out.stdout[:300]}')
         for fam, method, wrapped in rows:
             types = set(wrapped.rstrip('…').split(','))
             self.assertIn('double', types,
@@ -164,6 +182,24 @@ class TestOptionalFamilies(unittest.TestCase):
                     types - {'double'},
                     f'{method} is classified crash while wrapping only double '
                     f'— the worst-case rule has nothing to justify it')
+
+
+    def test_a_namespaced_type_is_reduced_to_its_bare_name(self):
+        """`std::string` must classify as raise, not crash.
+
+        `optional_methods()` strips the namespace off a simple T. Dropping
+        that strip moves 117 declarations from raise to crash in silence —
+        nothing asserted on `--on string`, so the mutation was free.
+        """
+        out = run('optionals', '--on', 'string')
+        self.assertEqual(0, out.returncode, out.stderr)
+        counts = self._families(out.stdout)
+        self.assertGreater(counts.get('raise', 0), 50,
+                           'optional<std::string> is a large raise-family '
+                           f'group: {out.stdout}')
+        self.assertEqual(0, counts.get('crash', 0),
+                         'a namespaced std::string must still be recognised '
+                         f'as a string: {out.stdout}')
 
 
 @needs_sdk_files

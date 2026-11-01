@@ -56,13 +56,39 @@ SDK = pathlib.Path('/usr/local/openstudio-3.11.0')
 #: default-constructible ones.
 RAISES = frozenset({'double', 'string', 'int', 'unsigned', 'float', 'bool',
                     'size_t', 'char'})
-RETURNS_DEFAULT = frozenset({'Model', 'ScheduleType', 'Time', 'Date',
-                             'DateTime'})
+#: Measured one fresh subprocess each, not inferred. `Time`/`Date`/`DateTime`
+#: were inferred in the first version of this file and later confirmed; the
+#: utilities types below were flagged by review as wrongly classified crash and
+#: then measured — they all return a default.
+RETURNS_DEFAULT = frozenset({
+    'Model', 'ScheduleType', 'Time', 'Date', 'DateTime',
+    'path', 'DayOfWeek', 'NthDayOfWeekInMonth', 'FuelType', 'EndUseType',
+    'InstallLocationType', 'EndUseCategoryType', 'Unit', 'TimeSeries',
+    'SqlFile', 'CSVFile', 'IddObject',
+})
+
+#: Measured as crashing, so they are NOT merely the unmeasured default.
+#: Recorded because `family()` would reach the same answer by falling through,
+#: and a reader cannot otherwise tell a measurement from a fallback.
+MEASURED_CRASH = frozenset({'UUID', 'EpwFile', 'ViewFactor', 'WorkspaceObject'})
 
 _CLASS = re.compile(r'^class\s+(\w+)\(([\w.]+)\)', re.M)
+
+#: Matched against COMMENT-STRIPPED, WHITESPACE-FLATTENED text, because the
+#: first version of this missed 27 method names (review of #170): ~31
+#: declarations prefixed `OS_DEPRECATED(...)`, one `static`, six with a comma
+#: inside T (`std::pair<ConstructionBase, int>`), and three split across lines
+#: — one of which, `createSurfacePropertyExposedFoundationPerimeter`, is
+#: called by `btap/modeling/envelope/foundations.py`. Under-reporting is the
+#: dangerous direction for this tool, so the match is deliberately loose and
+#: the comment strip is what keeps it honest.
 _OPTIONAL = re.compile(
-    r'^\s*(?:virtual\s+)?boost::optional<\s*([A-Za-z_:][\w:]*)\s*>\s+(\w+)\s*\(',
-    re.M)
+    r'(?:OS_DEPRECATED\s*\([^)]*\)\s+|static\s+|virtual\s+)*'
+    r'boost::optional\s*<\s*'
+    r'([^<>]*(?:<[^<>]*>[^<>]*)*?)'      # one level of nesting in T
+    r'\s*>\s+(\w+)\s*\(')
+_BLOCK_COMMENT = re.compile(r'/\*.*?\*/', re.S)
+_LINE_COMMENT = re.compile(r'//[^\n]*')
 _DECL = re.compile(r'^\s*(?:virtual\s+)?([\w:<>,\s*&]+?)\s+(\w+)\s*\(([^)]*)\)',
                    re.M)
 
@@ -95,6 +121,18 @@ def _read(path: pathlib.Path) -> str:
     return path.read_text(encoding='utf-8', errors='replace')
 
 
+def _declarations(source: str) -> str:
+    """Comments gone, newlines flattened — see `_OPTIONAL` for why.
+
+    Stripping comments FIRST matters: a loose match over raw text would pick
+    up commented-out declarations. Verified by review that stripping changes
+    no count on the current headers, which means the looseness costs nothing.
+    """
+    source = _BLOCK_COMMENT.sub(' ', source)
+    source = _LINE_COMMENT.sub(' ', source)
+    return re.sub(r'\s+', ' ', source)
+
+
 def class_tree() -> dict[str, str]:
     """``{class: immediate base}`` across every proxy module."""
     tree: dict[str, str] = {}
@@ -105,7 +143,14 @@ def class_tree() -> dict[str, str]:
 
 
 def family(wrapped: str) -> str:
-    """What an unguarded unwrap of an empty ``optional<wrapped>`` does."""
+    """What an unguarded unwrap of an empty ``optional<wrapped>`` does.
+
+    A T carrying a comma (``std::pair<ConstructionBase, int>``) is reported
+    crash: the aggregate's behaviour was not measured, and for this tool
+    over-reporting danger is the safe direction.
+    """
+    if ',' in wrapped or '<' in wrapped:
+        return 'crash'
     if wrapped in RAISES:
         return 'raise'
     if wrapped in RETURNS_DEFAULT:
@@ -113,13 +158,25 @@ def family(wrapped: str) -> str:
     return 'crash'
 
 
-def optional_methods() -> dict[str, set[str]]:
-    """``{method: {wrapped types}}`` for every ``boost::optional`` returner."""
+def optional_methods() -> tuple[dict[str, set[str]], int]:
+    """``({method name: {wrapped types}}, declaration count)``.
+
+    The two numbers differ a lot and conflating them was a documentation bug
+    (#170 review): the dict is keyed by NAME, so ``schedule()`` declared on
+    290 classes counts once. Quote the declaration count when describing the
+    size of the surface, and the name count when describing the API.
+    """
     out: dict[str, set[str]] = collections.defaultdict(set)
+    declarations = 0
     for path in _headers():
-        for wrapped, method in _OPTIONAL.findall(_read(path)):
-            out[method].add(wrapped.split('::')[-1])
-    return dict(out)
+        for wrapped, method in _OPTIONAL.findall(_declarations(_read(path))):
+            wrapped = wrapped.strip()
+            # Keep the namespace off a simple T, but leave an aggregate whole
+            # so `family()` can see the comma.
+            simple = wrapped.split('::')[-1] if ',' not in wrapped else wrapped
+            out[method].add(simple)
+            declarations += 1
+    return dict(out), declarations
 
 
 def cmd_tree(args) -> int:
@@ -150,7 +207,7 @@ def cmd_tree(args) -> int:
 
 
 def cmd_optionals(args) -> int:
-    methods = optional_methods()
+    methods, declarations = optional_methods()
     rows = []
     for method, wrapped in sorted(methods.items()):
         fams = {family(w) for w in wrapped}
@@ -164,7 +221,8 @@ def cmd_optionals(args) -> int:
             continue
         rows.append((method, worst, sorted(wrapped)))
     tally = collections.Counter(worst for _, worst, _ in rows)
-    print(f"{len(rows)} methods returning boost::optional<T>"
+    print(f"{len(rows)} method NAMES returning boost::optional<T> "
+          f"({declarations} declarations in all)"
           + (f" (family={args.family})" if args.family else "")
           + (f" (wrapping {args.on})" if args.on else ""))
     for fam in ('crash', 'default', 'raise'):

@@ -190,16 +190,16 @@ python3 -m venv .venv
 # Repository tools, from the repository root
 python3 python/scripts/necb_orphan_keys.py
 
-# SDK API lookups, from the files the image ships — no import, network or MCP
-python3 python/scripts/sdk_api.py tree LayeredConstruction --subclasses
-python3 python/scripts/sdk_api.py optionals --family crash --list
-python3 python/scripts/sdk_api.py method insulation
 python3 python/scripts/generate_necb_coverage.py
 python3 python/scripts/generate_necb_8_4_coverage.py
 python3 python/scripts/generate_necb_edition_delta.py --check
 python3 python/scripts/generate_necb_vintage_match.py --check
 python3 python/scripts/generate_decisions.py --check
 python3 python/scripts/legacy_whatsnew.py
+# SDK API lookups, from the files the image ships — no import, network or MCP
+python3 python/scripts/sdk_api.py tree LayeredConstruction --subclasses
+python3 python/scripts/sdk_api.py optionals --family crash --list
+python3 python/scripts/sdk_api.py method insulation
 
 # Authenticated maintainer refreshes; ordinary runtime and CI stay offline
 python3 python/scripts/fetch_necb_provisions.py
@@ -461,20 +461,39 @@ install.
   (39 of them) carry every class, its base, and parameter names. SWIG emits
   them beside the compiled bindings; read them AS TEXT, never execute them.
   `sdk_api.py tree <Class>` prints the ancestry and `--subclasses` the direct
-  children. They carry almost no return types.
+  children. No class-body method in them carries a return annotation — zero of
+  roughly 51,000 — though the module-level cast helpers
+  (`_to_PlantEquipmentOperationCoolingLoad`) do, which is where a cast's own
+  return type is written down.
 - **The C++ headers are the return types.** `$SDK/include/openstudio/model/*.hpp`
   — 613 public headers, excluding `*_Impl.hpp` — state them exactly, including
   which methods return `boost::optional<T>`. That is the D-79 hazard surface:
-  2067 methods, of which 786 wrap a type whose unguarded `.get()` SEGFAULTS.
-  `sdk_api.py optionals --family crash` lists them; `method <name>` gives a
-  signature.
+  3122 declarations across 2094 method NAMES, of which 794 names have at least
+  one overload the script classifies CRASH family. Quote the figure you mean —
+  `schedule()` is declared on some 290 classes and is one name. A name
+  overloaded across families is reported at its worst, because that is what a
+  caller must guard against. `sdk_api.py optionals --family crash` lists them;
+  `method <name>` gives a signature.
+
+  **"Crash family" is the script's classification, not a per-type
+  measurement.** D-79 measured the 617 `openstudio.model.Optional*` types; the
+  headers also wrap utilities types, and sixteen of those were measured
+  afterwards — `path`, `FuelType`, `SqlFile`, `TimeSeries` and nine more return
+  a default, while `UUID`, `EpwFile`, `ViewFactor` and `WorkspaceObject` crash.
+  Anything unmeasured falls through to crash deliberately: over-reporting
+  danger is the safe direction for a tool whose job is to stop a segfault.
 - **The modelling MCP is the IDD.** `mcp__modelling__get_idd_object` and
   `find_related_objects` answer what a FIELD accepts. A reference group gives
   the COMPLETE set — `OS:Surface`'s `Construction Name` resolves to
   `ConstructionNames`, which is exactly six types — which is what a guard or a
-  test matrix needs. It does not generalise: `OS:ZoneHVAC:EquipmentList`'s
-  equipment field is `AllObjects` and enumerates nothing, so zone equipment
-  and terminals come from the proxy files instead.
+  test matrix needs. It does not generalise on the OpenStudio side:
+  `OS:ZoneHVAC:EquipmentList`'s equipment field is `AllObjects` and enumerates
+  nothing, so OS-side zone equipment comes from
+  `sdk_api.py tree ZoneHVACComponent --subclasses` instead. The ENERGYPLUS IDD
+  does enumerate it — `ZoneHVAC:EquipmentList`'s object-type field is a
+  `\type choice`, 33 keys in E+ IDD 25.2, which is a DIFFERENT version line
+  from the SDK's 3.11.0 — and the same MCP serves it, so ask both before
+  concluding a set is unobtainable.
 
 `dir()`/`getattr()` on the live module recovers method NAMES only, not
 parameters and not return types, which is why probing an SDK question feels
