@@ -202,6 +202,42 @@ class TestOptionalFamilies(unittest.TestCase):
                          f'as a string: {out.stdout}')
 
 
+    def test_the_comment_strip_is_load_bearing(self):
+        """A ceiling, because the widened match needs the strip.
+
+        Raw text matches 3172 declarations and stripped text 3122: fifty
+        commented-out declarations would be false positives. Dropping the
+        line-comment strip passed every other test, so this asserts a CEILING
+        rather than an exact figure — exact counts move with an SDK version,
+        while fifty phantom declarations would blow straight through it.
+        """
+        out = run('optionals')
+        self.assertEqual(0, out.returncode, out.stderr)
+        match = re.search(r'\((\d+) declarations in all\)', out.stdout)
+        self.assertIsNotNone(match, f'no declaration count: {out.stdout}')
+        count = int(match.group(1))
+        self.assertGreater(count, 2500,
+                           'the match has collapsed; the header parse broke')
+        self.assertLess(count, 3150,
+                        f'{count} declarations is above what the headers hold '
+                        'once comments are stripped — the strip has been lost '
+                        'and commented-out declarations are being counted')
+
+    def test_a_declaration_the_narrow_regex_could_not_reach(self):
+        """One of the 41 recovered, so the prefix handling is pinned.
+
+        Dropping the `OS_DEPRECATED`/`static` prefixes — the whole point of
+        the widened regex — passed every test until this one. `Component::load`
+        is `static`, which the original could not cross.
+        """
+        out = run('method', 'load')
+        self.assertEqual(0, out.returncode, out.stderr)
+        self.assertIn('Component.hpp', out.stdout,
+                      'Component::load is a static boost::optional returner; '
+                      'if it is missing, the static/OS_DEPRECATED prefixes are '
+                      f'no longer matched. Got: {out.stdout[:300]}')
+
+
 @needs_sdk_files
 class TestMethodDeclarations(unittest.TestCase):
 
@@ -237,6 +273,34 @@ class TestItDegradesWithoutTheSdk(unittest.TestCase):
         self.assertNotIn('Traceback', out.stderr,
                          'an absent SDK is an expected condition on a bare '
                          f'runner, not a crash. Got: {out.stderr[:300]}')
+
+
+class TestTheMeasuredSetsStaySeparate(unittest.TestCase):
+    """`MEASURED_CRASH` must be read by something, or it is a comment.
+
+    It records the four utilities types measured as CRASHING, which `family()`
+    reaches by fallthrough anyway — so adding `UUID` to `RETURNS_DEFAULT`
+    silently reclassified a measured crash and passed every test. A frozenset
+    nothing reads cannot object to being contradicted.
+    """
+
+    def test_a_measured_crash_cannot_be_reclassified_as_safe(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location('sdk_api', SCRIPT)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        self.assertTrue(module.MEASURED_CRASH, 'the record must not be empty')
+        for name in sorted(module.MEASURED_CRASH):
+            with self.subTest(wrapped=name):
+                self.assertNotIn(
+                    name, module.RETURNS_DEFAULT,
+                    f'{name} was MEASURED to crash; listing it as returning a '
+                    'default would under-report danger')
+                self.assertNotIn(name, module.RAISES, f'{name} crashes')
+                self.assertEqual(
+                    'crash', module.family(name),
+                    f'family({name!r}) must agree with the measurement')
 
 
 if __name__ == '__main__':

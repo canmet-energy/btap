@@ -74,14 +74,20 @@ MEASURED_CRASH = frozenset({'UUID', 'EpwFile', 'ViewFactor', 'WorkspaceObject'})
 
 _CLASS = re.compile(r'^class\s+(\w+)\(([\w.]+)\)', re.M)
 
-#: Matched against COMMENT-STRIPPED, WHITESPACE-FLATTENED text, because the
-#: first version of this missed 27 method names (review of #170): ~31
-#: declarations prefixed `OS_DEPRECATED(...)`, one `static`, six with a comma
-#: inside T (`std::pair<ConstructionBase, int>`), and three split across lines
-#: — one of which, `createSurfacePropertyExposedFoundationPerimeter`, is
-#: called by `btap/modeling/envelope/foundations.py`. Under-reporting is the
-#: dangerous direction for this tool, so the match is deliberately loose and
-#: the comment strip is what keeps it honest.
+#: Matched against COMMENT-STRIPPED, WHITESPACE-FLATTENED text.
+#:
+#: The first version missed 41 declarations (review of #170), every one a
+#: genuine public declaration: 22 prefixed `OS_DEPRECATED(...)`, 12 `static`
+#: (`Model::load`, `Component::load`, `Space::fromFloorPrint`, …), 6 with an
+#: aggregate T (`std::pair<ConstructionBase, int>`), and 2 whose T is two
+#: words (`unsigned int`), which the old `[\w:]*` could not cross. None of
+#: the 41 has a call site in `btap`, so nothing was being mis-guarded — the
+#: fix matters because under-reporting is the dangerous direction for a tool
+#: whose job is to find calls that can segfault.
+#:
+#: A multi-line declaration was NOT among the misses: `>\s+(\w+)` already
+#: spans a newline under `re.M`. An earlier version of this comment claimed
+#: otherwise and named a method the old regex in fact found.
 _OPTIONAL = re.compile(
     r'(?:OS_DEPRECATED\s*\([^)]*\)\s+|static\s+|virtual\s+)*'
     r'boost::optional\s*<\s*'
@@ -124,9 +130,12 @@ def _read(path: pathlib.Path) -> str:
 def _declarations(source: str) -> str:
     """Comments gone, newlines flattened — see `_OPTIONAL` for why.
 
-    Stripping comments FIRST matters: a loose match over raw text would pick
-    up commented-out declarations. Verified by review that stripping changes
-    no count on the current headers, which means the looseness costs nothing.
+    Stripping comments FIRST is load-bearing for the widened match: on the
+    current headers it removes 50 commented-out declarations (3172 raw ->
+    3122). It was NOT load-bearing for the narrower first version, which
+    counted 3081 either way — so a docstring saying the strip changes nothing
+    was true once and is now false. `test_sdk_api_script` pins the headline
+    count under a ceiling so that cannot drift again unnoticed.
     """
     source = _BLOCK_COMMENT.sub(' ', source)
     source = _LINE_COMMENT.sub(' ', source)

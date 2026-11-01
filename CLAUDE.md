@@ -478,8 +478,9 @@ install.
   **"Crash family" is the script's classification, not a per-type
   measurement.** D-79 measured the 617 `openstudio.model.Optional*` types; the
   headers also wrap utilities types, and sixteen of those were measured
-  afterwards — `path`, `FuelType`, `SqlFile`, `TimeSeries` and nine more return
-  a default, while `UUID`, `EpwFile`, `ViewFactor` and `WorkspaceObject` crash.
+  afterwards — `path`, `FuelType`, `SqlFile`, `TimeSeries` and eight more
+  return a default, while `UUID`, `EpwFile`, `ViewFactor` and
+  `WorkspaceObject` crash.
   Anything unmeasured falls through to crash deliberately: over-reporting
   danger is the safe direction for a tool whose job is to stop a segfault.
 - **The modelling MCP is the IDD.** `mcp__modelling__get_idd_object` and
@@ -491,9 +492,10 @@ install.
   nothing, so OS-side zone equipment comes from
   `sdk_api.py tree ZoneHVACComponent --subclasses` instead. The ENERGYPLUS IDD
   does enumerate it — `ZoneHVAC:EquipmentList`'s object-type field is a
-  `\type choice`, 33 keys in E+ IDD 25.2, which is a DIFFERENT version line
-  from the SDK's 3.11.0 — and the same MCP serves it, so ask both before
-  concluding a set is unobtainable.
+  `\type choice` of 33 keys in the E+ 25.2 IDD that the SDK itself bundles at
+  `$SDK/EnergyPlus/Energy+.idd`, so it is checkable offline from the same
+  install. The same MCP serves it, so ask both before concluding a set is
+  unobtainable.
 
 `dir()`/`getattr()` on the live module recovers method NAMES only, not
 parameters and not return types, which is why probing an SDK question feels
