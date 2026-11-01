@@ -273,6 +273,14 @@ learns *why* we read the article that way.
   replace adjudicated package data. Never build a data path from
   `Path(__file__)` in a loader again.
 
+## Before casting or unwrapping an SDK object
+
+Root `CLAUDE.md`, "Three references for any SDK behaviour", and
+`python/scripts/sdk_api.py`. The rule-application code here holds 74 sites
+where an SDK accessor is unwrapped; `optionals --family crash` says which
+return a type whose empty `.get()` SEGFAULTS rather than raising, and #169 is
+the open audit. Route every one through `btap._compat.opt`.
+
 ## Key facts / traps
 
 - **One selector, one spelling: `code="necb2020"` / `--code necb2020`**

@@ -131,6 +131,22 @@ NRCan building-stock records.
   standardsBuildingType/standardsSpaceType, sliced ratio-true to 1%); wizard
   output is NOT — run the loads assignment on it.
 
+## Before casting or unwrapping an SDK object
+
+Root `CLAUDE.md`, "Three references for any SDK behaviour": the class tree
+comes from the SWIG proxy files, return types and the `boost::optional`
+surface from the C++ headers, and what a FIELD accepts from the modelling MCP.
+`python/scripts/sdk_api.py tree|optionals|method` is the shortcut.
+
+This subpackage is where it bites. `_as_layered` in
+`envelope/constructions.py` was first written with two downcasts in an order
+whose documented reason was invented — one `tree LayeredConstruction
+--subclasses` says the two layered types are SIBLINGS, so one
+`to_LayeredConstruction` covers both. Issue #169 is the audit of the
+`boost::optional` unwraps here: an empty one of the CRASH family segfaults
+rather than raising, which in a test run reports as a lost xdist worker and
+not as a failure.
+
 ## Traps
 
 - **`AirLoopHVACDedicatedOutdoorAirSystem` has three measured preconditions;
