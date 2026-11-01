@@ -535,3 +535,77 @@ class TestSeedConstructionsSimulate(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@needs_sdk
+class TestRetargetingAcceptsWhatTheSdkReturns(unittest.TestCase):
+    """#143: the documented chain reads a surface's construction and retargets.
+
+    `surface.construction()` and `sub_surface.construction()` both yield a
+    `ConstructionBase`, which has no `layers()`. Both public retargeting
+    functions raised `AttributeError: 'ConstructionBase' object has no
+    attribute 'layers'` on it, so following the README required knowing to
+    write `.to_Construction().get()` first. The wheel-smoke gate hit this and
+    recorded it as friction on #143 rather than fixing it.
+    """
+
+    @staticmethod
+    def _seeded():
+        import btap.modeling as modeling
+        model = modeling.create(shape='rectangle', length=30.0, width=20.0,
+                                storeys=1)
+        modeling.apply_wwr(model, wwr=0.4)
+        modeling.seed_constructions(model)
+        wall = next(s for s in model.getSurfaces()
+                    if s.surfaceType() == 'Wall'
+                    and s.outsideBoundaryCondition() == 'Outdoors')
+        window = next(iter(model.getSubSurfaces()))
+        return model, wall, window
+
+    def test_opaque_retargeting_takes_a_surfaces_own_construction(self):
+        from btap.modeling.envelope import constructions
+        model, wall, _ = self._seeded()
+        base = wall.construction().get()
+        self.assertFalse(
+            hasattr(base, 'layers'),
+            'precondition: surface.construction() must yield something WITHOUT '
+            'layers(), or this test cannot exercise the downcast at all')
+
+        retargeted = constructions.opaque_at_conductance(model, base, 0.21)
+        self.assertIn('U-0.21', retargeted.nameString())
+
+    def test_fenestration_retargeting_takes_a_subsurfaces_own_construction(self):
+        from btap.modeling.envelope import constructions
+        model, _, window = self._seeded()
+        base = window.construction().get()
+        self.assertFalse(hasattr(base, 'layers'), 'precondition, as above')
+
+        retargeted = constructions.fenestration_at_conductance(model, base, 2.2)
+        self.assertIn('SHGC', retargeted.nameString())
+
+    def test_an_already_downcast_construction_still_works_identically(self):
+        """Widening what a function accepts must not change what it returns."""
+        from btap.modeling.envelope import constructions
+        model, wall, _ = self._seeded()
+        base = wall.construction().get()
+        from_base = constructions.opaque_at_conductance(model, base, 0.21)
+        from_cast = constructions.opaque_at_conductance(
+            model, base.to_Construction().get(), 0.21)
+        self.assertEqual(from_base.nameString(), from_cast.nameString())
+        self.assertEqual(from_base.handle(), from_cast.handle(),
+                         'reuse-by-name must still return the SAME object, not '
+                         'a second copy, when called the two ways')
+
+    def test_something_with_no_layers_at_all_says_so(self):
+        """The error must name the problem, not die on an attribute."""
+        import openstudio
+
+        from btap.modeling.envelope import constructions
+        model, _, _ = self._seeded()
+        airwall = openstudio.model.ConstructionAirBoundary(model)
+        airwall.setName('an air boundary has no layers')
+        with self.assertRaises(TypeError) as ctx:
+            constructions.opaque_at_conductance(model, airwall, 0.21)
+        self.assertIn('not a layered construction', str(ctx.exception))
+        self.assertIn('an air boundary has no layers', str(ctx.exception),
+                      'the error must name the offending construction')

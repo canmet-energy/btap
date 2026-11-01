@@ -332,6 +332,39 @@ def material_conductance(material) -> float:
     return math.inf
 
 
+def _as_layered(construction):
+    """Accept what ``Surface#construction`` actually RETURNS.
+
+    The SDK yields a ``ConstructionBase`` from ``surface.construction()`` and
+    ``sub_surface.construction()``, and ``ConstructionBase`` has no
+    ``layers()``. So the chain `btap/modeling/README.md` documents — read a
+    surface's construction, hand it to a retargeting function — raised
+    ``AttributeError: 'ConstructionBase' object has no attribute 'layers'``
+    unless the caller knew to write ``.to_Construction().get()`` first. The
+    wheel-smoke gate hit exactly that in its own first version and recorded it
+    as friction on issue #143.
+
+    Normalizing HERE, at the public entry points, rather than inside
+    ``deep_copy`` or the transmittance helpers, is deliberate: those are
+    legacy-exact ports and their contracts stay as they are. This widens only
+    what the two public retargeting functions ACCEPT, which breaks no caller.
+
+    ``to_ConstructionWithInternalSource`` is tried first so an internal-source
+    construction keeps its own type — ``opaque_at_conductance`` branches on it.
+    """
+    if hasattr(construction, 'layers'):
+        return construction
+    for cast in ('to_ConstructionWithInternalSource', 'to_Construction'):
+        caster = getattr(construction, cast, None)
+        candidate = None if caster is None else opt(caster())
+        if candidate is not None:
+            return candidate
+    raise TypeError(
+        f"{type(construction).__name__} {construction.nameString()!r} is not "
+        f"a layered construction, so there are no layers to retarget. Pass a "
+        f"Construction or a ConstructionBase that downcasts to one.")
+
+
 def opaque_at_conductance(
         model, construction, conductance, *, name_discriminator=None):
     """Opaque construction at a target CONSTRUCTION conductance, W/(m2.K) —
@@ -339,6 +372,7 @@ def opaque_at_conductance(
     deep-copy, insulation-layer solve via SDK setConductance, layer-trimming
     fallback when the non-insulation layers alone exceed the target
     resistance."""
+    construction = _as_layered(construction)
     base = re.sub(r":.*\Z", "", construction.nameString())
     if name_discriminator is not None:
         base = f"{base} {name_discriminator}"
@@ -420,6 +454,7 @@ def fenestration_at_conductance(model, construction, conductance):
     """Fenestration construction at a target U — legacy-exact port of BTAP
     customize_fenestration_construction: replace with a shared SimpleGlazing
     that preserves SHGC and visible transmittance; reuse by name."""
+    construction = _as_layered(construction)
     shgc = fenestration_solar_transmittance(construction)
     vt = fenestration_visible_transmittance(construction)
     base = re.sub(r":.*\Z", "", construction.nameString())
