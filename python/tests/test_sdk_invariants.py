@@ -193,21 +193,32 @@ class TestNoUncheckedOptionalGet(unittest.TestCase):
                          f"{out.returncode}. stdout: {out.stdout[:200]}")
 
     def test_constructing_a_Model_flips_OptionalModel_to_RAISING(self):
-        """The fact that actually explains #141, pinned.
+        """The fresh-interpreter half of #141's mechanism. The flip is NOT
+        asserted, because it is not reliable on the floor interpreter.
 
-        `opt()` and this file both described the hazard as a stale C error
+        `opt()` and this file once described the hazard as a stale C error
         indicator left by a raising `.get()` for a later call to trip over.
         That is not what happens — the raise clears the indicator. What
-        happens is that the FIRST `.get()` on an empty default-constructible
-        optional returns a default object and every later one raises, per
-        class and per process. So `Model.load(bad)` unwrapped is silent in a
-        fresh interpreter and raises once anything has built a `Model()`,
-        which nearly every SDK test does.
+        happens is that an unwrap of an empty default-constructible optional
+        returns a default object in a fresh interpreter, and USUALLY raises
+        once something has constructed a `Model()`. That is #141's mechanism:
+        the flaky probe's result depended on whether a predecessor in its
+        xdist worker had built one, which nearly every SDK test does.
 
-        Two probes in ONE subprocess each, because the claim is about what a
-        process has already done and in-process ordering is the whole point.
-        The control matters as much as the subject: without it, a probe that
-        raised for some unrelated reason would look like proof.
+        **Usually, not always.** This test asserted the flip until it turned
+        `main` red (issue #167, at `843aa932`): on CPython 3.11 the
+        post-`Model()` unwrap silently returns a default about 2% of the time
+        — measured 1 of 60 here, and the CI `python` job hit it. A reviewer
+        had flagged a sibling probe shape as nondeterministic on 3.11 (9
+        silent defaults in 65) and I accepted 80 clean runs of THIS shape as
+        proof it was immune. Eighty runs cannot distinguish 2% from zero; the
+        expected count is 1.6.
+
+        So only the CONTROL is asserted — a fresh interpreter yields an EMPTY
+        MODEL, which is the silent-flow hazard `opt()` exists for and was
+        stable in every sample on both interpreters. The post-`Model()` case
+        is probed and its outcome recorded in the failure message, so a run
+        that sees the rare branch says so instead of failing.
         """
         try:
             import openstudio  # noqa: F401
@@ -238,14 +249,21 @@ class TestNoUncheckedOptionalGet(unittest.TestCase):
             return out.stdout
 
         self.assertIn("NO_RAISE 0", probe(construct_first=False),
-                      "CONTROL: in a fresh interpreter the empty optional must "
-                      "still yield an empty model — if this changed, the "
-                      "silent-flow hazard is gone and D-79 can be revisited")
-        self.assertIn("RAISED RuntimeError", probe(construct_first=True),
-                      "after a Model() has been constructed, the SAME call "
-                      "must raise SystemError caused by RuntimeError. This is "
-                      "the #141 mechanism; if it stops holding, the subprocess "
-                      "isolation in this file is no longer needed")
+                      "in a fresh interpreter the empty optional must still "
+                      "yield an EMPTY MODEL — if this changed, the silent-flow "
+                      "hazard is gone and D-79 can be revisited")
+
+        # The post-`Model()` case is NOT asserted either way: it raises about
+        # 98% of the time on 3.11 and returning a default is the other 2%.
+        # Both outcomes are accepted and the one seen is named, so this cannot
+        # go red on the rare branch — which is exactly how it broke `main`.
+        after = probe(construct_first=True)
+        self.assertTrue(
+            'RAISED RuntimeError' in after or 'NO_RAISE' in after,
+            "after a Model(), the unwrap must either raise SystemError caused "
+            "by RuntimeError (the usual outcome, and #141's mechanism) or "
+            "return a default model (~2% on 3.11). Anything else means the "
+            f"behaviour has changed and D-79 needs revisiting. Saw: {after!r}")
 
     def test_a_value_optional_RAISES_on_its_very_first_call(self):
         """The third family, pinned — and not where I first put it.
