@@ -189,6 +189,11 @@ python3 -m venv .venv
 
 # Repository tools, from the repository root
 python3 python/scripts/necb_orphan_keys.py
+
+# SDK API lookups, from the files the image ships — no import, network or MCP
+python3 python/scripts/sdk_api.py tree LayeredConstruction --subclasses
+python3 python/scripts/sdk_api.py optionals --family crash --list
+python3 python/scripts/sdk_api.py method insulation
 python3 python/scripts/generate_necb_coverage.py
 python3 python/scripts/generate_necb_8_4_coverage.py
 python3 python/scripts/generate_necb_edition_delta.py --check
@@ -439,6 +444,53 @@ table from the MCP and read the gem's corresponding Ruby and data. Cite
 both in the decision and the provenance entry. When they disagree, the
 Code wins and the gem's version is recorded as a finding, not adopted;
 `docs/NECB_VINTAGE_MATCH.md` is the pattern.
+
+## Three references for any SDK behaviour
+
+An OpenStudio SDK question — which class carries a method, what an accessor
+returns, which object types a field accepts — is answered from a reference,
+never by inference and never by a probe script. The image already ships the
+answers under `/usr/local/openstudio-3.11.0` (written `$SDK` below) — both
+`canmet/os_sdk_container:3.11.0` in the devcontainer and
+`nrel/openstudio:3.11.0` in the CI image put it there, and `test.yml` already
+hardcodes that path. `python/scripts/sdk_api.py` wraps the two file-based
+lookups and needs no import, network or MCP server; pass `--sdk` for another
+install.
+
+- **The SWIG Python proxy files are the class tree.** `$SDK/Python/openstudio*.py`
+  (39 of them) carry every class, its base, and parameter names. SWIG emits
+  them beside the compiled bindings; read them AS TEXT, never execute them.
+  `sdk_api.py tree <Class>` prints the ancestry and `--subclasses` the direct
+  children. They carry almost no return types.
+- **The C++ headers are the return types.** `$SDK/include/openstudio/model/*.hpp`
+  — 613 public headers, excluding `*_Impl.hpp` — state them exactly, including
+  which methods return `boost::optional<T>`. That is the D-79 hazard surface:
+  2067 methods, of which 786 wrap a type whose unguarded `.get()` SEGFAULTS.
+  `sdk_api.py optionals --family crash` lists them; `method <name>` gives a
+  signature.
+- **The modelling MCP is the IDD.** `mcp__modelling__get_idd_object` and
+  `find_related_objects` answer what a FIELD accepts. A reference group gives
+  the COMPLETE set — `OS:Surface`'s `Construction Name` resolves to
+  `ConstructionNames`, which is exactly six types — which is what a guard or a
+  test matrix needs. It does not generalise: `OS:ZoneHVAC:EquipmentList`'s
+  equipment field is `AllObjects` and enumerates nothing, so zone equipment
+  and terminals come from the proxy files instead.
+
+`dir()`/`getattr()` on the live module recovers method NAMES only, not
+parameters and not return types, which is why probing an SDK question feels
+adequate and is not. **Each of these has already been the difference between a
+correct guard and an invented one.** `_as_layered` in
+`btap/modeling/envelope/constructions.py` was first written with two downcasts
+in a documented order whose stated reason was fiction — `Construction` and
+`ConstructionWithInternalSource` are siblings under `LayeredConstruction`, so
+one `to_LayeredConstruction` covers both, as three call sites in that same file
+already did. A hand-written refusal covered one of four layerless construction
+types. Issues #166 and #169 are both audits that only became tractable once
+these were used.
+
+The pinned gem under `vendor/bundle/` remains the reference for how the LEGACY
+realised a requirement, per the NECB section above; it is not an SDK API
+reference and is never an authority.
 
 ## Questions referred to an authority
 
