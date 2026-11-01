@@ -41,6 +41,7 @@ from __future__ import annotations
 import argparse
 import collections
 import difflib
+import json
 import pathlib
 import re
 import sys
@@ -238,6 +239,17 @@ def cmd_optionals(args) -> int:
         if args.on and args.on not in wrapped:
             continue
         rows.append((method, worst, sorted(wrapped)))
+    if args.json:
+        # Names only, sorted, so a committed baseline has a stable diff. The
+        # unwrap ratchet in `tests/test_sdk_unwrap_ratchet.py` reads this on a
+        # runner with no SDK tree, which is why it must be committed rather
+        # than derived at test time.
+        print(json.dumps({'family': args.family or 'all',
+                          'declarations': declarations,
+                          'methods': [m for m, _, _ in rows]},
+                         indent=1, sort_keys=True))
+        return 0
+
     tally = collections.Counter(worst for _, worst, _ in rows)
     print(f"{len(rows)} method NAMES returning boost::optional<T> "
           f"({declarations} declarations in all)"
@@ -298,6 +310,8 @@ def main(argv=None) -> int:
     p.add_argument('--family', choices=('crash', 'default', 'raise'))
     p.add_argument('--on', metavar='T', help='only optionals wrapping T')
     p.add_argument('--list', action='store_true')
+    p.add_argument('--json', action='store_true',
+                   help='machine-readable names only, for a committed baseline')
     p.set_defaults(func=cmd_optionals)
 
     p = sub.add_parser('method', help='where a method is declared, and its signature')

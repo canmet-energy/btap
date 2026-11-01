@@ -1,0 +1,47 @@
+{
+ "note": "generated \u2014 see test_sdk_unwrap_ratchet.py",
+ "sites": {
+  "codes/necb/hvac/energy_recovery.py": {
+   "mixedAirModelObject": 1,
+   "outboardOANode": 2,
+   "primaryAirOutletModelObject": 1,
+   "returnAirModelObject": 1
+  },
+  "codes/necb/hvac/reference.py": {
+   "outletModelObject": 1,
+   "supplyOutletModelObject": 1
+  },
+  "codes/necb/path.py": {
+   "space": 2
+  },
+  "codes/necb/shw/efficiency.py": {
+   "plantLoop": 1
+  },
+  "costing/envelope/quantify.py": {
+   "adjacentSurface": 1
+  },
+  "modeling/envelope/foundations.py": {
+   "space": 1
+  },
+  "modeling/geometry/bar.py": {
+   "buildingStory": 4
+  },
+  "modeling/geometry/plan_query.py": {
+   "buildingStory": 1
+  },
+  "modeling/hvac/components/ecm_air.py": {
+   "returnAirNode": 1
+  },
+  "modeling/hvac/systems/hp_plant_fancoils.py": {
+   "outletModelObject": 1,
+   "supplyOutletModelObject": 2
+  },
+  "modeling/hvac/systems/vav_reheat.py": {
+   "mixedAirModelObject": 1,
+   "outboardOANode": 2,
+   "primaryAirOutletModelObject": 1,
+   "returnAirModelObject": 2
+  }
+ },
+ "total": 27
+}
