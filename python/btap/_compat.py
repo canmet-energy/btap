@@ -125,11 +125,12 @@ def opt(optional):
     to state a mechanism here (#164) each described something the SDK does not
     do.
 
-    No test pins this one. In a plain subprocess it is stable (200/200 via
-    ``-c``), but driven from pytest the same probe failed 4 of 12 runs, and a
-    test that flakes a third of the time is the defect it would be documenting.
-    So: do not rely on seeing it, and never read a clean run as evidence it is
-    gone.
+    It IS pinned, by two tests in ``tests/test_sdk_invariants.py`` that must
+    stay two: the probe is stable at one subprocess launch per test and fails
+    roughly 7% of the time when the control and the subject share one. Even so,
+    do not rely on SEEING this in the wild, and never read a clean run as
+    evidence it is gone — the trap fires on whatever checked call comes next,
+    which may be nowhere near the unwrap that caused it.
 
     Ruby raises cleanly in all of these. See D-79.
     """

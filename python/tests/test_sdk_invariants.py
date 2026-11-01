@@ -282,39 +282,88 @@ class TestNoUncheckedOptionalGet(unittest.TestCase):
                           f"{name} must raise on its FIRST unwrap in a fresh "
                           f"interpreter. stdout: {out.stdout[:300]}")
 
-    # THE RESIDUE TRAP IS NOT PINNED HERE, and the evidence for that is a
-    # measurement of the TEST, not of the hazard.
+    # The residue trap, in TWO tests on purpose. Putting the control and the
+    # subject in one test method means three subprocess launches from one
+    # parent, and in that shape the subject fails about 7% of the time
+    # (2 of 30, and 4 of 12 in a smaller sample that overestimated it). One
+    # launch per test is stable: 30 of 30 here and 42 of 42 on the reviewer's
+    # host. Why the launches interact is not established, so do not merge
+    # these two back together for tidiness. (Structure from Fable's review of
+    # #164, after two wrong conclusions of mine — first that the trap was
+    # unpinnable, then that it was intermittent.)
     #
-    # The hazard: D-79 said the RAISING unwrap leaves the C error indicator
-    # set. It does not. A SURVIVING one is worse — after `g M g` (unwrap,
-    # construct a `Model()`, unwrap again) the NEXT checked C call raises
-    # `SystemError` caused by `RuntimeError: Optional not initialized`. ANY
-    # such call: `[].append(0)` shows it as readily as an SDK call, and the
-    # error is set DURING that call rather than left pending before it
-    # (`PyErr_Occurred()` reads clear in the same position, 20/20, and
-    # `gc.disable()`/`gc.freeze()` change nothing). No mechanism is claimed
-    # beyond that.
-    #
-    # Why there is no test. A probe in a plain subprocess is stable —
-    # 200/200 poisoned via `-c`, 45/50 as a script FILE — but the same probe
-    # DRIVEN FROM PYTEST is not: written as a test here it failed 4 of 12
-    # runs. A test that fails a third of the time is the defect class issue
-    # #141 was, so it does not ship.
-    #
-    # Two traps for anyone who tries again, both of which caught someone
-    # during #164:
-    #
-    # 1. The pending error is tripped by whatever checked C call comes next.
-    #    Put anything between the surviving unwrap and your sentinel and the
-    #    probe dies THERE — and a harness looking for a marker then scores
-    #    the death as a clean run. That is how the hazard came to be reported
-    #    as intermittent when it was firing every time.
-    # 2. A sample of 20 is not enough to see the file-mode variance, and a
-    #    sample from a plain parent says nothing about the pytest case. Both
-    #    of those produced a confident wrong answer here.
-    #
-    # The four invariants this file DOES pin were each confirmed at 50/50 in
-    # the form they are pinned in.
+    # Nothing may sit between the surviving unwrap and the sentinel either:
+    # the pending error is tripped by the NEXT checked C call, so an extra
+    # statement there makes the probe die at that statement instead, and a
+    # harness looking for a marker scores the death as a clean run. That is
+    # how the trap first came to be reported as intermittent when it was
+    # firing every time.
+
+    _RESIDUE_PROBE = (
+        "import openstudio\n"
+        "def unwrap():\n"
+        "    x = openstudio.model.Model.load("
+        "openstudio.path('/nonexistent.osm'))\n"
+        "    assert not x.is_initialized()\n"
+        "    return x.get()\n"
+        "m1 = unwrap()\n"
+        "%s"
+        "m2 = unwrap()\n"
+        "try:\n"
+        "    [].append(0)\n"
+        "    print('SENTINEL_CLEAN', flush=True)\n"
+        "except SystemError as e:\n"
+        "    print('SENTINEL_POISONED', type(e.__cause__).__name__,\n"
+        "          flush=True)\n"
+    )
+
+    def _residue_probe(self, *, construct_between):
+        try:
+            import openstudio  # noqa: F401
+        except ImportError:
+            self.skipTest("needs the openstudio wheel")
+
+        import subprocess
+        import sys
+        body = self._RESIDUE_PROBE % (
+            "openstudio.model.Model()\n" if construct_between else "")
+        out = subprocess.run([sys.executable, "-c", body],
+                             capture_output=True, text=True, check=False,
+                             timeout=120)
+        # A probe that DIES is a result to classify, never an absence.
+        self.assertEqual(
+            0, out.returncode,
+            f"probe died (rc={out.returncode}) instead of reporting; "
+            f"something sits between the unwrap and the sentinel. "
+            f"stderr: {out.stderr[-400:]}")
+        return out.stdout
+
+    def test_unwraps_alone_do_not_poison_a_later_call(self):
+        """CONTROL for the test below, and it must stay its own test."""
+        self.assertIn("SENTINEL_CLEAN",
+                      self._residue_probe(construct_between=False),
+                      "two surviving unwraps with no Model() between them "
+                      "must leave the next C call alone — without this, the "
+                      "test below shows only that SOMETHING in the sequence "
+                      "poisons")
+
+    def test_a_SURVIVING_unwrap_poisons_the_NEXT_checked_C_call(self):
+        """D-79 put the residue on the raising case. It is the surviving one.
+
+        After unwrap, `Model()`, unwrap, the next checked C call raises
+        `SystemError` caused by `RuntimeError: Optional not initialized`. The
+        sentinel is `[].append(0)` — nothing to do with OpenStudio — because
+        the trap is any checked call, which is what makes an unguarded `.get()`
+        hard to diagnose.
+
+        The error is set DURING that call, not left pending before it:
+        `PyErr_Occurred()` read in the same position is clear, and disabling
+        the garbage collector changes nothing. No mechanism is claimed.
+        """
+        self.assertIn("SENTINEL_POISONED RuntimeError",
+                      self._residue_probe(construct_between=True),
+                      "a surviving unwrap after a Model() must poison the "
+                      "next checked C call")
 
     def test_the_checked_loader_names_the_path(self):
         from btap._sdk import load_model
