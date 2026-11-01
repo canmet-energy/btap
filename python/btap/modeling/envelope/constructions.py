@@ -363,10 +363,20 @@ def _as_layered(construction):
     wheel-smoke gate hit exactly that in its own first version and recorded it
     as friction on issue #143.
 
-    Normalizing HERE, at the public entry points, rather than inside
-    ``deep_copy`` or the transmittance helpers, is deliberate: those are
-    legacy-exact ports and their contracts stay as they are. This widens only
-    what the two public retargeting functions ACCEPT, which breaks no caller.
+    Called from the three public functions that need layers —
+    ``opaque_at_conductance``, ``fenestration_at_conductance`` and
+    ``deep_copy``. It widens only what they ACCEPT and so breaks no caller.
+
+    ``deep_copy`` was left out of the first version of this on the grounds that
+    it is a legacy-exact port whose contract should not move. That was wrong
+    twice over: normalizing a type changes nothing for any input the function
+    previously took, so "legacy-exact" was scope rather than a correctness
+    argument — and the unguarded path it protected EXITS 139, because
+    ``clone(model).to_Construction()`` is empty for a layerless construction
+    and ``.get()`` on that segfaults (#164). The transmittance helpers are
+    genuinely left alone: they fail with a plain ``AttributeError``, which is
+    friction rather than a crash, and nothing public reaches them with a
+    ``ConstructionBase``.
 
     A surface's ``Construction Name`` can name SIX types (the
     ``ConstructionNames`` reference group of the OpenStudio 3.11.0 IDD), and
