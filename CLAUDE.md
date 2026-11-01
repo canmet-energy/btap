@@ -189,12 +189,17 @@ python3 -m venv .venv
 
 # Repository tools, from the repository root
 python3 python/scripts/necb_orphan_keys.py
+
 python3 python/scripts/generate_necb_coverage.py
 python3 python/scripts/generate_necb_8_4_coverage.py
 python3 python/scripts/generate_necb_edition_delta.py --check
 python3 python/scripts/generate_necb_vintage_match.py --check
 python3 python/scripts/generate_decisions.py --check
 python3 python/scripts/legacy_whatsnew.py
+# SDK API lookups, from the files the image ships — no import, network or MCP
+python3 python/scripts/sdk_api.py tree LayeredConstruction --subclasses
+python3 python/scripts/sdk_api.py optionals --family crash --list
+python3 python/scripts/sdk_api.py method insulation
 
 # Authenticated maintainer refreshes; ordinary runtime and CI stay offline
 python3 python/scripts/fetch_necb_provisions.py
@@ -439,6 +444,74 @@ table from the MCP and read the gem's corresponding Ruby and data. Cite
 both in the decision and the provenance entry. When they disagree, the
 Code wins and the gem's version is recorded as a finding, not adopted;
 `docs/NECB_VINTAGE_MATCH.md` is the pattern.
+
+## Three references for any SDK behaviour
+
+An OpenStudio SDK question — which class carries a method, what an accessor
+returns, which object types a field accepts — is answered from a reference,
+never by inference and never by a probe script. The image already ships the
+answers under `/usr/local/openstudio-3.11.0` (written `$SDK` below) — both
+`canmet/os_sdk_container:3.11.0` in the devcontainer and
+`nrel/openstudio:3.11.0` in the CI image put it there, and `test.yml` already
+hardcodes that path. `python/scripts/sdk_api.py` wraps the two file-based
+lookups and needs no import, network or MCP server; pass `--sdk` for another
+install.
+
+- **The SWIG Python proxy files are the class tree.** `$SDK/Python/openstudio*.py`
+  (39 of them) carry every class, its base, and parameter names. SWIG emits
+  them beside the compiled bindings; read them AS TEXT, never execute them.
+  `sdk_api.py tree <Class>` prints the ancestry and `--subclasses` the direct
+  children. No class-body method in them carries a return annotation — zero of
+  roughly 51,000 — though the module-level cast helpers
+  (`_to_PlantEquipmentOperationCoolingLoad`) do, which is where a cast's own
+  return type is written down.
+- **The C++ headers are the return types.** `$SDK/include/openstudio/model/*.hpp`
+  — 613 public headers, excluding `*_Impl.hpp` — state them exactly, including
+  which methods return `boost::optional<T>`. That is the D-79 hazard surface:
+  3122 declarations across 2094 method NAMES, of which 794 names have at least
+  one overload the script classifies CRASH family. Quote the figure you mean —
+  `schedule()` is declared on some 290 classes and is one name. A name
+  overloaded across families is reported at its worst, because that is what a
+  caller must guard against. `sdk_api.py optionals --family crash` lists them;
+  `method <name>` gives a signature.
+
+  **"Crash family" is the script's classification, not a per-type
+  measurement.** D-79 measured the 617 `openstudio.model.Optional*` types; the
+  headers also wrap utilities types, and sixteen of those were measured
+  afterwards — `path`, `FuelType`, `SqlFile`, `TimeSeries` and eight more
+  return a default, while `UUID`, `EpwFile`, `ViewFactor` and
+  `WorkspaceObject` crash.
+  Anything unmeasured falls through to crash deliberately: over-reporting
+  danger is the safe direction for a tool whose job is to stop a segfault.
+- **The modelling MCP is the IDD.** `mcp__modelling__get_idd_object` and
+  `find_related_objects` answer what a FIELD accepts. A reference group gives
+  the COMPLETE set — `OS:Surface`'s `Construction Name` resolves to
+  `ConstructionNames`, which is exactly six types — which is what a guard or a
+  test matrix needs. It does not generalise on the OpenStudio side:
+  `OS:ZoneHVAC:EquipmentList`'s equipment field is `AllObjects` and enumerates
+  nothing, so OS-side zone equipment comes from
+  `sdk_api.py tree ZoneHVACComponent --subclasses` instead. The ENERGYPLUS IDD
+  does enumerate it — `ZoneHVAC:EquipmentList`'s object-type field is a
+  `\type choice` of 33 keys in the E+ 25.2 IDD that the SDK itself bundles at
+  `$SDK/EnergyPlus/Energy+.idd`, so it is checkable offline from the same
+  install. The same MCP serves it, so ask both before concluding a set is
+  unobtainable.
+
+`dir()`/`getattr()` on the live module recovers method NAMES only, not
+parameters and not return types, which is why probing an SDK question feels
+adequate and is not. **Each of these has already been the difference between a
+correct guard and an invented one.** `_as_layered` in
+`btap/modeling/envelope/constructions.py` was first written with two downcasts
+in a documented order whose stated reason was fiction — `Construction` and
+`ConstructionWithInternalSource` are siblings under `LayeredConstruction`, so
+one `to_LayeredConstruction` covers both, as three call sites in that same file
+already did. A hand-written refusal covered one of four layerless construction
+types. Issues #166 and #169 are both audits that only became tractable once
+these were used.
+
+The pinned gem under `vendor/bundle/` remains the reference for how the LEGACY
+realised a requirement, per the NECB section above; it is not an SDK API
+reference and is never an authority.
 
 ## Questions referred to an authority
 
