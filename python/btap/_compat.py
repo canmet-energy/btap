@@ -75,13 +75,67 @@ def opt(optional):
     """Unwrap an SDK Optional: the value, or None when empty (Ruby's
     ``x.is_initialized ? x.get : nil``). None passes through.
 
-    ALWAYS route through this rather than calling ``.get()`` directly. The
-    Python bindings do not fail the way Ruby does: ``OptionalModel.get()`` on
-    an EMPTY optional RETURNS AN EMPTY MODEL instead of raising (so a failed
-    ``Model.load`` flows onward silently), while ``OptionalDouble``/
-    ``OptionalString`` raise ``SystemError`` and leave the C-level error
-    indicator set, which can segfault the interpreter on a later unrelated
-    call. Ruby raises cleanly in all of these. See D-79.
+    ALWAYS route through this rather than calling ``.get()`` directly.
+    Unwrapping an EMPTY optional does not fail the way Ruby does, and what it
+    does is not a stable function of the type. Three outcomes occur, measured
+    on 3.11.0 (#164):
+
+    - it SEGFAULTS the interpreter. 615 of the 617 ``Optional*`` names in
+      ``openstudio.model`` do this — every one wrapping a
+      NON-DEFAULT-CONSTRUCTIBLE type, which is most model objects plus some
+      value types like ``ClimateZone`` and ``ViewFactor``. This is what a
+      failed ``to_X()`` cast returns, and equally what ``.thermalZone()``,
+      ``.construction()``, ``.spaceType()`` and the other optional accessors
+      return — the accessors are the larger population. History makes no
+      difference, and a crash takes the whole process with it (in a test run,
+      the whole xdist worker, which reports as a lost node rather than a
+      failure).
+    - it RAISES ``SystemError``, caused by ``RuntimeError: Optional not
+      initialized``. The value optionals ``OptionalDouble``,
+      ``OptionalString`` and ``OptionalInt`` do this on their FIRST call.
+    - it RETURNS A DEFAULT-CONSTRUCTED OBJECT, silently. ``OptionalModel`` and
+      ``OptionalScheduleType``, the namespace's two default-constructible
+      types, do this in a fresh interpreter. That is how an unwrapped failed
+      ``Model.load(...)`` flows onward as a model with no spaces and no
+      zones, and how the packaged catalog report came to emit 97 "diagram
+      unavailable" cards from a wheel instead of one clear error.
+
+    Which of the last two a default-constructible optional gives you depends
+    on what the process has already done, per class — and NOT in a way worth
+    writing down. Two sequences are pinned in
+    ``tests/test_sdk_invariants.py`` because they anchor the hazard; the rest
+    of the ordering was measured and deliberately left undocumented, because
+    two successive attempts to state a rule for it (#164, both mine) each
+    described behaviour the SDK does not have. Treat every unguarded unwrap as
+    one of the three outcomes above, unpredictably.
+
+    One further trap, which D-79 half-saw and put on the wrong case: after a
+    SURVIVING unwrap, the NEXT CHECKED C CALL — whatever it happens to be —
+    can raise ``SystemError`` caused by ``RuntimeError: Optional not
+    initialized``. Unwrap, construct a ``Model()``, unwrap again, and the
+    next call raises; a bare ``[].append(0)`` shows it as readily as any SDK
+    call, so the failure surfaces in code with no visible connection to an
+    optional. The RAISING case is the one that leaves nothing behind —
+    CPython chains the ``RuntimeError`` as ``__cause__`` and clears it.
+
+    The error is set DURING that next call, not left pending before it:
+    ``ctypes.pythonapi.PyErr_Occurred()`` read in the same position is clear,
+    and disabling the garbage collector changes nothing. Why is not known,
+    and this docstring deliberately does not guess — three successive attempts
+    to state a mechanism here (#164) each described something the SDK does not
+    do.
+
+    No test pins this one, and the reason is not flakiness: on the SAME SDK
+    build, the second unwrap SURVIVES on CPython 3.12 and RAISES on 3.11, so a
+    probe cannot assert one outcome across the interpreters this project
+    supports — 3.11 is the floor and 3.12 is what the CI image and local venvs
+    run.
+    ``tests/test_sdk_invariants.py`` records the measurements. Do not rely on
+    seeing this in the wild, and never read a clean run as evidence it is gone
+    — the trap fires on whatever checked call comes next, which may be nowhere
+    near the unwrap that caused it.
+
+    Ruby raises cleanly in all of these. See D-79.
     """
     if optional is None:
         return None
