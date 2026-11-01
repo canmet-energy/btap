@@ -109,18 +109,27 @@ def opt(optional):
     described behaviour the SDK does not have. Treat every unguarded unwrap as
     one of the three outcomes above, unpredictably.
 
-    One further trap, which D-79 half-saw and attributed to the wrong case: a
-    SURVIVING unwrap can leave the C-level error indicator set for a LATER,
-    UNRELATED call to trip over. Unwrap, construct a ``Model()``, unwrap
-    again, and a plain ``openstudio.path()`` then raises ``SystemError``. The
-    RAISING case is the one that leaves no residue — CPython chains the
-    ``RuntimeError`` as ``__cause__`` and clears it. So an unguarded unwrap
-    can detonate in code with no visible connection to any optional.
+    One further trap, which D-79 half-saw and put on the wrong case: after a
+    SURVIVING unwrap, the NEXT CHECKED C CALL — whatever it happens to be —
+    can raise ``SystemError`` caused by ``RuntimeError: Optional not
+    initialized``. Unwrap, construct a ``Model()``, unwrap again, and the
+    next call raises; a bare ``[].append(0)`` shows it as readily as any SDK
+    call, so the failure surfaces in code with no visible connection to an
+    optional. The RAISING case is the one that leaves nothing behind —
+    CPython chains the ``RuntimeError`` as ``__cause__`` and clears it.
 
-    That trap is intermittent, which is why no test pins it: the same source
-    poisoned 24/24 runs driven with ``-c``, 7 of 10 as a script file, and not
-    at all under pytest. Do not rely on seeing it, and do not read a clean run
-    as evidence it is gone.
+    The error is set DURING that next call, not left pending before it:
+    ``ctypes.pythonapi.PyErr_Occurred()`` read in the same position is clear,
+    and disabling the garbage collector changes nothing. Why is not known,
+    and this docstring deliberately does not guess — three successive attempts
+    to state a mechanism here (#164) each described something the SDK does not
+    do.
+
+    No test pins this one. In a plain subprocess it is stable (200/200 via
+    ``-c``), but driven from pytest the same probe failed 4 of 12 runs, and a
+    test that flakes a third of the time is the defect it would be documenting.
+    So: do not rely on seeing it, and never read a clean run as evidence it is
+    gone.
 
     Ruby raises cleanly in all of these. See D-79.
     """

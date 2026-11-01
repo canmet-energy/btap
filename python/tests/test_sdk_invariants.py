@@ -282,25 +282,39 @@ class TestNoUncheckedOptionalGet(unittest.TestCase):
                           f"{name} must raise on its FIRST unwrap in a fresh "
                           f"interpreter. stdout: {out.stdout[:300]}")
 
-    # The residue trap is deliberately NOT pinned, and that is a finding
-    # rather than an omission.
+    # THE RESIDUE TRAP IS NOT PINNED HERE, and the evidence for that is a
+    # measurement of the TEST, not of the hazard.
     #
-    # D-79 said the RAISING unwrap leaves the C error indicator set. It does
-    # not. A SURVIVING one can: after `g M g` — unwrap, construct a Model,
-    # unwrap again — a plain `openstudio.path()` raises SystemError with no
-    # connection to any optional. That is real, and it is why an unguarded
-    # `.get()` is hard to diagnose.
+    # The hazard: D-79 said the RAISING unwrap leaves the C error indicator
+    # set. It does not. A SURVIVING one is worse — after `g M g` (unwrap,
+    # construct a `Model()`, unwrap again) the NEXT checked C call raises
+    # `SystemError` caused by `RuntimeError: Optional not initialized`. ANY
+    # such call: `[].append(0)` shows it as readily as an SDK call, and the
+    # error is set DURING that call rather than left pending before it
+    # (`PyErr_Occurred()` reads clear in the same position, 20/20, and
+    # `gc.disable()`/`gc.freeze()` change nothing). No mechanism is claimed
+    # beyond that.
     #
-    # But it is not reliably observable. Measured over 24 runs of each shape:
-    # driven by a parent process with `-c`, 24/24 poisoned; the identical
-    # source run as a script FILE, 7/10 poisoned and 3/10 clean; and under
-    # pytest, clean. A test asserting it would fail intermittently depending
-    # on how the suite was invoked — which is precisely the defect class
-    # issue #141 was, and writing a second one to document the first would be
-    # absurd. The four invariants pinned in this file were each confirmed
-    # 24/24 deterministic before being pinned.
+    # Why there is no test. A probe in a plain subprocess is stable —
+    # 200/200 poisoned via `-c`, 45/50 as a script FILE — but the same probe
+    # DRIVEN FROM PYTEST is not: written as a test here it failed 4 of 12
+    # runs. A test that fails a third of the time is the defect class issue
+    # #141 was, so it does not ship.
     #
-    # If you need to see it, the sequence above reproduces it by hand.
+    # Two traps for anyone who tries again, both of which caught someone
+    # during #164:
+    #
+    # 1. The pending error is tripped by whatever checked C call comes next.
+    #    Put anything between the surviving unwrap and your sentinel and the
+    #    probe dies THERE — and a harness looking for a marker then scores
+    #    the death as a clean run. That is how the hazard came to be reported
+    #    as intermittent when it was firing every time.
+    # 2. A sample of 20 is not enough to see the file-mode variance, and a
+    #    sample from a plain parent says nothing about the pytest case. Both
+    #    of those produced a confident wrong answer here.
+    #
+    # The four invariants this file DOES pin were each confirmed at 50/50 in
+    # the form they are pinned in.
 
     def test_the_checked_loader_names_the_path(self):
         from btap._sdk import load_model
