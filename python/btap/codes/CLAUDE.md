@@ -276,10 +276,14 @@ learns *why* we read the article that way.
 ## Before casting or unwrapping an SDK object
 
 Root `CLAUDE.md`, "Three references for any SDK behaviour", and
-`python/scripts/sdk_api.py`. The rule-application code here holds 74 sites
-where an SDK accessor is unwrapped; `optionals --family crash` says which
-return a type whose empty `.get()` SEGFAULTS rather than raising, and #169 is
-the open audit. Route every one through `btap._compat.opt`.
+`python/scripts/sdk_api.py`. The rule-application code here holds some 78
+`X.method().get()` chains — and about 258 `.get()` calls in all once a value
+held in a local counts, which is the same hazard one step removed. The count
+is given with its pattern on purpose: a bare figure here read 74, reproduced
+as 78, and a precise number nobody can regenerate is what gets quoted back.
+`optionals --family crash` says which accessors return a type whose empty
+`.get()` SEGFAULTS rather than raising; #169 is the open audit. Route every
+one through `btap._compat.opt`.
 
 ## Key facts / traps
 

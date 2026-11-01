@@ -136,7 +136,8 @@ NRCan building-stock records.
 Root `CLAUDE.md`, "Three references for any SDK behaviour": the class tree
 comes from the SWIG proxy files, return types and the `boost::optional`
 surface from the C++ headers, and what a FIELD accepts from the modelling MCP.
-`python/scripts/sdk_api.py tree|optionals|method` is the shortcut.
+`python/scripts/sdk_api.py tree|optionals|method` is the shortcut. This
+subpackage holds 78 `X.method().get()` chains, 148 `.get()` calls in all.
 
 This subpackage is where it bites. `_as_layered` in
 `envelope/constructions.py` was first written with two downcasts in an order

@@ -77,10 +77,12 @@ _CLASS = re.compile(r'^class\s+(\w+)\(([\w.]+)\)', re.M)
 #: Matched against COMMENT-STRIPPED, WHITESPACE-FLATTENED text.
 #:
 #: The first version missed 41 declarations (review of #170), every one a
-#: genuine public declaration: 22 prefixed `OS_DEPRECATED(...)`, 12 `static`
-#: (`Model::load`, `Component::load`, `Space::fromFloorPrint`, …), 6 with an
-#: aggregate T (`std::pair<ConstructionBase, int>`), and 2 whose T is two
-#: words (`unsigned int`), which the old `[\w:]*` could not cross. None of
+#: genuine public declaration: 21 prefixed `OS_DEPRECATED(...)`, a dozen
+#: `static` (`Model::load`, `Component::load`, `Space::fromFloorPrint`, …), 6
+#: with an aggregate T (`std::pair<ConstructionBase, int>`), and 2 whose T is
+#: two words (`unsigned int`), which the old `[\w:]*` could not cross. Two
+#: careful counts put the static/other split at 11+1 and 12+0, so that one is
+#: written loosely on purpose; the 21 and the 41 both reproduce. None of
 #: the 41 has a call site in `btap`, so nothing was being mis-guarded — the
 #: fix matters because under-reporting is the dangerous direction for a tool
 #: whose job is to find calls that can segfault.
