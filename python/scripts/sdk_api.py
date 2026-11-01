@@ -77,12 +77,10 @@ _CLASS = re.compile(r'^class\s+(\w+)\(([\w.]+)\)', re.M)
 #: Matched against COMMENT-STRIPPED, WHITESPACE-FLATTENED text.
 #:
 #: The first version missed 41 declarations (review of #170), every one a
-#: genuine public declaration: 21 prefixed `OS_DEPRECATED(...)`, a dozen
-#: `static` (`Model::load`, `Component::load`, `Space::fromFloorPrint`, …), 6
-#: with an aggregate T (`std::pair<ConstructionBase, int>`), and 2 whose T is
-#: two words (`unsigned int`), which the old `[\w:]*` could not cross. Two
-#: careful counts put the static/other split at 11+1 and 12+0, so that one is
-#: written loosely on purpose; the 21 and the 41 both reproduce. None of
+#: genuine public declaration: 21 prefixed `OS_DEPRECATED(...)`, 12 `static`
+#: (`Model::load`, `Component::load`, `Space::fromFloorPrint`, …), 6 with an
+#: aggregate T (`std::pair<ConstructionBase, int>`), and 2 whose T is two
+#: words (`unsigned int`), which the old `[\w:]*` could not cross. None of
 #: the 41 has a call site in `btap`, so nothing was being mis-guarded — the
 #: fix matters because under-reporting is the dangerous direction for a tool
 #: whose job is to find calls that can segfault.
@@ -90,6 +88,15 @@ _CLASS = re.compile(r'^class\s+(\w+)\(([\w.]+)\)', re.M)
 #: A multi-line declaration was NOT among the misses: `>\s+(\w+)` already
 #: spans a newline under `re.M`. An earlier version of this comment claimed
 #: otherwise and named a method the old regex in fact found.
+#:
+#: If you re-derive that 41, classify each match by its OWN matched text. Two
+#: attempts here paired new matches against old ones by `(T, name)` instead,
+#: which miscounts any name declared twice: `ScheduleTypeLimits::units` is
+#: `static` at line 50 and plain at line 65, the old regex finds only the
+#: plain one, and the pairing consumes the static match against it — leaving
+#: the plain declaration looking "recovered" with no prefix. That artefact
+#: produced a phantom "1 other" and, briefly, a comment claiming the split
+#: was genuinely uncertain. It is 12 static, determinately.
 _OPTIONAL = re.compile(
     r'(?:OS_DEPRECATED\s*\([^)]*\)\s+|static\s+|virtual\s+)*'
     r'boost::optional\s*<\s*'
