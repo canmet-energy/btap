@@ -282,22 +282,69 @@ class TestNoUncheckedOptionalGet(unittest.TestCase):
                           f"{name} must raise on its FIRST unwrap in a fresh "
                           f"interpreter. stdout: {out.stdout[:300]}")
 
-    # The residue trap, in TWO tests on purpose. Putting the control and the
-    # subject in one test method means three subprocess launches from one
-    # parent, and in that shape the subject fails about 7% of the time
-    # (2 of 30, and 4 of 12 in a smaller sample that overestimated it). One
-    # launch per test is stable: 30 of 30 here and 42 of 42 on the reviewer's
-    # host. Why the launches interact is not established, so do not merge
-    # these two back together for tidiness. (Structure from Fable's review of
-    # #164, after two wrong conclusions of mine — first that the trap was
-    # unpinnable, then that it was intermittent.)
+    # THE RESIDUE TRAP IS PINNED ONLY IN THE HALF THAT IS PORTABLE, because
+    # HOW it fails differs by interpreter while THAT it fails does not.
     #
-    # Nothing may sit between the surviving unwrap and the sentinel either:
-    # the pending error is tripped by the NEXT checked C call, so an extra
-    # statement there makes the probe die at that statement instead, and a
-    # harness looking for a marker scores the death as a clean run. That is
-    # how the trap first came to be reported as intermittent when it was
-    # firing every time.
+    # The trap: D-79 said the RAISING unwrap leaves the C error indicator set.
+    # It does not. After `g M g` — unwrap, construct a `Model()`, unwrap again
+    # — the NEXT CHECKED C CALL raises `SystemError` caused by
+    # `RuntimeError: Optional not initialized`. Any checked call: a bare
+    # `[].append(0)` shows it as readily as an SDK call, which is what makes an
+    # unguarded `.get()` hard to diagnose. The error is set DURING that call,
+    # not left pending before it (`PyErr_Occurred()` reads clear in the same
+    # position, and `gc.disable()`/`gc.freeze()` change nothing). No mechanism
+    # is claimed.
+    #
+    # What cannot be pinned is a single outcome. The SECOND unwrap does not do
+    # the same thing on both interpreters:
+    #
+    #   CPython 3.12  it SURVIVES, and the sentinel after it is poisoned
+    #   CPython 3.11  it RAISES, so a probe never reaches a sentinel at all
+    #
+    # Each is 10/10 deterministic on its own interpreter, so this is a clean
+    # split rather than a flake: whichever outcome a test asserts, it is right
+    # on one interpreter and wrong on the other.
+    #
+    # 3.11 is the project floor (`test.yml` pins it for `lint` and `python`),
+    # 3.12 is what the CI image and local venvs run, so a pin asserting EITHER
+    # outcome passes one job and fails the other. A probe written against 3.12
+    # turned the `python` job red at `def9930d` with `probe died (rc=1)` — the
+    # interpreter difference, not a flake.
+    #
+    # What IS portable, and is pinned below, is that the sequence is NEVER a
+    # silent default: 30/30 poisoned on 3.12 and 30/30 raising on 3.11, with
+    # the control clean 30/30 on both. The silent default is the dangerous
+    # outcome — a wrong answer rather than a failure — so a test that catches
+    # its return is worth more than one asserting which way the failure comes.
+    # (Shape and the disjunction both from Fable's review of #164.)
+    #
+    # Three traps for anyone who tries again, each of which caught someone
+    # during #164:
+    #
+    # 1. The pending error is tripped by whatever checked C call comes next.
+    #    Put anything between the surviving unwrap and the sentinel and the
+    #    probe dies THERE; a harness looking for a marker then scores the
+    #    death as a clean run. That is how the trap was first reported as
+    #    intermittent when it was firing every time.
+    # 2. Measure the artifact, not a tidier rebuild of it. A simplified
+    #    one-launch probe came back 60/60 clean while the real three-launch
+    #    pin failed 2 of 30, which nearly got a real observation dismissed as
+    #    noise.
+    # 3. Measure on the FLOOR interpreter. Every determinism figure here —
+    #    200/200, 30/30, 42/42 — was taken on 3.12 and said nothing about the
+    #    job that actually failed.
+    #
+    # The four invariants this file DOES pin are MEASURED on both, not merely
+    # green in a job: 50/50 on 3.12, and on 3.11 the flip pin passed 40/40
+    # plus 10/10, the fresh unwrap returned a default 30/30, and the
+    # value-optional and segfault pins passed every 3.11 run of this file.
+    #
+    # One footnote that is an observation, not a defect. A BARE `M g` probe —
+    # no `unwrap()` helper, no `is_initialized` assert — returned a silent
+    # default on 3.11 in 9 of 95 runs, clustered in two of four batches, while
+    # the shape actually used here never did in 80. The shape dependence is
+    # unexplained, so do not restructure these probes without re-measuring on
+    # 3.11.
 
     _RESIDUE_PROBE = (
         "import openstudio\n"
@@ -306,18 +353,29 @@ class TestNoUncheckedOptionalGet(unittest.TestCase):
         "openstudio.path('/nonexistent.osm'))\n"
         "    assert not x.is_initialized()\n"
         "    return x.get()\n"
-        "m1 = unwrap()\n"
-        "%s"
-        "m2 = unwrap()\n"
+        "outcome = None\n"
         "try:\n"
-        "    [].append(0)\n"
-        "    print('SENTINEL_CLEAN', flush=True)\n"
-        "except SystemError as e:\n"
-        "    print('SENTINEL_POISONED', type(e.__cause__).__name__,\n"
-        "          flush=True)\n"
+        "    m1 = unwrap()\n"
+        "%s"
+        "    m2 = unwrap()\n"
+        "    try:\n"
+        "        [].append(0)\n"
+        "        outcome = 'CLEAN'\n"
+        "    except SystemError:\n"
+        "        outcome = 'POISONED'\n"
+        "except SystemError:\n"
+        "    outcome = 'RAISED_AT_UNWRAP'\n"
+        "print('OUTCOME', outcome, flush=True)\n"
     )
 
-    def _residue_probe(self, *, construct_between):
+    def _residue_outcome(self, *, construct_between):
+        """One subprocess launch, and the probe prints exactly one outcome.
+
+        Every branch is classified INSIDE the probe, so the parent never has
+        to read a missing marker: a probe that dies has broken, and the
+        returncode assertion says so. Printing anything before the sentinel
+        would make `print` the poisoned call instead.
+        """
         try:
             import openstudio  # noqa: F401
         except ImportError:
@@ -325,45 +383,46 @@ class TestNoUncheckedOptionalGet(unittest.TestCase):
 
         import subprocess
         import sys
-        body = self._RESIDUE_PROBE % (
-            "openstudio.model.Model()\n" if construct_between else "")
-        out = subprocess.run([sys.executable, "-c", body],
-                             capture_output=True, text=True, check=False,
-                             timeout=120)
-        # A probe that DIES is a result to classify, never an absence.
+        out = subprocess.run(
+            [sys.executable, "-c", self._RESIDUE_PROBE % (
+                "    openstudio.model.Model()\n" if construct_between else "")],
+            capture_output=True, text=True, check=False, timeout=120)
         self.assertEqual(
             0, out.returncode,
-            f"probe died (rc={out.returncode}) instead of reporting; "
-            f"something sits between the unwrap and the sentinel. "
-            f"stderr: {out.stderr[-400:]}")
-        return out.stdout
+            f"probe broke (rc={out.returncode}) instead of classifying its "
+            f"own outcome. stderr: {out.stderr[-400:]}")
+        marker = [line for line in out.stdout.splitlines()
+                  if line.startswith("OUTCOME ")]
+        self.assertEqual(1, len(marker),
+                         f"expected one OUTCOME line, got {marker!r}")
+        return marker[0].split(None, 1)[1]
 
-    def test_unwraps_alone_do_not_poison_a_later_call(self):
-        """CONTROL for the test below, and it must stay its own test."""
-        self.assertIn("SENTINEL_CLEAN",
-                      self._residue_probe(construct_between=False),
-                      "two surviving unwraps with no Model() between them "
-                      "must leave the next C call alone — without this, the "
-                      "test below shows only that SOMETHING in the sequence "
-                      "poisons")
+    def test_unwraps_alone_leave_the_next_call_alone(self):
+        """CONTROL, and it stays its own test — see the note above on launches."""
+        self.assertEqual(
+            "CLEAN", self._residue_outcome(construct_between=False),
+            "two surviving unwraps with no Model() between them must leave "
+            "the next checked call alone; without this the test below shows "
+            "only that SOMETHING in the sequence misbehaves")
 
-    def test_a_SURVIVING_unwrap_poisons_the_NEXT_checked_C_call(self):
-        """D-79 put the residue on the raising case. It is the surviving one.
+    def test_an_unwrap_after_a_Model_is_NEVER_a_silent_default(self):
+        """The portable half of the trap: it fails, and which way is not fixed.
 
-        After unwrap, `Model()`, unwrap, the next checked C call raises
-        `SystemError` caused by `RuntimeError: Optional not initialized`. The
-        sentinel is `[].append(0)` — nothing to do with OpenStudio — because
-        the trap is any checked call, which is what makes an unguarded `.get()`
-        hard to diagnose.
+        On 3.12 the second unwrap survives and poisons the next checked C call;
+        on 3.11 it raises at the unwrap. Both are failures. What must never
+        happen is CLEAN — a silent default-constructed model handed back to a
+        caller that asked for a file it could not read.
 
-        The error is set DURING that call, not left pending before it:
-        `PyErr_Occurred()` read in the same position is clear, and disabling
-        the garbage collector changes nothing. No mechanism is claimed.
+        Asserting the disjunction rather than either branch is deliberate: a
+        pin on one outcome is red on the other interpreter, which is how this
+        file came to turn the `python` job red once already.
         """
-        self.assertIn("SENTINEL_POISONED RuntimeError",
-                      self._residue_probe(construct_between=True),
-                      "a surviving unwrap after a Model() must poison the "
-                      "next checked C call")
+        outcome = self._residue_outcome(construct_between=True)
+        self.assertIn(
+            outcome, ("POISONED", "RAISED_AT_UNWRAP"),
+            f"got {outcome!r}. CLEAN means an unwrap after a Model() silently "
+            f"returned a default model — a wrong answer rather than a "
+            f"failure, and the one outcome this sequence must never give")
 
     def test_the_checked_loader_names_the_path(self):
         from btap._sdk import load_model

@@ -125,12 +125,15 @@ def opt(optional):
     to state a mechanism here (#164) each described something the SDK does not
     do.
 
-    It IS pinned, by two tests in ``tests/test_sdk_invariants.py`` that must
-    stay two: the probe is stable at one subprocess launch per test and fails
-    roughly 7% of the time when the control and the subject share one. Even so,
-    do not rely on SEEING this in the wild, and never read a clean run as
-    evidence it is gone — the trap fires on whatever checked call comes next,
-    which may be nowhere near the unwrap that caused it.
+    No test pins this one, and the reason is not flakiness: on the SAME SDK
+    build, the second unwrap SURVIVES on CPython 3.12 and RAISES on 3.11, so a
+    probe cannot assert one outcome across the interpreters this project
+    supports — 3.11 is the floor and 3.12 is what the CI image and local venvs
+    run.
+    ``tests/test_sdk_invariants.py`` records the measurements. Do not rely on
+    seeing this in the wild, and never read a clean run as evidence it is gone
+    — the trap fires on whatever checked call comes next, which may be nowhere
+    near the unwrap that caused it.
 
     Ruby raises cleanly in all of these. See D-79.
     """
