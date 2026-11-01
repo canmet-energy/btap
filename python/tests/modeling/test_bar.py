@@ -88,7 +88,7 @@ class TestBar(unittest.TestCase):
         import json
 
         import btap.modeling as modeling
-        from btap._compat import sorted_by_name
+        from btap._compat import opt, sorted_by_name
         from btap.audit import AuditLog
         from btap.codes.necb import envelope as necb_envelope
         from btap.codes.necb import lighting as necb_lighting
@@ -118,14 +118,66 @@ class TestBar(unittest.TestCase):
         self.assertGreaterEqual(len(model.getPlantLoops()), 2, 'heating + SHW plants')
         wall = next(s for s in model.getSurfaces()
                     if s.outsideBoundaryCondition() == 'Outdoors' and s.surfaceType() == 'Wall')
+        # Through `opt()`, not `.get()`. If the seed above ever stops leaving a
+        # construction on every surface, an unguarded `.get()` here SEGFAULTS
+        # — `OptionalConstructionBase` is in the crashing family (#164) — and a
+        # crash takes the xdist worker with it and reports as a lost node
+        # instead of naming this assertion. Verified: removing the seed turned
+        # this line into a core dump.
+        construction = opt(wall.construction())
+        self.assertIsNotNone(
+            construction,
+            'the seed construction set must leave every surface with a '
+            'construction before the envelope pass retargets it')
         # D-23: table 0.265 is OVERALL U (incl. films) — constructions are named by
         # the construction-only conductance 1/(1/0.265 - R_films) = 0.2759.
-        self.assertRegex(wall.construction().get().nameString(), r':U-0\.2759')
+        self.assertRegex(construction.nameString(), r':U-0\.2759')
         steps = list(dict.fromkeys(e['step'] for e in audit.entries))
         for step in ('loads', 'lighting', 'shw', 'prescriptive'):
             self.assertIn(step, steps)
         self.assertGreater(len(json.loads(audit.to_json())), 40,
                            'ONE audit spans geometry-authored building through every domain')
+
+        # The README's chain ends at `performance_compliance`, and says this
+        # test pins it. It did not: every compliance test in the suite starts
+        # from an authored OSM archetype, so a GEOMETRY-AUTHORED model had
+        # never been taken through a determination (#143). `simulate='none'`
+        # exercises the whole pipeline without EnergyPlus, which is what lets
+        # this live in the default lane.
+        #
+        # What it proves is that a model built from nothing but space-type
+        # ratios PASSES what the code layer requires — resolvable space types,
+        # a determinable storey count, thermostats everywhere, derivable
+        # ground-floor targets. It does NOT pin that those gates exist; that
+        # belongs to `tests/necb`, and deleting the phase-1 gate calls leaves
+        # this test green (checked). The distinction matters: a reader who
+        # takes this for gate coverage would be wrong.
+        import tempfile
+
+        from btap.codes import compliance
+
+        run_dir = tempfile.TemporaryDirectory(prefix='full-family-')
+        self.addCleanup(run_dir.cleanup)
+        result = compliance.performance_compliance(
+            model, code='necb2020', simulate='none', hdd=3890,
+            run_dir=run_dir.name)
+
+        self.assertIsNotNone(result.reference_model,
+                             'the chain must reach a built reference model')
+        self.assertTrue(result.report, 'and emit a report')
+        # `report['code']` comes from the ruleset and is model-independent, so
+        # it witnesses nothing on its own. These two do: no verdict is emitted
+        # without a simulation, and the REFERENCE side actually ran.
+        self.assertIsNone(
+            result.compliant,
+            "simulate='none' must emit no verdict — if this ever carries one, "
+            'nobody should read this test as a determination')
+        reference_steps = {e['step'] for e in result.audit.entries
+                           if e.get('building') == 'reference building'}
+        self.assertIn(
+            'build', reference_steps,
+            'the reference building must have been BUILT on this path, not '
+            f'merely allocated. reference steps seen: {sorted(reference_steps)}')
 
 
 if __name__ == '__main__':
