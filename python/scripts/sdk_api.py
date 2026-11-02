@@ -187,8 +187,16 @@ def family(wrapped: str) -> str:
 #: and their two `get*` forms each). Product code constructs
 #: `AirTerminalSingleDuctUncontrolled` at four sites, so that unwrap is a line
 #: someone may write. Classifying by the ANNOTATED TYPE gets them for free.
+# The quote class and the module prefix cost two characters each and match
+# nothing new today: every annotation in the 39 proxies is a bare
+# `Optional<X>` or `<X>Vector`, only the two `_workspace_to_*` helpers are
+# quoted, none is module-qualified, and no signature spans lines — Fable
+# measured that with a deliberately looser regex that matched the same 1738
+# names. They are here so a change in what SWIG emits shows up as a DRIFT
+# failure rather than a silent shrink.
 _PROXY_OPTIONAL = re.compile(
-    r'^def (\w+)\(.*\) -> "?(Optional\w+)"?:', re.M)
+    r'^def (\w+)\(.*\) -> ["\']?(?:[\w.]*\.)?(Optional\w+)["\']?:',
+    re.M)
 
 
 def generated_accessors() -> dict[str, set[str]]:
@@ -212,28 +220,6 @@ def generated_accessors() -> dict[str, set[str]]:
             out.setdefault(name.lstrip('_'), set()).add(
                 returned[len('Optional'):])
     return out
-
-
-def cast_accessors() -> dict[str, set[str]]:
-    """``to_<Class>`` only. Kept for callers that want just the casts.
-
-    These are SWIG ``%extend`` methods: no HEADER declares them, and no
-    class BODY defines them — but a module-level `def _to_<X>(self) ->
-    Optional<X>` does, which is the hook `generated_accessors()` uses. An
-    earlier version of this docstring claimed they appear in no proxy file at
-    all, which is false — `grep -c
-    '"to_'` on the generated baseline was 0, and `to_ThermalZone` is in zero
-    of both. The #169 ratchet therefore could not see 30 existing unguarded
-    `to_X().get()` calls, nor any new one, while `opt()`'s own docstring names
-    that family FIRST: "This is what a failed `to_X()` cast returns" (Fable,
-    review of #171).
-
-    Derived from the class tree instead. Over-broad on purpose — a name here
-    that has no such cast costs nothing, while a missing one is a hazard the
-    gate waves through.
-    """
-    return {f'to_{name}': {name} for name in class_tree()
-            if name not in RETURNS_DEFAULT and name not in RAISES}
 
 
 def optional_methods() -> tuple[dict[str, set[str]], int]:
