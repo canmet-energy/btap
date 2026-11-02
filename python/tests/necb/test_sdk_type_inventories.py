@@ -206,6 +206,7 @@ class TestHydronicPumpInventoriesUseTheNewCoils(unittest.TestCase):
 
         model = openstudio.model.Model()
         chilled = _plant(model, 'Chilled Water', 'Cooling')
+        heat_recovery = _plant(model, 'Heat Recovery', 'Heating')
         with tempfile.NamedTemporaryFile(suffix='.cbor') as representation:
             representation.write(b'\xa0')
             representation.flush()
@@ -216,6 +217,11 @@ class TestHydronicPumpInventoriesUseTheNewCoils(unittest.TestCase):
                 external.get())
             self.assertTrue(
                 chilled.addSupplyBranchForComponent(chiller))
+            self.assertFalse(
+                chiller.addToTertiaryNode(
+                    heat_recovery.demandInletNode()),
+                'precondition: SDK 3.11 refuses the unsupported connection')
+            self.assertFalse(chiller.heatRecoveryLoop().is_initialized())
 
             caster = 'to_ChillerElectricASHRAE205'
             self.assertTrue(getattr(chiller, caster)().is_initialized())
