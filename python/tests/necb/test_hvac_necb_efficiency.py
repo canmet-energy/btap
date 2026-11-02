@@ -423,5 +423,121 @@ class TestNecbEfficiency(unittest.TestCase):
                     for warning in audit.warnings))
 
 
+@needs_sdk
+class TestTheShippedChillerCurvesDisclosureIsReachable(unittest.TestCase):
+    """AHJ-17: a chiller row that applies NO curve must SAY so.
+
+    `find_row` treats a null field as a WILDCARD, and the single `AirCooled`
+    row in both editions carries `compressor_type: null` over 0-9999 tons, so
+    it MATCHES every air-cooled chiller and the "no chiller efficiency row
+    found" warning never fires. Its `capft`, `eirft` and `eirfplr` are all
+    null, so `curve()` returns None on each and the applier set nothing.
+
+    The decision line already recorded `curves None/None/None`, so this was
+    never total silence — what was missing was a WARNING level and a citation,
+    which is what an AHJ reading the trail weighs (issue #181).
+
+    No frozen scenario builds an air-cooled chiller — all three lanes stay
+    green with the warning in — so this test is the only thing that exercises
+    it.
+    """
+
+    @staticmethod
+    def _audit_for(condenser):
+        """A chiller of the given condenser type, through the real applier.
+
+        `setCondenserType('WaterCooled')` only takes once the chiller is on a
+        CONDENSER loop — it is refused on an unconnected machine — so the
+        water-cooled fixture builds both loops. A capacity is required either
+        way: the applier returns before the curve loop when it cannot
+        establish one, which is why a probe without it reported zero warnings
+        and made the citation look unreachable.
+        """
+        import openstudio
+
+        from btap.codes.necb.hvac import efficiency
+
+        model = openstudio.model.Model()
+        chiller = openstudio.model.ChillerElectricEIR(model)
+        chiller.setName(f'Scroll {condenser} probe')
+        chiller.setReferenceCapacity(500000.0)
+        chilled = openstudio.model.PlantLoop(model)
+        chilled.setName('Chilled Water')
+        chilled.sizingPlant().setLoopType('Cooling')
+        assert chilled.addSupplyBranchForComponent(chiller)
+        if condenser == 'WaterCooled':
+            condenser_loop = openstudio.model.PlantLoop(model)
+            condenser_loop.setName('Condenser Water')
+            condenser_loop.sizingPlant().setLoopType('Condenser')
+            assert condenser_loop.addDemandBranchForComponent(chiller)
+            assert chiller.setCondenserType('WaterCooled')
+        audit = AuditLog()
+        efficiency.apply(model, code='necb2020', audit=audit)
+        return chiller, audit
+
+    def test_an_air_cooled_chiller_discloses_the_simulator_default(self):
+        chiller, audit = self._audit_for('AirCooled')
+        self.assertEqual('AirCooled', chiller.condenserType(),
+                         'ChillerElectricEIR must default to AirCooled for '
+                         'this fixture to exercise the wildcard row')
+
+        cited = [e for e in audit.entries if e.get('ahj') == 'AHJ-17']
+        self.assertEqual(
+            1, len(cited),
+            'an air-cooled chiller whose row ships no curves must warn once '
+            f'and cite AHJ-17; got {[e.get("ahj") for e in audit.entries]}')
+        entry = cited[0]
+        self.assertEqual('warning', entry['level'],
+                         'a disclosure an AHJ weighs is a WARNING, not an '
+                         'info line — the decision already said '
+                         '"curves None/None/None" and nothing flagged it')
+        self.assertEqual(
+            [], entry['inputs']['curves_in_row'],
+            'the inputs must name WHICH curves the row carries, so the '
+            'reader need not go to the data to see that it is none of them')
+        self.assertEqual('AirCooled', entry['inputs']['cooling_type'])
+
+    def test_a_WATER_cooled_chiller_does_not_warn(self):
+        """The control, and my first version of it was VACUOUS.
+
+        It reused the air-cooled fixture and filtered on
+        `inputs['curves_in_row']` being non-empty — which for that fixture is
+        always `[]`, so the filter could never match and the assertion could
+        never fail. A control that cannot fail is the thing this suite keeps
+        catching.
+
+        A water-cooled Scroll chiller genuinely reaches a row that carries
+        curves — the decision line reads `curves
+        WaterCooled_Scroll_CAPFT/...` — so this rules out the warning
+        degenerating into a notice on every chiller.
+
+        What it does NOT prove, measured rather than assumed: that the
+        condition is scoped to the ABSENCE of curves rather than to the
+        AirCooled TYPE. Mutating `if not applied:` to
+        `if cooling_type == 'AirCooled' or not applied:` leaves every test
+        green, because the two coincide on every shipped row — the single
+        AirCooled row carries no curves and all nineteen WaterCooled rows
+        carry them, so no fixture can distinguish them. The scoping is a
+        choice about how this code ages (an edition that ships the curves
+        stops warning with no code change), not a property the data can
+        witness, and saying so beats a docstring that claims a proof it
+        does not have.
+        """
+        chiller, audit = self._audit_for('WaterCooled')
+        self.assertEqual('WaterCooled', chiller.condenserType(),
+                         'the fixture must really be water-cooled, or the '
+                         'control degenerates into the air-cooled case again')
+        self.assertEqual(
+            [], [e.get('ahj') for e in audit.entries
+                 if e.get('ahj') == 'AHJ-17'],
+            'a row that DOES carry curves must not warn, or the disclosure '
+            'becomes a notice on every chiller')
+        self.assertTrue(
+            any('WaterCooled_Scroll' in str(e.get('value') or '')
+                for e in audit.entries),
+            'the water-cooled row must actually have applied its curves — '
+            'otherwise this control passes for the wrong reason')
+
+
 if __name__ == '__main__':
     unittest.main()

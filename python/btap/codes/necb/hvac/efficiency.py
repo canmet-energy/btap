@@ -2825,6 +2825,7 @@ def _apply_chiller(chiller, tables, plant, audit, sizing_follows=False):
                           inputs={'cooling_type': cooling_type, 'compressor': compressor,
                                   'tons': ruby_round(tons, 1)})
 
+    applied = []
     for key, setter in zip(('capft', 'eirft', 'eirfplr'),
                            ('setCoolingCapacityFunctionOfTemperature',
                             'setElectricInputToCoolingOutputRatioFunctionOfTemperature',
@@ -2832,6 +2833,36 @@ def _apply_chiller(chiller, tables, plant, audit, sizing_follows=False):
         c = curve(chiller.model(), tables, row.get(key), audit=audit, target=name)
         if c:
             getattr(chiller, setter)(c)
+            applied.append(key)
+    if not applied:
+        # AHJ-17's silence, now disclosed. `find_row` treats a null field as a
+        # WILDCARD, and the single `AirCooled` row in both editions carries
+        # `compressor_type: null` over 0-9999 tons, so it MATCHES every
+        # air-cooled chiller and the "no row found" warning above never
+        # fires. Its `capft`, `eirft` and `eirfplr` are all null, so `curve()`
+        # returns None on each and the loop sets nothing — the reference
+        # chiller silently keeps three OpenStudio defaults where Table
+        # 8.4.5.5.-C values belong.
+        #
+        # Scoped to a row that applied NO curve rather than to the
+        # `AirCooled` type, so it stays an EXECUTED choice: a future edition
+        # that ships the curves stops warning without this code changing, and
+        # a water-cooled row that ever loses its curves is covered too.
+        audit.warn(
+            'efficiency',
+            'no performance curves are shipped for this chiller row — the '
+            'reference keeps the simulator default for capacity-f(T), '
+            'EIR-f(T) and EIR-f(PLR)',
+            target=name,
+            inputs={'cooling_type': cooling_type,
+                    'compressor': compressor,
+                    'tons': ruby_round(tons, 1),
+                    'curves_in_row': sorted(
+                        k for k in ('capft', 'eirft', 'eirfplr')
+                        if row.get(k) is not None)},
+            article=plant['chiller_eirft_table'],
+            ahj='AHJ-17',
+        )
     if row.get('eirft') in {
             'WaterCooled_Scroll_EIRFT',
             'WaterCooled_Reciprocating_EIRFT'}:

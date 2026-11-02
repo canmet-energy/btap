@@ -948,13 +948,9 @@ type, so the path is reachable rather than hypothetical.
 curves at the AHRI rating point and enumerating the chiller rows; split from
 AHJ-7 on Sol's clearance review.
 
-**Runtime.** not cited — the simulator default is used unconditionally, so no branch exists to carry a citation. That silence is the gap.
+**Runtime.** cited in `efficiency.py`.
 
-**What the tool does meanwhile.** It uses the simulator default, with no
-warning. Closing this means carrying the air-cooled rows — and the Screw row
-among them is the one AHJ-7's erratum affects, so closing it requires adopting
-that correction deliberately rather than transcribing the printed value.
-
+**What the tool does meanwhile.** It uses the simulator default for all three curves, and SAYS SO: the chiller applier warns when a matched row applied no curve at all, citing this entry. The warning is scoped to "no curve applied" rather than to the `AirCooled` type, so it is an executed choice rather than a notice on every run — an edition that ships the curves stops warning with no code change, and a water-cooled row that ever loses its curves is covered too (issue #181).
 ## AHJ-18 — the two-pipe fan-coil surrogate has no plant-side changeover
 
 **Article.** Table 8.4.4.7.-B / Table 8.4.5.7.-B, the System 5 row.
