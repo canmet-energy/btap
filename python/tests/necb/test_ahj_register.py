@@ -59,54 +59,29 @@ def _entry_bodies():
 
 
 def _live_cited_ids():
-    """Ids reachable as DATA at runtime, not merely mentioned.
+    """THE repo definition, imported rather than reinvented.
 
-    `_runtime_ids` greps the source text, which counts a comment and a
-    docstring. That is right for the forward check — an id named anywhere
-    should have an entry — and VACUOUS for the inverse: removing both
-    `ahj='AHJ-25'` citations from `reference.py` left every test green, because
-    an assertion message two lines below still said "AHJ-25" (issue #174).
+    My first version of this counted any non-docstring string literal. It was
+    vacuous for the two ids whose citation is helper-built: deleting
+    `ids.append('AHJ-5')` from `_disclosure_ahj` — the ONLY real AHJ-5
+    citation — left every test green, because `path.py`'s `UnknownAHJ` message
+    names `'AHJ-1 AHJ-5'` as a grammar EXAMPLE and that is a live literal
+    (Fable, review of #180).
 
-    So this parses instead, and counts an id only where it appears in a string
-    constant that is NOT a module, class or function docstring. Comments never
-    survive `ast.parse`, and a docstring is prose about the code rather than a
-    value the code carries.
-
-    An ASSERTION MESSAGE counts, and that is deliberate but worth knowing:
-    reddening the inverse check for AHJ-25 took TWO edits, the two `ahj=`
-    citations and the f-string two lines below that names the id in a failure
-    message. A message does reach a reader at runtime, so by this definition it
-    is a surfacing; a stricter rule would have to decide which string positions
-    are citations, which is the dataflow problem below.
-
-    It deliberately does NOT require the `ahj=` keyword, because four product
-    citations are indirect — `ahj=_boiler_class_ahj(...)`,
-    `_disclosure_ahj(...)`, `_plant_cardinality_ahj()`,
-    `_dispatch_ahj(...)` — and following helper returns would mean a dataflow
-    analysis. A literal that can reach a value is the honest line to draw, and
-    it is already sharp enough to separate the 16 live ids from the 9 that
-    exist only in prose.
+    `test_ahj_citations.cited_ids_by_file` already drew the line in the right
+    place — the value of an `ahj=` keyword, or a literal inside an authored
+    `CITATION_HELPERS` body — which admits the four indirect citations without
+    dataflow and excludes a failure message by construction. Writing a second,
+    weaker definition beside an existing stronger one is the mistake; this now
+    has one.
     """
-    import ast
+    return set(_cited_by_file())
 
-    found = set()
-    for path in sorted(PRODUCT.rglob("*.py")):
-        tree = ast.parse(path.read_text(encoding="utf-8"))
-        prose = set()
-        for node in ast.walk(tree):
-            if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef,
-                                 ast.AsyncFunctionDef)) and node.body:
-                first = node.body[0]
-                if (isinstance(first, ast.Expr)
-                        and isinstance(first.value, ast.Constant)
-                        and isinstance(first.value.value, str)):
-                    prose.add(id(first.value))
-        for node in ast.walk(tree):
-            if (isinstance(node, ast.Constant)
-                    and isinstance(node.value, str)
-                    and id(node) not in prose):
-                found |= set(ID_RE.findall(node.value))
-    return found
+
+def _cited_by_file():
+    from tests.necb.test_ahj_citations import cited_ids_by_file
+
+    return cited_ids_by_file()
 
 
 def _declared_runtime():
@@ -561,9 +536,6 @@ class TestNonReferralEntriesAreNotCalledAmbiguities(unittest.TestCase):
                         ident, status))
 
 
-if __name__ == "__main__":
-    unittest.main(verbosity=2)
-
 class TestTheCitationCheckRunsBOTHWays(unittest.TestCase):
     """The forward direction — a cited id with no entry — has been checked
     since this file existed. The INVERSE was not, and it is the direction that
@@ -613,6 +585,37 @@ class TestTheCitationCheckRunsBOTHWays(unittest.TestCase):
             f"these entries say they are NOT cited but product code cites "
             f"them: {stale}. Update the `**Runtime.**` line.")
 
+    def test_the_FILES_a_citation_names_are_the_files_that_cite_it(self):
+        """The list is a claim, and mine was wrong in 6 of 16 entries.
+
+        I generated them from the lenient grep this module's own docstring
+        calls the wrong tool, so AHJ-5 claimed five files when one cites it and
+        the rest name it in docstrings. A reader following "cited in `cli.py`"
+        found a comment (Fable, review of #180). Checked against the strict
+        per-file set, so the list cannot drift again.
+        """
+        strict = _cited_by_file()
+        wrong = []
+        for id_, body in _entry_bodies().items():
+            line = re.search(r"^\*\*Runtime\.\*\* cited in ([^\n]*)$",
+                             body, re.M)
+            if not line:
+                continue
+            claimed = set(re.findall(r"`([^`]+)`", line.group(1)))
+            if claimed != strict.get(id_, set()):
+                wrong.append(f"{id_}: says {sorted(claimed)}, "
+                             f"cites {sorted(strict.get(id_, set()))}")
+        self.assertEqual([], sorted(wrong), "\n".join(sorted(wrong)))
+
+    def test_each_entry_declares_its_runtime_state_EXACTLY_ONCE(self):
+        """Two `**Runtime.**` lines in one entry and the first wins silently,
+        so a contradicting second line would never be read (Fable, #180)."""
+        many = sorted(id_ for id_, body in _entry_bodies().items()
+                      if len(RUNTIME_RE.findall(body)) > 1)
+        self.assertEqual(
+            [], many,
+            f"these entries declare a runtime state more than once: {many}")
+
     def test_a_status_that_sets_a_run_conditional_MUST_be_cited(self):
         """`referral` and `alternative-solution` are the two statuses that
         make a run conditional. An uncited one is a condition that can never
@@ -632,3 +635,6 @@ class TestTheCitationCheckRunsBOTHWays(unittest.TestCase):
             f"a conditional-setting status with no runtime citation: "
             f"{sorted(offenders)}")
 
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

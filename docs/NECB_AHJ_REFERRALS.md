@@ -77,7 +77,7 @@ forbidden above 352 kW is not established by the text.
 **Established by.** Sol `119` section C, correcting his own earlier
 "conflict across every band" as too categorical.
 
-**Runtime.** cited in `path.py`, `plant_loops.py`, `reference.py`.
+**Runtime.** cited in `reference.py`.
 
 **What the tool does meanwhile.** The (6) coverage gap states that the
 applicable subclause is not established at selection time and claims none.
@@ -123,7 +123,7 @@ heating when the proposed block is heated.
 
 **Established by.** Sol `122`, who called it a genuine internal tension.
 
-**Runtime.** cited in `cli.py`, `path.py`, `reference.py`.
+**Runtime.** cited in `reference.py`.
 
 **What the tool does meanwhile.** It follows (5) and retains the heating,
 audited against both the sentence and the table row.
@@ -162,7 +162,7 @@ non-condensing curve on every boiler row, so the precedent is weak evidence.
 purchased-energy case separate, because 8.4.x.6 explicitly specifies a
 MODULATING boiler, so there the Code does elect.
 
-**Runtime.** cited in `efficiency.py`, `path.py`, `sections.py`.
+**Runtime.** cited in `efficiency.py`.
 
 **What the tool does meanwhile.** It applies D-89's classes, and the purchased
 route separately applies the modulating class the article names (D-89's own
@@ -200,7 +200,7 @@ exists. D-93 and D-97 decline in those cases and retain a simulator default.
 
 **Established by.** Sol `122`, as one combined referral for both decisions.
 
-**Runtime.** cited in `efficiency.py`, `path.py`.
+**Runtime.** cited in `efficiency.py`.
 
 **What the tool does meanwhile.** It DECLINES rather than guessing, emitting an
 unresolved warning per affected loop and leaving the simulator default in
@@ -287,7 +287,7 @@ nor (5) that it overrides (6).
 fetched both editions through the codes MCP; Fable reproduced the
 implementation's behaviour with code.
 
-**Runtime.** cited in `log.py`, `path.py`, `plant_loops.py`, `reference.py`.
+**Runtime.** cited in `reference.py`.
 
 **What the tool does meanwhile.** It elects ONE energy type for the reference
 SELECTION and computes no capacity ratio, so it satisfies neither clause of

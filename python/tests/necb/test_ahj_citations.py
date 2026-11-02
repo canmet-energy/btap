@@ -190,6 +190,57 @@ def _helper_ids() -> set:
     return found
 
 
+def cited_ids_by_file() -> dict:
+    """``{id: {basename, ...}}`` for every id a product file really CITES.
+
+    THE definition of "cited" for this repo, exported so that
+    `test_ahj_register.py` cannot grow a second, weaker one — it did: an
+    earlier version of #174's inverse check counted any non-docstring string
+    literal, which left `ahj='AHJ-5'`'s only real citation deletable with every
+    test green, because `path.py`'s `UnknownAHJ` message names `'AHJ-1 AHJ-5'`
+    as a grammar EXAMPLE (Fable, review of #180).
+
+    Two positions count, and only these two: the value of an `ahj=` keyword,
+    and a literal inside the body of one of the authored `CITATION_HELPERS`.
+    An assertion message, a comment and a docstring are all excluded by
+    construction, because no other position is read. The helper allowlist is
+    what makes an indirect citation visible without dataflow analysis.
+    """
+    import collections
+    import re
+
+    out = collections.defaultdict(set)
+    sites, _ = _citation_sites()
+    for path, _line, _method, value in sites:
+        for ident in TestAHJCitationSites._ids(value):
+            out[ident].add(pathlib.Path(path).name)
+    for path in sorted(PRODUCT.rglob("*.py")):
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        for node in ast.walk(tree):
+            if (isinstance(node, ast.FunctionDef)
+                    and node.name in CITATION_HELPERS):
+                # NOT the helper's own docstring. `_disclosure_ahj` explains in
+                # prose which ids it owns — "AHJ-1 always ... AHJ-3 only where
+                # ... AHJ-5 only where ..." — so walking every constant in the
+                # body made the docstring vouch for the code beside it.
+                # Measured: deleting `ids.append('AHJ-5')`, the ONLY real AHJ-5
+                # citation in the product, left this set unchanged and every
+                # register test green. The explanation of a citation is not a
+                # citation.
+                prose = None
+                if node.body and isinstance(node.body[0], ast.Expr) and \
+                        isinstance(node.body[0].value, ast.Constant) and \
+                        isinstance(node.body[0].value.value, str):
+                    prose = id(node.body[0].value)
+                for inner in ast.walk(node):
+                    if (isinstance(inner, ast.Constant)
+                            and isinstance(inner.value, str)
+                            and id(inner) != prose):
+                        for ident in re.findall(r"\bAHJ-\d+\b", inner.value):
+                            out[ident].add(path.name)
+    return dict(out)
+
+
 class TestTheRegisterAndTheSitesAgree(unittest.TestCase):
     """Sol's guard 2, the other direction: an entry the register says is
     runtime-wired must have a real call site."""
