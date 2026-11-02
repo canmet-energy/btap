@@ -209,14 +209,22 @@ class TestOptionalFamilies(unittest.TestCase):
         self.assertGreater(counts.get('raise', 0), 50,
                            'optional<std::string> is a large raise-family '
                            f'group: {out.stdout}')
-        # A name wrapping ONLY string is never crash. The assertion used to be
-        # that NO crash row appears at all, which held while the scan covered
-        # `model/` alone. With `utilities/**` in it (#175) exactly one name is
-        # overloaded across families — `buildingType() ->
+        # A name wrapping ONLY string is never crash. The assertion used to
+        # be that NO crash row appears at all, which held while the scan
+        # covered `model/` alone. With `utilities/**` in it (#175) exactly one
+        # name LANDS ON CRASH — `buildingType() ->
         # optional<FSBuildingType,string>` — and reporting it at its worst is
         # the rule working, not the namespace strip failing. This is the same
-        # shape as the `--on double` check above: the worst-case rule must have
-        # something to justify it.
+        # shape as the `--on double` check above: the worst-case rule must
+        # have something to justify it.
+        #
+        # FOUR names are overloaded across families under `--on string`;
+        # `fuelType`, `getField` and `units` land on default, so "exactly one
+        # overloaded" would be wrong — exactly one lands on CRASH.
+        # `FSBuildingType` cannot be measured: no proxy file mentions it and
+        # there is no `OptionalFSBuildingType`, so it is unreachable from
+        # Python and stays crash by the conservative default (Fable, review
+        # of #182).
         for fam, method, wrapped in self._rows(out.stdout):
             if fam != 'crash':
                 continue
@@ -224,8 +232,10 @@ class TestOptionalFamilies(unittest.TestCase):
             self.assertTrue(
                 types - {'string'},
                 f'{method} is classified crash while wrapping only string — '
-                'the namespace strip has been lost, so `std::string` is no '
-                f'longer recognised: {out.stdout}')
+                'so `string` has left RAISES. NOT a namespace-strip failure: '
+                'losing that strip makes the wrapped read `std::string`, which '
+                "this listing's own `--on string` filter then excludes, so the "
+                f'`> 50` assertion above is what reddens: {out.stdout}')
 
 
     def test_the_comment_strip_is_load_bearing(self):

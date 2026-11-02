@@ -3,12 +3,12 @@
 An empty `boost::optional<T>` behaves three ways when unwrapped without a
 guard, measured in #164 and classified by `scripts/sdk_api.py`: a value type
 raises `SystemError`, `OptionalModel` and `OptionalScheduleType` return a
-default object, and everything else SEGFAULTS — 794 of the 2094
-header-declared optional-returning method names, plus every proxy-generated
-accessor that returns one. A segfault takes the process, and in a test run the
+default object, and everything else SEGFAULTS — 897 of the 2094 names
+declared in the `model/` and `utilities/**` headers, plus every
+proxy-generated accessor that returns one. A segfault takes the process, and in a test run the
 whole xdist worker, reported as a lost node rather than a failure.
 
-The baseline carries 2527 names: 794 declared in the headers plus 1733 found
+The baseline carries 2629 names: 897 declared in the headers plus 1732 found
 only in the proxy files' module-level helpers, whose RETURN ANNOTATION says
 they yield an `Optional*`. Those helpers are the `to_<Class>` casts, the
 `get<Class>` and `get<Class>ByName` lookups, and six deprecated ALIASES whose
@@ -449,10 +449,13 @@ class TestNoNewUnguardedCrashFamilyUnwrap(unittest.TestCase):
         """It must fail loudly rather than vacuously pass if the file goes."""
         self.assertTrue(BASELINE.is_file(), f'missing baseline: {BASELINE}')
         accessors = crash_family_accessors()
-        # Above 2000 because the baseline is 2527: 794 header-declared plus
-        # 1733 proxy-derived. A floor must sit below the true figure and above
-        # a collapse — losing the proxy derivation leaves 794, losing
-        # everything leaves 0, and both fail here. The previous floor was
+        # Above 2000 because the baseline is 2629: 897 header-declared plus
+        # 1732 proxy-derived. A floor must sit below the true figure and above
+        # a collapse — losing the proxy derivation leaves 897, losing
+        # everything leaves 0, and both fail here. (897 and 1732, not the
+        # earlier 794 and 1733: `utilities/**` joined the header scan in #175,
+        # and `getMaterial` moved from proxy-only to declared because
+        # utilities declares it too.) The previous floor was
         # 3000, set against a 7993 baseline that derived three speculative
         # names per class; annotation-derivation is smaller and more accurate,
         # so the floor moved down with it.

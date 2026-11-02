@@ -82,7 +82,16 @@ RETURNS_DEFAULT = frozenset({
 #: Measured as crashing, so they are NOT merely the unmeasured default.
 #: Recorded because `family()` would reach the same answer by falling through,
 #: and a reader cannot otherwise tell a measurement from a fallback.
-MEASURED_CRASH = frozenset({'UUID', 'EpwFile', 'ViewFactor', 'WorkspaceObject'})
+MEASURED_CRASH = frozenset({
+    'UUID', 'EpwFile', 'ViewFactor', 'WorkspaceObject',
+    # Measured in #182 when `utilities/**` joined the scan, each in a fresh
+    # subprocess and again after a `Model()`: SIGSEGV in both states. They were
+    # already crash-family by the conservative default, so the classification
+    # does not move — recording them turns six guesses into six measurements,
+    # which is the difference between "we do not know" and "we checked".
+    'BCLMeasure', 'Attribute', 'WorkflowStep', 'IdfObject',
+    'IntersectionResult', 'DataError',
+})
 
 _CLASS = re.compile(r'^class\s+(\w+)\(([\w.]+)\)', re.M)
 
@@ -136,12 +145,23 @@ def _headers() -> list[pathlib.Path]:
     """The public headers: `model/*.hpp` plus all of `utilities/**`.
 
     `utilities` was missing until #175. It declares 333 optional-returning
-    method names that `model` does not, two of which are TRUE FALSE NEGATIVES
-    the proxy annotations cannot reach because they are header-declared rather
-    than SWIG-generated: `WorkflowJSON.getBCLMeasure` ->
-    `optional<BCLMeasure>` and `LocalBCL`/`RemoteBCL.getComponent` ->
-    `optional<BCLComponent>` (Fable, review of #171). Neither is called in
-    `btap`.
+    method names that `model` does not, and ONE of them is a true false
+    negative the proxy annotations cannot reach because it is header-declared
+    rather than SWIG-generated: `WorkflowJSON.getBCLMeasure` ->
+    `optional<BCLMeasure>`, and `OptionalBCLMeasure().get()` SEGFAULTS.
+
+    Its sibling `LocalBCL`/`RemoteBCL.getComponent` -> `optional<BCLComponent>`
+    is NOT one, which #175's first draft claimed on Fable's #171 figure and
+    Fable corrected in its review of #182: `OptionalBCLComponent().get()`
+    returns a default, so `getComponent` is a crash-BY-DEFAULT false positive,
+    harmless and over-reporting. Neither is called in `btap`.
+
+    Measured over the utilities types this scan now reaches, in a fresh
+    subprocess and again after a `Model()` and a ForwardTranslator pass:
+    16 return a default, `LogLevel` raises, and six SEGFAULT — `BCLMeasure`,
+    `Attribute`, `WorkflowStep`, `IdfObject`, `IntersectionResult`,
+    `DataError`. Shape does not predict behaviour: `IddField` holds an impl
+    pointer and defaults, `IdfObject` holds one and crashes.
 
     Adding them costs nothing in the fixture, which was the open question.
     Product code unwraps exactly five utilities-only names — `convert` (28
@@ -155,10 +175,25 @@ def _headers() -> list[pathlib.Path]:
     `*_Impl.hpp` are the implementation classes: same methods, not the public
     surface, and counting both double-reports everything.
     """
+    # MODEL + UTILITIES deliberately, not "the public headers": about twenty
+    # other include directories stay unscanned (`airflow` 18 names, `isomodel`
+    # 18, `measure` 14, `radiance` 11, `gltf` 10, `energyplus` 9, `osversion`
+    # 4 and smaller). Product code calls into four of them —
+    # `osversion.VersionTranslator`, `energyplus.ForwardTranslator`,
+    # `energyplus.loadAndTranslateIdf`, `gltf.GltfForwardTranslator` — and the
+    # optional-returning names it uses from them (`loadModel`,
+    # `loadAndTranslateIdf`, `convert` -> `optional<Model>`) are default or
+    # raise family, never crash, so widening would move nothing in the
+    # grandfathered list (Fable, review of #182). Widen when that stops being
+    # true, and say which scope this is meanwhile.
     model = (SDK / 'include/openstudio/model').glob('*.hpp')
     utilities = (SDK / 'include/openstudio/utilities').rglob('*.hpp')
     found = [p for p in sorted([*model, *utilities])
-             if not p.name.endswith('_Impl.hpp')]
+             # `rglob` sweeps gtest fixtures under `utilities/*/Test/`, which
+             # `model`'s plain `glob` misses only by accident. They contribute
+             # no declarations today; excluding them keeps it that way.
+             if not p.name.endswith('_Impl.hpp')
+             and not any(part in ('Test', 'test') for part in p.parts)]
     if not found:
         _die(f"no public headers under {SDK / 'include/openstudio'} — is this "
              f"an SDK install without headers?")
