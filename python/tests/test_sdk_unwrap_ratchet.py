@@ -4,14 +4,17 @@ An empty `boost::optional<T>` behaves three ways when unwrapped without a
 guard, measured in #164 and classified by `scripts/sdk_api.py`: a value type
 raises `SystemError`, `OptionalModel` and `OptionalScheduleType` return a
 default object, and everything else SEGFAULTS — 794 of the 2094
-header-declared optional-returning method names, plus every `to_<Class>` cast. A segfault takes the process, and in a test run the
+header-declared optional-returning method names, plus every proxy-generated
+accessor that returns one. A segfault takes the process, and in a test run the
 whole xdist worker, reported as a lost node rather than a failure.
 
-The baseline carries 3197 names: 794 from the headers plus 2403 `to_<Class>`
-casts derived from the proxy class tree. The casts are SWIG `%extend` methods
-declared in no header and defined in no proxy file, so the first version of
-this gate — built from the headers alone — could not see them, which is the
-family `btap._compat.opt`'s docstring names first.
+The baseline carries 2527 names: 794 declared in the headers plus 1733 found
+only in the proxy files' module-level helpers, whose RETURN ANNOTATION says
+they yield an `Optional*`. Those helpers are the `to_<Class>` casts, the
+`get<Class>` and `get<Class>ByName` lookups, and six deprecated ALIASES whose
+name does not match the class they return. A gate built from the headers alone
+could see none of them — and two successive attempts to add them by NAME SHAPE
+each missed a family, which is why the derivation is keyed on the annotation.
 
 phylroy's call (2026-11-01) is a RATCHET, not a migration: the 27 existing
 sites stay, and a new one fails. The two I hand-checked are safe via guards a
@@ -316,8 +319,15 @@ class TestNoNewUnguardedCrashFamilyUnwrap(unittest.TestCase):
         """It must fail loudly rather than vacuously pass if the file goes."""
         self.assertTrue(BASELINE.is_file(), f'missing baseline: {BASELINE}')
         accessors = crash_family_accessors()
+        # Above 2000 because the baseline is 2527: 794 header-declared plus
+        # 1733 proxy-derived. A floor must sit below the true figure and above
+        # a collapse — losing the proxy derivation leaves 794, losing
+        # everything leaves 0, and both fail here. The previous floor was
+        # 3000, set against a 7993 baseline that derived three speculative
+        # names per class; annotation-derivation is smaller and more accurate,
+        # so the floor moved down with it.
         self.assertGreater(
-            len(accessors), 3000,
+            len(accessors), 2000,
             'the crash-family list has collapsed; regenerate it with '
             '`sdk_api.py optionals --family crash --json`')
         # The floor used to be 500 — BELOW the 794 the baseline held before the
@@ -333,11 +343,18 @@ class TestNoNewUnguardedCrashFamilyUnwrap(unittest.TestCase):
         # whole family missing: the `to_<Class>` casts, then
         # `get<Class>ByName` (#171, two review rounds). Verified that
         # `getThermalZoneByName('nope').get()` dumps core.
-        for name, family in (('to_Node', 'to_<Class> cast'),
-                             ('to_Construction', 'to_<Class> cast'),
-                             ('getConstructionByName', 'get<Class>ByName'),
-                             ('getThermalZoneByName', 'get<Class>ByName'),
-                             ('getThermalZone', 'get<Class> by handle')):
+        for name, family in (
+                ('to_Node', 'to_<Class> cast'),
+                ('to_Construction', 'to_<Class> cast'),
+                ('getConstructionByName', 'get<Class>ByName'),
+                ('getThermalZoneByName', 'get<Class>ByName'),
+                ('getThermalZone', 'get<Class> by handle'),
+                # The aliases: name does NOT match the class returned, so a
+                # name-shape derivation cannot reach them. Product code
+                # constructs `AirTerminalSingleDuctUncontrolled` at four
+                # sites, so this unwrap is a line someone may write.
+                ('to_AirTerminalSingleDuctUncontrolled', 'deprecated alias'),
+                ('to_DistrictHeating', 'deprecated alias')):
             self.assertIn(
                 name, accessors,
                 f'{name} missing — the {family} family is derived from the '
@@ -581,7 +598,14 @@ class TestTheBaselineMatchesTheHeaders(unittest.TestCase):
             'headers. Regenerate: `python3 python/scripts/sdk_api.py '
             'optionals --family crash --json > '
             'python/tests/fixtures/sdk_crash_family_methods.json`')
-        self.assertEqual(committed['declarations'], fresh['declarations'])
+        self.assertEqual(committed['header_declarations'],
+                         fresh['header_declarations'])
+        self.assertEqual(committed['names_from_headers'],
+                         fresh['names_from_headers'])
+        self.assertEqual(committed['names_only_in_proxies'],
+                         fresh['names_only_in_proxies'],
+                         'the proxy-derived count moved: either the SDK '
+                         'changed or `generated_accessors()` regressed')
 
 
 if __name__ == '__main__':
