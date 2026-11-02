@@ -144,11 +144,32 @@ def unguarded_sites(accessors):
     crash-family accessor or cast.
     """
     found = collections.defaultdict(collections.Counter)
+    guards_by_text: dict = {}
+    stmt_end: dict = {}
     for path in sorted(PRODUCT.rglob('*.py')):
         source = path.read_text(encoding='utf-8')
         lines = source.splitlines()
         tree = ast.parse(source)
         rel = path.relative_to(PRODUCT).as_posix()
+        # `{receiver source: [lines where it is GUARDED]}` — an
+        # `is_initialized`/`empty` call whose own receiver unparses the same.
+        guards_by_text.setdefault(path, {})
+        for g in ast.walk(tree):
+            if (isinstance(g, ast.Call) and isinstance(g.func, ast.Attribute)
+                    and g.func.attr in ('is_initialized', 'empty', 'is_empty')):
+                try:
+                    text = ast.unparse(g.func.value)
+                except Exception:               # pragma: no cover
+                    continue
+                guards_by_text[path].setdefault(text, []).append(g.lineno)
+        # last line of the statement each line belongs to, so a guard trailing
+        # the unwrap inside one expression still counts
+        for stmt in ast.walk(tree):
+            if isinstance(stmt, ast.stmt):
+                for line in range(stmt.lineno,
+                                  getattr(stmt, 'end_lineno', stmt.lineno) + 1):
+                    stmt_end[line] = max(stmt_end.get(line, 0),
+                                         getattr(stmt, 'end_lineno', stmt.lineno))
         for key, count in _two_step_sites(tree, accessors).items():
             found[rel][key] += count
         for node in ast.walk(tree):
@@ -171,28 +192,28 @@ def unguarded_sites(accessors):
             accessor = inner.func.attr
             if accessor not in accessors:
                 continue
-            # Preceding lines and the call's OWN line are separate, because
-            # the receiver text necessarily appears in its own line — pooling
-            # them made every receiver look mentioned and the
-            # guard-on-a-different-object case kept passing.
-            own = lines[node.lineno - 1]
-            before = '\n'.join(lines[max(0, node.lineno - 4):node.lineno - 1])
+            # Guards are matched in the AST, not in source text. A text
+            # rule compared `ast.unparse(inner)` against the lines, which
+            # disagrees on every formatting difference — single vs double
+            # quotes (unparse always emits single), f-strings, `1.` vs `1.0`,
+            # inner whitespace, a multi-line receiver — and, worse, could not
+            # see a guard on the FOLLOWING line. It flagged two genuinely
+            # guarded sites: a comprehension whose filter trails the unwrap
+            # (`codes/necb/hvac/efficiency.py:2393`) and a ternary split
+            # across lines (`reference.py:2608`). Both were grandfathered as
+            # unguarded, which is a baseline growing for no reason.
             try:
                 receiver = ast.unparse(inner)
             except Exception:                       # pragma: no cover
                 receiver = None
-            # On the call's own line, a guard is `opt(...)` or a ternary
-            # (`x.get() if x.is_initialized() else None`), which is effective
-            # even though the guard reads later than the unwrap.
-            guarded = ('opt(' in own or 'is_initialized' in own
-                       or '.empty()' in own)
-            # Above it, the guard must name THIS receiver: a plain substring
-            # check accepted `if other.thermalZone().is_initialized():` above
-            # `s.thermalZone().get()`, which is a false negative in the
-            # dangerous direction (Fable, second review of #171).
-            if not guarded and receiver and receiver in before:
-                guarded = 'is_initialized' in before or '.empty()' in before
-            if guarded:
+            if receiver and receiver in guards_by_text.get(path, {}):
+                span = guards_by_text[path][receiver]
+                # within the enclosing statement, or the three lines above
+                if any(node.lineno - 3 <= line <= stmt_end.get(node.lineno,
+                                                               node.lineno)
+                       for line in span):
+                    continue
+            if 'opt(' in lines[node.lineno - 1]:
                 continue
             rel = path.relative_to(PRODUCT).as_posix()
             found[rel][f'{_enclosing(tree, node)}:{accessor}'] += 1
@@ -304,11 +325,28 @@ class TestNoNewUnguardedCrashFamilyUnwrap(unittest.TestCase):
         # left this green, and the gate would have gone back to missing the
         # hazard it is named for (Fable, second review of #171). These two pin
         # the family that `opt()`'s docstring warns about first.
-        for cast in ('to_Node', 'to_ThermalZone', 'to_Construction'):
+        # ONE PIN PER SWIG-GENERATED FAMILY. `TestTheWalkItself` can prove the
+        # walk works but can never notice a name missing from the baseline —
+        # its `ACCESSORS` are hand-picked, so a probe for an absent name
+        # returns 0 vacuously. These pins are the only defence, and they need
+        # an entry per family because the gate has now shipped twice with a
+        # whole family missing: the `to_<Class>` casts, then
+        # `get<Class>ByName` (#171, two review rounds). Verified that
+        # `getThermalZoneByName('nope').get()` dumps core.
+        for name, family in (('to_Node', 'to_<Class> cast'),
+                             ('to_Construction', 'to_<Class> cast'),
+                             ('getConstructionByName', 'get<Class>ByName'),
+                             ('getThermalZoneByName', 'get<Class>ByName'),
+                             ('getThermalZone', 'get<Class> by handle')):
             self.assertIn(
-                cast, accessors,
-                f'{cast} missing: the cast family is derived from the proxy '
-                'class tree, so `_CLASS` or `_proxy_files()` has regressed')
+                name, accessors,
+                f'{name} missing — the {family} family is derived from the '
+                'proxy class tree, so `_CLASS`, `_proxy_files()` or '
+                '`generated_accessors()` has regressed')
+        self.assertNotIn(
+            'getThermalZones', accessors,
+            'the PLURAL family returns a vector, not an optional; including '
+            'it would flag `.get()` calls that are not unwraps at all')
 
     def test_no_file_gains_an_unguarded_unwrap(self):
         found = unguarded_sites(crash_family_accessors())

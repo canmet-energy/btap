@@ -177,8 +177,42 @@ def family(wrapped: str) -> str:
     return 'crash'
 
 
+def generated_accessors() -> dict[str, set[str]]:
+    """Every SWIG-GENERATED accessor that returns ``optional<Class>``.
+
+    Three families, enumerated from the proxy sources rather than discovered
+    one at a time. The first version of this handled `to_<Class>` only,
+    because that was the family a review named — and the next review found
+    `get<Class>ByName` missing by the same mechanism (#171). Asking "what
+    other generated families exist" would have found both at once:
+
+    ===========================  ======  =============================
+    family                        count   returns
+    ===========================  ======  =============================
+    ``to_<Class>``                        ``optional<Class>`` (a cast)
+    ``get<Class>ByName``           1086   ``optional<Class>``
+    ``get<Class>``                  621   ``optional<Class>`` (by handle)
+    ``get<Class>s`` (plural)        612   a VECTOR — not an unwrap
+    ===========================  ======  =============================
+
+    Verified: `m.getThermalZoneByName('nope').get()` dumps core, so the
+    `ByName` family is the same hazard as the casts.
+
+    The plural is deliberately excluded: it returns a vector, and `.get()` on
+    one is not an optional unwrap.
+    """
+    classes = [name for name in class_tree()
+               if name not in RETURNS_DEFAULT and name not in RAISES]
+    out: dict[str, set[str]] = {}
+    for name in classes:
+        out[f'to_{name}'] = {name}
+        out[f'get{name}ByName'] = {name}
+        out[f'get{name}'] = {name}
+    return out
+
+
 def cast_accessors() -> dict[str, set[str]]:
-    """``to_<Class>`` for every class the proxy files know, as ``optional<Class>``.
+    """``to_<Class>`` only. Kept for callers that want just the casts.
 
     These are SWIG ``%extend`` methods: they appear in NO header and in NO
     proxy file body, so a header-derived list cannot contain them — `grep -c
@@ -249,7 +283,7 @@ def cmd_optionals(args) -> int:
     # The cast family, which no header declares. Merged here rather than in
     # `optional_methods()` so the DECLARATION count stays a count of real
     # header declarations.
-    for name, wrapped in cast_accessors().items():
+    for name, wrapped in generated_accessors().items():
         methods.setdefault(name, set()).update(wrapped)
     rows = []
     for method, wrapped in sorted(methods.items()):

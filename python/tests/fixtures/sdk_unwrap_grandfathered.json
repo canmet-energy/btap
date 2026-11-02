@@ -5,10 +5,7 @@
    "_align_heat_pump_heating_capacity:to_CoilCoolingDXMultiSpeed": 1,
    "_align_heat_pump_heating_capacity:to_CoilCoolingDXSingleSpeed": 1,
    "_align_heat_pump_heating_capacity:to_CoilHeatingDXMultiSpeed": 1,
-   "_align_heat_pump_heating_capacity:to_CoilHeatingDXSingleSpeed": 1,
-   "_apply_tower_rules:to_ChillerElectricEIR": 1,
-   "_apply_tower_rules:to_CoolingTowerSingleSpeed": 1,
-   "_plant_role:to_BoilerHotWater": 1
+   "_align_heat_pump_heating_capacity:to_CoilHeatingDXSingleSpeed": 1
   },
   "codes/necb/hvac/energy_recovery.py": {
    "_add_energy_recovery:mixedAirModelObject": 1,
@@ -18,7 +15,6 @@
    "_add_energy_recovery:to_Node": 3
   },
   "codes/necb/hvac/reference.py": {
-   "_apply_fan_rules:to_FanVariableVolume": 1,
    "_attach_humidity_control:outletModelObject": 1,
    "_attach_humidity_control:to_Node": 1,
    "_build_water_economizer:supplyOutletModelObject": 1,
@@ -26,15 +22,15 @@
    "_condenser_loop_for:to_ChillerElectricEIR": 1,
    "_reset_condenser_setpoint:to_CoolingTowerSingleSpeed": 1
   },
+  "codes/necb/lighting/reference_daylighting.py": {
+   "_set_reference_reflectances:construction": 1
+  },
   "codes/necb/path.py": {
    "_ground_class_floors:space": 1,
    "_ordinary_ground_floors:space": 1
   },
   "codes/necb/shw/demand.py": {
    "_apply_shw:to_WaterHeaterMixed": 1
-  },
-  "codes/necb/shw/efficiency.py": {
-   "_apply_solar_pool_minimums:plantLoop": 1
   },
   "costing/envelope/quantify.py": {
    "census_interzonal:adjacentSurface": 1
@@ -58,7 +54,6 @@
   },
   "modeling/geometry/bar.py": {
    "bar_hash_setup_run:buildingStory": 3,
-   "create_bar:buildingStory": 1,
    "create_space_from_polygon:fromFloorPrint": 1
   },
   "modeling/geometry/plan_query.py": {
@@ -96,9 +91,8 @@
    "add_energy_recovery:outboardOANode": 2,
    "add_energy_recovery:primaryAirOutletModelObject": 1,
    "add_energy_recovery:returnAirModelObject": 1,
-   "add_energy_recovery:to_HeatExchangerAirToAirSensibleAndLatent": 1,
    "add_energy_recovery:to_Node": 3
   }
  },
- "total": 64
+ "total": 58
 }
