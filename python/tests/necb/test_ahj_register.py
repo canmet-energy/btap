@@ -43,6 +43,61 @@ def _runtime_ids():
     return found
 
 
+
+# The FULL form, not a bare `cited`: `**Runtime.** cited.` passed the
+# declaration test, counted as live, and matched nothing in the
+# file-list test, so it was a third undeclared state (Fable, #180).
+RUNTIME_RE = re.compile(
+    r"^\*\*Runtime\.\*\* (cited in |not cited — )", re.M)
+
+
+def _entry_bodies():
+    """Each id mapped to its own section of the register."""
+    text = _register_text()
+    out = {}
+    for match in re.finditer(r"^## (AHJ-\d+) —", text, re.M):
+        start = match.start()
+        nxt = text.find("\n## ", start + 1)
+        out[match.group(1)] = text[start:len(text) if nxt == -1 else nxt]
+    return out
+
+
+def _live_cited_ids():
+    """THE repo definition, imported rather than reinvented.
+
+    My first version of this counted any non-docstring string literal. It was
+    vacuous for the two ids whose citation is helper-built: deleting
+    `ids.append('AHJ-5')` from `_disclosure_ahj` — the ONLY real AHJ-5
+    citation — left every test green, because `path.py`'s `UnknownAHJ` message
+    names `'AHJ-1 AHJ-5'` as a grammar EXAMPLE and that is a live literal
+    (Fable, review of #180).
+
+    `test_ahj_citations.cited_ids_by_file` already drew the line in the right
+    place — the value of an `ahj=` keyword, or a literal inside an authored
+    `CITATION_HELPERS` body — which admits the four indirect citations without
+    dataflow and excludes a failure message by construction. Writing a second,
+    weaker definition beside an existing stronger one is the mistake; this now
+    has one.
+    """
+    return set(_cited_by_file())
+
+
+def _cited_by_file():
+    from tests.necb.test_ahj_citations import cited_ids_by_file
+
+    return cited_ids_by_file()
+
+
+def _declared_runtime():
+    """Each id mapped to True if it DECLARES a runtime citation."""
+    out = {}
+    for id_, body in _entry_bodies().items():
+        found = RUNTIME_RE.search(body)
+        if found:
+            out[id_] = found.group(1) == "cited in "
+    return out
+
+
 class TestTheRegisterExists(unittest.TestCase):
     def test_the_file_is_tracked_not_gitignored(self):
         import subprocess
@@ -483,6 +538,106 @@ class TestNonReferralEntriesAreNotCalledAmbiguities(unittest.TestCase):
                     "**The ambiguity.**", body,
                     "{} is {!r}, so its subject is not an ambiguity".format(
                         ident, status))
+
+
+class TestTheCitationCheckRunsBOTHWays(unittest.TestCase):
+    """The forward direction — a cited id with no entry — has been checked
+    since this file existed. The INVERSE was not, and it is the direction that
+    rots: a condition gets refactored away, its citation goes with it, and the
+    register keeps advertising a runtime behaviour that no longer exists.
+
+    Seven of the then twenty-four entries were cited nowhere in product source
+    when this was measured (AHJ-6, 8, 9, 13, 17, 19, 20). Every one turned out
+    to be legitimate — five `tool-gap` entries whose whole point is that the
+    tool proceeds silently, and two `ruled` entries with no choice to disclose.
+    The register simply had no way to say which of the two it was, so the
+    honest state was indistinguishable from the rotten one (issue #174).
+
+    No `referral` and no `alternative-solution` was uncited, which matters:
+    those are the only two statuses that make a run conditional, so an uncited
+    one is a condition that cannot fire. That is pinned separately below.
+    """
+
+    def test_every_entry_DECLARES_whether_it_is_cited_at_runtime(self):
+        missing = sorted(set(_register_ids()) - set(_declared_runtime()))
+        self.assertEqual(
+            [], missing,
+            f"entries with no `**Runtime.**` line: {missing}. Each must say "
+            "`cited in ...` or `not cited — <why>`, so that an entry nothing "
+            "reaches is a DECLARED state rather than a silent one.")
+
+    def test_an_entry_that_claims_a_citation_HAS_one(self):
+        """The rot direction. A refactor that removes the last citation of an
+        id leaves the entry claiming a runtime behaviour that is gone."""
+        live = _live_cited_ids()
+        broken = sorted(id_ for id_, cited in _declared_runtime().items()
+                        if cited and id_ not in live)
+        self.assertEqual(
+            [], broken,
+            f"these entries say they are cited and are not: {broken}. Either "
+            "the citation was lost in a refactor — restore it — or the entry "
+            "should declare `not cited` and say why.")
+
+    def test_an_entry_that_claims_NO_citation_really_has_none(self):
+        """The other direction. An entry that gains a citation and still says
+        it has none is a stale declaration, and the next reader trusts it."""
+        live = _live_cited_ids()
+        stale = sorted(id_ for id_, cited in _declared_runtime().items()
+                       if not cited and id_ in live)
+        self.assertEqual(
+            [], stale,
+            f"these entries say they are NOT cited but product code cites "
+            f"them: {stale}. Update the `**Runtime.**` line.")
+
+    def test_the_FILES_a_citation_names_are_the_files_that_cite_it(self):
+        """The list is a claim, and mine was wrong in 6 of 16 entries.
+
+        I generated them from the lenient grep this module's own docstring
+        calls the wrong tool, so AHJ-5 claimed five files when one cites it and
+        the rest name it in docstrings. A reader following "cited in `cli.py`"
+        found a comment (Fable, review of #180). Checked against the strict
+        per-file set, so the list cannot drift again.
+        """
+        strict = _cited_by_file()
+        wrong = []
+        for id_, body in _entry_bodies().items():
+            line = re.search(r"^\*\*Runtime\.\*\* cited in ([^\n]*)$",
+                             body, re.M)
+            if not line:
+                continue
+            claimed = set(re.findall(r"`([^`]+)`", line.group(1)))
+            if claimed != strict.get(id_, set()):
+                wrong.append(f"{id_}: says {sorted(claimed)}, "
+                             f"cites {sorted(strict.get(id_, set()))}")
+        self.assertEqual([], sorted(wrong), "\n".join(sorted(wrong)))
+
+    def test_each_entry_declares_its_runtime_state_EXACTLY_ONCE(self):
+        """Two `**Runtime.**` lines in one entry and the first wins silently,
+        so a contradicting second line would never be read (Fable, #180)."""
+        many = sorted(id_ for id_, body in _entry_bodies().items()
+                      if len(RUNTIME_RE.findall(body)) > 1)
+        self.assertEqual(
+            [], many,
+            f"these entries declare a runtime state more than once: {many}")
+
+    def test_a_status_that_sets_a_run_conditional_MUST_be_cited(self):
+        """`referral` and `alternative-solution` are the two statuses that
+        make a run conditional. An uncited one is a condition that can never
+        fire, which is worse than no entry: the register advertises a
+        safeguard that does not exist."""
+        bodies = _entry_bodies()
+        declared = _declared_runtime()
+        offenders = []
+        for id_, body in bodies.items():
+            status = re.search(r"\*\*Status:? \`([a-z-]+)\`", body)
+            if status and status.group(1) in ("referral",
+                                             "alternative-solution"):
+                if not declared.get(id_):
+                    offenders.append(f"{id_} ({status.group(1)})")
+        self.assertEqual(
+            [], sorted(offenders),
+            f"a conditional-setting status with no runtime citation: "
+            f"{sorted(offenders)}")
 
 
 if __name__ == "__main__":

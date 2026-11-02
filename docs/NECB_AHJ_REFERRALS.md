@@ -50,6 +50,8 @@ fallback: D-52 uses a structural fuel proxy when the heat-pump share is at or
 below the 33% proviso or when annual data are absent. Both are local choices
 the article does not make.
 
+**Runtime.** cited in `reference.py`.
+
 **What the tool does meanwhile.** The (5) disclosure runs on the heat-pump
 path as well as the structural one, and says the allocation is NOT VERIFIED.
 It does not claim the auxiliary election eliminates electric reference
@@ -75,6 +77,8 @@ forbidden above 352 kW is not established by the text.
 **Established by.** Sol `119` section C, correcting his own earlier
 "conflict across every band" as too categorical.
 
+**Runtime.** cited in `reference.py`.
+
 **What the tool does meanwhile.** The (6) coverage gap states that the
 applicable subclause is not established at selection time and claims none.
 
@@ -90,6 +94,8 @@ area, with a north/east/south/west tie-break. Neither the metric nor the
 tie-break is in the text.
 
 **Established by.** Sol `122`, decision-log audit.
+
+**Runtime.** cited in `reference.py`.
 
 **What the tool does meanwhile.** It applies D-18's rule — largest exterior-wall
 area with an N/E/S/W tie-break — and **the choice IS audited**, since the
@@ -117,6 +123,8 @@ heating when the proposed block is heated.
 
 **Established by.** Sol `122`, who called it a genuine internal tension.
 
+**Runtime.** cited in `reference.py`.
+
 **What the tool does meanwhile.** It follows (5) and retains the heating,
 audited against both the sentence and the table row.
 
@@ -132,6 +140,8 @@ energy source only for humidification already present in the REFERENCE — a
 materially different scope.
 
 **Established by.** Sol `122`.
+
+**Runtime.** cited in `reference.py`.
 
 **What the tool does meanwhile.** It applies D-55's reading, which adds
 reference humidification the other reading would not.
@@ -152,6 +162,8 @@ non-condensing curve on every boiler row, so the precedent is weak evidence.
 purchased-energy case separate, because 8.4.x.6 explicitly specifies a
 MODULATING boiler, so there the Code does elect.
 
+**Runtime.** cited in `efficiency.py`.
+
 **What the tool does meanwhile.** It applies D-89's classes, and the purchased
 route separately applies the modulating class the article names (D-89's own
 scope note).
@@ -169,6 +181,8 @@ makes this the largest single unreferred assumption the audit found.
 
 **Established by.** Sol `122`. D-91 remains the interim project ruling.
 
+**Runtime.** cited in `reference.py`.
+
 **What the tool does meanwhile.** It dispatches air-terminal-first per D-91
 and audits it. The magnitude is why this entry exists rather than sitting in
 the decision log alone.
@@ -185,6 +199,8 @@ one grouped reference system, nor the case where no unique correspondence
 exists. D-93 and D-97 decline in those cases and retain a simulator default.
 
 **Established by.** Sol `122`, as one combined referral for both decisions.
+
+**Runtime.** cited in `efficiency.py`.
 
 **What the tool does meanwhile.** It DECLINES rather than guessing, emitting an
 unresolved warning per affected loop and leaving the simulator default in
@@ -223,6 +239,8 @@ identified the chiller counterexample and Claude withdrew the claim that
 The Code evidence was checked against both editions' retained codes-MCP
 payloads, including Article 13, its Appendix note and the Part 5 equipment
 tables.
+
+**Runtime.** cited in `reference.py`.
 
 **What the tool does meanwhile.** D-37's conservative behavior remains: BTAP
 builds the Article 13 air-source heat-pump reference when the unpaired
@@ -268,6 +286,8 @@ nor (5) that it overrides (6).
 **Established by.** Sol `110`, `112`, `119`, `120`; Fable `117`, `118`. Sol
 fetched both editions through the codes MCP; Fable reproduced the
 implementation's behaviour with code.
+
+**Runtime.** cited in `reference.py`.
 
 **What the tool does meanwhile.** It elects ONE energy type for the reference
 SELECTION and computes no capacity ratio, so it satisfies neither clause of
@@ -332,6 +352,8 @@ this register on 2026-10-07 after phylroy recalled that table errors had been
 found in an earlier session; they were recorded in provenance and in the
 vintage-match verification, but not as an AHJ-weighable question.
 
+**Runtime.** cited in `efficiency.py`.
+
 **What the tool does meanwhile.** It ships the CORRECTED values for two of the
 three rows, and the manifest provenance records that it does so and why: "the
 water-cooled Scroll and Reciprocating rows agree only after the codes
@@ -385,6 +407,8 @@ prescribed method into the other.
 of `CoolingTowerSingleSpeed` on 2026-10-14. The earlier `engine` coverage
 disposition described the substitution but incorrectly called the requirement
 satisfied.
+
+**Runtime.** cited in `efficiency.py`.
 
 **What the tool does meanwhile.** It retains the single-speed Merkel tower,
 cites D-07 and this entry on every affected condenser loop, and makes the run
