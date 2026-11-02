@@ -589,6 +589,13 @@ def _heat_pump_redirects(group):
     return any(s != 'water_loop' for s in sources)
 
 
+def _cooling_only_plant_heat_pump_identity_is_unresolved(group):
+    """Whether an unpaired cooling-side plant object is the only HP evidence."""
+    return bool(group.get('unpaired_cooling_plant_heat_pumps')) and not (
+        group.get('heating_capable_plant_heat_pump')
+        or group.get('nonplant_heat_pump'))
+
+
 # 'air-cooled unitary, packaged terminal or room air conditioner, or fan coils'
 # (the "(or heat pumps)" parenthetical is superseded by the 8.4.4.7.(4)
 # redirect per D-34 — REDIRECTING heat-pump groups never reach this check;
@@ -787,6 +794,25 @@ def _finalize(assignment, group, definitions, selection, facts, audit,
     hp_rule = selection['special_rules']['heat_pump']
     hp_article = heat_pump_article_base(selection)
     if _heat_pump_redirects(group) and assignment.reference_system in hp_rule['applies_to_systems']:
+        if _cooling_only_plant_heat_pump_identity_is_unresolved(group):
+            inputs = {
+                'unpaired_cooling_plant_heat_pumps':
+                    group.get('unpaired_cooling_plant_heat_pumps'),
+                'interim_reference': 'air-source heat pump',
+            }
+            text = (
+                'UNRESOLVED: cooling-only plant equipment has no heating '
+                'companion, so its identity as a heat pump rather than a '
+                'packaged water chiller is not established; the conservative '
+                'interim choice applies the air-source heat-pump reference')
+            if hp_rule['article'].startswith('8.4.5.'):
+                audit.warn('selection', text, target=','.join(group['zones']),
+                           inputs=inputs, article='8.4.5.13.(2)(a)',
+                           ruling='D-37', ahj='AHJ-25')
+            else:
+                audit.warn('selection', text, target=','.join(group['zones']),
+                           inputs=inputs, article='8.4.4.13.(2)(a)',
+                           ruling='D-37', ahj='AHJ-25')
         audit.decision('selection',
                        'proposed heat pump -> reference is an air-source heat pump '
                        f"({hp_rule['article']})",

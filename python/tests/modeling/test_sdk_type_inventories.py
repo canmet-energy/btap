@@ -439,6 +439,51 @@ class TestEveryAddedPlantHeatPumpIsLoadBearing(unittest.TestCase):
             'the type alone cannot establish water-loop versus external '
             'water-source service; D-37 keeps this source unclassified')
 
+    def test_an_unpaired_cooling_side_is_recorded_separately(self):
+        import openstudio
+
+        from btap.modeling.hvac import classify
+
+        model = openstudio.model.Model()
+        loop = _plant(model, 'Chilled Water', 'Cooling')
+        unit = openstudio.model.HeatPumpPlantLoopEIRCooling(model)
+        unit.setName('Unpaired Cooling HP')
+        self.assertTrue(unit.setCondenserType('AirSource'))
+        self.assertTrue(loop.addSupplyBranchForComponent(unit))
+        self.assertFalse(unit.companionHeatingHeatPump().is_initialized())
+
+        facts = classify.characterize(model)['plants'][0]
+        self.assertFalse(facts['heating_capable_heat_pump'])
+        self.assertEqual(
+            ['Unpaired Cooling HP'],
+            facts['unpaired_cooling_heat_pumps'])
+
+    def test_a_heating_companion_establishes_the_other_side(self):
+        import openstudio
+
+        from btap.modeling.hvac import classify
+
+        model = openstudio.model.Model()
+        chilled = _plant(model, 'Chilled Water', 'Cooling')
+        hot = _plant(model, 'Heat Pump Hot Water', 'Heating')
+        cooling = openstudio.model.HeatPumpPlantLoopEIRCooling(model)
+        cooling.setName('Paired Cooling HP')
+        heating = openstudio.model.HeatPumpPlantLoopEIRHeating(model)
+        self.assertTrue(cooling.setCondenserType('AirSource'))
+        self.assertTrue(heating.setCondenserType('AirSource'))
+        self.assertTrue(chilled.addSupplyBranchForComponent(cooling))
+        self.assertTrue(hot.addSupplyBranchForComponent(heating))
+        self.assertTrue(cooling.setCompanionHeatingHeatPump(heating))
+        self.assertTrue(cooling.companionHeatingHeatPump().is_initialized())
+
+        plants = {
+            plant['name']: plant
+            for plant in classify.characterize(model)['plants']
+        }
+        facts = plants['Chilled Water']
+        self.assertTrue(facts['heating_capable_heat_pump'])
+        self.assertEqual([], facts['unpaired_cooling_heat_pumps'])
+
     def test_central_heat_pump_marks_both_load_sides(self):
         import openstudio
 

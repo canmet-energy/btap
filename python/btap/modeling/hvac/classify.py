@@ -17,6 +17,9 @@ cooling capacity) and by costing of foreign models.
           'heated': True, 'cooled': False,
           'heating_energy_types': ['NaturalGas'], 'cooling_energy_types': ['Electricity'],
           'heat_pump': False, 'heat_pump_sources': ['air'|'water_loop'|'external'],
+          'nonplant_heat_pump': False,
+          'heating_capable_plant_heat_pump': False,
+          'unpaired_cooling_plant_heat_pumps': ['Cooling HP'],
           'terminal_type': 'vav_reheat'|'dual_duct_vav'|'cv_reheat'|'cv'|'none',
           'cooling_plants': ['Chilled Water Loop'],
           'design_cooling_kw': 42.0|None,
@@ -26,6 +29,8 @@ cooling capacity) and by costing of foreign models.
                     'fuel_capacities_w': {'NaturalGas': 176000.0, 'Electricity': None},
                     'purchased': False, 'heat_pump': False,
                     'heat_pump_modes': ['heating'|'cooling'],
+                    'heating_capable_heat_pump': False,
+                    'unpaired_cooling_heat_pumps': ['Cooling HP'],
                     'chiller_types': ['electric_eir'|'absorption'|...] } ],
       'purchased_energy': { 'heating': False, 'cooling': False }
     }
@@ -193,11 +198,28 @@ def _plant_heat_pump(comp, loop):
     return None
 
 
+def _plant_heat_pump_has_heating_side(unit, mode):
+    """Whether this plant heat-pump equipment carries a heating side."""
+    if mode == 'heating':
+        return True
+
+    for accessor in (
+            'companionHeatingHeatPump',
+            'heatPumpAirToWater',
+            'heatingPlantLoop'):
+        method = getattr(unit, accessor, None)
+        if method is not None and opt(method()) is not None:
+            return True
+    return False
+
+
 def _plant_facts(loop, audit):
     fuels = []
     purchased = False
     heat_pump = False
     heat_pump_modes = []
+    heating_capable_heat_pump = False
+    unpaired_cooling_heat_pumps = []
     has_boiler = has_chiller = has_rejection = False
     chiller_types = []
 
@@ -247,9 +269,13 @@ def _plant_facts(loop, audit):
 
             hp = _plant_heat_pump(comp, loop)
             if hp is not None:
-                _unit, mode, fuel, _source_kind = hp
+                unit, mode, fuel, _source_kind = hp
                 heat_pump = True
                 heat_pump_modes.append(mode)
+                if _plant_heat_pump_has_heating_side(unit, mode):
+                    heating_capable_heat_pump = True
+                elif mode == 'cooling':
+                    unpaired_cooling_heat_pumps.append(unit.nameString())
                 fuels.append(fuel)
                 continue
 
@@ -302,6 +328,9 @@ def _plant_facts(loop, audit):
              'boiler_count': len(allocation),
              'purchased': purchased, 'heat_pump': heat_pump,
              'heat_pump_modes': list(dict.fromkeys(heat_pump_modes)),
+             'heating_capable_heat_pump': heating_capable_heat_pump,
+             'unpaired_cooling_heat_pumps':
+                 list(dict.fromkeys(unpaired_cooling_heat_pumps)),
              'chiller_types': list(dict.fromkeys(chiller_types))}
     if audit is not None:
         audit.info('characterize', 'plant loop classified', target=loop.nameString(),
@@ -587,6 +616,10 @@ def _record_plant_heat_pump(group, coil, plant_by_name):
         return
 
     group['heat_pump'] = True
+    if plant.get('heating_capable_heat_pump'):
+        group['heating_capable_plant_heat_pump'] = True
+    unpaired = group.setdefault('unpaired_cooling_plant_heat_pumps', [])
+    _union(unpaired, plant.get('unpaired_cooling_heat_pumps') or [])
     source = plant.get('hp_source')
     if source is not None:
         _union(group['heat_pump_sources'], [source])
@@ -613,6 +646,7 @@ def _record_heat_pump(group, hp_kind, unit):
         return
 
     group['heat_pump'] = True
+    group['nonplant_heat_pump'] = True
     source = (_water_to_air_hp_source(unit)
               if hp_kind == 'water_to_air' else 'air')
     if source is not None:
