@@ -2,7 +2,7 @@
  "version": 2,
  "spec_sha256": "f7d5cb76db9e77c526024a6545047ba19f6517332372b39242c64682168be76c",
  "provenance": {
-  "commit": "5d9508f22e97596b079703421b35207b1b1872b6",
+  "commit": "2b462ec81b3faf625b8627e98d3391ef442de0cb",
   "dirty": false,
   "openstudio_cli": "3.11.0+241b8abb4d",
   "producer": {
@@ -1559,8 +1559,8 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "52c8bcd66f100ff52607c3fe33b8885c9ac3dbb8287a43221ac0c3b261e5c5fd",
-    "audit.txt": "556028c8c4db1f35c4d8038c69e0307edad977db0e3062b805b9dd5177f18ded",
+    "audit.json": "248fbf5a26fd1f84ae9f2c06e8d2d74dc3dbe4c5aa0811321343396364fd4f43",
+    "audit.txt": "53dc399dbaa67a557d03bcabc7faf2bd37e86ae397d579ee544df1d3e3a9bde3",
     "report.json": "4b4d1653736f903dc27fa1a6acf4e7240b632295bed306eb4c14641918576584",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "8e27fd15c910ebe133bbdbcaab15891161d3b4840262b00c4a4e211df1ae644b"
@@ -2100,8 +2100,8 @@
     }
    ],
    "baseline_sha256": {
-    "audit.json": "f88c17247302d741e66077bf767a615e292a88b7eeacff2b381902c70dd8f25b",
-    "audit.txt": "f7956c40f4dc0f73ee4fcf048fb68bce269e2317d771a862483441c798447412",
+    "audit.json": "2f92e32c0ff930e7560367769d9bd35d7d381269eb93914a58f94c6ed53a8d6f",
+    "audit.txt": "ac136dc34dc21b5be282ac0f6f9202461c3e89c8ce12b90fe82fc7f77bcff368",
     "report.json": "00054dad5f4c3e9b7632a46cf64d4fa87ff3eb99b7bdf50d318ce170b19d3be8",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "d95659ffb5341908526d14529867fd93084b1224f37e44f4cf1773adfcaec0ee"
@@ -3091,8 +3091,8 @@
     }
    ],
    "baseline_sha256": {
-    "audit.json": "005ae35e4059076c908fc819ef154d07729c2d786c954a591bef0befcbcc53c3",
-    "audit.txt": "f6e69377ad49b7e2218649ad97d5b23f5c283ba5f2a19d0d076c64549cd0da8d",
+    "audit.json": "a904b855ba19d5895927b8d9b7d0281d0cff4e2c8997f105614f0ada270d0d48",
+    "audit.txt": "c460af06336047a42bdc524c2dc2382d7960454542987df965e3e815aedbaa90",
     "report.json": "afb52de315a8c861607a2c7d05ea7811056d956439afbf020af163a7e96a56ee",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "3b26d60ba7e243ae8cc6f7a08cb883788794b2e17e05c6ab03f32edd4fda8a2a"

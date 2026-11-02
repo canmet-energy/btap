@@ -309,7 +309,8 @@
    "selected_system": 3,
    "heat_pump_sources": [
     "water_loop"
-   ]
+   ],
+   "heat_pump_source_unclassified": false
   },
   "article": "8.4.4.13.(1)",
   "ruling": "D-37",
@@ -366,7 +367,8 @@
    "selected_system": 3,
    "heat_pump_sources": [
     "water_loop"
-   ]
+   ],
+   "heat_pump_source_unclassified": false
   },
   "article": "8.4.4.13.(1)",
   "ruling": "D-37",
@@ -423,7 +425,8 @@
    "selected_system": 3,
    "heat_pump_sources": [
     "water_loop"
-   ]
+   ],
+   "heat_pump_source_unclassified": false
   },
   "article": "8.4.4.13.(1)",
   "ruling": "D-37",
@@ -480,7 +483,8 @@
    "selected_system": 3,
    "heat_pump_sources": [
     "water_loop"
-   ]
+   ],
+   "heat_pump_source_unclassified": false
   },
   "article": "8.4.4.13.(1)",
   "ruling": "D-37",
@@ -537,7 +541,8 @@
    "selected_system": 3,
    "heat_pump_sources": [
     "water_loop"
-   ]
+   ],
+   "heat_pump_source_unclassified": false
   },
   "article": "8.4.4.13.(1)",
   "ruling": "D-37",

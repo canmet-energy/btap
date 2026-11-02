@@ -284,7 +284,8 @@
    "selected_system": 3,
    "heat_pump_sources": [
     "air"
-   ]
+   ],
+   "heat_pump_source_unclassified": false
   },
   "value": "hp",
   "article": "8.4.4.13.(2)(a)",
@@ -378,7 +379,8 @@
    "selected_system": 3,
    "heat_pump_sources": [
     "air"
-   ]
+   ],
+   "heat_pump_source_unclassified": false
   },
   "value": "hp",
   "article": "8.4.4.13.(2)(a)",
@@ -411,7 +413,8 @@
    "selected_system": 3,
    "heat_pump_sources": [
     "air"
-   ]
+   ],
+   "heat_pump_source_unclassified": false
   },
   "value": "hp",
   "article": "8.4.4.13.(2)(a)",
@@ -444,7 +447,8 @@
    "selected_system": 3,
    "heat_pump_sources": [
     "air"
-   ]
+   ],
+   "heat_pump_source_unclassified": false
   },
   "value": "hp",
   "article": "8.4.4.13.(2)(a)",
@@ -477,7 +481,8 @@
    "selected_system": 3,
    "heat_pump_sources": [
     "air"
-   ]
+   ],
+   "heat_pump_source_unclassified": false
   },
   "value": "hp",
   "article": "8.4.4.13.(2)(a)",
