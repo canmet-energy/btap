@@ -124,11 +124,24 @@ def unguarded_sites(accessors):
 
     - substring matching, so a COMMENT mentioning `is_initialized`, or a guard
       on a DIFFERENT object, reads as a guard;
-    - two-step `x = obj.accessor()` then `x.get()` and the walrus ARE walked
-      now (`_two_step_sites`), but by one of the five binding forms `_bindings` handles. Still invisible, each with no hazardous product instance: an attribute or subscript target (`reference.py:1210` binds one, to a NON-optional `availabilitySchedule()`), a starred unpack, a nested unpack, a module- or class-level binding, and a tuple target over a literal iterable. A two-step site inside a NESTED function is counted under both the inner and the outer function, because `ast.walk` descends into nested defs: zero product instances, and over-reporting is the safe direction. The for-target over a tuple of casts is a real
-      product idiom — `codes/necb/hvac/reference.py:1726`,
-      `modeling/hvac/components/coils.py:298`, `classify.py:673` — all guarded
-      today, so a NEW unguarded one in that shape would also be invisible;
+    - a two-step `x = obj.accessor()` then `x.get()` IS walked
+      (`_two_step_sites`), through the five binding forms `_bindings` handles:
+      `Assign` to a Name, every target of a chained assignment, a positional
+      tuple unpack, `AnnAssign`, the walrus, a `for`/comprehension target over
+      a literal sequence, and a conditional on either branch. The for-target
+      idiom is PROVEN visible: removing the guard in `unitary_children`
+      (`modeling/hvac/components/coils.py`) reddens the gate. Function names,
+      not line numbers, because the sites move — `_apply_zone_fan_rules` in
+      `codes/necb/hvac/reference.py`, `unitary_children` in
+      `components/coils.py`, `_zonal_hp_coil` in `classify.py`;
+    - still invisible, each with NO HAZARDOUS product instance: an attribute or
+      subscript target (`reference.py` binds one in `_apply_zone_fan_rules`, to
+      a NON-optional `availabilitySchedule()`, so the honest claim is "no
+      hazardous instance" rather than "none"), a starred or nested unpack, a
+      module- or class-level binding, and a tuple target over a literal
+      iterable. A two-step site inside a NESTED function is counted under both
+      the inner and the outer function, since `ast.walk` descends into nested
+      defs: zero product instances, and over-reporting is the safe direction;
     - an alias or a `getattr` call is invisible, as is anything
       inter-procedural;
     - `btap/` only: `scripts/` and `tests/` are not walked, though test code
@@ -601,6 +614,15 @@ class TestTheWalkItself(unittest.TestCase):
                 ('conditional inside a tuple element',
                  'def f(s, c):\n'
                  '    x, y = (s.space() if c else None), 1\n'
+                 '    return x.get()\n'),
+                # `BoolOp` had NO PIN until now: removing its branch from
+                # `_accessor` left the whole harness green. Zero product
+                # instances, so the choice was to pin it or drop it, and an
+                # unfalsifiable rule is the thing this file keeps catching
+                # itself on (Fable, follow-up on #178).
+                ('a boolean fallback chain',
+                 'def f(s, t):\n'
+                 '    x = s.thermalZone() or t.thermalZone()\n'
                  '    return x.get()\n'),
                 ('a chained assignment binds EVERY target',
                  'def f(s):\n    x = y = s.plantLoop()\n'
