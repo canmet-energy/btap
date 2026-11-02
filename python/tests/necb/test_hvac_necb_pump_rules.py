@@ -889,9 +889,8 @@ class TestNecbPumpRules(unittest.TestCase):
             if cls is None:
                 continue  # not in this SDK version
             with self.subTest(cls=name):
-                obj = cls(model)
                 named = [a for a in ('heatRecoveryLoop', 'heatingPlantLoop')
-                         if hasattr(obj, a)]
+                         if hasattr(cls, a)]
                 self.assertTrue(named,
                                 f'{name} is listed as having a LOAD tertiary but exposes no '
                                 'load-named accessor; the SDK name is the evidence')

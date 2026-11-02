@@ -18,12 +18,15 @@ cooling capacity) and by costing of foreign models.
           'heating_energy_types': ['NaturalGas'], 'cooling_energy_types': ['Electricity'],
           'heat_pump': False, 'heat_pump_sources': ['air'|'water_loop'|'external'],
           'terminal_type': 'vav_reheat'|'dual_duct_vav'|'cv_reheat'|'cv'|'none',
+          'cooling_plants': ['Chilled Water Loop'],
           'design_cooling_kw': 42.0|None,
           'dcv': False, 'system_outdoor_air_method': 'ZoneSum'|None } ],
       'plants': [ { 'name':, 'type': 'hot_water'|'chilled_water'|'condenser'|'service_water'|'other',
                     'fuels': ['NaturalGas'],
                     'fuel_capacities_w': {'NaturalGas': 176000.0, 'Electricity': None},
-                    'purchased': False, 'heat_pump': False } ],
+                    'purchased': False, 'heat_pump': False,
+                    'heat_pump_modes': ['heating'|'cooling'],
+                    'chiller_types': ['electric_eir'|'absorption'|...] } ],
       'purchased_energy': { 'heating': False, 'cooling': False }
     }
 """
@@ -78,6 +81,7 @@ def characterize(model, audit=None):
     plants = [_plant_facts(loop, audit) for loop in sorted_by_name(model.getPlantLoops())]
     plant_by_name = {p['name']: p for p in plants}
     _annotate_heat_pump_plants(model, plant_by_name)
+    _annotate_absorption_chiller_plants(model, plant_by_name)
 
     groups = []
     served = {}
@@ -130,11 +134,72 @@ def characterize(model, audit=None):
 
 # ---------------- plants ----------------
 
+ELECTRIC_CHILLER_CASTS = {
+    'to_ChillerElectricEIR': 'electric_eir',
+    'to_ChillerElectricReformulatedEIR': 'electric_reformulated_eir',
+    'to_ChillerElectricASHRAE205': 'electric_ashrae205',
+}
+ABSORPTION_CHILLER_CASTS = {
+    'to_ChillerAbsorption': 'absorption',
+    'to_ChillerAbsorptionIndirect': 'absorption_indirect',
+}
+
+PLANT_HEATING_HP_CASTS = (
+    'to_HeatPumpPlantLoopEIRHeating',
+    'to_HeatPumpWaterToWaterEquationFitHeating',
+    'to_HeatPumpAirToWaterHeating',
+    'to_HeatPumpAirToWaterFuelFiredHeating',
+)
+PLANT_COOLING_HP_CASTS = (
+    'to_HeatPumpPlantLoopEIRCooling',
+    'to_HeatPumpWaterToWaterEquationFitCooling',
+    'to_HeatPumpAirToWaterCooling',
+    'to_HeatPumpAirToWaterFuelFiredCooling',
+)
+PLANT_HP_CASTS = (PLANT_HEATING_HP_CASTS + PLANT_COOLING_HP_CASTS
+                  + ('to_CentralHeatPumpSystem',))
+FUEL_FIRED_AIR_TO_WATER_CASTS = (
+    'to_HeatPumpAirToWaterFuelFiredHeating',
+    'to_HeatPumpAirToWaterFuelFiredCooling',
+)
+
+
+def _plant_heat_pump(comp, loop):
+    """Return ``(unit, mode, fuel)`` for a heat pump serving ``loop``."""
+    for cast in PLANT_HEATING_HP_CASTS:
+        unit = _try_cast(comp, cast)
+        if unit is not None:
+            fuel = (unit.fuelType()
+                    if cast in FUEL_FIRED_AIR_TO_WATER_CASTS
+                    else 'Electricity')
+            return unit, 'heating', fuel
+    for cast in PLANT_COOLING_HP_CASTS:
+        unit = _try_cast(comp, cast)
+        if unit is not None:
+            fuel = (unit.fuelType()
+                    if cast in FUEL_FIRED_AIR_TO_WATER_CASTS
+                    else 'Electricity')
+            return unit, 'cooling', fuel
+
+    central = _try_cast(comp, 'to_CentralHeatPumpSystem')
+    if central is None:
+        return None
+    heating = opt(central.heatingPlantLoop())
+    cooling = opt(central.coolingPlantLoop())
+    if heating is not None and heating.handle() == loop.handle():
+        return central, 'heating', 'Electricity'
+    if cooling is not None and cooling.handle() == loop.handle():
+        return central, 'cooling', 'Electricity'
+    return None
+
+
 def _plant_facts(loop, audit):
     fuels = []
     purchased = False
     heat_pump = False
+    heat_pump_modes = []
     has_boiler = has_chiller = has_rejection = False
+    chiller_types = []
 
     #: (fuel, watts|None) per heating device on this plant — see below.
     allocation = []
@@ -160,40 +225,56 @@ def _plant_facts(loop, audit):
                 watts = opt(boiler.autosizedNominalCapacity())
             allocation.append((boiler.fuelType(),
                                float(watts) if watts is not None else None))
-        elif comp.to_ChillerElectricEIR().is_initialized():
-            has_chiller = True
-            fuels.append('Electricity')
-        elif _district_heating(comp):
-            purchased = True
-            fuels.append('Purchased')
-        elif comp.to_DistrictCooling().is_initialized():
-            purchased = True
-            fuels.append('Purchased')
-        elif (comp.to_HeatPumpPlantLoopEIRHeating().is_initialized() or
-              comp.to_HeatPumpWaterToWaterEquationFitHeating().is_initialized()):
-            heat_pump = True
-            fuels.append('Electricity')
-        elif comp.to_HeatPumpPlantLoopEIRCooling().is_initialized():
-            heat_pump = True
-            fuels.append('Electricity')
-        elif (comp.to_CoolingTowerSingleSpeed().is_initialized() or
-              comp.to_EvaporativeFluidCoolerSingleSpeed().is_initialized() or
-              comp.to_GroundHeatExchangerVertical().is_initialized()):
-            has_rejection = True
-        elif comp.to_WaterHeaterMixed().is_initialized():
-            fuels.append(comp.to_WaterHeaterMixed().get().heaterFuelType())
+        else:
+            chiller_type = next(
+                (kind for cast, kind in ELECTRIC_CHILLER_CASTS.items()
+                 if _try_cast(comp, cast) is not None),
+                None)
+            if chiller_type is not None:
+                has_chiller = True
+                chiller_types.append(chiller_type)
+                fuels.append('Electricity')
+                continue
+
+            chiller_type = next(
+                (kind for cast, kind in ABSORPTION_CHILLER_CASTS.items()
+                 if _try_cast(comp, cast) is not None),
+                None)
+            if chiller_type is not None:
+                has_chiller = True
+                chiller_types.append(chiller_type)
+                continue
+
+            hp = _plant_heat_pump(comp, loop)
+            if hp is not None:
+                _unit, mode, fuel = hp
+                heat_pump = True
+                heat_pump_modes.append(mode)
+                fuels.append(fuel)
+                continue
+
+            if _district_heating(comp):
+                purchased = True
+                fuels.append('Purchased')
+            elif comp.to_DistrictCooling().is_initialized():
+                purchased = True
+                fuels.append('Purchased')
+            elif (comp.to_CoolingTowerSingleSpeed().is_initialized() or
+                  comp.to_EvaporativeFluidCoolerSingleSpeed().is_initialized() or
+                  comp.to_GroundHeatExchangerVertical().is_initialized()):
+                has_rejection = True
+            elif comp.to_WaterHeaterMixed().is_initialized():
+                fuels.append(comp.to_WaterHeaterMixed().get().heaterFuelType())
 
     swh = any(c.to_WaterUseConnections().is_initialized() for c in loop.demandComponents())
     if swh:
         type_ = 'service_water'
-    elif has_boiler or (purchased and _heating_loop(loop)) or (heat_pump and _heating_loop(loop)):
+    elif has_boiler or (purchased and _heating_loop(loop)) or 'heating' in heat_pump_modes:
         type_ = 'hot_water'
-    elif has_chiller or (purchased and not _heating_loop(loop)):
+    elif has_chiller or (purchased and not _heating_loop(loop)) or 'cooling' in heat_pump_modes:
         type_ = 'chilled_water'
     elif has_rejection:
         type_ = 'condenser'
-    elif heat_pump:
-        type_ = 'hot_water'
     else:
         type_ = 'other'
 
@@ -219,10 +300,13 @@ def _plant_facts(loop, audit):
              # is the count the (5) disclosure needs, so the field keeps that
              # scope and says so.
              'boiler_count': len(allocation),
-             'purchased': purchased, 'heat_pump': heat_pump}
+             'purchased': purchased, 'heat_pump': heat_pump,
+             'heat_pump_modes': list(dict.fromkeys(heat_pump_modes)),
+             'chiller_types': list(dict.fromkeys(chiller_types))}
     if audit is not None:
         audit.info('characterize', 'plant loop classified', target=loop.nameString(),
-                   value=type_, inputs={'fuels': facts['fuels'], 'purchased': purchased})
+                   value=type_, inputs={'fuels': facts['fuels'], 'purchased': purchased,
+                                        'chiller_types': facts['chiller_types']})
     return facts
 
 
@@ -390,6 +474,7 @@ def _base_group(zone_names, air_loop_name):
             'zonal_units': [], 'loop_dx_cooling': False,
             'packaged_unitary': False, 'ventilation_sized': False,
             'declared_equipment_class': None,
+            'cooling_plants': [],
             'design_cooling_kw': 0.0, 'cooling_capacity_complete': True,
             'dcv': False, 'system_outdoor_air_method': None,
             'evidence': []}
@@ -424,17 +509,44 @@ def _outdoor_air_facts(group, air_loop, audit):
 # heat pump AND never a plant heat pump" (gas coils), None means "not a heat
 # pump itself but its plant may BE one" (electric/hydronic coils), exactly the
 # Ruby false/nil split.
+HYDRONIC_HEATING_COIL_CASTS = (
+    'to_CoilHeatingWater',
+    'to_CoilHeatingWaterBaseboard',
+    'to_CoilHeatingWaterBaseboardRadiant',
+    'to_CoilHeatingFourPipeBeam',
+    'to_CoilHeatingLowTempRadiantConstFlow',
+    'to_CoilHeatingLowTempRadiantVarFlow',
+)
+HYDRONIC_COOLING_COIL_CASTS = (
+    'to_CoilCoolingWater',
+    'to_CoilCoolingCooledBeam',
+    'to_CoilCoolingFourPipeBeam',
+    'to_CoilCoolingLowTempRadiantConstFlow',
+    'to_CoilCoolingLowTempRadiantVarFlow',
+    'to_CoilCoolingWaterPanelRadiant',
+)
+
 HEATING_COILS = [
     ('to_CoilHeatingGas', lambda _c, _p: 'NaturalGas', False),
     ('to_CoilHeatingGasMultiStage', lambda _c, _p: 'NaturalGas', False),
     ('to_CoilHeatingDXMultiSpeed', lambda _c, _p: 'Electricity', 'air'),
     ('to_CoilHeatingElectric', lambda _c, _p: 'Electricity', None),
+    ('to_CoilHeatingElectricMultiStage', lambda _c, _p: 'Electricity', None),
+    ('to_CoilHeatingDesuperheater', lambda _c, _p: 'Electricity', False),
     ('to_CoilHeatingWater', lambda c, p: _hydronic_fuels(c, p), None),
     ('to_CoilHeatingDXSingleSpeed', lambda _c, _p: 'Electricity', 'air'),
     ('to_CoilHeatingDXVariableSpeed', lambda _c, _p: 'Electricity', 'air'),
     ('to_CoilHeatingWaterBaseboard', lambda c, p: _hydronic_fuels(c, p), None),
+    ('to_CoilHeatingWaterBaseboardRadiant', lambda c, p: _hydronic_fuels(c, p), None),
+    ('to_CoilHeatingFourPipeBeam', lambda c, p: _hydronic_fuels(c, p), None),
+    ('to_CoilHeatingLowTempRadiantConstFlow', lambda c, p: _hydronic_fuels(c, p), None),
+    ('to_CoilHeatingLowTempRadiantVarFlow', lambda c, p: _hydronic_fuels(c, p), None),
     ('to_CoilHeatingWaterToAirHeatPumpEquationFit', lambda _c, _p: 'Electricity', 'water_to_air'),
+    ('to_CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit',
+     lambda _c, _p: 'Electricity', 'water_to_air'),
     ('to_CoilHeatingDXVariableRefrigerantFlow', lambda _c, _p: 'Electricity', 'air'),
+    ('to_CoilHeatingDXVariableRefrigerantFlowFluidTemperatureControl',
+     lambda _c, _p: 'Electricity', 'air'),
 ]
 
 
@@ -480,20 +592,12 @@ def _record_plant_heat_pump(group, coil, plant_by_name):
         f"plant heat pump on '{plant['name']}' (source {plant.get('hp_source') or 'water_loop'})")
 
 
-def _zonal_water_heating_coil(unit):
-    """The water heating coil a zonal unit draws from its plant, if any."""
-    coil = unit.heatingCoil() if hasattr(unit, 'heatingCoil') else None
-    if coil is not None and hasattr(coil, 'is_initialized') and coil.is_initialized():
-        coil = coil.get()
-    if coil is None or not hasattr(coil, 'to_CoilHeatingWater'):
-        return None
-
-    if coil.to_CoilHeatingWater().is_initialized():
-        return coil.to_CoilHeatingWater().get()
-    if (hasattr(coil, 'to_CoilHeatingWaterBaseboard') and
-            coil.to_CoilHeatingWaterBaseboard().is_initialized()):
-        return coil.to_CoilHeatingWaterBaseboard().get()
-    return None
+def _record_hydronic_plant(group, coil, key):
+    if coil is None or not hasattr(coil, 'plantLoop'):
+        return
+    loop = opt(coil.plantLoop())
+    if loop is not None:
+        _union(group[key], [loop.nameString()])
 
 
 def _record_heat_pump(group, hp_kind, unit):
@@ -545,10 +649,6 @@ def _water_to_air_hp_source(coil):
     return 'external' if _external_source_loop(loop) else 'water_loop'
 
 
-PLANT_HP_CASTS = ('to_HeatPumpPlantLoopEIRHeating', 'to_HeatPumpWaterToWaterEquationFitHeating',
-                  'to_HeatPumpPlantLoopEIRCooling', 'to_HeatPumpWaterToWaterEquationFitCooling')
-
-
 def _annotate_heat_pump_plants(model, plant_by_name):
     """Classify each heat-pump PLANT's source per Note A-8.4.4.13 (D-58): the HP
     object's source-side loop carries the evidence — external components =>
@@ -564,21 +664,73 @@ def _annotate_heat_pump_plants(model, plant_by_name):
 
         source = None
         for comp in loop.supplyComponents():
-            for cast in PLANT_HP_CASTS:
-                hp = _try_cast(comp, cast)
-                if hp is None:
-                    continue
+            hp_facts = _plant_heat_pump(comp, loop)
+            if hp_facts is None:
+                continue
+            hp, _mode, _fuel = hp_facts
 
-                secondary = opt(hp.secondaryPlantLoop()) if hasattr(hp, 'secondaryPlantLoop') else None
-                if secondary is None:
-                    source = source or 'air'
-                else:
-                    src_plant = plant_by_name.get(secondary.nameString())
-                    if src_plant is not None:
-                        src_plant['hp_source_loop'] = True
-                    plant['hp_source_loop_name'] = secondary.nameString()
-                    source = 'external' if _external_source_loop(secondary) else (source or 'water_loop')
+            air_to_water = any(
+                _try_cast(comp, cast) is not None
+                for cast in (
+                    'to_HeatPumpAirToWaterHeating',
+                    'to_HeatPumpAirToWaterCooling',
+                    'to_HeatPumpAirToWaterFuelFiredHeating',
+                    'to_HeatPumpAirToWaterFuelFiredCooling'))
+            water_to_water = any(
+                _try_cast(comp, cast) is not None
+                for cast in (
+                    'to_HeatPumpWaterToWaterEquationFitHeating',
+                    'to_HeatPumpWaterToWaterEquationFitCooling',
+                    'to_CentralHeatPumpSystem'))
+            if air_to_water:
+                source = source or 'air'
+                continue
+            if hasattr(hp, 'sourcePlantLoop'):
+                secondary = opt(hp.sourcePlantLoop())
+            elif hasattr(hp, 'secondaryPlantLoop'):
+                secondary = opt(hp.secondaryPlantLoop())
+            else:
+                secondary = None
+            if secondary is None:
+                condenser_type = (hp.condenserType()
+                                  if hasattr(hp, 'condenserType') else None)
+                source = source or (
+                    'water_loop'
+                    if water_to_water or condenser_type == 'WaterSource'
+                    else 'air')
+            else:
+                src_plant = plant_by_name.get(secondary.nameString())
+                if src_plant is not None:
+                    src_plant['hp_source_loop'] = True
+                plant['hp_source_loop_name'] = secondary.nameString()
+                source = 'external' if _external_source_loop(secondary) else (source or 'water_loop')
         plant['hp_source'] = source or 'water_loop'
+
+
+def _annotate_absorption_chiller_plants(model, plant_by_name):
+    """Attribute an absorption chiller's generator energy to its cooling loop."""
+    for loop in model.getPlantLoops():
+        plant = plant_by_name.get(loop.nameString())
+        if not (plant and any(t.startswith('absorption')
+                              for t in plant['chiller_types'])):
+            continue
+
+        generator_fuels = []
+        for comp in loop.supplyComponents():
+            chiller = next(
+                (unit for cast in ABSORPTION_CHILLER_CASTS
+                 if (unit := _try_cast(comp, cast)) is not None),
+                None)
+            if chiller is None:
+                continue
+            generator = opt(chiller.generatorLoop())
+            if generator is None:
+                continue
+            source = plant_by_name.get(generator.nameString())
+            if source is not None:
+                _union(generator_fuels, source['fuels'])
+
+        _union(plant['fuels'], generator_fuels or ['Unknown'])
 
 
 def _scan_cooling_component(group, comp, plant_by_name, evidence):
@@ -586,6 +738,7 @@ def _scan_cooling_component(group, comp, plant_by_name, evidence):
     fuels = None
     hp = None
     hp_unit = None
+    plant_coil = None
     if comp.to_CoilCoolingDXSingleSpeed().is_initialized():
         c = comp.to_CoilCoolingDXSingleSpeed().get()
         fuels = 'Electricity'
@@ -611,24 +764,59 @@ def _scan_cooling_component(group, comp, plant_by_name, evidence):
     elif comp.to_CoilCoolingWater().is_initialized():
         c = comp.to_CoilCoolingWater().get()
         fuels = _hydronic_fuels(c, plant_by_name)
+        plant_coil = c
         kw = _optional_kw(None, c.autosizedDesignCoilLoad())
     elif comp.to_CoilCoolingCooledBeam().is_initialized():
         c = comp.to_CoilCoolingCooledBeam().get()
         fuels = _hydronic_fuels(c, plant_by_name)
+        plant_coil = c
         # The SDK exposes the autosized beam geometry and water flow on the
         # terminal, but no nominal/autosized capacity on this coil.
         kw = None
+    elif any(_try_cast(comp, cast) is not None
+             for cast in HYDRONIC_COOLING_COIL_CASTS[2:]):
+        c = next(_try_cast(comp, cast)
+                 for cast in HYDRONIC_COOLING_COIL_CASTS[2:]
+                 if _try_cast(comp, cast) is not None)
+        fuels = _hydronic_fuels(c, plant_by_name)
+        plant_coil = c
+        if (c.to_CoilCoolingWaterPanelRadiant().is_initialized() or
+                c.to_CoilCoolingLowTempRadiantVarFlow().is_initialized()):
+            kw = _optional_kw(c.coolingDesignCapacity(),
+                              _autosized_when_sized(
+                                  c, 'autosizedCoolingDesignCapacity'))
+        else:
+            kw = None
     elif comp.to_CoilCoolingWaterToAirHeatPumpEquationFit().is_initialized():
         c = comp.to_CoilCoolingWaterToAirHeatPumpEquationFit().get()
         fuels = 'Electricity'
         hp = 'water_to_air'
         hp_unit = c
         kw = _optional_kw(c.ratedTotalCoolingCapacity(), c.autosizedRatedTotalCoolingCapacity())
+    elif comp.to_CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit().is_initialized():
+        c = comp.to_CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit().get()
+        fuels = 'Electricity'
+        hp = 'water_to_air'
+        hp_unit = c
+        kw = _optional_kw(
+            c.grossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel(),
+            _autosized_when_sized(
+                c,
+                'autosizedGrossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel'))
     elif comp.to_CoilCoolingDXVariableRefrigerantFlow().is_initialized():
         c = comp.to_CoilCoolingDXVariableRefrigerantFlow().get()
         fuels = 'Electricity'
         hp = 'air'
-        kw = _optional_kw(c.ratedTotalCoolingCapacity(), c.autosizedRatedTotalCoolingCapacity())
+        kw = _optional_kw(
+            c.ratedTotalCoolingCapacity(),
+            _autosized_when_sized(c, 'autosizedRatedTotalCoolingCapacity'))
+    elif comp.to_CoilCoolingDXVariableRefrigerantFlowFluidTemperatureControl().is_initialized():
+        c = comp.to_CoilCoolingDXVariableRefrigerantFlowFluidTemperatureControl().get()
+        fuels = 'Electricity'
+        hp = 'air'
+        kw = _optional_kw(
+            c.ratedTotalCoolingCapacity(),
+            _autosized_when_sized(c, 'autosizedRatedTotalCoolingCapacity'))
     elif comp.to_EvaporativeCoolerDirectResearchSpecial().is_initialized():
         fuels = 'Electricity'
         kw = 0.0
@@ -638,6 +826,8 @@ def _scan_cooling_component(group, comp, plant_by_name, evidence):
     group['cooled'] = True
     _union(group['cooling_energy_types'], _array(fuels))
     _record_heat_pump(group, hp, hp_unit)
+    _record_hydronic_plant(group, plant_coil, 'cooling_plants')
+    _record_plant_heat_pump(group, plant_coil, plant_by_name)
     # The Table 8.4.4.7.-A residential parenthetical needs to know whether the
     # LOOP's own DX cools the zones (an air-cooled unitary/packaged shape) —
     # a fact, where the family string is only a name (D-58).
@@ -674,6 +864,12 @@ def _optional_kw(hard, autosized):
     return None
 
 
+def _autosized_when_sized(component, accessor):
+    if not component.model().sqlFile().is_initialized():
+        return None
+    return getattr(component, accessor)()
+
+
 # ---------------- 8.4.4.13.(2)(g) heating-election inventory (D-52) ----------------
 
 BASEBOARD_VARIABLE = 'Baseboard Total Heating Energy'
@@ -681,12 +877,21 @@ COIL_VARIABLE = 'Heating Coil Heating Energy'
 
 DX_HEATING_CASTS = ('to_CoilHeatingDXSingleSpeed', 'to_CoilHeatingDXMultiSpeed',
                     'to_CoilHeatingDXVariableSpeed', 'to_CoilHeatingWaterToAirHeatPumpEquationFit',
-                    'to_CoilHeatingDXVariableRefrigerantFlow')
+                    'to_CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit',
+                    'to_CoilHeatingDXVariableRefrigerantFlow',
+                    'to_CoilHeatingDXVariableRefrigerantFlowFluidTemperatureControl')
 AUX_COIL_FUELS = {
     'to_CoilHeatingGas': 'NaturalGas',
     'to_CoilHeatingGasMultiStage': 'NaturalGas',
     'to_CoilHeatingElectric': 'Electricity',
+    'to_CoilHeatingElectricMultiStage': 'Electricity',
+    'to_CoilHeatingDesuperheater': 'Electricity',
     'to_CoilHeatingWater': 'hydronic',
+    'to_CoilHeatingWaterBaseboard': 'hydronic',
+    'to_CoilHeatingWaterBaseboardRadiant': 'hydronic',
+    'to_CoilHeatingFourPipeBeam': 'hydronic',
+    'to_CoilHeatingLowTempRadiantConstFlow': 'hydronic',
+    'to_CoilHeatingLowTempRadiantVarFlow': 'hydronic',
 }
 
 
@@ -780,8 +985,16 @@ ZONAL_HEATING_UNITS = (
     ('to_ZoneHVACWaterToAirHeatPump', ('heatingCoil', 'supplementalHeatingCoil')),
     ('to_ZoneHVACFourPipeFanCoil', ('heatingCoil',)),
     ('to_ZoneHVACUnitHeater', ('heatingCoil',)),
+    ('to_ZoneHVACUnitVentilator', ('heatingCoil',)),
+    ('to_ZoneHVACLowTempRadiantConstFlow', ('heatingCoil',)),
+    ('to_ZoneHVACLowTempRadiantVarFlow', ('heatingCoil',)),
     ('to_AirTerminalSingleDuctVAVReheat', ('reheatCoil',)),
     ('to_AirTerminalSingleDuctConstantVolumeReheat', ('reheatCoil',)),
+    ('to_AirTerminalSingleDuctParallelPIUReheat', ('reheatCoil',)),
+    ('to_AirTerminalSingleDuctSeriesPIUReheat', ('reheatCoil',)),
+    ('to_AirTerminalSingleDuctVAVHeatAndCoolReheat', ('reheatCoil',)),
+    ('to_AirTerminalSingleDuctConstantVolumeFourPipeBeam', ('heatingCoil',)),
+    ('to_AirTerminalSingleDuctConstantVolumeFourPipeInduction', ('heatingCoil',)),
 )
 
 
@@ -812,31 +1025,53 @@ def _zonal_heating_coils(eq):
 
 
 TERMINALS = {
-    'to_AirTerminalDualDuctVAV': 'dual_duct_vav',
-    'to_AirTerminalSingleDuctVAVReheat': 'vav_reheat',
-    'to_AirTerminalSingleDuctVAVNoReheat': 'vav',
-    'to_AirTerminalSingleDuctConstantVolumeReheat': 'cv_reheat',
-    'to_AirTerminalSingleDuctConstantVolumeNoReheat': 'cv',
-    'to_AirTerminalSingleDuctConstantVolumeCooledBeam': 'chilled_beam',
+    'to_AirTerminalDualDuctConstantVolume': ('dual_duct_cv', ()),
+    'to_AirTerminalDualDuctVAV': ('dual_duct_vav', ()),
+    'to_AirTerminalDualDuctVAVOutdoorAir': ('dual_duct_vav_outdoor_air', ()),
+    'to_AirTerminalSingleDuctVAVReheat': (
+        'vav_reheat', (('reheatCoil', 'heat'),)),
+    'to_AirTerminalSingleDuctVAVNoReheat': ('vav', ()),
+    'to_AirTerminalSingleDuctVAVHeatAndCoolReheat': (
+        'vav_heat_cool_reheat', (('reheatCoil', 'heat'),)),
+    'to_AirTerminalSingleDuctVAVHeatAndCoolNoReheat': (
+        'vav_heat_cool', ()),
+    'to_AirTerminalSingleDuctParallelPIUReheat': (
+        'parallel_piu_reheat', (('reheatCoil', 'heat'),)),
+    'to_AirTerminalSingleDuctSeriesPIUReheat': (
+        'series_piu_reheat', (('reheatCoil', 'heat'),)),
+    'to_AirTerminalSingleDuctInletSideMixer': ('inlet_side_mixer', ()),
+    'to_AirTerminalSingleDuctConstantVolumeReheat': (
+        'cv_reheat', (('reheatCoil', 'heat'),)),
+    'to_AirTerminalSingleDuctConstantVolumeNoReheat': ('cv', ()),
+    'to_AirTerminalSingleDuctConstantVolumeCooledBeam': (
+        'chilled_beam', (('coilCoolingCooledBeam', 'cool'),)),
+    'to_AirTerminalSingleDuctConstantVolumeFourPipeBeam': (
+        'four_pipe_beam',
+        (('heatingCoil', 'heat'), ('coolingCoil', 'cool'))),
+    'to_AirTerminalSingleDuctConstantVolumeFourPipeInduction': (
+        'four_pipe_induction',
+        (('heatingCoil', 'heat'), ('coolingCoil', 'cool'))),
 }
 
 
 def _terminal_facts(group, eq, plant_by_name):
-    for cast, kind in TERMINALS.items():
-        optional = getattr(eq, cast)()
-        if not optional.is_initialized():
+    for cast, (kind, coil_accessors) in TERMINALS.items():
+        unit = _try_cast(eq, cast)
+        if unit is None:
             continue
 
         group['terminal_type'] = kind
-        if kind in ('vav_reheat', 'cv_reheat'):
-            coil = optional.get().reheatCoil()
-            _scan_heating_component(group, coil, plant_by_name,
-                                    f"reheat coil on terminal {eq.nameString()}")
-        elif kind == 'chilled_beam':
-            coil = optional.get().coilCoolingCooledBeam()
-            _scan_cooling_component(
-                group, coil, plant_by_name,
-                f"cooled-beam coil on terminal {eq.nameString()}")
+        for accessor, side in coil_accessors:
+            coil = getattr(unit, accessor)()
+            if hasattr(coil, 'is_initialized'):
+                coil = opt(coil)
+            if coil is None:
+                continue
+            evidence = f"{accessor} on terminal {eq.nameString()}"
+            if side == 'heat':
+                _scan_heating_component(group, coil, plant_by_name, evidence)
+            else:
+                _scan_cooling_component(group, coil, plant_by_name, evidence)
         return True
     return False
 
@@ -846,12 +1081,19 @@ def _terminal_facts(group, eq, plant_by_name):
 ZONAL = (
     ('to_ZoneHVACBaseboardConvectiveWater', {'heat': 'hydronic', 'kind': 'baseboard'}),
     ('to_ZoneHVACBaseboardConvectiveElectric', {'heat': 'Electricity', 'kind': 'baseboard'}),
+    ('to_ZoneHVACBaseboardRadiantConvectiveWater', {'heat': 'hydronic', 'kind': 'baseboard'}),
+    ('to_ZoneHVACBaseboardRadiantConvectiveElectric', {'heat': 'Electricity', 'kind': 'baseboard'}),
     ('to_ZoneHVACPackagedTerminalAirConditioner', {'cool': 'Electricity', 'heat': 'coil', 'kind': 'ptac'}),
     ('to_ZoneHVACPackagedTerminalHeatPump', {'heat': 'Electricity', 'cool': 'Electricity', 'hp': True, 'kind': 'pthp'}),
     ('to_ZoneHVACFourPipeFanCoil', {'heat': 'coil', 'cool': 'coil', 'kind': 'fan_coil'}),
     ('to_ZoneHVACTerminalUnitVariableRefrigerantFlow', {'heat': 'Electricity', 'cool': 'Electricity', 'hp': True, 'kind': 'vrf_terminal'}),
     ('to_ZoneHVACUnitHeater', {'heat': 'coil', 'kind': 'unit_heater'}),
+    ('to_ZoneHVACUnitVentilator', {'heat': 'coil', 'cool': 'coil', 'kind': 'unit_ventilator'}),
     ('to_ZoneHVACWaterToAirHeatPump', {'heat': 'Electricity', 'cool': 'Electricity', 'hp': True, 'kind': 'wshp'}),
+    ('to_ZoneHVACCoolingPanelRadiantConvectiveWater', {'cool': 'hydronic', 'kind': 'radiant'}),
+    ('to_ZoneHVACLowTempRadiantConstFlow', {'heat': 'coil', 'cool': 'coil', 'kind': 'radiant'}),
+    ('to_ZoneHVACLowTempRadiantVarFlow', {'heat': 'coil', 'cool': 'coil', 'kind': 'radiant'}),
+    ('to_ZoneHVACEvaporativeCoolerUnit', {'cool': 'Electricity', 'kind': 'evap_cooler'}),
     ('to_ZoneHVACHighTemperatureRadiant', {'heat': 'Electricity', 'kind': 'radiant'}),
     ('to_ZoneHVACLowTemperatureRadiantElectric', {'heat': 'Electricity', 'kind': 'radiant'}),
 )
@@ -871,17 +1113,28 @@ def _merge_zonal_equipment(group, zone, plant_by_name, _audit):
             if roles.get('kind'):
                 _union(group['zonal_units'], [roles['kind']])
             if roles.get('heat'):
-                group['heated'] = True
-                _union(group['heating_energy_types'],
-                       _zonal_fuels(unit, roles['heat'], 'heat', plant_by_name))
-                group['evidence'].append(f"heated: {evidence}")
-                _record_plant_heat_pump(group, _zonal_water_heating_coil(unit), plant_by_name)
+                fuels = _zonal_fuels(
+                    unit, roles['heat'], 'heat', plant_by_name)
+                if fuels is not None:
+                    group['heated'] = True
+                    _union(group['heating_energy_types'], fuels)
+                    group['evidence'].append(f"heated: {evidence}")
+                    _record_plant_heat_pump(
+                        group, _zonal_water_coil(unit, 'heat'),
+                        plant_by_name)
             if roles.get('cool'):
-                group['cooled'] = True
-                _union(group['cooling_energy_types'],
-                       _zonal_fuels(unit, roles['cool'], 'cool', plant_by_name))
-                group['evidence'].append(f"cooled: {evidence}")
-                _add_zonal_cooling_capacity(group, unit)
+                fuels = _zonal_fuels(
+                    unit, roles['cool'], 'cool', plant_by_name)
+                if fuels is not None:
+                    group['cooled'] = True
+                    _union(group['cooling_energy_types'], fuels)
+                    group['evidence'].append(f"cooled: {evidence}")
+                    _add_zonal_cooling_capacity(group, unit)
+                    water_coil = _zonal_water_coil(unit, 'cool')
+                    _record_hydronic_plant(
+                        group, water_coil, 'cooling_plants')
+                    _record_plant_heat_pump(
+                        group, water_coil, plant_by_name)
             _record_heat_pump(group,
                               _zonal_hp_kind(unit) if roles.get('hp') else None,
                               _zonal_hp_coil(unit))
@@ -920,28 +1173,51 @@ def _zonal_hp_coil(unit):
     return None
 
 
+def _zonal_child_coil(unit, side):
+    accessor = 'heatingCoil' if side == 'heat' else 'coolingCoil'
+    if not hasattr(unit, accessor):
+        return None
+    coil = getattr(unit, accessor)()
+    if hasattr(coil, 'is_initialized'):
+        coil = opt(coil)
+    return coil
+
+
+def _zonal_water_coil(unit, side):
+    """The hydronic child coil a zonal unit draws from its plant, if any."""
+    coil = _zonal_child_coil(unit, side)
+    casts = (HYDRONIC_HEATING_COIL_CASTS
+             if side == 'heat' else HYDRONIC_COOLING_COIL_CASTS)
+    return next(
+        (water_coil for cast in casts
+         if (water_coil := _try_cast(coil, cast)) is not None),
+        None)
+
+
 def _zonal_fuels(unit, role, side, plant_by_name):
-    if role == 'hydronic':
-        coil = unit.heatingCoil()
-        bb = coil.to_CoilHeatingWaterBaseboard()
-        if bb.is_initialized():
-            return _array(_hydronic_fuels(bb.get(), plant_by_name))
-        return ['Unknown']
-    if role == 'coil':
-        coil = unit.heatingCoil() if side == 'heat' else unit.coolingCoil()
-        if hasattr(coil, 'is_initialized') and coil.is_initialized():
-            coil = coil.get()
+    if role in ('hydronic', 'coil'):
+        coil = _zonal_child_coil(unit, side)
         if coil is None:
-            return ['Unknown']
-        if coil.to_CoilHeatingGas().is_initialized():
-            return ['NaturalGas']
-        if (coil.to_CoilHeatingElectric().is_initialized() or
-                coil.to_CoilCoolingDXSingleSpeed().is_initialized()):
-            return ['Electricity']
-        if coil.to_CoilHeatingWater().is_initialized():
-            return _array(_hydronic_fuels(coil.to_CoilHeatingWater().get(), plant_by_name))
-        if coil.to_CoilCoolingWater().is_initialized():
-            return _array(_hydronic_fuels(coil.to_CoilCoolingWater().get(), plant_by_name))
+            return None
+        if side == 'heat':
+            for cast, fuel_of, _hp_kind in HEATING_COILS:
+                heating_coil = _try_cast(coil, cast)
+                if heating_coil is not None:
+                    return _array(fuel_of(heating_coil, plant_by_name))
+        else:
+            water_coil = _zonal_water_coil(unit, side)
+            if water_coil is not None:
+                return _array(_hydronic_fuels(water_coil, plant_by_name))
+            if any(_try_cast(coil, cast) is not None for cast in (
+                    'to_CoilCoolingDXSingleSpeed',
+                    'to_CoilCoolingDXMultiSpeed',
+                    'to_CoilCoolingDXTwoSpeed',
+                    'to_CoilCoolingDXVariableSpeed',
+                    'to_CoilCoolingWaterToAirHeatPumpEquationFit',
+                    'to_CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit',
+                    'to_CoilCoolingDXVariableRefrigerantFlow',
+                    'to_CoilCoolingDXVariableRefrigerantFlowFluidTemperatureControl')):
+                return ['Electricity']
         return ['Unknown']
     if isinstance(role, str):  # a literal energy type ('Electricity')
         return [role]
@@ -949,10 +1225,9 @@ def _zonal_fuels(unit, role, side, plant_by_name):
 
 
 def _add_zonal_cooling_capacity(group, unit):
-    coil = unit.coolingCoil() if hasattr(unit, 'coolingCoil') else None
-    if coil is not None and hasattr(coil, 'is_initialized') and coil.is_initialized():
-        coil = coil.get()
+    coil = _zonal_child_coil(unit, 'cool')
     if coil is None:
+        group['cooling_capacity_complete'] = False
         return
 
     if coil.to_CoilCoolingDXSingleSpeed().is_initialized():
@@ -963,9 +1238,31 @@ def _add_zonal_cooling_capacity(group, unit):
     elif coil.to_CoilCoolingWaterToAirHeatPumpEquationFit().is_initialized():
         c = coil.to_CoilCoolingWaterToAirHeatPumpEquationFit().get()
         kw = _optional_kw(c.ratedTotalCoolingCapacity(), c.autosizedRatedTotalCoolingCapacity())
+    elif coil.to_CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit().is_initialized():
+        c = coil.to_CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit().get()
+        kw = _optional_kw(
+            c.grossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel(),
+            _autosized_when_sized(
+                c,
+                'autosizedGrossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel'))
     elif coil.to_CoilCoolingDXVariableRefrigerantFlow().is_initialized():
         c = coil.to_CoilCoolingDXVariableRefrigerantFlow().get()
         kw = _optional_kw(c.ratedTotalCoolingCapacity(), c.autosizedRatedTotalCoolingCapacity())
+    elif coil.to_CoilCoolingDXVariableRefrigerantFlowFluidTemperatureControl().is_initialized():
+        c = coil.to_CoilCoolingDXVariableRefrigerantFlowFluidTemperatureControl().get()
+        kw = _optional_kw(
+            c.ratedTotalCoolingCapacity(),
+            _autosized_when_sized(c, 'autosizedRatedTotalCoolingCapacity'))
+    elif coil.to_CoilCoolingWaterPanelRadiant().is_initialized():
+        c = coil.to_CoilCoolingWaterPanelRadiant().get()
+        kw = _optional_kw(c.coolingDesignCapacity(),
+                          _autosized_when_sized(
+                              c, 'autosizedCoolingDesignCapacity'))
+    elif coil.to_CoilCoolingLowTempRadiantVarFlow().is_initialized():
+        c = coil.to_CoilCoolingLowTempRadiantVarFlow().get()
+        kw = _optional_kw(c.coolingDesignCapacity(),
+                          _autosized_when_sized(
+                              c, 'autosizedCoolingDesignCapacity'))
     else:
         kw = None
     if kw is None:
@@ -989,11 +1286,15 @@ def _zonal_group(zone, plant_by_name, audit):
 def _structural_family_guess(group):
     """Coarse structural guess for foreign systems (gem-built groups carry exact 'family')."""
     if group['air_loop'] is not None:
-        if group['terminal_type'] == 'chilled_beam':
+        if group['terminal_type'] in (
+                'chilled_beam', 'four_pipe_beam', 'four_pipe_induction'):
             return 'chilled_beam'
-        if group['terminal_type'] == 'dual_duct_vav':
+        if group['terminal_type'].startswith('dual_duct'):
             return 'dual_duct_vav'
-        if group['terminal_type'] in ('vav_reheat', 'vav'):
+        if group['terminal_type'] in (
+                'vav_reheat', 'vav', 'vav_heat_cool_reheat',
+                'vav_heat_cool', 'parallel_piu_reheat',
+                'series_piu_reheat'):
             return 'multizone_vav'
         if group['terminal_type'] == 'cv_reheat':
             return 'multizone_cv'

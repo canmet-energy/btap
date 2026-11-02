@@ -994,6 +994,8 @@ ZONE_SERVING_WATER_COILS = (
     # served zones, on the commonest reference heating terminal there is.
     'to_CoilHeatingWaterBaseboard',
     'to_CoilHeatingWaterBaseboardRadiant',
+    'to_CoilHeatingFourPipeBeam',
+    'to_CoilCoolingFourPipeBeam',
     'to_CoilCoolingWaterPanelRadiant',
     'to_CoilHeatingLowTempRadiantVarFlow',
     'to_CoilCoolingLowTempRadiantVarFlow',
@@ -1146,7 +1148,13 @@ def _holder_zones(holder):
 #: tertiary really is attributed as served. It does NOT prove the named accessor
 #: and `tertiaryPlantLoop` are the same loop; an earlier comment here claimed
 #: that check existed when it did not (Fable, PR #63).
+#:
+#: ChillerElectricASHRAE205 declares a heat-recovery load connection, but SDK
+#: 3.11 also declares that connection unsupported by EnergyPlus. Keep the type
+#: in the measured inventory while gating its tertiary until the SDK says the
+#: connection is supported; type identity alone cannot create a load circuit.
 TERTIARY_LOAD_CASTS = ('to_ChillerElectricEIR', 'to_ChillerElectricReformulatedEIR',
+                       'to_ChillerElectricASHRAE205',
                        'to_CentralHeatPumpSystem', 'to_HeatPumpPlantLoopEIRHeating',
                        'to_HeatPumpPlantLoopEIRCooling')
 
@@ -1158,6 +1166,10 @@ def _load_loops(comp):
     for caster in TERTIARY_LOAD_CASTS:
         candidate = getattr(comp, caster, None)
         if candidate is not None and candidate().is_initialized():
+            unit = candidate().get()
+            if (caster == 'to_ChillerElectricASHRAE205'
+                    and not unit.isHeatRecoverySupportedByEnergyplus):
+                break
             loops.extend(_w2w_loops(comp, ('tertiaryPlantLoop',)))
             break
     return tuple(loops)

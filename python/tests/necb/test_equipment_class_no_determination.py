@@ -428,6 +428,13 @@ class TestEveryRegisteredEditionHasARefusalCitation(unittest.TestCase):
             'equipment_class_not_established': {
                 'reason': 'equipment_class_not_established',
                 'blocks': ['Zone 1'], 'action': 'copy_proposed'},
+            'absorption_chiller_reference_not_supported': {
+                'reason': 'absorption_chiller_reference_not_supported',
+                'plants': [{
+                    'plant': 'Chilled Water',
+                    'chiller_types': ['absorption_indirect'],
+                }],
+            },
         }
 
         for code in sorted(_registered_necb_ids()):

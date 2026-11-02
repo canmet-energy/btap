@@ -273,6 +273,11 @@ def _record_inferred_equipment_class(run, assignments):
     })
 
 
+def _record_reference_limitations(run, limitations):
+    for limitation in limitations:
+        record_target_not_established(run, limitation)
+
+
 def _record_ground_method_limit(run, floors):
     if not floors:
         return
@@ -718,6 +723,8 @@ def build_reference(run):
             sizing_follows=opts.get("simulate", "none") != "none")
         reference = reference_result.model
         _record_inferred_equipment_class(run, reference_result.assignments)
+        _record_reference_limitations(
+            run, reference_result.target_limitations)
         envelope.reference._apply(
             reference, ruleset, hdd=run.hdd,
             actual_roof_absorptance_used=opts["actual_roof_absorptance_used"],
@@ -2934,8 +2941,26 @@ _NO_DETERMINATION_CAUSES = {
             "is unitary equipment. {table} reserves that copy for a closed "
             "list of equipment, and the model does not establish that this is "
             "on it"),
-        "necb2020": {"article": "8.4.4.7.(1)", "table": "Table 8.4.4.7.-A"},
-        "necb2025": {"article": "8.4.5.7.(1)", "table": "Table 8.4.5.7.-A"},
+        "necb2020": {
+            "article": "8.4.4.7.(1)", "table": "Table 8.4.4.7.-A",
+            "ruling": "D-108"},
+        "necb2025": {
+            "article": "8.4.5.7.(1)", "table": "Table 8.4.5.7.-A",
+            "ruling": "D-108"},
+    },
+    "absorption_chiller_reference_not_supported": {
+        "reason": "absorption-chiller reference target not established",
+        "what_would_fix_it": (
+            "BTAP needs a validated NECB absorption-chiller reference catalog "
+            "and efficiency applier; the submitter is not required to replace "
+            "valid proposed absorption equipment"),
+        "warning": (
+            "NO DETERMINATION — the proposed building uses an absorption "
+            "chiller, but BTAP has no validated absorption-chiller reference "
+            "catalog or efficiency applier, so the reference chiller type "
+            "required by {article_no} is not established"),
+        "necb2020": {"article": "8.4.4.10.(6)(f)"},
+        "necb2025": {"article": "8.4.5.10.(6)(f)"},
     },
 }
 
@@ -2989,11 +3014,12 @@ def _refuse_determination(run, causes, code):
         block = {
             "reason": spec["reason"],
             "article": edition["article"],
-            "ruling": edition.get("ruling", "D-108"),
             "detail": cause,
             "what_would_fix_it": spec["what_would_fix_it"].format(
                 table=edition.get("table", "")),
         }
+        if edition.get("ruling"):
+            block["ruling"] = edition["ruling"]
         if spec.get("ahj"):
             block["ahj"] = spec["ahj"]
         blocks.append(block)
@@ -3022,6 +3048,13 @@ def _refuse_determination(run, causes, code):
         if cause["reason"] == "ground_method_not_supported":
             run.audit.warn("compliance", text + _DIAGNOSTIC_TAIL,
                            inputs=cause, article="8.4.1.1.(1)", ruling="D-32")
+        elif cause["reason"] == "absorption_chiller_reference_not_supported":
+            if code == "necb2025":
+                run.audit.warn("compliance", text + _DIAGNOSTIC_TAIL,
+                               inputs=cause, article="8.4.5.10.(6)(f)")
+            else:
+                run.audit.warn("compliance", text + _DIAGNOSTIC_TAIL,
+                               inputs=cause, article="8.4.4.10.(6)(f)")
         elif code == "necb2025":
             run.audit.warn("compliance", text + _DIAGNOSTIC_TAIL,
                            inputs=cause, article="8.4.5.7.(1)", ruling="D-108",
