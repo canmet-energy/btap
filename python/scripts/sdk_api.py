@@ -41,6 +41,7 @@ from __future__ import annotations
 import argparse
 import collections
 import difflib
+import json
 import pathlib
 import re
 import sys
@@ -176,6 +177,51 @@ def family(wrapped: str) -> str:
     return 'crash'
 
 
+#: A module-level proxy helper annotated with its optional return type. This
+#: is the GENERIC hook. Two earlier versions derived the generated accessors
+#: from NAME SHAPES — first `to_<Class>`, then `get<Class>ByName` and
+#: `get<Class>` — and each missed a family until a review named it. Shapes
+#: cannot see a name that disagrees with the class it returns, and six such
+#: aliases exist (`to_DistrictHeating -> OptionalDistrictHeatingWater`,
+#: `to_AirTerminalSingleDuctUncontrolled -> Optional...ConstantVolumeNoReheat`,
+#: and their two `get*` forms each). Product code constructs
+#: `AirTerminalSingleDuctUncontrolled` at four sites, so that unwrap is a line
+#: someone may write. Classifying by the ANNOTATED TYPE gets them for free.
+# The quote class and the module prefix cost two characters each and match
+# nothing new today: every annotation in the 39 proxies is a bare
+# `Optional<X>` or `<X>Vector`, only the two `_workspace_to_*` helpers are
+# quoted, none is module-qualified, and no signature spans lines — Fable
+# measured that with a deliberately looser regex that matched the same 1738
+# names. They are here so a change in what SWIG emits shows up as a DRIFT
+# failure rather than a silent shrink.
+_PROXY_OPTIONAL = re.compile(
+    r'^def (\w+)\(.*\) -> ["\']?(?:[\w.]*\.)?(Optional\w+)["\']?:',
+    re.M)
+
+
+def generated_accessors() -> dict[str, set[str]]:
+    """Every proxy helper whose ANNOTATION says it returns ``optional<T>``.
+
+    1738 of them across the 39 proxy files, in three shapes — `_get<X>`
+    (1139), `_to_<X>` (597) and `_workspace_to_<X>` (2) — all assigned onto a
+    class after definition, which is why a class-body search finds nothing and
+    an earlier docstring here wrongly said the casts appear in no proxy file.
+
+    The leading underscore is stripped: the public name is what product code
+    calls. `T` comes from the annotation, so the family and the wrapped type
+    are read from the same place and an alias cannot slip through.
+
+    Deliberately NOT included: the plural `get<X>s`, which returns a vector —
+    `.get()` on one is not an unwrap.
+    """
+    out: dict[str, set[str]] = {}
+    for path in _proxy_files():
+        for name, returned in _PROXY_OPTIONAL.findall(_read(path)):
+            out.setdefault(name.lstrip('_'), set()).add(
+                returned[len('Optional'):])
+    return out
+
+
 def optional_methods() -> tuple[dict[str, set[str]], int]:
     """``({method name: {wrapped types}}, declaration count)``.
 
@@ -226,6 +272,13 @@ def cmd_tree(args) -> int:
 
 def cmd_optionals(args) -> int:
     methods, declarations = optional_methods()
+    # The cast family, which no header declares. Merged here rather than in
+    # `optional_methods()` so the DECLARATION count stays a count of real
+    # header declarations.
+    from_headers = set(methods)
+    generated = generated_accessors()
+    for name, wrapped in generated.items():
+        methods.setdefault(name, set()).update(wrapped)
     rows = []
     for method, wrapped in sorted(methods.items()):
         fams = {family(w) for w in wrapped}
@@ -238,9 +291,33 @@ def cmd_optionals(args) -> int:
         if args.on and args.on not in wrapped:
             continue
         rows.append((method, worst, sorted(wrapped)))
+    shown = {m for m, _, _ in rows}
+    if args.json:
+        # Names only, sorted, so a committed baseline has a stable diff. The
+        # unwrap ratchet in `tests/test_sdk_unwrap_ratchet.py` reads this on a
+        # runner with no SDK tree, which is why it must be committed rather
+        # than derived at test time.
+        print(json.dumps({'family': args.family or 'all',
+                          'header_declarations': declarations,
+                          'names_from_headers': len(shown & from_headers),
+                          'names_only_in_proxies': len(shown - from_headers),
+                          'methods': sorted(shown)},
+                         indent=1, sort_keys=True))
+        return 0
+
     tally = collections.Counter(worst for _, worst, _ in rows)
-    print(f"{len(rows)} method NAMES returning boost::optional<T> "
-          f"({declarations} declarations in all)"
+    # DECLARED and GENERATED reported separately. Merging them printed
+    # "9293 method NAMES ... (3122 declarations)", which conflates a count of
+    # header declarations with a count of names from two different sources —
+    # the exact confusion CLAUDE.md warns about, reintroduced by me one
+    # section below where I wrote the warning.
+    # Counted over the FILTERED rows, not the whole set. Reporting the
+    # unfiltered totals beside a `--family` figure was itself a conflation —
+    # the third one I have introduced in this file while fixing one.
+    print(f"{len(rows)} method NAMES returning boost::optional<T>: "
+          f"{len(shown & from_headers)} declared in headers "
+          f"({declarations} declarations in all), "
+          f"{len(shown - from_headers)} only in the proxy annotations"
           + (f" (family={args.family})" if args.family else "")
           + (f" (wrapping {args.on})" if args.on else ""))
     for fam in ('crash', 'default', 'raise'):
@@ -298,6 +375,8 @@ def main(argv=None) -> int:
     p.add_argument('--family', choices=('crash', 'default', 'raise'))
     p.add_argument('--on', metavar='T', help='only optionals wrapping T')
     p.add_argument('--list', action='store_true')
+    p.add_argument('--json', action='store_true',
+                   help='machine-readable names only, for a committed baseline')
     p.set_defaults(func=cmd_optionals)
 
     p = sub.add_parser('method', help='where a method is declared, and its signature')

@@ -469,7 +469,11 @@ install.
   — 613 public headers, excluding `*_Impl.hpp` — state them exactly, including
   which methods return `boost::optional<T>`. That is the D-79 hazard surface:
   3122 declarations across 2094 method NAMES, of which 794 names have at least
-  one overload the script classifies CRASH family. Quote the figure you mean —
+  one overload the script classifies CRASH family. The proxy files add 1733
+  more crash-family NAMES that no header declares — the `to_<Class>` casts,
+  the `get<Class>`/`get<Class>ByName` lookups and six deprecated aliases —
+  found by their module-level helper's return annotation, not by name shape.
+  `sdk_api.py optionals` reports the two sources separately for that reason. Quote the figure you mean —
   `schedule()` is declared on some 290 classes and is one name. A name
   overloaded across families is reported at its worst, because that is what a
   caller must guard against. `sdk_api.py optionals --family crash` lists them;
