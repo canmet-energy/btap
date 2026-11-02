@@ -664,3 +664,63 @@ class TestDeliberateExclusionsStayExplicit(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+@needs_sdk
+class TestTheHydronicCoolingCapacityKindsAreBOTHExercised(unittest.TestCase):
+    """`HYDRONIC_COOLING_COILS` records a capacity KIND per cast, and nothing
+    tested the `design_capacity` kind at all.
+
+    Found while closing #176 item 2. Breaking that branch — in the shared
+    extractor, or in either of the two copies it replaced — left every test in
+    the inventory and plant-heat-pump modules green, so the registry's own
+    value was unverified for three of its six casts and the refactor that
+    merged the copies could not be shown to preserve anything.
+
+    `autosized_load` has coverage through the four-pipe fan coil fixtures;
+    `design_capacity` had none, and it is the kind that reads a DECLARED
+    capacity rather than a sizing result, so it is the one that works without
+    a simulation.
+    """
+
+    def test_a_declared_panel_radiant_capacity_reaches_design_cooling_kw(self):
+        import openstudio
+
+        from btap.modeling.hvac import classify
+
+        model = openstudio.model.Model()
+        zone = openstudio.model.ThermalZone(model)
+        zone.setName('Zone')
+        panel = (openstudio.model
+                 .ZoneHVACCoolingPanelRadiantConvectiveWater(model))
+        coil = panel.coolingCoil().to_CoilCoolingWaterPanelRadiant().get()
+        self.assertTrue(coil.setCoolingDesignCapacityMethod('CoolingDesignCapacity'))
+        self.assertTrue(coil.setCoolingDesignCapacity(8000.0))
+        chilled = openstudio.model.PlantLoop(model)
+        chilled.setName('Chilled Water')
+        chilled.sizingPlant().setLoopType('Cooling')
+        self.assertTrue(chilled.addDemandBranchForComponent(coil))
+        self.assertTrue(panel.addToThermalZone(zone))
+
+        group = classify.characterize(model)['zone_groups'][0]
+        self.assertAlmostEqual(
+            8.0, group['design_cooling_kw'], places=6,
+            msg="the registry's `design_capacity` kind must reach the zonal "
+                'capacity total — 8000 W declared is 8 kW')
+        self.assertTrue(
+            group.get('cooling_capacity_complete', True),
+            'a coil whose capacity IS readable must not mark the group '
+            'incomplete')
+
+    def test_the_kinds_the_registry_declares_are_the_ones_it_handles(self):
+        """Every kind in the registry must be one the extractor implements.
+
+        A typo in a kind string would otherwise fall through to None and
+        silently drop that coil's capacity, which is the same silent-skip
+        shape as an unmatched space type.
+        """
+        from btap.modeling.hvac import classify
+
+        self.assertEqual(
+            {None, 'autosized_load', 'design_capacity'},
+            set(classify.HYDRONIC_COOLING_COILS.values()),
+            'an unimplemented capacity kind drops the coil silently')
