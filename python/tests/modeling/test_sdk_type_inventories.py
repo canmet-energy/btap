@@ -204,6 +204,15 @@ class TestEveryAddedZonalTypeIsLoadBearing(unittest.TestCase):
                          else group['cooling_energy_types'])
                 self.assertIn(fuel, fuels)
 
+                if class_name.startswith(
+                        'ZoneHVACBaseboardRadiantConvective'):
+                    election = classify._zonal_heating_entries(unit, {})
+                    self.assertEqual(1, len(election))
+                    self.assertEqual(fuel, election[0]['fuel'])
+                    self.assertEqual(
+                        classify.BASEBOARD_VARIABLE,
+                        election[0]['variable'])
+
                 if class_name in (
                         'ZoneHVACLowTempRadiantConstFlow',
                         'ZoneHVACLowTempRadiantVarFlow',
