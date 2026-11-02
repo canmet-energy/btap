@@ -104,6 +104,7 @@ nonconformity with 8.4.x.9.(6)(e).
 | AHJ-21 | the archetype-EUI path applies no capacity increase under sentence (5) | tool-gap | necb2025 | no |
 | AHJ-22 | cooling-tower capacity equations replaced by the engine Merkel model | alternative-solution | necb2020, necb2025 | yes, where a reference cooling tower is present |
 | AHJ-23 | Table 8.4.x.7.-A residential identity branch | tool-gap | necb2020, necb2025 | no |
+| AHJ-24 | no validated absorption-chiller reference catalog or efficiency applier | tool-gap | necb2020, necb2025 | no |
 
 ---
 
@@ -1225,3 +1226,32 @@ rather than inferring it: preserve the container identity that
 `supply_components` discards, and read an independently declared equipment
 class where a model states one. Positive evidence then covers the cases that
 are currently inferred, and only a genuinely bare topology remains.
+
+## AHJ-24 — no validated absorption-chiller reference catalog or efficiency applier
+
+**Article.** NECB 2020 Article 8.4.4.10.(6)(f) and NECB 2025 Article
+8.4.5.10.(6)(f), which require the reference water-chiller types to be
+identical to those of the proposed building.
+
+**Status: `tool-gap`, NOT a referral.** The Code decides the required type.
+What is missing is a validated BTAP catalog and efficiency applier for
+`ChillerAbsorption` and `ChillerAbsorptionIndirect`. That is implementable,
+needs no authority's interpretation, and sets no run conditional.
+
+**Established by.** Sol's issue #166 SDK-inventory implementation recognized
+both absorption types and traced their generator-loop fuels. Fable's review of
+PR #172 on 2026-11-02 established that recognition without a validated
+reference implementation must remain an explicit defect rather than an
+untracked string-table refusal.
+
+**What the tool does meanwhile.** When an absorption chiller actually serves
+a retained thermal block, BTAP preserves the proposed plant evidence, builds
+diagnostic outputs, and emits `compliance_determination: no_determination`
+(exit 6). It cites this entry and the edition's own sentence (6)(f). An orphan
+absorption object does not withhold a determination. The submitter is not
+asked to replace valid proposed absorption equipment, and no authority's
+approval can turn the missing reference target into a verdict.
+
+**To close it.** Issue #173 tracks the per-edition reference catalog,
+efficiency applier and serving-equipment witnesses required before this
+refusal can be retired.

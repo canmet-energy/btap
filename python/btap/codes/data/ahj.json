@@ -216,6 +216,15 @@
         "necb2020",
         "necb2025"
       ]
+    },
+    {
+      "id": "AHJ-24",
+      "title": "no validated absorption-chiller reference catalog or efficiency applier",
+      "status": "tool-gap",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ]
     }
   ]
 }

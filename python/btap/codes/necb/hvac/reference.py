@@ -972,6 +972,28 @@ class ReferenceResult:
     model: object = None
     assignments: list = field(default_factory=list)
     audit: object = None
+    target_limitations: list = field(default_factory=list)
+
+
+def _reference_target_limitations(facts):
+    cooling_plants = {
+        plant
+        for group in facts['zone_groups']
+        for plant in group.get('cooling_plants', ())
+    }
+    absorption_plants = [
+        {'plant': plant['name'], 'chiller_types': plant['chiller_types']}
+        for plant in facts['plants']
+        if plant['name'] in cooling_plants
+        if any(kind.startswith('absorption')
+               for kind in plant.get('chiller_types', ()))
+    ]
+    if not absorption_plants:
+        return []
+    return [{
+        'reason': 'absorption_chiller_reference_not_supported',
+        'plants': absorption_plants,
+    }]
 
 
 def reference_hvac(model, code='necb2020', building=None, audit=None, proposed_annual=None):
@@ -1028,7 +1050,8 @@ def reference_hvac(model, code='necb2020', building=None, audit=None, proposed_a
     :param building: dict or None — overrides for 'storeys', 'zone_types',
         'kitchen_hood_zones', 'refrigerated_zones' (defaults derived from the model)
     :param audit: AuditLog or None
-    :return: ReferenceResult — model (clone), assignments, audit
+    :return: ReferenceResult — model (clone), assignments, audit, and any
+        recognized equipment limitation that prevents a target determination
     """
     return _reference_hvac(model, resolve(code), building=building,
                            audit=audit, proposed_annual=proposed_annual)
@@ -1114,6 +1137,7 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
     _clear_proposed_capacity_ownership(reference, audit)
 
     facts = _classify.characterize(reference, audit=audit)
+    target_limitations = _reference_target_limitations(facts)
     info = _building_info(reference, building, audit)
     assignments = _select_reference_systems(facts=facts, building=info,
                                             ruleset=ruleset, audit=audit,
@@ -1551,7 +1575,9 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
     # sizing through the clone, so its plant capacities and pump powers are released
     _efficiency.prepare_for_resizing(reference, audit=audit, code=ruleset.id)
 
-    return ReferenceResult(model=reference, assignments=assignments, audit=audit)
+    return ReferenceResult(
+        model=reference, assignments=assignments, audit=audit,
+        target_limitations=target_limitations)
 
 
 def _audit_terminal_secondary_split(zones, reference_system, code, audit):

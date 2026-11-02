@@ -470,7 +470,8 @@ class TestForwardingFunctionsAreExecuted(unittest.TestCase):
             seen.append(kwargs.get('sizing_follows', '<absent>'))
             # `assignments` because that is what ReferenceResult carries;
             # a fake missing a field its caller reads tests the fake.
-            return SimpleNamespace(model=object(), assignments=[])
+            return SimpleNamespace(
+                model=object(), assignments=[], target_limitations=[])
 
         envelope.prescriptive._embedded_floor_inventory = lambda _m: None
         hvac.reference._reference_hvac = reference_hvac
@@ -534,7 +535,8 @@ class TestForwardingFunctionsAreExecuted(unittest.TestCase):
 
         def reference_hvac(model, ruleset, **_kwargs):
             calls.append(('hvac', model, ruleset.id))
-            return SimpleNamespace(model=reference, assignments=[])
+            return SimpleNamespace(
+                model=reference, assignments=[], target_limitations=[])
 
         def reference_envelope(model, ruleset, **kwargs):
             calls.append((
