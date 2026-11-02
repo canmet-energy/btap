@@ -243,6 +243,84 @@ def _enclosing(tree, target):
     return best
 
 
+def _accessor(value, accessors):
+    """The crash-family accessor this expression calls, or None."""
+    if (isinstance(value, ast.Call)
+            and isinstance(value.func, ast.Attribute)
+            and value.func.attr in accessors):
+        return value.func.attr
+    return None
+
+
+def _zip_targets(target, value, accessors):
+    """`a, b = obj.to_A(), obj.to_B()` — pairwise, positionally.
+
+    Only when both sides are literal sequences of the same length. A starred
+    target or a mismatched length is skipped rather than guessed at: binding
+    the wrong name to an accessor would flag an unrelated unwrap.
+    """
+    if not (isinstance(target, (ast.Tuple, ast.List))
+            and isinstance(value, (ast.Tuple, ast.List))
+            and len(target.elts) == len(value.elts)):
+        return {}
+    out = {}
+    for one, expr in zip(target.elts, value.elts):
+        accessor = _accessor(expr, accessors)
+        if isinstance(one, ast.Name) and accessor:
+            out[one.id] = accessor
+    return out
+
+
+def _iter_bindings(target, iterable, accessors):
+    """`for x in (obj.to_A(), obj.to_B()):` and the comprehension form.
+
+    Every element binds the SAME name in turn, so one accessor among them is
+    enough to make the name an optional for this walk's purposes. An arbitrary
+    iterable expression says nothing about what it yields and binds nothing.
+    """
+    if not (isinstance(target, ast.Name)
+            and isinstance(iterable, (ast.Tuple, ast.List, ast.Set))):
+        return {}
+    for expr in iterable.elts:
+        accessor = _accessor(expr, accessors)
+        if accessor:
+            return {target.id: accessor}
+    return {}
+
+
+def _bindings(node, accessors):
+    """Every name this node binds to a crash-family accessor's result.
+
+    Five forms, all of which product code could use today and four of which
+    the walk missed until Fable enumerated them (#175). The two it had were
+    `Assign` to a single Name and the walrus; the walrus alone took three
+    attempts, because the `.get()` RECEIVER is the `NamedExpr`, not its target.
+
+    Deliberately NOT handled, with zero product instances each: an attribute
+    or subscript target (`self.x = obj.to_X()`), which would need the walk to
+    track object state rather than local names, and a starred unpack.
+    """
+    if isinstance(node, ast.Assign) and len(node.targets) == 1:
+        target = node.targets[0]
+        accessor = _accessor(node.value, accessors)
+        if isinstance(target, ast.Name) and accessor:
+            return {target.id: accessor}
+        return _zip_targets(target, node.value, accessors)
+    # `x: Construction = obj.to_Construction()` — an annotation changes the
+    # node type, not the hazard.
+    if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+        accessor = _accessor(node.value, accessors)
+        return {node.target.id: accessor} if accessor else {}
+    if isinstance(node, ast.NamedExpr) and isinstance(node.target, ast.Name):
+        accessor = _accessor(node.value, accessors)
+        return {node.target.id: accessor} if accessor else {}
+    if isinstance(node, (ast.For, ast.AsyncFor)):
+        return _iter_bindings(node.target, node.iter, accessors)
+    if isinstance(node, ast.comprehension):
+        return _iter_bindings(node.target, node.iter, accessors)
+    return {}
+
+
 def _two_step_sites(tree, accessors):
     """`x = obj.accessor()` then `x.get()`, with no guard on `x` in the function.
 
@@ -263,22 +341,7 @@ def _two_step_sites(tree, accessors):
             continue
         bound = {}
         for node in ast.walk(function):
-            # `x = obj.accessor()`
-            if (isinstance(node, ast.Assign) and len(node.targets) == 1
-                    and isinstance(node.targets[0], ast.Name)
-                    and isinstance(node.value, ast.Call)
-                    and isinstance(node.value.func, ast.Attribute)
-                    and node.value.func.attr in accessors):
-                bound[node.targets[0].id] = node.value.func.attr
-            # `(x := obj.accessor()).get()` — the walrus was the one evasion
-            # of Fable's five that survived the first fix, because this walk
-            # handled `Assign` only.
-            elif (isinstance(node, ast.NamedExpr)
-                    and isinstance(node.target, ast.Name)
-                    and isinstance(node.value, ast.Call)
-                    and isinstance(node.value.func, ast.Attribute)
-                    and node.value.func.attr in accessors):
-                bound[node.target.id] = node.value.func.attr
+            bound.update(_bindings(node, accessors))
         if not bound:
             continue
 
@@ -465,6 +528,25 @@ class TestTheWalkItself(unittest.TestCase):
                 ('guard on a DIFFERENT object',
                  'def f(s, t):\n    if t.thermalZone().is_initialized():\n'
                  '        pass\n    return s.thermalZone().get()\n'),
+                # The four forms of #175. Each was reachable by product code
+                # and bound nothing, so the unwrap read as being on a name the
+                # walk had never seen and was silently ignored.
+                ('annotated assignment',
+                 'def f(s):\n    x: object = s.thermalZone()\n'
+                 '    return x.get()\n'),
+                ('tuple unpack, first element',
+                 'def f(s):\n    x, y = s.thermalZone(), 1\n'
+                 '    return x.get()\n'),
+                ('tuple unpack, second element',
+                 'def f(s):\n    y, x = 1, s.to_Node()\n'
+                 '    return x.get()\n'),
+                ('for-loop target over a tuple of accessor calls',
+                 'def f(s):\n'
+                 '    for x in (s.thermalZone(), s.space()):\n'
+                 '        return x.get()\n'),
+                ('comprehension target',
+                 'def f(s):\n'
+                 '    return [x.get() for x in (s.plantLoop(),)]\n'),
         ):
             with self.subTest(shape=label):
                 self.assertEqual(1, self.walk(body),
@@ -472,6 +554,35 @@ class TestTheWalkItself(unittest.TestCase):
 
     def test_shapes_that_must_NOT_be_flagged(self):
         for label, body in (
+                # The same four forms, GUARDED — a form that flags everything
+                # is as useless as one that flags nothing, and the guard scope
+                # is per function, so each of these must come back clean.
+                ('annotated assignment, guarded',
+                 'def f(s):\n    x: object = s.thermalZone()\n'
+                 '    if x.is_initialized():\n        return x.get()\n'
+                 '    return None\n'),
+                ('tuple unpack, guarded',
+                 'def f(s):\n    x, y = s.thermalZone(), 1\n'
+                 '    if not x.empty():\n        return x.get()\n'
+                 '    return None\n'),
+                ('for-loop target, guarded',
+                 'def f(s):\n'
+                 '    for x in (s.thermalZone(), s.space()):\n'
+                 '        if x.is_initialized():\n            return x.get()\n'
+                 '    return None\n'),
+                ('comprehension target, guarded',
+                 'def f(s):\n'
+                 '    return [x.get() for x in (s.plantLoop(),)\n'
+                 '            if x.is_initialized()]\n'),
+                # A tuple unpack whose lengths DISAGREE binds nothing rather
+                # than guessing which name takes the accessor: binding the
+                # wrong one would flag an unrelated unwrap.
+                ('tuple unpack of mismatched length',
+                 'def f(s, pair):\n    x, y = pair\n    return x.get()\n'),
+                # An arbitrary iterable says nothing about what it yields.
+                ('for-loop over an opaque iterable',
+                 'def f(s, seq):\n    for x in seq:\n'
+                 '        return x.get()\n'),
                 ('is_initialized one-liner',
                  'def f(s):\n    x = s.thermalZone()\n'
                  '    if x.is_initialized():\n        return x.get()\n'
