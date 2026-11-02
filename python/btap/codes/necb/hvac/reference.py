@@ -582,11 +582,30 @@ def _heat_pump_redirects(group):
 
     # A DECLARED-only heat pump has no source evidence, so it takes the same
     # conservative redirect as a detected one whose source is unclassifiable.
+    if group.get('heat_pump_source_unclassified'):
+        return True
+
     sources = group.get('heat_pump_sources') or []
     if not sources:
         return True
 
     return any(s != 'water_loop' for s in sources)
+
+
+def _cooling_only_plant_heat_pump_identity_is_unresolved(group):
+    """Whether unpaired cooling equipment is decisive for the HP redirect."""
+    resolved = {
+        'heat_pump': group.get('resolved_heat_pump'),
+        'heat_pump_sources': group.get('resolved_heat_pump_sources'),
+        'heat_pump_source_unclassified':
+            group.get('resolved_heat_pump_source_unclassified'),
+        'declared_equipment_class': group.get('declared_equipment_class'),
+    }
+    return (
+        bool(group.get('unpaired_cooling_plant_heat_pumps'))
+        and not _heat_pump_redirects(resolved)
+        and _heat_pump_redirects(group)
+    )
 
 
 # 'air-cooled unitary, packaged terminal or room air conditioner, or fan coils'
@@ -787,12 +806,41 @@ def _finalize(assignment, group, definitions, selection, facts, audit,
     hp_rule = selection['special_rules']['heat_pump']
     hp_article = heat_pump_article_base(selection)
     if _heat_pump_redirects(group) and assignment.reference_system in hp_rule['applies_to_systems']:
+        if _cooling_only_plant_heat_pump_identity_is_unresolved(group):
+            inputs = {
+                'unpaired_cooling_plant_heat_pumps':
+                    group.get('unpaired_cooling_plant_heat_pumps'),
+                'interim_reference': 'air-source heat pump',
+            }
+            text = (
+                'UNRESOLVED: cooling-only plant equipment has no heating '
+                'companion, so its identity as a heat pump rather than a '
+                'packaged water chiller is not established; the conservative '
+                'interim choice applies the air-source heat-pump reference')
+            if ruleset is not None and ruleset.id == 'necb2025':
+                audit.warn('selection', text, target=','.join(group['zones']),
+                           inputs=inputs, article='8.4.5.13.(2)(a)',
+                           ruling='D-37', ahj='AHJ-25')
+            elif ruleset is None or ruleset.id == 'necb2020':
+                audit.warn('selection', text, target=','.join(group['zones']),
+                           inputs=inputs, article='8.4.4.13.(2)(a)',
+                           ruling='D-37', ahj='AHJ-25')
+            else:
+                raise ValueError(
+                    f"AHJ-25 has no literal Article 13 citation for {ruleset.id}")
         audit.decision('selection',
                        'proposed heat pump -> reference is an air-source heat pump '
                        f"({hp_rule['article']})",
                        target=','.join(group['zones']),
+                       # The unclassified flag belongs beside the sources:
+                       # without it a mixed group audits as
+                       # `heat_pump_sources: ['water_loop']` -> `value: 'hp'`,
+                       # which reads as a contradiction of D-37's own split
+                       # (Fable, re-review of PR #177).
                        inputs={'selected_system': assignment.reference_system,
-                               'heat_pump_sources': group.get('heat_pump_sources')},
+                               'heat_pump_sources': group.get('heat_pump_sources'),
+                               'heat_pump_source_unclassified':
+                                   group.get('heat_pump_source_unclassified')},
                        value='hp', article=hp_rule['article'], ruling='D-37')
         assignment.reference_system = 'hp'
         assignment.articles.append(hp_rule['article'])
@@ -802,8 +850,15 @@ def _finalize(assignment, group, definitions, selection, facts, audit,
                        f"{_selection_table_citation(selection)} selection retained "
                        "(no ASHP redirect)",
                        target=','.join(group['zones']),
+                       # The unclassified flag belongs beside the sources:
+                       # without it a mixed group audits as
+                       # `heat_pump_sources: ['water_loop']` -> `value: 'hp'`,
+                       # which reads as a contradiction of D-37's own split
+                       # (Fable, re-review of PR #177).
                        inputs={'selected_system': assignment.reference_system,
-                               'heat_pump_sources': group.get('heat_pump_sources')},
+                               'heat_pump_sources': group.get('heat_pump_sources'),
+                               'heat_pump_source_unclassified':
+                                   group.get('heat_pump_source_unclassified')},
                        article=f'{hp_article}.(1)', ruling='D-37')
 
     assignment.energy_type = None

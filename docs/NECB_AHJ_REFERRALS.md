@@ -9,7 +9,7 @@ the framing sentences are this generator's.
 The register holds every question in four statuses. Two of them need
 no authority — `ruled` is settled, and `tool-gap` is a defect for us
 to close, not a question for anyone else. This document is the other
-two: **8 `referral`** entries, where the
+two: **9 `referral`** entries, where the
 Code's text does not decide the question, and
 **3 `alternative-solution`**
 entries, where it does decide and this tool does not meet it — which
@@ -192,6 +192,56 @@ place. That is NOT a conservative bound, which this entry previously
 claimed: D-97's runtime warning and Sol's `126` both say the retained
 default may bias the reference in EITHER direction. Declining to guess is
 defensible; calling the result conservative was not.
+
+### AHJ-25 — whether cooling-only plant equipment is an Article 13 heat pump
+
+- **Editions:** necb2020, necb2025
+- **Article:** NECB 2020 Article 8.4.4.13.(2), Table 5.2.12.1.-K and Tables 5.2.12.1.-L/-M; NECB 2025 Article 8.4.5.13.(2) and the corresponding packaged-water-chiller and heat-pump performance tables.
+- **Makes a run conditional:** yes, where the unresolved identity changes the reference to the Article 13 air-source heat pump
+
+**The question.** Article 13 reaches an air-, water- or ground-source heat-pump
+system supplying conditioned water, but it does not define when cooling plant
+equipment is a heat pump rather than a chiller. The Part 5 taxonomy leans
+toward the chiller category for equipment that is genuinely cooling-only:
+the packaged-water-chiller table includes air-cooled vapour-compression
+equipment, while the heat-pump tables carry the cooling- and heating-mode
+ratings of reversible packages. The Appendix note says a heat-pump system may
+use its medium as a heat source and/or sink, but that presupposes the equipment
+is a heat-pump system; using the phrase as the identity test would classify
+every air-cooled chiller as an air-source heat pump.
+
+A lone `HeatPumpPlantLoopEIRCooling` with no heating companion does not settle
+the physical equipment category. It can describe the cooling side of a
+reversible package whose companion was omitted from the model, or the same
+cooling-only vapour-compression physics represented by
+`ChillerElectricEIR`. The serialized object name is not project evidence that
+chooses between those readings.
+
+**Established by.** Sol's 2026-11-02 adjudication of PR #177, after Fable
+identified the chiller counterexample and Claude withdrew the claim that
+"conditioned water" and the Appendix note settled the equipment category.
+The Code evidence was checked against both editions' retained codes-MCP
+payloads, including Article 13, its Appendix note and the Part 5 equipment
+tables.
+
+**What the tool does meanwhile.** D-37's conservative behavior remains: BTAP
+builds the Article 13 air-source heat-pump reference when the unpaired
+cooling object's source contribution makes the group redirect and the
+resolved heat-pump evidence would not redirect on its own. The selection
+warning cites this entry, and an annual result is `conditional` on the
+authority accepting that equipment identity. This is not an equally
+supported chiller reading: if project evidence establishes genuinely
+cooling-only equipment, the interim Article 13 choice is non-conforming.
+Where removing the unpaired contribution leaves the same reference, the
+unresolved identity changes no selection and this entry sets no condition.
+
+**What resolves it.** Project evidence that the proposed equipment is a
+reversible heat-pump package, including a modeled heating companion, places
+it within Article 13 without this referral; the companion declares package
+capability even if that side currently serves no demand equipment. Evidence
+that it is cooling-only packaged water-chilling equipment places it under the
+chiller category. In the absence of either, the authority must decide which
+equipment identity governs the submitted model.
 
 ---
 

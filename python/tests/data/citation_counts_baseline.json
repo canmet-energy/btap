@@ -36,6 +36,9 @@
     "8.4.4.12": {
       "warn": 1
     },
+    "8.4.4.13": {
+      "warn": 1
+    },
     "8.4.4.14": {
       "cited": 5,
       "warn": 10
@@ -118,6 +121,9 @@
     "8.4.5.12": {
       "warn": 1
     },
+    "8.4.5.13": {
+      "warn": 2
+    },
     "8.4.5.14": {
       "cited": 5,
       "warn": 10
@@ -170,6 +176,7 @@
     "Re-baselined 2026-10-23 for phylroy's preflight direction on D-32. The phase-2b `8.4.1.1.(1)` warning remains and now raises `PreflightError` before sizing; the second warning in `determine` is deleted because an invalid target no longer builds, sizes and simulates before being overridden. Each edition therefore moves from `8.4.1.1: {'warn': 2}` to `{'warn': 1}`, taking the Section 8.4 total from 230 to 228. This is an intentional removal of an unreachable late path, not a loss of the gate: the real pipeline witness fails if the preflight raise is replaced with a return while the full-area control remains green.",
     "Re-baselined 2026-10-23 for phylroy's correction distinguishing OSM defects from request limitations. The model-fixable phase-2b gate remains unchanged, including when `simple` is selected. An otherwise Kiva-eligible model explicitly run with `simple` now completes for diagnostic output: `prepare_model` records that the requested mode leaves the target unestablished, and `determine` withholds the verdict last. Those two diagnostic `8.4.1.1.(1)` warning sites sit beside the retained input-preflight warning, so each edition moves from `8.4.1.1: {'warn': 1}` to `{'warn': 3}`, taking the Section 8.4 total from 228 to 232. The two call-site mutations are independent: bypassing the input gate reaches proposed sizing while the valid-simple control stays green; bypassing the late withholding loses the explicit no-determination block while the invalid-model gate stays green.",
     "Re-baselined 2026-10-23 for D-32's approved method-neutral correction. Simple Ground now establishes the reference target through the declared equivalent-UA approximation, and a valid simple-Ground floor that cannot be translated to Kiva falls back to that same symmetric method. The explicit simple-mode decision and the Kiva-fallback warning are two new `8.4.1.2.(2)` source sites, one cited and one warn in each edition. Both editions therefore move from cited 13/warn 8 to cited 14/warn 9, taking the Section 8.4 total from 232 to 236. No existing citation is lost.",
-    "Re-baselined 2026-11-01 for issue #166. The absorption-chiller no-determination diagnostic adds one scanner-visible warning site at NECB 2025 Article 8.4.5.10, taking the Section 8.4 total from 238 to 239. The corresponding NECB 2020 audit call is also a literal (`8.4.4.10.(6)(f)`) and has a per-edition runtime witness, but the coverage generator deliberately excludes literal `8.4.4.*` citations from umbrella `necb/path.py` for an edition whose reference subsection remains 8.4.4, because that umbrella also hosts the 2025-only EUI path; it therefore does not move the 2020 count. No existing citation is lost."
+    "Re-baselined 2026-11-01 for issue #166. The absorption-chiller no-determination diagnostic adds one scanner-visible warning site at NECB 2025 Article 8.4.5.10, taking the Section 8.4 total from 238 to 239. The corresponding NECB 2020 audit call is also a literal (`8.4.4.10.(6)(f)`) and has a per-edition runtime witness, but the coverage generator deliberately excludes literal `8.4.4.*` citations from umbrella `necb/path.py` for an edition whose reference subsection remains 8.4.4, because that umbrella also hosts the 2025-only EUI path; it therefore does not move the 2020 count. No existing citation is lost.",
+    "Re-baselined 2026-11-02 for AHJ-25. The conservative Article 13 redirect now emits an explicit warning when a cooling-side plant object has no modeled heating side and its physical identity as a reversible heat-pump package or cooling-only chiller is therefore unresolved. The audit calls carry literal edition-specific citations as required: `8.4.4.13.(2)(a)` and `8.4.5.13.(2)(a)`. The source scanner counts the 2020 literal once under NECB 2020 and remaps that shared-source site into NECB 2025, where it also sees the separate 2025 branch; 2020/8.4.4.13 therefore gains one warn site and 2025/8.4.5.13 gains two, taking the Section 8.4 total from 239 to 242. No existing citation is lost."
   ]
 }

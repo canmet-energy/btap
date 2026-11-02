@@ -105,6 +105,7 @@ nonconformity with 8.4.x.9.(6)(e).
 | AHJ-22 | cooling-tower capacity equations replaced by the engine Merkel model | alternative-solution | necb2020, necb2025 | yes, where a reference cooling tower is present |
 | AHJ-23 | Table 8.4.x.7.-A residential identity branch | tool-gap | necb2020, necb2025 | no |
 | AHJ-24 | no validated absorption-chiller reference catalog or efficiency applier | tool-gap | necb2020, necb2025 | no |
+| AHJ-25 | cooling-only plant object: Article 13 heat pump or packaged water chiller | referral | necb2020, necb2025 | yes, where the unresolved identity changes the reference to the Article 13 air-source heat pump |
 
 ---
 
@@ -1255,3 +1256,56 @@ approval can turn the missing reference target into a verdict.
 **To close it.** Issue #173 tracks the per-edition reference catalog,
 efficiency applier and serving-equipment witnesses required before this
 refusal can be retired.
+
+## AHJ-25 — whether cooling-only plant equipment is an Article 13 heat pump
+
+**Article.** NECB 2020 Article 8.4.4.13.(2), Table 5.2.12.1.-K and Tables
+5.2.12.1.-L/-M; NECB 2025 Article 8.4.5.13.(2) and the corresponding
+packaged-water-chiller and heat-pump performance tables.
+
+**Status: `referral`** — the acceptable-solution text does not establish the
+equipment identity of an unpaired cooling-side simulation object.
+
+**The question.** Article 13 reaches an air-, water- or ground-source heat-pump
+system supplying conditioned water, but it does not define when cooling plant
+equipment is a heat pump rather than a chiller. The Part 5 taxonomy leans
+toward the chiller category for equipment that is genuinely cooling-only:
+the packaged-water-chiller table includes air-cooled vapour-compression
+equipment, while the heat-pump tables carry the cooling- and heating-mode
+ratings of reversible packages. The Appendix note says a heat-pump system may
+use its medium as a heat source and/or sink, but that presupposes the equipment
+is a heat-pump system; using the phrase as the identity test would classify
+every air-cooled chiller as an air-source heat pump.
+
+A lone `HeatPumpPlantLoopEIRCooling` with no heating companion does not settle
+the physical equipment category. It can describe the cooling side of a
+reversible package whose companion was omitted from the model, or the same
+cooling-only vapour-compression physics represented by
+`ChillerElectricEIR`. The serialized object name is not project evidence that
+chooses between those readings.
+
+**Established by.** Sol's 2026-11-02 adjudication of PR #177, after Fable
+identified the chiller counterexample and Claude withdrew the claim that
+"conditioned water" and the Appendix note settled the equipment category.
+The Code evidence was checked against both editions' retained codes-MCP
+payloads, including Article 13, its Appendix note and the Part 5 equipment
+tables.
+
+**What the tool does meanwhile.** D-37's conservative behavior remains: BTAP
+builds the Article 13 air-source heat-pump reference when the unpaired
+cooling object's source contribution makes the group redirect and the
+resolved heat-pump evidence would not redirect on its own. The selection
+warning cites this entry, and an annual result is `conditional` on the
+authority accepting that equipment identity. This is not an equally
+supported chiller reading: if project evidence establishes genuinely
+cooling-only equipment, the interim Article 13 choice is non-conforming.
+Where removing the unpaired contribution leaves the same reference, the
+unresolved identity changes no selection and this entry sets no condition.
+
+**What resolves it.** Project evidence that the proposed equipment is a
+reversible heat-pump package, including a modeled heating companion, places
+it within Article 13 without this referral; the companion declares package
+capability even if that side currently serves no demand equipment. Evidence
+that it is cooling-only packaged water-chilling equipment places it under the
+chiller category. In the absence of either, the authority must decide which
+equipment identity governs the submitted model.

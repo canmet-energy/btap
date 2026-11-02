@@ -17,6 +17,12 @@ cooling capacity) and by costing of foreign models.
           'heated': True, 'cooled': False,
           'heating_energy_types': ['NaturalGas'], 'cooling_energy_types': ['Electricity'],
           'heat_pump': False, 'heat_pump_sources': ['air'|'water_loop'|'external'],
+          'heat_pump_source_unclassified': False,
+          'resolved_heat_pump': False,
+          'resolved_heat_pump_sources': ['air'|'water_loop'|'external'],
+          'resolved_heat_pump_source_unclassified': False,
+          'unpaired_cooling_plant_heat_pumps': [
+              {'name': 'Cooling HP', 'source': 'air'}],
           'terminal_type': 'vav_reheat'|'dual_duct_vav'|'cv_reheat'|'cv'|'none',
           'cooling_plants': ['Chilled Water Loop'],
           'design_cooling_kw': 42.0|None,
@@ -26,6 +32,12 @@ cooling capacity) and by costing of foreign models.
                     'fuel_capacities_w': {'NaturalGas': 176000.0, 'Electricity': None},
                     'purchased': False, 'heat_pump': False,
                     'heat_pump_modes': ['heating'|'cooling'],
+                    'resolved_heat_pumps': ['Heating HP'],
+                    'unpaired_cooling_heat_pumps': ['Cooling HP'],
+                    'heat_pump_contributors': [
+                        {'name': 'Cooling HP', 'mode': 'cooling',
+                         'resolved': False, 'source': 'air',
+                         'source_loop': None}],
                     'chiller_types': ['electric_eir'|'absorption'|...] } ],
       'purchased_energy': { 'heating': False, 'cooling': False }
     }
@@ -193,11 +205,28 @@ def _plant_heat_pump(comp, loop):
     return None
 
 
+def _plant_heat_pump_has_heating_side(unit, mode):
+    """Whether this plant heat-pump equipment carries a heating side."""
+    if mode == 'heating':
+        return True
+
+    for accessor in (
+            'companionHeatingHeatPump',
+            'heatPumpAirToWater',
+            'heatingPlantLoop'):
+        method = getattr(unit, accessor, None)
+        if method is not None and opt(method()) is not None:
+            return True
+    return False
+
+
 def _plant_facts(loop, audit):
     fuels = []
     purchased = False
     heat_pump = False
     heat_pump_modes = []
+    resolved_heat_pumps = []
+    unpaired_cooling_heat_pumps = []
     has_boiler = has_chiller = has_rejection = False
     chiller_types = []
 
@@ -247,9 +276,13 @@ def _plant_facts(loop, audit):
 
             hp = _plant_heat_pump(comp, loop)
             if hp is not None:
-                _unit, mode, fuel, _source_kind = hp
+                unit, mode, fuel, _source_kind = hp
                 heat_pump = True
                 heat_pump_modes.append(mode)
+                if _plant_heat_pump_has_heating_side(unit, mode):
+                    resolved_heat_pumps.append(unit.nameString())
+                elif mode == 'cooling':
+                    unpaired_cooling_heat_pumps.append(unit.nameString())
                 fuels.append(fuel)
                 continue
 
@@ -302,6 +335,9 @@ def _plant_facts(loop, audit):
              'boiler_count': len(allocation),
              'purchased': purchased, 'heat_pump': heat_pump,
              'heat_pump_modes': list(dict.fromkeys(heat_pump_modes)),
+             'resolved_heat_pumps': list(dict.fromkeys(resolved_heat_pumps)),
+             'unpaired_cooling_heat_pumps':
+                 list(dict.fromkeys(unpaired_cooling_heat_pumps)),
              'chiller_types': list(dict.fromkeys(chiller_types))}
     if audit is not None:
         audit.info('characterize', 'plant loop classified', target=loop.nameString(),
@@ -470,6 +506,10 @@ def _base_group(zone_names, air_loop_name):
             'heated': False, 'cooled': False,
             'heating_energy_types': [], 'cooling_energy_types': [],
             'heat_pump': False, 'heat_pump_sources': [], 'heat_pump_source_loops': [],
+            'heat_pump_source_unclassified': False,
+            'resolved_heat_pump': False, 'resolved_heat_pump_sources': [],
+            'resolved_heat_pump_source_unclassified': False,
+            'unpaired_cooling_plant_heat_pumps': [],
             'terminal_type': 'none',
             'zonal_units': [], 'loop_dx_cooling': False,
             'packaged_unitary': False, 'ventilation_sized': False,
@@ -587,14 +627,30 @@ def _record_plant_heat_pump(group, coil, plant_by_name):
         return
 
     group['heat_pump'] = True
-    source = plant.get('hp_source')
-    if source is not None:
-        _union(group['heat_pump_sources'], [source])
-    _union(group['heat_pump_source_loops'],
-           [n for n in [plant.get('hp_source_loop_name')] if n is not None])
+    contributors = plant.get('heat_pump_contributors') or []
+    for contributor in contributors:
+        source = contributor['source']
+        if source is None:
+            group['heat_pump_source_unclassified'] = True
+        else:
+            _union(group['heat_pump_sources'], [source])
+
+        if contributor['resolved']:
+            group['resolved_heat_pump'] = True
+            if source is None:
+                group['resolved_heat_pump_source_unclassified'] = True
+            else:
+                _union(group['resolved_heat_pump_sources'], [source])
+        elif contributor['mode'] == 'cooling':
+            _union(
+                group['unpaired_cooling_plant_heat_pumps'],
+                [{'name': contributor['name'], 'source': source}])
+
+        source_loop = contributor.get('source_loop')
+        if source_loop is not None:
+            _union(group['heat_pump_source_loops'], [source_loop])
     group['evidence'].append(
-        f"plant heat pump on '{plant['name']}' "
-        f"(source {source or 'unclassified'})")
+        f"plant heat pump on '{plant['name']}'")
 
 
 def _record_hydronic_plant(group, coil, key):
@@ -613,10 +669,15 @@ def _record_heat_pump(group, hp_kind, unit):
         return
 
     group['heat_pump'] = True
+    group['resolved_heat_pump'] = True
     source = (_water_to_air_hp_source(unit)
               if hp_kind == 'water_to_air' else 'air')
-    if source is not None:
+    if source is None:
+        group['heat_pump_source_unclassified'] = True
+        group['resolved_heat_pump_source_unclassified'] = True
+    else:
         _union(group['heat_pump_sources'], [source])
+        _union(group['resolved_heat_pump_sources'], [source])
     # 8.4.4.13.(2)(g)(ii) needs "all the heat pumps connected to the same
     # water loop" — record the source-loop NAME so the aux-fuel election can
     # aggregate across zone groups sharing it (D-52).
@@ -670,37 +731,56 @@ def _annotate_heat_pump_plants(model, plant_by_name):
         if not (plant and plant['heat_pump']):
             continue
 
-        source = None
+        contributors = []
         for comp in loop.supplyComponents():
             hp_facts = _plant_heat_pump(comp, loop)
             if hp_facts is None:
                 continue
-            hp, _mode, _fuel, source_kind = hp_facts
-
+            hp, mode, _fuel, source_kind = hp_facts
+            source = None
+            source_loop = None
             if source_kind == 'air':
-                source = source or 'air'
-                continue
-            if (source_kind == 'condenser'
-                    and hasattr(hp, 'condenserType')
-                    and hp.condenserType() != 'WaterSource'):
-                source = source or 'air'
-                continue
-            if hasattr(hp, 'sourcePlantLoop'):
-                secondary = opt(hp.sourcePlantLoop())
-            elif hasattr(hp, 'secondaryPlantLoop'):
-                secondary = opt(hp.secondaryPlantLoop())
+                source = 'air'
+            elif (source_kind == 'condenser'
+                  and hasattr(hp, 'condenserType')
+                  and hp.condenserType() != 'WaterSource'):
+                source = 'air'
             else:
-                secondary = None
-            if secondary is None:
-                continue
+                if hasattr(hp, 'sourcePlantLoop'):
+                    secondary = opt(hp.sourcePlantLoop())
+                elif hasattr(hp, 'secondaryPlantLoop'):
+                    secondary = opt(hp.secondaryPlantLoop())
+                else:
+                    secondary = None
+                if secondary is not None:
+                    source_loop = secondary.nameString()
+                    src_plant = plant_by_name.get(source_loop)
+                    if src_plant is not None:
+                        src_plant['hp_source_loop'] = True
+                    source = ('external' if _external_source_loop(secondary)
+                              else 'water_loop')
 
-            src_plant = plant_by_name.get(secondary.nameString())
-            if src_plant is not None:
-                src_plant['hp_source_loop'] = True
-            plant['hp_source_loop_name'] = secondary.nameString()
-            source = ('external' if _external_source_loop(secondary)
-                      else (source or 'water_loop'))
-        plant['hp_source'] = source
+            contributors.append({
+                'name': hp.nameString(),
+                'mode': mode,
+                'resolved': _plant_heat_pump_has_heating_side(hp, mode),
+                'source': source,
+                'source_loop': source_loop,
+            })
+
+        plant['heat_pump_contributors'] = contributors
+        sources = [row['source'] for row in contributors
+                   if row['source'] is not None]
+        plant['hp_source'] = next(
+            (source for source in ('external', 'air', 'water_loop')
+             if source in sources),
+            None)
+        source_loops = list(dict.fromkeys(
+            row['source_loop'] for row in contributors
+            if row['source_loop'] is not None))
+        plant['hp_source_loop_names'] = source_loops
+        plant['hp_source_loop_name'] = (
+            source_loops[0] if source_loops else None)
 
 
 def _annotate_absorption_chiller_plants(model, plant_by_name):
