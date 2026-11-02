@@ -1642,23 +1642,25 @@ residential rules ('wshp' is compatible cooling -> copy).
 
 **Cooling-only plant equipment is outside this ruling's settled boundary.**
 Article 13 names a heat-pump *system*, but does not say whether a cooling-only
-plant object with no heating companion is such a system. Part 5 keeps packaged
-water chillers and heat-pump packages in distinct categories: Table
+plant object with no heating companion is such a system. Part 5 leans toward
+the chiller reading for equipment that is genuinely cooling-only: Table
 5.2.12.1.-K includes air-cooled packaged water chillers, while Tables
-5.2.12.1.-L and -M rate heat pumps in cooling and heating modes. The Appendix
-note's "heat source and/or sink" language classifies the source medium after
-the equipment is established as a heat-pump system; reading it as the
-equipment-identity test would also turn every air-cooled chiller into an
-air-source heat pump.
+5.2.12.1.-L and -M rate the cooling and heating modes of heat-pump packages.
+The Appendix note's "heat source and/or sink" language classifies the source
+medium after the equipment is established as a heat-pump system; reading it
+as the equipment-identity test would also turn every air-cooled chiller into
+an air-source heat pump.
 
-The two readings therefore remain distinguishable and unresolved for a lone
-cooling-side simulation object: it may represent the cooling side of a
-reversible heat-pump package whose heating companion is absent from the model,
-or a cooling-only chiller represented by equivalent vapour-compression
-physics. D-37's conservative source redirect remains the interim choice where
-that distinction changes the reference, but AHJ-25 is cited and an annual
-determination is conditional. An internal water-loop source keeps the Table
-8.4.x.7.-A selection under either reading, so it raises no approval condition.
+What remains unresolved is the project evidence carried by a lone cooling-side
+simulation object: it may represent the cooling side of a reversible
+heat-pump package whose heating companion is absent from the model, or
+genuinely cooling-only equipment in the chiller category. D-37's source
+redirect is a conservative interim choice, not a co-equal Code reading; if
+the equipment is genuinely cooling-only, applying Article 13 is a
+non-conformance. Wherever the unpaired object's contribution changes the
+reference, AHJ-25 is cited and an annual determination is conditional. An
+unpaired object whose own source is an internal water loop contributes no
+redirect under either reading, so it raises no approval condition.
 
 Consequence faced squarely: the catalog 'Water source heat pumps' system
 (internal boiler + evaporative fluid cooler loop) is by the note's
@@ -3680,7 +3682,6 @@ the HP redirect correct on all 97×2; three defect classes found:
    from its source-side loop (external evidence → :external; none → :air;
    else :water_loop) with the same Note A-8.4.4.13 boundary as water-to-air
    units, and records the source-loop name for the D-52 (g)(ii) scope.
-
 3. **A ground loop read as PURCHASED heating.** The legacy GLHX pattern puts
    District objects on the HP's source loop as the ground proxy;
    purchased-energy detection saw "district heating" and hs14's variant came

@@ -453,10 +453,14 @@ class TestEveryAddedPlantHeatPumpIsLoadBearing(unittest.TestCase):
         self.assertFalse(unit.companionHeatingHeatPump().is_initialized())
 
         facts = classify.characterize(model)['plants'][0]
-        self.assertFalse(facts['heating_capable_heat_pump'])
+        self.assertEqual([], facts['resolved_heat_pumps'])
         self.assertEqual(
             ['Unpaired Cooling HP'],
             facts['unpaired_cooling_heat_pumps'])
+        self.assertEqual(
+            [{'name': 'Unpaired Cooling HP', 'mode': 'cooling',
+              'resolved': False, 'source': 'air', 'source_loop': None}],
+            facts['heat_pump_contributors'])
 
     def test_a_heating_companion_establishes_the_other_side(self):
         import openstudio
@@ -481,8 +485,12 @@ class TestEveryAddedPlantHeatPumpIsLoadBearing(unittest.TestCase):
             for plant in classify.characterize(model)['plants']
         }
         facts = plants['Chilled Water']
-        self.assertTrue(facts['heating_capable_heat_pump'])
+        self.assertEqual(['Paired Cooling HP'], facts['resolved_heat_pumps'])
         self.assertEqual([], facts['unpaired_cooling_heat_pumps'])
+        self.assertEqual(
+            [{'name': 'Paired Cooling HP', 'mode': 'cooling',
+              'resolved': True, 'source': 'air', 'source_loop': None}],
+            facts['heat_pump_contributors'])
 
     def test_central_heat_pump_marks_both_load_sides(self):
         import openstudio

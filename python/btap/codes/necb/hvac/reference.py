@@ -582,6 +582,9 @@ def _heat_pump_redirects(group):
 
     # A DECLARED-only heat pump has no source evidence, so it takes the same
     # conservative redirect as a detected one whose source is unclassifiable.
+    if group.get('heat_pump_source_unclassified'):
+        return True
+
     sources = group.get('heat_pump_sources') or []
     if not sources:
         return True
@@ -590,10 +593,19 @@ def _heat_pump_redirects(group):
 
 
 def _cooling_only_plant_heat_pump_identity_is_unresolved(group):
-    """Whether an unpaired cooling-side plant object is the only HP evidence."""
-    return bool(group.get('unpaired_cooling_plant_heat_pumps')) and not (
-        group.get('heating_capable_plant_heat_pump')
-        or group.get('nonplant_heat_pump'))
+    """Whether unpaired cooling equipment is decisive for the HP redirect."""
+    resolved = {
+        'heat_pump': group.get('resolved_heat_pump'),
+        'heat_pump_sources': group.get('resolved_heat_pump_sources'),
+        'heat_pump_source_unclassified':
+            group.get('resolved_heat_pump_source_unclassified'),
+        'declared_equipment_class': group.get('declared_equipment_class'),
+    }
+    return (
+        bool(group.get('unpaired_cooling_plant_heat_pumps'))
+        and not _heat_pump_redirects(resolved)
+        and _heat_pump_redirects(group)
+    )
 
 
 # 'air-cooled unitary, packaged terminal or room air conditioner, or fan coils'
@@ -805,14 +817,17 @@ def _finalize(assignment, group, definitions, selection, facts, audit,
                 'companion, so its identity as a heat pump rather than a '
                 'packaged water chiller is not established; the conservative '
                 'interim choice applies the air-source heat-pump reference')
-            if hp_rule['article'].startswith('8.4.5.'):
+            if ruleset is not None and ruleset.id == 'necb2025':
                 audit.warn('selection', text, target=','.join(group['zones']),
                            inputs=inputs, article='8.4.5.13.(2)(a)',
                            ruling='D-37', ahj='AHJ-25')
-            else:
+            elif ruleset is None or ruleset.id == 'necb2020':
                 audit.warn('selection', text, target=','.join(group['zones']),
                            inputs=inputs, article='8.4.4.13.(2)(a)',
                            ruling='D-37', ahj='AHJ-25')
+            else:
+                raise ValueError(
+                    f"AHJ-25 has no literal Article 13 citation for {ruleset.id}")
         audit.decision('selection',
                        'proposed heat pump -> reference is an air-source heat pump '
                        f"({hp_rule['article']})",

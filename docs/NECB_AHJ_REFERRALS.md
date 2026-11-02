@@ -201,13 +201,14 @@ defensible; calling the result conservative was not.
 
 **The question.** Article 13 reaches an air-, water- or ground-source heat-pump
 system supplying conditioned water, but it does not define when cooling plant
-equipment is a heat pump rather than a chiller. The Part 5 taxonomy cuts both
-ways: the packaged-water-chiller table includes air-cooled vapour-compression
-equipment, while the heat-pump tables carry separate cooling- and heating-mode
-ratings. The Appendix note says a heat-pump system may use its medium as a heat
-source and/or sink, but that presupposes the equipment is a heat-pump system;
-using the phrase as the identity test would classify every air-cooled chiller
-as an air-source heat pump.
+equipment is a heat pump rather than a chiller. The Part 5 taxonomy leans
+toward the chiller category for equipment that is genuinely cooling-only:
+the packaged-water-chiller table includes air-cooled vapour-compression
+equipment, while the heat-pump tables carry the cooling- and heating-mode
+ratings of reversible packages. The Appendix note says a heat-pump system may
+use its medium as a heat source and/or sink, but that presupposes the equipment
+is a heat-pump system; using the phrase as the identity test would classify
+every air-cooled chiller as an air-source heat pump.
 
 A lone `HeatPumpPlantLoopEIRCooling` with no heating companion does not settle
 the physical equipment category. It can describe the cooling side of a
@@ -223,21 +224,24 @@ The Code evidence was checked against both editions' retained codes-MCP
 payloads, including Article 13, its Appendix note and the Part 5 equipment
 tables.
 
-**What the tool does meanwhile.** D-37's conservative behavior remains: where
-the unpaired cooling object is the only heat-pump evidence and its source is
-air, external water/ground, or unclassified, BTAP builds the Article 13
-air-source heat-pump reference. The selection warning cites this entry, and an
-annual result is `conditional` on the authority accepting that equipment
-identity. Where the source is an internal water loop, both readings retain the
-Table 8.4.x.7.-A reference, so the unresolved identity changes no selection
-and this entry does not set a condition.
+**What the tool does meanwhile.** D-37's conservative behavior remains: BTAP
+builds the Article 13 air-source heat-pump reference when the unpaired
+cooling object's source contribution makes the group redirect and the
+resolved heat-pump evidence would not redirect on its own. The selection
+warning cites this entry, and an annual result is `conditional` on the
+authority accepting that equipment identity. This is not an equally
+supported chiller reading: if project evidence establishes genuinely
+cooling-only equipment, the interim Article 13 choice is non-conforming.
+Where removing the unpaired contribution leaves the same reference, the
+unresolved identity changes no selection and this entry sets no condition.
 
 **What resolves it.** Project evidence that the proposed equipment is a
-reversible heat-pump package, including a modeled heating companion, places it
-within Article 13 without this referral. Evidence that it is cooling-only
-packaged water-chilling equipment places it under the chiller category. In the
-absence of either, the authority must decide which equipment identity governs
-the submitted model.
+reversible heat-pump package, including a modeled heating companion, places
+it within Article 13 without this referral; the companion declares package
+capability even if that side currently serves no demand equipment. Evidence
+that it is cooling-only packaged water-chilling equipment places it under the
+chiller category. In the absence of either, the authority must decide which
+equipment identity governs the submitted model.
 
 ---
 
