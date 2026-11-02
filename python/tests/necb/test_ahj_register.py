@@ -44,7 +44,11 @@ def _runtime_ids():
 
 
 
-RUNTIME_RE = re.compile(r"^\*\*Runtime\.\*\* (cited|not cited)\b", re.M)
+# The FULL form, not a bare `cited`: `**Runtime.** cited.` passed the
+# declaration test, counted as live, and matched nothing in the
+# file-list test, so it was a third undeclared state (Fable, #180).
+RUNTIME_RE = re.compile(
+    r"^\*\*Runtime\.\*\* (cited in |not cited — )", re.M)
 
 
 def _entry_bodies():
@@ -90,7 +94,7 @@ def _declared_runtime():
     for id_, body in _entry_bodies().items():
         found = RUNTIME_RE.search(body)
         if found:
-            out[id_] = found.group(1) == "cited"
+            out[id_] = found.group(1) == "cited in "
     return out
 
 
