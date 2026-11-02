@@ -3,12 +3,12 @@
 An empty `boost::optional<T>` behaves three ways when unwrapped without a
 guard, measured in #164 and classified by `scripts/sdk_api.py`: a value type
 raises `SystemError`, `OptionalModel` and `OptionalScheduleType` return a
-default object, and everything else SEGFAULTS — 794 of the 2094
-header-declared optional-returning method names, plus every proxy-generated
-accessor that returns one. A segfault takes the process, and in a test run the
+default object, and everything else SEGFAULTS — 897 of the 2094 names
+declared in the `model/` and `utilities/**` headers, plus every
+proxy-generated accessor that returns one. A segfault takes the process, and in a test run the
 whole xdist worker, reported as a lost node rather than a failure.
 
-The baseline carries 2527 names: 794 declared in the headers plus 1733 found
+The baseline carries 2629 names: 897 declared in the headers plus 1732 found
 only in the proxy files' module-level helpers, whose RETURN ANNOTATION says
 they yield an `Optional*`. Those helpers are the `to_<Class>` casts, the
 `get<Class>` and `get<Class>ByName` lookups, and six deprecated ALIASES whose
@@ -234,7 +234,7 @@ def unguarded_sites(accessors):
 
 
 def _enclosing(tree, target):
-    """Name of the function containing `target`, or `<module>`.
+    """Dotted name of the scope containing `target`, or `<module>`.
 
     The key includes it because `(file, accessor)` alone let a site be SWAPPED:
     guard one `outboardOANode` unwrap and add a new unguarded one elsewhere in
@@ -242,15 +242,37 @@ def _enclosing(tree, target):
     green, and prune-only `regenerate()` never runs because nothing failed
     (Fable, second review of #171). `vav_reheat.py` had `to_Node: 4` and three
     files share `airLoopHVACOutdoorAirSystem: 3`, so the hole was live.
+
+    CLASS-QUALIFIED (#175). A bare function name let two classes in one file
+    share a key, so the same swap worked between them. Measured across `btap`:
+    `simulation/backends.py` defines `execute` in three classes and `__init__`
+    in three, and `_mcp.py` defines `__init__` in two — no crash-family unwrap
+    sits in either today, which is why Fable scored it zero instances over the
+    21 files the baseline covers, but the shape exists in product code and the
+    qualification costs one walk.
     """
-    best = '<module>'
+    scopes = {}
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.ClassDef, ast.FunctionDef,
+                             ast.AsyncFunctionDef)):
+            for child in ast.iter_child_nodes(node):
+                scopes[id(child)] = node
+
+    # innermost enclosing scope by line span, then walk out through its parents
+    best = None
     for node in ast.walk(tree):
         if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             continue
         end = getattr(node, 'end_lineno', node.lineno)
         if node.lineno <= target.lineno <= end:
-            best = node.name
-    return best
+            best = node
+    if best is None:
+        return '<module>'
+    parts, cursor = [best.name], best
+    while id(cursor) in scopes:
+        cursor = scopes[id(cursor)]
+        parts.append(cursor.name)
+    return '.'.join(reversed(parts))
 
 
 def _accessor(value, accessors):
@@ -417,7 +439,7 @@ def _two_step_sites(tree, accessors):
                 continue
             name = node.func.value.id
             if name in bound and name not in guarded:
-                counts[f'{function.name}:{bound[name]}'] += 1
+                counts[f'{_enclosing(tree, node)}:{bound[name]}'] += 1
     return counts
 
 
@@ -427,10 +449,13 @@ class TestNoNewUnguardedCrashFamilyUnwrap(unittest.TestCase):
         """It must fail loudly rather than vacuously pass if the file goes."""
         self.assertTrue(BASELINE.is_file(), f'missing baseline: {BASELINE}')
         accessors = crash_family_accessors()
-        # Above 2000 because the baseline is 2527: 794 header-declared plus
-        # 1733 proxy-derived. A floor must sit below the true figure and above
-        # a collapse — losing the proxy derivation leaves 794, losing
-        # everything leaves 0, and both fail here. The previous floor was
+        # Above 2000 because the baseline is 2629: 897 header-declared plus
+        # 1732 proxy-derived. A floor must sit below the true figure and above
+        # a collapse — losing the proxy derivation leaves 897, losing
+        # everything leaves 0, and both fail here. (897 and 1732, not the
+        # earlier 794 and 1733: `utilities/**` joined the header scan in #175,
+        # and `getMaterial` moved from proxy-only to declared because
+        # utilities declares it too.) The previous floor was
         # 3000, set against a 7993 baseline that derived three speculative
         # names per class; annotation-derivation is smaller and more accurate,
         # so the floor moved down with it.
