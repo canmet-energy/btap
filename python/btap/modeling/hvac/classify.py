@@ -305,8 +305,8 @@ def _plant_facts(loop, audit):
              'chiller_types': list(dict.fromkeys(chiller_types))}
     if audit is not None:
         audit.info('characterize', 'plant loop classified', target=loop.nameString(),
-                   value=type_, inputs={'fuels': facts['fuels'], 'purchased': purchased,
-                                        'chiller_types': facts['chiller_types']})
+                   value=type_, inputs={'fuels': facts['fuels'],
+                                        'purchased': purchased})
     return facts
 
 
