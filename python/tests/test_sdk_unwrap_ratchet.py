@@ -125,10 +125,7 @@ def unguarded_sites(accessors):
     - substring matching, so a COMMENT mentioning `is_initialized`, or a guard
       on a DIFFERENT object, reads as a guard;
     - two-step `x = obj.accessor()` then `x.get()` and the walrus ARE walked
-      now (`_two_step_sites`), but only when the name is bound by a plain
-      `Assign` or `NamedExpr`. A tuple unpack, an `AnnAssign`, a for-loop
-      target, a subscript or attribute target, or a binding at module or class
-      level is invisible. The for-target over a tuple of casts is a real
+      now (`_two_step_sites`), but by one of the five binding forms `_bindings` handles. Still invisible, each with no hazardous product instance: an attribute or subscript target (`reference.py:1210` binds one, to a NON-optional `availabilitySchedule()`), a starred unpack, a nested unpack, a module- or class-level binding, and a tuple target over a literal iterable. A two-step site inside a NESTED function is counted under both the inner and the outer function, because `ast.walk` descends into nested defs: zero product instances, and over-reporting is the safe direction. The for-target over a tuple of casts is a real
       product idiom — `codes/necb/hvac/reference.py:1726`,
       `modeling/hvac/components/coils.py:298`, `classify.py:673` — all guarded
       today, so a NEW unguarded one in that shape would also be invisible;
@@ -244,11 +241,41 @@ def _enclosing(tree, target):
 
 
 def _accessor(value, accessors):
-    """The crash-family accessor this expression calls, or None."""
+    """The crash-family accessor this expression calls, or None.
+
+    It DESCENDS through a conditional, because the common product idiom binds
+    through one:
+
+        loop = unitary.airLoopHVAC() if unitary is not None else None
+        ...
+        loop.get()
+
+    Four sites in `btap` bind that way and later unwrap —
+    `codes/necb/hvac/efficiency.py:3332` and `:3368`,
+    `codes/necb/shw/efficiency.py:365`, `modeling/geometry/plan.py:239` — all
+    guarded today, so a NEW unguarded one was the invisible case (Fable, review
+    of #178; it was the shape none of my five snippets reached, which is the
+    failure mode of every evasion table I write).
+
+    The reasoning matches `_iter_bindings`: the name holds an optional on at
+    least one path, so it must be guarded. Descending here covers a conditional
+    inside a tuple element, a for-iterable, an `AnnAssign` and the walrus
+    without `_bindings` knowing anything about it.
+
+    `BoolOp` is included for the same reason and has zero product instances.
+    """
     if (isinstance(value, ast.Call)
             and isinstance(value.func, ast.Attribute)
             and value.func.attr in accessors):
         return value.func.attr
+    if isinstance(value, ast.IfExp):
+        return (_accessor(value.body, accessors)
+                or _accessor(value.orelse, accessors))
+    if isinstance(value, ast.BoolOp):
+        for operand in value.values:
+            found = _accessor(operand, accessors)
+            if found:
+                return found
     return None
 
 
@@ -300,12 +327,17 @@ def _bindings(node, accessors):
     or subscript target (`self.x = obj.to_X()`), which would need the walk to
     track object state rather than local names, and a starred unpack.
     """
-    if isinstance(node, ast.Assign) and len(node.targets) == 1:
-        target = node.targets[0]
+    if isinstance(node, ast.Assign):
+        # EVERY target: `x = y = obj.to_X()` bound neither when this required
+        # exactly one, and iterating costs nothing (Fable, review of #178).
+        out = {}
         accessor = _accessor(node.value, accessors)
-        if isinstance(target, ast.Name) and accessor:
-            return {target.id: accessor}
-        return _zip_targets(target, node.value, accessors)
+        for target in node.targets:
+            if isinstance(target, ast.Name) and accessor:
+                out[target.id] = accessor
+            else:
+                out.update(_zip_targets(target, node.value, accessors))
+        return out
     # `x: Construction = obj.to_Construction()` — an annotation changes the
     # node type, not the hazard.
     if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
@@ -547,6 +579,35 @@ class TestTheWalkItself(unittest.TestCase):
                 ('comprehension target',
                  'def f(s):\n'
                  '    return [x.get() for x in (s.plantLoop(),)]\n'),
+                # The accessor NOT first. Every snippet above put it in
+                # position 0, so `_iter_bindings` scanning `elts[:1]` only
+                # SURVIVED a mutation — the "one accessor among them is
+                # enough" claim was untested (Fable, review of #178).
+                ('for-loop target, accessor not first',
+                 'def f(s):\n    for x in (1, s.thermalZone()):\n'
+                 '        return x.get()\n'),
+                # The shape none of my five reached. Four product sites bind
+                # through a conditional and unwrap: efficiency.py:3332/:3368,
+                # shw/efficiency.py:365, plan.py:239 — all guarded, so a new
+                # unguarded one was the invisible case.
+                ('conditional on the true branch',
+                 'def f(s, c):\n'
+                 '    x = s.thermalZone() if c else None\n'
+                 '    return x.get()\n'),
+                ('conditional on the false branch',
+                 'def f(s, c):\n'
+                 '    x = None if c else s.to_Node()\n'
+                 '    return x.get()\n'),
+                ('conditional inside a tuple element',
+                 'def f(s, c):\n'
+                 '    x, y = (s.space() if c else None), 1\n'
+                 '    return x.get()\n'),
+                ('a chained assignment binds EVERY target',
+                 'def f(s):\n    x = y = s.plantLoop()\n'
+                 '    return y.get()\n'),
+                ('list target',
+                 'def f(s):\n    [x, y] = [s.thermalZone(), 1]\n'
+                 '    return x.get()\n'),
         ):
             with self.subTest(shape=label):
                 self.assertEqual(1, self.walk(body),
@@ -574,11 +635,26 @@ class TestTheWalkItself(unittest.TestCase):
                  'def f(s):\n'
                  '    return [x.get() for x in (s.plantLoop(),)\n'
                  '            if x.is_initialized()]\n'),
-                # A tuple unpack whose lengths DISAGREE binds nothing rather
-                # than guessing which name takes the accessor: binding the
-                # wrong one would flag an unrelated unwrap.
-                ('tuple unpack of mismatched length',
+                # An OPAQUE unpack binds nothing: the value is a single Name,
+                # so there is no element to attribute an accessor to. This was
+                # labelled "mismatched length" and never reached the length
+                # rule at all — it is refused by the literal-sequence test
+                # first, so the label described a check it did not exercise
+                # (Fable, review of #178).
+                ('opaque unpack',
                  'def f(s, pair):\n    x, y = pair\n    return x.get()\n'),
+                ('conditional with no accessor on either branch',
+                 'def f(s, c):\n    x = None if c else s.notAnAccessor()\n'
+                 '    return x.get()\n'),
+                # A LITERAL length mismatch. This raises `ValueError` if it
+                # ever runs, which is why Fable suggested relabelling the
+                # check as unpinnable — but the walk only PARSES, so the
+                # snippet pins it fine, and without the length rule `zip`
+                # would pair `x` with the accessor and flag it. Odd-looking on
+                # purpose: it is the only input that reaches that branch.
+                ('literal unpack whose sides disagree in length',
+                 'def f(s):\n    x, y = s.thermalZone(), 1, 2\n'
+                 '    return x.get()\n'),
                 # An arbitrary iterable says nothing about what it yields.
                 ('for-loop over an opaque iterable',
                  'def f(s, seq):\n    for x in seq:\n'
