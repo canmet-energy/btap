@@ -662,9 +662,6 @@ class TestDeliberateExclusionsStayExplicit(unittest.TestCase):
                 self.assertFalse(group['cooled'])
 
 
-if __name__ == '__main__':
-    unittest.main()
-
 @needs_sdk
 class TestTheHydronicCoolingCapacityKindsAreBOTHExercised(unittest.TestCase):
     """`HYDRONIC_COOLING_COILS` records a capacity KIND per cast, and nothing
@@ -672,9 +669,15 @@ class TestTheHydronicCoolingCapacityKindsAreBOTHExercised(unittest.TestCase):
 
     Found while closing #176 item 2. Breaking that branch — in the shared
     extractor, or in either of the two copies it replaced — left every test in
-    the inventory and plant-heat-pump modules green, so the registry's own
-    value was unverified for three of its six casts and the refactor that
+    the inventory and plant-heat-pump modules green, so the refactor that
     merged the copies could not be shown to preserve anything.
+
+    The precise claim, because the loose one is wrong: three base-tree test
+    files DO construct `PanelRadiant` and `LowTempRadiantVarFlow` coils, and
+    `test_chilled_beams.py:175` asserts `IsNone` for a beam. What none of them
+    did is assert a capacity VALUE arrived through the registry's kind, which
+    is the step a typo in a kind string would break (Fable, follow-up on
+    #179).
 
     `autosized_load` has coverage through the four-pipe fan coil fixtures;
     `design_capacity` had none, and it is the kind that reads a DECLARED
@@ -702,6 +705,15 @@ class TestTheHydronicCoolingCapacityKindsAreBOTHExercised(unittest.TestCase):
         self.assertTrue(panel.addToThermalZone(zone))
 
         group = classify.characterize(model)['zone_groups'][0]
+        # Before the near-equality, because `assertAlmostEqual(8.0, None)`
+        # raises `TypeError: unsupported operand type(s) for -` and the message
+        # below never prints — so both mutations went red for the wrong reason
+        # and a reader saw an arithmetic error instead of the claim (Fable,
+        # follow-up on #179).
+        self.assertIsNotNone(
+            group['design_cooling_kw'],
+            "the registry's `design_capacity` kind produced no capacity at "
+            'all; the coil was recognised and its declared value dropped')
         self.assertAlmostEqual(
             8.0, group['design_cooling_kw'], places=6,
             msg="the registry's `design_capacity` kind must reach the zonal "
@@ -724,3 +736,7 @@ class TestTheHydronicCoolingCapacityKindsAreBOTHExercised(unittest.TestCase):
             {None, 'autosized_load', 'design_capacity'},
             set(classify.HYDRONIC_COOLING_COILS.values()),
             'an unimplemented capacity kind drops the coil silently')
+
+
+if __name__ == '__main__':
+    unittest.main()
