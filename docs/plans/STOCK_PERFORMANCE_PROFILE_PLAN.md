@@ -82,6 +82,100 @@ config -> builder:
 The other 36 are literals in builder bodies. The work is to do what
 `vav_reheat` already does, for them.
 
+## The articulation surface, measured against an existing implementation
+
+phylroy pointed at `canmet-energy/osruby`'s `measures/dnd_analysis` (private
+repo; read through `gh`). Its measure class is literally
+`ColdLakeVintageMaker`, and it is the thing that produced the `models/`
+archetypes. Its architecture is the one this plan proposes, which is
+reassuring:
+
+    resources/*.osm        geometry per building type — barracks, office, hangar,
+                           fire_hall, food_service, recreation_center,
+                           storage_building, training_building, vehicle_garage,
+                           maintenance_shop{,_small}
+    cl_modelling_assumptions.{xlsx,csv}
+                           one row per variant, keyed by `measure_id`, with
+                           `building_type` and `vintage_name` columns
+    apply_ecms(model, row) reflection: calls every `ecm_*` method it finds
+    model naming           "<building_type>~<vintage_name>~baseline"
+
+`measure.rb` itself is 73 lines of wrapper. The articulation lives in 20
+`ecm_*` methods, each declaring a `measure_values` array of column names —
+**113 declared columns in all**. The first sketch of the recipe in this plan
+covered about four of the eighteen performance categories.
+
+Mapped against what `btap.modeling` can do today, by probing for the SDK
+classes and setters each category needs:
+
+| category | cols | state |
+| --- | --- | --- |
+| `ecm_envelope` | 43 | **modeling** — `opaque_at_conductance`, `fenestration_at_conductance`, `seed_set` and `find_and_set_insulation_layer` are all present |
+| `ecm_hotwater_boilers` | 10 | modeling builds `BoilerHotWater`; the efficiency setter is codes-side |
+| `ecm_economizers` | 6 | modeling |
+| `ecm_temp_setback` | 6 | modeling |
+| `ecm_sat_reset` | 5 | modeling — and **no `codes` counterpart at all** |
+| **`ecm_infiltration`** | **4** | **CODES ONLY** |
+| `ecm_sizing` | 4 | modeling |
+| **`ecm_lighting`** | **4** | **CODES ONLY** |
+| **`ecm_plugs`** | **4** | **CODES ONLY** |
+| `ecm_fans` / `ecm_pumps` / `ecm_dhw` / `ecm_erv` / `ecm_heating_cooling_setpoints` / `ecm_cold_deck_reset_control` | 3 each | modeling (`cold_deck_reset_control` also has no `codes` counterpart) |
+| `ecm_cooling_cop` | 1 | modeling |
+| **`ecm_dcv`** | **1** | **CODES ONLY** |
+| `ecm_exhaust_fans` | 1 | modeling |
+| `ecm_capital_costs` | 3 | out of scope — `btap.costing` |
+| `ecm_id` | 3 | out of scope — bookkeeping |
+
+**14 of the 18 performance categories already have their primitives in
+`btap.modeling`**, which makes phase 2 parameterisation rather than
+construction. `ecm_envelope`'s 43 columns — RSI and cost per m3 for every
+surface class, with `solar_trans` and `vis_trans` on the glazed ones — are
+already covered by four existing functions, so the envelope half stays the
+easy half, just far wider than this plan's sample shows.
+
+## Phase 0 — lift the four codes-only load primitives
+
+`ecm_infiltration`, `ecm_lighting`, `ecm_plugs` and `ecm_dcv` exist ONLY in
+`btap.codes.necb`:
+
+    SpaceInfiltrationDesignFlowRate   codes/necb/loads/apply.py,
+                                      codes/necb/envelope/reference.py
+    LightsDefinition                  codes/necb/lighting/apply_lights.py,
+                                      codes/necb/lighting/exterior.py
+    ElectricEquipmentDefinition       codes/necb/loads/apply.py
+    setDemandControlled               codes/necb/hvac/reference.py
+
+So a stock model built through `modeling` alone **cannot set them at all**, and
+for a 1940s building infiltration is arguably the dominant difference from a
+2005 one. That makes this a prerequisite for the recipe, not a later
+refinement: a recipe that cannot express infiltration is incomplete for the use
+case that motivated it.
+
+The lift is bounded, because the PRIMITIVE is separable from the NECB lookup.
+`loads/apply.py:296` is
+
+    def create():
+        infiltration = openstudio.model.SpaceInfiltrationDesignFlowRate(
+            space_type.model())
+        infiltration.setName(f"{space_type.nameString()} Infiltration")
+        infiltration.setSpaceType(space_type)
+        return infiltration
+
+— object construction and attachment, with the NECB part being only where the
+VALUE comes from. `loads/apply.py` is 468 lines with 27 NECB-coupled
+references and `lighting/apply_lights.py` is 443 with 40, so the primitives are
+a minority of each file.
+
+Phase 0 extracts "apply an infiltration rate / lighting fractions / a plug-load
+density to a space type" into `btap.modeling`, leaving the NECB value lookup in
+`codes`, which then calls down into the primitive. That direction is what D-77
+already allows: `codes` imports `modeling`, never the reverse.
+
+**Verification:** the NECB appliers must produce byte-identical output — this
+is a move, not a change — so the frozen corpus must not move at all, in any of
+the three lanes. The 108-system sizing sweep must stay 108/108 with
+`severe: 0`.
+
 ## Phase 1 — the honest inventory, as a test
 
 Pin the current 37 before moving anything: a test that walks
@@ -134,6 +228,8 @@ for the second.
 
 ## Verification at each phase
 
+- phase 0 is a MOVE, not a change: the NECB appliers must produce
+  byte-identical output, so the frozen corpus must not move in any lane;
 - phase 1's fixture is the regression net for 2 and 3;
 - `simulate_all_systems.py --check` must stay 108/108 with `severe: 0`;
 - the frozen corpus must NOT move at all in phases 1-3: the same numbers
@@ -143,7 +239,7 @@ for the second.
   all three lanes checked, `audit.json`/`audit.txt` only and never
   `report.json`.
 
-## The recipe (#184), which phases 1-2 unblock
+## The recipe (#184), which phases 0-2 unblock
 
 One file per building TYPE, a section per vintage, each naming a catalogue
 system and listing that vintage's performance and envelope properties:
