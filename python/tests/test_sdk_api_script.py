@@ -184,6 +184,18 @@ class TestOptionalFamilies(unittest.TestCase):
                     f'— the worst-case rule has nothing to justify it')
 
 
+    @staticmethod
+    def _rows(stdout):
+        """`[(family, method, wrapped_types)]` from a `--list` listing."""
+        rows = []
+        for line in stdout.splitlines():
+            found = re.match(
+                r'\s+(crash|raise|default)\s+(\S+?)\(\) -> optional<(.+)>$',
+                line)
+            if found:
+                rows.append((found.group(1), found.group(2), found.group(3)))
+        return rows
+
     def test_a_namespaced_type_is_reduced_to_its_bare_name(self):
         """`std::string` must classify as raise, not crash.
 
@@ -197,28 +209,46 @@ class TestOptionalFamilies(unittest.TestCase):
         self.assertGreater(counts.get('raise', 0), 50,
                            'optional<std::string> is a large raise-family '
                            f'group: {out.stdout}')
-        self.assertEqual(0, counts.get('crash', 0),
-                         'a namespaced std::string must still be recognised '
-                         f'as a string: {out.stdout}')
+        # A name wrapping ONLY string is never crash. The assertion used to be
+        # that NO crash row appears at all, which held while the scan covered
+        # `model/` alone. With `utilities/**` in it (#175) exactly one name is
+        # overloaded across families — `buildingType() ->
+        # optional<FSBuildingType,string>` — and reporting it at its worst is
+        # the rule working, not the namespace strip failing. This is the same
+        # shape as the `--on double` check above: the worst-case rule must have
+        # something to justify it.
+        for fam, method, wrapped in self._rows(out.stdout):
+            if fam != 'crash':
+                continue
+            types = set(wrapped.rstrip('…').split(','))
+            self.assertTrue(
+                types - {'string'},
+                f'{method} is classified crash while wrapping only string — '
+                'the namespace strip has been lost, so `std::string` is no '
+                f'longer recognised: {out.stdout}')
 
 
     def test_the_comment_strip_is_load_bearing(self):
         """A ceiling, because the widened match needs the strip.
 
-        Raw text matches 3172 declarations and stripped text 3122: fifty
+        Raw text matches 3896 declarations and stripped text 3845: fifty-one
         commented-out declarations would be false positives. Dropping the
         line-comment strip passed every other test, so this asserts a CEILING
         rather than an exact figure — exact counts move with an SDK version,
-        while fifty phantom declarations would blow straight through it.
+        while fifty-one phantom declarations would blow straight through it.
+
+        The figures were 3172/3122 while the scan covered `model/` alone;
+        `utilities/**` joined it in #175 and the gap between them stayed at
+        about fifty, so the ceiling still sits inside it.
         """
         out = run('optionals')
         self.assertEqual(0, out.returncode, out.stderr)
         match = re.search(r'\((\d+) declarations in all\)', out.stdout)
         self.assertIsNotNone(match, f'no declaration count: {out.stdout}')
         count = int(match.group(1))
-        self.assertGreater(count, 2500,
+        self.assertGreater(count, 3000,
                            'the match has collapsed; the header parse broke')
-        self.assertLess(count, 3150,
+        self.assertLess(count, 3870,
                         f'{count} declarations is above what the headers hold '
                         'once comments are stripped — the strip has been lost '
                         'and commented-out declarations are being counted')

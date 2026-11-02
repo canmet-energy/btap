@@ -234,7 +234,7 @@ def unguarded_sites(accessors):
 
 
 def _enclosing(tree, target):
-    """Name of the function containing `target`, or `<module>`.
+    """Dotted name of the scope containing `target`, or `<module>`.
 
     The key includes it because `(file, accessor)` alone let a site be SWAPPED:
     guard one `outboardOANode` unwrap and add a new unguarded one elsewhere in
@@ -242,15 +242,37 @@ def _enclosing(tree, target):
     green, and prune-only `regenerate()` never runs because nothing failed
     (Fable, second review of #171). `vav_reheat.py` had `to_Node: 4` and three
     files share `airLoopHVACOutdoorAirSystem: 3`, so the hole was live.
+
+    CLASS-QUALIFIED (#175). A bare function name let two classes in one file
+    share a key, so the same swap worked between them. Measured across `btap`:
+    `simulation/backends.py` defines `execute` in three classes and `__init__`
+    in three, and `_mcp.py` defines `__init__` in two — no crash-family unwrap
+    sits in either today, which is why Fable scored it zero instances over the
+    21 files the baseline covers, but the shape exists in product code and the
+    qualification costs one walk.
     """
-    best = '<module>'
+    scopes = {}
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.ClassDef, ast.FunctionDef,
+                             ast.AsyncFunctionDef)):
+            for child in ast.iter_child_nodes(node):
+                scopes[id(child)] = node
+
+    # innermost enclosing scope by line span, then walk out through its parents
+    best = None
     for node in ast.walk(tree):
         if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             continue
         end = getattr(node, 'end_lineno', node.lineno)
         if node.lineno <= target.lineno <= end:
-            best = node.name
-    return best
+            best = node
+    if best is None:
+        return '<module>'
+    parts, cursor = [best.name], best
+    while id(cursor) in scopes:
+        cursor = scopes[id(cursor)]
+        parts.append(cursor.name)
+    return '.'.join(reversed(parts))
 
 
 def _accessor(value, accessors):
@@ -417,7 +439,7 @@ def _two_step_sites(tree, accessors):
                 continue
             name = node.func.value.id
             if name in bound and name not in guarded:
-                counts[f'{function.name}:{bound[name]}'] += 1
+                counts[f'{_enclosing(tree, node)}:{bound[name]}'] += 1
     return counts
 
 

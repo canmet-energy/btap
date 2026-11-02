@@ -66,6 +66,17 @@ RETURNS_DEFAULT = frozenset({
     'path', 'DayOfWeek', 'NthDayOfWeekInMonth', 'FuelType', 'EndUseType',
     'InstallLocationType', 'EndUseCategoryType', 'Unit', 'TimeSeries',
     'SqlFile', 'CSVFile', 'IddObject',
+    # Measured for #175, when `utilities/**` joined the header scan. Both
+    # return a DEFAULT-CONSTRUCTED object from an EMPTY optional — neither
+    # raises and neither crashes:
+    #     OptionalQuantity().get()  -> Quantity
+    #     OptionalIddField().get()  -> IddField
+    # `Quantity` is the one that mattered: `convert` is overloaded
+    # `optional<double>` / `optional<Quantity>`, and with `Quantity`
+    # unmeasured the worst-of rule made `convert` crash-family, which would
+    # have added 28 product sites to the grandfathered list for a call that in
+    # practice returns a double and RAISES. Measuring beat exempting.
+    'Quantity', 'IddField',
 })
 
 #: Measured as crashing, so they are NOT merely the unmeasured default.
@@ -122,14 +133,35 @@ def _proxy_files() -> list[pathlib.Path]:
 
 
 def _headers() -> list[pathlib.Path]:
-    # `*_Impl.hpp` are the implementation classes: same methods, not the
-    # public surface, and counting both double-reports everything.
-    found = [p for p in sorted((SDK / 'include/openstudio/model').glob('*.hpp'))
+    """The public headers: `model/*.hpp` plus all of `utilities/**`.
+
+    `utilities` was missing until #175. It declares 333 optional-returning
+    method names that `model` does not, two of which are TRUE FALSE NEGATIVES
+    the proxy annotations cannot reach because they are header-declared rather
+    than SWIG-generated: `WorkflowJSON.getBCLMeasure` ->
+    `optional<BCLMeasure>` and `LocalBCL`/`RemoteBCL.getComponent` ->
+    `optional<BCLComponent>` (Fable, review of #171). Neither is called in
+    `btap`.
+
+    Adding them costs nothing in the fixture, which was the open question.
+    Product code unwraps exactly five utilities-only names — `convert` (28
+    sites) and `BoundingBox`'s `minX`/`minY`/`maxX`/`maxY` (4 each) — and every
+    one returns `optional<double>` in practice, which is the RAISE family. The
+    only reason `convert` looked like a crash-family hazard is its second
+    overload returning `optional<Quantity>`, and the worst-of rule. Measuring
+    `Quantity` rather than exempting `convert` settled it: see
+    `RETURNS_DEFAULT`.
+
+    `*_Impl.hpp` are the implementation classes: same methods, not the public
+    surface, and counting both double-reports everything.
+    """
+    model = (SDK / 'include/openstudio/model').glob('*.hpp')
+    utilities = (SDK / 'include/openstudio/utilities').rglob('*.hpp')
+    found = [p for p in sorted([*model, *utilities])
              if not p.name.endswith('_Impl.hpp')]
     if not found:
-        _die(f"no public model headers under "
-             f"{SDK / 'include/openstudio/model'} — is this an SDK install "
-             f"without headers?")
+        _die(f"no public headers under {SDK / 'include/openstudio'} — is this "
+             f"an SDK install without headers?")
     return found
 
 
