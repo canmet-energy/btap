@@ -832,8 +832,15 @@ def _finalize(assignment, group, definitions, selection, facts, audit,
                        'proposed heat pump -> reference is an air-source heat pump '
                        f"({hp_rule['article']})",
                        target=','.join(group['zones']),
+                       # The unclassified flag belongs beside the sources:
+                       # without it a mixed group audits as
+                       # `heat_pump_sources: ['water_loop']` -> `value: 'hp'`,
+                       # which reads as a contradiction of D-37's own split
+                       # (Fable, re-review of PR #177).
                        inputs={'selected_system': assignment.reference_system,
-                               'heat_pump_sources': group.get('heat_pump_sources')},
+                               'heat_pump_sources': group.get('heat_pump_sources'),
+                               'heat_pump_source_unclassified':
+                                   group.get('heat_pump_source_unclassified')},
                        value='hp', article=hp_rule['article'], ruling='D-37')
         assignment.reference_system = 'hp'
         assignment.articles.append(hp_rule['article'])
@@ -843,8 +850,15 @@ def _finalize(assignment, group, definitions, selection, facts, audit,
                        f"{_selection_table_citation(selection)} selection retained "
                        "(no ASHP redirect)",
                        target=','.join(group['zones']),
+                       # The unclassified flag belongs beside the sources:
+                       # without it a mixed group audits as
+                       # `heat_pump_sources: ['water_loop']` -> `value: 'hp'`,
+                       # which reads as a contradiction of D-37's own split
+                       # (Fable, re-review of PR #177).
                        inputs={'selected_system': assignment.reference_system,
-                               'heat_pump_sources': group.get('heat_pump_sources')},
+                               'heat_pump_sources': group.get('heat_pump_sources'),
+                               'heat_pump_source_unclassified':
+                                   group.get('heat_pump_source_unclassified')},
                        article=f'{hp_article}.(1)', ruling='D-37')
 
     assignment.energy_type = None

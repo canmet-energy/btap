@@ -1629,6 +1629,20 @@ KEEP their Table 8.4.4.7.-A selection per 8.4.4.13.(1); air-, water- and
 ground-SOURCE heat pumps redirect to the Table 8.4.4.13 ASHP reference per
 sentence (2).
 
+**An UNCLASSIFIED source is decisive on its own, including in a MIXED group.**
+`decided` has said since this decision was written that an unclassified source
+is redirected too, but the code only honoured it when the unclassified plant
+was the group's SOLE heat-pump evidence: a group with one `water_loop` plant
+beside one unclassified plant read `['water_loop']` and kept Table -A, because
+an unclassified source was represented as the ABSENCE of a source rather than
+as evidence. `_heat_pump_redirects` now returns True on
+`heat_pump_source_unclassified` before it looks at the source list, so the
+mixed group redirects — the conservative reading, and the one the decision
+already declared. That closes item 1 of issue #176. No frozen scenario moves,
+because the corpus contains no plant heat pump at all; the behaviour is pinned
+by `test_an_unclassified_resolved_source_elects_without_the_unpaired_one`
+(Fable, re-review of PR #177).
+
 Implementation: Classify now records per-group heat_pump_sources
 (:air | :water_loop | :external) — DX/PTHP/VRF are :air; water-to-air
 coils/units are classified by their SOURCE loop (ground HX, district, or
