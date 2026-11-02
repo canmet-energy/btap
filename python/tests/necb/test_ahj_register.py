@@ -43,6 +43,82 @@ def _runtime_ids():
     return found
 
 
+
+RUNTIME_RE = re.compile(r"^\*\*Runtime\.\*\* (cited|not cited)\b", re.M)
+
+
+def _entry_bodies():
+    """Each id mapped to its own section of the register."""
+    text = _register_text()
+    out = {}
+    for match in re.finditer(r"^## (AHJ-\d+) —", text, re.M):
+        start = match.start()
+        nxt = text.find("\n## ", start + 1)
+        out[match.group(1)] = text[start:len(text) if nxt == -1 else nxt]
+    return out
+
+
+def _live_cited_ids():
+    """Ids reachable as DATA at runtime, not merely mentioned.
+
+    `_runtime_ids` greps the source text, which counts a comment and a
+    docstring. That is right for the forward check — an id named anywhere
+    should have an entry — and VACUOUS for the inverse: removing both
+    `ahj='AHJ-25'` citations from `reference.py` left every test green, because
+    an assertion message two lines below still said "AHJ-25" (issue #174).
+
+    So this parses instead, and counts an id only where it appears in a string
+    constant that is NOT a module, class or function docstring. Comments never
+    survive `ast.parse`, and a docstring is prose about the code rather than a
+    value the code carries.
+
+    An ASSERTION MESSAGE counts, and that is deliberate but worth knowing:
+    reddening the inverse check for AHJ-25 took TWO edits, the two `ahj=`
+    citations and the f-string two lines below that names the id in a failure
+    message. A message does reach a reader at runtime, so by this definition it
+    is a surfacing; a stricter rule would have to decide which string positions
+    are citations, which is the dataflow problem below.
+
+    It deliberately does NOT require the `ahj=` keyword, because four product
+    citations are indirect — `ahj=_boiler_class_ahj(...)`,
+    `_disclosure_ahj(...)`, `_plant_cardinality_ahj()`,
+    `_dispatch_ahj(...)` — and following helper returns would mean a dataflow
+    analysis. A literal that can reach a value is the honest line to draw, and
+    it is already sharp enough to separate the 16 live ids from the 9 that
+    exist only in prose.
+    """
+    import ast
+
+    found = set()
+    for path in sorted(PRODUCT.rglob("*.py")):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        prose = set()
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef,
+                                 ast.AsyncFunctionDef)) and node.body:
+                first = node.body[0]
+                if (isinstance(first, ast.Expr)
+                        and isinstance(first.value, ast.Constant)
+                        and isinstance(first.value.value, str)):
+                    prose.add(id(first.value))
+        for node in ast.walk(tree):
+            if (isinstance(node, ast.Constant)
+                    and isinstance(node.value, str)
+                    and id(node) not in prose):
+                found |= set(ID_RE.findall(node.value))
+    return found
+
+
+def _declared_runtime():
+    """Each id mapped to True if it DECLARES a runtime citation."""
+    out = {}
+    for id_, body in _entry_bodies().items():
+        found = RUNTIME_RE.search(body)
+        if found:
+            out[id_] = found.group(1) == "cited"
+    return out
+
+
 class TestTheRegisterExists(unittest.TestCase):
     def test_the_file_is_tracked_not_gitignored(self):
         import subprocess
@@ -487,3 +563,72 @@ class TestNonReferralEntriesAreNotCalledAmbiguities(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+class TestTheCitationCheckRunsBOTHWays(unittest.TestCase):
+    """The forward direction — a cited id with no entry — has been checked
+    since this file existed. The INVERSE was not, and it is the direction that
+    rots: a condition gets refactored away, its citation goes with it, and the
+    register keeps advertising a runtime behaviour that no longer exists.
+
+    Seven of the then twenty-four entries were cited nowhere in product source
+    when this was measured (AHJ-6, 8, 9, 13, 17, 19, 20). Every one turned out
+    to be legitimate — five `tool-gap` entries whose whole point is that the
+    tool proceeds silently, and two `ruled` entries with no choice to disclose.
+    The register simply had no way to say which of the two it was, so the
+    honest state was indistinguishable from the rotten one (issue #174).
+
+    No `referral` and no `alternative-solution` was uncited, which matters:
+    those are the only two statuses that make a run conditional, so an uncited
+    one is a condition that cannot fire. That is pinned separately below.
+    """
+
+    def test_every_entry_DECLARES_whether_it_is_cited_at_runtime(self):
+        missing = sorted(set(_register_ids()) - set(_declared_runtime()))
+        self.assertEqual(
+            [], missing,
+            f"entries with no `**Runtime.**` line: {missing}. Each must say "
+            "`cited in ...` or `not cited — <why>`, so that an entry nothing "
+            "reaches is a DECLARED state rather than a silent one.")
+
+    def test_an_entry_that_claims_a_citation_HAS_one(self):
+        """The rot direction. A refactor that removes the last citation of an
+        id leaves the entry claiming a runtime behaviour that is gone."""
+        live = _live_cited_ids()
+        broken = sorted(id_ for id_, cited in _declared_runtime().items()
+                        if cited and id_ not in live)
+        self.assertEqual(
+            [], broken,
+            f"these entries say they are cited and are not: {broken}. Either "
+            "the citation was lost in a refactor — restore it — or the entry "
+            "should declare `not cited` and say why.")
+
+    def test_an_entry_that_claims_NO_citation_really_has_none(self):
+        """The other direction. An entry that gains a citation and still says
+        it has none is a stale declaration, and the next reader trusts it."""
+        live = _live_cited_ids()
+        stale = sorted(id_ for id_, cited in _declared_runtime().items()
+                       if not cited and id_ in live)
+        self.assertEqual(
+            [], stale,
+            f"these entries say they are NOT cited but product code cites "
+            f"them: {stale}. Update the `**Runtime.**` line.")
+
+    def test_a_status_that_sets_a_run_conditional_MUST_be_cited(self):
+        """`referral` and `alternative-solution` are the two statuses that
+        make a run conditional. An uncited one is a condition that can never
+        fire, which is worse than no entry: the register advertises a
+        safeguard that does not exist."""
+        bodies = _entry_bodies()
+        declared = _declared_runtime()
+        offenders = []
+        for id_, body in bodies.items():
+            status = re.search(r"\*\*Status:? \`([a-z-]+)\`", body)
+            if status and status.group(1) in ("referral",
+                                             "alternative-solution"):
+                if not declared.get(id_):
+                    offenders.append(f"{id_} ({status.group(1)})")
+        self.assertEqual(
+            [], sorted(offenders),
+            f"a conditional-setting status with no runtime citation: "
+            f"{sorted(offenders)}")
+

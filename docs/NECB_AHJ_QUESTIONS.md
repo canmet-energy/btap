@@ -175,6 +175,8 @@ nor (5) that it overrides (6).
 fetched both editions through the codes MCP; Fable reproduced the
 implementation's behaviour with code.
 
+**Runtime.** cited in `log.py`, `path.py`, `plant_loops.py`, `reference.py`.
+
 **What the tool does meanwhile.** It elects ONE energy type for the reference
 SELECTION and computes no capacity ratio, so it satisfies neither clause of
 (5). What the reference's FINAL equipment carries is a separate question this
@@ -259,6 +261,8 @@ fallback: D-52 uses a structural fuel proxy when the heat-pump share is at or
 below the 33% proviso or when annual data are absent. Both are local choices
 the article does not make.
 
+**Runtime.** cited in `reference.py`.
+
 **What the tool does meanwhile.** The (5) disclosure runs on the heat-pump
 path as well as the structural one, and says the allocation is NOT VERIFIED.
 It does not claim the auxiliary election eliminates electric reference
@@ -283,6 +287,8 @@ forbidden above 352 kW is not established by the text.
 
 **Established by.** Sol `119` section C, correcting his own earlier
 "conflict across every band" as too categorical.
+
+**Runtime.** cited in `path.py`, `plant_loops.py`, `reference.py`.
 
 **What the tool does meanwhile.** The (6) coverage gap states that the
 applicable subclause is not established at selection time and claims none.
@@ -312,6 +318,8 @@ supply order and the word "Secondary" are not qualifying controls. A project
 with an explicit mutually exclusive interlock could qualify, but the modeller
 must supply that control evidence. Recorded here because it was raised as a
 possible referral and is not one.
+**Runtime.** not cited — `reference.py` records the ruling in a DOCSTRING, which is prose and not a citation. The backup equipment is modelled as the text requires, so no runtime choice is disclosed.
+
 
 ## AHJ-5 — a water-loop heat pump's source-loop boiler IS an energy type
 
@@ -357,6 +365,8 @@ energy type "used by the heating system" for (5) is a scoping question the
 text does not settle.
 
 **Established by.** Fable `117` O2.
+
+**Runtime.** cited in `ahj.py`, `log.py`, `path.py`, `reference.py`, `sections.py`.
 
 **What the tool does now.** `service_set_heating_fuels` adds the source-loop
 plant's fuels to the group's service set, so 8.4.x.9.(5) is disclosed as
@@ -406,6 +416,8 @@ measured; only oil's has.
 
 **Established by.** Sol `110`, confirmed against fetched text in `121`
 blocker 2.
+
+**Runtime.** not cited — the shortfall is declared in COVERAGE — 8.4.x.9.(4) is held at `partial` — and no runtime choice turns on it, because the catalog simply has no oil or propane variant to choose.
 
 **What the tool does meanwhile.** 8.4.x.9.(4) is held at `partial` and the
 collapse is stated in its coverage gap. It does NOT currently set the run's
@@ -457,6 +469,8 @@ relying on either needs its authority to accept which reading applies.
 this register on 2026-10-07 after phylroy recalled that table errors had been
 found in an earlier session; they were recorded in provenance and in the
 vintage-match verification, but not as an AHJ-weighable question.
+
+**Runtime.** cited in `efficiency.py`.
 
 **What the tool does meanwhile.** It ships the CORRECTED values for two of the
 three rows, and the manifest provenance records that it does so and why: "the
@@ -531,6 +545,8 @@ also carries the control columns, and the id is prefix-matched, so the claim
 reaches them. That is an overclaim of the same shape this register's first six
 entries were created for.
 
+**Runtime.** not cited — there is nothing to cite: the tool does not carry Table 4.2.1.6's control marks at all, so no runtime choice is made about them. The absence IS the gap.
+
 **What the tool does meanwhile.** Nothing — and nothing warns. This is a gap to
 CLOSE, not a question for an authority: carry the A and B marks, implement
 Note (1)'s group requirement, and correct the coverage claim. Until then a
@@ -566,6 +582,8 @@ are correct and in printed order.
 by column label, which cannot hold a duplicate key, so the two are served as
 `12p` for noon and `12a` for midnight. Both are recovered from the raw
 extraction, not inferred.
+
+**Runtime.** not cited — the service hands us the disambiguated form, so the structure is settled before any product code runs and no choice is left to disclose.
 
 **What the tool does meanwhile.** It consumes the service's disambiguated form
 as given — `12p`/`12a` as served, and the 21 rows in printed order — and adds
@@ -662,6 +680,8 @@ tie-break is in the text.
 
 **Established by.** Sol `122`, decision-log audit.
 
+**Runtime.** cited in `reference.py`.
+
 **What the tool does now.** It applies D-18's rule — largest exterior-wall
 area with an N/E/S/W tie-break — and **the choice IS audited**, since the
 metadata handoff landed. `VAVReheat` records structured grouping evidence
@@ -709,6 +729,8 @@ heating when the proposed block is heated.
 
 **Established by.** Sol `122`, who called it a genuine internal tension.
 
+**Runtime.** cited in `cli.py`, `path.py`, `reference.py`.
+
 **What the tool does meanwhile.** It follows (5) and retains the heating,
 audited against both the sentence and the table row.
 
@@ -740,6 +762,8 @@ materially different scope.
 
 **Established by.** Sol `122`.
 
+**Runtime.** cited in `reference.py`.
+
 **What the tool does meanwhile.** It applies D-55's reading, which adds
 reference humidification the other reading would not.
 
@@ -762,6 +786,8 @@ water chiller whose applicable Table K row has Path B populated and the tool
 selects Path B; rows carrying only Path A present no choice.
 
 **Established by.** Sol `122`, re-dispositioned in `126` against fetched text.
+
+**Runtime.** not cited — the runtime cites D-59 on the `ruling` axis instead. Path B is applied unconditionally, so there is no AHJ-facing choice, and the open question is whether we MEET its IPLV, not which path to take.
 
 **What the tool does meanwhile.** It applies Path B, recorded in D-59.
 
@@ -790,6 +816,8 @@ non-condensing curve on every boiler row, so the precedent is weak evidence.
 purchased-energy case separate, because 8.4.x.6 explicitly specifies a
 MODULATING boiler, so there the Code does elect.
 
+**Runtime.** cited in `efficiency.py`, `path.py`, `sections.py`.
+
 **What the tool does meanwhile.** It applies D-89's classes, and the purchased
 route separately applies the modulating class the article names (D-89's own
 scope note).
@@ -815,6 +843,8 @@ makes this the largest single unreferred assumption the audit found.
 
 **Established by.** Sol `122`. D-91 remains the interim project ruling.
 
+**Runtime.** cited in `reference.py`.
+
 **What the tool does meanwhile.** It dispatches air-terminal-first per D-91
 and audits it. The magnitude is why this entry exists rather than sitting in
 the decision log alone.
@@ -831,6 +861,8 @@ one grouped reference system, nor the case where no unique correspondence
 exists. D-93 and D-97 decline in those cases and retain a simulator default.
 
 **Established by.** Sol `122`, as one combined referral for both decisions.
+
+**Runtime.** cited in `efficiency.py`, `path.py`.
 
 **What the tool does meanwhile.** It DECLINES rather than guessing, emitting an
 unresolved warning per affected loop and leaving the simulator default in
@@ -910,6 +942,8 @@ type, so the path is reachable rather than hypothetical.
 curves at the AHRI rating point and enumerating the chiller rows; split from
 AHJ-7 on Sol's clearance review.
 
+**Runtime.** not cited — the simulator default is used unconditionally, so no branch exists to carry a citation. That silence is the gap.
+
 **What the tool does meanwhile.** It uses the simulator default, with no
 warning. Closing this means carrying the air-cooled rows — and the Screw row
 among them is the one AHJ-7's erratum affects, so closing it requires adopting
@@ -948,6 +982,8 @@ heating unavailable in summer for every other system drawing on it — a worse
 defect than the one being fixed. Closing this properly needs either a dedicated
 loop for the two-pipe system or a changeover that does not disable the loop for
 its other consumers, which is a design decision rather than a one-line control.
+
+**Runtime.** not cited — `reference.py` names it in a COMMENT beside the changeover logic, which no runtime value carries. The four-pipe surrogate is built unconditionally, so there is no branch to attach a citation to.
 
 **What the tool does meanwhile.** It builds the four-pipe surrogate. A heated
 System 5 reference may fail to simulate, and when it does the run fails loudly
@@ -990,6 +1026,8 @@ interpretation. It sets no verdict conditional.
 **Established by.** Sol `130`, by building the models and reading the outputs
 rather than the code.
 
+**Runtime.** not cited — a refrigeration-only block gets no reference system at all, so there is no decision or warning to attach a citation to.
+
 **What the tool does meanwhile.** A refrigeration-only block gets no reference
 system; a block with a low-limit heater reaches System 5 only because the heater
 makes it look conditioned and the caller supplies `refrigerated_zones`. The
@@ -1025,6 +1063,8 @@ affect space temperature and energy, and unmet-load hours to be determined;
 added after my own absurd fixture would not have caught this one.
 
 **Established by.** Sol `130`, measuring zone temperatures and unmet hours.
+
+**Runtime.** not cited — the comfort loop is built unconditionally; configuring the alternative is not a choice the tool makes.
 
 **What the tool does meanwhile.** It builds the comfort loop. Configuring a
 water-chiller reference that can actually serve a refrigerated block — an
@@ -1105,6 +1145,8 @@ and D-91's first establishment account was wrong on both counts. Confirmed by
 reading `_eui_compliance` for calls to the unmet-hour machinery: there are
 none.
 
+**Runtime.** cited in `path.py`.
+
 **What the tool does meanwhile.** It applies (3) and (4)(a), composes them
 into the verdict, and emits a WARNING naming (5) on every run where the limits
 are not met, so no reader is left to infer that a remediation step was taken.
@@ -1152,6 +1194,8 @@ of `CoolingTowerSingleSpeed` on 2026-10-14. The earlier `engine` coverage
 disposition described the substitution but incorrectly called the requirement
 satisfied.
 
+**Runtime.** cited in `efficiency.py`.
+
 **What the tool does meanwhile.** It retains the single-speed Merkel tower,
 cites D-07 and this entry on every affected condenser loop, and makes the run
 conditional on the authority accepting the substitution. Closing the entry
@@ -1187,6 +1231,8 @@ model does not carry the difference: `coils.supply_components` replaces an
 it must, or a staged reference system's coils cannot be found at all — and a
 matched split unit may legitimately be modelled with bare components anyway, so
 the container's absence proves nothing either.
+
+**Runtime.** cited in `path.py`, `reference.py`.
 
 **What the tool does meanwhile.** Three-valued in effect, with the third value
 resolved by inference rather than refusal:
@@ -1245,6 +1291,8 @@ PR #172 on 2026-11-02 established that recognition without a validated
 reference implementation must remain an explicit defect rather than an
 untracked string-table refusal.
 
+**Runtime.** cited in `path.py`.
+
 **What the tool does meanwhile.** When an absorption chiller actually serves
 a retained thermal block, BTAP preserves the proposed plant evidence, builds
 diagnostic outputs, and emits `compliance_determination: no_determination`
@@ -1290,6 +1338,8 @@ identified the chiller counterexample and Claude withdrew the claim that
 The Code evidence was checked against both editions' retained codes-MCP
 payloads, including Article 13, its Appendix note and the Part 5 equipment
 tables.
+
+**Runtime.** cited in `reference.py`.
 
 **What the tool does meanwhile.** D-37's conservative behavior remains: BTAP
 builds the Article 13 air-source heat-pump reference when the unpaired
