@@ -1067,7 +1067,11 @@ def _terminal_facts(group, eq, plant_by_name):
                 coil = opt(coil)
             if coil is None:
                 continue
-            evidence = f"{accessor} on terminal {eq.nameString()}"
+            evidence_kind = {
+                'reheatCoil': 'reheat coil',
+                'coilCoolingCooledBeam': 'cooled-beam coil',
+            }.get(accessor, accessor)
+            evidence = f"{evidence_kind} on terminal {eq.nameString()}"
             if side == 'heat':
                 _scan_heating_component(group, coil, plant_by_name, evidence)
             else:
