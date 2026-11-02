@@ -3,9 +3,15 @@
 An empty `boost::optional<T>` behaves three ways when unwrapped without a
 guard, measured in #164 and classified by `scripts/sdk_api.py`: a value type
 raises `SystemError`, `OptionalModel` and `OptionalScheduleType` return a
-default object, and everything else — 794 of the 2094 optional-returning
-method names — SEGFAULTS. A segfault takes the process, and in a test run the
+default object, and everything else SEGFAULTS — 794 of the 2094
+header-declared optional-returning method names, plus every `to_<Class>` cast. A segfault takes the process, and in a test run the
 whole xdist worker, reported as a lost node rather than a failure.
+
+The baseline carries 3197 names: 794 from the headers plus 2403 `to_<Class>`
+casts derived from the proxy class tree. The casts are SWIG `%extend` methods
+declared in no header and defined in no proxy file, so the first version of
+this gate — built from the headers alone — could not see them, which is the
+family `btap._compat.opt`'s docstring names first.
 
 phylroy's call (2026-11-01) is a RATCHET, not a migration: the 27 existing
 sites stay, and a new one fails. The two I hand-checked are safe via guards a
@@ -115,9 +121,16 @@ def unguarded_sites(accessors):
 
     - substring matching, so a COMMENT mentioning `is_initialized`, or a guard
       on a DIFFERENT object, reads as a guard;
-    - only `X.accessor().get()`. A two-step `x = obj.accessor()` then
-      `x.get()`, a walrus, an alias or a `getattr` is invisible — 240 of the
-      444 zero-arg `.get()` calls in `btap` have a bare-Name receiver;
+    - two-step `x = obj.accessor()` then `x.get()` and the walrus ARE walked
+      now (`_two_step_sites`), but only when the name is bound by a plain
+      `Assign` or `NamedExpr`. A tuple unpack, an `AnnAssign`, a for-loop
+      target, a subscript or attribute target, or a binding at module or class
+      level is invisible. The for-target over a tuple of casts is a real
+      product idiom — `codes/necb/hvac/reference.py:1726`,
+      `modeling/hvac/components/coils.py:298`, `classify.py:673` — all guarded
+      today, so a NEW unguarded one in that shape would also be invisible;
+    - an alias or a `getattr` call is invisible, as is anything
+      inter-procedural;
     - `btap/` only: `scripts/` and `tests/` are not walked, though test code
       is what produces the lost-xdist-worker symptom;
     - an ALIAS (`f = obj.accessor` then `f().get()`) or a
@@ -136,8 +149,8 @@ def unguarded_sites(accessors):
         lines = source.splitlines()
         tree = ast.parse(source)
         rel = path.relative_to(PRODUCT).as_posix()
-        for accessor, count in _two_step_sites(tree, accessors).items():
-            found[rel][accessor] += count
+        for key, count in _two_step_sites(tree, accessors).items():
+            found[rel][key] += count
         for node in ast.walk(tree):
             if not (isinstance(node, ast.Call)
                     and isinstance(node.func, ast.Attribute)
@@ -158,12 +171,52 @@ def unguarded_sites(accessors):
             accessor = inner.func.attr
             if accessor not in accessors:
                 continue
-            context = '\n'.join(lines[max(0, node.lineno - 4):node.lineno])
-            if 'is_initialized' in context or 'opt(' in lines[node.lineno - 1]:
+            # Preceding lines and the call's OWN line are separate, because
+            # the receiver text necessarily appears in its own line — pooling
+            # them made every receiver look mentioned and the
+            # guard-on-a-different-object case kept passing.
+            own = lines[node.lineno - 1]
+            before = '\n'.join(lines[max(0, node.lineno - 4):node.lineno - 1])
+            try:
+                receiver = ast.unparse(inner)
+            except Exception:                       # pragma: no cover
+                receiver = None
+            # On the call's own line, a guard is `opt(...)` or a ternary
+            # (`x.get() if x.is_initialized() else None`), which is effective
+            # even though the guard reads later than the unwrap.
+            guarded = ('opt(' in own or 'is_initialized' in own
+                       or '.empty()' in own)
+            # Above it, the guard must name THIS receiver: a plain substring
+            # check accepted `if other.thermalZone().is_initialized():` above
+            # `s.thermalZone().get()`, which is a false negative in the
+            # dangerous direction (Fable, second review of #171).
+            if not guarded and receiver and receiver in before:
+                guarded = 'is_initialized' in before or '.empty()' in before
+            if guarded:
                 continue
             rel = path.relative_to(PRODUCT).as_posix()
-            found[rel][accessor] += 1
+            found[rel][f'{_enclosing(tree, node)}:{accessor}'] += 1
     return found
+
+
+def _enclosing(tree, target):
+    """Name of the function containing `target`, or `<module>`.
+
+    The key includes it because `(file, accessor)` alone let a site be SWAPPED:
+    guard one `outboardOANode` unwrap and add a new unguarded one elsewhere in
+    the same file, and the count stays at 2 — nothing rises, nothing dies, all
+    green, and prune-only `regenerate()` never runs because nothing failed
+    (Fable, second review of #171). `vav_reheat.py` had `to_Node: 4` and three
+    files share `airLoopHVACOutdoorAirSystem: 3`, so the hole was live.
+    """
+    best = '<module>'
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        end = getattr(node, 'end_lineno', node.lineno)
+        if node.lineno <= target.lineno <= end:
+            best = node.name
+    return best
 
 
 def _two_step_sites(tree, accessors):
@@ -215,7 +268,7 @@ def _two_step_sites(tree, accessors):
             if (isinstance(node, ast.Call)
                     and isinstance(node.func, ast.Attribute)
                     and node.func.attr in ('is_initialized', 'is_empty',
-                                           'isNull', 'has_value')
+                                           'empty', 'isNull', 'has_value')
                     and isinstance(node.func.value, ast.Name)):
                 guarded.add(node.func.value.id)
             elif (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
@@ -232,7 +285,7 @@ def _two_step_sites(tree, accessors):
                 continue
             name = node.func.value.id
             if name in bound and name not in guarded:
-                counts[bound[name]] += 1
+                counts[f'{function.name}:{bound[name]}'] += 1
     return counts
 
 
@@ -243,9 +296,19 @@ class TestNoNewUnguardedCrashFamilyUnwrap(unittest.TestCase):
         self.assertTrue(BASELINE.is_file(), f'missing baseline: {BASELINE}')
         accessors = crash_family_accessors()
         self.assertGreater(
-            len(accessors), 500,
+            len(accessors), 3000,
             'the crash-family list has collapsed; regenerate it with '
             '`sdk_api.py optionals --family crash --json`')
+        # The floor used to be 500 — BELOW the 794 the baseline held before the
+        # casts were added. So losing every cast and regenerating would have
+        # left this green, and the gate would have gone back to missing the
+        # hazard it is named for (Fable, second review of #171). These two pin
+        # the family that `opt()`'s docstring warns about first.
+        for cast in ('to_Node', 'to_ThermalZone', 'to_Construction'):
+            self.assertIn(
+                cast, accessors,
+                f'{cast} missing: the cast family is derived from the proxy '
+                'class tree, so `_CLASS` or `_proxy_files()` has regressed')
 
     def test_no_file_gains_an_unguarded_unwrap(self):
         found = unguarded_sites(crash_family_accessors())
@@ -299,6 +362,160 @@ class TestNoNewUnguardedCrashFamilyUnwrap(unittest.TestCase):
             total, sum(sum(c.values()) for c in sites.values()),
             'the fixture\'s `total` disagrees with its own `sites` — it was '
             'hand-edited rather than regenerated')
+
+
+class TestTheWalkItself(unittest.TestCase):
+    """One snippet per shape, through the REAL walk.
+
+    Until this existed every shape was verified by hand-editing
+    `vav_reheat.py` and running the suite, which is why the walrus took three
+    attempts and why `.empty()` went unrecognised through a whole review
+    round: a manual table only contains the cases its author thought of
+    (Fable, second review of #171).
+
+    `unguarded_sites` is pointed at a temp directory, so these run on a bare
+    runner with no SDK and cost milliseconds.
+    """
+
+    ACCESSORS = {'outboardOANode', 'thermalZone', 'to_Node', 'to_ThermalZone',
+                 'space', 'plantLoop'}
+
+    def walk(self, source):
+        import tempfile
+
+        import tests.test_sdk_unwrap_ratchet as module
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / 'probe.py').write_text(source, encoding='utf-8')
+            original = module.PRODUCT
+            module.PRODUCT = root
+            try:
+                found = module.unguarded_sites(self.ACCESSORS)
+            finally:
+                module.PRODUCT = original
+        return sum(sum(c.values()) for c in found.values())
+
+    def test_shapes_that_must_be_FLAGGED(self):
+        for label, body in (
+                ('one-liner', 'def f(s):\n    return s.thermalZone().get()\n'),
+                ('cast', 'def f(s):\n    return s.to_Node().get()\n'),
+                ('chained', 'def f(s):\n'
+                            '    return s.outboardOANode().to_Node().get()\n'),
+                ('two-step', 'def f(s):\n    x = s.thermalZone()\n'
+                             '    return x.get()\n'),
+                ('walrus', 'def f(s):\n'
+                           '    return (x := s.thermalZone()).get()\n'),
+                ('subscript receiver',
+                 'def f(ls):\n    return ls[0].thermalZone().get()\n'),
+                ('guard on a DIFFERENT object',
+                 'def f(s, t):\n    if t.thermalZone().is_initialized():\n'
+                 '        pass\n    return s.thermalZone().get()\n'),
+        ):
+            with self.subTest(shape=label):
+                self.assertEqual(1, self.walk(body),
+                                 f'{label} must be flagged:\n{body}')
+
+    def test_shapes_that_must_NOT_be_flagged(self):
+        for label, body in (
+                ('is_initialized one-liner',
+                 'def f(s):\n    x = s.thermalZone()\n'
+                 '    if x.is_initialized():\n        return x.get()\n'
+                 '    return None\n'),
+                ('.empty() — the idiom at 19 of the grandfathered sites',
+                 'def f(s):\n    x = s.thermalZone()\n'
+                 '    if x.empty():\n        return None\n'
+                 '    return x.get()\n'),
+                ('opt() on the line',
+                 'def f(s):\n    from btap._compat import opt\n'
+                 '    return opt(s.thermalZone())\n'),
+                ('opt() on the bound name',
+                 'def f(s):\n    from btap._compat import opt\n'
+                 '    x = s.thermalZone()\n    return opt(x)\n'),
+                ('a .get() on something NOT an SDK accessor',
+                 'def f(d):\n    return d.setdefault().get()\n'),
+                ('dict.get with an argument',
+                 'def f(d):\n    return d.get("k")\n'),
+        ):
+            with self.subTest(shape=label):
+                self.assertEqual(0, self.walk(body),
+                                 f'{label} must NOT be flagged:\n{body}')
+
+    def test_regenerate_refuses_to_absorb_a_new_site(self):
+        """`regenerate()`'s prune-only refusal, which was itself unpinned.
+
+        The hole it closes: the dead-entry failure message used to name this
+        command, which absorbed a new unguarded site and turned the suite
+        green. Verified by raising a count against a stub fixture.
+        """
+        import json
+        import tempfile
+
+        import tests.test_sdk_unwrap_ratchet as module
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / 'probe.py').write_text(
+                'def a(s):\n    return s.thermalZone().get()\n',
+                encoding='utf-8')
+            fixture = root / 'grandfathered.json'
+            fixture.write_text(json.dumps(
+                {'note': 'stub', 'total': 0, 'sites': {}}), encoding='utf-8')
+            saved = (module.PRODUCT, module.GRANDFATHERED_FILE,
+                     module.crash_family_accessors)
+            module.PRODUCT = root
+            module.GRANDFATHERED_FILE = fixture
+            module.crash_family_accessors = lambda: {'thermalZone'}
+            try:
+                with self.assertRaises(SystemExit) as ctx:
+                    module.regenerate()
+                self.assertIn('refusing to raise', str(ctx.exception))
+                self.assertEqual(
+                    {'note': 'stub', 'total': 0, 'sites': {}},
+                    json.loads(fixture.read_text(encoding='utf-8')),
+                    'a refused regenerate must leave the fixture untouched')
+                # and with the flag it writes
+                module.regenerate(allow_new=True)
+                self.assertEqual(
+                    1, json.loads(fixture.read_text(encoding='utf-8'))['total'])
+            finally:
+                (module.PRODUCT, module.GRANDFATHERED_FILE,
+                 module.crash_family_accessors) = saved
+
+    def test_a_guarded_site_cannot_be_SWAPPED_for_an_unguarded_one(self):
+        """The laundering hole `(file, accessor)` keying left open.
+
+        Guard one site and add a new unguarded one in the same file with the
+        same accessor, and a per-(file, accessor) count stays put: nothing
+        rises, nothing dies, every test green, and prune-only `regenerate()`
+        never runs because nothing failed. Keying by enclosing function makes
+        the swap visible as one key dying and another appearing.
+        """
+        import tempfile
+
+        import tests.test_sdk_unwrap_ratchet as module
+        before = ('def a(s):\n    return s.thermalZone().get()\n\n'
+                  'def b(s):\n    return 1\n')
+        after = ('def a(s):\n    x = s.thermalZone()\n'
+                 '    if x.is_initialized():\n        return x.get()\n'
+                 '    return None\n\n'
+                 'def b(s):\n    return s.thermalZone().get()\n')
+
+        def keys(source):
+            with tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                (root / 'probe.py').write_text(source, encoding='utf-8')
+                original = module.PRODUCT
+                module.PRODUCT = root
+                try:
+                    found = module.unguarded_sites(self.ACCESSORS)
+                finally:
+                    module.PRODUCT = original
+            return {k for counts in found.values() for k in counts}
+
+        self.assertEqual({'a:thermalZone'}, keys(before))
+        self.assertEqual(
+            {'b:thermalZone'}, keys(after),
+            'the swap must change the KEY, not just preserve a count — '
+            'otherwise a new unguarded site rides in on a guarded one')
 
 
 @unittest.skipUnless(SDK_HEADERS.is_dir(),
