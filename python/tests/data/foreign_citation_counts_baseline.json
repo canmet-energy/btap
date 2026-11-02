@@ -122,7 +122,7 @@
       "cited": 1
     },
     "plant['chiller_eirft_table']": {
-      "warn": 1
+      "warn": 2
     },
     "presence_article": {
       "cited": 1
@@ -357,6 +357,9 @@
     },
     "materials_hvac (next-largest-size rule)": {
       "cited": 1
+    },
+    "8.4.4.10.(6)(f)": {
+      "warn": 1
     }
   }
 }
