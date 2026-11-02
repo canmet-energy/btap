@@ -57,10 +57,35 @@ def grandfathered():
     return data['sites'], data['total']
 
 
-def regenerate():
-    """Rewrite the grandfathered fixture from the current tree."""
+def regenerate(allow_new=False):
+    """Rewrite the grandfathered fixture — PRUNE-ONLY unless asked otherwise.
+
+    The escape hatch this closes was real and I built it: guard one
+    grandfathered site, add a new unguarded one, and both the rise check and
+    the dead-entry check go red — whereupon the dead-entry message told the
+    developer to run exactly this function, which absorbed the new site and
+    turned both green (Fable, review of #171). My gate's own failure message
+    was the bypass.
+
+    So a count may only FALL here. Raising one, or adding a (file, accessor)
+    the fixture does not list, requires `allow_new=True` — which is a
+    deliberate act someone has to justify in a commit message, not a command
+    an error message suggests.
+    """
     found = unguarded_sites(crash_family_accessors())
     sites = {rel: dict(sorted(c.items())) for rel, c in sorted(found.items())}
+    if not allow_new:
+        committed, _ = grandfathered()
+        risen = [f'{rel}: {acc} {committed.get(rel, {}).get(acc, 0)} -> {n}'
+                 for rel, counts in sites.items()
+                 for acc, n in counts.items()
+                 if n > committed.get(rel, {}).get(acc, 0)]
+        if risen:
+            raise SystemExit(
+                'refusing to raise the grandfathered counts — that is how a '
+                'new unguarded unwrap gets laundered into the baseline. '
+                'Guard the call, or call regenerate(allow_new=True) and say '
+                'why in the commit message:\n  ' + '\n  '.join(risen))
     total = sum(sum(c.values()) for c in sites.values())
     GRANDFATHERED_FILE.write_text(
         json.dumps({'note': 'generated — see test_sdk_unwrap_ratchet.py',
@@ -78,23 +103,55 @@ def crash_family_accessors():
 def unguarded_sites(accessors):
     """`{relpath: {accessor: count}}` for `X.accessor().get()` with no guard.
 
-    A guard is `is_initialized` within the preceding four lines, or `opt(` on
-    the line itself. Deliberately crude: it over-reports, every sample checked
-    so far was safe via a CALLER's guard, and the ratchet only cares that the
-    number does not RISE. Tightening it would move every count and tell us
-    nothing new.
+    A guard is `is_initialized` in the THREE preceding lines or on the call's
+    own line, or `opt(` on the call's line. `lines[lineno-4:lineno]` is three
+    preceding plus the call — the first version of this docstring said four
+    and was off by one (Fable, review of #171). Three is kept rather than
+    widened: a narrower window counts a distant guard as absent, which
+    over-reports, and over-reporting is the safe direction here.
+
+    Crude in three further ways, all of which let a real hazard through, and
+    all deliberate for a RATCHET whose only job is that the number not rise:
+
+    - substring matching, so a COMMENT mentioning `is_initialized`, or a guard
+      on a DIFFERENT object, reads as a guard;
+    - only `X.accessor().get()`. A two-step `x = obj.accessor()` then
+      `x.get()`, a walrus, an alias or a `getattr` is invisible — 240 of the
+      444 zero-arg `.get()` calls in `btap` have a bare-Name receiver;
+    - `btap/` only: `scripts/` and `tests/` are not walked, though test code
+      is what produces the lost-xdist-worker symptom;
+    - an ALIAS (`f = obj.accessor` then `f().get()`) or a
+      `getattr(obj, 'accessor')().get()` still evades. Four `Call(Name)`
+      receivers exist in `btap` today. Both shapes are contrived enough that
+      catching them needs call-target resolution, and a gate that claims to
+      stop a determined author is lying; this one stops an ordinary edit.
+
+    Closing those needs same-function dataflow, which is a different tool. The
+    gate's claim is narrow on purpose: no new unguarded ONE-LINER unwrap of a
+    crash-family accessor or cast.
     """
     found = collections.defaultdict(collections.Counter)
     for path in sorted(PRODUCT.rglob('*.py')):
         source = path.read_text(encoding='utf-8')
         lines = source.splitlines()
-        for node in ast.walk(ast.parse(source)):
+        tree = ast.parse(source)
+        rel = path.relative_to(PRODUCT).as_posix()
+        for accessor, count in _two_step_sites(tree, accessors).items():
+            found[rel][accessor] += count
+        for node in ast.walk(tree):
             if not (isinstance(node, ast.Call)
                     and isinstance(node.func, ast.Attribute)
                     and node.func.attr == 'get'
                     and not node.args and not node.keywords):
                 continue
             inner = node.func.value
+            # `(x := obj.accessor()).get()` — the receiver is a NamedExpr, so
+            # neither this walk (which wants a Call) nor the two-step walk
+            # (which wants a Name) saw it. Binding the walrus target in
+            # `_two_step_sites` was not enough: the unwrap itself has to be
+            # recognised here. Two fixes before this one missed that.
+            if isinstance(inner, ast.NamedExpr):
+                inner = inner.value
             if not (isinstance(inner, ast.Call)
                     and isinstance(inner.func, ast.Attribute)):
                 continue
@@ -107,6 +164,76 @@ def unguarded_sites(accessors):
             rel = path.relative_to(PRODUCT).as_posix()
             found[rel][accessor] += 1
     return found
+
+
+def _two_step_sites(tree, accessors):
+    """`x = obj.accessor()` then `x.get()`, with no guard on `x` in the function.
+
+    The one-liner walk below misses this shape entirely, and it is the common
+    one: 240 of the 444 zero-arg `.get()` calls in `btap` have a bare-Name
+    receiver (Fable, review of #171). Checked per FUNCTION, because that is the
+    scope a guard plausibly lives in — `if x.is_initialized():` anywhere in the
+    same function counts, wherever it sits relative to the unwrap.
+
+    Deliberately not inter-procedural. Of the 108 existing two-step sites
+    assigned from a crash-family accessor, exactly one has no guard anywhere in
+    its function, which is the signal this is tight enough to be useful rather
+    than noise.
+    """
+    counts = collections.Counter()
+    for function in ast.walk(tree):
+        if not isinstance(function, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        bound = {}
+        for node in ast.walk(function):
+            # `x = obj.accessor()`
+            if (isinstance(node, ast.Assign) and len(node.targets) == 1
+                    and isinstance(node.targets[0], ast.Name)
+                    and isinstance(node.value, ast.Call)
+                    and isinstance(node.value.func, ast.Attribute)
+                    and node.value.func.attr in accessors):
+                bound[node.targets[0].id] = node.value.func.attr
+            # `(x := obj.accessor()).get()` — the walrus was the one evasion
+            # of Fable's five that survived the first fix, because this walk
+            # handled `Assign` only.
+            elif (isinstance(node, ast.NamedExpr)
+                    and isinstance(node.target, ast.Name)
+                    and isinstance(node.value, ast.Call)
+                    and isinstance(node.value.func, ast.Attribute)
+                    and node.value.func.attr in accessors):
+                bound[node.target.id] = node.value.func.attr
+        if not bound:
+            continue
+
+        # Names guarded ANYWHERE in this function, matched as NODES. An
+        # earlier version string-matched `ast.dump(function)` and reported 201
+        # sites where the real figure is a handful — `ast.dump` carries
+        # `ctx=Load()` and other fields, so the patterns never matched and
+        # every guard read as absent.
+        guarded = set()
+        for node in ast.walk(function):
+            if (isinstance(node, ast.Call)
+                    and isinstance(node.func, ast.Attribute)
+                    and node.func.attr in ('is_initialized', 'is_empty',
+                                           'isNull', 'has_value')
+                    and isinstance(node.func.value, ast.Name)):
+                guarded.add(node.func.value.id)
+            elif (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+                  and node.func.id in ('opt', 'opt_or')
+                  and node.args and isinstance(node.args[0], ast.Name)):
+                guarded.add(node.args[0].id)
+
+        for node in ast.walk(function):
+            if not (isinstance(node, ast.Call)
+                    and isinstance(node.func, ast.Attribute)
+                    and node.func.attr == 'get'
+                    and not node.args and not node.keywords
+                    and isinstance(node.func.value, ast.Name)):
+                continue
+            name = node.func.value.id
+            if name in bound and name not in guarded:
+                counts[bound[name]] += 1
+    return counts
 
 
 class TestNoNewUnguardedCrashFamilyUnwrap(unittest.TestCase):
@@ -158,8 +285,11 @@ class TestNoNewUnguardedCrashFamilyUnwrap(unittest.TestCase):
                                 f'now {actual}')
         self.assertEqual(
             [], dead,
-            'these sites were fixed or moved — regenerate the fixture so the '
-            'ratchet keeps its teeth (see GRANDFATHERED_FILE):\n  '
+            'these sites were fixed or moved — LOWER the counts in '
+            'GRANDFATHERED_FILE so the ratchet keeps its teeth. '
+            '`regenerate()` does that and is prune-only; it will refuse if a '
+            'NEW unguarded site is also present, which is deliberate — this '
+            'message used to suggest a command that absorbed one:\n  '
             + '\n  '.join(dead))
 
     def test_the_fixture_total_matches_its_own_sites(self):

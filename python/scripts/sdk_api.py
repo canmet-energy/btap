@@ -177,6 +177,25 @@ def family(wrapped: str) -> str:
     return 'crash'
 
 
+def cast_accessors() -> dict[str, set[str]]:
+    """``to_<Class>`` for every class the proxy files know, as ``optional<Class>``.
+
+    These are SWIG ``%extend`` methods: they appear in NO header and in NO
+    proxy file body, so a header-derived list cannot contain them — `grep -c
+    '"to_'` on the generated baseline was 0, and `to_ThermalZone` is in zero
+    of both. The #169 ratchet therefore could not see 30 existing unguarded
+    `to_X().get()` calls, nor any new one, while `opt()`'s own docstring names
+    that family FIRST: "This is what a failed `to_X()` cast returns" (Fable,
+    review of #171).
+
+    Derived from the class tree instead. Over-broad on purpose — a name here
+    that has no such cast costs nothing, while a missing one is a hazard the
+    gate waves through.
+    """
+    return {f'to_{name}': {name} for name in class_tree()
+            if name not in RETURNS_DEFAULT and name not in RAISES}
+
+
 def optional_methods() -> tuple[dict[str, set[str]], int]:
     """``({method name: {wrapped types}}, declaration count)``.
 
@@ -227,6 +246,11 @@ def cmd_tree(args) -> int:
 
 def cmd_optionals(args) -> int:
     methods, declarations = optional_methods()
+    # The cast family, which no header declares. Merged here rather than in
+    # `optional_methods()` so the DECLARATION count stays a count of real
+    # header declarations.
+    for name, wrapped in cast_accessors().items():
+        methods.setdefault(name, set()).update(wrapped)
     rows = []
     for method, wrapped in sorted(methods.items()):
         fams = {family(w) for w in wrapped}
