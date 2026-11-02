@@ -3660,6 +3660,31 @@ the HP redirect correct on all 97×2; three defect classes found:
    from its source-side loop (external evidence → :external; none → :air;
    else :water_loop) with the same Note A-8.4.4.13 boundary as water-to-air
    units, and records the source-loop name for the D-52 (g)(ii) scope.
+   **The detection is MODE-BLIND, and that is the Code's own word.** Both
+   editions carry the identical trigger: a system that "includes an
+   air-source, water-source or ground-source heat pump that supplies
+   **conditioned** air to a thermal block or **conditioned water** to a
+   hydronic loop" (8.4.4.13.(2); 8.4.5.13.(2) verbatim). Not *heated* air and
+   not *hot* water — chilled water to a hydronic loop is conditioned water, so
+   a plant heat pump that only ever COOLS is inside the sentence, and the
+   reference becomes the Table 8.4.4.13./8.4.5.13. air-source heat pump even
+   where the proposed heating plant is a gas boiler. Note A-8.4.4.13 says it
+   from the other side: all four heat-pump types are defined as using their
+   medium "as a heat source **and/or sink**", and a sink-only machine is a
+   cooling-only one.
+
+   So `_record_plant_heat_pump` is called from the COOLING coil on both paths —
+   `_scan_cooling_component` for an air loop's chilled water coil and
+   `_merge_zonal_equipment` for a zonal unit's — and a cooling-only plant heat
+   pump elects the ASHP reference. This was the implemented behaviour from the
+   start of the plant-HP fix above, but the reading was never written down, no
+   test exercised it, and the frozen corpus contains no plant heat pump at all,
+   so three independent places that should have recorded the intent were all
+   silent (Fable, review of #172; issue #176). Each path now has its own
+   witness: deleting either call reddens exactly one test and leaves the
+   plain-chiller controls green, which is how the first draft of those tests
+   was caught claiming the air-loop path while exercising only the zonal one.
+
 3. **A ground loop read as PURCHASED heating.** The legacy GLHX pattern puts
    District objects on the HP's source loop as the ground proxy;
    purchased-energy detection saw "district heating" and hs14's variant came

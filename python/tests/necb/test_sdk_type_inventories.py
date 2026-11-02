@@ -214,6 +214,178 @@ class TestUnclassifiedPlantHeatPumpSourceRedirects(unittest.TestCase):
 
 
 @needs_sdk
+class TestACoolingOnlyPlantHeatPumpStillRedirects(unittest.TestCase):
+    """8.4.4.13.(2) and 8.4.5.13.(2) say CONDITIONED, not heated.
+
+    Both editions carry the identical trigger: "where the proposed building's
+    HVAC system includes an air-source, water-source or ground-source heat pump
+    that supplies conditioned air to a thermal block or conditioned water to a
+    hydronic loop". Chilled water to a hydronic loop is conditioned water, so a
+    plant heat pump that only ever COOLS is within the sentence, and the
+    reference becomes the Table 8.4.4.13./8.4.5.13. air-source heat pump even
+    where the proposed heating plant is a gas boiler.
+
+    Note A-8.4.4.13 says the same thing from the other side: all four heat-pump
+    types are defined as using their medium "as a heat source AND/OR SINK", and
+    a sink-only machine is a cooling-only one.
+
+    `classify` therefore records a plant heat pump from a COOLING coil on both
+    paths, and each needs its own witness because a model reaches only one:
+
+    - `_merge_zonal_equipment` (`classify.py:1125`) for a zonal unit's chilled
+      water coil — the four-pipe fan coil below;
+    - `_scan_cooling_component` (`classify.py:820`) for an air loop's cooling
+      coil — the air-handler below.
+
+    Neither had a test at this shape, and the frozen corpus contains no plant
+    heat pump at all, so nothing witnessed the redirect either way (Fable,
+    review of #172; issue #176). The first draft of this class claimed to
+    exercise `_scan_cooling_component` and in fact exercised only the zonal
+    path: deleting the air-loop call left both tests green.
+    """
+
+    @staticmethod
+    def _model(cooling_supply):
+        import openstudio
+
+        model = openstudio.model.Model()
+        zone = openstudio.model.ThermalZone(model)
+        zone.setName('Zone')
+        always_on = model.alwaysOnDiscreteSchedule()
+
+        # The HEATING side is deliberately not a heat pump: a gas boiler.
+        hot = _plant(model, 'Hot Water', 'Heating')
+        boiler = openstudio.model.BoilerHotWater(model)
+        boiler.setFuelType('NaturalGas')
+        assert hot.addSupplyBranchForComponent(boiler)
+
+        chilled = _plant(model, 'Chilled Water', 'Cooling')
+        assert chilled.addSupplyBranchForComponent(cooling_supply(model))
+
+        fan = openstudio.model.FanConstantVolume(model, always_on)
+        cooling = openstudio.model.CoilCoolingWater(model, always_on)
+        heating = openstudio.model.CoilHeatingWater(model, always_on)
+        assert chilled.addDemandBranchForComponent(cooling)
+        assert hot.addDemandBranchForComponent(heating)
+        fan_coil = openstudio.model.ZoneHVACFourPipeFanCoil(
+            model, always_on, fan, cooling, heating)
+        assert fan_coil.addToThermalZone(zone)
+        return model
+
+    def test_a_cooling_only_air_source_plant_hp_redirects_past_a_gas_boiler(self):
+        import openstudio
+
+        from btap.modeling.hvac import classify
+
+        model = self._model(openstudio.model.HeatPumpAirToWaterCooling)
+        facts = classify.characterize(model)
+        group = facts['zone_groups'][0]
+
+        self.assertEqual(
+            ['NaturalGas'], group['heating_energy_types'],
+            'the proposed heating plant is a gas boiler, not a heat pump')
+        self.assertTrue(
+            group['heat_pump'],
+            'a plant heat pump reached only through the COOLING coil still '
+            'supplies conditioned water to a hydronic loop')
+        self.assertEqual(['air'], group['heat_pump_sources'])
+
+        assignments = _select(facts)
+        self.assertEqual(1, len(assignments))
+        self.assertEqual(
+            'hp', assignments[0].reference_system,
+            '8.4.4.13.(2) is triggered by a heat pump supplying CONDITIONED '
+            'water, so a cooling-only plant heat pump redirects even where the '
+            'proposed heating is gas')
+
+    @staticmethod
+    def _air_loop_model(cooling_supply):
+        """The same question on the AIR LOOP path: a central cooling coil fed by
+        a heat-pump plant, with a gas boiler on the heating coil."""
+        import openstudio
+
+        model = openstudio.model.Model()
+        zone = openstudio.model.ThermalZone(model)
+        zone.setName('Zone')
+        always_on = model.alwaysOnDiscreteSchedule()
+
+        hot = _plant(model, 'Hot Water', 'Heating')
+        boiler = openstudio.model.BoilerHotWater(model)
+        boiler.setFuelType('NaturalGas')
+        assert hot.addSupplyBranchForComponent(boiler)
+
+        chilled = _plant(model, 'Chilled Water', 'Cooling')
+        assert chilled.addSupplyBranchForComponent(cooling_supply(model))
+
+        loop = openstudio.model.AirLoopHVAC(model)
+        loop.setName('Air Loop')
+        fan = openstudio.model.FanConstantVolume(model, always_on)
+        cooling = openstudio.model.CoilCoolingWater(model, always_on)
+        heating = openstudio.model.CoilHeatingWater(model, always_on)
+        assert chilled.addDemandBranchForComponent(cooling)
+        assert hot.addDemandBranchForComponent(heating)
+        node = loop.supplyOutletNode()
+        assert fan.addToNode(node)
+        assert cooling.addToNode(node)
+        assert heating.addToNode(node)
+        diffuser = openstudio.model.AirTerminalSingleDuctConstantVolumeNoReheat(
+            model, always_on)
+        assert loop.addBranchForZone(zone, diffuser)
+        return model
+
+    def test_the_air_loop_path_redirects_on_a_cooling_only_plant_hp(self):
+        import openstudio
+
+        from btap.modeling.hvac import classify
+
+        model = self._air_loop_model(
+            openstudio.model.HeatPumpAirToWaterCooling)
+        facts = classify.characterize(model)
+        group = facts['zone_groups'][0]
+
+        self.assertTrue(
+            group['heat_pump'],
+            '_scan_cooling_component must record the plant heat pump behind '
+            "an air loop's chilled water coil")
+        self.assertEqual(['air'], group['heat_pump_sources'])
+        self.assertEqual('hp', _select(facts)[0].reference_system)
+
+    def test_the_air_loop_control_with_a_plain_chiller(self):
+        import openstudio
+
+        from btap.modeling.hvac import classify
+
+        model = self._air_loop_model(openstudio.model.ChillerElectricEIR)
+        facts = classify.characterize(model)
+        group = facts['zone_groups'][0]
+
+        self.assertFalse(group.get('heat_pump'))
+        self.assertNotEqual('hp', _select(facts)[0].reference_system)
+
+    def test_the_same_shape_with_a_plain_chiller_does_NOT_redirect(self):
+        """The control. Without it the test above could pass for any reason the
+        fixture happens to supply — a gas boiler plus hydronic fan coils is a
+        System 3/6 shape, and only the heat pump should move it."""
+        import openstudio
+
+        from btap.modeling.hvac import classify
+
+        model = self._model(openstudio.model.ChillerElectricEIR)
+        facts = classify.characterize(model)
+        group = facts['zone_groups'][0]
+
+        self.assertFalse(group.get('heat_pump'))
+        self.assertEqual([], group['heat_pump_sources'])
+
+        assignments = _select(facts)
+        self.assertEqual(1, len(assignments))
+        self.assertNotEqual(
+            'hp', assignments[0].reference_system,
+            'an ordinary electric chiller is not a heat pump and triggers no '
+            'redirect')
+
+
+@needs_sdk
 class TestHydronicPumpInventoriesUseTheNewCoils(unittest.TestCase):
     def test_four_pipe_beam_coils_each_contribute_the_served_zone(self):
         import openstudio
