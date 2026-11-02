@@ -662,5 +662,81 @@ class TestDeliberateExclusionsStayExplicit(unittest.TestCase):
                 self.assertFalse(group['cooled'])
 
 
+@needs_sdk
+class TestTheHydronicCoolingCapacityKindsAreBOTHExercised(unittest.TestCase):
+    """`HYDRONIC_COOLING_COILS` records a capacity KIND per cast, and nothing
+    tested the `design_capacity` kind at all.
+
+    Found while closing #176 item 2. Breaking that branch — in the shared
+    extractor, or in either of the two copies it replaced — left every test in
+    the inventory and plant-heat-pump modules green, so the refactor that
+    merged the copies could not be shown to preserve anything.
+
+    The precise claim, because the loose one is wrong: three base-tree test
+    files DO construct `PanelRadiant` and `LowTempRadiantVarFlow` coils, and
+    `test_chilled_beams.py:175` asserts `IsNone` for a beam. What none of them
+    did is assert a capacity VALUE arrived through the registry's kind, which
+    is the step a typo in a kind string would break (Fable, follow-up on
+    #179).
+
+    `autosized_load` has coverage through the four-pipe fan coil fixtures;
+    `design_capacity` had none, and it is the kind that reads a DECLARED
+    capacity rather than a sizing result, so it is the one that works without
+    a simulation.
+    """
+
+    def test_a_declared_panel_radiant_capacity_reaches_design_cooling_kw(self):
+        import openstudio
+
+        from btap.modeling.hvac import classify
+
+        model = openstudio.model.Model()
+        zone = openstudio.model.ThermalZone(model)
+        zone.setName('Zone')
+        panel = (openstudio.model
+                 .ZoneHVACCoolingPanelRadiantConvectiveWater(model))
+        coil = panel.coolingCoil().to_CoilCoolingWaterPanelRadiant().get()
+        self.assertTrue(coil.setCoolingDesignCapacityMethod('CoolingDesignCapacity'))
+        self.assertTrue(coil.setCoolingDesignCapacity(8000.0))
+        chilled = openstudio.model.PlantLoop(model)
+        chilled.setName('Chilled Water')
+        chilled.sizingPlant().setLoopType('Cooling')
+        self.assertTrue(chilled.addDemandBranchForComponent(coil))
+        self.assertTrue(panel.addToThermalZone(zone))
+
+        group = classify.characterize(model)['zone_groups'][0]
+        # Before the near-equality, because `assertAlmostEqual(8.0, None)`
+        # raises `TypeError: unsupported operand type(s) for -` and the message
+        # below never prints — so both mutations went red for the wrong reason
+        # and a reader saw an arithmetic error instead of the claim (Fable,
+        # follow-up on #179).
+        self.assertIsNotNone(
+            group['design_cooling_kw'],
+            "the registry's `design_capacity` kind produced no capacity at "
+            'all; the coil was recognised and its declared value dropped')
+        self.assertAlmostEqual(
+            8.0, group['design_cooling_kw'], places=6,
+            msg="the registry's `design_capacity` kind must reach the zonal "
+                'capacity total — 8000 W declared is 8 kW')
+        self.assertTrue(
+            group.get('cooling_capacity_complete', True),
+            'a coil whose capacity IS readable must not mark the group '
+            'incomplete')
+
+    def test_the_kinds_the_registry_declares_are_the_ones_it_handles(self):
+        """Every kind in the registry must be one the extractor implements.
+
+        A typo in a kind string would otherwise fall through to None and
+        silently drop that coil's capacity, which is the same silent-skip
+        shape as an unmatched space type.
+        """
+        from btap.modeling.hvac import classify
+
+        self.assertEqual(
+            {None, 'autosized_load', 'design_capacity'},
+            set(classify.HYDRONIC_COOLING_COILS.values()),
+            'an unimplemented capacity kind drops the coil silently')
+
+
 if __name__ == '__main__':
     unittest.main()

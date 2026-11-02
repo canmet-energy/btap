@@ -568,6 +568,15 @@ HYDRONIC_COOLING_COILS = {
 
 
 def _hydronic_coil_fuels(coil, plant_by_name):
+    """A FORWARD REFERENCE, not a redundant alias.
+
+    `HEATING_COILS` is built at module level immediately below and holds this
+    function OBJECT, but `_hydronic_fuels` is defined several hundred lines
+    further down. Naming it directly in that list raises `NameError` at import;
+    this wrapper defers the lookup to call time. Fable read it as "a one-line
+    alias with no purpose" in its re-review of #172 precisely because nothing
+    said otherwise, and deleting it breaks `import btap.modeling.hvac.classify`.
+    """
     return _hydronic_fuels(coil, plant_by_name)
 
 
@@ -817,6 +826,31 @@ def _hydronic_cooling_coil(comp):
     return None
 
 
+def _hydronic_cooling_kw(coil, capacity_kind):
+    """The design cooling load of a hydronic coil, by its registered kind.
+
+    Both the air-loop scan and the zonal merge need this, and until #176 item 2
+    each had its own copy: `_scan_cooling_component` read `capacity_kind` from
+    `HYDRONIC_COOLING_COILS` while `_add_zonal_cooling_capacity` hand-wrote
+    `to_CoilCoolingWater`, `to_CoilCoolingWaterPanelRadiant` and
+    `to_CoilCoolingLowTempRadiantVarFlow` branches of its own. They agreed, but
+    adding a seventh hydronic coil to the registry would have been silently
+    half-applied — counted on an air loop and dropped in a zone.
+
+    A kind of None means the coil carries no capacity this tool can read, which
+    is what `HYDRONIC_COOLING_COILS` records for the beams and the constant-flow
+    radiant coil. The caller treats that as incomplete, exactly as an
+    unrecognised coil.
+    """
+    if capacity_kind == 'autosized_load':
+        return _optional_kw(None, coil.autosizedDesignCoilLoad())
+    if capacity_kind == 'design_capacity':
+        return _optional_kw(
+            coil.coolingDesignCapacity(),
+            _autosized_when_sized(coil, 'autosizedCoolingDesignCapacity'))
+    return None
+
+
 def _scan_cooling_component(group, comp, plant_by_name, evidence):
     kw = None
     fuels = None
@@ -849,14 +883,7 @@ def _scan_cooling_component(group, comp, plant_by_name, evidence):
         c, capacity_kind = hydronic
         fuels = _hydronic_fuels(c, plant_by_name)
         plant_coil = c
-        if capacity_kind == 'autosized_load':
-            kw = _optional_kw(None, c.autosizedDesignCoilLoad())
-        elif capacity_kind == 'design_capacity':
-            kw = _optional_kw(c.coolingDesignCapacity(),
-                              _autosized_when_sized(
-                                  c, 'autosizedCoolingDesignCapacity'))
-        else:
-            kw = None
+        kw = _hydronic_cooling_kw(c, capacity_kind)
     elif comp.to_CoilCoolingWaterToAirHeatPumpEquationFit().is_initialized():
         c = comp.to_CoilCoolingWaterToAirHeatPumpEquationFit().get()
         fuels = 'Electricity'
@@ -1302,8 +1329,8 @@ def _add_zonal_cooling_capacity(group, unit):
     if coil.to_CoilCoolingDXSingleSpeed().is_initialized():
         c = coil.to_CoilCoolingDXSingleSpeed().get()
         kw = _optional_kw(c.ratedTotalCoolingCapacity(), c.autosizedRatedTotalCoolingCapacity())
-    elif coil.to_CoilCoolingWater().is_initialized():
-        kw = _optional_kw(None, coil.to_CoilCoolingWater().get().autosizedDesignCoilLoad())
+    elif (hydronic := _hydronic_cooling_coil(coil)) is not None:
+        kw = _hydronic_cooling_kw(*hydronic)
     elif coil.to_CoilCoolingWaterToAirHeatPumpEquationFit().is_initialized():
         c = coil.to_CoilCoolingWaterToAirHeatPumpEquationFit().get()
         kw = _optional_kw(c.ratedTotalCoolingCapacity(), c.autosizedRatedTotalCoolingCapacity())
@@ -1322,16 +1349,6 @@ def _add_zonal_cooling_capacity(group, unit):
         kw = _optional_kw(
             c.ratedTotalCoolingCapacity(),
             _autosized_when_sized(c, 'autosizedRatedTotalCoolingCapacity'))
-    elif coil.to_CoilCoolingWaterPanelRadiant().is_initialized():
-        c = coil.to_CoilCoolingWaterPanelRadiant().get()
-        kw = _optional_kw(c.coolingDesignCapacity(),
-                          _autosized_when_sized(
-                              c, 'autosizedCoolingDesignCapacity'))
-    elif coil.to_CoilCoolingLowTempRadiantVarFlow().is_initialized():
-        c = coil.to_CoilCoolingLowTempRadiantVarFlow().get()
-        kw = _optional_kw(c.coolingDesignCapacity(),
-                          _autosized_when_sized(
-                              c, 'autosizedCoolingDesignCapacity'))
     else:
         kw = None
     if kw is None:
