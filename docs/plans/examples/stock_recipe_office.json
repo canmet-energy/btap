@@ -1,0 +1,130 @@
+{
+  "_comment": [
+    "ILLUSTRATIVE SAMPLE for docs/plans/STOCK_PERFORMANCE_PROFILE_PLAN.md.",
+    "Not shipped data and not researched figures: the library ships NO vintage",
+    "data (phylroy, 2026-11-02), so every number here is a placeholder showing",
+    "the SHAPE. Resolving vintage x location x building type to real values is",
+    "the caller's business.",
+    "The four `system` names ARE real catalogue entries, verified against",
+    "python/btap/modeling/hvac/data/systems.json."
+  ],
+
+  "recipe_version": 1,
+  "building_type": "Office",
+  "source": "canmet-energy/campus — gagetown_coldlake",
+
+  "geometry": {
+    "osm": "geometry/Office.osm",
+    "_comment": [
+      "Spaces, space types, thermal zones and surfaces come from here.",
+      "btap.stock does not author geometry. btap.modeling can (create(),",
+      "create_from_footprint(), bar()) but a stock recipe reuses the existing",
+      "hand-built geometry so only performance changes by vintage."
+    ]
+  },
+
+  "vintages": {
+    "pre-1960": {
+      "hvac": {
+        "system": "Hot water unit heaters",
+        "performance": {
+          "boiler_efficiency": 0.68,
+          "boiler_part_load_curve": "BOILER-CONSTANT",
+          "fan_pressure_rise_pa": 300
+        }
+      },
+      "envelope": {
+        "opaque": {
+          "wall":   { "conductance_w_m2k": 1.10 },
+          "roof":   { "conductance_w_m2k": 0.85 },
+          "floor":  { "conductance_w_m2k": 1.20 }
+        },
+        "fenestration": {
+          "window":   { "u_w_m2k": 5.20, "shgc": 0.72, "vt": 0.80 },
+          "skylight": { "u_w_m2k": 6.10, "shgc": 0.75, "vt": 0.70 }
+        },
+        "wwr": 0.18
+      },
+      "_comment": "No cooling at all — the 1940s case. 'Hot water unit heaters' is a real catalogue entry, so no new builder code is needed."
+    },
+
+    "1960-1979": {
+      "hvac": {
+        "system": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+        "performance": {
+          "boiler_efficiency": 0.72,
+          "boiler_part_load_curve": "BOILER-CONSTANT",
+          "cooling_cop": 2.40,
+          "dx_cooling_curves": "DXCOOL-1970s",
+          "dx_heating_curves": null,
+          "fan_pressure_rise_pa": 500
+        }
+      },
+      "envelope": {
+        "opaque": {
+          "wall":   { "conductance_w_m2k": 0.70 },
+          "roof":   { "conductance_w_m2k": 0.45 },
+          "floor":  { "conductance_w_m2k": 0.90 }
+        },
+        "fenestration": {
+          "window":   { "u_w_m2k": 3.30, "shgc": 0.65, "vt": 0.70 },
+          "skylight": { "u_w_m2k": 4.40, "shgc": 0.68, "vt": 0.60 }
+        },
+        "wwr": 0.30
+      }
+    },
+
+    "1980-2004": {
+      "hvac": {
+        "system": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+        "performance": {
+          "boiler_efficiency": 0.80,
+          "boiler_part_load_curve": "BOILER-NONCONDENSING-PLF",
+          "cooling_cop": 3.00,
+          "dx_cooling_curves": "DXCOOL-1990s",
+          "dx_heating_curves": null,
+          "fan_pressure_rise_pa": 640
+        }
+      },
+      "envelope": {
+        "opaque": {
+          "wall":   { "conductance_w_m2k": 0.45 },
+          "roof":   { "conductance_w_m2k": 0.30 },
+          "floor":  { "conductance_w_m2k": 0.60 }
+        },
+        "fenestration": {
+          "window":   { "u_w_m2k": 2.60, "shgc": 0.55, "vt": 0.62 },
+          "skylight": { "u_w_m2k": 3.20, "shgc": 0.58, "vt": 0.55 }
+        },
+        "wwr": 0.35
+      }
+    },
+
+    "2005-2014": {
+      "hvac": {
+        "system": "VAV chiller with gas boiler reheat",
+        "performance": {
+          "boiler_efficiency": 0.85,
+          "boiler_part_load_curve": "BOILER-NONCONDENSING-PLF",
+          "cooling_cop": 4.10,
+          "dx_cooling_curves": null,
+          "dx_heating_curves": null,
+          "fan_pressure_rise_pa": 900
+        }
+      },
+      "envelope": {
+        "opaque": {
+          "wall":   { "conductance_w_m2k": 0.31 },
+          "roof":   { "conductance_w_m2k": 0.21 },
+          "floor":  { "conductance_w_m2k": 0.38 }
+        },
+        "fenestration": {
+          "window":   { "u_w_m2k": 2.20, "shgc": 0.40, "vt": 0.55 },
+          "skylight": { "u_w_m2k": 2.70, "shgc": 0.45, "vt": 0.50 }
+        },
+        "wwr": 0.40
+      },
+      "_comment": "A different system from the earlier vintages — which is why `system` sits INSIDE the vintage block rather than once per file."
+    }
+  }
+}

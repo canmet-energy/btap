@@ -148,29 +148,13 @@ for the second.
 One file per building TYPE, a section per vintage, each naming a catalogue
 system and listing that vintage's performance and envelope properties:
 
-```json
-{
-  "building_type": "Office",
-  "geometry": { "osm": "geometry/Office.osm" },
-  "vintages": {
-    "pre-1960": {
-      "hvac": { "system": "Hot Water Baseboards only",
-                "performance": { "boiler_efficiency": 0.68 } },
-      "envelope": { "opaque": { "wall": { "conductance_w_m2k": 1.10 } },
-                    "fenestration": { "window": { "u_w_m2k": 5.20,
-                                                  "shgc": 0.72 } },
-                    "wwr": 0.18 }
-    },
-    "1960-1979": {
-      "hvac": { "system": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
-                "performance": { "boiler_efficiency": 0.72,
-                                 "cooling_cop": 2.40,
-                                 "dx_cooling_curves": "DXCOOL-1970s" } },
-      "envelope": { "...": "..." }
-    }
-  }
-}
-```
+A complete, parsing sample is at
+[`examples/stock_recipe_office.json`](examples/stock_recipe_office.json) — four
+vintages for one building type, with the four `system` names verified against
+`python/btap/modeling/hvac/data/systems.json`. Every NUMBER in it is a
+placeholder: the library ships no vintage data, so the sample shows the shape
+and nothing more.
+
 
 `system` sits INSIDE the vintage block, because systems do change by vintage: a
 1940 building may be hydronic radiators with no cooling, and the catalogue
@@ -189,6 +173,21 @@ A key-parity check is worth having from the start: vintage blocks side by side
 make the progression legible, and also invite copy-paste drift. A performance
 key present in two vintages and missing from the third is invisible to a diff
 review.
+
+**Parity is PER SYSTEM, not per file** — a correction the sample forced. An
+earlier draft of this plan proposed asserting that every vintage block carries
+the same keys, and writing
+[`examples/stock_recipe_office.json`](examples/stock_recipe_office.json) showed
+that would REFUSE a correct recipe: its `pre-1960` block names
+`Hot water unit heaters` and therefore has no `cooling_cop` and no DX curve
+keys at all, because the building has no cooling. Padding it with
+`cooling_cop: null` would be worse than omitting it — it implies a cooling
+concept the system does not have.
+
+So the check is: two vintage blocks naming the SAME catalogue system must carry
+the same performance keys. Blocks naming different systems legitimately differ,
+and the sample's four blocks fall into three groups (`Hot water unit heaters`,
+the PSZ twice, `VAV chiller with gas boiler reheat`).
 
 ## `btap.stock`, a sixth subpackage
 
