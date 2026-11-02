@@ -928,11 +928,16 @@ carries only the published-table defect. The Code supplies the curves; we do
 not ship them. Nothing here needs an authority.
 
 **What is missing.** `efficiencies.json` carries 19 `WaterCooled` chiller rows
-and exactly ONE `AirCooled` row, and that row has `compressor_type: null` and
-`eirft: null`. Curves are applied from the row via
-`setElectricInputToCoolingOutputRatioFunctionOfTemperature`, so an air-cooled
-reference chiller keeps the **OpenStudio default** performance curve rather
-than a Table 8.4.5.5.-C one. Every curve reference that IS present resolves —
+and exactly ONE `AirCooled` row. That row is a WILDCARD — `compressor_type:
+null` and a 0–9999 ton range — so it matches every air-cooled chiller and no
+"no row found" warning is ever emitted, and **all THREE of its curves are
+null**: `capft`, `eirft` and `eirfplr`. Measured in both editions on
+2026-11-02; this entry previously named only `eirft`, understating its own
+gap. Curves are applied from the row via
+`setElectricInputToCoolingOutputRatioFunctionOfTemperature` and its siblings,
+so an air-cooled reference chiller keeps the **OpenStudio default** for
+capacity-f(T), EIR-f(T) and EIR-f(PLR) alike rather than Table 8.4.5.5.-C
+values. Every curve reference that IS present resolves —
 0 dangling of 60 checked — so this is an absence, not a broken link.
 
 **Why it matters.** 8.4.x.6.(2) represents purchased cooling with an
