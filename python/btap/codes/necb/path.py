@@ -2950,6 +2950,7 @@ _NO_DETERMINATION_CAUSES = {
     },
     "absorption_chiller_reference_not_supported": {
         "reason": "absorption-chiller reference target not established",
+        "ahj": "AHJ-24",
         "what_would_fix_it": (
             "BTAP needs a validated NECB absorption-chiller reference catalog "
             "and efficiency applier; the submitter is not required to replace "
@@ -3051,10 +3052,12 @@ def _refuse_determination(run, causes, code):
         elif cause["reason"] == "absorption_chiller_reference_not_supported":
             if code == "necb2025":
                 run.audit.warn("compliance", text + _DIAGNOSTIC_TAIL,
-                               inputs=cause, article="8.4.5.10.(6)(f)")
+                               inputs=cause, article="8.4.5.10.(6)(f)",
+                               ahj="AHJ-24")
             else:
                 run.audit.warn("compliance", text + _DIAGNOSTIC_TAIL,
-                               inputs=cause, article="8.4.4.10.(6)(f)")
+                               inputs=cause, article="8.4.4.10.(6)(f)",
+                               ahj="AHJ-24")
         elif code == "necb2025":
             run.audit.warn("compliance", text + _DIAGNOSTIC_TAIL,
                            inputs=cause, article="8.4.5.7.(1)", ruling="D-108",

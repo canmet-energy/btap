@@ -165,6 +165,55 @@ class TestAirToWaterFactsReachTheArticle13Redirect(unittest.TestCase):
 
 
 @needs_sdk
+class TestUnclassifiedPlantHeatPumpSourceRedirects(unittest.TestCase):
+    def test_water_to_water_type_without_a_source_loop_does_not_imply_wlhp(self):
+        import openstudio
+
+        from btap.modeling.hvac import classify
+
+        model = openstudio.model.Model()
+        zone = openstudio.model.ThermalZone(model)
+        zone.setName('Zone')
+        chilled = _plant(model, 'Chilled Water', 'Cooling')
+        heat_pump = (
+            openstudio.model.HeatPumpWaterToWaterEquationFitCooling(model))
+        panel = (
+            openstudio.model
+            .ZoneHVACCoolingPanelRadiantConvectiveWater(model))
+        baseboard = (
+            openstudio.model
+            .ZoneHVACBaseboardRadiantConvectiveElectric(model))
+        self.assertTrue(
+            chilled.addSupplyBranchForComponent(heat_pump))
+        self.assertTrue(
+            chilled.addDemandBranchForComponent(panel.coolingCoil()))
+        self.assertTrue(panel.addToThermalZone(zone))
+        self.assertTrue(baseboard.addToThermalZone(zone))
+
+        facts = classify.characterize(model)
+        group = facts['zone_groups'][0]
+        plant = next(
+            plant for plant in facts['plants']
+            if plant['name'] == 'Chilled Water')
+        self.assertIsNone(
+            plant['hp_source'],
+            'the type alone cannot distinguish an internal water loop from '
+            'an external water source')
+        self.assertTrue(group['heat_pump'])
+        self.assertEqual(
+            [], group['heat_pump_sources'],
+            'D-37 represents a missing source fact as missing evidence, not '
+            'as a water-loop classification')
+
+        assignments = _select(facts)
+        self.assertEqual(1, len(assignments))
+        self.assertEqual(
+            'hp', assignments[0].reference_system,
+            'D-37 conservatively redirects a detected heat pump whose source '
+            'cannot be classified')
+
+
+@needs_sdk
 class TestHydronicPumpInventoriesUseTheNewCoils(unittest.TestCase):
     def test_four_pipe_beam_coils_each_contribute_the_served_zone(self):
         import openstudio
@@ -304,6 +353,62 @@ class TestAbsorptionRecognitionWithholdsAnUnsupportedTarget(unittest.TestCase):
             'an orphan absorption object does not serve a thermal block and '
             'cannot invalidate its reference target')
 
+    def test_each_new_hydronic_child_coil_keeps_the_refusal_reachable(self):
+        import openstudio
+
+        from btap.codes.necb.hvac import reference
+        from btap.modeling.hvac import classify
+        from tests.modeling.test_sdk_type_inventories import (
+            _absorption_plant,
+            _terminal,
+            _zonal_equipment,
+        )
+
+        cases = (
+            ('to_CoilCoolingFourPipeBeam',
+             'AirTerminalSingleDuctConstantVolumeFourPipeBeam'),
+            ('to_CoilCoolingLowTempRadiantConstFlow',
+             'ZoneHVACLowTempRadiantConstFlow'),
+            ('to_CoilCoolingLowTempRadiantVarFlow',
+             'ZoneHVACLowTempRadiantVarFlow'),
+            ('to_CoilCoolingWaterPanelRadiant',
+             'ZoneHVACCoolingPanelRadiantConvectiveWater'),
+        )
+        for caster, class_name in cases:
+            with self.subTest(class_name=class_name):
+                model = openstudio.model.Model()
+                zone = openstudio.model.ThermalZone(model)
+                zone.setName('Zone')
+                if class_name.startswith('AirTerminal'):
+                    unit = _terminal(model, class_name)
+                    air_loop = openstudio.model.AirLoopHVAC(model)
+                    self.assertTrue(
+                        air_loop.addBranchForZone(zone, unit))
+                else:
+                    unit = _zonal_equipment(model, class_name)
+                    self.assertTrue(unit.addToThermalZone(zone))
+
+                coil = classify._zonal_child_coil(unit, 'cool')
+                self.assertIsNotNone(
+                    classify._try_cast(coil, caster),
+                    'precondition: this parent carries the exact hydronic '
+                    'child type under test')
+                chilled = _absorption_plant(model)
+                self.assertTrue(
+                    chilled.addDemandBranchForComponent(coil))
+
+                facts = classify.characterize(model)
+                group = facts['zone_groups'][0]
+                self.assertEqual(
+                    ['Chilled Water'], group['cooling_plants'],
+                    'the child cast is the only route to the serving plant')
+                limitations = reference._reference_target_limitations(facts)
+                self.assertEqual(
+                    ['absorption_chiller_reference_not_supported'],
+                    [cause['reason'] for cause in limitations],
+                    'dropping this cast must not bypass the absorption '
+                    'no-determination gate')
+
     def test_the_performance_path_carries_the_limitation_to_the_verdict(self):
         from btap.codes import compliance
         from tests.necb.hvac_helpers import load_fixture
@@ -358,8 +463,10 @@ class TestAbsorptionRecognitionWithholdsAnUnsupportedTarget(unittest.TestCase):
                     'ruling', block,
                     'this is an acknowledged implementation gap, not an '
                     'adjudicated reinterpretation of the Code')
+                self.assertEqual('AHJ-24', block['ahj'])
                 self.assertIn('absorption', block['reason'])
                 self.assertEqual(article, run.audit.entries[-1]['article'])
+                self.assertEqual('AHJ-24', run.audit.entries[-1]['ahj'])
 
 
 if __name__ == '__main__':

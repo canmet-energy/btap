@@ -39,6 +39,33 @@ def _cooling_const_flow_coil(model):
         model, schedule, schedule, schedule, schedule)
 
 
+def _cooling_coil(model, class_name):
+    import openstudio
+
+    if class_name == 'CoilCoolingLowTempRadiantConstFlow':
+        return _cooling_const_flow_coil(model)
+    if class_name == 'CoilCoolingLowTempRadiantVarFlow':
+        return openstudio.model.CoilCoolingLowTempRadiantVarFlow(
+            model, _schedule(model))
+    return getattr(openstudio.model, class_name)(model)
+
+
+def _absorption_plant(model, name='Chilled Water'):
+    import openstudio
+
+    chilled = _plant(model, name, 'Cooling')
+    condenser = _plant(model, 'Condenser', 'Condenser')
+    generator = _plant(model, 'Generator', 'Heating')
+    boiler = openstudio.model.BoilerHotWater(model)
+    assert boiler.setFuelType('NaturalGas')
+    assert generator.addSupplyBranchForComponent(boiler)
+    chiller = openstudio.model.ChillerAbsorptionIndirect(model)
+    assert chilled.addSupplyBranchForComponent(chiller)
+    assert condenser.addDemandBranchForComponent(chiller)
+    assert chiller.addToTertiaryNode(generator.demandInletNode())
+    return chilled
+
+
 def _zonal_equipment(model, class_name):
     import openstudio
 
@@ -107,13 +134,13 @@ class TestEveryAddedHeatingCoilIsLoadBearing(unittest.TestCase):
         ('to_CoilHeatingElectricMultiStage', 'CoilHeatingElectricMultiStage',
          'Electricity', False, True),
         ('to_CoilHeatingFourPipeBeam', 'CoilHeatingFourPipeBeam',
-         'Unknown', False, True),
+         'Electricity', True, True),
         ('to_CoilHeatingLowTempRadiantConstFlow',
-         'CoilHeatingLowTempRadiantConstFlow', 'Unknown', False, True),
+         'CoilHeatingLowTempRadiantConstFlow', 'Electricity', True, True),
         ('to_CoilHeatingLowTempRadiantVarFlow',
-         'CoilHeatingLowTempRadiantVarFlow', 'Unknown', False, True),
+         'CoilHeatingLowTempRadiantVarFlow', 'Electricity', True, True),
         ('to_CoilHeatingWaterBaseboardRadiant',
-         'CoilHeatingWaterBaseboardRadiant', 'Unknown', False, True),
+         'CoilHeatingWaterBaseboardRadiant', 'Electricity', True, True),
         ('to_CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit',
          'CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit',
          'Electricity', True, False),
@@ -124,7 +151,7 @@ class TestEveryAddedHeatingCoilIsLoadBearing(unittest.TestCase):
 
         from btap.modeling.hvac import classify
 
-        for caster, class_name, fuel, heat_pump, auxiliary in self.CASES:
+        for caster, class_name, fuel, expected_heat_pump, auxiliary in self.CASES:
             with self.subTest(class_name=class_name):
                 model = openstudio.model.Model()
                 coil = _heating_coil(model, class_name)
@@ -134,19 +161,85 @@ class TestEveryAddedHeatingCoilIsLoadBearing(unittest.TestCase):
                 self.assertIn(
                     caster, [entry[0] for entry in classify.HEATING_COILS])
 
+                plant_by_name = {}
+                if caster in classify.HYDRONIC_HEATING_COIL_CASTS:
+                    load = _plant(model, 'Air Source Hot Water', 'Heating')
+                    plant_heat_pump = (
+                        openstudio.model.HeatPumpAirToWaterHeating(model))
+                    self.assertTrue(
+                        load.addSupplyBranchForComponent(plant_heat_pump))
+                    self.assertTrue(
+                        load.addDemandBranchForComponent(coil))
+                    plant_by_name = {
+                        plant['name']: plant
+                        for plant in classify.characterize(model)['plants']
+                    }
+
                 group = classify._base_group(['Zone'], None)
                 self.assertTrue(classify._scan_heating_component(
-                    group, coil, {}, class_name))
+                    group, coil, plant_by_name, class_name))
                 self.assertTrue(group['heated'])
                 self.assertIn(fuel, group['heating_energy_types'])
-                self.assertEqual(heat_pump, group['heat_pump'])
+                self.assertEqual(expected_heat_pump, group['heat_pump'])
+                if caster in classify.HYDRONIC_HEATING_COIL_CASTS:
+                    self.assertEqual(['air'], group['heat_pump_sources'])
 
-                if heat_pump:
-                    self.assertIn(caster, classify.DX_HEATING_CASTS)
+                if expected_heat_pump:
+                    self.assertTrue(
+                        caster in classify.DX_HEATING_CASTS
+                        or caster in classify.HYDRONIC_HEATING_COIL_CASTS)
                 if auxiliary:
                     self.assertIn(caster, classify.AUX_COIL_FUELS)
-                    self.assertIsNotNone(
-                        classify._aux_coil_entry(coil, {}))
+                    entry = classify._aux_coil_entry(
+                        coil, plant_by_name)
+                    self.assertIsNotNone(entry)
+                    self.assertEqual(fuel, entry['fuel'])
+
+
+@needs_sdk
+class TestEveryAddedHydronicCoolingCoilIsLoadBearing(unittest.TestCase):
+    CASES = (
+        ('to_CoilCoolingFourPipeBeam', 'CoilCoolingFourPipeBeam'),
+        ('to_CoilCoolingLowTempRadiantConstFlow',
+         'CoilCoolingLowTempRadiantConstFlow'),
+        ('to_CoilCoolingLowTempRadiantVarFlow',
+         'CoilCoolingLowTempRadiantVarFlow'),
+        ('to_CoilCoolingWaterPanelRadiant',
+         'CoilCoolingWaterPanelRadiant'),
+    )
+
+    def test_each_coil_carries_its_absorption_plant_to_the_group(self):
+        import openstudio
+
+        from btap.modeling.hvac import classify
+
+        for caster, class_name in self.CASES:
+            with self.subTest(class_name=class_name):
+                model = openstudio.model.Model()
+                coil = _cooling_coil(model, class_name)
+                self.assertIsNotNone(
+                    classify._try_cast(coil, caster),
+                    'precondition: the fixture is the SDK type under test')
+                self.assertIn(caster, classify.HYDRONIC_COOLING_COILS)
+
+                chilled = _absorption_plant(model)
+                self.assertTrue(
+                    chilled.addDemandBranchForComponent(coil))
+                plant_by_name = {
+                    plant['name']: plant
+                    for plant in classify.characterize(model)['plants']
+                }
+
+                group = classify._base_group(['Zone'], None)
+                self.assertTrue(classify._scan_cooling_component(
+                    group, coil, plant_by_name, class_name))
+                self.assertTrue(group['cooled'])
+                self.assertEqual(
+                    ['NaturalGas'], group['cooling_energy_types'])
+                self.assertEqual(
+                    ['Chilled Water'], group['cooling_plants'],
+                    'the hydronic cast is the only route from this child '
+                    'coil to its serving absorption plant')
 
 
 @needs_sdk
@@ -325,7 +418,7 @@ class TestEveryAddedPlantHeatPumpIsLoadBearing(unittest.TestCase):
                 self.assertTrue(facts['heat_pump'])
                 self.assertEqual('air', facts['hp_source'])
 
-    def test_water_to_water_cooling_is_not_mislabeled_hot_water(self):
+    def test_unconnected_water_to_water_cooling_has_no_source_evidence(self):
         import openstudio
 
         from btap.modeling.hvac import classify
@@ -341,7 +434,10 @@ class TestEveryAddedPlantHeatPumpIsLoadBearing(unittest.TestCase):
         facts = classify.characterize(model)['plants'][0]
         self.assertEqual('chilled_water', facts['type'])
         self.assertEqual(['cooling'], facts['heat_pump_modes'])
-        self.assertEqual('water_loop', facts['hp_source'])
+        self.assertIsNone(
+            facts['hp_source'],
+            'the type alone cannot establish water-loop versus external '
+            'water-source service; D-37 keeps this source unclassified')
 
     def test_central_heat_pump_marks_both_load_sides(self):
         import openstudio
