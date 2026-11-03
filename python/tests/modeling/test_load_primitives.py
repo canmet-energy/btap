@@ -422,6 +422,215 @@ class TestAllFiveInfiltrationMethods(unittest.TestCase):
 
 
 @needs_sdk
+class TestTheSplitOnWrite(unittest.TestCase):
+    """#186: setting a value on a SHARED definition changed every instance
+    using it, and the caller named one space type explicitly.
+
+    Already in the corpus: 4 of the 28 campus archetypes share a definition,
+    and all three `Hangar` vintages share a `LightsDefinition`, an
+    `ElectricEquipmentDefinition` AND a `PeopleDefinition` between
+    `Shop-Machinery` and `Shop-Machinery-Hangar`.
+    """
+
+    @staticmethod
+    def _shared(model=None, watts=10.0, count=2):
+        import openstudio
+
+        model = model or openstudio.model.Model()
+        definition = openstudio.model.LightsDefinition(model)
+        definition.setName('Shared Lighting Definition')
+        definition.setWattsperSpaceFloorArea(watts)
+        types = []
+        for n in range(count):
+            space_type = openstudio.model.SpaceType(model)
+            space_type.setName(f'Type {n}')
+            lights = openstudio.model.Lights(definition)
+            lights.setName(f'Lights {n}')
+            lights.setSpaceType(space_type)
+            types.append(space_type)
+        return model, definition, types
+
+    def test_setting_one_space_type_no_longer_changes_the_other(self):
+        model, original, types = self._shared()
+        Loads.set_lighting(types[0], watts_per_area_si=25.0, audit=AuditLog())
+
+        self.assertAlmostEqual(
+            25.0,
+            opt(next(iter(types[0].lights())).lightsDefinition()
+                .wattsperSpaceFloorArea()),
+            msg='the space type that was asked for')
+        self.assertAlmostEqual(
+            10.0,
+            opt(next(iter(types[1].lights())).lightsDefinition()
+                .wattsperSpaceFloorArea()),
+            msg='the space type that was NOT asked for must be untouched — '
+                'before the fix it read 25.0')
+        self.assertEqual(2, len(model.getLightsDefinitions()))
+        self.assertAlmostEqual(10.0, opt(original.wattsperSpaceFloorArea()))
+
+    def test_the_split_is_AUDITED(self):
+        _model, _original, types = self._shared()
+        audit = AuditLog()
+        Loads.set_lighting(types[0], watts_per_area_si=25.0, audit=audit)
+        splits = [e for e in audit.entries
+                  if 'SPLIT' in str(e.get('value') or e.get('action') or '')]
+        self.assertEqual(
+            1, len(splits),
+            'a changed object graph must be in the trail; got '
+            f'{[e.get("action") for e in audit.entries]}')
+        self.assertEqual(2, splits[0]['inputs']['sharers_before'])
+
+    def test_the_SAME_value_on_many_sharers_REUSES_one_clone(self):
+        """phylroy's objection to cloning: duplication. Fifty space types
+        sharing one definition and all set to the same value must not produce
+        fifty-one definitions."""
+        model, _original, types = self._shared(count=6)
+        audit = AuditLog()
+        for space_type in types:
+            Loads.set_lighting(space_type, watts_per_area_si=25.0, audit=audit)
+        self.assertEqual(
+            2, len(model.getLightsDefinitions()),
+            'the original plus ONE clone that the rest reuse by name')
+        for space_type in types:
+            self.assertAlmostEqual(
+                25.0,
+                opt(next(iter(space_type.lights())).lightsDefinition()
+                    .wattsperSpaceFloorArea()))
+        reuses = [e for e in audit.entries
+                  if 'REUSED' in str(e.get('value') or e.get('action') or '')]
+        self.assertEqual(
+            4, len(reuses),
+            'one split, four reuses, and then the LAST instance is by that '
+            'point the only one left on the original — so it is unshared and '
+            'mutates the original directly rather than reusing. Both '
+            'definitions end at 25.0, which is a harmless redundancy and the '
+            'price of never renaming an unshared definition.')
+
+    def test_DISTINCT_values_get_distinct_definitions(self):
+        model, original, types = self._shared(count=3)
+        for n, space_type in enumerate(types):
+            Loads.set_lighting(space_type, watts_per_area_si=10.0 + n)
+        # Two clones, and the third write lands on the original because by
+        # then it is the only instance left on it.
+        self.assertEqual(3, len(model.getLightsDefinitions()))
+        self.assertAlmostEqual(12.0, opt(original.wattsperSpaceFloorArea()),
+                               msg='the last writer owned the original')
+        for n, space_type in enumerate(types):
+            self.assertAlmostEqual(
+                10.0 + n,
+                opt(next(iter(space_type.lights())).lightsDefinition()
+                    .wattsperSpaceFloorArea()),
+                msg='every space type keeps its OWN value, which is the whole '
+                    'point')
+
+    def test_an_UNSHARED_definition_is_not_renamed(self):
+        """The NECB appliers call these setters, their definitions are already
+        unique and carefully named, and renaming them would move every frozen
+        baseline for no behavioural reason."""
+        _model, space_type = _space_type()
+        lights = Loads.set_lighting(space_type, watts_per_area_si=8.0)
+        name = lights.lightsDefinition().nameString()
+        Loads.set_lighting(space_type, watts_per_area_si=12.0)
+        self.assertEqual(
+            name, lights.lightsDefinition().nameString(),
+            'an unshared definition keeps its name across a re-set')
+        self.assertNotIn(':W-', name,
+                         'the value-encoding name is for CLONES only')
+
+    def test_equipment_and_people_split_too(self):
+        import openstudio
+
+        model = openstudio.model.Model()
+        for kind, definition_cls, instance_cls, setter, kwargs in (
+                ('equip', openstudio.model.ElectricEquipmentDefinition,
+                 openstudio.model.ElectricEquipment,
+                 Loads.set_electric_equipment, {'watts_per_area_si': 20.0}),
+                ('people', openstudio.model.PeopleDefinition,
+                 openstudio.model.People, Loads.set_people,
+                 {'people_per_area_si': 0.1})):
+            with self.subTest(kind):
+                definition = definition_cls(model)
+                definition.setName(f'Shared {kind}')
+                types = []
+                for n in range(2):
+                    space_type = openstudio.model.SpaceType(model)
+                    space_type.setName(f'{kind} Type {n}')
+                    inst = instance_cls(definition)
+                    inst.setSpaceType(space_type)
+                    types.append(space_type)
+                self.assertEqual(2, len(definition.instances()))
+                setter(types[0], **kwargs)
+                self.assertEqual(
+                    1, len(definition.instances()),
+                    'the written-to instance must have left the shared '
+                    'definition')
+
+
+@needs_sdk
+class TestPeopleAndInternalMass(unittest.TestCase):
+    """Lifted for #186 (People was already implicated by the Hangar) and at
+    phylroy's request (InternalMass)."""
+
+    def test_people_by_each_method(self):
+        for kwarg, value, method, reader in (
+                ('people_per_area_si', 0.1, 'People/Area',
+                 'peopleperSpaceFloorArea'),
+                ('number_of_people', 12.0, 'People', 'numberofPeople'),
+                ('area_per_person_si', 9.3, 'Area/Person',
+                 'spaceFloorAreaperPerson')):
+            with self.subTest(kwarg):
+                _model, space_type = _space_type()
+                people = Loads.set_people(space_type, fraction_radiant=0.3,
+                                          **{kwarg: value})
+                definition = people.peopleDefinition()
+                self.assertEqual(
+                    method, definition.numberofPeopleCalculationMethod())
+                self.assertAlmostEqual(value,
+                                       opt(getattr(definition, reader)()))
+                self.assertAlmostEqual(0.3, definition.fractionRadiant())
+
+    def test_people_refuses_two_methods(self):
+        _model, space_type = _space_type()
+        with self.assertRaises(ValueError) as caught:
+            Loads.set_people(space_type, people_per_area_si=0.1,
+                             number_of_people=12.0)
+        self.assertIn('ONE numberofPeopleCalculationMethod',
+                      str(caught.exception))
+
+    def test_internal_mass_by_each_method(self):
+        for kwarg, value, reader in (
+                ('surface_area_si', 40.0, 'surfaceArea'),
+                ('per_floor_area_si', 2.5, 'surfaceAreaperSpaceFloorArea'),
+                ('per_person_si', 3.5, 'surfaceAreaperPerson')):
+            with self.subTest(kwarg):
+                _model, space_type = _space_type()
+                mass = Loads.set_internal_mass(space_type, **{kwarg: value})
+                self.assertAlmostEqual(
+                    value, opt(getattr(mass.internalMassDefinition(),
+                                       reader)()))
+
+    def test_internal_mass_takes_a_construction_OBJECT(self):
+        """Building or choosing a construction belongs to
+        `btap.modeling.envelope`, which already does it."""
+        import openstudio
+
+        model, space_type = _space_type()
+        construction = openstudio.model.Construction(model)
+        construction.setName('Mass Construction')
+        mass = Loads.set_internal_mass(space_type, per_floor_area_si=2.0,
+                                       construction=construction)
+        self.assertEqual(
+            construction.handle(),
+            opt(mass.internalMassDefinition().construction()).handle())
+
+    def test_internal_mass_refuses_two_methods(self):
+        _model, space_type = _space_type()
+        with self.assertRaises(ValueError):
+            Loads.set_internal_mass(space_type, surface_area_si=40.0,
+                                    per_floor_area_si=2.5)
+
+
+@needs_sdk
 class TestSingleInstance(unittest.TestCase):
 
     def test_a_duplicate_is_REMOVED_and_audited(self):

@@ -23,6 +23,8 @@ carries none of that convention.
 
 from __future__ import annotations
 
+from btap._compat import opt
+
 # NO module-level `import openstudio`. `btap.modeling` has none — three
 # inside-function imports instead — because the package must import on a bare
 # runner: the zero-install lane (`python3 -m unittest`) has no SDK, and
@@ -49,6 +51,98 @@ def single_instance(instances, create, audit=None, step='loads'):
                        f"removed duplicate load instance {extra.nameString()}")
         extra.remove()
     return instances[0]
+
+
+def unshared_definition(instance, *, value_suffix, find_named=None,
+                        audit=None, step='loads'):
+    """The instance's definition, SPLIT first if any other instance shares it.
+
+    Setting a value on a shared definition changes every instance using it,
+    and a caller naming one space type did not ask for that. Measured:
+    `set_lighting(type_0, watts_per_area_si=25.0)` on a definition shared with
+    `type_1` left `type_1` reading 25.0 too.
+
+    It is structural to all ELEVEN `SpaceLoadDefinition` subclasses and it is
+    already in the corpus — 4 of the 28 hand-built campus archetypes share
+    one, and all three `Hangar` vintages share a `LightsDefinition`, an
+    `ElectricEquipmentDefinition` AND a `PeopleDefinition` between the
+    `Shop-Machinery` and `Shop-Machinery-Hangar` space types (#186).
+
+    **The split is the SDK's own operation.** `SpaceLoadInstance::makeUnique()`
+    is documented as "ensures that no other instances share this instances
+    definition", and measured: shared by three, `L0.makeUnique()` gives L0 a
+    clone carrying the value while L1 and L2 keep the original, and it is a
+    NO-OP when the instance is already unique. Hand-rolling a clone-and-
+    reassign was the first draft of this and was both longer and less correct.
+
+    **Reuse by name before splitting**, which answers the objection that
+    cloning multiplies objects: fifty space types sharing one definition and
+    all set to the SAME value produce two definitions, not fifty-one, because
+    the second onward find the first clone by name. Fifty DISTINCT values
+    produce fifty, which is what the model should say. `opaque_at_conductance`
+    has worked this way for constructions since long before, and its comment
+    makes the point that the naming is the dedupe key rather than decoration.
+
+    **An UNSHARED definition is never renamed.** The NECB appliers call these
+    setters, their definitions are already unique and carefully named, and
+    renaming them would move every frozen baseline for no behavioural reason.
+    Only a clone takes `name`.
+
+    The caveat inherited from the construction case: a CONTINUOUSLY VARYING
+    target defeats name-based reuse, since every value is distinct. That is why
+    `opaque_at_conductance` carries a `name_discriminator`. Discrete table
+    values — vintage LPDs and NECB densities alike — dedupe well.
+
+    The key is built from the DEFINITION's name, not the caller's space type.
+    An earlier version used the space type, so every sharer generated a
+    different name, nothing ever matched, and six sharers set to one value
+    produced six clones — the duplication this is supposed to prevent. The
+    construction case keys on the construction for the same reason: the name
+    has to be the same for every instance that shares the object.
+
+    :param value_suffix: appended after a colon to form the clone's name, e.g.
+        ``'W-25.0'``. Any existing ``:suffix`` on the definition's name is
+        replaced rather than accumulated, as `opaque_at_conductance` does.
+    :param find_named: ``lambda name: definition_or_None`` for this load type,
+        normally `opt(model.get<Type>DefinitionByName(name))`. Without it, no
+        reuse is attempted and every split clones.
+    :returns: a definition safe to mutate for this instance alone.
+    """
+    import re
+
+    definition = instance.definition()
+    sharers = definition.instances()
+    if len(sharers) <= 1:
+        return definition
+
+    base = re.sub(r':[^:]*\Z', '', definition.nameString())
+    name = f"{base}:{value_suffix}"
+
+    if find_named is not None:
+        existing = find_named(name)
+        if (existing is not None
+                and str(existing.handle()) != str(definition.handle())):
+            instance.setDefinition(existing)
+            if audit is not None:
+                audit.info(step,
+                           'load definition REUSED by name instead of cloned',
+                           target=instance.nameString(),
+                           inputs={'was': definition.nameString(),
+                                   'now': name,
+                                   'sharers_before': len(sharers)})
+            return instance.definition()
+
+    instance.makeUnique()
+    split = instance.definition()
+    split.setName(name)
+    if audit is not None:
+        audit.info(step,
+                   'load definition SPLIT — it was shared, and setting it '
+                   'would have changed every instance using it',
+                   target=instance.nameString(),
+                   inputs={'was': definition.nameString(), 'now': name,
+                           'sharers_before': len(sharers)})
+    return split
 
 
 def set_infiltration(space_type, *, design_flow_rate_si=None,
@@ -176,7 +270,12 @@ def set_electric_equipment(space_type, *, watts_per_area_si, latent=None,
 
     instance = single_instance(space_type.electricEquipment(), create,
                                audit=audit, step=step)
-    definition = instance.electricEquipmentDefinition()
+    definition = opt(unshared_definition(
+        instance,
+        value_suffix=f"W-{round(watts_per_area_si, 4)}",
+        find_named=lambda n: opt(
+            space_type.model().getElectricEquipmentDefinitionByName(n)),
+        audit=audit, step=step).to_ElectricEquipmentDefinition())
     definition.setWattsperSpaceFloorArea(watts_per_area_si)
     set_load_fractions(definition, latent=latent, radiant=radiant, lost=lost)
     return instance
@@ -207,7 +306,12 @@ def set_gas_equipment(space_type, *, watts_per_area_si, latent=None,
 
     instance = single_instance(space_type.gasEquipment(), create, audit=audit,
                                step=step)
-    definition = instance.gasEquipmentDefinition()
+    definition = opt(unshared_definition(
+        instance,
+        value_suffix=f"W-{round(watts_per_area_si, 4)}",
+        find_named=lambda n: opt(
+            space_type.model().getGasEquipmentDefinitionByName(n)),
+        audit=audit, step=step).to_GasEquipmentDefinition())
     definition.setWattsperSpaceFloorArea(watts_per_area_si)
     set_load_fractions(definition, latent=latent, radiant=radiant, lost=lost)
     return instance
@@ -259,7 +363,12 @@ def set_lighting(space_type, *, watts_per_area_si=None,
 
     instance = single_instance(space_type.lights(), create, audit=audit,
                                step=step)
-    definition = instance.lightsDefinition()
+    density = watts_per_area_si or watts_per_person or 0.0
+    definition = opt(unshared_definition(
+        instance, value_suffix=f"W-{round(density, 4)}",
+        find_named=lambda n: opt(
+            space_type.model().getLightsDefinitionByName(n)),
+        audit=audit, step=step).to_LightsDefinition())
     # `Watts/Area` and `Watts/Person` are mutually exclusive too, by the same
     # measurement: `setWattsperPerson` switches
     # `designLevelCalculationMethod` and clears the area value.
@@ -418,4 +527,135 @@ def scale_electric_equipment_in_model(model, *, factor, audit=None,
         model.getElectricEquipments(),
         lambda equip: equip.electricEquipmentDefinition(),
         audit, step, factor, 'electric equipment')
+
+
+def set_people(space_type, *, people_per_area_si=None, number_of_people=None,
+               area_per_person_si=None, fraction_radiant=None, audit=None,
+               step='loads'):
+    """Occupant density on ``space_type``, by one of three methods.
+
+    Lifted for #186: the `Hangar` archetypes share a `PeopleDefinition`
+    between `Shop-Machinery` and `Shop-Machinery-Hangar`, so People was
+    already implicated in the shared-definition defect before it had a
+    primitive of its own.
+
+    The three methods are MUTUALLY EXCLUSIVE, like infiltration's five and
+    lighting's two: `PeopleDefinition` carries one
+    `numberofPeopleCalculationMethod`, and each setter switches it. Passing
+    more than one is refused rather than letting the last silently win.
+
+    :param people_per_area_si: people per m^2 (`People/Area`). NECB's table is
+        people per 1000 ft^2 and that conversion stays on the NECB side.
+    :param number_of_people: an absolute count (`People`)
+    :param area_per_person_si: m^2 per person (`Area/Person`)
+    :param fraction_radiant: applied when given; NECB uses 0.3
+    :returns: the ``People`` applied to, or None when given no density.
+    """
+    import openstudio
+
+    given = {'people_per_area_si': people_per_area_si,
+             'number_of_people': number_of_people,
+             'area_per_person_si': area_per_person_si}
+    given = {k: v for k, v in given.items() if v}
+    if not given:
+        return None
+    if len(given) > 1:
+        raise ValueError(
+            'PeopleDefinition carries ONE numberofPeopleCalculationMethod: '
+            f"got {sorted(given)}. Each setter clears the others, so only the "
+            'last would survive. Pass exactly one.')
+
+    base = f"{space_type.nameString()} People"
+
+    def create():
+        definition = openstudio.model.PeopleDefinition(space_type.model())
+        definition.setName(f"{base} Definition")
+        people = openstudio.model.People(definition)
+        people.setName(base)
+        people.setSpaceType(space_type)
+        return people
+
+    instance = single_instance(space_type.people(), create, audit=audit,
+                               step=step)
+    density = next(iter(given.values()))
+    definition = opt(unshared_definition(
+        instance, value_suffix=f"N-{round(density, 6)}",
+        find_named=lambda n: opt(
+            space_type.model().getPeopleDefinitionByName(n)),
+        audit=audit, step=step).to_PeopleDefinition())
+    if people_per_area_si:
+        definition.setPeopleperSpaceFloorArea(people_per_area_si)
+    elif number_of_people:
+        definition.setNumberofPeople(number_of_people)
+    elif area_per_person_si:
+        definition.setSpaceFloorAreaperPerson(area_per_person_si)
+    if fraction_radiant:
+        definition.setFractionRadiant(fraction_radiant)
+    return instance
+
+
+def set_internal_mass(space_type, *, surface_area_si=None,
+                      per_floor_area_si=None, per_person_si=None,
+                      construction=None, audit=None, step='loads'):
+    """Internal thermal mass on ``space_type``, by one of three methods.
+
+    phylroy asked for this alongside People (2026-11-03). It matters more for
+    stock work than for compliance: thermal mass is a large part of why a
+    1940s masonry building behaves unlike a 2005 one, and NECB does not
+    prescribe it, so nothing in `btap.codes` sets it.
+
+    `InternalMassDefinition`'s three methods are mutually exclusive in the same
+    way and refused in the same way.
+
+    :param surface_area_si: m^2, absolute
+    :param per_floor_area_si: m^2 of mass per m^2 of floor — the usual stock
+        form, since it scales with the building
+    :param per_person_si: m^2 of mass per person
+    :param construction: the mass's `ConstructionBase`, or None to leave it.
+        A construction OBJECT, not a name: building or choosing one belongs to
+        `btap.modeling.envelope`, which already does it.
+    :returns: the ``InternalMass`` applied to, or None when given no area.
+    """
+    import openstudio
+
+    given = {'surface_area_si': surface_area_si,
+             'per_floor_area_si': per_floor_area_si,
+             'per_person_si': per_person_si}
+    given = {k: v for k, v in given.items() if v}
+    if not given:
+        return None
+    if len(given) > 1:
+        raise ValueError(
+            'InternalMassDefinition carries ONE surface-area calculation '
+            f"method: got {sorted(given)}. Each setter clears the others, so "
+            'only the last would survive. Pass exactly one.')
+
+    base = f"{space_type.nameString()} Internal Mass"
+
+    def create():
+        definition = openstudio.model.InternalMassDefinition(
+            space_type.model())
+        definition.setName(f"{base} Definition")
+        mass = openstudio.model.InternalMass(definition)
+        mass.setName(base)
+        mass.setSpaceType(space_type)
+        return mass
+
+    instance = single_instance(space_type.internalMass(), create, audit=audit,
+                               step=step)
+    area = next(iter(given.values()))
+    definition = opt(unshared_definition(
+        instance, value_suffix=f"A-{round(area, 6)}",
+        find_named=lambda n: opt(
+            space_type.model().getInternalMassDefinitionByName(n)),
+        audit=audit, step=step).to_InternalMassDefinition())
+    if surface_area_si:
+        definition.setSurfaceArea(surface_area_si)
+    elif per_floor_area_si:
+        definition.setSurfaceAreaperSpaceFloorArea(per_floor_area_si)
+    elif per_person_si:
+        definition.setSurfaceAreaperPerson(per_person_si)
+    if construction is not None:
+        definition.setConstruction(construction)
+    return instance
 
