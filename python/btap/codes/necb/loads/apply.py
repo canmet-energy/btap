@@ -15,6 +15,7 @@ from btap.audit import AuditLog, emit_coverage
 from btap.codes import resolve
 from btap.codes.necb.loads import schedules as Schedules
 from btap.codes.necb.loads import space_types as SpaceTypes
+from btap.modeling import loads as Loads
 
 
 def _f(value):
@@ -185,19 +186,14 @@ def apply_equipment(space_type, record, audit):
     fractions."""
     electric = _f(record['electric_equipment_per_area'])
     if electric != 0:
-        def create_electric():
-            definition = openstudio.model.ElectricEquipmentDefinition(space_type.model())
-            definition.setName(f"{space_type.nameString()} Elec Equip Definition")
-            equip = openstudio.model.ElectricEquipment(definition)
-            equip.setName(f"{space_type.nameString()} Elec Equip")
-            equip.setSpaceType(space_type)
-            return equip
-
-        instance = _single_instance(space_type.electricEquipment(), audit, create_electric)
-        definition = instance.electricEquipmentDefinition()
-        definition.setWattsperSpaceFloorArea(
-            openstudio.convert(electric, 'W/ft^2', 'W/m^2').get())
-        _set_fractions(definition, record, 'electric_equipment')
+        # Primitive in `btap.modeling.loads` (#183 phase 0); the NECB part is
+        # the column names, the W/ft^2 -> W/m^2 conversion and the citation.
+        Loads.set_electric_equipment(
+            space_type,
+            watts_per_area_si=openstudio.convert(
+                electric, 'W/ft^2', 'W/m^2').get(),
+            **_fraction_kwargs(record, 'electric_equipment'),
+            audit=audit)
         audit.info('loads', 'electric equipment set', target=space_type.nameString(),
                    inputs={'w_per_ft2': electric}, article='8.4.3.2.(2)')
 
@@ -205,19 +201,12 @@ def apply_equipment(space_type, record, audit):
     if gas == 0:
         return
 
-    def create_gas():
-        definition = openstudio.model.GasEquipmentDefinition(space_type.model())
-        definition.setName(f"{space_type.nameString()} Gas Equip Definition")
-        equip = openstudio.model.GasEquipment(definition)
-        equip.setName(f"{space_type.nameString()} Gas Equip")
-        equip.setSpaceType(space_type)
-        return equip
-
-    instance = _single_instance(space_type.gasEquipment(), audit, create_gas)
-    definition = instance.gasEquipmentDefinition()
-    definition.setWattsperSpaceFloorArea(
-        openstudio.convert(gas, 'Btu/hr*ft^2', 'W/m^2').get())
-    _set_fractions(definition, record, 'gas_equipment')
+    Loads.set_gas_equipment(
+        space_type,
+        watts_per_area_si=openstudio.convert(
+            gas, 'Btu/hr*ft^2', 'W/m^2').get(),
+        **_fraction_kwargs(record, 'gas_equipment'),
+        audit=audit)
     audit.info('loads', 'gas equipment set', target=space_type.nameString(),
                inputs={'btu_hr_ft2': gas}, article='8.4.3.2.(2)')
 
@@ -293,24 +282,30 @@ def _apply_infiltration(space_type, record, audit):
     if per_ext_area == 0 and per_ext_wall == 0 and ach == 0:
         return
 
-    def create():
-        infiltration = openstudio.model.SpaceInfiltrationDesignFlowRate(space_type.model())
-        infiltration.setName(f"{space_type.nameString()} Infiltration")
-        infiltration.setSpaceType(space_type)
-        return infiltration
-
-    instance = _single_instance(space_type.spaceInfiltrationDesignFlowRates(), audit, create)
-    if per_ext_area != 0:
-        instance.setFlowperExteriorSurfaceArea(
-            openstudio.convert(per_ext_area, 'ft^3/min*ft^2', 'm^3/s*m^2').get())
-    if per_ext_wall != 0:
-        instance.setFlowperExteriorWallArea(
-            openstudio.convert(per_ext_wall, 'ft^3/min*ft^2', 'm^3/s*m^2').get())
-    if ach != 0:
-        instance.setAirChangesperHour(ach)
+    # The PRIMITIVE moved to `btap.modeling.loads` (#183 phase 0): before the
+    # lift, a model authored through `btap.modeling` alone could not set
+    # infiltration at all, and for stock work on a pre-1960 building that is
+    # the dominant difference from a 2005 one. What stays here is the NECB
+    # part — which record column means what, the IP-to-SI conversion for the
+    # Code's `ft^3/min*ft^2` columns, resolving a NECB schedule NAME, and the
+    # audit sentence.
     schedule_name = record['infiltration_schedule']
-    if schedule_name is not None:  # Ruby truthiness: only nil/false are falsy
-        instance.setSchedule(Schedules.add(space_type.model(), schedule_name, audit=audit))
+    instance = Loads.set_infiltration(
+        space_type,
+        per_exterior_area_si=(
+            openstudio.convert(per_ext_area, 'ft^3/min*ft^2', 'm^3/s*m^2').get()
+            if per_ext_area != 0 else None),
+        per_exterior_wall_area_si=(
+            openstudio.convert(per_ext_wall, 'ft^3/min*ft^2', 'm^3/s*m^2').get()
+            if per_ext_wall != 0 else None),
+        air_changes_per_hour=ach if ach != 0 else None,
+        # Ruby truthiness: only nil/false are falsy
+        schedule=(Schedules.add(space_type.model(), schedule_name, audit=audit)
+                  if schedule_name is not None else None),
+        audit=audit)
+    assert instance is not None, (
+        'the guard above returned early for an all-zero record, so the '
+        'primitive must have applied something')
     audit.info('loads',
                'space-type modelling infiltration set (distinct from envelope 8.4.3.3 air leakage)',
                target=space_type.nameString(),
@@ -425,16 +420,16 @@ def _single_instance(instances, audit, create):
     return instances[0]
 
 
-def _set_fractions(definition, record, key):
-    latent = _f(record[f"{key}_fraction_latent"])
-    radiant = _f(record[f"{key}_fraction_radiant"])
-    lost = _f(record[f"{key}_fraction_lost"])
-    if latent != 0:
-        definition.setFractionLatent(latent)
-    if radiant != 0:
-        definition.setFractionRadiant(radiant)
-    if lost != 0:
-        definition.setFractionLost(lost)
+def _fraction_kwargs(record, key):
+    """The three heat-split fractions as kwargs for `modeling.loads`.
+
+    A zero stays a zero here and the primitive skips it, which preserves the
+    distinction that mattered in `_set_fractions`: a zero in the NECB table
+    means "leave the SDK default", not "set zero".
+    """
+    return {'latent': _f(record[f"{key}_fraction_latent"]),
+            'radiant': _f(record[f"{key}_fraction_radiant"]),
+            'lost': _f(record[f"{key}_fraction_lost"])}
 
 
 COMFORT_SCHEDULES = {
