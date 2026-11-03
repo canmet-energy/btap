@@ -44,6 +44,8 @@ Unresolved systems are emitted as unresolved.
 
 from __future__ import annotations
 
+from btap.modeling.recipe.controls import controls_section
 from btap.modeling.recipe.envelope import envelope_section
+from btap.modeling.recipe.loads import loads_section
 
-__all__ = ['envelope_section']
+__all__ = ['controls_section', 'envelope_section', 'loads_section']
