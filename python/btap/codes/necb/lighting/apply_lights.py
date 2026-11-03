@@ -27,6 +27,7 @@ from btap._compat import ruby_round, sorted_by_name
 from btap.audit import AuditLog, emit_coverage
 from btap.codes import resolve
 from btap.codes.necb import lighting as _lighting
+from btap.modeling import loads as Loads
 
 _WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
 _TOKEN_DAYS = {'Mon': 'Monday', 'Tue': 'Tuesday', 'Wed': 'Wednesday',
@@ -166,9 +167,8 @@ def _apply_to_space_type(model, space_type, ruleset, lights_type, lights_scale, 
                        article='4.2.1.6.')
         return False
 
-    instance = _single_lights_instance(space_type, lights_type)
-    definition = instance.lightsDefinition()
     applied_lpd_w_ft2 = None
+    fractions = record
 
     if lpd != 0.0:
         if lights_type == 'LED':
@@ -180,21 +180,33 @@ def _apply_to_space_type(model, space_type, ruleset, lights_type, lights_scale, 
 
             applied_lpd_w_ft2 = _led_lpd_w_ft2(space_type, standards_type, led, ruleset,
                                                audit) * lights_scale
-            definition.setWattsperSpaceFloorArea(
-                openstudio.convert(applied_lpd_w_ft2, 'W/ft^2', 'W/m^2').get())
-            _set_fraction(definition, 'setReturnAirFraction', led['lighting_fraction_to_return_air'])
-            _set_fraction(definition, 'setFractionRadiant', led['lighting_fraction_radiant'])
-            _set_fraction(definition, 'setFractionVisible', led['lighting_fraction_visible'])
+            fractions = led
         else:
             applied_lpd_w_ft2 = lpd * lights_scale
-            definition.setWattsperSpaceFloorArea(
-                openstudio.convert(applied_lpd_w_ft2, 'W/ft^2', 'W/m^2').get())
-            _set_fraction(definition, 'setReturnAirFraction',
-                          record['lighting_fraction_to_return_air'])
-            _set_fraction(definition, 'setFractionRadiant', record['lighting_fraction_radiant'])
-            _set_fraction(definition, 'setFractionVisible', record['lighting_fraction_visible'])
-    if per_person != 0.0:
-        definition.setWattsperPerson(per_person)
+
+    # Down to the primitive (phase 0 of the stock plan). The NECB part — the
+    # catalogue record, the LED branch, `_led_lpd_w_ft2`, the scale factor and
+    # the ft^2 -> m^2 conversion — stays here; the primitive only writes.
+    #
+    # `instances=` carries the name partition this applier depends on: a space
+    # type's lights are split into the main set and a separate "Additional"
+    # one, and the primitive must not collapse them together.
+    # `definition_name=` carries the LED suffix, which is on the DEFINITION
+    # and not on the instance.
+    # audit=None because this site emits the 'lights set' entry below, and the
+    # primitive's duplicate-removal note would move every frozen baseline.
+    suffix = ' - LED lighting' if lights_type == 'LED' else ''
+    Loads.set_lighting(
+        space_type,
+        watts_per_area_si=(None if applied_lpd_w_ft2 is None else
+                           openstudio.convert(applied_lpd_w_ft2, 'W/ft^2', 'W/m^2').get()),
+        watts_per_person=(per_person if per_person != 0.0 else None),
+        return_air_fraction=_f(fractions['lighting_fraction_to_return_air']) or None,
+        radiant=_f(fractions['lighting_fraction_radiant']) or None,
+        visible=_f(fractions['lighting_fraction_visible']) or None,
+        definition_name=f"{space_type.nameString()} Lights Definition{suffix}",
+        instances=[light for light in sorted_by_name(space_type.lights())
+                   if 'Additional' not in light.nameString()])
 
     _add_additional_lights(space_type, record)
     _wire_lighting_schedule(model, space_type, record, ruleset, audit)
@@ -247,16 +259,18 @@ def _add_additional_lights(space_type, record):
     if any('Additional' in light.nameString() for light in space_type.lights()):
         return
 
-    definition = openstudio.model.LightsDefinition(space_type.model())
-    definition.setName(f"{space_type.nameString()} Additional Lights Definition")
-    definition.setWattsperSpaceFloorArea(
-        openstudio.convert(additional, 'W/ft^2', 'W/m^2').get())
-    _set_fraction(definition, 'setReturnAirFraction', record['lighting_fraction_to_return_air'])
-    _set_fraction(definition, 'setFractionRadiant', record['lighting_fraction_radiant'])
-    _set_fraction(definition, 'setFractionVisible', record['lighting_fraction_visible'])
-    lights = openstudio.model.Lights(definition)
-    lights.setName(f"{space_type.nameString()} Additional Lights")
-    lights.setSpaceType(space_type)
+    # The other half of the name partition: this set is what the main path
+    # excludes, so the primitive is pointed at exactly the "Additional"
+    # instances and cannot disturb the main one.
+    Loads.set_lighting(
+        space_type,
+        watts_per_area_si=openstudio.convert(additional, 'W/ft^2', 'W/m^2').get(),
+        return_air_fraction=_f(record['lighting_fraction_to_return_air']) or None,
+        radiant=_f(record['lighting_fraction_radiant']) or None,
+        visible=_f(record['lighting_fraction_visible']) or None,
+        name=f"{space_type.nameString()} Additional Lights",
+        instances=[light for light in sorted_by_name(space_type.lights())
+                   if 'Additional' in light.nameString()])
 
 
 def _wire_lighting_schedule(model, space_type, record, edition_rules, audit):
@@ -402,23 +416,6 @@ def _add_values(day_schedule, values):
         if values[i] == nxt:
             continue
         day_schedule.addValue(openstudio.Time(0, i + 1, 0, 0), _f(values[i]))
-
-
-def _single_lights_instance(space_type, lights_type):
-    instances = [light for light in sorted_by_name(space_type.lights())
-                 if 'Additional' not in light.nameString()]
-    if not instances:
-        definition = openstudio.model.LightsDefinition(space_type.model())
-        suffix = ' - LED lighting' if lights_type == 'LED' else ''
-        definition.setName(f"{space_type.nameString()} Lights Definition{suffix}")
-        lights = openstudio.model.Lights(definition)
-        lights.setName(f"{space_type.nameString()} Lights")
-        lights.setSpaceType(space_type)
-        return lights
-
-    for extra in instances[1:]:
-        extra.remove()
-    return instances[0]
 
 
 def _set_fraction(definition, setter, value):

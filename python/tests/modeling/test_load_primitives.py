@@ -909,5 +909,132 @@ class TestDeduplicateDefinitions(unittest.TestCase):
         self.assertEqual(3, merges[0]['inputs']['instances_reassigned'])
 
 
+@needs_sdk
+class TestNameOrderedSingleInstance(unittest.TestCase):
+    """`single_instance` orders BY NAME. Both it and the NECB applier it came
+    from used a plain `sorted()`, which is not name order on 3.11, so which
+    duplicate survived depended on something other than the name."""
+
+    def test_the_SURVIVOR_is_the_first_by_NAME(self):
+        import openstudio
+
+        model, space_type = _space_type()
+        for name in ('Zebra Lights', 'Alpha Lights', 'Middle Lights'):
+            definition = openstudio.model.LightsDefinition(model)
+            definition.setName(name + ' Def')
+            definition.setWattsperSpaceFloorArea(5.0)
+            lights = openstudio.model.Lights(definition)
+            lights.setName(name)
+            lights.setSpaceType(space_type)
+        self.assertEqual(3, len(space_type.lights()))
+
+        Loads.set_lighting(space_type, watts_per_area_si=11.0)
+        survivors = [light.nameString() for light in space_type.lights()]
+        self.assertEqual(
+            ['Alpha Lights'], survivors,
+            'the first BY NAME survives; a plain sorted() kept Alpha here too '
+            'but ordered the rest Zebra/Middle, so the survivor was not a '
+            'property of the name')
+
+
+@needs_sdk
+class TestExteriorLights(unittest.TestCase):
+    """A DIFFERENT class family: ExteriorLightsDefinition descends from
+    ExteriorLoadDefinition, not SpaceLoadDefinition, so it has no space type
+    and no `instances()`."""
+
+    def test_it_creates_the_pair_with_daylight_control(self):
+        import openstudio
+
+        model = openstudio.model.Model()
+        lights = Loads.set_exterior_lights(model, 1500.0, name='Yard Lights')
+        self.assertEqual('Yard Lights', lights.nameString())
+        self.assertEqual('AstronomicalClock', lights.controlOption())
+        definition = lights.exteriorLightsDefinition()
+        self.assertEqual('Yard Lights Definition', definition.nameString())
+        self.assertAlmostEqual(1500.0, definition.designLevel())
+
+    def test_the_default_control_is_NOT_the_SDK_default(self):
+        """The SDK's own default is ScheduleNameOnly, so a lift that passed
+        nothing would have turned the daylight control off."""
+        import openstudio
+
+        model = openstudio.model.Model()
+        bare = openstudio.model.ExteriorLights(
+            openstudio.model.ExteriorLightsDefinition(model))
+        self.assertEqual('ScheduleNameOnly', bare.controlOption())
+        self.assertEqual(
+            'AstronomicalClock',
+            Loads.set_exterior_lights(model, 10.0).controlOption())
+
+
+@needs_sdk
+class TestDemandControlledVentilation(unittest.TestCase):
+    """Phase 0's fourth primitive, `ecm_dcv`, which had never been lifted."""
+
+    @staticmethod
+    def _loop_with_oa():
+        import openstudio
+
+        model = openstudio.model.Model()
+        air_loop = openstudio.model.AirLoopHVAC(model)
+        air_loop.setName('Probe Air Loop')
+        controller = openstudio.model.ControllerOutdoorAir(model)
+        oa_system = openstudio.model.AirLoopHVACOutdoorAirSystem(
+            model, controller)
+        oa_system.addToNode(air_loop.supplyInletNode())
+        return model, air_loop
+
+    def test_it_turns_dcv_on_and_sets_the_method(self):
+        from btap.modeling.hvac import ventilation as Ventilation
+
+        _model, air_loop = self._loop_with_oa()
+        mech = Ventilation.set_demand_controlled_ventilation(
+            air_loop, system_outdoor_air_method='ZoneSum')
+        self.assertIsNotNone(mech)
+        self.assertTrue(mech.demandControlledVentilation())
+        self.assertEqual('ZoneSum', mech.systemOutdoorAirMethod())
+
+    def test_the_method_is_LEFT_ALONE_when_not_given(self):
+        from btap.modeling.hvac import ventilation as Ventilation
+
+        _model, air_loop = self._loop_with_oa()
+        before = Ventilation.set_demand_controlled_ventilation(
+            air_loop, system_outdoor_air_method='ZoneSum'
+        ).systemOutdoorAirMethod()
+        after = Ventilation.set_demand_controlled_ventilation(
+            air_loop).systemOutdoorAirMethod()
+        self.assertEqual(before, after,
+                         'choosing an outdoor-air method is a code question, '
+                         'so the primitive must not pick one')
+
+    def test_enabled_False_CLEARS_it(self):
+        from btap.modeling.hvac import ventilation as Ventilation
+
+        _model, air_loop = self._loop_with_oa()
+        Ventilation.set_demand_controlled_ventilation(air_loop)
+        mech = Ventilation.set_demand_controlled_ventilation(
+            air_loop, enabled=False)
+        self.assertFalse(mech.demandControlledVentilation())
+
+    def test_a_loop_with_NO_outdoor_air_system_returns_None(self):
+        """A recirculating loop has nowhere to carry the setting. That is not
+        an error — DCV is meaningless on one — so it must not raise."""
+        import openstudio
+
+        from btap.modeling.hvac import ventilation as Ventilation
+
+        model = openstudio.model.Model()
+        air_loop = openstudio.model.AirLoopHVAC(model)
+        air_loop.setName('No OA Loop')
+        audit = AuditLog()
+        self.assertIsNone(Ventilation.set_demand_controlled_ventilation(
+            air_loop, audit=audit))
+        self.assertTrue(
+            any('not applicable' in str(e.get('value') or e.get('action') or '')
+                for e in audit.entries),
+            'and it says so in the trail')
+
+
 if __name__ == '__main__':
     unittest.main()

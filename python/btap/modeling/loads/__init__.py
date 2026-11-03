@@ -23,7 +23,7 @@ carries none of that convention.
 
 from __future__ import annotations
 
-from btap._compat import opt
+from btap._compat import opt, sorted_by_name
 
 # NO module-level `import openstudio`. `btap.modeling` has none — three
 # inside-function imports instead — because the package must import on a bare
@@ -37,12 +37,27 @@ from btap._compat import opt
 def single_instance(instances, create, audit=None, step='loads'):
     """The first of ``instances``, removing any duplicates, or ``create()``.
 
-    Ruby's block form, lifted verbatim in behaviour from
-    `codes/necb/loads/apply.py::_single_instance`: a space type carrying two
-    infiltration objects is a model defect either way, and silently using one
-    of them would make the applied value depend on object order.
+    Ruby's block form, from `codes/necb/loads/apply.py::_single_instance`: a
+    space type carrying two infiltration objects is a model defect either way,
+    and silently using one of them would make the applied value depend on
+    object order.
+
+    **Ordered BY NAME, which the original was not.** Both this function and
+    the NECB loads applier it came from used a plain `sorted()`, and measured
+    on 3.11 that is not name order:
+
+        sorted_by_name  ['Alpha Lights', 'Middle Lights', 'Zebra Lights']
+        sorted()        ['Alpha Lights', 'Zebra Lights', 'Middle Lights']
+
+    So WHICH duplicate survived depended on something other than the name,
+    while `_compat.sorted_by_name` states the project rule — "every iteration
+    whose order reaches an output must pass through here". The lighting
+    applier already obeyed it (`_single_lights_instance` sorts by name) and
+    the loads applier did not, so the two disagreed. Corrected here rather
+    than preserved, because preserving it would have blocked routing lighting
+    through this function at all.
     """
-    instances = sorted(instances)
+    instances = sorted_by_name(instances)
     if not instances:
         return create()
     for extra in instances[1:]:
@@ -400,7 +415,8 @@ def set_gas_equipment(space_type, *, watts_per_area_si, latent=None,
 
 def set_lighting(space_type, *, watts_per_area_si=None,
                  watts_per_person=None, return_air_fraction=None,
-                 radiant=None, visible=None, name=None, audit=None,
+                 radiant=None, visible=None, name=None,
+                 definition_name=None, instances=None, audit=None,
                  step='loads'):
     """Lighting power and its heat-split fractions on ``space_type``.
 
@@ -449,14 +465,15 @@ def set_lighting(space_type, *, watts_per_area_si=None,
 
     def create():
         definition = openstudio.model.LightsDefinition(space_type.model())
-        definition.setName(f"{base} Definition")
+        definition.setName(definition_name or f"{base} Definition")
         lights = openstudio.model.Lights(definition)
         lights.setName(base)
         lights.setSpaceType(space_type)
         return lights
 
-    instance = single_instance(space_type.lights(), create, audit=audit,
-                               step=step)
+    instance = single_instance(
+        space_type.lights() if instances is None else instances,
+        create, audit=audit, step=step)
     definition = opt(unshared_definition(
         instance, audit=audit, step=step).to_LightsDefinition())
     if watts_per_area_si:
@@ -732,4 +749,47 @@ def set_internal_mass(space_type, *, surface_area_si=None,
     if construction is not None:
         definition.setConstruction(construction)
     return instance
+
+
+def set_exterior_lights(model, watts, *, name='Exterior Lighting',
+                        control_option='AstronomicalClock', audit=None,
+                        step='loads'):
+    """An ``ExteriorLights`` object at ``watts``, with daylight control.
+
+    Lifted for phase 0 of the stock plan, which listed exterior lighting among
+    the codes-only load primitives. It is a DIFFERENT class family from the
+    rest of this module: measured on 3.11,
+
+        ExteriorLightsDefinition -> ExteriorLoadDefinition -> ResourceObject
+        LightsDefinition         -> SpaceLoadDefinition     -> ResourceObject
+
+    so it attaches to the FACILITY rather than a space type, has no
+    `instances()`, and cannot share a definition with anything. None of #186's
+    split-on-write applies to it, which is why it is a function of its own
+    rather than a mode of `set_lighting`.
+
+    The NECB applier was already this function with an NECB default name and
+    an `article=` on its audit entry — the only coupling was those two — so
+    the lift leaves the value lookup and the citation in `codes` and moves the
+    object construction here.
+
+    :param control_option: `'AstronomicalClock'` turns the lights off in
+        daylight. The SDK's own default is `'ScheduleNameOnly'`, so passing
+        nothing here would change behaviour; the NECB default is kept.
+    :returns: the ``ExteriorLights``.
+    """
+    import openstudio
+
+    definition = openstudio.model.ExteriorLightsDefinition(model)
+    definition.setName(f"{name} Definition")
+    definition.setDesignLevel(float(watts))
+    lights = openstudio.model.ExteriorLights(definition)
+    lights.setName(name)
+    lights.setControlOption(control_option)
+    if audit is not None:
+        audit.info(step, 'exterior lights created',
+                   target=name,
+                   inputs={'design_w': round(float(watts), 1),
+                           'control_option': control_option})
+    return lights
 

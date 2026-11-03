@@ -11,12 +11,11 @@ from __future__ import annotations
 
 import json
 
-import openstudio
-
 from btap._compat import ruby_round
 from btap.audit import AuditLog
 from btap.codes import resolve
 from btap.codes.necb import _data_root, edition_file
+from btap.modeling import loads as Loads
 
 #: Cached per (data root, edition) — each edition reads its own copy.
 _data_cache: dict[tuple, dict] = {}
@@ -96,12 +95,7 @@ def _sum_rows(rows, quantities, zone_key, lines, audit):
 def apply_exterior_lights(model, watts, name='NECB Exterior Lighting', audit=None):
     """Create an ExteriorLights object at the given design wattage with
     astronomical-clock control (lights off in daylight)."""
-    definition = openstudio.model.ExteriorLightsDefinition(model)
-    definition.setName(f"{name} Definition")
-    definition.setDesignLevel(float(watts))
-    lights = openstudio.model.ExteriorLights(definition)
-    lights.setName(name)
-    lights.setControlOption('AstronomicalClock')
+    lights = Loads.set_exterior_lights(model, watts, name=name)
     if audit is not None:
         audit.decision('lighting_exterior',
                        'exterior lights created (astronomical clock control)',
