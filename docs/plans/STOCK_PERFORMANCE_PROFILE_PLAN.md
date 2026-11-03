@@ -176,6 +176,106 @@ is a move, not a change — so the frozen corpus must not move at all, in any of
 the three lanes. The 108-system sizing sweep must stay 108/108 with
 `severe: 0`.
 
+## Phase 0b — the three ECM clusters a retrofit set needs
+
+Numbered 0b rather than renumbering 1-5, because "phase 0" is referenced by
+merged commits (#187, #191) and by the verification section below.
+
+phylroy pointed at `canmet-energy/campus`'s 22 measures
+(`src/resources/buildings/measures`) and asked whether phase 0 covers their
+articulation. It does not, and the gap is NOT phase 0's — it is this plan's.
+Phases 1-5 do not reach it either: phase 1 is an inventory test, phase 2 turns
+code-derived values into catalogue columns, phase 3 deliberately leaves device
+physics alone, phase 4 is disclosure and phase 5 a decision.
+
+Those measures are PYTHON OpenStudio measures, so they are not a parallel
+lineage to translate — they are callers these primitives could serve directly.
+
+### What `btap.modeling` articulates today: 9 of 22
+
+| measure | where |
+|---|---|
+| `change_ext_wall_r_value` | `envelope/constructions.py` `opaque_at_conductance` |
+| `window_retrofit` | `envelope/constructions.py` `fenestration_at_conductance` |
+| `add_ashp_with_backup` | `hvac/systems/ashp_baseboard.py` |
+| `add_doas_erv` | `hvac/systems/doas.py`, `zone_ervs.py` |
+| `reduce_lighting_load_by_percentage` | `loads` `scale_lighting` |
+| `reduce_infiltration_by_percentage` | `loads` `scale_infiltration` |
+| `demand_controlled_ventilation` | `hvac/ventilation.py` |
+| `led_lighting` | `loads` `set_lighting` (the LED VALUE is a data question) |
+| `shift_hours_of_operation` | `hvac/components/schedules.py`, PARTIAL — it creates rulesets; shifting an existing one is a different act |
+
+### The three clusters that are absent
+
+**Equipment efficiency (3 measures).** `improve_motor_efficiency`,
+`improve_fan_and_pump_total_efficiency`,
+`fan_and_pump_motor_efficiency_upgrade`. Zero hits for
+`setMotorEfficiency` or `setFanTotalEfficiency` anywhere in `btap.modeling`.
+
+This is NOT what phase 3 excludes. Phase 3 leaves the 6 defrost EIR curves and
+11 heat-recovery limits alone because they describe how a machine behaves;
+a motor efficiency is a NAMEPLATE RATING that a retrofit changes and a vintage
+determines, and a 1955 fan motor against a 2015 premium-efficiency one is
+exactly the kind of difference this plan exists to express.
+
+**Controls (6 measures).** `add_daylight_sensors`,
+`daylight_and_occupancy_controls`, `adjust_thermostat_deadband`,
+`unoccupied_temp_setback`, `economizer_control`,
+`windowed_setpoint_and_load_override`. No setpoint setter exists in
+`btap.modeling` at all — zero hits for
+`setHeatingSetpointTemperatureSchedule` or its cooling counterpart.
+
+**Service water (2 measures).** `install_low_flow_fixtures`,
+`upgrade_dhw_plant`. `hvac/classify.py:299` reads `to_WaterHeaterMixed()` for
+FUEL CLASSIFICATION only; nothing constructs or upgrades one.
+
+`add_reporting_outputs` is a fourth, smaller gap: one system
+(`hp_plant_fancoils.py:238`) creates an `OutputVariable` for its own
+debugging, and there is no general facility. `shared_resources` is a helper
+library, not a capability.
+
+### Three greps that had to be discarded, and why that matters
+
+Counting matches would have inflated the supported column, and each of these
+looked like a hit:
+
+- **thermostat deadband** matched `hvac/catalog_report.py:290`, which
+  constructs a BARE `ThermostatSetpointDualSetpoint` for the catalogue's
+  sizing probe. No setpoints and no deadband.
+- **economizer** matched `hvac/systems/doas.py:60` —
+  `setEconomizerControlType('NoEconomizer')`, hardcoded OFF. The opposite of
+  the capability.
+- **DHW plant** matched a classifier read, as above.
+
+A name appearing in the package is not the capability; the file had to be
+opened in each case. That is the same discipline the coverage manifest
+enforces — a code pointer means implemented, and a pointer into a report does
+not.
+
+### Why this matters for the recipe
+
+A stock generator missing these can build a 1940s building's ENVELOPE and not
+its OPERATION. Equipment efficiency and controls are most of a retrofit
+measure set's vocabulary, and for pre-1980 vintages the operating assumptions
+— no setback, no economizer, no daylight control, a standard-efficiency motor
+— are as characteristic as the wall assembly. A recipe that cannot say "this
+vintage had no night setback" cannot describe the building.
+
+### Verification for this phase
+
+Each lift is a MOVE where it has an existing caller and an ADDITION where it
+does not, and the two have different evidence:
+
+- a lift with an NECB caller must leave the frozen corpus byte-identical in
+  all three lanes, as phase 0's did;
+- an addition has no caller to hold identical, so it carries unit tests that
+  FAIL against its absence, and the plan should not claim corpus evidence for
+  it. Phase 0 learned this twice: `lighting_per_person` and
+  `additional_lighting_per_area` are 0 in all 308 rows of both editions, so
+  the corpus cannot witness either branch, and the `sorted()` ->
+  `sorted_by_name` determinism fix moved no baseline because no corpus model
+  carries two load instances on one space type.
+
 ## Phase 1 — the honest inventory, as a test
 
 Pin the current 37 before moving anything: a test that walks
