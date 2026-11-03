@@ -29,6 +29,7 @@ from btap.codes import resolve
 from btap.codes.necb import code_id, rulesdata
 from btap.costing.hvac import geometry as _costing_geometry
 from btap.modeling.hvac import classify as _classify
+from btap.modeling.hvac import efficiency as _efficiency
 from btap.modeling.hvac import ventilation as _ventilation
 from btap.modeling.hvac.components import coils as _coils
 from btap.modeling.hvac.components import schedules as _schedules
@@ -2713,10 +2714,18 @@ def _apply_fan_rules(air_loops, reference_system, rules_data, audit):
 
 
 def _set_fan_total_efficiency(fan, efficiency):
-    if hasattr(fan, 'setFanTotalEfficiency'):
-        fan.setFanTotalEfficiency(efficiency)
-    else:
-        fan.setFanEfficiency(efficiency)
+    """Down to the primitive (#192), which also retires this guard.
+
+    The `hasattr(fan, 'setFanTotalEfficiency')` test with a
+    `setFanEfficiency` fallback assumed some fan class carries only the old
+    name. Measured on 3.11, none does: all five scalar fan classes declare
+    `setFanTotalEfficiency`, `setFanEfficiency` is documented as "Deprecated,
+    forwards to setFanTotalEfficiency", and the sixth class
+    (`FanComponentModel`) declares NEITHER — so the fallback was dead for
+    every class that could use it and an AttributeError for the one that
+    reached it.
+    """
+    _efficiency.set_fan_efficiency(fan, total_efficiency=efficiency)
 
 
 def _apply_heat_pump_limits(air_loops, rules_data, audit):

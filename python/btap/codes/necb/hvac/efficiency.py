@@ -25,6 +25,7 @@ import openstudio
 from btap._compat import NullAudit, ruby_round, sorted_by_name
 from btap.codes import resolve
 from btap.codes.necb import code_id, rulesdata
+from btap.modeling.hvac import efficiency as _mod_efficiency
 from btap.modeling.hvac.components import coils as _coils
 from btap.modeling.hvac.systems.plant_loops import (
     BOILER_PART_LOAD_CLASS_FEATURE,
@@ -872,7 +873,8 @@ def _state_pump_characteristics(pump, w_per_l_s, motor_eff, pump_eff):
     head_pa = w_per_l_s * 1000.0 * motor_eff * pump_eff
     pump.setDesignPowerSizingMethod(POWER_PER_FLOW_PER_PRESSURE)
     pump.setDesignShaftPowerPerUnitFlowRatePerUnitHead(1.0 / pump_eff)
-    pump.setMotorEfficiency(motor_eff)
+    _mod_efficiency.set_pump_efficiency(pump,
+                                        motor_efficiency=motor_eff)
     pump.setRatedPumpHead(head_pa)
     pump.autosizeRatedPowerConsumption()
     return head_pa
@@ -1640,7 +1642,8 @@ def _apply_sentence_1(reference_pump, proposed_pump, prefix, audit):
     reference_pump.setDesignPowerSizingMethod(POWER_PER_FLOW_PER_PRESSURE)
     reference_pump.setRatedPumpHead(head)
     reference_pump.setDesignShaftPowerPerUnitFlowRatePerUnitHead(1.0 / pump_eff)
-    reference_pump.setMotorEfficiency(motor_eff)
+    _mod_efficiency.set_pump_efficiency(
+        reference_pump, motor_efficiency=motor_eff)
     reference_pump.autosizeRatedPowerConsumption()
 
     audit.decision('efficiency', 'pump head and efficiency inherited from the corresponding '
@@ -1715,7 +1718,8 @@ def _apply_sentence_2(reference_pump, proposed_pumps, reference_flow, prefix, au
     reference_pump.setDesignPowerSizingMethod(POWER_PER_FLOW_PER_PRESSURE)
     reference_pump.setRatedPumpHead(head_pa)
     reference_pump.setDesignShaftPowerPerUnitFlowRatePerUnitHead(1.0 / pump_eff)
-    reference_pump.setMotorEfficiency(motor_eff)
+    _mod_efficiency.set_pump_efficiency(
+        reference_pump, motor_efficiency=motor_eff)
     reference_pump.autosizeRatedPowerConsumption()
 
     audit.decision('efficiency', "combined peak shaft power transferred from the proposed system's pumps",
