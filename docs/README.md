@@ -40,7 +40,6 @@ the CI lint job regenerates both and fails on any diff):
   must satisfy.
 - `archetype_compliance_findings.md` — do the legacy archetypes meet the
   2020 performance path (fixed-point analysis).
-- `code_clarity_review.md` — the worked-off clarity review ledger.
 - `python_port_m6_m7_review.md` — shareable review of the completed Python M6
   umbrella and the corrected native `py-tbd` plan and acceptance gates for M7.
 - `d80_retirement_plan_review.md` — durable review and execution checklist for
