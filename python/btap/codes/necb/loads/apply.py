@@ -160,19 +160,18 @@ def apply_people(space_type, record, audit):
     if occupancy_per_area == 0:
         return
 
-    def create():
-        definition = openstudio.model.PeopleDefinition(space_type.model())
-        definition.setName(f"{space_type.nameString()} People Definition")
-        people = openstudio.model.People(definition)
-        people.setName(f"{space_type.nameString()} People")
-        people.setSpaceType(space_type)
-        return people
-
-    instance = _single_instance(space_type.people(), audit, create)
-    definition = instance.peopleDefinition()
-    definition.setPeopleperSpaceFloorArea(
-        openstudio.convert(occupancy_per_area / 1000, 'people/ft^2', 'people/m^2').get())
-    definition.setFractionRadiant(0.3)
+    # Down to the primitive, which SPLITS a shared definition before writing
+    # (#186). This path needs it: every sample corpus model and the 5Zone seed
+    # share one `PeopleDefinition` across five SmallOffice library space
+    # types. They are untagged today, so `find` returns no record and this
+    # applier never reaches them — but that is the catalog's doing, not a
+    # property of the applier, and a tagged model with shared people
+    # definitions would have had one space type's density overwrite another's.
+    instance = Loads.set_people(
+        space_type,
+        people_per_area_si=openstudio.convert(
+            occupancy_per_area / 1000, 'people/ft^2', 'people/m^2').get(),
+        fraction_radiant=0.3, audit=audit, step='loads')
     instance.setClothingInsulationSchedule(_comfort_schedule(space_type.model(), 'clothing'))
     instance.setAirVelocitySchedule(_comfort_schedule(space_type.model(), 'air_velocity'))
     instance.setWorkEfficiencySchedule(_comfort_schedule(space_type.model(), 'work_efficiency'))
