@@ -17,6 +17,7 @@ from __future__ import annotations
 
 from btap._compat import opt, sorted_by_name
 
+
 def lighting_control_types():
     """The control types THIS SDK accepts, from the SDK itself.
 
