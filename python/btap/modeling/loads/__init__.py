@@ -53,8 +53,7 @@ def single_instance(instances, create, audit=None, step='loads'):
     return instances[0]
 
 
-def unshared_definition(instance, *, value_suffix, find_named=None,
-                        audit=None, step='loads'):
+def unshared_definition(instance, *, audit=None, step='loads'):
     """The instance's definition, SPLIT first if any other instance shares it.
 
     Setting a value on a shared definition changes every instance using it,
@@ -62,9 +61,9 @@ def unshared_definition(instance, *, value_suffix, find_named=None,
     `set_lighting(type_0, watts_per_area_si=25.0)` on a definition shared with
     `type_1` left `type_1` reading 25.0 too.
 
-    It is structural to all ELEVEN `SpaceLoadDefinition` subclasses and it is
-    already in the corpus — 4 of the 28 hand-built campus archetypes share
-    one, and all three `Hangar` vintages share a `LightsDefinition`, an
+    Structural to all ELEVEN `SpaceLoadDefinition` subclasses and already in
+    the corpus — 4 of the 28 hand-built campus archetypes share one, and all
+    three `Hangar` vintages share a `LightsDefinition`, an
     `ElectricEquipmentDefinition` AND a `PeopleDefinition` between the
     `Shop-Machinery` and `Shop-Machinery-Hangar` space types (#186).
 
@@ -72,77 +71,167 @@ def unshared_definition(instance, *, value_suffix, find_named=None,
     is documented as "ensures that no other instances share this instances
     definition", and measured: shared by three, `L0.makeUnique()` gives L0 a
     clone carrying the value while L1 and L2 keep the original, and it is a
-    NO-OP when the instance is already unique. Hand-rolling a clone-and-
-    reassign was the first draft of this and was both longer and less correct.
+    NO-OP when the instance is already unique. Nothing but that instance's own
+    object can hold the definition — the OpenStudio 3.11 IDD shows
+    `OS:Lights:Definition` and its siblings referenced ONLY by their instance
+    object — so once `instances()` is down to one, mutating it is sound.
 
-    **Reuse by name before splitting**, which answers the objection that
-    cloning multiplies objects: fifty space types sharing one definition and
-    all set to the SAME value produce two definitions, not fifty-one, because
-    the second onward find the first clone by name. Fifty DISTINCT values
-    produce fifty, which is what the model should say. `opaque_at_conductance`
-    has worked this way for constructions since long before, and its comment
-    makes the point that the naming is the dedupe key rather than decoration.
+    **There is deliberately NO reuse-by-name here, and the first version of
+    this function had it.** The idea was to keep the object count proportional
+    to distinct VALUES: name a clone after its value, and let the next sharer
+    needing the same value adopt it instead of cloning again. It re-created
+    #186 one object down. The key encoded only the primary density, so
+    everything else a setter writes — calculation METHOD, the heat-split
+    fractions, a construction — was outside the key, and the reuse branch
+    returned a definition OTHER instances were already using and then wrote
+    those unmatched fields into it:
+
+        set_lighting(T0, watts_per_area_si=25.0, radiant=0.3)
+        set_lighting(T1, watts_per_area_si=25.0, radiant=0.7)
+            -> T0 silently reads radiant 0.7
+
+        set_lighting(T0, watts_per_area_si=10.0)
+        set_lighting(T1, watts_per_person=10.0)
+            -> both round to 'W-10.0', T1 adopts T0's clone and switches the
+               method, and T0's watts-per-area reads None
+
+    `opaque_at_conductance` reuses by name safely because it RETURNS the
+    construction and writes nothing afterwards. This function returns an
+    object its caller is about to write into, which is a different contract
+    and cannot take the same shortcut. A second collision came free: two
+    different shared originals whose names differ only after the last colon
+    (`Bldg:Core`, `Bldg:Perim`) truncated to the same base and collapsed onto
+    one object.
+
+    So this function does ONE thing. The price is object count: fifty space
+    types sharing one definition and all written produce fifty definitions,
+    which is semantically right — each instance owns its values — and larger
+    than it needs to be. Shrinking it belongs in a separate pass that merges
+    definitions which are field-for-field identical, AFTER the writes, where
+    equality is measured rather than inferred from a name (#189).
+
+    The clone is named after the INSTANCE, so the name identifies whose
+    definition it is and claims nothing about its contents. An earlier version
+    named it after the value, which produced labels like `...:W-0.0` on a
+    definition whose density was an inherited non-zero.
 
     **An UNSHARED definition is never renamed.** The NECB appliers call these
     setters, their definitions are already unique and carefully named, and
     renaming them would move every frozen baseline for no behavioural reason.
-    Only a clone takes `name`.
 
-    The caveat inherited from the construction case: a CONTINUOUSLY VARYING
-    target defeats name-based reuse, since every value is distinct. That is why
-    `opaque_at_conductance` carries a `name_discriminator`. Discrete table
-    values — vintage LPDs and NECB densities alike — dedupe well.
-
-    The key is built from the DEFINITION's name, not the caller's space type.
-    An earlier version used the space type, so every sharer generated a
-    different name, nothing ever matched, and six sharers set to one value
-    produced six clones — the duplication this is supposed to prevent. The
-    construction case keys on the construction for the same reason: the name
-    has to be the same for every instance that shares the object.
-
-    :param value_suffix: appended after a colon to form the clone's name, e.g.
-        ``'W-25.0'``. Any existing ``:suffix`` on the definition's name is
-        replaced rather than accumulated, as `opaque_at_conductance` does.
-    :param find_named: ``lambda name: definition_or_None`` for this load type,
-        normally `opt(model.get<Type>DefinitionByName(name))`. Without it, no
-        reuse is attempted and every split clones.
-    :returns: a definition safe to mutate for this instance alone.
+    :returns: a definition no other instance shares, safe to mutate.
     """
-    import re
-
     definition = instance.definition()
     sharers = definition.instances()
     if len(sharers) <= 1:
         return definition
 
-    base = re.sub(r':[^:]*\Z', '', definition.nameString())
-    name = f"{base}:{value_suffix}"
-
-    if find_named is not None:
-        existing = find_named(name)
-        if (existing is not None
-                and str(existing.handle()) != str(definition.handle())):
-            instance.setDefinition(existing)
-            if audit is not None:
-                audit.info(step,
-                           'load definition REUSED by name instead of cloned',
-                           target=instance.nameString(),
-                           inputs={'was': definition.nameString(),
-                                   'now': name,
-                                   'sharers_before': len(sharers)})
-            return instance.definition()
-
+    was = definition.nameString()
     instance.makeUnique()
     split = instance.definition()
-    split.setName(name)
+    split.setName(f"{instance.nameString()} Definition")
     if audit is not None:
         audit.info(step,
-                   'load definition SPLIT — it was shared, and setting it '
+                   'load definition split — it was shared, and setting it '
                    'would have changed every instance using it',
                    target=instance.nameString(),
-                   inputs={'was': definition.nameString(), 'now': name,
+                   inputs={'was': was, 'now': split.nameString(),
                            'sharers_before': len(sharers)})
     return split
+
+
+def _definition_fingerprint(definition):
+    """Every field of ``definition`` but its Handle and Name, with its type.
+
+    The exclusion is DERIVED from the IDD rather than positional: measured on
+    OpenStudio 3.11, `LightsDefinition`, `PeopleDefinition`,
+    `InternalMassDefinition` and `ElectricEquipmentDefinition` all name field 0
+    `Handle` and field 1 `Name`, and reading those names means the function
+    does not break if a type ever orders them differently.
+
+    `idfObject().fieldComment(i)` is NOT usable for this — it returns an empty
+    optional on a constructed object, so filtering on it excludes nothing and
+    every fingerprint silently includes the handle, which makes every
+    definition unique. That was the first version.
+
+    Object REFERENCES are compared by handle, so two definitions pointing at
+    different schedule or construction objects are different even if those
+    objects are themselves identical. Conservative in the safe direction: a
+    merge that should not happen is worse than one that is missed.
+    """
+    idf = definition.idfObject()
+    idd = idf.iddObject()
+    fields = []
+    for index in range(idf.numFields()):
+        field = opt(idd.getField(index))
+        if field is not None and field.name() in ('Handle', 'Name'):
+            continue
+        fields.append(opt(idf.getString(index)) or '')
+    return (definition.iddObjectType().valueName(), tuple(fields))
+
+
+def deduplicate_definitions(model, *, audit=None, step='loads'):
+    """Merge load definitions that are field-for-field identical.
+
+    The companion to `unshared_definition`, and phylroy's design
+    (2026-11-03): copy on write, then find the duplicates, keep one of each
+    and reassign. It is what makes splitting affordable — fifty space types
+    written to the same values become fifty definitions on the way through and
+    one on the way out.
+
+    **Why this is safe where reuse-by-name was not.** Reuse inferred equality
+    from a NAME, BEFORE the writes, so fields outside the key were never
+    compared and the merged object diverged afterwards — a caller's radiant
+    fraction landing on another space type's definition. This measures every
+    field AFTER the writes. Nothing can diverge later because there is no
+    later.
+
+    **Which is also its precondition: run it after the per-instance writes are
+    finished.** Merge first and write afterwards and you have rebuilt exactly
+    the defect, because the write lands on a definition other instances now
+    share. That is a contract a caller can keep; the name key had no safe
+    version at all.
+
+    Definitions with no instances are left alone rather than merged or
+    removed: an orphan is not this function's business, and deleting objects a
+    caller may still hold is not a deduplication.
+
+    :returns: the number of definitions removed.
+    """
+    collections = (
+        ('Lights', model.getLightsDefinitions),
+        ('ElectricEquipment', model.getElectricEquipmentDefinitions),
+        ('GasEquipment', model.getGasEquipmentDefinitions),
+        ('People', model.getPeopleDefinitions),
+        ('InternalMass', model.getInternalMassDefinitions),
+    )
+    removed = 0
+    for label, getter in collections:
+        groups = {}
+        for definition in getter():
+            if not definition.instances():
+                continue
+            groups.setdefault(_definition_fingerprint(definition),
+                              []).append(definition)
+        for duplicates in groups.values():
+            if len(duplicates) < 2:
+                continue
+            keeper, rest = duplicates[0], duplicates[1:]
+            moved = 0
+            for spare in rest:
+                for instance in list(spare.instances()):
+                    instance.setDefinition(keeper)
+                    moved += 1
+                spare.remove()
+                removed += 1
+            if audit is not None:
+                audit.info(step,
+                           f'{len(rest) + 1} identical {label} definitions '
+                           'merged into one',
+                           target=keeper.nameString(),
+                           inputs={'removed': len(rest),
+                                   'instances_reassigned': moved})
+    return removed
 
 
 def set_infiltration(space_type, *, design_flow_rate_si=None,
@@ -271,11 +360,7 @@ def set_electric_equipment(space_type, *, watts_per_area_si, latent=None,
     instance = single_instance(space_type.electricEquipment(), create,
                                audit=audit, step=step)
     definition = opt(unshared_definition(
-        instance,
-        value_suffix=f"W-{round(watts_per_area_si, 4)}",
-        find_named=lambda n: opt(
-            space_type.model().getElectricEquipmentDefinitionByName(n)),
-        audit=audit, step=step).to_ElectricEquipmentDefinition())
+        instance, audit=audit, step=step).to_ElectricEquipmentDefinition())
     definition.setWattsperSpaceFloorArea(watts_per_area_si)
     set_load_fractions(definition, latent=latent, radiant=radiant, lost=lost)
     return instance
@@ -307,11 +392,7 @@ def set_gas_equipment(space_type, *, watts_per_area_si, latent=None,
     instance = single_instance(space_type.gasEquipment(), create, audit=audit,
                                step=step)
     definition = opt(unshared_definition(
-        instance,
-        value_suffix=f"W-{round(watts_per_area_si, 4)}",
-        find_named=lambda n: opt(
-            space_type.model().getGasEquipmentDefinitionByName(n)),
-        audit=audit, step=step).to_GasEquipmentDefinition())
+        instance, audit=audit, step=step).to_GasEquipmentDefinition())
     definition.setWattsperSpaceFloorArea(watts_per_area_si)
     set_load_fractions(definition, latent=latent, radiant=radiant, lost=lost)
     return instance
@@ -351,6 +432,19 @@ def set_lighting(space_type, *, watts_per_area_si=None,
                if v is not None):
         return None
 
+    # `Watts/Area` and `Watts/Person` are mutually exclusive, by the same
+    # measurement: `setWattsperPerson` switches `designLevelCalculationMethod`
+    # and clears the area value. REFUSE BEFORE TOUCHING THE MODEL — an earlier
+    # version raised after `single_instance` and `unshared_definition` had
+    # already run, so a refused call left a new instance, a split definition
+    # and a split audit entry behind, while `set_people` and
+    # `set_internal_mass` raised cleanly.
+    if watts_per_area_si and watts_per_person:
+        raise ValueError(
+            'LightsDefinition carries ONE design-level calculation method: '
+            'watts_per_area_si and watts_per_person are exclusive, and the '
+            'second would clear the first. Pass one.')
+
     base = name or f"{space_type.nameString()} Lights"
 
     def create():
@@ -363,20 +457,8 @@ def set_lighting(space_type, *, watts_per_area_si=None,
 
     instance = single_instance(space_type.lights(), create, audit=audit,
                                step=step)
-    density = watts_per_area_si or watts_per_person or 0.0
     definition = opt(unshared_definition(
-        instance, value_suffix=f"W-{round(density, 4)}",
-        find_named=lambda n: opt(
-            space_type.model().getLightsDefinitionByName(n)),
-        audit=audit, step=step).to_LightsDefinition())
-    # `Watts/Area` and `Watts/Person` are mutually exclusive too, by the same
-    # measurement: `setWattsperPerson` switches
-    # `designLevelCalculationMethod` and clears the area value.
-    if watts_per_area_si and watts_per_person:
-        raise ValueError(
-            'LightsDefinition carries ONE design-level calculation method: '
-            'watts_per_area_si and watts_per_person are exclusive, and the '
-            'second would clear the first. Pass one.')
+        instance, audit=audit, step=step).to_LightsDefinition())
     if watts_per_area_si:
         definition.setWattsperSpaceFloorArea(watts_per_area_si)
     elif watts_per_person:
@@ -577,12 +659,8 @@ def set_people(space_type, *, people_per_area_si=None, number_of_people=None,
 
     instance = single_instance(space_type.people(), create, audit=audit,
                                step=step)
-    density = next(iter(given.values()))
     definition = opt(unshared_definition(
-        instance, value_suffix=f"N-{round(density, 6)}",
-        find_named=lambda n: opt(
-            space_type.model().getPeopleDefinitionByName(n)),
-        audit=audit, step=step).to_PeopleDefinition())
+        instance, audit=audit, step=step).to_PeopleDefinition())
     if people_per_area_si:
         definition.setPeopleperSpaceFloorArea(people_per_area_si)
     elif number_of_people:
@@ -643,12 +721,8 @@ def set_internal_mass(space_type, *, surface_area_si=None,
 
     instance = single_instance(space_type.internalMass(), create, audit=audit,
                                step=step)
-    area = next(iter(given.values()))
     definition = opt(unshared_definition(
-        instance, value_suffix=f"A-{round(area, 6)}",
-        find_named=lambda n: opt(
-            space_type.model().getInternalMassDefinitionByName(n)),
-        audit=audit, step=step).to_InternalMassDefinition())
+        instance, audit=audit, step=step).to_InternalMassDefinition())
     if surface_area_si:
         definition.setSurfaceArea(surface_area_si)
     elif per_floor_area_si:
