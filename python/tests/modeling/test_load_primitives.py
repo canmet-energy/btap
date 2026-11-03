@@ -287,6 +287,110 @@ class TestScaling(unittest.TestCase):
 
 
 @needs_sdk
+class TestASharedDefinitionIsScaledONCE(unittest.TestCase):
+    """Several load instances can SHARE one definition, and a per-instance
+    loop then applies the factor once per sharer.
+
+    Measured before the fix: two `Lights` on one `LightsDefinition` at
+    10 W/m^2, scaled x2 by a naive per-instance loop, came out at 40 W/m^2.
+    The hand-built campus archetypes do not share today — 9 Lights and 9
+    definitions in each Office-Small vintage, 0 shared — so this was latent
+    there, and stops being latent the moment anything scales model-wide,
+    because sharing ACROSS space types is how a library construction set or a
+    copied space type ends up wired (phylroy raised it, 2026-11-03).
+    """
+
+    @staticmethod
+    def _two_lights_one_definition(model=None, watts=10.0):
+        import openstudio
+
+        model = model or openstudio.model.Model()
+        definition = openstudio.model.LightsDefinition(model)
+        definition.setName('Shared Lighting Definition')
+        definition.setWattsperSpaceFloorArea(watts)
+        types = []
+        for n in range(2):
+            space_type = openstudio.model.SpaceType(model)
+            space_type.setName(f'Type {n}')
+            lights = openstudio.model.Lights(definition)
+            lights.setName(f'Lights {n}')
+            lights.setSpaceType(space_type)
+            types.append(space_type)
+        return model, definition, types
+
+    def test_model_wide_scaling_applies_the_factor_ONCE(self):
+        model, definition, _types = self._two_lights_one_definition()
+        self.assertEqual(2, len(model.getLightss()))
+        self.assertEqual(1, len(model.getLightsDefinitions()))
+
+        scaled = Loads.scale_lighting_in_model(model, factor=2.0)
+        self.assertEqual(1, scaled, 'one DEFINITION, not two instances')
+        self.assertAlmostEqual(
+            20.0, opt(definition.wattsperSpaceFloorArea()),
+            msg='a shared definition scaled per instance would read 40.0')
+
+    def test_per_space_type_scaling_also_dedupes(self):
+        """The same hazard reaches the per-space-type form when two Lights in
+        ONE space type share a definition."""
+        import openstudio
+
+        model = openstudio.model.Model()
+        space_type = openstudio.model.SpaceType(model)
+        space_type.setName('One Type')
+        definition = openstudio.model.LightsDefinition(model)
+        definition.setWattsperSpaceFloorArea(10.0)
+        for n in range(2):
+            lights = openstudio.model.Lights(definition)
+            lights.setName(f'Lights {n}')
+            lights.setSpaceType(space_type)
+
+        self.assertEqual(1, Loads.scale_lighting(space_type, factor=2.0))
+        self.assertAlmostEqual(20.0, opt(definition.wattsperSpaceFloorArea()))
+
+    def test_model_wide_scaling_reaches_SPACE_attached_lights(self):
+        """`Lights` can hang off a `Space` rather than a `SpaceType`, and
+        "every space that has lighting" has to mean both."""
+        import openstudio
+
+        model = openstudio.model.Model()
+        space = openstudio.model.Space(model)
+        space.setName('Directly Lit Space')
+        definition = openstudio.model.LightsDefinition(model)
+        definition.setWattsperSpaceFloorArea(6.0)
+        lights = openstudio.model.Lights(definition)
+        lights.setSpace(space)
+
+        self.assertEqual(1, Loads.scale_lighting_in_model(model, factor=0.5))
+        self.assertAlmostEqual(3.0, opt(definition.wattsperSpaceFloorArea()))
+
+    def test_it_does_NOT_create_lighting_where_there_is_none(self):
+        """"All spaces that HAD lighting" is the question. A space with no
+        Lights is left alone rather than given a density it never had."""
+        import openstudio
+
+        model = openstudio.model.Model()
+        space = openstudio.model.Space(model)
+        space.setName('Unlit Space')
+        self.assertEqual(0, Loads.scale_lighting_in_model(model, factor=2.0))
+        self.assertEqual([], list(model.getLightss()))
+
+    def test_equipment_model_wide_too(self):
+        import openstudio
+
+        model = openstudio.model.Model()
+        definition = openstudio.model.ElectricEquipmentDefinition(model)
+        definition.setWattsperSpaceFloorArea(8.0)
+        for n in range(2):
+            space_type = openstudio.model.SpaceType(model)
+            space_type.setName(f'Equip Type {n}')
+            equip = openstudio.model.ElectricEquipment(definition)
+            equip.setSpaceType(space_type)
+        self.assertEqual(
+            1, Loads.scale_electric_equipment_in_model(model, factor=1.5))
+        self.assertAlmostEqual(12.0, opt(definition.wattsperSpaceFloorArea()))
+
+
+@needs_sdk
 class TestAllFiveInfiltrationMethods(unittest.TestCase):
     """The first draft offered three of the SDK's five. osruby's
     `ecm_infiltration` names `infiltration_design_flow_rate` and

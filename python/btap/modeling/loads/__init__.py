@@ -23,7 +23,13 @@ carries none of that convention.
 
 from __future__ import annotations
 
-import openstudio
+# NO module-level `import openstudio`. `btap.modeling` has none — three
+# inside-function imports instead — because the package must import on a bare
+# runner: the zero-install lane (`python3 -m unittest`) has no SDK, and
+# `@needs_sdk` can only SKIP a test whose module already imported. A
+# module-level import here made `tests.modeling.test_load_primitives`
+# unimportable rather than skipped, and the bare lane failed with
+# `ModuleNotFoundError: No module named 'openstudio'`.
 
 
 def single_instance(instances, create, audit=None, step='loads'):
@@ -78,6 +84,8 @@ def set_infiltration(space_type, *, design_flow_rate_si=None,
     :returns: the ``SpaceInfiltrationDesignFlowRate`` applied to, or None when
         every quantity was absent or zero.
     """
+    import openstudio
+
     given = {'design_flow_rate_si': design_flow_rate_si,
              'per_floor_area_si': per_floor_area_si,
              'per_exterior_area_si': per_exterior_area_si,
@@ -152,6 +160,8 @@ def set_electric_equipment(space_type, *, watts_per_area_si, latent=None,
         conversion stays on the NECB side.
     :returns: the ``ElectricEquipment`` applied to, or None for a zero load.
     """
+    import openstudio
+
     if not watts_per_area_si:
         return None
 
@@ -181,6 +191,8 @@ def set_gas_equipment(space_type, *, watts_per_area_si, latent=None,
 
     :returns: the ``GasEquipment`` applied to, or None for a zero load.
     """
+    import openstudio
+
     if not watts_per_area_si:
         return None
 
@@ -228,6 +240,8 @@ def set_lighting(space_type, *, watts_per_area_si=None,
         name plus " Lights".
     :returns: the ``Lights`` applied to, or None when given nothing to set.
     """
+    import openstudio
+
     if not any(v for v in (watts_per_area_si, watts_per_person,
                            return_air_fraction, radiant, visible)
                if v is not None):
@@ -269,6 +283,45 @@ def set_lighting(space_type, *, watts_per_area_si=None,
     return instance
 
 
+def _scale_definitions(instances, read_definition, audit, step, factor, kind):
+    """Scale each DISTINCT definition once, by handle.
+
+    Several load instances can SHARE one definition, and scaling per instance
+    then applies the factor once per sharer. Measured: two `Lights` on one
+    `LightsDefinition` at 10 W/m^2, scaled x2 by a naive per-instance loop,
+    come out at 40 W/m^2 rather than 20.
+
+    The hand-built campus archetypes do not share today — 9 Lights and 9
+    definitions in each Office-Small vintage, 0 shared — so this is latent
+    there. It stops being latent the moment anything applies a density
+    model-wide, because sharing ACROSS space types is the natural way a
+    library construction set or a copied space type ends up wired.
+
+    Only a `Watts/Area` density is scaled. A definition using another
+    calculation method is left alone and reported, rather than silently
+    converted to a method the caller did not choose.
+    """
+    seen, scaled = set(), 0
+    for instance in instances:
+        definition = read_definition(instance)
+        handle = str(definition.handle())
+        if handle in seen:
+            continue
+        seen.add(handle)
+        watts = definition.wattsperSpaceFloorArea()
+        if not watts.is_initialized():
+            if audit is not None:
+                audit.info(step,
+                           f"{kind} not scaled — its density is "
+                           f"{definition.designLevelCalculationMethod()}, not "
+                           'Watts/Area',
+                           target=definition.nameString())
+            continue
+        definition.setWattsperSpaceFloorArea(watts.get() * factor)
+        scaled += 1
+    return scaled
+
+
 def scale_electric_equipment(space_type, *, factor, audit=None, step='loads'):
     """Multiply every electric-equipment density on ``space_type`` by ``factor``.
 
@@ -293,21 +346,10 @@ def scale_electric_equipment(space_type, *, factor, audit=None, step='loads'):
     """
     if factor is None:
         return 0
-    scaled = 0
-    for equip in space_type.electricEquipment():
-        definition = equip.electricEquipmentDefinition()
-        watts = definition.wattsperSpaceFloorArea()
-        if not watts.is_initialized():
-            if audit is not None:
-                audit.info(step,
-                           'electric equipment not scaled — its density is '
-                           f"{definition.designLevelCalculationMethod()}, not "
-                           'Watts/Area',
-                           target=definition.nameString())
-            continue
-        definition.setWattsperSpaceFloorArea(watts.get() * factor)
-        scaled += 1
-    return scaled
+    return _scale_definitions(
+        space_type.electricEquipment(),
+        lambda equip: equip.electricEquipmentDefinition(),
+        audit, step, factor, 'electric equipment')
 
 
 def scale_lighting(space_type, *, factor, audit=None, step='loads'):
@@ -325,19 +367,50 @@ def scale_lighting(space_type, *, factor, audit=None, step='loads'):
     """
     if factor is None:
         return 0
-    scaled = 0
-    for lights in space_type.lights():
-        definition = lights.lightsDefinition()
-        watts = definition.wattsperSpaceFloorArea()
-        if not watts.is_initialized():
-            if audit is not None:
-                audit.info(step,
-                           'lighting not scaled — its density is '
-                           f"{definition.designLevelCalculationMethod()}, not "
-                           'Watts/Area',
-                           target=definition.nameString())
-            continue
-        definition.setWattsperSpaceFloorArea(watts.get() * factor)
-        scaled += 1
-    return scaled
+    return _scale_definitions(
+        space_type.lights(), lambda lights: lights.lightsDefinition(),
+        audit, step, factor, 'lighting')
+
+
+def scale_lighting_in_model(model, *, factor, audit=None, step='loads'):
+    """Scale every lighting density in ``model``, wherever the Lights hang.
+
+    The model-wide form phylroy asked for: apply to everything that ALREADY
+    has lighting, rather than per space type. `Lights` can attach to a
+    `Space` or to a `SpaceType`, and this reaches both because it walks
+    `model.getLightss()`.
+
+    It does NOT create lighting where there is none — "all spaces that had
+    lighting" is the question, and a space with no Lights object is left
+    alone rather than given a density it never had.
+
+    Deduplicating by DEFINITION is what makes this safe: sharing across space
+    types is the natural result of a library construction set or a copied
+    space type, and a per-instance loop would apply the factor once per
+    sharer. See `_scale_definitions`.
+
+    :returns: the number of distinct definitions scaled.
+    """
+    if factor is None:
+        return 0
+    return _scale_definitions(
+        model.getLightss(), lambda lights: lights.lightsDefinition(),
+        audit, step, factor, 'lighting')
+
+
+def scale_electric_equipment_in_model(model, *, factor, audit=None,
+                                      step='loads'):
+    """Scale every electric-equipment density in ``model``.
+
+    The counterpart to `scale_lighting_in_model`, same reasoning and the same
+    per-definition deduplication.
+
+    :returns: the number of distinct definitions scaled.
+    """
+    if factor is None:
+        return 0
+    return _scale_definitions(
+        model.getElectricEquipments(),
+        lambda equip: equip.electricEquipmentDefinition(),
+        audit, step, factor, 'electric equipment')
 
