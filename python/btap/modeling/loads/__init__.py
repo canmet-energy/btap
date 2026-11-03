@@ -512,7 +512,9 @@ def set_lighting(space_type, *, watts_per_area_si=None,
 
 
 def _scale_definitions(instances, read_definition, audit, step, factor, kind,
-                       cast=None):
+                       cast=None, reader='wattsperSpaceFloorArea',
+                       setter='setWattsperSpaceFloorArea', optional=True,
+                       skip_note=None):
     """Scale each DISTINCT definition once, CLONING any that is shared with an
     instance outside ``instances``.
 
@@ -568,15 +570,23 @@ def _scale_definitions(instances, read_definition, audit, step, factor, kind,
     for handle in order:
         members = groups[handle]
         definition = read_definition(members[0])
-        watts = definition.wattsperSpaceFloorArea()
-        if not watts.is_initialized():
-            if audit is not None:
-                audit.info(step,
-                           f"{kind} not scaled — its density is "
-                           f"{definition.designLevelCalculationMethod()}, not "
-                           'Watts/Area',
-                           target=definition.nameString())
-            continue
+        raw = getattr(definition, reader)()
+        # Some definitions carry the quantity as an OPTIONAL (a Lights
+        # density is absent when the object uses another calculation method)
+        # and some as a plain double (`WaterUseEquipmentDefinition.peakFlowRate`
+        # is declared `double peakFlowRate() const`). Reading the second
+        # through `opt()` raises, so the caller declares which it is.
+        if optional:
+            if not raw.is_initialized():
+                if audit is not None:
+                    audit.info(step,
+                               skip_note or f'{kind} not scaled — the '
+                               'definition carries no value in that field',
+                               target=definition.nameString())
+                continue
+            current = raw.get()
+        else:
+            current = raw
 
         outsiders = [i for i in definition.instances()
                      if str(i.handle()) not in in_scope]
@@ -596,7 +606,7 @@ def _scale_definitions(instances, read_definition, audit, step, factor, kind,
                            inputs={'clone': target.nameString(),
                                    'outside_scope': len(outsiders),
                                    'in_scope': len(members)})
-        target.setWattsperSpaceFloorArea(watts.get() * factor)
+        getattr(target, setter)(current * factor)
         scaled += 1
     return scaled
 
@@ -629,7 +639,9 @@ def scale_electric_equipment(space_type, *, factor, audit=None, step='loads'):
         space_type.electricEquipment(),
         lambda equip: equip.electricEquipmentDefinition(),
         audit, step, factor, 'electric equipment',
-        cast='to_ElectricEquipmentDefinition')
+        cast='to_ElectricEquipmentDefinition',
+        skip_note='electric equipment not scaled — its density is not '
+                  'Watts/Area')
 
 
 def scale_lighting(space_type, *, factor, audit=None, step='loads'):
@@ -649,7 +661,8 @@ def scale_lighting(space_type, *, factor, audit=None, step='loads'):
         return 0
     return _scale_definitions(
         space_type.lights(), lambda lights: lights.lightsDefinition(),
-        audit, step, factor, 'lighting', cast='to_LightsDefinition')
+        audit, step, factor, 'lighting', cast='to_LightsDefinition',
+        skip_note='lighting not scaled — its density is not Watts/Area')
 
 
 def scale_lighting_in_model(model, *, factor, audit=None, step='loads'):
@@ -675,7 +688,8 @@ def scale_lighting_in_model(model, *, factor, audit=None, step='loads'):
         return 0
     return _scale_definitions(
         model.getLightss(), lambda lights: lights.lightsDefinition(),
-        audit, step, factor, 'lighting', cast='to_LightsDefinition')
+        audit, step, factor, 'lighting', cast='to_LightsDefinition',
+        skip_note='lighting not scaled — its density is not Watts/Area')
 
 
 def scale_electric_equipment_in_model(model, *, factor, audit=None,
@@ -693,7 +707,9 @@ def scale_electric_equipment_in_model(model, *, factor, audit=None,
         model.getElectricEquipments(),
         lambda equip: equip.electricEquipmentDefinition(),
         audit, step, factor, 'electric equipment',
-        cast='to_ElectricEquipmentDefinition')
+        cast='to_ElectricEquipmentDefinition',
+        skip_note='electric equipment not scaled — its density is not '
+                  'Watts/Area')
 
 
 def set_people(space_type, *, people_per_area_si=None, number_of_people=None,
@@ -938,4 +954,73 @@ def scale_infiltration_in_model(model, *, factor, audit=None, step='loads'):
     return sum(scale_infiltration(space_type, factor=factor, audit=audit,
                                   step=step)
                for space_type in sorted_by_name(model.getSpaceTypes()))
+
+
+def scale_water_use(space, *, factor, audit=None, step='loads'):
+    """Scale ``space``'s water-use peak flow rates by ``factor``.
+
+    #192's service-water cluster. `canmet-energy/campus`'s
+    `install_low_flow_fixtures` is exactly this, and its own description names
+    the hazard: it "scales each selected WaterUseEquipmentDefinition peak flow
+    rate ONCE, even when several WaterUseEquipment objects share it" — #186,
+    independently arrived at.
+
+    `WaterUseEquipment` is one of the eleven `SpaceLoadInstance` pairs —
+    measured, `WaterUseEquipment -> SpaceLoadInstance` and
+    `WaterUseEquipmentDefinition -> SpaceLoadDefinition` — so this reuses
+    `_scale_definitions` whole, including the clone-when-out-of-scope rule
+    that fixing `scale_lighting` produced. A fixture retrofit scoped to one
+    space type must not re-plumb another.
+
+    Its field is NOT an optional: the header declares
+    `double peakFlowRate() const`, where a `Lights` density is a
+    `boost::optional`. That is why `_scale_definitions` now takes
+    `optional=`; reading a plain double through `opt()` raises.
+
+    **Scoped by SPACE, not space type**, which is an SDK asymmetry rather
+    than a choice. `SpaceType` exposes eleven load accessors — `lights`,
+    `people`, `electricEquipment`, `spaceInfiltrationDesignFlowRates` and the
+    rest — and `waterUseEquipment` is NOT among them, while `Space` has it.
+    `SpaceLoad::setSpaceType` is inherited so a water-use object CAN be
+    assigned to a space type, and then cannot be read back from it; the first
+    version of this function took a space type by analogy with
+    `scale_lighting` and failed with `'SpaceType' object has no attribute
+    'waterUseEquipment'`.
+
+    :returns: the number of definitions scaled.
+    """
+    if factor is None:
+        return 0
+    return _scale_definitions(
+        space.waterUseEquipment(),
+        lambda equip: equip.waterUseEquipmentDefinition(),
+        audit, step, factor, 'water use',
+        cast='to_WaterUseEquipmentDefinition',
+        reader='peakFlowRate', setter='setPeakFlowRate', optional=False)
+
+
+def scale_water_use_in_model(model, *, factor, audit=None, step='loads',
+                             name_contains=None):
+    """`scale_water_use` across a whole model, optionally filtered by name.
+
+    :param name_contains: only equipment whose name contains this substring,
+        which is how the campus measure targets one fixture family —
+        lavatories but not showers. Case-sensitive, like the measure.
+    """
+    if factor is None:
+        return 0
+    instances = [equip for equip in sorted_by_name(model.getWaterUseEquipments())
+                 if name_contains is None
+                 or name_contains in equip.nameString()]
+    if not instances:
+        if audit is not None:
+            audit.info(step,
+                       'no water-use equipment matched — nothing scaled',
+                       inputs={'name_contains': name_contains})
+        return 0
+    return _scale_definitions(
+        instances, lambda equip: equip.waterUseEquipmentDefinition(),
+        audit, step, factor, 'water use',
+        cast='to_WaterUseEquipmentDefinition',
+        reader='peakFlowRate', setter='setPeakFlowRate', optional=False)
 
