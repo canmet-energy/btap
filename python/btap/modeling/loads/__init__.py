@@ -252,8 +252,8 @@ def deduplicate_definitions(model, *, audit=None, step='loads'):
 def set_infiltration(space_type, *, design_flow_rate_si=None,
                      per_floor_area_si=None, per_exterior_area_si=None,
                      per_exterior_wall_area_si=None,
-                     air_changes_per_hour=None, schedule=None, audit=None,
-                     step='loads'):
+                     air_changes_per_hour=None, schedule=None,
+                     coefficients=None, audit=None, step='loads'):
     """Set space-type modelling infiltration, in SI, on ``space_type``.
 
     This is the SPACE-TYPE modelling quantity, not an envelope air-leakage
@@ -331,6 +331,26 @@ def set_infiltration(space_type, *, design_flow_rate_si=None,
         instance.setAirChangesperHour(air_changes_per_hour)
     if schedule is not None:
         instance.setSchedule(schedule)
+    if coefficients is not None:
+        # The wind and stack response, which the setter had no way to express.
+        # `canmet-energy/campus`'s reduce_infiltration_by_percentage sets all
+        # four, and for stock work they are much of the point: the usual
+        # modelling default is the constant DOE-2 form (1, 0, 0, 0), which
+        # makes infiltration independent of the weather, while a 1940s
+        # envelope's response to wind and stack is a large part of why it
+        # behaves unlike a 2005 one. Four values, in EnergyPlus's order.
+        constant, temperature, velocity, velocity_squared = coefficients
+        instance.setConstantTermCoefficient(float(constant))
+        instance.setTemperatureTermCoefficient(float(temperature))
+        instance.setVelocityTermCoefficient(float(velocity))
+        instance.setVelocitySquaredTermCoefficient(float(velocity_squared))
+        if audit is not None:
+            audit.info(step, 'infiltration wind and stack coefficients set',
+                       target=instance.nameString(),
+                       inputs={'constant': float(constant),
+                               'temperature': float(temperature),
+                               'velocity': float(velocity),
+                               'velocity_squared': float(velocity_squared)})
     return instance
 
 
@@ -491,36 +511,63 @@ def set_lighting(space_type, *, watts_per_area_si=None,
     return instance
 
 
-def _scale_definitions(instances, read_definition, audit, step, factor, kind):
-    """Scale each DISTINCT definition once, by handle.
+def _scale_definitions(instances, read_definition, audit, step, factor, kind,
+                       cast=None):
+    """Scale each DISTINCT definition once, CLONING any that is shared with an
+    instance outside ``instances``.
 
-    Several load instances can SHARE one definition, and scaling per instance
-    then applies the factor once per sharer. Measured: two `Lights` on one
-    `LightsDefinition` at 10 W/m^2, scaled x2 by a naive per-instance loop,
-    come out at 40 W/m^2 rather than 20.
+    Two separate hazards, and an earlier version of this function fixed only
+    the first.
 
-    FOUR of the 28 hand-built campus archetypes share one today, which an
-    earlier version of this docstring denied on the strength of three
-    Office-Small models: `FireHall_pre-1960` shares a `PeopleDefinition`, and
-    all three `Hangar` vintages share a `LightsDefinition`, an
-    `ElectricEquipmentDefinition` AND a `PeopleDefinition` between the
-    `Shop-Machinery` and `Shop-Machinery-Hangar` space types.
+    **Scaling once per sharer.** Several load instances can share one
+    definition, so a per-instance loop applies the factor once each. Measured:
+    two `Lights` on one `LightsDefinition` at 10 W/m^2, scaled x2 naively, come
+    out at 40 rather than 20. Fixed by walking distinct definitions.
 
-    So sharing across space types is not hypothetical — it is how a library
-    construction set or a copied space type ends up wired, and it is already
-    in the corpus.
+    **Scaling an instance the caller did not name.** This is the one that was
+    missed. `scale_lighting(space_type, factor=0.8)` is SCOPED to that space
+    type, but mutating a shared definition in place also changes every other
+    space type using it. #186 recorded the belief that in-place was fine here
+    because "scaling a shared definition by one factor is coherent" — which
+    holds only when EVERY sharer is in scope, and a scoped call is exactly the
+    case where they are not.
+
+    FOUR of the 28 hand-built campus archetypes share a definition: the
+    `FireHall_pre-1960` a `PeopleDefinition`, and all three `Hangar` vintages a
+    `LightsDefinition`, an `ElectricEquipmentDefinition` AND a
+    `PeopleDefinition`, each between `Shop-Machinery` and
+    `Shop-Machinery-Hangar` — two different space types, so a call naming one
+    of them would have moved the other.
+
+    `canmet-energy/campus`'s `reduce_lighting_load_by_percentage` measure
+    solves it by cloning: "clone, rename and adjust a definition once; reuse
+    the clone afterwards", keyed on the SOURCE definition. That is the right
+    key for a UNIFORM transform — every in-scope sharer wants the same
+    result — and it is why #186's value-keyed reuse was wrong for the SETTERS
+    while this is right for the scalers: a scale is one factor for everybody,
+    a set is a different value per caller.
+
+    So a definition whose instances are all in scope is scaled in place, and
+    one with an out-of-scope sharer is cloned once, renamed, repointed and
+    scaled, leaving the original untouched for whoever else holds it.
 
     Only a `Watts/Area` density is scaled. A definition using another
     calculation method is left alone and reported, rather than silently
     converted to a method the caller did not choose.
     """
-    seen, scaled = set(), 0
+    in_scope = {str(i.handle()) for i in instances}
+    groups, order = {}, []
     for instance in instances:
-        definition = read_definition(instance)
-        handle = str(definition.handle())
-        if handle in seen:
-            continue
-        seen.add(handle)
+        handle = str(read_definition(instance).handle())
+        if handle not in groups:
+            groups[handle] = []
+            order.append(handle)
+        groups[handle].append(instance)
+
+    scaled = 0
+    for handle in order:
+        members = groups[handle]
+        definition = read_definition(members[0])
         watts = definition.wattsperSpaceFloorArea()
         if not watts.is_initialized():
             if audit is not None:
@@ -530,7 +577,26 @@ def _scale_definitions(instances, read_definition, audit, step, factor, kind):
                            'Watts/Area',
                            target=definition.nameString())
             continue
-        definition.setWattsperSpaceFloorArea(watts.get() * factor)
+
+        outsiders = [i for i in definition.instances()
+                     if str(i.handle()) not in in_scope]
+        target = definition
+        if outsiders:
+            clone = definition.clone(definition.model())
+            target = clone if cast is None else opt(getattr(clone, cast)())
+            target.setName(f"{definition.nameString()} x{round(factor, 4)}")
+            for member in members:
+                member.setDefinition(target)
+            if audit is not None:
+                audit.info(step,
+                           f'{kind} definition CLONED before scaling — it is '
+                           f'shared with {len(outsiders)} instance(s) outside '
+                           'this call, which were not asked to change',
+                           target=definition.nameString(),
+                           inputs={'clone': target.nameString(),
+                                   'outside_scope': len(outsiders),
+                                   'in_scope': len(members)})
+        target.setWattsperSpaceFloorArea(watts.get() * factor)
         scaled += 1
     return scaled
 
@@ -562,7 +628,8 @@ def scale_electric_equipment(space_type, *, factor, audit=None, step='loads'):
     return _scale_definitions(
         space_type.electricEquipment(),
         lambda equip: equip.electricEquipmentDefinition(),
-        audit, step, factor, 'electric equipment')
+        audit, step, factor, 'electric equipment',
+        cast='to_ElectricEquipmentDefinition')
 
 
 def scale_lighting(space_type, *, factor, audit=None, step='loads'):
@@ -582,7 +649,7 @@ def scale_lighting(space_type, *, factor, audit=None, step='loads'):
         return 0
     return _scale_definitions(
         space_type.lights(), lambda lights: lights.lightsDefinition(),
-        audit, step, factor, 'lighting')
+        audit, step, factor, 'lighting', cast='to_LightsDefinition')
 
 
 def scale_lighting_in_model(model, *, factor, audit=None, step='loads'):
@@ -608,7 +675,7 @@ def scale_lighting_in_model(model, *, factor, audit=None, step='loads'):
         return 0
     return _scale_definitions(
         model.getLightss(), lambda lights: lights.lightsDefinition(),
-        audit, step, factor, 'lighting')
+        audit, step, factor, 'lighting', cast='to_LightsDefinition')
 
 
 def scale_electric_equipment_in_model(model, *, factor, audit=None,
@@ -625,7 +692,8 @@ def scale_electric_equipment_in_model(model, *, factor, audit=None,
     return _scale_definitions(
         model.getElectricEquipments(),
         lambda equip: equip.electricEquipmentDefinition(),
-        audit, step, factor, 'electric equipment')
+        audit, step, factor, 'electric equipment',
+        cast='to_ElectricEquipmentDefinition')
 
 
 def set_people(space_type, *, people_per_area_si=None, number_of_people=None,
@@ -792,4 +860,82 @@ def set_exterior_lights(model, watts, *, name='Exterior Lighting',
                    inputs={'design_w': round(float(watts), 1),
                            'control_option': control_option})
     return lights
+
+
+# EnergyPlus's five mutually exclusive infiltration methods, as
+# (reader, setter) pairs in the order `reduce_infiltration_by_percentage`
+# tries them. Exactly one is ever initialized, because each setter clears the
+# others — measured on 3.11 and pinned by `set_infiltration`'s own test.
+_INFILTRATION_METHODS = (
+    ('designFlowRate', 'setDesignFlowRate'),
+    ('flowperSpaceFloorArea', 'setFlowperSpaceFloorArea'),
+    ('flowperExteriorSurfaceArea', 'setFlowperExteriorSurfaceArea'),
+    ('flowperExteriorWallArea', 'setFlowperExteriorWallArea'),
+    ('airChangesperHour', 'setAirChangesperHour'),
+)
+
+
+def scale_infiltration(space_type, *, factor, audit=None, step='loads'):
+    """Scale ``space_type``'s infiltration by ``factor``, whichever method it
+    uses.
+
+    The retrofit shape the setters could not express. `set_infiltration`
+    writes a value; a stock or retrofit caller much more often wants "twenty
+    percent tighter than whatever is in the file", because the file is a
+    measured or assumed vintage rate and the ECM is a delta on it.
+    `canmet-energy/campus`'s `reduce_infiltration_by_percentage` is exactly
+    this, and nothing here could do it.
+
+    Scaling has to be method-aware, since EnergyPlus carries the rate in one
+    of FIVE mutually exclusive fields: read whichever is initialized, scale
+    it, write it back through its own setter. Writing through the wrong
+    setter would silently switch the method and discard the rate.
+
+    Unlike the lighting and plug scalers this needs no clone, because
+    `SpaceInfiltrationDesignFlowRate` is NOT a definition/instance pair: the
+    rate lives on the object itself and nothing shares it.
+
+    :returns: the number of infiltration objects scaled.
+    """
+    if factor is None:
+        return 0
+    scaled = 0
+    for instance in sorted_by_name(space_type.spaceInfiltrationDesignFlowRates()):
+        for reader, setter in _INFILTRATION_METHODS:
+            value = getattr(instance, reader)()
+            if value.is_initialized():
+                getattr(instance, setter)(value.get() * factor)
+                scaled += 1
+                if audit is not None:
+                    audit.info(step, 'infiltration scaled',
+                               target=instance.nameString(),
+                               inputs={'method': reader, 'factor': factor,
+                                       'from': value.get(),
+                                       'to': value.get() * factor})
+                break
+        else:
+            # NOT reachable through the SDK: a constructed
+            # `SpaceInfiltrationDesignFlowRate` defaults to method
+            # 'Flow/Space' with designFlowRate 0.0 — initialized, not absent —
+            # and the 3.11 header declares resetSchedule and four coefficient
+            # resets but NO reset for any of the five rate fields, so the one
+            # that is set cannot be cleared. It is kept for an object that
+            # reached the model from a file rather than a setter, where a
+            # blank field is possible, and it is deliberately NOT claimed as
+            # tested: nothing in the suite can construct the case.
+            if audit is not None:
+                audit.warn(step,
+                           'infiltration object carries NO rate in any of the '
+                           'five calculation methods — nothing to scale',
+                           target=instance.nameString())
+    return scaled
+
+
+def scale_infiltration_in_model(model, *, factor, audit=None, step='loads'):
+    """`scale_infiltration` across every space type in ``model``."""
+    if factor is None:
+        return 0
+    return sum(scale_infiltration(space_type, factor=factor, audit=audit,
+                                  step=step)
+               for space_type in sorted_by_name(model.getSpaceTypes()))
 

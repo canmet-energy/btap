@@ -48,10 +48,42 @@ def set_demand_controlled_ventilation(air_loop, *, enabled=True,
                        target=air_loop.nameString())
         return None
 
-    mech = oa_system.getControllerOutdoorAir().controllerMechanicalVentilation()
-    mech.setDemandControlledVentilation(bool(enabled))
+    controller = oa_system.getControllerOutdoorAir()
+    mech = controller.controllerMechanicalVentilation()
+
+    # A FixedMinimum outdoor-air FLOOR can make this a silent no-op: DCV
+    # cannot reduce ventilation below a hard minimum, so the flag goes on and
+    # nothing changes in the simulation. `canmet-energy/campus`'s
+    # demand_controlled_ventilation measure warns about exactly this, and a
+    # measure that reports no saving for an unstated reason is worse than one
+    # that refuses.
+    if enabled:
+        floor = opt(controller.minimumOutdoorAirFlowRate())
+        if (controller.getMinimumLimitType() == 'FixedMinimum'
+                and floor is not None and floor > 0):
+            if audit is not None:
+                audit.warn(step,
+                           'demand-controlled ventilation turned on while the '
+                           'outdoor-air controller holds a FixedMinimum floor '
+                           '— DCV cannot reduce ventilation below it, so this '
+                           'may change nothing',
+                           target=air_loop.nameString(),
+                           inputs={'minimum_outdoor_air_m3_per_s': floor,
+                                   'minimum_limit_type': 'FixedMinimum'})
+
+    # The setters return a bool and CAN fail; treating a false as success is
+    # how a measure reports work it did not do.
+    if not mech.setDemandControlledVentilation(bool(enabled)):
+        raise ValueError(
+            'the model refused setDemandControlledVentilation('
+            f'{bool(enabled)}) on {air_loop.nameString()!r}')
     if system_outdoor_air_method is not None:
-        mech.setSystemOutdoorAirMethod(system_outdoor_air_method)
+        if not mech.setSystemOutdoorAirMethod(system_outdoor_air_method):
+            raise ValueError(
+                'the model refused system outdoor-air method '
+                f'{system_outdoor_air_method!r} on '
+                f'{air_loop.nameString()!r} — EnergyPlus accepts only its own '
+                'keys, such as ZoneSum or VentilationRateProcedure')
     if audit is not None:
         audit.info(step,
                    'demand-controlled ventilation '
