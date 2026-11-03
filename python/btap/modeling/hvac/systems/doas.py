@@ -7,6 +7,7 @@ from __future__ import annotations
 import openstudio
 
 from btap.modeling.hvac import naming
+from btap.modeling.hvac import ventilation as _ventilation
 from btap.modeling.hvac.components import coils, schedules
 from btap.modeling.hvac.systems.base_system import BaseSystem
 
@@ -57,7 +58,12 @@ def build_dehumidifying_doas(system, model, *, system_name, namer,
     oa_controller = oa_system.getControllerOutdoorAir()
     oa_controller.setMinimumFractionofOutdoorAirSchedule(always_on)
     oa_controller.setMaximumFractionofOutdoorAirSchedule(always_on)
-    oa_controller.setEconomizerControlType('NoEconomizer')
+    # Through the primitive (#192): a DOAS delivers conditioned outdoor
+    # air at a fixed rate, so there is no economizer mode to modulate.
+    # Asserted rather than left at the IDD default, which is the same
+    # state but says nothing.
+    _ventilation.set_economizer(oa_controller,
+                                control_type='NoEconomizer')
 
     inlet = air_loop.supplyInletNode()
     fan.addToNode(inlet)
