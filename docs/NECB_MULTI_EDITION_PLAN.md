@@ -429,7 +429,7 @@ resolve to a named destination):
 | `energy_tier` | stays — `btap/codes/necb/tiers.py` (all editions) |
 | `eui_data`, `eui_building_energy_target` | `editions/necb2025/eui_archetypes.py` (with the EUI implementation that already imports them) |
 | `ghg_data`, `operational_ghg_kg`, `ghg_level` | `editions/necb2025/part11_ghg.py` | **Historical records are excluded
-deliberately, never rewritten**: `PORT_STATUS.md`, `docs/R6_REVIEW_HANDOFF.md`,
+deliberately, never rewritten**: `PORT_STATUS.md`,
 `docs/d80_retirement_plan_review.md`, **both ledgers** (the R6 one and
 `coverage_code_ref_mapping_r7.json`, whose `old` column necessarily names
 `python/btap/necb/…` — the chain test validates them structurally instead),
@@ -1517,8 +1517,8 @@ rather than main. Same execution model and the one-heavy-job rule.
   gains `removeprefix("necb/")` to preserve the exact prior domain mapping;
   console script names unchanged (user surface); package `CLAUDE.md`/
   `README.md` at `btap/codes/`; 0.3.0 in `pyproject`, `btap/__init__`,
-  the `.iss` guard and four usage examples; `docs/python_port_m6_m7_review.md`
-  added to the historical set; a `test_self_containment.py` allowlist row
+  the `.iss` guard and four usage examples; the M6/M7 port review
+  added to the historical set (itself retired once its subject merged); a `test_self_containment.py` allowlist row
   for the gate; `test.yml:106` bare comment fixed by hand. **D-86** (`kind:
   process`) adjudicates R-B. The agent ran the full suite twice, serially
   (a docstring edit after regenerating docs shifted `#L` anchors — the

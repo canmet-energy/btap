@@ -1,62 +1,104 @@
 # canmet-btap docs — which register is which
 
-Two registers are **live**:
+Every file here is one of three kinds, and knowing which one you are editing
+is the whole point of this page.
 
-- **D — decisions** (`necb_decisions.md`): the judgement calls a reviewer
-  cannot re-derive from the code — code interpretations, accepted deviations,
-  product-shaping choices. Mirrored machine-readably in
-  `../python/btap/codes/data/decisions.json` and surfaced **at runtime**: code
-  paths tag their audit entries with `ruling: 'D-XX'`, and the AHJ report's
-  "Decisions and assumptions applied" appendix lists the ones that fired in the
-  run. Adding a `## D-XX` heading without a registry entry fails
-  `python/tests/necb/test_decisions_registry_sync.py`.
-- **L — legacy findings** (`legacy_findings.md`): defects and divergences found
-  in the legacy openstudio-standards lineage, with filing status.
+## GENERATED — never edit by hand
 
-Two registers are **retired**:
+Each carries a do-not-edit header, and CI fails on any diff between the file
+and a fresh run of its generator.
 
-- **A (adjudicate) and T (to-fix)** were the working queues of the 2026-07-25
-  reference-systems audit (`audit_2026-07-25_reference_systems.md`). Both are
-  drained — T1-T13 became D-22, A1-A5 became D-34/D-37/D-38/D-39/D-40, and A6
-  became D-45 (ruled 2026-07-29). That file is kept as
-  **archived evidence** for the reasoning behind those decisions; nothing new
-  goes into it.
+| file | generator |
+|---|---|
+| `necb_decisions.md` | `generate_decisions.py` |
+| `CODE_DECISIONS_BY_PROVISION.md` | `generate_decisions.py` |
+| `NECB_COVERAGE.md` | `generate_necb_coverage.py` |
+| `NECB_8_4_COVERAGE.html` | `generate_necb_8_4_coverage.py` |
+| `NECB_EDITION_DELTAS.md` | `generate_necb_edition_delta.py` |
+| `NECB_VINTAGE_MATCH.md` | `generate_necb_vintage_match.py` |
+| `NECB_AHJ_REFERRALS.md` | `generate_ahj_referrals.py` |
 
-The rest of this directory splits into two kinds — know which you are
-editing:
+**`necb_decisions.md` is an OUTPUT, not the register.** The canonical source
+of one decision is one file, `docs/decisions/D-NN.md`, with TOML front matter
+plus an authored body. To add or change a decision, edit that file and run
+`python3 python/scripts/generate_decisions.py`;
+`python/tests/necb/test_decisions_registry_sync.py` gates the three outputs
+against the sources. An earlier version of this page said to add a `## D-XX`
+heading here, which would have had you hand-editing a generated file.
 
-**GENERATED — never edit by hand** (each carries a do-not-edit header, and
-the CI lint job regenerates both and fails on any diff):
-- `NECB_8_4_COVERAGE.html` and `NECB_COVERAGE.md` — the coverage
-  documents, rebuilt by `python3 python/scripts/generate_necb_coverage.py`
-  and `python3 python/scripts/generate_necb_8_4_coverage.py` from the Python
-  rules manifests, the `article` citation scan, and cached 8.4 article text.
-  (Both were named `NECB_GEM_COVERAGE` until R6; the gems they were named for
-  no longer exist, and the file carries no evidence pointers, so the rename
-  cost nothing.)
+(`NECB_COVERAGE.md` and `NECB_8_4_COVERAGE.html` were named
+`NECB_GEM_COVERAGE` until R6; the gems they were named for no longer exist.)
 
-**AUTHORED reference:**
-- `necb_rule_verification.md` — the evidence-tier rules the coverage claims
-  must satisfy.
-- `archetype_compliance_findings.md` — do the legacy archetypes meet the
-  2020 performance path (fixed-point analysis).
-- `code_clarity_review.md` — the worked-off clarity review ledger.
-- `python_port_m6_m7_review.md` — shareable review of the completed Python M6
-  umbrella and the corrected native `py-tbd` plan and acceptance gates for M7.
-- `d80_retirement_plan_review.md` — durable review and execution checklist for
-  D-80 Rev 4: live Leg C, verification self-sufficiency, and staged Ruby-gem
-  retirement.
-- `R6_REVIEW_HANDOFF.md` — the R6 review record, CLOSED at `bb28cf6`: commit
-  boundaries, invariants, intentional oracle divergences, both review rounds
-  and how each finding was resolved, the closing four-job dispatch evidence,
-  and the one unexplained working-tree event.
+## AUTHORED and live
 
-## Review debt: none
+These are the ones to edit, and each has a consumer that will tell you if you
+break it.
 
-`pending_review.md` — CLOSED 2026-08-02: the deferred review of the
-2026-07-29 backlog was executed in full (see the dated entry in
-`necb_decisions.md`); the consolidated fleet baseline there is reviewed, not
-just swept.
+- `NECB_AHJ_QUESTIONS.md` — the register of Code questions this tool does not
+  decide, four statuses, `AHJ-NN` ids. Cited from runtime source as the third
+  citation axis and gated by `python/tests/necb/test_ahj_register.py`, which
+  fails if the runtime cites an id with no entry. The most load-bearing
+  authored document in this directory.
+- `necb_rule_verification.md` — the evidence tiers a coverage claim must
+  satisfy, and the `verify` job's coverage baseline.
+- `legacy_findings.md` — register **L**: defects and divergences found in the
+  legacy openstudio-standards lineage, with filing status. Cited by
+  `docs/decisions/_preamble.md`.
+- `DEVELOPERS.md` — contributor setup and the test lanes. `CLAUDE.md` points
+  here rather than repeating it.
+- `necb_dx_plf_refit.md` — the DX part-load refit study D-102 refers to and
+  deliberately does NOT adopt, regenerated by
+  `docs/scripts/necb_dx_plf_refit.py`. It exists because unadopted figures
+  kept leaking into D-102's adopted evidence.
+- `README.md` — this page, and the glossary below.
+
+## AUTHORED evidence — keep, do not extend
+
+Measurements and audit records that something else depends on. Nothing new
+goes into them; a new finding goes to a live register above.
+
+- `audit_2026-07-25_reference_systems.md` — the four-auditor three-way
+  comparison (code text vs openstudio-hvac vs legacy) behind D-22,
+  D-34/D-37/D-38/D-39/D-40 and D-45. Its **A** and **T** registers are
+  retired and drained; it is kept for the per-finding technical basis, which
+  the decisions cite rather than restate.
+- `archetype_compliance_findings.md` — the fixed-point analysis: 15 of the 17
+  testable legacy archetypes fail the full 8.4.1.2 determination at
+  Toronto/Electricity. Seventeen simulations to reproduce.
+- `d80_retirement_plan_review.md` — the D-80 Rev 4 review of record. Named as
+  a provenance field in `verification/oracle/request_manifest.json`, which is
+  tracked and gated, so this one is a verification dependency rather than a
+  docs choice.
+
+## Plans
+
+Live direction documents. Five are cited from product code or `CLAUDE.md`, so
+a rename breaks a pointer:
+
+- `NECB_MULTI_EDITION_PLAN.md` — the multi-edition restructure (D-86 Stage 1
+  and after).
+- `HVAC_MODERN_SYSTEMS_PLAN.md` — read by `scripts/simulate_all_systems.py`.
+- `plans/DECISION_APPLICABILITY_PLAN.md` — the structured-decision migration;
+  read by `generate_decisions.py` and two tests.
+- `plans/KIVA_FOUNDATION_PLAN.md` — read by `modeling/envelope/foundations.py`.
+- `plans/PROPOSED_CHARACTERIZATION_PLAN.md` — named in `CLAUDE.md`.
+- `plans/MODEL_ARTICULATION_API_PLAN.md` — the articulation surface; the gap
+  it names is what the stock work's phase 0 closed.
+- `plans/METRICS_OUTPUT_AUDIT.md` — what a run already produces versus what we
+  read from it.
+- `plans/ARTICULATION_API_AUDIT.md` — the measured articulation inventory.
+
+A plan holds reasoning and measurements. Live STATUS belongs in its GitHub
+issue, so the two do not drift apart.
+
+## Retired from this directory
+
+Process records whose subjects merged, removed once their rulings were carried
+by the decisions and their commits by git: the R6 review handoff (D-84 is the
+retirement authority), the M6/M7 port review (`PORT_STATUS.md` and D-79 hold
+the migration history), the closed deferred-review tombstone (D-57 records its
+execution), the R5 release checklist, and the worked-off clarity ledger
+(D-67).
 
 ## Project glossary (the house dialect, defined once)
 
