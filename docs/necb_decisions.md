@@ -2434,9 +2434,10 @@ the four simulation runs the pipeline already pays for.
 interior lighting falls 230.6 -> 158.3 kWh/wk (-31%), the reference total falls
 3.0%, and percent-of-target rises 91.4 -> 94.2: the target got STRICTER, which
 is the direction the sentence intends. Per-building attribution across the
-fleet is a DEFERRED review gate, not something this entry claims:
-`docs/pending_review.md` holds the sweep item, and until it is run the D-46
-table remains the last validated fleet baseline.
+fleet is a DEFERRED review gate, not something this entry claims. The sweep
+item was tracked separately and CLOSED 2026-08-02 (see D-57's "Deferred review
+EXECUTED" section); until the sweep itself is run the D-46 table remains the
+last validated fleet baseline.
 
 **Scope limit found while measuring — the flip is inert on most archetypes
 [RAN].** `reference_daylighting` places controls with `placement:
@@ -3216,7 +3217,8 @@ Read the table for the mechanisms, not just the totals:
 
 **Energy attribution across the fleet is NOT claimed here.** No sweep was run:
 the plan defers it and this entry does not pre-empt it. The D-46 table remains
-the last validated fleet baseline. See the `pending_review.md` item below.
+the last validated fleet baseline. See the "Deferred review EXECUTED" section
+below, which closed that item.
 
 ### Citation hygiene (the other half of L-26)
 
@@ -3471,7 +3473,7 @@ first checking whether the fan crossed 25 kW.**
 
 - Who/when: Claude under D-10 delegation, 2026-07-30.
 
-### Deferred review EXECUTED (2026-08-02, Fable) — pending_review.md closed
+### Deferred review EXECUTED (2026-08-02, Fable)
 
 The review pass deferred on 2026-07-29 ("no Fable today") ran today. Every
 reviewer DECISION owed by phases 0-4, 6 and 7 is adjudicated below; every
