@@ -1,0 +1,331 @@
+{
+  "_generated_by": "python/scripts/fetch_ecm_field_inventory.py",
+  "_note": "DO NOT EDIT. Derived from two PRIVATE repositories through an authenticated gh session; ordinary runtime and CI read this file and stay offline.",
+  "campus": {
+    "counts": {
+      "arguments_in_scope": 63,
+      "measures": 21
+    },
+    "dropped_as_costing_or_bookkeeping": {
+      "add_daylight_sensors": [
+        "years_until_costs_start",
+        "demo_cost_initial_const",
+        "om_cost",
+        "om_frequency"
+      ],
+      "change_ext_wall_r_value": [
+        "material_cost_increase_ip",
+        "one_time_retrofit_cost_ip",
+        "years_until_retrofit_cost"
+      ],
+      "led_lighting": [
+        "years_until_costs_start",
+        "demo_cost_initial_const",
+        "om_cost",
+        "om_frequency"
+      ],
+      "reduce_infiltration_by_percentage": [
+        "material_and_installation_cost",
+        "om_cost",
+        "om_frequency"
+      ],
+      "reduce_lighting_load_by_percentage": [
+        "years_until_costs_start",
+        "demo_cost_initial_const",
+        "om_cost",
+        "om_frequency"
+      ]
+    },
+    "measures": {
+      "add_ashp_with_backup": [
+        "ashp_capacity_w",
+        "enable_loop_reset",
+        "loop_name_filter"
+      ],
+      "add_daylight_sensors": [
+        "space_type",
+        "setpoint",
+        "control_type",
+        "fraction_zone_controlled",
+        "height",
+        "expected_life"
+      ],
+      "add_doas_erv": [],
+      "add_reporting_outputs": [
+        "tolerance",
+        "plant_diagnostics"
+      ],
+      "adjust_thermostat_deadband": [
+        "heating_offset_c",
+        "cooling_offset_c",
+        "min_deadband_c",
+        "apply_heating",
+        "apply_cooling"
+      ],
+      "change_ext_wall_r_value": [
+        "r_value",
+        "allow_reduction"
+      ],
+      "daylight_and_occupancy_controls": [
+        "choice",
+        "template"
+      ],
+      "demand_controlled_ventilation": [
+        "dcv_type"
+      ],
+      "economizer_control": [
+        "economizer_type",
+        "econoMaxDryBulbTemp",
+        "econoMinDryBulbTemp"
+      ],
+      "fan_and_pump_motor_efficiency_upgrade": [
+        "object",
+        "motor_eff"
+      ],
+      "improve_fan_and_pump_total_efficiency": [],
+      "improve_motor_efficiency": [
+        "object",
+        "motor_eff"
+      ],
+      "install_low_flow_fixtures": [
+        "flow_reduction_pct",
+        "name_filter"
+      ],
+      "led_lighting": [
+        "space_type",
+        "expected_life"
+      ],
+      "reduce_infiltration_by_percentage": [
+        "space_type",
+        "space_infiltration_reduction_percent",
+        "alter_coef"
+      ],
+      "reduce_lighting_load_by_percentage": [
+        "space_type",
+        "expected_life"
+      ],
+      "shift_hours_of_operation": [
+        "fraction_of_daily_occ_range",
+        "hoo_var_method",
+        "target_hoo_from_model"
+      ],
+      "unoccupied_temp_setback": [
+        "zone_name"
+      ],
+      "upgrade_dhw_plant": [
+        "thermal_efficiency",
+        "off_cycle_loss_reduction_pct",
+        "name_filter"
+      ],
+      "window_retrofit": [
+        "target_rsi_m2k_w",
+        "target_shgc"
+      ],
+      "windowed_setpoint_and_load_override": [
+        "heating_setpoint_c",
+        "cooling_setpoint_c",
+        "plug_reduction_pct",
+        "occupancy_reduction_pct",
+        "lighting_reduction_pct",
+        "start_month",
+        "start_day",
+        "end_month",
+        "end_day",
+        "apply_heating",
+        "apply_cooling",
+        "apply_plug",
+        "apply_occupancy",
+        "apply_lighting",
+        "remove_special_days",
+        "apply_hvac_shutdown",
+        "windows"
+      ]
+    },
+    "repo": "canmet-energy/campus",
+    "source": "src/resources/buildings/measures"
+  },
+  "osruby": {
+    "categories": {
+      "ecm_capital_costs": [
+        "measure_id",
+        "cost_per_floor_m2",
+        "cost_per_building"
+      ],
+      "ecm_cold_deck_reset_control": [
+        "cold_deck_reset_enabled",
+        "cold_deck_reset_max_supply_air_temp",
+        "cold_deck_reset_min_supply_air_temp"
+      ],
+      "ecm_cooling_cop": [
+        "cop"
+      ],
+      "ecm_dcv": [
+        "dcv_enabled"
+      ],
+      "ecm_dhw": [
+        "shw_setpoint_sched_name",
+        "shw_heater_fuel_type",
+        "shw_thermal_eff"
+      ],
+      "ecm_economizers": [
+        "economizer_control_type",
+        "economizer_control_action_type",
+        "economizer_maximum_limit_dry_bulb_temperature",
+        "economizer_maximum_limit_enthalpy",
+        "economizer_maximum_limit_dewpoint_temperature",
+        "economizer_minimum_limit_dry_bulb_temperature"
+      ],
+      "ecm_envelope": [
+        "library_file",
+        "default_construction_set_name",
+        "ext_wall_rsi",
+        "ext_floor_rsi",
+        "ext_roof_rsi",
+        "ground_wall_rsi",
+        "ground_floor_rsi",
+        "ground_roof_rsi",
+        "fixed_window_rsi",
+        "fixed_wind_solar_trans",
+        "fixed_wind_vis_trans",
+        "operable_window_rsi",
+        "operable_wind_solar_trans",
+        "operable_wind_vis_trans",
+        "door_construction_rsi",
+        "glass_door_rsi",
+        "glass_door_solar_trans",
+        "glass_door_vis_trans",
+        "overhead_door_rsi",
+        "skylight_rsi",
+        "skylight_solar_trans",
+        "skylight_vis_trans",
+        "tubular_daylight_dome_rsi",
+        "tubular_daylight_dome_solar_trans",
+        "tubular_daylight_dome_vis_trans",
+        "tubular_daylight_diffuser_rsi",
+        "tubular_daylight_diffuser_solar_trans",
+        "tubular_daylight_diffuser_vis_trans",
+        "ext_wall_cost_m3",
+        "ext_floor_cost_m3",
+        "ext_roof_cost_m3",
+        "ground_wall_cost_m3",
+        "ground_floor_cost_m3",
+        "ground_roof_cost_m3",
+        "fixed_window_cost_m3",
+        "operable_window_cost_m3",
+        "door_construction_cost_m3",
+        "glass_door_cost_m3",
+        "overhead_door_cost_m3",
+        "skylight_cost_m3",
+        "tubular_daylight_dome_cost_m3",
+        "tubular_daylight_diffuser_cost_m3",
+        "total_building_construction_set_cost"
+      ],
+      "ecm_erv": [
+        "erv_enabled",
+        "erv_autosizeNominalSupplyAirFlowRate",
+        "erv_NominalSupplyAirFlowRate",
+        "erv_HeatExchangerType",
+        "erv_SensibleEffectivenessat100CoolingAirFlow",
+        "erv_SensibleEffectivenessat75CoolingAirFlow",
+        "erv_LatentEffectiveness100Cooling",
+        "erv_LatentEffectiveness75Cooling",
+        "erv_SensibleEffectiveness100Heating",
+        "erv_SensibleEffectiveness75Heating",
+        "erv_LatentEffectiveness100Heating",
+        "erv_LatentEffectiveness75Heating",
+        "erv_SupplyAirOutletTemperatureControl",
+        "erv_setFrostControlType",
+        "erv_ThresholdTemperature",
+        "erv_InitialDefrostTimeFraction",
+        "erv_nominal_electric_power",
+        "erv_economizer_lockout"
+      ],
+      "ecm_exhaust_fans": [
+        "exhaust_fans_occ_control_enabled"
+      ],
+      "ecm_fans": [
+        "fan_total_eff",
+        "fan_motor_eff",
+        "fan_volume_type"
+      ],
+      "ecm_heating_cooling_setpoints": [
+        "library_file",
+        "heating_schedule_name",
+        "cooling_schedule_name"
+      ],
+      "ecm_hotwater_boilers": [
+        "hw_boiler_design_water_outlet_temperature",
+        "hw_boiler_fuel_type",
+        "hw_boiler_thermal_eff",
+        "hw_boiler_curve",
+        "hw_boiler_flow_mode",
+        "hw_boiler_eff_curve_temp_eval_var",
+        "hw_boiler_reset_highsupplytemp",
+        "hw_boiler_reset_outsidehighsupplytemp",
+        "hw_boiler_reset_lowsupplytemp",
+        "hw_boiler_reset_outsidelowsupplytemp"
+      ],
+      "ecm_id": [
+        "building_type",
+        "vintage_name",
+        "measure_id"
+      ],
+      "ecm_infiltration": [
+        "infiltration_design_flow_rate",
+        "infiltration_flow_per_space",
+        "infiltration_flow_per_exterior_area",
+        "infiltration_air_changes_per_hour"
+      ],
+      "ecm_lighting": [
+        "lighting_scaling_factor",
+        "lighting_fraction_radiant",
+        "lighting_fraction_visible",
+        "lighting_return_air_fraction"
+      ],
+      "ecm_plugs": [
+        "elec_equipment_scaling_factor",
+        "elec_equipment_fraction_radiant",
+        "elec_equipment_fraction_latent",
+        "elec_equipment_fraction_lost"
+      ],
+      "ecm_pumps": [
+        "pump_motor_eff",
+        "pump_control_type",
+        "pump_speed_type"
+      ],
+      "ecm_sat_reset": [
+        "sat_reset_enabled",
+        "sat_reset_outdoor_high_temperature",
+        "sat_reset_outdoor_low_temperature",
+        "sat_reset_setpoint_at_outdoor_high_temperature",
+        "sat_reset_setpoint_at_outdoor_low_temperature"
+      ],
+      "ecm_sizing": [
+        "heating_sizing_factor",
+        "cooling_sizing_factor",
+        "zone_heating_sizing_factor",
+        "zone_cooling_sizing_factor"
+      ],
+      "ecm_temp_setback": [
+        "occ_stbck_enabled",
+        "occ_stbck_tolerance",
+        "occ_stbck_heat_setback",
+        "occ_stbck_heat_setpoint",
+        "occ_stbck_cool_setback",
+        "occ_stbck_cool_setpoint"
+      ]
+    },
+    "counts": {
+      "categories_in_scope": 18,
+      "categories_total": 20,
+      "columns_in_scope": 122,
+      "columns_total": 128
+    },
+    "out_of_scope": [
+      "ecm_capital_costs",
+      "ecm_id"
+    ],
+    "repo": "canmet-energy/osruby",
+    "source": "lib/btap/measures.rb"
+  }
+}
