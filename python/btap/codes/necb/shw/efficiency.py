@@ -21,6 +21,7 @@ from btap._compat import NullAudit, ruby_round, ruby_str
 from btap._sdk import ensure_sdk_hashable
 from btap.audit import AuditLog
 from btap.codes import resolve
+from btap.modeling import shw as _mod_shw
 
 # `uniq` over SDK plant loops (apply_solar_pool_minimums) keys on the objects
 # themselves, exactly as the Ruby Array#uniq did.
@@ -131,9 +132,9 @@ def _apply_efficiency(water_heater, ruleset, audit=None):
         return False
 
     ua_w_k = openstudio.convert(ua_btu_hr_f, "Btu/hr*R", "W/K").get()
-    water_heater.setHeaterThermalEfficiency(efficiency)
-    water_heater.setOffCycleLossCoefficienttoAmbientTemperature(ua_w_k)
-    water_heater.setOnCycleLossCoefficienttoAmbientTemperature(ua_w_k)
+    _mod_shw.set_water_heater_efficiency(water_heater,
+                                         thermal_efficiency=efficiency)
+    _mod_shw.set_water_heater_losses(water_heater, ua_w_per_k=ua_w_k)
     water_heater.setOnCycleParasiticFuelType(fuel)
     water_heater.setOnCycleParasiticHeatFractiontoTank(
         _to_f(rules["parasitic"]["on_cycle_heat_fraction"]))
@@ -177,9 +178,10 @@ def _apply_instantaneous(water_heater, rules, fuel, capacity, audit):
         audit.warn("shw_efficiency",
                    f"{water_heater.nameString()}: instantaneous fuel '{fuel}' not supported")
         return False
-    water_heater.setHeaterThermalEfficiency(efficiency)
-    water_heater.setOffCycleLossCoefficienttoAmbientTemperature(0.0)
-    water_heater.setOnCycleLossCoefficienttoAmbientTemperature(0.0)
+    _mod_shw.set_water_heater_efficiency(water_heater,
+                                         thermal_efficiency=efficiency)
+    # Tankless: a zero UA is the physical claim, not a missing value.
+    _mod_shw.set_water_heater_losses(water_heater, ua_w_per_k=0.0)
     water_heater.setName(f"{water_heater.nameString()} "
                          f"{ruby_str(ruby_round(efficiency, 3))} Therm Eff Instantaneous")
     audit.decision("shw_efficiency",
@@ -387,7 +389,8 @@ def _apply_solar_pool_minimums(model, ruleset, audit=None):
             else:
                 minimum = None
             if minimum is not None:
-                heater.setHeaterThermalEfficiency(minimum)
+                _mod_shw.set_water_heater_efficiency(
+                    heater, thermal_efficiency=minimum)
                 audit.decision("shw_efficiency",
                                "pool heater set to the Table 6.2.2.1 minimum thermal efficiency",
                                target=heater.nameString(),
