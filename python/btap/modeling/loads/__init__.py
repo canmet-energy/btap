@@ -291,11 +291,16 @@ def _scale_definitions(instances, read_definition, audit, step, factor, kind):
     `LightsDefinition` at 10 W/m^2, scaled x2 by a naive per-instance loop,
     come out at 40 W/m^2 rather than 20.
 
-    The hand-built campus archetypes do not share today — 9 Lights and 9
-    definitions in each Office-Small vintage, 0 shared — so this is latent
-    there. It stops being latent the moment anything applies a density
-    model-wide, because sharing ACROSS space types is the natural way a
-    library construction set or a copied space type ends up wired.
+    FOUR of the 28 hand-built campus archetypes share one today, which an
+    earlier version of this docstring denied on the strength of three
+    Office-Small models: `FireHall_pre-1960` shares a `PeopleDefinition`, and
+    all three `Hangar` vintages share a `LightsDefinition`, an
+    `ElectricEquipmentDefinition` AND a `PeopleDefinition` between the
+    `Shop-Machinery` and `Shop-Machinery-Hangar` space types.
+
+    So sharing across space types is not hypothetical — it is how a library
+    construction set or a copied space type ends up wired, and it is already
+    in the corpus.
 
     Only a `Watts/Area` density is scaled. A definition using another
     calculation method is left alone and reported, rather than silently
