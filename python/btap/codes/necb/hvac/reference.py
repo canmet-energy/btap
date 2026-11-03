@@ -29,6 +29,7 @@ from btap.codes import resolve
 from btap.codes.necb import code_id, rulesdata
 from btap.costing.hvac import geometry as _costing_geometry
 from btap.modeling.hvac import classify as _classify
+from btap.modeling.hvac import ventilation as _ventilation
 from btap.modeling.hvac.components import coils as _coils
 from btap.modeling.hvac.components import schedules as _schedules
 from btap.modeling.hvac.systems.plant_loops import BOILER_PART_LOAD_CLASS_FEATURE
@@ -2622,7 +2623,6 @@ def _apply_dcv(air_loops, zones, proposed_dcv, code, audit):
         if oa_system.empty():
             continue
 
-        mech = oa_system.get().getControllerOutdoorAir().controllerMechanicalVentilation()
         if not enabled:
             audit.info('rules', 'no demand-controlled ventilation on the proposed systems serving these thermal '
                                 'blocks — none modeled in the reference',
@@ -2631,11 +2631,18 @@ def _apply_dcv(air_loops, zones, proposed_dcv, code, audit):
                        article=article, ruling='D-54')
             continue
 
-        mech.setDemandControlledVentilation(True)
         methods = _uniq([s['method'] for s in enabled if s['method'] is not None])
         copied = [m for m in methods if m in DCV_METHODS]
-        if len(copied) == 1:
-            mech.setSystemOutdoorAirMethod(copied[0])
+        # Down to the primitive (phase 0 of the stock plan): turning DCV
+        # on is a modelling act, while WHETHER the reference gets it and
+        # which outdoor-air method it inherits are D-54's call and stay
+        # here. audit=None deliberately — this site owns the trail, with
+        # its article and ruling, and the primitive's own entry would
+        # double it and move every frozen baseline.
+        mech = _ventilation.set_demand_controlled_ventilation(
+            air_loop, enabled=True,
+            system_outdoor_air_method=(
+                copied[0] if len(copied) == 1 else None))
         audit.decision('rules', 'proposed demand-controlled ventilation strategy copied to the reference system',
                        target=air_loop.nameString(),
                        inputs={'proposed_loops': _uniq([s['air_loop'] for s in enabled]),

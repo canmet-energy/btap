@@ -909,5 +909,384 @@ class TestDeduplicateDefinitions(unittest.TestCase):
         self.assertEqual(3, merges[0]['inputs']['instances_reassigned'])
 
 
+@needs_sdk
+class TestNameOrderedSingleInstance(unittest.TestCase):
+    """`single_instance` orders BY NAME. Both it and the NECB applier it came
+    from used a plain `sorted()`, which is not name order on 3.11, so which
+    duplicate survived depended on something other than the name."""
+
+    def test_the_SURVIVOR_is_the_first_by_NAME(self):
+        import openstudio
+
+        model, space_type = _space_type()
+        for name in ('Zebra Lights', 'Alpha Lights', 'Middle Lights'):
+            definition = openstudio.model.LightsDefinition(model)
+            definition.setName(name + ' Def')
+            definition.setWattsperSpaceFloorArea(5.0)
+            lights = openstudio.model.Lights(definition)
+            lights.setName(name)
+            lights.setSpaceType(space_type)
+        self.assertEqual(3, len(space_type.lights()))
+
+        Loads.set_lighting(space_type, watts_per_area_si=11.0)
+        survivors = [light.nameString() for light in space_type.lights()]
+        self.assertEqual(
+            ['Alpha Lights'], survivors,
+            'the first BY NAME survives; a plain sorted() kept Alpha here too '
+            'but ordered the rest Zebra/Middle, so the survivor was not a '
+            'property of the name')
+
+
+@needs_sdk
+class TestExteriorLights(unittest.TestCase):
+    """A DIFFERENT class family: ExteriorLightsDefinition descends from
+    ExteriorLoadDefinition, not SpaceLoadDefinition, so it has no space type
+    and no `instances()`."""
+
+    def test_it_creates_the_pair_with_daylight_control(self):
+        import openstudio
+
+        model = openstudio.model.Model()
+        lights = Loads.set_exterior_lights(model, 1500.0, name='Yard Lights')
+        self.assertEqual('Yard Lights', lights.nameString())
+        self.assertEqual('AstronomicalClock', lights.controlOption())
+        definition = lights.exteriorLightsDefinition()
+        self.assertEqual('Yard Lights Definition', definition.nameString())
+        self.assertAlmostEqual(1500.0, definition.designLevel())
+
+    def test_the_default_control_is_NOT_the_SDK_default(self):
+        """The SDK's own default is ScheduleNameOnly, so a lift that passed
+        nothing would have turned the daylight control off."""
+        import openstudio
+
+        model = openstudio.model.Model()
+        bare = openstudio.model.ExteriorLights(
+            openstudio.model.ExteriorLightsDefinition(model))
+        self.assertEqual('ScheduleNameOnly', bare.controlOption())
+        self.assertEqual(
+            'AstronomicalClock',
+            Loads.set_exterior_lights(model, 10.0).controlOption())
+
+
+@needs_sdk
+class TestDemandControlledVentilation(unittest.TestCase):
+    """Phase 0's fourth primitive, `ecm_dcv`, which had never been lifted."""
+
+    @staticmethod
+    def _loop_with_oa():
+        import openstudio
+
+        model = openstudio.model.Model()
+        air_loop = openstudio.model.AirLoopHVAC(model)
+        air_loop.setName('Probe Air Loop')
+        controller = openstudio.model.ControllerOutdoorAir(model)
+        oa_system = openstudio.model.AirLoopHVACOutdoorAirSystem(
+            model, controller)
+        oa_system.addToNode(air_loop.supplyInletNode())
+        return model, air_loop
+
+    def test_it_turns_dcv_on_and_sets_the_method(self):
+        from btap.modeling.hvac import ventilation as Ventilation
+
+        _model, air_loop = self._loop_with_oa()
+        mech = Ventilation.set_demand_controlled_ventilation(
+            air_loop, system_outdoor_air_method='ZoneSum')
+        self.assertIsNotNone(mech)
+        self.assertTrue(mech.demandControlledVentilation())
+        self.assertEqual('ZoneSum', mech.systemOutdoorAirMethod())
+
+    def test_the_method_is_LEFT_ALONE_when_not_given(self):
+        from btap.modeling.hvac import ventilation as Ventilation
+
+        _model, air_loop = self._loop_with_oa()
+        before = Ventilation.set_demand_controlled_ventilation(
+            air_loop, system_outdoor_air_method='ZoneSum'
+        ).systemOutdoorAirMethod()
+        after = Ventilation.set_demand_controlled_ventilation(
+            air_loop).systemOutdoorAirMethod()
+        self.assertEqual(before, after,
+                         'choosing an outdoor-air method is a code question, '
+                         'so the primitive must not pick one')
+
+    def test_enabled_False_CLEARS_it(self):
+        from btap.modeling.hvac import ventilation as Ventilation
+
+        _model, air_loop = self._loop_with_oa()
+        Ventilation.set_demand_controlled_ventilation(air_loop)
+        mech = Ventilation.set_demand_controlled_ventilation(
+            air_loop, enabled=False)
+        self.assertFalse(mech.demandControlledVentilation())
+
+    def test_a_loop_with_NO_outdoor_air_system_returns_None(self):
+        """A recirculating loop has nowhere to carry the setting. That is not
+        an error — DCV is meaningless on one — so it must not raise."""
+        import openstudio
+
+        from btap.modeling.hvac import ventilation as Ventilation
+
+        model = openstudio.model.Model()
+        air_loop = openstudio.model.AirLoopHVAC(model)
+        air_loop.setName('No OA Loop')
+        audit = AuditLog()
+        self.assertIsNone(Ventilation.set_demand_controlled_ventilation(
+            air_loop, audit=audit))
+        self.assertTrue(
+            any('not applicable' in str(e.get('value') or e.get('action') or '')
+                for e in audit.entries),
+            'and it says so in the trail')
+
+
+@needs_sdk
+class TestScalingDoesNotReachOutSIDE_ITS_SCOPE(unittest.TestCase):
+    """The defect #186 recorded as acceptable and was not.
+
+    #186 said `scale_*` could keep mutating a shared definition in place
+    because "scaling a shared definition by one factor is coherent". That
+    holds only when EVERY sharer is in scope, and a call naming one space type
+    is exactly the case where they are not. `canmet-energy/campus`'s
+    reduce_lighting_load_by_percentage clones for this reason.
+    """
+
+    @staticmethod
+    def _two_types_one_definition(watts=10.0):
+        import openstudio
+
+        model = openstudio.model.Model()
+        definition = openstudio.model.LightsDefinition(model)
+        definition.setName('Shared Lighting Definition')
+        definition.setWattsperSpaceFloorArea(watts)
+        types = []
+        for n in range(2):
+            space_type = openstudio.model.SpaceType(model)
+            space_type.setName(f'Type {n}')
+            lights = openstudio.model.Lights(definition)
+            lights.setName(f'Lights {n}')
+            lights.setSpaceType(space_type)
+            types.append(space_type)
+        return model, definition, types
+
+    def test_the_space_type_NOT_named_keeps_its_value(self):
+        model, original, types = self._two_types_one_definition()
+        audit = AuditLog()
+        Loads.scale_lighting(types[0], factor=0.5, audit=audit)
+
+        self.assertAlmostEqual(
+            5.0,
+            opt(next(iter(types[0].lights())).lightsDefinition()
+                .wattsperSpaceFloorArea()),
+            msg='the space type that was asked for')
+        self.assertAlmostEqual(
+            10.0,
+            opt(next(iter(types[1].lights())).lightsDefinition()
+                .wattsperSpaceFloorArea()),
+            msg='the space type that was NOT asked for — before the fix this '
+                'read 5.0, because the shared definition was scaled in place')
+        self.assertAlmostEqual(10.0, opt(original.wattsperSpaceFloorArea()),
+                               msg='and the original is untouched')
+        self.assertEqual(2, len(model.getLightsDefinitions()))
+
+    def test_the_clone_is_audited(self):
+        _model, _original, types = self._two_types_one_definition()
+        audit = AuditLog()
+        Loads.scale_lighting(types[0], factor=0.5, audit=audit)
+        clones = [e for e in audit.entries
+                  if 'CLONED' in str(e.get('value') or e.get('action') or '')]
+        self.assertEqual(1, len(clones))
+        self.assertEqual(1, clones[0]['inputs']['outside_scope'])
+
+    def test_NO_clone_when_every_sharer_is_in_scope(self):
+        """A model-wide call holds all the sharers, so in-place is right and
+        cloning would only bloat the model."""
+        model, original, _types = self._two_types_one_definition()
+        Loads.scale_lighting_in_model(model, factor=0.5)
+        self.assertEqual(
+            1, len(model.getLightsDefinitions()),
+            'one definition in, one definition out')
+        self.assertAlmostEqual(5.0, opt(original.wattsperSpaceFloorArea()))
+
+    def test_the_factor_applies_ONCE_to_a_shared_definition(self):
+        """The hazard the first version DID fix, still fixed: a per-instance
+        loop would scale a definition once per sharer."""
+        model, original, _types = self._two_types_one_definition()
+        Loads.scale_lighting_in_model(model, factor=2.0)
+        self.assertAlmostEqual(20.0, opt(original.wattsperSpaceFloorArea()),
+                               msg='20, not 40')
+
+
+@needs_sdk
+class TestScaleInfiltration(unittest.TestCase):
+    """The retrofit shape the setters could not express: "twenty percent
+    tighter than whatever is in the file"."""
+
+    def test_it_scales_whichever_METHOD_the_object_uses(self):
+        cases = (
+            ('design_flow_rate_si', 0.05, 'designFlowRate'),
+            ('per_floor_area_si', 0.0004, 'flowperSpaceFloorArea'),
+            ('per_exterior_area_si', 0.0003, 'flowperExteriorSurfaceArea'),
+            ('per_exterior_wall_area_si', 0.0002, 'flowperExteriorWallArea'),
+            ('air_changes_per_hour', 0.25, 'airChangesperHour'),
+        )
+        for kwarg, value, reader in cases:
+            with self.subTest(kwarg):
+                _model, space_type = _space_type()
+                Loads.set_infiltration(space_type, **{kwarg: value})
+                self.assertEqual(1, Loads.scale_infiltration(space_type,
+                                                             factor=0.8))
+                instance = next(iter(
+                    space_type.spaceInfiltrationDesignFlowRates()))
+                self.assertAlmostEqual(
+                    value * 0.8, opt(getattr(instance, reader)()),
+                    msg='scaled through its OWN setter — writing through '
+                        'another would switch the method and discard the rate')
+
+    def test_it_does_not_switch_the_method(self):
+        _model, space_type = _space_type()
+        Loads.set_infiltration(space_type, air_changes_per_hour=0.25)
+        Loads.scale_infiltration(space_type, factor=0.5)
+        instance = next(iter(space_type.spaceInfiltrationDesignFlowRates()))
+        self.assertEqual('AirChanges/Hour',
+                         instance.designFlowRateCalculationMethod())
+        self.assertIsNone(opt(instance.designFlowRate()))
+
+    def test_a_BARE_object_already_carries_a_rate(self):
+        """Why `scale_infiltration`'s no-rate branch does not fire here, and
+        is not claimed as tested.
+
+        A constructed `SpaceInfiltrationDesignFlowRate` defaults to method
+        'Flow/Space' with `designFlowRate` 0.0 — INITIALIZED, not absent — so
+        it scales (to zero) rather than warning. And the 3.11 header declares
+        `resetSchedule` plus four coefficient resets but NO reset for any of
+        the five rate fields, so the set one cannot be cleared through the
+        API: the suite cannot construct a rateless object at all.
+        """
+        import openstudio
+
+        model, space_type = _space_type()
+        bare = openstudio.model.SpaceInfiltrationDesignFlowRate(model)
+        bare.setName('Bare Infiltration')
+        bare.setSpaceType(space_type)
+        self.assertEqual('Flow/Space',
+                         bare.designFlowRateCalculationMethod())
+        self.assertAlmostEqual(0.0, opt(bare.designFlowRate()))
+        self.assertEqual(
+            1, Loads.scale_infiltration(space_type, factor=0.5),
+            'it is scaled, not skipped — a zero rate is still a rate')
+
+    def test_model_wide(self):
+        import openstudio
+
+        model = openstudio.model.Model()
+        for n in range(3):
+            space_type = openstudio.model.SpaceType(model)
+            space_type.setName(f'T{n}')
+            Loads.set_infiltration(space_type, air_changes_per_hour=0.4)
+        self.assertEqual(3, Loads.scale_infiltration_in_model(model,
+                                                              factor=0.5))
+
+
+@needs_sdk
+class TestInfiltrationCoefficients(unittest.TestCase):
+    """The wind and stack response. For stock work these are much of the
+    point: the usual default is the constant DOE-2 form, which makes
+    infiltration independent of the weather."""
+
+    def test_all_four_are_set(self):
+        _model, space_type = _space_type()
+        instance = Loads.set_infiltration(
+            space_type, air_changes_per_hour=0.3,
+            coefficients=(0.0, 0.224, 0.0, 0.0))
+        self.assertAlmostEqual(0.0, instance.constantTermCoefficient())
+        self.assertAlmostEqual(0.224, instance.temperatureTermCoefficient())
+        self.assertAlmostEqual(0.0, instance.velocityTermCoefficient())
+        self.assertAlmostEqual(0.0,
+                               instance.velocitySquaredTermCoefficient())
+
+    def test_omitting_them_leaves_the_SDK_default_alone(self):
+        _model, space_type = _space_type()
+        instance = Loads.set_infiltration(space_type,
+                                          air_changes_per_hour=0.3)
+        self.assertAlmostEqual(1.0, instance.constantTermCoefficient(),
+                               msg='the constant DOE-2 form')
+        self.assertAlmostEqual(0.0, instance.temperatureTermCoefficient())
+
+    def test_they_are_audited(self):
+        _model, space_type = _space_type()
+        audit = AuditLog()
+        Loads.set_infiltration(space_type, air_changes_per_hour=0.3,
+                               coefficients=(0.0, 0.224, 0.0, 0.0),
+                               audit=audit)
+        self.assertTrue(any('wind and stack' in str(e.get('value') or
+                                                    e.get('action') or '')
+                            for e in audit.entries))
+
+
+@needs_sdk
+class TestDcvFixedMinimumAndSetterReturns(unittest.TestCase):
+
+    @staticmethod
+    def _loop(minimum=None):
+        import openstudio
+
+        model = openstudio.model.Model()
+        air_loop = openstudio.model.AirLoopHVAC(model)
+        air_loop.setName('Probe Air Loop')
+        controller = openstudio.model.ControllerOutdoorAir(model)
+        if minimum is not None:
+            controller.setMinimumOutdoorAirFlowRate(minimum)
+            controller.setMinimumLimitType('FixedMinimum')
+        oa_system = openstudio.model.AirLoopHVACOutdoorAirSystem(
+            model, controller)
+        oa_system.addToNode(air_loop.supplyInletNode())
+        return model, air_loop
+
+    def test_a_FixedMinimum_floor_is_WARNED_about(self):
+        """DCV cannot reduce ventilation below a hard minimum, so the flag
+        goes on and the simulation does not change. A measure reporting no
+        saving for an unstated reason is worse than one that refuses."""
+        from btap.modeling.hvac import ventilation as Ventilation
+
+        _model, air_loop = self._loop(minimum=0.5)
+        audit = AuditLog()
+        Ventilation.set_demand_controlled_ventilation(air_loop, audit=audit)
+        warnings = [e for e in audit.entries if e.get('level') == 'warning']
+        self.assertEqual(1, len(warnings), 'exactly one, and not silent')
+        self.assertIn('FixedMinimum', str(warnings[0].get('value') or
+                                          warnings[0].get('action') or ''))
+        self.assertAlmostEqual(
+            0.5, warnings[0]['inputs']['minimum_outdoor_air_m3_per_s'])
+
+    def test_no_warning_without_a_floor(self):
+        from btap.modeling.hvac import ventilation as Ventilation
+
+        _model, air_loop = self._loop()
+        audit = AuditLog()
+        Ventilation.set_demand_controlled_ventilation(air_loop, audit=audit)
+        self.assertEqual(
+            [], [e for e in audit.entries if e.get('level') == 'warning'],
+            'the control exists so the warning is not unconditional')
+
+    def test_disabling_does_not_warn_about_the_floor(self):
+        """Turning DCV off cannot be defeated by a minimum."""
+        from btap.modeling.hvac import ventilation as Ventilation
+
+        _model, air_loop = self._loop(minimum=0.5)
+        audit = AuditLog()
+        Ventilation.set_demand_controlled_ventilation(air_loop, enabled=False,
+                                                      audit=audit)
+        self.assertEqual(
+            [], [e for e in audit.entries if e.get('level') == 'warning'])
+
+    def test_a_REFUSED_outdoor_air_method_raises(self):
+        """The setters return a bool and can fail; treating false as success
+        is how a tool reports work it did not do."""
+        from btap.modeling.hvac import ventilation as Ventilation
+
+        _model, air_loop = self._loop()
+        with self.assertRaises(ValueError) as caught:
+            Ventilation.set_demand_controlled_ventilation(
+                air_loop, system_outdoor_air_method='NotAnEnergyPlusKey')
+        self.assertIn('refused', str(caught.exception))
+
+
 if __name__ == '__main__':
     unittest.main()
