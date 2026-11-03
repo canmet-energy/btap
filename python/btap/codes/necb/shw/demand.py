@@ -22,6 +22,7 @@ from btap.codes import resolve
 from btap.codes.necb import loads as necb_loads
 from btap.codes.necb.loads import schedules as loads_schedules
 from btap.codes.necb.loads import space_types as loads_space_types
+from btap.modeling.hvac import efficiency as _mod_efficiency
 
 DAY_KEYS = ("Default|Wkdy", "Sat", "Sun|Hol")
 NEXT_DAY = {"Default|Wkdy": "Sat", "Sat": "Sun|Hol", "Sun|Hol": "Default|Wkdy"}
@@ -258,7 +259,8 @@ def _build_loop(model, sizing, fuel, rules, audit):
     pump = openstudio.model.PumpConstantSpeed(model)
     pump.setName("Main Service Water Loop Pump")
     pump.setRatedPumpHead(rules["pump_head_pa"])
-    pump.setMotorEfficiency(rules["pump_motor_efficiency"])
+    _mod_efficiency.set_pump_efficiency(
+        pump, motor_efficiency=rules["pump_motor_efficiency"])
     pump.setPumpControlType("Intermittent")
     pump.addToNode(loop.supplyInletNode())
     audit.info("shw", f"pump head set to the OpenStudio constant-speed default "
