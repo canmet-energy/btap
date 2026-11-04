@@ -24516,6 +24516,338 @@
     ]
   },
   {
+    "name": "Shared PSZ with gas boiler coils and hot water baseboard",
+    "family": "psz",
+    "catalog_general_2storey": [
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+        "blocks": 1
+      }
+    ],
+    "catalog_general_3storey": [
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
+        "blocks": 1
+      }
+    ],
+    "catalog_residential": [
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      },
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      },
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      },
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      },
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      }
+    ],
+    "catalog_data_processing": [
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "PSZ MAU Hot Water and DX Coils and Hot Water Baseboard with PTAC",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "PSZ MAU Hot Water and DX Coils and Hot Water Baseboard with PTAC",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "PSZ MAU Hot Water and DX Coils and Hot Water Baseboard with PTAC",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "PSZ MAU Hot Water and DX Coils and Hot Water Baseboard with PTAC",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "PSZ MAU Hot Water and DX Coils and Hot Water Baseboard with PTAC",
+        "blocks": 1
+      }
+    ],
+    "catalog_groups": [
+      {
+        "zones": 5,
+        "family": "psz",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      }
+    ],
+    "scrubbed_general_2storey": [
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_general_3storey": [
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_residential": [
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      },
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      },
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      },
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      },
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      }
+    ],
+    "scrubbed_data_processing": [
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "PSZ MAU Hot Water and DX Coils and Hot Water Baseboard with PTAC",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "PSZ MAU Hot Water and DX Coils and Hot Water Baseboard with PTAC",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "PSZ MAU Hot Water and DX Coils and Hot Water Baseboard with PTAC",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "PSZ MAU Hot Water and DX Coils and Hot Water Baseboard with PTAC",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "PSZ MAU Hot Water and DX Coils and Hot Water Baseboard with PTAC",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_groups": [
+      {
+        "zones": 5,
+        "family": "central_doas_or_cv",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      }
+    ]
+  },
+  {
     "name": "Electric unit heaters",
     "family": "unit_heaters",
     "catalog_groups": [

@@ -76,8 +76,17 @@ def run_checks() -> int:
         assert rules, "necb loads rules are empty"
         from btap.modeling.hvac import catalog
         rows = catalog.rows()
-        assert len(rows) == 108, f"catalog has {len(rows)} systems, expected 108"
-    check("packaged data loads (necb rules + the 108-system catalog)", data_loads)
+        # An EXACT count, deliberately: this is a distribution-integrity check
+        # and the count is the tripwire that catches a truncated or stale
+        # `systems.json` in the built wheel, which a `> 0` test would pass.
+        # It MOVES with the catalogue, so adding a system means updating it
+        # here — that is the tax for the tripwire, not an oversight. Adding one
+        # also needs the sizing sweep, the ADJUDICATED D-58 golden, the
+        # catalog-generation names and `tests/stock/`.
+        assert len(rows) == 109, (
+            f"catalog has {len(rows)} systems, expected 109 — if a system was "
+            "added on purpose, update this count and the four other gates")
+    check("packaged data loads (necb rules + the 109-system catalog)", data_loads)
 
     def coverage_reference_loads():
         from btap.codes import coverage

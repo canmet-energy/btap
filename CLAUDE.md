@@ -1,9 +1,9 @@
 # CLAUDE.md — canmet-btap repository guide
 
 This repository contains one product implementation: the Python distribution
-`canmet-btap` (import `btap`), licensed **GPL-3.0-or-later**. It has five
+`canmet-btap` (import `btap`), licensed **GPL-3.0-or-later**. It has six
 subpackages: `btap.audit`, `btap.simulation`, `btap.modeling`, `btap.costing`,
-and `btap.codes`. `btap.codes` is the code-compliance layer, with the NECB
+`btap.codes`, and `btap.stock`. `btap.codes` is the code-compliance layer, with the NECB
 family under `btap.codes.necb` (D-86 renamed and re-shaped that package at
 Stage 1 of the multi-edition plan; the old namespace is gone, and
 `python/tests/test_no_legacy_namespace.py` keeps it gone). The former
@@ -24,10 +24,13 @@ unless a moved link itself is wrong.
 
 - **Pure OpenStudio SDK.** Product code does not depend on
   `openstudio-standards`, measures, or legacy BTAP.
-- **One distribution, five subpackages.** Dependency direction is
+- **One distribution, six subpackages.** Dependency direction is
   `btap.codes` → `btap.costing` → `btap.modeling` → `btap.audit`, with
   `btap.simulation` beside and depending only on audit. Import-linter enforces
-  this D-77 contract.
+  this D-77 contract. `btap.stock` is a SIBLING of `btap.codes` — both consume
+  `btap.modeling` and neither imports the other — and it has no `data/`
+  directory: a recipe is authored input, not a shipped table. See
+  `btap/stock/CLAUDE.md`.
 - **Code families live under `btap.codes`; data lives by EDITION.**
   `btap.codes.necb` holds the five NECB rule domains and
   `btap/codes/necb/editions/necb2025/` for what exists in one edition only.

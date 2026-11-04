@@ -376,7 +376,8 @@ def _air_loop_group(air_loop, plant_by_name, audit):
     # air loop with no coils at all.
     for comp in coils.supply_components(air_loop):
         evidence = f"{comp.iddObjectType().valueName()} on {air_loop.nameString()}"
-        _scan_heating_component(group, comp, plant_by_name, evidence)
+        _scan_heating_component(group, comp, plant_by_name, evidence,
+                                supply=True)
         _scan_cooling_component(group, comp, plant_by_name, evidence)
 
     for zone in sorted_by_name(air_loop.thermalZones()):
@@ -511,6 +512,13 @@ def _base_group(zone_names, air_loop_name):
             'resolved_heat_pump_source_unclassified': False,
             'unpaired_cooling_plant_heat_pumps': [],
             'terminal_type': 'none',
+            # The MEDIUM of the loop's own heating coil, which
+            # `heating_energy_types` cannot express: that is the fuel
+            # resolved THROUGH the plant, so a `Coil:Heating:Water` on a
+            # gas boiler and a `Coil:Heating:Gas` burner both read
+            # 'NaturalGas'. Two independent agent reads named losing
+            # this as the recipe identifier's primary error (2026-11-04).
+            'supply_heating_media': [],
             'zonal_units': [], 'loop_dx_cooling': False,
             'packaged_unitary': False, 'ventilation_sized': False,
             'declared_equipment_class': None,
@@ -601,7 +609,28 @@ HEATING_COILS = [
 ]
 
 
-def _scan_heating_component(group, comp, plant_by_name, evidence):
+SUPPLY_HEATING_MEDIA = {
+    'to_CoilHeatingGas': 'combustion',
+    'to_CoilHeatingGasMultiStage': 'combustion',
+    'to_CoilHeatingElectric': 'electric',
+    'to_CoilHeatingElectricMultiStage': 'electric',
+    'to_CoilHeatingDesuperheater': 'refrigerant',
+    'to_CoilHeatingDXSingleSpeed': 'refrigerant',
+    'to_CoilHeatingDXMultiSpeed': 'refrigerant',
+    'to_CoilHeatingDXVariableSpeed': 'refrigerant',
+    'to_CoilHeatingWaterToAirHeatPumpEquationFit': 'refrigerant',
+    'to_CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit': 'refrigerant',
+    'to_CoilHeatingDXVariableRefrigerantFlow': 'refrigerant',
+    'to_CoilHeatingDXVariableRefrigerantFlowFluidTemperatureControl':
+        'refrigerant',
+}
+# Hydronic comes from HYDRONIC_HEATING_COIL_CASTS, NOT from a substring of the
+# cast name: 'to_CoilHeatingWaterToAirHeatPumpEquationFit' contains "Water" and
+# is a REFRIGERANT coil. That tuple already draws the line correctly, so it
+# stays the one source of truth and this table does not repeat it.
+
+
+def _scan_heating_component(group, comp, plant_by_name, evidence, supply=False):
     for cast, fuel_of, hp_kind in HEATING_COILS:
         coil = _try_cast(comp, cast)
         if coil is None:
@@ -609,6 +638,11 @@ def _scan_heating_component(group, comp, plant_by_name, evidence):
 
         group['heated'] = True
         _union(group['heating_energy_types'], _array(fuel_of(coil, plant_by_name)))
+        if supply:
+            medium = ('hydronic' if cast in HYDRONIC_HEATING_COIL_CASTS
+                      else SUPPLY_HEATING_MEDIA.get(cast))
+            if medium is not None:
+                _union(group['supply_heating_media'], [medium])
         _record_heat_pump(group, hp_kind, coil)
         if hp_kind is None:  # hydronic coils: plant may BE a heat pump
             _record_plant_heat_pump(group, coil, plant_by_name)

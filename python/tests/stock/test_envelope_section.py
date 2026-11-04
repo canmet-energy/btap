@@ -11,8 +11,8 @@ import unittest
 
 from btap._compat import opt
 from btap.audit import AuditLog
-from btap.modeling.recipe import envelope_section
-from btap.modeling.recipe.envelope import ENVELOPE_BOUNDARIES
+from btap.stock import envelope_section
+from btap.stock.envelope import ENVELOPE_BOUNDARIES
 from tests.support import needs_sdk
 
 

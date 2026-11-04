@@ -22,7 +22,7 @@ from btap.modeling import shw as Shw
 from btap.modeling.hvac import efficiency as Efficiency
 from btap.modeling.hvac import thermostats as Thermostats
 from btap.modeling.hvac import ventilation as Ventilation
-from btap.modeling.recipe import write_recipe
+from btap.stock import write_recipe
 from tests.support import needs_sdk
 
 # What the model is built with, and what the recipe must report back.
