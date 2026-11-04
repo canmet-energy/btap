@@ -118,7 +118,7 @@ class TestEverySetValueIsReadBack(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.recipe = write_recipe(_build(), building_type='Probe',
-                                  vintage='known', source='built-in-test')
+                                  vintage_name='known', source='built-in-test')
 
     def _loads(self, section, field):
         return (self.recipe['loads']['by_space_type']['Known Space Type']

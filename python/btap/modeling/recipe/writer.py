@@ -12,7 +12,8 @@ from btap.modeling.recipe.space_types import space_types_section
 SCHEMA = 1
 
 
-def write_recipe(model, *, building_type=None, vintage=None, source=None,
+def write_recipe(model, *, building_type=None, vintage_name=None,
+                 source=None,
                  audit=None):
     """A recipe derived from ``model``.
 
@@ -20,14 +21,23 @@ def write_recipe(model, *, building_type=None, vintage=None, source=None,
         as given — NOT inferred from the model, because a model does not
         record what building type its author meant and guessing one would put
         an invented label on real values.
-    :param vintage: likewise, e.g. 'pre-1960'.
+    :param vintage_name: likewise, e.g. 'pre-1960'.
+
+        NOT `vintage=`. CLAUDE.md retires `vintage` as a parameter name
+        everywhere and `tests/test_no_vintage_parameter.py` enforces it: that
+        spelling was the pre-D-87 name for the NECB EDITION selector, which is
+        now `code=`/`edition=`. A stock recipe's vintage is a different thing
+        — a building AGE cohort — so neither of those is the right rename, and
+        the gate's own message says to rename rather than allowlist.
+        `vintage_name` is osruby's own column name for exactly this quantity,
+        so it disambiguates and matches upstream.
     :param source: where the values came from, normally the OSM path. A
         recipe without this cannot be checked against its origin.
     """
     recipe = {
         'schema': SCHEMA,
         'building_type': building_type,
-        'vintage': vintage,
+        'vintage_name': vintage_name,
         'source': source,
         'space_types': space_types_section(model, audit=audit),
         'envelope': envelope_section(model, audit=audit),
@@ -39,9 +49,10 @@ def write_recipe(model, *, building_type=None, vintage=None, source=None,
     if audit is not None:
         audit.info('recipe', 'recipe written',
                    inputs={'building_type': building_type,
-                           'vintage': vintage, 'source': source,
+                           'vintage_name': vintage_name,
+                           'source': source,
                            'sections': sorted(
                                k for k in recipe
                                if k not in ('schema', 'building_type',
-                                            'vintage', 'source'))})
+                                            'vintage_name', 'source'))})
     return recipe
