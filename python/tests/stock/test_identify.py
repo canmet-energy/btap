@@ -19,7 +19,12 @@ from tests.support import needs_sdk
 def _group(**facts):
     base = {'family_guess': None, 'heated': True, 'cooled': False,
             'heating_energy_types': [], 'cooling_energy_types': [],
-            'terminal_type': 'none', 'zonal_units': []}
+            'terminal_type': 'none', 'zonal_units': [],
+            # The two facts the scorer used to ignore. `loop_dx_cooling`
+            # distinguishes a cooled LOOP from a group cooled only at the
+            # zone; `system_outdoor_air_method` is what actually encodes OA
+            # presence, where `ventilation_sized` does not.
+            'loop_dx_cooling': False, 'system_outdoor_air_method': None}
     base.update(facts)
     return {'resolved': False, 'descriptive': base}
 
@@ -141,14 +146,31 @@ class TestWhatItFindsOnTheRealSIGNATURES(unittest.TestCase):
         self.assertEqual('PSZ MAU Hot Water with water-heated PTAC',
                          candidates[0]['system'])
 
-    def test_a_central_cv_group_finds_a_PSZ_row(self):
+    def test_a_central_cv_group_finds_a_SHARED_hydronic_psz(self):
+        """Assert the PROPERTIES, not the name. My earlier version required
+        'Hot Water Baseboard' as a substring, which the correct answer — the
+        row added 2026-11-04 — does not contain.
+
+        Two independent agent reads established what this group needs: ONE
+        shared CV loop (not per-zone), a HOT WATER central coil on a gas
+        boiler (not a direct-gas coil), and hot-water baseboards.
+        """
+        from btap.modeling.hvac import catalog
+
         candidates = identify_candidates(_group(
             family_guess='central_doas_or_cv', cooled=True,
             heating_energy_types=['NaturalGas'],
             cooling_energy_types=['Electricity'], terminal_type='cv',
-            zonal_units=['baseboard']))
-        self.assertIn('PSZ', candidates[0]['system'])
-        self.assertIn('Hot Water Baseboard', candidates[0]['system'])
+            zonal_units=['baseboard'], loop_dx_cooling=True,
+            system_outdoor_air_method='ZoneSum'))
+        row = catalog.resolve(candidates[0]['system'])
+        self.assertEqual('psz', row['family'])
+        self.assertFalse(row.get('per_zone'),
+                         'the model has 6-7 zones on ONE loop')
+        self.assertEqual('Hot Water', row.get('heating_coil_type'),
+                         "the model's central coil is Coil:Heating:Water")
+        self.assertEqual('Hot Water', row.get('baseboard_type'))
+        self.assertEqual('NaturalGas', row.get('boiler_fuel'))
 
     def test_provenance_is_a_TIEBREAK_and_cannot_outweigh_a_fact(self):
         """A provenance tag is not evidence about the equipment."""
@@ -342,22 +364,39 @@ class TestTheTwoFieldVocabularies(unittest.TestCase):
             any('Hot Water' in m or 'boiler' in m for m in top['matched']),
             f"nothing in {top['matched']} reads the row's hydronic heating")
 
-    def test_a_row_that_does_NOT_cool_loses_a_cooled_group(self):
-        """The campus vocabulary's `cooling: False` is a hard fact and must
-        count against — 'Shared hot water heating-only air handler' cannot
-        serve a cooled zone group."""
-        group = {'resolved': False, 'descriptive': {
+    def test_a_non_cooling_row_loses_a_LOOP_cooled_group_and_wins_a_zonal_one(self):
+        """`cooling: False` counts against only when the LOOP cools.
+
+        My first version of this test asserted it always counts against, on a
+        fact set that was incoherent: cooled=True with neither loop nor zonal
+        cooling. `cooled` is a UNION, and the distinction is the whole point —
+        'Shared hot water heating-only air handler' is WRONG for a loop with a
+        DX coil and RIGHT for the four-zone loop whose cooling is two PTACs.
+        """
+        name = 'Shared hot water heating-only air handler'
+
+        loop_cooled = {'resolved': False, 'descriptive': {
             'family_guess': 'central_doas_or_cv', 'heated': True,
             'cooled': True, 'heating_energy_types': ['NaturalGas'],
             'cooling_energy_types': ['Electricity'], 'terminal_type': 'cv',
-            'zonal_units': [], 'ventilation_sized': False}}
-        candidates = identify_candidates(group, limit=30)
-        heating_only = [c for c in candidates
-                        if c['system'] == 'Shared hot water heating-only air '
-                                          'handler']
-        self.assertTrue(heating_only)
-        self.assertTrue(any('does NOT cool' in a
-                            for a in heating_only[0]['against']))
+            'zonal_units': [], 'loop_dx_cooling': True,
+            'system_outdoor_air_method': 'ZoneSum',
+            'ventilation_sized': False}}
+        hit = next(c for c in identify_candidates(loop_cooled, limit=30)
+                   if c['system'] == name)
+        self.assertTrue(any('DX cooling' in a for a in hit['against']),
+                        f"expected a cooling objection, got {hit['against']}")
+
+        zonal_cooled = dict(loop_cooled)
+        zonal_cooled['descriptive'] = dict(loop_cooled['descriptive'])
+        zonal_cooled['descriptive']['loop_dx_cooling'] = False
+        zonal_cooled['descriptive']['zonal_units'] = ['ptac', 'baseboard']
+        hit = next(c for c in identify_candidates(zonal_cooled, limit=30)
+                   if c['system'] == name)
+        self.assertTrue(
+            any('its cooling is zonal' in m for m in hit['matched']),
+            'a row that does not cool the air handler is CORRECT when the '
+            f"group's cooling is zonal; got {hit['matched']}")
 
     def test_the_reheat_field_matches_a_vav_reheat_terminal(self):
         group = {'resolved': False, 'descriptive': {

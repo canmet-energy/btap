@@ -138,10 +138,19 @@ def _score(row, group):
             score -= 1.5
             against.append('baseboard present but row has none')
         elif not uses_baseboard_field:
-            # Silence, not disagreement: this row does not model baseboards,
-            # so the group's baseboards come from their own row.
-            matched.append('row does not carry baseboards — they are separate '
-                           'zone equipment in this vocabulary')
+            # MY RATIONALE HERE WAS FALSE. I wrote that silence was not
+            # disagreement "because the group's baseboards come from their own
+            # row" — but `reader._build_hvac` builds exactly ONE system per
+            # group with `remove_existing=True`, and nothing builds the
+            # baseboards afterwards. So picking a row that carries none DROPS
+            # them silently. Until the reader can build a second row for the
+            # zonal equipment, a row without baseboards is a real loss for a
+            # group that has them, and it is scored as one.
+            score -= 1.0
+            against.append(
+                'this row carries no baseboards and the reader builds ONE '
+                'system per group, so the group\'s baseboards would be '
+                'dropped — not merely unmodelled by this row')
     elif row.get('baseboard_type') in ('Hot Water', 'Electric'):
         score -= 1.0
         against.append(f"row has {row['baseboard_type']!r} baseboard, "
@@ -155,15 +164,50 @@ def _score(row, group):
         score -= 2.0
         against.append(f'row does NOT heat but the group heats with '
                        f'{sorted(heat)}')
-    if row.get('cooling') is True and cool:
-        score += 1.5
-        matched.append('row cools; group cools')
-    elif row.get('cooling') is False and cool:
+    loop_cools = group.get('loop_dx_cooling') is True
+    zonal_cools = bool(cool) and not loop_cools
+    row_cools = bool(row.get('cooling') is True
+                     or row.get('cooling_type')
+                     or row.get('needs_chiller')
+                     or row.get('chiller_type')
+                     or 'psz' in str(row.get('family') or '')
+                     or 'DX' in str(row.get('name') or ''))
+    if zonal_cools and row_cools and not row.get('ptac_heating_type'):
+        score -= 2.5
+        against.append(
+            'the GROUP is cooled only by zonal equipment '
+            f'({", ".join(sorted(zonal)) or "zone units"}) — its loop has no '
+            'cooling coil — but this row puts cooling on the air handler')
+    elif loop_cools and row_cools:
+        score += 1.0
+        matched.append('the loop cools and this row cools the loop')
+    elif loop_cools and not row_cools:
         score -= 2.0
-        against.append('row does NOT cool but the group is cooled')
-    elif row.get('cooling') is True and not cool:
-        score -= 1.0
-        against.append('row cools but the group is not cooled')
+        against.append('the loop has DX cooling; this row does not cool the '
+                       'air handler')
+
+    # The same union problem on the other branch: a row that does NOT cool is
+    # CORRECT for a group whose cooling is zonal, and penalising it there was
+    # how `Shared hot water heating-only air handler` — the right air handler
+    # for the four-zone loop — scored 2.25 and never reached the top eight.
+    if row.get('cooling') is True:
+        if loop_cools:
+            score += 1.5
+            matched.append('row cools; the loop cools')
+        elif zonal_cools:
+            pass        # already scored by the loop/zonal test above
+        else:
+            score -= 1.0
+            against.append('row cools but the group is not cooled')
+    elif row.get('cooling') is False:
+        if loop_cools:
+            score -= 2.0
+            against.append('row does NOT cool but the loop has DX cooling')
+        elif zonal_cools:
+            score += 2.0
+            matched.append(
+                'row does not cool the air handler, and neither does the '
+                'group — its cooling is zonal')
 
     if row.get('reheat'):
         if facts_terminal(group) == 'vav_reheat':
@@ -174,10 +218,37 @@ def _score(row, group):
             score -= 1.0
             against.append(f"row has reheat terminals; group terminal is "
                            f'{facts_terminal(group)!r}')
-    if row.get('ventilation') is False and group.get('ventilation_sized'):
-        score -= 0.5
-        against.append('row has no outdoor air; the group is '
-                       'ventilation-sized')
+    # FIX: `ventilation_sized` does NOT mean "has outdoor air". Confirmed
+    # independently by two agents: it is true only when `SizingSystem` is
+    # `VentilationRequirement` with all-OA sizing — i.e. "this is a DOAS whose
+    # coil tempers make-up air". The fact that encodes OA PRESENCE is
+    # `system_outdoor_air_method`: a string when an OA controller exists, None
+    # when none does. The old test therefore penalised a no-OA row only
+    # against a DOAS, never against an ordinary mixed-air loop — so
+    # 'Shared furnace with DX cooling and no outdoor air' was never marked
+    # down for the Gagetown loops, which all carry real ventilating OA with
+    # autosized DSOA minimums and an economizer. Building it would DELETE both,
+    # and the reader cannot restore the economizer because
+    # `set_economizer_in_model` skips a loop with no controller.
+    group_has_oa = group.get('system_outdoor_air_method') is not None
+    if row.get('ventilation') is False:
+        if group_has_oa:
+            score -= 3.0
+            against.append(
+                'this row builds NO outdoor-air system, but the group has one '
+                f"({group['system_outdoor_air_method']}) — building it would "
+                'delete the ventilation and the economizer with it')
+        else:
+            score += 1.0
+            matched.append('neither the row nor the group has outdoor air')
+    elif row.get('ventilation') is True and not group_has_oa:
+        score -= 1.0
+        against.append('row builds an outdoor-air system; the group has none')
+
+    if group.get('ventilation_sized') and row.get('family') in (
+            'doas', 'doas_pthp', 'mau_ptac'):
+        score += 1.0
+        matched.append('group is ventilation-sized; row is a DOAS/MAU family')
 
     # A COIL MEDIUM IS NOT A FUEL, and conflating them inverted this test.
     # Measured: the `vav_reheat` family has NO gas coil at all — 12 rows are
@@ -265,6 +336,13 @@ def _score(row, group):
         score -= 0.5
         against.append(f'row needs a boiler; group heats with {sorted(heat)}')
 
+    # FIX: `cooled` is a UNION of loop and zonal cooling, and treating it as
+    # loop cooling gave a DX rooftop to a loop with no cooling coil at all.
+    # Measured on `Office_pre-1960`'s four-zone loop: supply path is OA system
+    # -> Coil:Heating:Water -> CV fan, NO cooling coil, and its
+    # `cooling_energy_types: ['Electricity']` comes from two zonal PTACs.
+    # `loop_dx_cooling` is the fact that says whether the LOOP cools, and the
+    # scorer never read it.
     cooling_medium = str(row.get('cooling_type') or '').lower()
     if cool and cooling_medium:
         score += 1.0
