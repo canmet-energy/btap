@@ -15,7 +15,7 @@ from __future__ import annotations
 import unittest
 
 from btap.audit import AuditLog
-from btap.modeling.recipe import space_types_section
+from btap.stock import space_types_section
 from tests.support import needs_sdk
 
 

@@ -6,8 +6,8 @@ import unittest
 
 from btap.audit import AuditLog
 from btap.modeling.hvac import efficiency as Efficiency
-from btap.modeling.recipe import equipment_section, hvac_section, write_recipe
-from btap.modeling.recipe.writer import SCHEMA
+from btap.stock import equipment_section, hvac_section, write_recipe
+from btap.stock.writer import SCHEMA
 from tests.support import needs_sdk
 
 

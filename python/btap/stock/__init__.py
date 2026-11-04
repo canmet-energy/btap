@@ -5,7 +5,7 @@ campus archetypes can seed a recipe library instead of it being authored from
 guesses. The scope is the UNION of two external ECM field sets — all the
 values for all the ECMs in `canmet-energy/campus` and the items in
 `canmet-energy/osruby` — enumerated in
-`btap/modeling/data/ecm_field_inventory.json` and derived by
+`docs/reference/ecm_field_inventory.json` and derived by
 `scripts/fetch_ecm_field_inventory.py` rather than transcribed.
 
 Four rules hold across every section, and they are what make the output
@@ -44,15 +44,15 @@ Unresolved systems are emitted as unresolved.
 
 from __future__ import annotations
 
-from btap.modeling.recipe.controls import controls_section
-from btap.modeling.recipe.envelope import envelope_section
-from btap.modeling.recipe.equipment import equipment_section
-from btap.modeling.recipe.hvac import hvac_section
-from btap.modeling.recipe.identify import identify_candidates, suggest
-from btap.modeling.recipe.loads import loads_section
-from btap.modeling.recipe.reader import RecipeError, build_from_recipe
-from btap.modeling.recipe.space_types import space_types_section
-from btap.modeling.recipe.writer import write_recipe
+from btap.stock.controls import controls_section
+from btap.stock.envelope import envelope_section
+from btap.stock.equipment import equipment_section
+from btap.stock.hvac import hvac_section
+from btap.stock.identify import identify_candidates, suggest
+from btap.stock.loads import loads_section
+from btap.stock.reader import RecipeError, build_from_recipe
+from btap.stock.space_types import space_types_section
+from btap.stock.writer import write_recipe
 
 __all__ = ['RecipeError', 'build_from_recipe',
            'identify_candidates', 'suggest',

@@ -21,8 +21,8 @@ from btap._compat import opt
 from btap.audit import AuditLog
 from btap.modeling import loads as Loads
 from btap.modeling.hvac import efficiency as Efficiency
-from btap.modeling.recipe import RecipeError, build_from_recipe, envelope_section, write_recipe
-from btap.modeling.recipe.writer import SCHEMA
+from btap.stock import RecipeError, build_from_recipe, envelope_section, write_recipe
+from btap.stock.writer import SCHEMA
 from tests.support import needs_sdk
 
 

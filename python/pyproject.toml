@@ -101,10 +101,14 @@ root_package = "btap"
 # Required because the audit contract forbids an EXTERNAL module (openstudio).
 include_external_packages = true
 
+# btap.stock sits BESIDE btap.codes: both consume btap.modeling and neither
+# imports the other. The sibling syntax ("a | b") makes them independent at the
+# same layer, so "stock may import modeling; modeling may NOT import stock"
+# holds, and so does "stock may not import codes".
 [[tool.importlinter.contracts]]
 name = "family dependency direction (D-77)"
 type = "layers"
-layers = ["btap.codes", "btap.costing", "btap.modeling", "btap.audit"]
+layers = ["btap.codes | btap.stock", "btap.costing", "btap.modeling", "btap.audit"]
 
 [[tool.importlinter.contracts]]
 name = "simulation depends only on audit"

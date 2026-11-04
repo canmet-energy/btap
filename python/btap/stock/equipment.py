@@ -204,6 +204,48 @@ def _boilers(model):
     return out
 
 
+def _cooling(model):
+    """Cooling COP, by equipment class — osruby's `ecm_cooling_cop`.
+
+    THE GAP A SIMULATION FOUND. The writer carried no cooling efficiency at
+    all, so a reader that rebuilt the HVAC got the catalogue default: measured
+    on `Office_pre-1960`, every DX coil in the source model is COP 2.50 and
+    every rebuilt one came out 3.00 — a 20% efficiency gift the recipe had no
+    way to prevent, and the field was in the inventory
+    (`ecm_cooling_cop: ['cop']`) the whole time.
+
+    All three accessors are plain doubles, not optionals — `ratedCOP()`,
+    `ratedHighSpeedCOP()`, `referenceCOP()` — which is worth stating because
+    `opt()` on any of them raises.
+    """
+    out = {}
+    single = [c.ratedCOP() for c in sorted_by_name(
+        model.getCoilCoolingDXSingleSpeeds())]
+    agg = _aggregate(single, 'DX single-speed coils')
+    if agg is not None:
+        out['dx_single_speed_cop'] = agg
+
+    two_high = [c.ratedHighSpeedCOP() for c in sorted_by_name(
+        model.getCoilCoolingDXTwoSpeeds())]
+    agg = _aggregate(two_high, 'DX two-speed coils')
+    if agg is not None:
+        out['dx_two_speed_high_cop'] = agg
+    two_low = [c.ratedLowSpeedCOP() for c in sorted_by_name(
+        model.getCoilCoolingDXTwoSpeeds())]
+    agg = _aggregate(two_low, 'DX two-speed coils')
+    if agg is not None:
+        out['dx_two_speed_low_cop'] = agg
+
+    chillers = [c.referenceCOP() for c in sorted_by_name(
+        model.getChillerElectricEIRs())]
+    agg = _aggregate(chillers, 'chillers')
+    if agg is not None:
+        out['chiller_cop'] = agg
+        out['chiller_type'] = sorted({c.condenserType() for c in
+                                      model.getChillerElectricEIRs()})
+    return out or None
+
+
 def _sizing(model):
     sizing = model.getSizingParameters()
     out = {}
@@ -242,7 +284,8 @@ def equipment_section(model, audit=None):
     section = {}
     for key, reader in (('fans', _fans), ('pumps', _pumps),
                         ('water_heaters', _water_heaters),
-                        ('boilers', _boilers), ('sizing', _sizing)):
+                        ('boilers', _boilers), ('cooling', _cooling),
+                        ('sizing', _sizing)):
         got = reader(model)
         if got is not None:
             section[key] = got

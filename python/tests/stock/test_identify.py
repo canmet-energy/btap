@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import unittest
 
-from btap.modeling.recipe.identify import FAMILY_CANDIDATES, identify_candidates, suggest
+from btap.stock.identify import FAMILY_CANDIDATES, identify_candidates, suggest
 from tests.support import needs_sdk
 
 
@@ -198,7 +198,7 @@ class TestItIsOffByDefault(unittest.TestCase):
         the flag."""
         import openstudio
 
-        from btap.modeling.recipe import write_recipe
+        from btap.stock import write_recipe
 
         model = openstudio.model.Model()
         air_loop = openstudio.model.AirLoopHVAC(model)

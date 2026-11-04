@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from btap.modeling.recipe.controls import controls_section
-from btap.modeling.recipe.envelope import envelope_section
-from btap.modeling.recipe.equipment import equipment_section
-from btap.modeling.recipe.hvac import hvac_section
-from btap.modeling.recipe.loads import loads_section
-from btap.modeling.recipe.space_types import space_types_section
+from btap.stock.controls import controls_section
+from btap.stock.envelope import envelope_section
+from btap.stock.equipment import equipment_section
+from btap.stock.hvac import hvac_section
+from btap.stock.loads import loads_section
+from btap.stock.space_types import space_types_section
 
 SCHEMA = 1
 
@@ -53,7 +53,7 @@ def write_recipe(model, *, building_type=None, vintage_name=None,
         # unless a caller explicitly asks for guesses and explicitly accepts
         # one. Turning this on by default would make a guess look like a
         # finding to anyone who did not read the flag.
-        from btap.modeling.recipe.identify import suggest
+        from btap.stock.identify import suggest
         suggest(recipe['hvac'])
     if audit is not None:
         audit.info('recipe', 'recipe written',

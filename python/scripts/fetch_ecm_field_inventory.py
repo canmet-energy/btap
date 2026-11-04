@@ -45,8 +45,12 @@ CAMPUS = 'canmet-energy/campus'
 MEASURES_RB = 'lib/btap/measures.rb'
 CAMPUS_DIR = 'src/resources/buildings/measures'
 
-OUT = (pathlib.Path(__file__).resolve().parents[1]
-       / 'btap' / 'modeling' / 'data' / 'ecm_field_inventory.json')
+# A REFERENCE artifact, not runtime data: nothing in the package reads it, and
+# `btap.stock` deliberately has no `data/` directory (the plan's rule — a stock
+# package that ships values is the thing #183 exists to prevent). So it lands
+# in docs/ beside the other generated references.
+OUT = (pathlib.Path(__file__).resolve().parents[2]
+       / 'docs' / 'reference' / 'ecm_field_inventory.json')
 
 # osruby categories that are not building performance.
 OSRUBY_OUT_OF_SCOPE = ('ecm_capital_costs', 'ecm_id')

@@ -8,7 +8,7 @@ from btap.audit import AuditLog
 from btap.modeling import loads as Loads
 from btap.modeling.hvac import thermostats as Thermostats
 from btap.modeling.hvac import ventilation as Ventilation
-from btap.modeling.recipe import controls_section, loads_section
+from btap.stock import controls_section, loads_section
 from tests.support import needs_sdk
 
 

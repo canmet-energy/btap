@@ -42,7 +42,7 @@ from btap.modeling.envelope import constructions
 from btap.modeling.hvac import efficiency as Efficiency
 from btap.modeling.hvac import thermostats as Thermostats
 from btap.modeling.hvac import ventilation as Ventilation
-from btap.modeling.recipe.writer import SCHEMA
+from btap.stock.writer import SCHEMA
 
 
 class RecipeError(ValueError):
@@ -156,7 +156,7 @@ def _apply_envelope(model, envelope, applied, skipped, audit):
     import openstudio
 
     from btap._compat import opt
-    from btap.modeling.recipe.envelope import film_class
+    from btap.stock.envelope import film_class
 
     for key, field in sorted(envelope.get('opaque', {}).items()):
         if field is None:
@@ -302,6 +302,51 @@ def _apply_equipment(model, equipment, applied, skipped, audit):
                 heater, thermal_efficiency=efficiency, audit=audit)
         if ua is not None:
             Shw.set_water_heater_losses(heater, ua_w_per_k=ua, audit=audit)
+    boilers = equipment.get('boilers', {})
+    boiler_eff = _value(boilers.get('hw_boiler_thermal_eff'))
+    if boiler_eff is not None:
+        count = 0
+        for boiler in sorted_by_name(model.getBoilerHotWaters()):
+            if boiler.setNominalThermalEfficiency(float(boiler_eff)):
+                count += 1
+        if count:
+            applied.append(f'boiler thermal efficiency on {count} boiler(s)')
+        else:
+            skipped.append('boiler thermal efficiency: the model refused it')
+
+    # The gap a simulation found: without this, a rebuilt DX coil keeps the
+    # catalogue default and the generated building cools for free. Measured,
+    # 2.50 in the source against 3.00 rebuilt.
+    cooling = equipment.get('cooling', {})
+    single = _value(cooling.get('dx_single_speed_cop'))
+    if single is not None:
+        count = 0
+        for coil in sorted_by_name(model.getCoilCoolingDXSingleSpeeds()):
+            if coil.setRatedCOP(float(single)):
+                count += 1
+        if count:
+            applied.append(f'DX single-speed COP {single} on {count} coil(s)')
+    high = _value(cooling.get('dx_two_speed_high_cop'))
+    low = _value(cooling.get('dx_two_speed_low_cop'))
+    if high is not None or low is not None:
+        count = 0
+        for coil in sorted_by_name(model.getCoilCoolingDXTwoSpeeds()):
+            if high is not None:
+                coil.setRatedHighSpeedCOP(float(high))
+            if low is not None:
+                coil.setRatedLowSpeedCOP(float(low))
+            count += 1
+        if count:
+            applied.append(f'DX two-speed COP on {count} coil(s)')
+    chiller_cop = _value(cooling.get('chiller_cop'))
+    if chiller_cop is not None:
+        count = 0
+        for chiller in sorted_by_name(model.getChillerElectricEIRs()):
+            if chiller.setReferenceCOP(float(chiller_cop)):
+                count += 1
+        if count:
+            applied.append(f'chiller COP {chiller_cop} on {count} chiller(s)')
+
     stratified = model.getWaterHeaterStratifieds()
     for heater in sorted_by_name(stratified):
         if efficiency is not None:
@@ -411,15 +456,34 @@ def build_from_recipe(recipe, model, *, accept_candidates=False, audit=None):
         _apply_space_type_loads(space_type, entry, applied, skipped, audit)
 
     _apply_envelope(model, recipe.get('envelope', {}), applied, skipped, audit)
-    _apply_controls(model, recipe.get('controls', {}), applied, skipped, audit)
-    _apply_equipment(model, recipe.get('equipment', {}), applied, skipped,
-                     audit)
 
+    # ORDER MATTERS, and getting it wrong cost 21% of site energy.
+    #
+    # `build_system` is TOPOLOGY ONLY — its own docstring says "run your
+    # sizing and code-efficiency passes afterwards" — and it is called with
+    # `remove_existing=True`, so it DESTROYS the equipment serving those
+    # zones and creates new objects carrying SDK defaults.
+    #
+    # The first version applied the equipment and controls sections BEFORE
+    # building, so the recipe's fan, pump and water-heater efficiencies, its
+    # economizer and its DCV were written onto equipment that was then torn
+    # down. The generated model ran on defaults, and the end uses showed it:
+    # fans -18.4%, pumps -41.5%, heating -21.1%, cooling -84.0% against the
+    # original. Each section was correct in isolation; only an end-to-end
+    # simulation could show that the SEQUENCE was not.
+    #
+    # So HVAC is built first, then the performance sections land on the
+    # equipment that will actually run.
     unresolved = [group for group in recipe.get('hvac', {})
                   .get('zone_groups', []) if not group.get('resolved')]
     if accept_candidates:
         _build_hvac(model, unresolved, applied, refused, audit)
-    else:
+
+    _apply_controls(model, recipe.get('controls', {}), applied, skipped, audit)
+    _apply_equipment(model, recipe.get('equipment', {}), applied, skipped,
+                     audit)
+
+    if not accept_candidates:
         for group in unresolved:
             refused.append(
                 f"HVAC for {len(group.get('zones', []))} zone(s) "
