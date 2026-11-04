@@ -13,8 +13,7 @@ SCHEMA = 1
 
 
 def write_recipe(model, *, building_type=None, vintage_name=None,
-                 source=None,
-                 audit=None):
+                 source=None, suggest_systems=False, audit=None):
     """A recipe derived from ``model``.
 
     :param building_type: the recipe's building type, e.g. 'Office'. Carried
@@ -33,6 +32,8 @@ def write_recipe(model, *, building_type=None, vintage_name=None,
         so it disambiguates and matches upstream.
     :param source: where the values came from, normally the OSM path. A
         recipe without this cannot be checked against its origin.
+    :param suggest_systems: add ranked catalogue CANDIDATES to each unresolved
+        HVAC group. Off by default — see the note at the call site.
     """
     recipe = {
         'schema': SCHEMA,
@@ -46,6 +47,14 @@ def write_recipe(model, *, building_type=None, vintage_name=None,
         'equipment': equipment_section(model, audit=audit),
         'hvac': hvac_section(model, audit=audit),
     }
+    if suggest_systems:
+        # OFF by default, deliberately. A default recipe carries no system
+        # candidates, so the reader's refusal of an unresolved group stands
+        # unless a caller explicitly asks for guesses and explicitly accepts
+        # one. Turning this on by default would make a guess look like a
+        # finding to anyone who did not read the flag.
+        from btap.modeling.recipe.identify import suggest
+        suggest(recipe['hvac'])
     if audit is not None:
         audit.info('recipe', 'recipe written',
                    inputs={'building_type': building_type,
