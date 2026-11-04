@@ -75,3 +75,47 @@ slightly BETTER (unmet hours 1854 -> 1717 h heating) with MORE cooling
 equipment and matched COP and boiler efficiency. That is substitution, not
 breakage: nine catalogue systems in place of ten hand-built ones. Do not
 present a generated model as a reproduction of a specific building.
+
+## The identifier scores FACTS, and the fuel is not the coil medium
+
+`identify.py` ranks catalogue rows against the facts `classify.characterize`
+produces, and three of those facts are easy to misread. Each of these was a
+real defect, found 2026-11-04 by two independent agent reads of
+`gagetown_coldlake_Office_pre-1960.osm`:
+
+- **`heating_energy_types` is the fuel resolved THROUGH the plant, not the
+  coil medium.** All four of that model's central loops report
+  `['NaturalGas']` while their coil is a `Coil:Heating:Water` on a gas boiler.
+  Scoring the fuel alone let a direct-gas burner take a "gas coil matches gas
+  heating" credit on a hydronic building. `supply_heating_media` is the fact
+  that carries the medium, recorded from the SUPPLY path only — a terminal
+  reheat coil is not the loop's coil.
+- **`cooled` is a UNION of loop and zonal cooling.** That model's four-zone
+  loop has NO cooling coil; its `cooling_energy_types: ['Electricity']` comes
+  from two zonal PTACs. `loop_dx_cooling` is what says whether the LOOP cools,
+  and a row that does not cool the air handler is CORRECT for such a group.
+- **`ventilation_sized` does NOT mean "has outdoor air".** It is true only
+  when the sizing basis is `VentilationRequirement` — "a DOAS whose coil
+  tempers make-up air". OA PRESENCE is `system_outdoor_air_method`: a string
+  when a controller exists, `None` when none does. Conflating them meant a
+  no-OA row was marked down only against a DOAS, never against an ordinary
+  mixed-air loop, and building one DELETES the ventilation and the economizer
+  (`set_economizer_in_model` skips a loop with no controller, so the reader
+  cannot restore it).
+
+A row that OMITS a coil field is not silent when its BUILDER defaults it:
+`furnace.py` is `config.get('heating_type', 'Gas')`. `_BUILDER_COIL_DEFAULTS`
+mirrors five builders and a test re-reads their source so the mirror cannot
+drift. Heat-pump rows carry `heat_source` instead of a coil type, and
+`composite` rows delegate to `parts` — which is why the medium is a SET.
+
+**One system per group is the standing limit.** `reader._build_hvac` builds
+exactly one, with `remove_existing=True`, and nothing builds the group's
+baseboards or PTACs afterwards. So a row carrying no baseboards DROPS them,
+and a comment claiming they "come from their own row" was false. Until the
+reader can build zonal equipment separately, a group with baseboards and
+zonal cooling has no fully correct single answer.
+
+Adding a catalogue row to satisfy any of this is FOUR gates, not one: the
+sizing sweep, the ADJUDICATED D-58 golden (never regenerated from Python, per
+D-79), the catalog-generation names, and `tests/stock/`.
