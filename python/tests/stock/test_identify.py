@@ -545,3 +545,110 @@ class TestTheFuelCannotStandInForTheMedium(unittest.TestCase):
         self.assertFalse(
             any('substitutes the heating MEDIUM' in a for a in hit['against']),
             'the same row must not be marked down once the loop is combustion')
+
+
+class TestCompositesAreReachable(unittest.TestCase):
+    """A `composite` row is a LOOP PLUS ZONE EQUIPMENT on the same zones.
+
+    That is what 5 of the 47 groups in `Office_pre-1960` are, and
+    `build_system` has always built them correctly — the teardown runs once at
+    the top and each part layers on. They were reachable from NO group shape:
+    measured 0 composite candidates out of 27/25/32/25 for the four layerable
+    shapes.
+    """
+
+    LAYERED = {
+        'family_guess': 'central_doas_or_cv', 'heated': True, 'cooled': True,
+        'heating_energy_types': ['NaturalGas'],
+        'cooling_energy_types': ['Electricity'], 'terminal_type': 'cv',
+        'zonal_units': ['baseboard'], 'loop_dx_cooling': True,
+        'system_outdoor_air_method': 'ZoneSum', 'ventilation_sized': False,
+        'supply_heating_media': ['hydronic'],
+    }
+
+    def _candidates(self, **over):
+        group = dict(self.LAYERED, **over)
+        return identify_candidates(
+            {'resolved': False, 'descriptive': group}, limit=200)
+
+    def test_a_layered_group_can_reach_a_composite(self):
+        comps = [c for c in self._candidates() if c['family'] == 'composite']
+        self.assertTrue(
+            comps,
+            'a group with a loop AND zone equipment must be able to reach a '
+            'composite row — the mechanism that builds exactly that shape')
+
+    def test_every_layerable_shape_can_reach_one(self):
+        for shape in ('central_doas_or_cv', 'packaged_single_zone',
+                      'multizone_vav', 'zonal_heat_cool'):
+            with self.subTest(shape=shape):
+                comps = [c for c in self._candidates(family_guess=shape)
+                         if c['family'] == 'composite']
+                self.assertTrue(comps, f'{shape} cannot reach a composite')
+
+    def test_CONTROL_a_group_with_no_zone_equipment_does_not_rank_one(self):
+        """Reachable is not the same as preferred.
+
+        With nothing at the zone there is nothing for a composite's second
+        part to serve, so none should reach the top. If this fails, the
+        reachability change is suggesting composites indiscriminately.
+        """
+        top = self._candidates(zonal_units=[])[:5]
+        self.assertNotIn('composite', [c['family'] for c in top],
+                         'a composite should not outrank simple rows for a '
+                         'group with no zone equipment')
+
+    def test_the_layering_credit_names_the_unit_it_would_build(self):
+        hit = next(c for c in self._candidates()
+                   if c['family'] == 'composite'
+                   and 'baseboard' in c['system'].lower())
+        self.assertTrue(
+            any('AND this row builds it as a part' in m
+                for m in hit['matched']), hit['matched'])
+
+
+class TestTheZonalVocabularyIsComplete(unittest.TestCase):
+    """`_ZONAL_UNIT_FAMILY` mirrors classify's zone-equipment table.
+
+    An incomplete mirror does not fail — it silently under-credits. Using the
+    3-entry `_ZONAL_FAMILY` for this starved every DOAS+fan-coil, DOAS+VRF and
+    DOAS+WSHP composite (10 of the 12 shipped) because their zone equipment
+    mapped to nothing.
+    """
+
+    def test_every_kind_classify_can_emit_is_mapped(self):
+        import re
+
+        from btap.stock.identify import _ZONAL_UNIT_FAMILY
+
+        source = (pathlib.Path(__file__).resolve().parents[2] / 'btap'
+                  / 'modeling' / 'hvac' / 'classify.py').read_text(
+                      encoding='utf-8')
+        kinds = set(re.findall(r"'kind': '([a-z_]+)'", source))
+        self.assertTrue(kinds, 'found no zone-equipment kinds to check')
+        self.assertEqual(
+            set(), kinds - set(_ZONAL_UNIT_FAMILY),
+            'classify can emit these zonal_units kinds and '
+            '_ZONAL_UNIT_FAMILY does not map them, so a composite carrying '
+            'one earns no credit')
+        self.assertEqual(
+            set(), set(_ZONAL_UNIT_FAMILY) - kinds,
+            'these mapped kinds are not emitted by classify any more')
+
+    def test_every_named_family_exists_in_the_catalogue(self):
+        import json
+
+        from btap.stock.identify import _ZONAL_UNIT_FAMILY
+
+        rows = json.loads(
+            (pathlib.Path(__file__).resolve().parents[2] / 'btap' / 'modeling'
+             / 'hvac' / 'data' / 'systems.json').read_text(encoding='utf-8')
+        )['systems']
+        families = {r['family'] for r in rows}
+        for kind, family in sorted(_ZONAL_UNIT_FAMILY.items()):
+            if family is None:
+                continue
+            with self.subTest(kind=kind):
+                self.assertIn(family, families,
+                              f'{kind} maps to {family!r}, which no '
+                              'catalogue row has')

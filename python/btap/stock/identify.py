@@ -40,22 +40,63 @@ FAMILY_CANDIDATES = {
     'unconditioned': (),
     'zonal_heating_only': ('baseboards', 'unit_heaters'),
     'zonal_heat_cool': ('mau_ptac', 'fan_coils', 'vrf', 'wshp', 'doas_pthp',
-                        'zone_terminal'),
-    'central_doas_or_cv': ('furnace', 'psz', 'doas', 'evap_cooler'),
-    'packaged_single_zone': ('psz', 'furnace'),
+                        'zone_terminal', 'composite'),
+    'central_doas_or_cv': ('furnace', 'psz', 'doas', 'evap_cooler',
+                           'composite'),
+    'packaged_single_zone': ('psz', 'furnace', 'composite'),
     # 'furnace' belongs here: in this catalogue that family covers SHARED AIR
     # HANDLERS, and the campus row 'Shared hot water air handler with water
     # reheat' carries `reheat: 'Hot Water'` while sitting under `furnace`. A
     # mapping that admitted only `vav_reheat` excluded it by FAMILY before any
     # fact was scored — so the row built for a multizone reheat system could
     # never be proposed for one. My own test caught this.
-    'multizone_vav': ('vav_reheat', 'dual_duct', 'furnace'),
+    'multizone_vav': ('vav_reheat', 'dual_duct', 'furnace', 'composite'),
+    # `composite` is on every shape that can be LAYERED, and the reason is
+    # structural: a `composite` row is a LOOP PLUS ZONE EQUIPMENT on the same
+    # zones, which is what 5 of the 47 groups in `Office_pre-1960` actually
+    # are (a rooftop unit for ventilation and cooling, hot-water baseboards
+    # under the windows). `build_system` has always built them correctly —
+    # `teardown.remove_hvac_from_zones` runs ONCE at the top and each part
+    # then layers on, because the recursive call does not pass
+    # `remove_existing` — and all 12 shipped composites are exactly this shape
+    # ('Residential AC with baseboard electric' is
+    # `furnace(heating=False) + baseboards`).
+    #
+    # They were reachable from NO group shape, measured: 0 composite
+    # candidates out of 27/25/32/25 for the four shapes above. The mechanism
+    # that solves layering was built, tested and shipped, and the identifier
+    # never offered it.
 }
 
 #: A zonal unit the classifier saw -> the catalogue family or attribute it
-#: implies.
+#: implies. `None` means the kind is carried as an ATTRIBUTE of a bigger row
+#: (`baseboard_type`) rather than by a family of its own.
 _ZONAL_FAMILY = {'unit_heater': 'unit_heaters', 'ptac': 'mau_ptac',
                  'baseboard': None}
+
+#: The COMPLETE `zonal_units` vocabulary `classify.py` can emit, mapped to the
+#: catalogue family that builds it. Complete on purpose: `_ZONAL_FAMILY` above
+#: covers three of the ten kinds, and using it to judge a composite's parts
+#: silently under-credited every DOAS+fan-coil, DOAS+VRF and DOAS+WSHP row —
+#: 10 of the 12 shipped composites — because their zone equipment mapped to
+#: nothing. Mapped to `None` where the catalogue genuinely has no family:
+#: a radiant panel, a unit ventilator and a zone ERV are not buildable from a
+#: row today, so claiming a family for them would be a guess.
+#: Kinds come from the `'kind'` field of classify's zone-equipment table;
+#: `tests/stock/test_identify.py` re-reads that table and fails if a kind is
+#: added without being mapped here.
+_ZONAL_UNIT_FAMILY = {
+    'baseboard': 'baseboards',
+    'evap_cooler': 'evap_cooler',
+    'fan_coil': 'fan_coils',
+    'ptac': 'mau_ptac',
+    'pthp': 'doas_pthp',
+    'radiant': None,
+    'unit_heater': 'unit_heaters',
+    'unit_ventilator': None,
+    'vrf_terminal': 'vrf',
+    'wshp': 'wshp',
+}
 
 
 def _fuel_tokens(energy_types):
@@ -100,6 +141,42 @@ _BUILDER_COIL_DEFAULTS = {
     'zone_terminal': 'None',
 }
 
+
+
+
+def _composite_shape(row, _depth=0):
+    """A composite's `(part families, zone-equipment kinds)`.
+
+    Zone-equipment kinds are named in the VOCABULARY `classify` uses for
+    `zonal_units` ('baseboard', 'ptac', 'unit_heater'), so the two can be
+    compared directly. A part is zone equipment when its family maps to one of
+    those, or when it carries a `baseboard_type` that is not 'None' — a PSZ
+    part bundling baseboards serves the zones just as a separate baseboard
+    part does, and reading only the family would miss it.
+    """
+    if _depth > 3:
+        return frozenset(), frozenset()
+    families, zonal = set(), set()
+    for part in row.get('parts') or ():
+        try:
+            base = dict(catalog.resolve(part['name']))
+        except (KeyError, ValueError):
+            continue
+        base.update(part.get('config') or {})
+        family = str(base.get('family') or '')
+        families.add(family)
+        if family == 'composite':
+            sub_f, sub_z = _composite_shape(base, _depth + 1)
+            families |= sub_f
+            zonal |= sub_z
+            continue
+        for unit, unit_family in _ZONAL_UNIT_FAMILY.items():
+            if unit_family is not None and family == unit_family:
+                zonal.add(unit)
+        bb = base.get('baseboard_type')
+        if bb is not None and str(bb) != 'None':
+            zonal.add('baseboard')
+    return frozenset(families), frozenset(zonal)
 
 def _row_heating_media(row, _depth=0):
     """The set of MEDIA a row's air-handler heating would use.
@@ -449,6 +526,51 @@ def _score(row, group):
                 'but this row heats the air handler with '
                 f"{'/'.join(sorted(row_media))} — that substitutes the "
                 'heating MEDIUM, not just the equipment')
+
+    # A composite carries almost no fields of its own: its behaviour is in
+    # `parts`. Scoring it on absent fields would mark it down for every fact
+    # it delegates, so the parts are inspected for the two that decide
+    # layering — does anything cool, and does anything serve the zones.
+    #
+    # MERGING the parts' fields into one effective row was tried and REVERTED
+    # (2026-11-04). It works mechanically — nine fields gained — but the
+    # catalogue keeps loop-side and zone-side coils in one namespace
+    # (`mau_heating_coil_type` beside `heating_type` and `fan_coil_type`), so
+    # a merged row cannot say WHICH SIDE a coil is on. The scorer then read
+    # the fan coils' cooling as cooling on the air handler and the two parts'
+    # coils as one confused medium, and `DOAS with fan coil chiller with
+    # boiler` scored -3.5 against a group that IS a DOAS loop with fan coils,
+    # on three objections that were all false.
+    #
+    # Scoring a composite on its parts therefore needs the facts and the row
+    # fields SPLIT by side — loop coil vs zone coil — which is a change to the
+    # scoring model, not a merge. Until then a composite earns the layering
+    # credit below and nothing from the field checks, so it is reachable and
+    # honestly ranked rather than confidently wrong.
+    if row.get('family') == 'composite' and row.get('parts'):
+        part_families, part_zonal = _composite_shape(row)
+        if zonal and part_zonal:
+            shared_zonal = zonal & part_zonal
+            if shared_zonal:
+                score += 2.5
+                matched.append(
+                    'the group is served by '
+                    f"{'/'.join(sorted(shared_zonal))} at the zone AND this "
+                    'row builds it as a part, so it is not dropped')
+            else:
+                score -= 1.0
+                against.append(
+                    f"the group has {'/'.join(sorted(zonal))} at the zone; "
+                    f"this row's parts build {'/'.join(sorted(part_zonal))}")
+        elif zonal and not part_zonal:
+            score -= 1.0
+            against.append('this row builds no zone equipment, so the '
+                           f"group's {'/'.join(sorted(zonal))} would be "
+                           'dropped')
+        if loop_cools and 'evap_cooler' in part_families:
+            score -= 1.5
+            against.append('the loop has DX cooling; this row cools '
+                           'evaporatively, which is a different machine')
 
     cooling_medium = str(row.get('cooling_type') or '').lower()
     if cool and cooling_medium:
