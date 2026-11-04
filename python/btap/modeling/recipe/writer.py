@@ -7,6 +7,7 @@ from btap.modeling.recipe.envelope import envelope_section
 from btap.modeling.recipe.equipment import equipment_section
 from btap.modeling.recipe.hvac import hvac_section
 from btap.modeling.recipe.loads import loads_section
+from btap.modeling.recipe.space_types import space_types_section
 
 SCHEMA = 1
 
@@ -28,6 +29,7 @@ def write_recipe(model, *, building_type=None, vintage=None, source=None,
         'building_type': building_type,
         'vintage': vintage,
         'source': source,
+        'space_types': space_types_section(model, audit=audit),
         'envelope': envelope_section(model, audit=audit),
         'loads': loads_section(model, audit=audit),
         'controls': controls_section(model, audit=audit),

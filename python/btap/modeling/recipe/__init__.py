@@ -49,7 +49,9 @@ from btap.modeling.recipe.envelope import envelope_section
 from btap.modeling.recipe.equipment import equipment_section
 from btap.modeling.recipe.hvac import hvac_section
 from btap.modeling.recipe.loads import loads_section
+from btap.modeling.recipe.space_types import space_types_section
 from btap.modeling.recipe.writer import write_recipe
 
 __all__ = ['controls_section', 'envelope_section', 'equipment_section',
-           'hvac_section', 'loads_section', 'write_recipe']
+           'hvac_section', 'loads_section', 'space_types_section',
+           'write_recipe']
