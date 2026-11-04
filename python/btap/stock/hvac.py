@@ -37,6 +37,10 @@ _DESCRIPTIVE = (
     'cooling_energy_types', 'terminal_type', 'zonal_units',
     'loop_dx_cooling', 'packaged_unitary', 'heat_pump',
     'system_outdoor_air_method', 'dcv', 'ventilation_sized',
+    # The loop coil's MEDIUM. `heating_energy_types` is the fuel resolved
+    # through the plant, so it cannot tell a hydronic coil on a gas
+    # boiler from a gas burner — the identifier's primary error.
+    'supply_heating_media',
 )
 
 

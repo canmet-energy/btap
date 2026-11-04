@@ -10,6 +10,7 @@ what did not, so a wrong-looking candidate carries its own contradiction.
 
 from __future__ import annotations
 
+import pathlib
 import unittest
 
 from btap.stock.identify import FAMILY_CANDIDATES, identify_candidates, suggest
@@ -415,3 +416,132 @@ class TestTheTwoFieldVocabularies(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class TestTheBuilderDefaultsAreNotGuessed(unittest.TestCase):
+    """`_BUILDER_COIL_DEFAULTS` mirrors knowledge that LIVES in the builders.
+
+    Duplicated knowledge drifts silently, so this re-reads each builder's own
+    source and fails if a default moves — the table is not allowed to be a
+    guess that happens to be right today.
+    """
+
+    def test_the_builder_coil_defaults_match_this_table(self):
+        import re
+
+        from btap.stock.identify import _BUILDER_COIL_DEFAULTS
+
+        root = (pathlib.Path(__file__).resolve().parents[2]
+                / 'btap' / 'modeling' / 'hvac' / 'systems')
+        pattern = re.compile(
+            r"config\.get\('(?:heating_type|heating_coil_type"
+            r"|mau_heating_coil_type)',\s*'([^']*)'\)")
+
+        for family, expected in sorted(_BUILDER_COIL_DEFAULTS.items()):
+            source = (root / f'{family}.py')
+            self.assertTrue(source.exists(), f'no builder named {family}.py')
+            found = pattern.findall(source.read_text(encoding='utf-8'))
+            self.assertTrue(
+                found,
+                f'{family}.py no longer supplies a coil default, so '
+                f'_BUILDER_COIL_DEFAULTS should not claim {expected!r}')
+            self.assertEqual(
+                {expected}, set(found),
+                f"{family}.py's coil default is {set(found)}, but "
+                f'_BUILDER_COIL_DEFAULTS says {expected!r}')
+
+    def test_psz_and_vav_take_no_default_so_silence_is_silence(self):
+        from btap.stock.identify import _BUILDER_COIL_DEFAULTS
+
+        for family in ('psz', 'vav_reheat'):
+            self.assertNotIn(
+                family, _BUILDER_COIL_DEFAULTS,
+                f'{family} passes no default to config.get, so a row that '
+                'omits the coil field makes no claim about medium')
+
+
+class TestTheFuelCannotStandInForTheMedium(unittest.TestCase):
+    """The primary error, named independently by two agent reads.
+
+    `heating_energy_types` is the fuel resolved THROUGH the plant, so a
+    `Coil:Heating:Water` on a gas boiler and a `Coil:Heating:Gas` burner both
+    report ['NaturalGas']. Scoring the fuel alone let a direct-gas row match a
+    hydronic building. Measured on the Gagetown Office archetype: all four
+    central loops report fuel=['NaturalGas'] AND media=['hydronic'].
+    """
+
+    GAS_FUELLED_HYDRONIC = {
+        'family_guess': 'central_doas_or_cv', 'heated': True, 'cooled': True,
+        'heating_energy_types': ['NaturalGas'],
+        'cooling_energy_types': ['Electricity'], 'terminal_type': 'cv',
+        'zonal_units': ['baseboard'], 'loop_dx_cooling': True,
+        'system_outdoor_air_method': 'ZoneSum', 'ventilation_sized': False,
+        'supply_heating_media': ['hydronic'],
+    }
+    COMBUSTION = 'PSZ RTU Gas and DX Coils and Hot Water Baseboard'
+    HYDRONIC = 'Shared PSZ with gas boiler coils and hot water baseboard'
+
+    def _find(self, group, name):
+        return next(c for c in identify_candidates(
+            {'resolved': False, 'descriptive': group}, limit=120)
+            if c['system'] == name)
+
+    def test_a_direct_gas_row_is_marked_down_for_a_hydronic_loop(self):
+        hit = self._find(self.GAS_FUELLED_HYDRONIC, self.COMBUSTION)
+        self.assertTrue(
+            any('substitutes the heating MEDIUM' in a for a in hit['against']),
+            'a direct-gas coil on a hydronic loop substitutes the medium, '
+            f"which the fuel alone cannot see; got {hit['against']}")
+
+    def test_the_hydronic_row_is_credited_for_the_same_group(self):
+        hit = self._find(self.GAS_FUELLED_HYDRONIC, self.HYDRONIC)
+        self.assertTrue(
+            any('hydronic coil and so does this row' in m
+                for m in hit['matched']), hit['matched'])
+
+    def test_the_RANKING_FLIPS_when_only_the_medium_changes(self):
+        """A flip, because "the hydronic row ranks higher" passes either way.
+
+        My first version of this asserted exactly that, and it survived a
+        mutation that blinded the scorer to the medium — the hydronic row wins
+        on baseboards whatever the medium, so the assertion was measuring
+        something it did not name. Two runs differing ONLY in medium must
+        REVERSE the pair; a scorer that cannot see the medium returns the same
+        order twice and fails here.
+        """
+        def order_of(media):
+            group = dict(self.GAS_FUELLED_HYDRONIC, supply_heating_media=media)
+            ranked = [c['system'] for c in identify_candidates(
+                {'resolved': False, 'descriptive': group}, limit=120)]
+            return ranked.index(self.HYDRONIC) < ranked.index(self.COMBUSTION)
+
+        self.assertTrue(
+            order_of(['hydronic']),
+            'on a hydronic loop the hydronic row must rank higher')
+        self.assertFalse(
+            order_of(['combustion']),
+            'on a combustion loop the direct-gas row must rank higher — if '
+            'the order is unchanged, the medium is not being read')
+
+    def test_CONTROL_the_MEDIUM_drives_this_and_not_the_fuel(self):
+        """The control. Same fuel, same everything — only the MEDIUM flips.
+
+        If this passed while the test above also passed on a scorer that
+        ignored the medium, the assertions would be measuring the row's name
+        or the group's fuel instead of the thing under test.
+        """
+        combustion_loop = dict(self.GAS_FUELLED_HYDRONIC,
+                               supply_heating_media=['combustion'])
+        self.assertEqual(
+            self.GAS_FUELLED_HYDRONIC['heating_energy_types'],
+            combustion_loop['heating_energy_types'],
+            'the control must differ ONLY in medium')
+
+        hit = self._find(combustion_loop, self.COMBUSTION)
+        self.assertTrue(
+            any('combustion coil and so does this row' in m
+                for m in hit['matched']),
+            f"the direct-gas row is now CORRECT; got {hit['matched']}")
+        self.assertFalse(
+            any('substitutes the heating MEDIUM' in a for a in hit['against']),
+            'the same row must not be marked down once the loop is combustion')

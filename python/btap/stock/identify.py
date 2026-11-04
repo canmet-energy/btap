@@ -79,6 +79,89 @@ def facts_terminal(group):
     return group.get('terminal_type')
 
 
+
+# A row that OMITS its coil field is NOT silent when its builder supplies a
+# default. `furnace.py` is `self.config.get('heating_type', 'Gas')`, so a
+# furnace row with no `heating_type` BUILDS a combustion coil — reading it as
+# "no claim" let the medium substitution this guards against back in one field
+# over, which is how 'Shared furnace with DX cooling and no outdoor air'
+# escaped the check on first measurement.
+#
+# Mirrored from the builders and pinned by
+# `test_identify.py::test_the_builder_coil_defaults_match_this_table`, which
+# re-reads each builder's source and FAILS if a default moves. `psz` and
+# `vav_reheat` take no default, so silence there is genuine silence.
+_BUILDER_COIL_DEFAULTS = {
+    'furnace': 'Gas',
+    'unit_heaters': 'Gas',
+    'fan_coils': 'Gas',
+    'doas': 'Electric',
+    'mau_ptac': 'Electric',
+    'zone_terminal': 'None',
+}
+
+
+def _row_heating_media(row, _depth=0):
+    """The set of MEDIA a row's air-handler heating would use.
+
+    A set, not one value, because a `composite` row delegates to `parts` and
+    can bring more than one. Empty means the row makes no claim about medium —
+    which is NOT the same as "heats with nothing", and is why the three
+    non-obvious sources below are read rather than assumed:
+
+    - a BUILDER DEFAULT, when the row omits the field (`furnace.py` defaults
+      `heating_type` to 'Gas', so a silent furnace row builds combustion);
+    - `heat_source`, which 8 heat-pump rows carry INSTEAD of a coil type — a
+      heat-pump coil heats with refrigerant, and reading only coil fields let
+      every one of them escape the medium check;
+    - `parts`, for the 12 composite rows, whose own air handler may not heat
+      at all (`Residential AC with baseboard electric` has `heating: False`),
+      in which case the empty set is the right answer.
+
+    Measured when this was written: of 109 catalogue rows, 24 combustion,
+    22 electric, 20 hydronic, 15 refrigerant, and the remainder genuinely
+    silent.
+    """
+    if _depth > 3:        # a malformed self-referential composite
+        return frozenset()
+
+    if row.get('family') == 'composite' and row.get('parts'):
+        media = set()
+        for part in row['parts']:
+            try:
+                base = dict(catalog.resolve(part['name']))
+            except (KeyError, ValueError):
+                continue
+            base.update(part.get('config') or {})
+            if base.get('heating') is False:
+                continue      # this part's air handler does not heat
+            media |= _row_heating_media(base, _depth + 1)
+        return frozenset(media)
+
+    # A heat-pump coil heats with refrigerant whatever fuel backs it up, so
+    # this is tested BEFORE the coil fields: a row carrying both `heat_source`
+    # and `supp_htg_fuel: 'Gas'` is a heat pump, not a gas furnace.
+    if row.get('heat_source'):
+        return frozenset({'refrigerant'})
+
+    name = (row.get('heating_coil_type') or row.get('heating_type')
+            or row.get('mau_heating_coil_type'))
+    if name is None:
+        name = _BUILDER_COIL_DEFAULTS.get(str(row.get('family') or ''))
+    text = str(name or '').strip().lower()
+    if not text or text == 'none':
+        return frozenset()
+    if 'hot water' in text or 'hydronic' in text:
+        return frozenset({'hydronic'})
+    if 'electric' in text:
+        return frozenset({'electric'})
+    # ASHP/heat-pump before gas, or 'ASHP with Gas' reads as combustion.
+    if 'ashp' in text or 'heat pump' in text or 'dx' in text:
+        return frozenset({'refrigerant'})
+    if 'gas' in text or 'furnace' in text or 'combustion' in text:
+        return frozenset({'combustion'})
+    return frozenset()
+
 def _score(row, group):
     """Score one catalogue row against one zone group's facts.
 
@@ -343,6 +426,30 @@ def _score(row, group):
     # `cooling_energy_types: ['Electricity']` comes from two zonal PTACs.
     # `loop_dx_cooling` is the fact that says whether the LOOP cools, and the
     # scorer never read it.
+    # THE PRIMARY ERROR, named independently by two agent reads (2026-11-04).
+    # `heating_energy_types` is the fuel resolved THROUGH the plant, so every
+    # Gagetown central loop reads ['NaturalGas'] while its coil is a
+    # `Coil:Heating:Water` — measured, all four loops: fuel=['NaturalGas'],
+    # media=['hydronic']. Scoring the fuel alone let a direct-gas burner take
+    # +2.0 for "gas coil matches gas heating" on a hydronic model, which is how
+    # a row that substitutes the heating MEDIUM could win.
+    media = set(group.get('supply_heating_media') or ())
+    row_media = _row_heating_media(row)
+    if media and row_media:
+        shared = media & row_media
+        if shared:
+            score += 2.0
+            matched.append('the loop heats with a '
+                           f"{'/'.join(sorted(shared))} coil and so does "
+                           'this row')
+        else:
+            score -= 2.5
+            against.append(
+                f"the loop's own heating coil is {'/'.join(sorted(media))}, "
+                'but this row heats the air handler with '
+                f"{'/'.join(sorted(row_media))} — that substitutes the "
+                'heating MEDIUM, not just the equipment')
+
     cooling_medium = str(row.get('cooling_type') or '').lower()
     if cool and cooling_medium:
         score += 1.0
