@@ -316,14 +316,76 @@ def _apply_equipment(model, equipment, applied, skipped, audit):
             'per-unit-area skin losses hold')
 
 
-def build_from_recipe(recipe, model, *, audit=None):
+def _build_hvac(model, groups, applied, refused, audit):
+    """Build HVAC from ACCEPTED candidates, auditing each as a candidate.
+
+    Reached only when the caller passes `accept_candidates=True`. A group with
+    no candidate is still refused: accepting candidates does not mean
+    inventing one where the identifier proposed none.
+
+    `build_system(..., remove_existing=True)` tears down whatever serves those
+    zones first, which is what makes this a GENERATION rather than an overlay.
+    The earlier simulation comparison was an overlay — the original HVAC was
+    inherited untouched — and that is why its -2.53% described only the 14% of
+    site energy the recipe actually rebuilt.
+    """
+    from btap.modeling.hvac import builder
+
+    for group in groups:
+        candidates = group.get('candidates') or []
+        zone_names = group.get('zones') or []
+        if not candidates:
+            refused.append(
+                f'HVAC for {len(zone_names)} zone(s): no candidate to accept '
+                '— the identifier proposed none, and accepting candidates '
+                'does not mean inventing one')
+            continue
+        chosen = candidates[0]
+        zones = [z for z in sorted_by_name(model.getThermalZones())
+                 if z.nameString() in set(zone_names)]
+        if not zones:
+            refused.append(
+                f"HVAC {chosen['system']!r}: none of its "
+                f'{len(zone_names)} zone(s) exist in this geometry')
+            continue
+        try:
+            builder.build_system(model, chosen['system'],
+                                 [z for z in zones], remove_existing=True)
+        except Exception as exc:
+            refused.append(
+                f"HVAC {chosen['system']!r} on {len(zones)} zone(s): the "
+                f'builder refused it — {type(exc).__name__}: {exc}')
+            continue
+        applied.append(
+            f"HVAC {chosen['system']!r} (CANDIDATE, score "
+            f"{chosen['score']}) on {len(zones)} zone(s)")
+        if audit is not None:
+            audit.warn('recipe',
+                       'HVAC built from a CANDIDATE, not an identified '
+                       'system — the recipe reported no catalogue system for '
+                       'these zones and this is a ranked guess',
+                       target=chosen['system'],
+                       inputs={'score': chosen['score'],
+                               'family': chosen.get('family'),
+                               'origin': chosen.get('origin'),
+                               'zones': len(zones),
+                               'matched': chosen.get('matched', [])[:4],
+                               'against': chosen.get('against', [])})
+
+
+def build_from_recipe(recipe, model, *, accept_candidates=False, audit=None):
     """Apply ``recipe`` to ``model``, which supplies the geometry.
 
     :returns: ``{'applied': [...], 'skipped': [...], 'refused': [...]}`` —
         a per-field account, because a caller has to be able to see which half
         of a recipe reached the model.
-    :raises RecipeError: on an unknown schema, or a recipe whose HVAC section
-        carries an unresolved zone group (see the module docstring).
+    :param accept_candidates: build HVAC from each unresolved group's TOP
+        ranked candidate instead of refusing it. OFF by default: a candidate
+        is a guess, `classify.py` establishes that structural identification
+        cannot be made reliable, and a caller has to say so deliberately.
+        Every system built this way is audited as a candidate, with its score
+        and the facts that went AGAINST it.
+    :raises RecipeError: on an unknown schema.
     """
     schema = recipe.get('schema')
     if schema != SCHEMA:
@@ -355,12 +417,17 @@ def build_from_recipe(recipe, model, *, audit=None):
 
     unresolved = [group for group in recipe.get('hvac', {})
                   .get('zone_groups', []) if not group.get('resolved')]
-    for group in unresolved:
-        refused.append(
-            f"HVAC for {len(group.get('zones', []))} zone(s) "
-            f"({', '.join(group.get('zones', [])[:3])}…): the recipe reports "
-            'no catalogue system, and family_guess is a guess — building from '
-            'it would produce a system the source model is not')
+    if accept_candidates:
+        _build_hvac(model, unresolved, applied, refused, audit)
+    else:
+        for group in unresolved:
+            refused.append(
+                f"HVAC for {len(group.get('zones', []))} zone(s) "
+                f"({', '.join(group.get('zones', [])[:3])}…): the recipe "
+                'reports no catalogue system, and family_guess is a guess — '
+                'building from it would produce a system the source model is '
+                'not. Pass accept_candidates=True to build from the ranked '
+                'candidate instead.')
 
     untagged = (recipe.get('space_types', {}).get('from', {})
                 .get('untagged_space_types', 0))

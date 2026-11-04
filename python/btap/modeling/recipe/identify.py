@@ -155,11 +155,46 @@ def _score(row, group):
                 score -= 1.5
                 against.append(f'gas heating coil against {sorted(heat)}')
 
-    if row.get('needs_boiler') and 'gas' in heat:
+    # THE BOILER'S OWN FUEL, which is the field that breaks the tie that cost
+    # 75,600 kWh. 'Baseboard gas boiler' and 'Baseboard district hot water'
+    # both scored 3.50 on baseboard medium alone, so the alphabetical sort
+    # picked DISTRICT for a NaturalGas building — and the generated model
+    # carried 75,600 kWh of district heating the original does not use at all.
+    # Nine catalogue rows declare `boiler_fuel` and one declares
+    # `hw_source: district`; both were being ignored.
+    boiler_fuel = _fuel_tokens([row.get('boiler_fuel')]
+                               if row.get('boiler_fuel') else [])
+    if boiler_fuel and heat:
+        if boiler_fuel & heat:
+            score += 2.5
+            matched.append(f"boiler fuel {row['boiler_fuel']!r} matches "
+                           f'{sorted(heat)}')
+        else:
+            score -= 2.0
+            against.append(f"boiler fuel {row['boiler_fuel']!r} against "
+                           f'{sorted(heat)}')
+
+    # A district source is a different PLANT, not a different efficiency, so
+    # proposing one for a building that fires its own boiler introduces an
+    # energy stream the original has none of.
+    if row.get('hw_source') == 'district':
+        if 'district' in heat:
+            score += 2.5
+            matched.append('district hot water matches district heating')
+        else:
+            score -= 3.0
+            against.append(
+                f'row is DISTRICT hot water but the group heats with '
+                f'{sorted(heat) or "nothing"} — this would introduce a '
+                'purchased-heat stream the building does not have')
+    if row.get('chw_source') == 'district' and 'district' not in cool:
+        score -= 3.0
+        against.append('row is district chilled water; the group is not')
+
+    if row.get('needs_boiler') and heat & {'gas', 'oil', 'district'}:
         score += 0.5
-        matched.append('row needs a boiler; group heats with gas')
-    if row.get('needs_boiler') and heat and 'gas' not in heat \
-            and 'district' not in heat:
+        matched.append(f'row needs a boiler; group heats with {sorted(heat)}')
+    elif row.get('needs_boiler') and heat:
         score -= 0.5
         against.append(f'row needs a boiler; group heats with {sorted(heat)}')
 
