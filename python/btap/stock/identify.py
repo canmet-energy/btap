@@ -43,7 +43,13 @@ FAMILY_CANDIDATES = {
                         'zone_terminal'),
     'central_doas_or_cv': ('furnace', 'psz', 'doas', 'evap_cooler'),
     'packaged_single_zone': ('psz', 'furnace'),
-    'multizone_vav': ('vav_reheat', 'dual_duct'),
+    # 'furnace' belongs here: in this catalogue that family covers SHARED AIR
+    # HANDLERS, and the campus row 'Shared hot water air handler with water
+    # reheat' carries `reheat: 'Hot Water'` while sitting under `furnace`. A
+    # mapping that admitted only `vav_reheat` excluded it by FAMILY before any
+    # fact was scored — so the row built for a multizone reheat system could
+    # never be proposed for one. My own test caught this.
+    'multizone_vav': ('vav_reheat', 'dual_duct', 'furnace'),
 }
 
 #: A zonal unit the classifier saw -> the catalogue family or attribute it
@@ -66,6 +72,11 @@ def _fuel_tokens(energy_types):
         elif 'oil' in lowered or 'diesel' in lowered:
             out.add('oil')
     return out
+
+
+def facts_terminal(group):
+    """The group's terminal type, from either a raw or wrapped fact dict."""
+    return group.get('terminal_type')
 
 
 def _score(row, group):
@@ -96,6 +107,22 @@ def _score(row, group):
             score += 3.0
             matched.append(f'zonal unit {unit!r} implies family {implied!r}')
 
+    # TWO FIELD VOCABULARIES, and reading only one made the campus rows
+    # unreachable. The NECB-shaped rows describe an air handler by
+    # `heating_coil_type` and `baseboard_type`; the six `origin: campus` rows —
+    # added by #152 explicitly "for reconstructing the Campus models" — use
+    # `heating`, `cooling`, `heating_type`, `cooling_type`, `ventilation`,
+    # `reheat`, `per_zone`, `mau_heating_coil_type` and `ptac_heating_type`
+    # instead, and carry NO `baseboard_type` at all because in that
+    # reconstruction the baseboards are separate zone equipment with their own
+    # catalogue row.
+    #
+    # A scorer that read only the NECB names therefore saw nothing informative
+    # on a campus row and then PENALISED it for the missing baseboard field —
+    # so 'Shared furnace with DX cooling and no outdoor air', the row built for
+    # exactly this group, did not reach the top eight while
+    # 'PSZ RTU Gas and DX Coils and Hot Water Baseboard' led at 6.00.
+    uses_baseboard_field = 'baseboard_type' in row
     if 'baseboard' in zonal:
         baseboard = row.get('baseboard_type')
         if baseboard in ('Hot Water', 'Electric'):
@@ -110,10 +137,47 @@ def _score(row, group):
         elif baseboard == 'None':
             score -= 1.5
             against.append('baseboard present but row has none')
+        elif not uses_baseboard_field:
+            # Silence, not disagreement: this row does not model baseboards,
+            # so the group's baseboards come from their own row.
+            matched.append('row does not carry baseboards — they are separate '
+                           'zone equipment in this vocabulary')
     elif row.get('baseboard_type') in ('Hot Water', 'Electric'):
         score -= 1.0
         against.append(f"row has {row['baseboard_type']!r} baseboard, "
                        'none seen in the group')
+
+    # The campus vocabulary's own facts.
+    if row.get('heating') is True and heat:
+        score += 1.0
+        matched.append('row heats; group heats')
+    elif row.get('heating') is False and heat:
+        score -= 2.0
+        against.append(f'row does NOT heat but the group heats with '
+                       f'{sorted(heat)}')
+    if row.get('cooling') is True and cool:
+        score += 1.5
+        matched.append('row cools; group cools')
+    elif row.get('cooling') is False and cool:
+        score -= 2.0
+        against.append('row does NOT cool but the group is cooled')
+    elif row.get('cooling') is True and not cool:
+        score -= 1.0
+        against.append('row cools but the group is not cooled')
+
+    if row.get('reheat'):
+        if facts_terminal(group) == 'vav_reheat':
+            score += 2.5
+            matched.append(f"row has {row['reheat']!r} reheat terminals; "
+                           'group terminal is vav_reheat')
+        else:
+            score -= 1.0
+            against.append(f"row has reheat terminals; group terminal is "
+                           f'{facts_terminal(group)!r}')
+    if row.get('ventilation') is False and group.get('ventilation_sized'):
+        score -= 0.5
+        against.append('row has no outdoor air; the group is '
+                       'ventilation-sized')
 
     # A COIL MEDIUM IS NOT A FUEL, and conflating them inverted this test.
     # Measured: the `vav_reheat` family has NO gas coil at all — 12 rows are
@@ -123,7 +187,10 @@ def _score(row, group):
     # building the correct hot-water rows were penalised exactly like the wrong
     # electric ones, and electric won on name order. A hot-water coil fed by a
     # gas boiler is a gas-heated system.
-    coil = str(row.get('heating_coil_type') or '').lower()
+    # One medium, three spellings across the two vocabularies.
+    coil_name = (row.get('heating_coil_type') or row.get('heating_type')
+                 or row.get('mau_heating_coil_type'))
+    coil = str(coil_name or '').lower()
     # Fuels that can fire a boiler, and therefore agree with a hydronic coil.
     boiler_fuels = {'gas', 'oil', 'district'}
     if coil and heat:
@@ -139,12 +206,12 @@ def _score(row, group):
         elif 'water' in coil or 'steam' in coil:
             if heat & boiler_fuels:
                 score += 2.0
-                matched.append(f'{row["heating_coil_type"]!r} coil fed by a '
+                matched.append(f'{coil_name!r} coil fed by a '
                                f'{sorted(heat & boiler_fuels)} boiler')
             elif 'electric' in heat:
                 # An electric boiler is legal but unusual; mildly against.
                 score -= 0.5
-                against.append(f'{row["heating_coil_type"]!r} coil with '
+                against.append(f'{coil_name!r} coil with '
                                'electric-only heating implies an electric '
                                'boiler')
         elif 'gas' in coil:
@@ -198,6 +265,10 @@ def _score(row, group):
         score -= 0.5
         against.append(f'row needs a boiler; group heats with {sorted(heat)}')
 
+    cooling_medium = str(row.get('cooling_type') or '').lower()
+    if cool and cooling_medium:
+        score += 1.0
+        matched.append(f'row cooling type {row["cooling_type"]!r}')
     if cool:
         if row.get('needs_chiller') or row.get('chiller_type'):
             score += 0.5

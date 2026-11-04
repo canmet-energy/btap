@@ -277,5 +277,102 @@ class TestTheDistrictTieBreak(unittest.TestCase):
                             for a in gas['against']))
 
 
+@needs_sdk
+class TestTheTwoFieldVocabularies(unittest.TestCase):
+    """Why the Gagetown systems were unreachable although the library has them.
+
+    `3d343f60` added SIX rows with `origin: campus` — "Six catalogue variants
+    for reconstructing the Campus models" (#152). They were unreachable for two
+    reasons, and only the second was mine:
+
+    1. the archetypes' air loops are named generically — 'Packaged Rooftop Air
+       Conditioner', 'AHU 2 - First Floor' — so `_recognize_gem_name`, which
+       resolves the loop NAME against the catalogue, finds nothing. A naming
+       gap, not a capability gap;
+    2. the campus rows use a DIFFERENT field vocabulary — `heating`,
+       `cooling`, `heating_type`, `cooling_type`, `ventilation`, `reheat`,
+       `per_zone`, `mau_heating_coil_type`, `ptac_heating_type` — where the
+       NECB-shaped rows use `baseboard_type` and `heating_coil_type`. The
+       scorer read only the NECB names, so a campus row scored nothing
+       informative AND was penalised 1.5 for a `baseboard_type` it never
+       carries, because in that reconstruction baseboards are separate zone
+       equipment with their own row.
+    """
+
+    @staticmethod
+    def _ptac_group():
+        return {'resolved': False, 'descriptive': {
+            'family_guess': 'zonal_heat_cool', 'heated': True, 'cooled': True,
+            'heating_energy_types': ['NaturalGas'],
+            'cooling_energy_types': ['Electricity'],
+            'terminal_type': 'none', 'zonal_units': ['ptac'],
+            'ventilation_sized': False}}
+
+    def test_the_campus_PTAC_row_wins_its_own_case(self):
+        candidates = identify_candidates(self._ptac_group(), limit=5)
+        top = candidates[0]
+        self.assertEqual('PSZ MAU Hot Water with water-heated PTAC',
+                         top['system'])
+        self.assertEqual('campus', top['origin'])
+
+    def test_a_row_with_NO_baseboard_field_is_not_penalised_for_it(self):
+        """The penalty that made the campus rows unreachable. Their baseboards
+        are a separate catalogue row, so silence is not disagreement."""
+        group = {'resolved': False, 'descriptive': {
+            'family_guess': 'central_doas_or_cv', 'heated': True,
+            'cooled': True, 'heating_energy_types': ['NaturalGas'],
+            'cooling_energy_types': ['Electricity'], 'terminal_type': 'cv',
+            'zonal_units': ['baseboard'], 'ventilation_sized': False}}
+        candidates = identify_candidates(group, limit=30)
+        campus = [c for c in candidates if c['origin'] == 'campus']
+        self.assertTrue(campus, 'a campus furnace row must be RANKED at all')
+        for c in campus:
+            self.assertFalse(
+                any('baseboard present but row has none' in a
+                    for a in c['against']),
+                f"{c['system']!r} penalised for a field its vocabulary does "
+                'not use')
+
+    def test_the_campus_heating_type_is_read_as_a_coil_medium(self):
+        """`heating_type: 'Hot Water'` means what `heating_coil_type:
+        'Hot Water'` means, and reading only the second made it invisible."""
+        candidates = identify_candidates(self._ptac_group(), limit=5)
+        top = candidates[0]
+        self.assertTrue(
+            any('Hot Water' in m or 'boiler' in m for m in top['matched']),
+            f"nothing in {top['matched']} reads the row's hydronic heating")
+
+    def test_a_row_that_does_NOT_cool_loses_a_cooled_group(self):
+        """The campus vocabulary's `cooling: False` is a hard fact and must
+        count against — 'Shared hot water heating-only air handler' cannot
+        serve a cooled zone group."""
+        group = {'resolved': False, 'descriptive': {
+            'family_guess': 'central_doas_or_cv', 'heated': True,
+            'cooled': True, 'heating_energy_types': ['NaturalGas'],
+            'cooling_energy_types': ['Electricity'], 'terminal_type': 'cv',
+            'zonal_units': [], 'ventilation_sized': False}}
+        candidates = identify_candidates(group, limit=30)
+        heating_only = [c for c in candidates
+                        if c['system'] == 'Shared hot water heating-only air '
+                                          'handler']
+        self.assertTrue(heating_only)
+        self.assertTrue(any('does NOT cool' in a
+                            for a in heating_only[0]['against']))
+
+    def test_the_reheat_field_matches_a_vav_reheat_terminal(self):
+        group = {'resolved': False, 'descriptive': {
+            'family_guess': 'multizone_vav', 'heated': True, 'cooled': False,
+            'heating_energy_types': ['NaturalGas'],
+            'cooling_energy_types': [], 'terminal_type': 'vav_reheat',
+            'zonal_units': [], 'ventilation_sized': True}}
+        candidates = identify_candidates(group, limit=30)
+        reheat = [c for c in candidates
+                  if c['system'] == 'Shared hot water air handler with water '
+                                    'reheat']
+        self.assertTrue(reheat, 'the campus reheat row must be ranked')
+        self.assertTrue(any('reheat terminals' in m
+                            for m in reheat[0]['matched']))
+
+
 if __name__ == '__main__':
     unittest.main()
