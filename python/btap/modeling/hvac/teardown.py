@@ -20,12 +20,60 @@ def remove_hvac_from_zones(model, zones):
     # 1. Zone equipment on the given zones (baseboards, PTAC/PTHP, fan coils, VRF
     #    terminals...). Exhaust fans are preserved (they represent code-required
     #    exhaust, not the system).
+    #
+    # Preserving the OBJECT is not enough, and this is issue #201. Removing a
+    # zone component that occupies an exhaust port — a unit heater, a fan coil,
+    # anything drawing zone air — can clear the zone's ENTIRE exhaust
+    # `PortList`, taking the preserved fan's port with it. The fan then keeps
+    # an inlet-node reference the zone no longer registers, and EnergyPlus
+    # reports "Node Connection Error, Inlet node did not find an appropriate
+    # matching outlet node" for every one of them.
+    #
+    # Measured on `gagetown_coldlake_Office_pre-1960.osm`: five of its seven
+    # exhaust fans, in exactly the five zones whose other equipment is a
+    # `ZoneHVAC:UnitHeater`. The two zones with baseboards are unaffected,
+    # because a baseboard has no air inlet and so never occupies a port. The
+    # five became five extra EnergyPlus Severes in any model generated from
+    # that archetype's recipe.
+    #
+    # Isolated to `ZoneHVACComponent::removeFromThermalZone()` — `remove()`
+    # calls it, and calling it alone reproduces the wipe. It is upstream SDK
+    # behaviour that nine probes could not reproduce on a hand-built zone
+    # (single and multi zone, electric and hydronic coils, both add orders,
+    # with and without an air loop, and through a save/VersionTranslator round
+    # trip), so the remaining trigger lives somewhere in the real model's
+    # object graph. What matters here is that THIS function's documented
+    # contract is "exhaust fans are preserved", so this function is the right
+    # place to make that true rather than leave callers to discover it.
+    preserved = []
+    for zone in zones:
+        for equipment in zone.equipment():
+            fan = equipment.to_FanZoneExhaust()
+            if fan.is_initialized():
+                preserved.append((zone, fan.get()))
+
     for zone in zones:
         for equipment in zone.equipment():
             if equipment.to_FanZoneExhaust().is_initialized():
                 continue
 
             equipment.remove()
+
+    # Re-assert the preserved fans. `addToThermalZone` is a no-op when the port
+    # is still registered, so a zone that kept its ports pays nothing; only a
+    # fan whose port was dropped is re-attached, and re-attaching carries the
+    # fan's own fields (efficiency, pressure rise, schedules) unchanged because
+    # only the connection is rebuilt.
+    for zone, fan in preserved:
+        registered = {
+            node.nameString()
+            for node in zone.exhaustPortList().modelObjects()
+        }
+        inlet = fan.inletNode()
+        if inlet.is_initialized() and inlet.get().nameString() in registered:
+            continue
+        fan.removeFromThermalZone()
+        fan.addToThermalZone(zone)
 
     # 2. Air loops serving the given zones: remove entirely if they serve only these
     #    zones, otherwise detach just the given zones from the shared loop.
