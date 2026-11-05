@@ -66,15 +66,52 @@ values land on objects that are then torn down. The first version had it the
 other way; every section was correct in isolation and only an end-to-end
 simulation could show the sequence was not.
 
-## The measured limit
+## The measured limit, and why the first number was MISATTRIBUTED
 
 A generated building is representative for loads, envelope and equipment
-performance, and NOT for HVAC. On `Office_pre-1960`, candidate-based
-generation lands **~21% below** the source on site energy while meeting load
-slightly BETTER (unmet hours 1854 -> 1717 h heating) with MORE cooling
-equipment and matched COP and boiler efficiency. That is substitution, not
-breakage: nine catalogue systems in place of ten hand-built ones. Do not
-present a generated model as a reproduction of a specific building.
+performance, and only approximately for HVAC. On `Office_pre-1960`,
+candidate-based generation lands about **21% below** the source on site
+energy.
+
+**Most of that gap is a DEFECT IN THE SOURCE MODEL, not a limit of
+generating from a recipe.** This file previously said the 21% was
+substitution rather than breakage, with no further account. The measurement
+was right and the attribution was wrong, and the decomposition (2026-11-05)
+is:
+
+- the three `Office` archetypes carry TWO `SetpointManager:MixedAir` objects
+  on the VAV loop that reference EACH OTHER — in `Office_pre-1960`,
+  `Node 149` is set from `Node 155` and `Node 155` from `Node 149`. Each hop
+  subtracts fan heat, so the target spirals: the simulated supply air
+  averages **-48.5 C** and the reported setpoint falls below **-1000 C**. The
+  DX coil chases it while terminal reheat fights back, burning **76.06 MWh**
+  of cooling electricity where the rebuilt model uses **6.11**;
+- correcting ONLY that manager, with every other source object untouched,
+  takes the source from **1,468.43** to **1,182.12 MWh/yr** and leaves the
+  generated model just **3.28%** lower. Heating unmet hours barely move
+  (1854 -> 1853.25 h), which is what shows the change is not a capacity
+  thaw. That is **88.1%** of the gap;
+- the other 21 shipped archetypes are clean. No test or scenario reads the
+  three Office models, so nothing we validate against is affected.
+
+What remains is attributable rather than mysterious: rebuilt CV supply fans
+take **250 Pa** where the source has **500 Pa** (the recipe does NOT capture
+fan pressure rise — a real gap), the recipe's AVERAGED fan efficiency moves
+retained exhaust fans from 0.60 to 0.711111 by design, and two heating plants
+become one pump.
+
+A generated model also carries **five Severes of its own** that the source
+does not: retained `Fan:ZoneExhaust` inlet nodes are orphaned by the HVAC
+teardown (issue #201). Count Severes against the source before reading a
+generated run as evidence.
+
+Open: #200 the archetype setpoint cycle, #201 the orphaned exhaust-fan nodes,
+#202 the uncaptured fan pressure.
+
+So: do not present a generated model as a reproduction of a specific
+building, and do NOT quote a headline gap against a hand-built archetype as a
+property of this package until the archetype's own HVAC has been read. On
+this model the generated building is arguably the better one.
 
 ## The identifier scores FACTS, and the fuel is not the coil medium
 
