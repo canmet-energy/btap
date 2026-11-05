@@ -2,18 +2,30 @@
 
 `remove_hvac_from_zones` documents that "exhaust fans are preserved (they
 represent code-required exhaust, not the system)". Preserving the OBJECT was
-not enough: removing a zone component that occupies an exhaust port can clear
-the zone's entire exhaust `PortList`, leaving the fan with an inlet-node
-reference the zone no longer registers. EnergyPlus then reports "Node
-Connection Error, Inlet node did not find an appropriate matching outlet node"
-for each one — five extra Severes in a model generated from this archetype.
+not enough: removing a zone component that occupies an exhaust port clears the
+zone's entire exhaust `PortList`, leaving the fan with an inlet-node reference
+the zone no longer registers. EnergyPlus then reports "Node Connection Error,
+Inlet node did not find an appropriate matching outlet node" for each one.
 
-**This test uses the REAL archetype deliberately.** Nine hand-built
-reproductions do NOT trigger the wipe: single zone and multi-zone, electric
-and hydronic coils, both equipment add orders, with and without an air loop on
-the zone, and through a save/`VersionTranslator` round trip. Each one removes
-only the departing component's port and keeps the fan's. A synthetic fixture
-here would pass against the unfixed code and prove nothing.
+## Why the fixture is a REDUCED REAL MODEL, not a hand-built one
+
+Nine hand-built reproductions do NOT trigger the wipe — single zone and
+multi-zone, electric and hydronic coils with a real boiler plant, both
+equipment add orders, with and without an air loop, and through a
+save/`VersionTranslator` round trip. Each removes only the departing
+component's port and keeps the fan's. So a synthetic fixture would pass
+against the UNFIXED code and prove nothing.
+
+`fixtures/zone_unit_heater_with_exhaust_fan.osm` is therefore
+`gagetown_coldlake_Office_pre-1960.osm` mechanically reduced to its Paint Shop
+zone — 344 objects, 141 KB, from 2.4 MB — by removing the other zones, the
+loops, orphaned spaces, geometry, loads and rendering objects and purging
+unused resources. It still reproduces, which is what makes it a valid fixture.
+
+**It is committed deliberately.** The first version of this test loaded the
+archetype from `models/`, which is gitignored (`.gitignore:111`), so all four
+tests SKIPPED in CI — including the `verify` lane. The fix merged in #204 had
+no CI protection at all and the green signal did not cover it.
 """
 
 from __future__ import annotations
@@ -23,76 +35,62 @@ import unittest
 
 from tests.support import needs_sdk
 
-ARCHETYPE = (pathlib.Path(__file__).resolve().parents[3] / 'models'
-             / 'gagetown_coldlake_Office_pre-1960.osm')
+FIXTURE = (pathlib.Path(__file__).resolve().parents[1] / 'fixtures'
+           / 'zone_unit_heater_with_exhaust_fan.osm')
 
-#: The five zones whose other equipment is a `ZoneHVAC:UnitHeater`, which
-#: occupies an exhaust port. These are the zones that broke.
-UNIT_HEATER_ZONES = ('Paint Shop', 'Carpenter Shop', 'Machine Shop',
-                     'RM Shop 1', 'RM Shop 2')
-
-#: The control: their other equipment is a `ZoneHVAC:Baseboard:Convective:
-#: Water`, which has no air inlet and so never occupies a port. These were
-#: never affected, so they must not be what makes this test pass.
-BASEBOARD_ZONES = ('Washrooms 1', 'Washroom 2')
+#: The zone's other equipment is a `ZoneHVAC:UnitHeater`, which occupies an
+#: exhaust port. That is what makes the wipe happen; a
+#: `ZoneHVAC:Baseboard:Convective:Water` has no air inlet and never occupies
+#: one, which is why the two baseboard zones in the source archetype were
+#: unaffected while these five were.
+ZONE = 'Paint Shop'
 
 
 @needs_sdk
-@unittest.skipUnless(ARCHETYPE.is_file(), f'{ARCHETYPE.name} not present')
 class TestTeardownKeepsExhaustFansConnected(unittest.TestCase):
 
     def setUp(self):
         import openstudio
 
-        self.openstudio = openstudio
+        self.assertTrue(FIXTURE.is_file(), f'{FIXTURE.name} is missing')
         translator = openstudio.osversion.VersionTranslator()
         self.model = translator.loadModel(
-            openstudio.toPath(str(ARCHETYPE))).get()
+            openstudio.toPath(str(FIXTURE))).get()
+        self.zone = next(z for z in self.model.getThermalZones()
+                         if z.nameString() == ZONE)
 
-    def unregistered(self):
-        """Zone names whose exhaust fan's inlet node the zone does not list."""
+    def fan(self):
+        return next(e.to_FanZoneExhaust().get() for e in self.zone.equipment()
+                    if e.to_FanZoneExhaust().is_initialized())
+
+    def registered_ports(self):
+        return {node.nameString()
+                for node in self.zone.exhaustPortList().modelObjects()}
+
+    def fan_is_registered(self):
         from btap._compat import opt
 
-        out = []
-        for fan in self.model.getFanZoneExhausts():
-            zone = fan.thermalZone()
-            if not zone.is_initialized():
-                out.append(f'{fan.nameString()} (detached from its zone)')
-                continue
-            zone = opt(zone)
-            inlet = fan.inletNode()
-            registered = {node.nameString()
-                          for node in zone.exhaustPortList().modelObjects()}
-            if (not inlet.is_initialized()
-                    or opt(inlet).nameString() not in registered):
-                out.append(zone.nameString())
-        return sorted(out)
+        inlet = self.fan().inletNode()
+        return (inlet.is_initialized()
+                and opt(inlet).nameString() in self.registered_ports())
 
-    def fan_fields(self):
-        return sorted((f.nameString(), round(f.fanTotalEfficiency(), 6),
-                       round(f.pressureRise(), 4))
-                      for f in self.model.getFanZoneExhausts())
+    def test_the_fixture_starts_consistent_and_still_carries_the_hazard(self):
+        """Without BOTH of these the rest of the file proves nothing."""
+        kinds = {e.iddObjectType().valueName() for e in self.zone.equipment()}
+        self.assertIn('OS_Fan_ZoneExhaust', kinds)
+        self.assertIn('OS_ZoneHVAC_UnitHeater', kinds,
+                      'the unit heater is what occupies the second exhaust '
+                      'port; without it the wipe cannot be observed')
+        self.assertEqual(2, len(self.registered_ports()))
+        self.assertTrue(self.fan_is_registered())
 
-    def zones_named(self, names):
-        return [z for z in self.model.getThermalZones()
-                if z.nameString() in names]
-
-    def test_the_archetype_starts_consistent(self):
-        """If this fails the premise is gone and the rest proves nothing."""
-        self.assertEqual([], self.unregistered())
-        self.assertEqual(7, len(self.model.getFanZoneExhausts()))
-
-    def test_tearing_down_the_UNIT_HEATER_zones_keeps_the_fans_connected(self):
+    def test_the_teardown_keeps_the_fan_registered(self):
         from btap.modeling.hvac import teardown
 
-        zones = self.zones_named(UNIT_HEATER_ZONES)
-        self.assertEqual(len(UNIT_HEATER_ZONES), len(zones),
-                         'the archetype no longer has these zones')
+        teardown.remove_hvac_from_zones(self.model, [self.zone])
 
-        teardown.remove_hvac_from_zones(self.model, zones)
-
-        self.assertEqual(
-            [], self.unregistered(),
+        self.assertTrue(
+            self.fan_is_registered(),
             'a preserved exhaust fan must stay REGISTERED on its zone, not '
             'merely survive as an object: EnergyPlus reports a Node '
             'Connection Error for an inlet node the zone does not list')
@@ -101,22 +99,31 @@ class TestTeardownKeepsExhaustFansConnected(unittest.TestCase):
         """Re-attaching rebuilds the connection, not the fan."""
         from btap.modeling.hvac import teardown
 
-        before = self.fan_fields()
-        teardown.remove_hvac_from_zones(
-            self.model, self.zones_named(UNIT_HEATER_ZONES))
-        self.assertEqual(before, self.fan_fields())
+        fan = self.fan()
+        before = (round(fan.fanTotalEfficiency(), 6),
+                  round(fan.pressureRise(), 4))
 
-    def test_CONTROL_the_baseboard_zones_were_never_the_ones_at_risk(self):
-        """Tearing down ONLY the baseboard zones was always safe.
+        teardown.remove_hvac_from_zones(self.model, [self.zone])
 
-        So a fix that merely re-attached every fan everywhere would pass the
-        test above while telling us nothing about the unit-heater case. This
-        pins which zones carry the risk.
+        after = (round(self.fan().fanTotalEfficiency(), 6),
+                 round(self.fan().pressureRise(), 4))
+        self.assertEqual(before, after)
+
+    def test_CONTROL_the_raw_SDK_removal_still_wipes_the_list(self):
+        """Pins the HAZARD, so the test above cannot pass vacuously.
+
+        If a future SDK release fixes `removeFromThermalZone`, this fails and
+        the repair in `remove_hvac_from_zones` becomes removable. Until then it
+        documents that the repair is load-bearing rather than defensive
+        decoration.
         """
-        from btap.modeling.hvac import teardown
+        unit_heater = next(e for e in self.zone.equipment()
+                           if e.to_ZoneHVACUnitHeater().is_initialized())
 
-        zones = self.zones_named(BASEBOARD_ZONES)
-        self.assertEqual(len(BASEBOARD_ZONES), len(zones))
+        unit_heater.remove()
 
-        teardown.remove_hvac_from_zones(self.model, zones)
-        self.assertEqual([], self.unregistered())
+        self.assertFalse(
+            self.fan_is_registered(),
+            'the raw SDK removal no longer wipes the exhaust PortList — if '
+            'this is a genuine SDK fix, the repair in '
+            'remove_hvac_from_zones can go')
