@@ -82,6 +82,81 @@ def _union(existing, additions):
             existing.append(item)
 
 
+
+def _setpoint_reference_cycles(model):
+    """Air loops whose supply-outlet setpoint derives, transitively, from
+    ITSELF.
+
+    `SetpointManager:MixedAir` computes its target from a reference node MINUS
+    fan heat. That is correct on an OA system's mixed-air node, where the
+    reference is the supply outlet. Point two of them at each other and the
+    pair has no fixed point: each timestep subtracts fan heat again and the
+    target runs away downward.
+
+    Returns `[(air loop name, [node names in the cycle])]`.
+
+    The walk follows `MixedAir` references only, because they are the managers
+    that DERIVE a setpoint from another node. A `Scheduled`, `Warmest` or
+    `SingleZoneReheat` manager terminates the chain: its target comes from a
+    schedule or from zone loads, not from another node's setpoint.
+
+    MEASURED, 2026-11-05: the three `gagetown_coldlake_Office_*` archetypes
+    each carry `Node 149 <- ref Node 155` and `Node 155 <- ref Node 149` on
+    their `Packaged Rooftop VAV with Reheat` loop. The consequence is a
+    simulated supply-air mean of -48.5 C, a reported setpoint below -1000 C,
+    about 390,000 EnergyPlus warnings, and roughly 19.5% of annual site energy
+    burned as cooling against terminal reheat. EnergyPlus reports it as
+    warnings, never an error, so the run COMPLETES and the numbers look
+    plausible. That is the hazard this detects: not a crash, a believable wrong
+    answer.
+    """
+    derived_from = {}
+    for manager in model.getSetpointManagerMixedAirs():
+        node = manager.setpointNode()
+        reference = manager.referenceSetpointNode()
+        if node.is_initialized() and reference.is_initialized():
+            derived_from[node.get().nameString()] = (
+                reference.get().nameString())
+
+    cycles = []
+    for air_loop in sorted_by_name(model.getAirLoopHVACs()):
+        node = air_loop.supplyOutletNode().nameString()
+        seen, order = set(), []
+        while node is not None and node not in seen:
+            seen.add(node)
+            order.append(node)
+            node = derived_from.get(node)
+        if node is not None:
+            cycles.append((air_loop.nameString(), order[order.index(node):]))
+    return cycles
+
+
+def _warn_on_setpoint_cycles(model, audit):
+    """Disclose any supply-outlet setpoint cycle. Never silent.
+
+    This WARNS rather than refusing, per phylroy's ruling that reference
+    creation is not responsible for whether every aspect of the proposed model
+    is correct. It is a judgement call worth revisiting: the failure mode is
+    the same shape as the missing-thermostat PREFLIGHT GATE, which IS fatal
+    precisely because the run completes and the determination comes out
+    numerically valid and physically meaningless. Promoting this to a gate is
+    an adjudicated change, so it is raised in the issue rather than taken here.
+    """
+    if audit is None:
+        return []
+    cycles = _setpoint_reference_cycles(model)
+    for loop_name, nodes in cycles:
+        audit.warn(
+            'characterize',
+            'SUPPLY-AIR SETPOINT DERIVES FROM ITSELF — the MixedAir manager '
+            'chain on this loop has no fixed point, so the target runs away '
+            'and the simulation completes with physically meaningless supply '
+            'temperatures',
+            target=loop_name,
+            value=' -> '.join(nodes + [nodes[0]]),
+            inputs={'cycle_length': len(nodes), 'nodes': nodes})
+    return cycles
+
 def characterize(model, audit=None):
     """Characterize a model's HVAC into the neutral facts dict (schema above).
 
@@ -90,6 +165,11 @@ def characterize(model, audit=None):
     :return: dict facts — { 'built_by_gem':, 'zone_groups': [...], 'plants': [...],
         'purchased_energy': { 'heating':, 'cooling': } } (see the module docstring)
     """
+    # Disclose a self-referential supply-air setpoint before anything is
+    # characterized: every downstream fact is computed from a model whose
+    # control target has no fixed point, and the run will COMPLETE.
+    _warn_on_setpoint_cycles(model, audit)
+
     plants = [_plant_facts(loop, audit) for loop in sorted_by_name(model.getPlantLoops())]
     plant_by_name = {p['name']: p for p in plants}
     _annotate_heat_pump_plants(model, plant_by_name)
