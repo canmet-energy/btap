@@ -57,8 +57,15 @@ def hvac_section(model, audit=None):
     """The recipe's HVAC section, from `characterize`.
 
     :returns: ``{'zone_groups': [...], 'plants': [...], 'from': {...}}``
+
+    The audit is PASSED THROUGH, not merely accepted. `characterize` discloses
+    input defects that only it can see — a supply-air setpoint that derives
+    from itself (#200) is the one that prompted this — and dropping the audit
+    here made that guard silent on the recipe-writer path, which is exactly
+    where a reader meets a hand-built archetype. `writer.py` was already
+    threading the audit this far; this function was the break.
     """
-    facts = classify.characterize(model)
+    facts = classify.characterize(model, audit=audit)
     raw = facts.get('zone_groups', [])
 
     # COLLAPSED BY SIGNATURE, per phylroy's constraint that the recipe be

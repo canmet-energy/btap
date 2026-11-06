@@ -213,3 +213,95 @@ class TestSetpointReferenceCycleGuard(unittest.TestCase):
         found = self.cycles()
         self.assertEqual(1, len(found))
         self.assertEqual(3, len(found[0][1]))
+
+
+@needs_sdk
+class TestTheGuardReachesItsREALCallers(unittest.TestCase):
+    """A correct guard that nothing invokes is not a guard.
+
+    `characterize` returns early when `audit is None`, so every caller must
+    THREAD its audit. When this guard shipped, two of the three real callers
+    did not — `btap.stock.hvac.hvac_section` and
+    `btap.costing.hvac.report.classify_unmapped_loops` both ACCEPTED an audit
+    and then called `characterize(model)` without it. The recipe writer was
+    already threading the audit as far as `hvac_section`, which dropped it, so
+    the guard was silent on exactly the path where a reader meets a hand-built
+    archetype.
+
+    These tests exercise the PUBLIC entry points rather than `characterize`,
+    because testing the guard directly is what let that ship.
+    """
+
+    def _model_with_a_cycle(self):
+        import openstudio
+
+        model = openstudio.model.Model()
+        sched = openstudio.model.ScheduleConstant(model)
+        sched.setValue(1.0)
+        loop = openstudio.model.AirLoopHVAC(model)
+        loop.setName('Cyclic VAV')
+        openstudio.model.FanConstantVolume(model, sched).addToNode(
+            loop.supplyInletNode())
+        oa = openstudio.model.AirLoopHVACOutdoorAirSystem(
+            model, openstudio.model.ControllerOutdoorAir(model))
+        oa.addToNode(loop.supplyInletNode())
+        from btap._compat import opt
+
+        mixed = opt(oa.mixedAirModelObject()).to_Node().get()
+        outlet = loop.supplyOutletNode()
+        for sets, reference in ((outlet, mixed), (mixed, outlet)):
+            manager = openstudio.model.SetpointManagerMixedAir(model)
+            manager.addToNode(sets)
+            manager.setReferenceSetpointNode(reference)
+        return model
+
+    def _cycle_warnings(self, audit):
+        return [e for e in audit.warnings
+                if 'DERIVES FROM ITSELF' in e['action']]
+
+    def test_the_recipe_WRITER_discloses_it(self):
+        from btap.audit import AuditLog
+        from btap.stock.hvac import hvac_section
+
+        audit = AuditLog()
+        hvac_section(self._model_with_a_cycle(), audit=audit)
+
+        self.assertEqual(
+            1, len(self._cycle_warnings(audit)),
+            'hvac_section accepts an audit; it must PASS it to characterize, '
+            'or the guard is silent on the recipe-writer path')
+
+    def test_the_COSTING_loop_classifier_discloses_it(self):
+        from btap.audit import AuditLog
+        from btap.costing.hvac.report import classify_unmapped_loops
+
+        audit = AuditLog()
+        classify_unmapped_loops(self._model_with_a_cycle(), {}, audit=audit)
+
+        self.assertEqual(1, len(self._cycle_warnings(audit)))
+
+    def test_CONTROL_a_clean_model_stays_quiet_on_both_paths(self):
+        import openstudio
+
+        from btap.audit import AuditLog
+        from btap.costing.hvac.report import classify_unmapped_loops
+        from btap.stock.hvac import hvac_section
+
+        def clean():
+            model = openstudio.model.Model()
+            sched = openstudio.model.ScheduleConstant(model)
+            sched.setValue(1.0)
+            loop = openstudio.model.AirLoopHVAC(model)
+            loop.setName('Healthy')
+            openstudio.model.FanConstantVolume(model, sched).addToNode(
+                loop.supplyInletNode())
+            return model
+
+        for label, call in (
+                ('hvac_section', lambda a: hvac_section(clean(), audit=a)),
+                ('classify_unmapped_loops',
+                 lambda a: classify_unmapped_loops(clean(), {}, audit=a))):
+            with self.subTest(path=label):
+                audit = AuditLog()
+                call(audit)
+                self.assertEqual([], self._cycle_warnings(audit))

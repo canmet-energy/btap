@@ -133,7 +133,10 @@ def classify_unmapped_loops(model, loop_families, audit=None):
         return []
 
     warnings = []
-    facts = classify.characterize(model)
+    # Audit passed through so `characterize`'s own input-defect disclosures
+    # (#200's setpoint-cycle guard among them) are not lost on this path. The
+    # returned `warnings` list is this function's own channel and is unrelated.
+    facts = classify.characterize(model, audit=audit)
     for group in facts['zone_groups']:
         name = group['air_loop']
         if name is None or name in loop_families:
