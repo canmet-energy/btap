@@ -12,7 +12,7 @@ reported so a reader can see when that single number is a poor summary.
 from __future__ import annotations
 
 from btap._compat import opt, sorted_by_name
-from btap.modeling.hvac.efficiency import fan_pressure_rise
+from btap.modeling.hvac.efficiency import fan_design_flow, fan_pressure_rise
 
 SPREAD_WARNING_RATIO = 1.5
 
@@ -25,6 +25,62 @@ def _num(value):
         if value is None:
             return None
     return float(value)
+
+
+def _weighted_aggregate(pairs, label, weight_name):
+    """A WEIGHTED mean of `(value, weight)` pairs, with its provenance.
+
+    phylroy, 2026-11-06: **weighted averages are the way** — and the envelope
+    section has always known it, aggregating U by AREA because the effective U
+    of an assembly set is sum(U*A)/sum(A). This brings the equipment section
+    into line.
+
+    MEASURED, and the reason this exists (#202): fan power is P x Q, so an
+    UNWEIGHTED mean of pressure is wrong whenever flows differ. On
+    `Office_pre-1960` the seven exhaust fans are one 658.2 Pa fan moving
+    6.8 m3/s and six 100 Pa fans moving at most 1.12 — the big one is 88% of
+    the class's fan power. Unweighted mean 179.74 Pa; FLOW-WEIGHTED 403.39.
+    Applying the unweighted value cost 172 GJ/yr and made the round trip
+    WORSE than the global average it replaced (-6.49% against -5.23%).
+
+    When any member lacks a weight — an autosized fan has no authored flow —
+    this falls back to the UNWEIGHTED mean and says so in the provenance,
+    because weighting by an invented number is worse than declining to weight.
+    """
+    present = [(v, w) for v, w in pairs if v is not None]
+    if not present:
+        return None
+
+    weights = [w for _v, w in present]
+    unweighable = [w for w in weights if w is None or w <= 0]
+    values = [v for v, _w in present]
+
+    if unweighable:
+        out = _aggregate(values, label)
+        if out is not None:
+            out['from']['weighting'] = (
+                f'UNWEIGHTED — {len(unweighable)} of {len(present)} carry no '
+                f'{weight_name}, so an unweighted mean was used. Fan power is '
+                'flow-weighted, so this value understates it.')
+        return out
+
+    total = sum(weights)
+    mean = sum(v * w for v, w in present) / total
+    lo, hi = min(values), max(values)
+    out = {'value': round(mean, 6),
+           'from': {'objects': len(present), 'min': round(lo, 6),
+                    'max': round(hi, 6),
+                    'weighting': f'weighted by {weight_name}',
+                    f'total_{weight_name}': round(total, 6)}}
+    if lo:
+        ratio = hi / lo
+        out['from']['spread_ratio'] = round(ratio, 2)
+        if ratio > SPREAD_WARNING_RATIO:
+            out['from']['spread_warning'] = (
+                f'{len(present)} {label} span {round(ratio, 2)}x; the '
+                f'{weight_name}-weighted mean preserves the aggregate they '
+                'drive, but no single value reproduces each object')
+    return out
 
 
 def _aggregate(values, label):
@@ -62,7 +118,8 @@ def _fans(model):
         ('FanZoneExhaust', model.getFanZoneExhausts, False),
     )
     out, counts = {}, {}
-    totals, motors, pressures = [], [], []
+    totals, motors = [], []
+    pressure_by_class = {}
     for name, getter, has_motor in classes:
         fans = sorted_by_name(getter())
         if not fans:
@@ -71,15 +128,24 @@ def _fans(model):
         totals += [_num(f.fanTotalEfficiency()) for f in fans]
         if has_motor:
             motors += [_num(f.motorEfficiency()) for f in fans]
-        # Pressure rise, via the per-class accessor: `FanSystemModel` spells
-        # it `designPressureRise`, so a duck-typed `pressureRise` would skip
-        # it silently. Issue #202: this was NOT captured, so a rebuilt fan
-        # took the builder's default — measured on `Office_pre-1960`, CV
-        # supply fans dropped 500 Pa -> 250 Pa and unit-heater fans
-        # 250 Pa -> 49.82 Pa, with flow and hours unchanged, which is
-        # directly a fan-power difference.
-        pressures += [p for p in (fan_pressure_rise(f) for f in fans)
-                      if p is not None]
+        # Pressure rise is aggregated PER CLASS, not globally, and that is the
+        # whole point. Read via the per-class accessor because `FanSystemModel`
+        # spells it `designPressureRise`, so a duck-typed `pressureRise` would
+        # skip it silently.
+        #
+        # MEASURED (#202, round trip against the repaired source archetype):
+        # a GLOBAL average loses 138 GJ/yr, 62% of the remaining -5.23% gap.
+        # `Office_pre-1960` carries 27 fans spanning 100-658 Pa with its
+        # constant-volume SUPPLY fans at 500 Pa; the global mean is 278.1, so
+        # rebuilt supply fans dropped 500 -> 278 while unit-heater fans rose
+        # 100 -> 278. Fan power is FLOW-WEIGHTED and the supply fans move by
+        # far the most air, so an unweighted average of pressure does not
+        # preserve fan energy. One value per CLASS keeps the recipe's declared
+        # design — one value per class of thing, not forty — while preserving
+        # the distinction that carries the energy.
+        pairs = [(fan_pressure_rise(f), fan_design_flow(f)) for f in fans]
+        if any(v is not None for v, _w in pairs):
+            pressure_by_class[name] = pairs
 
     detailed = model.getFanComponentModels()
     if detailed:
@@ -91,9 +157,14 @@ def _fans(model):
     motor = _aggregate(motors, 'fan motors')
     if motor is not None:
         out['fan_motor_eff'] = motor
-    pressure = _aggregate(pressures, 'fan pressure rise')
-    if pressure is not None:
-        out['fan_pressure_rise_pa'] = pressure
+    pressures = {}
+    for name, pairs in pressure_by_class.items():
+        aggregate = _weighted_aggregate(
+            pairs, f'{name} pressure rise', 'design_flow_m3_s')
+        if aggregate is not None:
+            pressures[name] = aggregate
+    if pressures:
+        out['fan_pressure_rise_pa_by_class'] = pressures
     if not out:
         return None
     out['from'] = {'by_class': counts}

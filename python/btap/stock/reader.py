@@ -298,13 +298,40 @@ def _apply_equipment(model, equipment, applied, skipped, audit):
     # 100 Pa unit-heater fan at once. That is the recipe's declared design
     # (one value per class of thing, not forty), and the warning is how the
     # loss is disclosed rather than hidden.
-    pressure = _value(fans.get('fan_pressure_rise_pa'))
-    if pressure is not None:
-        _warn_if_lossy(fans.get('fan_pressure_rise_pa'),
-                       'fan design pressure rise', audit)
-        written = Efficiency.set_fan_pressure_rise_in_model(
-            model, pressure, audit=audit)
-        applied.append(f'fan pressure rise, {written} fan(s)')
+    by_class = fans.get('fan_pressure_rise_pa_by_class')
+    if by_class:
+        resolved = {}
+        for name, record in sorted(by_class.items()):
+            value = _value(record)
+            if value is None:
+                continue
+            _warn_if_lossy(record, f'{name} design pressure rise', audit)
+            resolved[name] = value
+        if resolved:
+            written = Efficiency.set_fan_pressure_rise_by_class_in_model(
+                model, resolved, audit=audit)
+            applied.append(
+                f'fan pressure rise per class, {written} fan(s) across '
+                f'{len(resolved)} class(es)')
+    else:
+        # A recipe written before #202's per-class split carries one scalar.
+        # Honour it rather than ignoring it, so an older recipe still builds —
+        # but it loses fan energy for the reason the split exists.
+        pressure = _value(fans.get('fan_pressure_rise_pa'))
+        if pressure is not None:
+            _warn_if_lossy(fans.get('fan_pressure_rise_pa'),
+                           'fan design pressure rise', audit)
+            if audit is not None:
+                audit.warn(
+                    'stock',
+                    'this recipe carries ONE fan pressure for every class — '
+                    'a pre-#202 shape. Fan power is flow-weighted, so one '
+                    'value understates it; re-write the recipe to get '
+                    'fan_pressure_rise_pa_by_class',
+                    target='equipment.fans')
+            written = Efficiency.set_fan_pressure_rise_in_model(
+                model, pressure, audit=audit)
+            applied.append(f'fan pressure rise, {written} fan(s)')
 
     pumps = equipment.get('pumps', {})
     pump_motor = _value(pumps.get('pump_motor_eff'))

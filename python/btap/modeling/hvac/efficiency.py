@@ -18,7 +18,7 @@ Nothing here holds a value. WHICH efficiency a code requires stays in
 
 from __future__ import annotations
 
-from btap._compat import sorted_by_name
+from btap._compat import opt, sorted_by_name
 
 # Measured on OpenStudio 3.11, by reading the public headers and then probing
 # the SWIG classes — not inferred:
@@ -134,6 +134,35 @@ def set_pump_efficiency(pump, *, motor_efficiency=None, audit=None,
     return 1
 
 
+#: The accessor each fan class uses for design air flow. Differs by class
+#: exactly as pressure does — `FanSystemModel` renames this one too.
+#:
+#: NOTE THE ASYMMETRY: pressure returns a plain `double`, flow returns
+#: `boost::optional<double>` because it is AUTOSIZABLE. So `opt()` is required
+#: here and would RAISE on pressure. Verified in the C++ headers class by
+#: class; guessing either way is the D-79 trap.
+_FLOW_ACCESSOR = {
+    'FanConstantVolume': 'maximumFlowRate',
+    'FanVariableVolume': 'maximumFlowRate',
+    'FanOnOff': 'maximumFlowRate',
+    'FanZoneExhaust': 'maximumFlowRate',
+    'FanSystemModel': 'designMaximumAirFlowRate',
+}
+
+
+def fan_design_flow(fan):
+    """A fan's design air flow in m3/s, or None when it is autosized.
+
+    None is the honest answer for an autosized fan: there is no authored flow
+    to weight by, and inventing one would be worse than declining to weight.
+    """
+    accessor = _FLOW_ACCESSOR.get(_class_name(fan))
+    if accessor is None:
+        return None
+    value = getattr(fan, accessor)()
+    return float(opt(value)) if value.is_initialized() else None
+
+
 def fan_pressure_rise(fan):
     """A fan's design pressure rise in Pa, or None if the class has no scalar.
 
@@ -188,6 +217,48 @@ def set_fan_pressure_rise_in_model(model, pressure_rise_pa, *, audit=None,
         for fan in sorted_by_name(getter()):
             written += set_fan_pressure_rise(
                 fan, pressure_rise_pa, audit=audit, step=step)
+    detailed = model.getFanComponentModels()
+    if detailed and audit is not None:
+        audit.warn(step,
+                   f'{len(detailed)} FanComponentModel fan(s) SKIPPED — '
+                   'pressure rise is in their curves, not a scalar field',
+                   target='model')
+    return written
+
+
+def set_fan_pressure_rise_by_class_in_model(model, by_class, *, audit=None,
+                                            step='hvac'):
+    """Apply a pressure rise PER FAN CLASS, from `{class name: Pa}`.
+
+    One value for every fan loses fan energy, because fan power is
+    FLOW-WEIGHTED: a building's constant-volume supply fans move far more air
+    than its unit-heater fans, so averaging a 100-658 Pa spread down to one
+    number drops the supply fans and raises the small ones. Measured on
+    `Office_pre-1960` (#202): the global average cost 138 GJ/yr, 62% of the
+    whole remaining round-trip gap.
+
+    A class absent from `by_class` is LEFT ALONE rather than defaulted — the
+    recipe said nothing about it, and inventing a value would be the silent
+    widening this split exists to avoid.
+    """
+    getters = {
+        'FanConstantVolume': model.getFanConstantVolumes,
+        'FanVariableVolume': model.getFanVariableVolumes,
+        'FanOnOff': model.getFanOnOffs,
+        'FanSystemModel': model.getFanSystemModels,
+        'FanZoneExhaust': model.getFanZoneExhausts,
+    }
+    unknown = sorted(set(by_class) - set(getters))
+    if unknown:
+        raise ValueError(
+            f"no fan class named {', '.join(unknown)} — expected one of "
+            f"{', '.join(sorted(getters))}")
+
+    written = 0
+    for name, pressure_pa in sorted(by_class.items()):
+        for fan in sorted_by_name(getters[name]()):
+            written += set_fan_pressure_rise(
+                fan, pressure_pa, audit=audit, step=step)
     detailed = model.getFanComponentModels()
     if detailed and audit is not None:
         audit.warn(step,
