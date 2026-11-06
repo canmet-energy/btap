@@ -286,6 +286,26 @@ def _apply_equipment(model, equipment, applied, skipped, audit):
             audit=audit)
         applied.append(f'fan efficiency, {written} field(s)')
 
+    # Issue #202. Without this a rebuilt fan took the BUILDER's default, not
+    # the building's own value: measured on `Office_pre-1960`, CV supply fans
+    # 500 Pa -> 250 Pa and unit-heater fans 250 Pa -> 49.82 Pa, flow and hours
+    # unchanged, which is directly a fan-power difference and was the largest
+    # remaining honest gap in a recipe round trip.
+    #
+    # The spread is wide on a real building (100-658 Pa over 27 fans), so
+    # `_warn_if_lossy` matters here more than it does for efficiency — one
+    # averaged pressure cannot represent a 658 Pa paint-shop exhaust and a
+    # 100 Pa unit-heater fan at once. That is the recipe's declared design
+    # (one value per class of thing, not forty), and the warning is how the
+    # loss is disclosed rather than hidden.
+    pressure = _value(fans.get('fan_pressure_rise_pa'))
+    if pressure is not None:
+        _warn_if_lossy(fans.get('fan_pressure_rise_pa'),
+                       'fan design pressure rise', audit)
+        written = Efficiency.set_fan_pressure_rise_in_model(
+            model, pressure, audit=audit)
+        applied.append(f'fan pressure rise, {written} fan(s)')
+
     pumps = equipment.get('pumps', {})
     pump_motor = _value(pumps.get('pump_motor_eff'))
     if pump_motor is not None:

@@ -39,6 +39,20 @@ from btap._compat import sorted_by_name
 # dead for all five scalar classes, and an AttributeError for the sixth, which
 # has neither. The guard's premise was false.
 _NO_MOTOR_EFFICIENCY = ('FanZoneExhaust',)
+
+#: The accessor each fan class uses for design pressure rise. `FanSystemModel`
+#: spells it DIFFERENTLY (`designPressureRise`), and a duck-typed
+#: `getattr(fan, 'pressureRise')` would silently skip it — the same trap
+#: `_fans` already documents for motor efficiency. All of these return a plain
+#: `double`, NOT `boost::optional`, so `opt()` must not be applied: on a plain
+#: double it raises. Verified in the C++ headers, class by class.
+_PRESSURE_RISE_ACCESSOR = {
+    'FanConstantVolume': ('pressureRise', 'setPressureRise'),
+    'FanVariableVolume': ('pressureRise', 'setPressureRise'),
+    'FanOnOff': ('pressureRise', 'setPressureRise'),
+    'FanZoneExhaust': ('pressureRise', 'setPressureRise'),
+    'FanSystemModel': ('designPressureRise', 'setDesignPressureRise'),
+}
 _CURVE_BASED = ('FanComponentModel',)
 
 
@@ -118,6 +132,69 @@ def set_pump_efficiency(pump, *, motor_efficiency=None, audit=None,
                    inputs={'class': _class_name(pump),
                            'motor_efficiency': motor_efficiency})
     return 1
+
+
+def fan_pressure_rise(fan):
+    """A fan's design pressure rise in Pa, or None if the class has no scalar.
+
+    `FanComponentModel` legitimately returns None: its pressure is in curves.
+    """
+    accessors = _PRESSURE_RISE_ACCESSOR.get(_class_name(fan))
+    if accessors is None:
+        return None
+    return float(getattr(fan, accessors[0])())
+
+
+def set_fan_pressure_rise(fan, pressure_rise_pa, *, audit=None, step='hvac'):
+    """Set a fan's design pressure rise, in Pa.
+
+    :returns: the number of fields written (0 for a curve-based fan).
+    """
+    kind = _class_name(fan)
+    if kind in _CURVE_BASED:
+        raise ValueError(
+            f'{kind} carries no scalar pressure rise: its pressure is in '
+            'curves, and writing a scalar would change the device model '
+            'rather than its rating.')
+    accessors = _PRESSURE_RISE_ACCESSOR.get(kind)
+    if accessors is None:
+        raise ValueError(f'no pressure-rise accessor known for {kind}')
+
+    before = float(getattr(fan, accessors[0])())
+    if not getattr(fan, accessors[1])(float(pressure_rise_pa)):
+        raise ValueError(
+            f'the model refused a pressure rise of {pressure_rise_pa} Pa on '
+            f'{fan.nameString()!r}')
+    if audit is not None:
+        audit.info(step, 'fan design pressure rise set',
+                   target=fan.nameString(), value=float(pressure_rise_pa),
+                   inputs={'was_pa': before, 'class': kind})
+    return 1
+
+
+def set_fan_pressure_rise_in_model(model, pressure_rise_pa, *, audit=None,
+                                   step='hvac'):
+    """`set_fan_pressure_rise` across every scalar fan in ``model``.
+
+    Curve-based fans are SKIPPED with a warning, matching
+    `set_fan_efficiency_in_model`: one detailed fan does not stop the other
+    forty being set.
+    """
+    getters = (model.getFanConstantVolumes, model.getFanVariableVolumes,
+               model.getFanOnOffs, model.getFanSystemModels,
+               model.getFanZoneExhausts)
+    written = 0
+    for getter in getters:
+        for fan in sorted_by_name(getter()):
+            written += set_fan_pressure_rise(
+                fan, pressure_rise_pa, audit=audit, step=step)
+    detailed = model.getFanComponentModels()
+    if detailed and audit is not None:
+        audit.warn(step,
+                   f'{len(detailed)} FanComponentModel fan(s) SKIPPED — '
+                   'pressure rise is in their curves, not a scalar field',
+                   target='model')
+    return written
 
 
 def set_fan_efficiency_in_model(model, *, total_efficiency=None,

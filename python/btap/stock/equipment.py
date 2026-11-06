@@ -12,6 +12,7 @@ reported so a reader can see when that single number is a poor summary.
 from __future__ import annotations
 
 from btap._compat import opt, sorted_by_name
+from btap.modeling.hvac.efficiency import fan_pressure_rise
 
 SPREAD_WARNING_RATIO = 1.5
 
@@ -61,7 +62,7 @@ def _fans(model):
         ('FanZoneExhaust', model.getFanZoneExhausts, False),
     )
     out, counts = {}, {}
-    totals, motors = [], []
+    totals, motors, pressures = [], [], []
     for name, getter, has_motor in classes:
         fans = sorted_by_name(getter())
         if not fans:
@@ -70,6 +71,15 @@ def _fans(model):
         totals += [_num(f.fanTotalEfficiency()) for f in fans]
         if has_motor:
             motors += [_num(f.motorEfficiency()) for f in fans]
+        # Pressure rise, via the per-class accessor: `FanSystemModel` spells
+        # it `designPressureRise`, so a duck-typed `pressureRise` would skip
+        # it silently. Issue #202: this was NOT captured, so a rebuilt fan
+        # took the builder's default — measured on `Office_pre-1960`, CV
+        # supply fans dropped 500 Pa -> 250 Pa and unit-heater fans
+        # 250 Pa -> 49.82 Pa, with flow and hours unchanged, which is
+        # directly a fan-power difference.
+        pressures += [p for p in (fan_pressure_rise(f) for f in fans)
+                      if p is not None]
 
     detailed = model.getFanComponentModels()
     if detailed:
@@ -81,6 +91,9 @@ def _fans(model):
     motor = _aggregate(motors, 'fan motors')
     if motor is not None:
         out['fan_motor_eff'] = motor
+    pressure = _aggregate(pressures, 'fan pressure rise')
+    if pressure is not None:
+        out['fan_pressure_rise_pa'] = pressure
     if not out:
         return None
     out['from'] = {'by_class': counts}
