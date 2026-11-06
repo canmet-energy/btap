@@ -289,9 +289,22 @@ class TestWhatItExcludesAndRefuses(unittest.TestCase):
         self.assertAlmostEqual(
             0.60, fenestration_solar_transmittance(opaque_door),
             msg='the existing helper fabricates this')
-        entry = envelope_section(model)['fenestration']['Door:Outdoors']
-        self.assertNotIn('shgc', entry,
-                         'and the writer omits it instead')
+
+        section = envelope_section(model)
+
+        # The omission this test was written for is now structural: an opaque
+        # door is filed as OPAQUE, so the 0.60 fabrication cannot reach the
+        # recipe at all — there is no fenestration record to omit it from.
+        #
+        # The earlier version asserted `'shgc' not in
+        # section['fenestration']['Door:Outdoors']`, which was true but filed
+        # the door as glazing. The reader then gave it a glazing construction
+        # and the ForwardTranslator reclassified all 29 doors in
+        # `Office_pre-1960` as `GlassDoor` in the IDF.
+        self.assertIn('Door:Outdoors', section['opaque'])
+        self.assertNotIn('Door:Outdoors', section['fenestration'])
+        self.assertNotIn('shgc', section['opaque']['Door:Outdoors'],
+                         'an opaque record carries no SHGC either')
 
 
 if __name__ == '__main__':

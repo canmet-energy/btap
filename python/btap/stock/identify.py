@@ -39,6 +39,21 @@ from btap.modeling.hvac import catalog
 FAMILY_CANDIDATES = {
     'unconditioned': (),
     'zonal_heating_only': ('baseboards', 'unit_heaters'),
+    # #221: four of `_structural_family_guess`'s nine returns had no entry
+    # here, and `identify_candidates` proposes NOTHING for an unmapped guess.
+    # So a dual-duct or chilled-beam building got no suggestion at all, and
+    # the `dual_duct` and `chilled_beams` catalogue rows could never be
+    # proposed for any building.
+    'dual_duct_vav': ('dual_duct', 'vav_reheat'),
+    'chilled_beam': ('chilled_beams', 'doas', 'fan_coils'),
+    # A multizone CONSTANT-volume loop. `crah` and `base_system` are the
+    # constant-volume central shapes; `psz` is included because a per-zone
+    # row serving several zones is the common substitution when no true
+    # multizone CV row fits.
+    'multizone_cv': ('crah', 'psz', 'furnace'),
+    # Cooling with no heating at all. `evap_cooler` and `zone_terminal` are
+    # the cooling-only shapes; `vrf` covers a cooling-mode heat pump.
+    'zonal_cooling_only': ('zone_terminal', 'evap_cooler', 'vrf'),
     'zonal_heat_cool': ('mau_ptac', 'fan_coils', 'vrf', 'wshp', 'doas_pthp',
                         'zone_terminal', 'composite'),
     'central_doas_or_cv': ('furnace', 'psz', 'doas', 'evap_cooler',
@@ -288,12 +303,37 @@ def _score(row, group):
         if baseboard in ('Hot Water', 'Electric'):
             score += 2.0
             matched.append(f'baseboard present; row has {baseboard!r}')
-            if baseboard == 'Hot Water' and 'gas' in heat:
+            # #221: the MEDIUM, measured, in preference to the heating fuel as
+            # a proxy for it. `heating_energy_types` is the fuel resolved
+            # THROUGH the plant, so a hydronic baseboard on a gas boiler
+            # reports 'gas' — the proxy coincides with the medium on this
+            # archetype without being a measurement of it, and a gas PSZ with
+            # ELECTRIC baseboards took the hot-water credit.
+            #
+            # The fuel proxy is kept ONLY where the medium is unknown, which
+            # is a recipe written before `baseboard_media` existed. An absent
+            # fact is not evidence of agreement OR disagreement, so it scores
+            # as the proxy did rather than as a penalty.
+            media = group.get('baseboard_media')
+            if media:
+                if baseboard in media:
+                    score += 1.5
+                    matched.append(
+                        f'baseboard medium {baseboard!r} matches the group')
+                else:
+                    score -= 2.0
+                    against.append(
+                        f'the group\'s baseboards are '
+                        f'{", ".join(sorted(media))} but this row builds '
+                        f'{baseboard!r} ones')
+            elif baseboard == 'Hot Water' and 'gas' in heat:
                 score += 1.0
-                matched.append('hot-water baseboard with gas heating')
+                matched.append('hot-water baseboard with gas heating '
+                               '(medium not recorded; fuel used as a proxy)')
             elif baseboard == 'Electric' and 'electric' in heat:
                 score += 1.0
-                matched.append('electric baseboard with electric heating')
+                matched.append('electric baseboard with electric heating '
+                               '(medium not recorded; fuel used as a proxy)')
         elif baseboard == 'None':
             score -= 1.5
             against.append('baseboard present but row has none')
@@ -324,7 +364,15 @@ def _score(row, group):
         score -= 2.0
         against.append(f'row does NOT heat but the group heats with '
                        f'{sorted(heat)}')
-    loop_cools = group.get('loop_dx_cooling') is True
+    # #221: loop cooling is NOT DX-only. A chilled-water air handler cools on
+    # the supply side just as much as a DX one, and reading `loop_dx_cooling`
+    # alone made `zonal_cools` true for it — producing the explicit, FALSE
+    # objection that its loop has no cooling coil, against every row that puts
+    # cooling on the air handler. Measured: all 8 chilled-water
+    # `MZ BU RTU Hot Water` rows came back as a `cooling: False` air handler,
+    # the chiller plant deleted.
+    loop_cools = (group.get('loop_dx_cooling') is True
+                  or group.get('loop_hydronic_cooling_supply') is True)
     zonal_cools = bool(cool) and not loop_cools
     row_cools = bool(row.get('cooling') is True
                      or row.get('cooling_type')
@@ -571,6 +619,31 @@ def _score(row, group):
             score -= 1.5
             against.append('the loop has DX cooling; this row cools '
                            'evaporatively, which is a different machine')
+
+    # Heat recovery, #214. Two rows can differ ONLY by this
+    # (`PVAV with gas boiler reheat` and `... and plate HRV`), so a scorer
+    # blind to it picks by tie-break — and it picked the HRV variant for a
+    # loop carrying no heat exchanger, adding a device worth 48.64 GJ/yr of
+    # recovery to a building that has none.
+    #
+    # Asymmetric deliberately. Building recovery a loop has no evidence of
+    # adds equipment to the model, so it is marked down. The reverse —
+    # omitting recovery the loop HAS — is a smaller fidelity loss and the
+    # catalogue may carry no equivalent row with it, so it is reported rather
+    # than punished as hard.
+    row_recovers = bool(row.get('needs_erv'))
+    group_recovers = group.get('loop_heat_recovery') is True
+    if row_recovers and not group_recovers:
+        score -= 2.5
+        against.append('this row builds HEAT RECOVERY, but the loop carries '
+                       'no air-to-air heat exchanger — that adds a device the '
+                       'building does not have')
+    elif row_recovers and group_recovers:
+        score += 2.0
+        matched.append('the loop recovers heat and so does this row')
+    elif group_recovers and not row_recovers:
+        score -= 1.0
+        against.append('the loop recovers heat; this row does not')
 
     cooling_medium = str(row.get('cooling_type') or '').lower()
     if cool and cooling_medium:

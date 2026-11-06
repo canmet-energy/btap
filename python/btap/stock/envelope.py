@@ -233,10 +233,31 @@ def envelope_section(model, audit=None):
                                    'why': 'no layered construction, or its '
                                           'conductance is not resolvable'})
                 continue
-            glazed_rows.setdefault(
-                f'{sub.subSurfaceType()}:{boundary}', []).append(
-                    (sub.grossArea(), sub_u, _shgc(sub_layered),
-                     _visible_transmittance(sub_layered)))
+            # Bucket by whether the CONSTRUCTION is opaque, NOT by
+            # `subSurfaceType`. An exterior `Door` is a sub-surface with an
+            # opaque assembly — 'V4 Door R4', a single `Material` layer,
+            # `isOpaque() == True` — while a `GlassDoor` carries
+            # `WindowMaterial:SimpleGlazingSystem`.
+            #
+            # Filing every sub-surface as fenestration made the reader hand an
+            # opaque door a GLAZING construction, and the ForwardTranslator
+            # then reclassified it: all 29 exterior doors in
+            # `Office_pre-1960` came out of a round trip as `GlassDoor` in the
+            # IDF, gaining solar heat the real doors do not admit. The OSM
+            # still reported `subSurfaceType() == 'Door'`, so the defect was
+            # invisible until the translated IDF was read.
+            #
+            # The writer already had the signal and did not use it: it records
+            # `shgc=None` for these, because `_shgc` finds no glazing to read.
+            if sub_layered.isOpaque():
+                opaque_rows.setdefault(
+                    f'{sub.subSurfaceType()}:{boundary}', []).append(
+                        (sub.grossArea(), sub_u))
+            else:
+                glazed_rows.setdefault(
+                    f'{sub.subSurfaceType()}:{boundary}', []).append(
+                        (sub.grossArea(), sub_u, _shgc(sub_layered),
+                         _visible_transmittance(sub_layered)))
 
     section = {
         'opaque': {key: _aggregate(rows)

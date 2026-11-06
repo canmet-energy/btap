@@ -711,18 +711,18 @@
       "origin": "cbecs",
       "comment": "per-zone packaged units with hot-water coils served by a gas boiler loop"
     },
-      {
-        "name": "Shared PSZ with gas boiler coils and hot water baseboard",
-        "family": "psz",
-        "sys_abbr": "psz_ac",
-        "per_zone": false,
-        "heating_coil_type": "Hot Water",
-        "baseboard_type": "Hot Water",
-        "boiler_fuel": "NaturalGas",
-        "needs_boiler": true,
-        "origin": "campus",
-        "comment": "one shared constant-volume loop serving several zones, hot-water heating coil on a gas boiler loop, DX cooling, hot-water baseboard in the zones. The Gagetown Office archetype's central loops are exactly this and NO catalogue row matched: 'PSZ-AC with gas boiler' is per_zone with no baseboards, and every other PSZ row heats with a direct-gas coil. Established 2026-11-04 by two independent agent reads of gagetown_coldlake_Office_pre-1960.osm, whose loops carry Coil:Heating:Water on a gas boiler loop plus ZoneHVAC:Baseboard:Convective:Water in the zones."
-      },
+    {
+      "name": "Shared PSZ with gas boiler coils and hot water baseboard",
+      "family": "psz",
+      "sys_abbr": "psz_ac",
+      "per_zone": false,
+      "heating_coil_type": "Hot Water",
+      "baseboard_type": "Hot Water",
+      "boiler_fuel": "NaturalGas",
+      "needs_boiler": true,
+      "origin": "campus",
+      "comment": "one shared constant-volume loop serving several zones, hot-water heating coil on a gas boiler loop, DX cooling, hot-water baseboard in the zones. The Gagetown Office archetype's central loops are exactly this and NO catalogue row matched: 'PSZ-AC with gas boiler' is per_zone with no baseboards, and every other PSZ row heats with a direct-gas coil. Established 2026-11-04 by two independent agent reads of gagetown_coldlake_Office_pre-1960.osm, whose loops carry Coil:Heating:Water on a gas boiler loop plus ZoneHVAC:Baseboard:Convective:Water in the zones."
+    },
     {
       "name": "VAV chiller with gas boiler reheat",
       "family": "vav_reheat",
@@ -1034,6 +1034,20 @@
       "erv_nominal_electric_power": 150.0,
       "origin": "generic",
       "comment": "opt-in packaged VAV sensible-only plate recovery with gas-boiler hydronic perimeter trim and explicit effectiveness, frost, bypass, pretreat and parasitic-power inputs"
+    },
+    {
+      "name": "PVAV with gas boiler reheat and hot water baseboard",
+      "family": "vav_reheat",
+      "sys_abbr": "pvav",
+      "sizing": "necb_vav",
+      "heating_coil_type": "Hot Water",
+      "baseboard_type": "Hot Water",
+      "cooling_type": "dx",
+      "boiler_fuel": "NaturalGas",
+      "needs_boiler": true,
+      "needs_chiller": false,
+      "origin": "generic",
+      "comment": "the PVAV sys-6 shape with hot-water baseboards and NO heat recovery. Its only sibling carrying baseboards also carries a plate HRV, so before this row a building with baseboards and no heat exchanger had no faithful choice: the HRV row added a recovery device worth 48.64 GJ/yr that the building does not have, and the baseboard-less row dropped equipment it does. Established 2026-11-06 from gagetown_coldlake_Office_pre-1960.osm, whose Packaged Rooftop VAV with Reheat has hot-water baseboards in its zones and zero HeatExchangerAirToAirSensibleAndLatent anywhere in the model."
     },
     {
       "name": "Direct evap coolers with baseboard electric",

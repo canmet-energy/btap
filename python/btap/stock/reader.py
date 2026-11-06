@@ -195,6 +195,32 @@ def _apply_envelope(model, envelope, applied, skipped, audit):
                 model, existing, conductance)
             surface.setConstruction(replacement)
             count += 1
+
+        # SUB-surfaces with an opaque assembly reach this loop too, because
+        # the writer now files them here — an exterior `Door` is opaque and
+        # must keep an opaque construction. Giving it a glazing construction
+        # made the ForwardTranslator reclassify it as `GlassDoor`, adding
+        # solar gain to 29 doors that do not admit any.
+        #
+        # Matched on the sub-surface TYPE, which is what the recipe key
+        # carries, and the parent surface's boundary, because a sub-surface
+        # has no `outsideBoundaryCondition` of its own.
+        for sub in sorted_by_name(model.getSubSurfaces()):
+            if sub.subSurfaceType() != surface_type:
+                continue
+            parent = opt(sub.surface())
+            if (parent is None
+                    or parent.outsideBoundaryCondition() != boundary):
+                continue
+            existing = opt(sub.construction())
+            if existing is None:
+                skipped.append(f'{sub.nameString()}: no construction to base '
+                               'an assembly on')
+                continue
+            replacement = constructions.opaque_at_conductance(
+                model, existing, conductance)
+            sub.setConstruction(replacement)
+            count += 1
         if count:
             applied.append(f'{key}: U {u} on {count} surface(s)')
 
@@ -256,10 +282,46 @@ def _apply_controls(model, controls, applied, skipped, audit):
     economizers = controls.get('economizers') or {}
     rows = economizers.get('by_air_loop') or []
     if rows:
-        control_type = rows[0]['economizer_control_type']
+        row = rows[0]
+        control_type = row['economizer_control_type']
+        # #219: the writer records the economizer's LIMITS as well as its
+        # control type, and this call used to pass only the type — so a
+        # 19 C high-limit shutoff came back as the builder's 28 C and the
+        # regenerated building got free cooling across a 9 K band the real one
+        # does not have. The primitive already accepted these; nothing but the
+        # call was missing.
+        #
+        # A limit the source left unset is recorded as null by the writer's
+        # `opt()`, and `set_economizer` skips a None rather than coercing it,
+        # so an absent limit never becomes 0.0.
+        #
+        # `reset_omitted=True` because skipping a None only means "absent
+        # stays absent" when the TARGET had nothing there either. Rebuilding
+        # onto a model that already carries a limit, a skip leaves the
+        # target's value standing as though the source had declared it. A
+        # recipe is a reconstruction, so an omitted limit is a statement about
+        # the source BUILDING, not an instruction to leave the target alone.
+        limits = {
+            name: row.get(field)
+            for name, field in (
+                ('action_type', 'economizer_control_action_type'),
+                ('maximum_limit_drybulb_c',
+                 'economizer_maximum_limit_dry_bulb_temperature'),
+                ('minimum_limit_drybulb_c',
+                 'economizer_minimum_limit_dry_bulb_temperature'),
+                ('maximum_limit_enthalpy_j_per_kg',
+                 'economizer_maximum_limit_enthalpy'),
+                ('maximum_limit_dewpoint_c',
+                 'economizer_maximum_limit_dewpoint_temperature'),
+            )
+            if row.get(field) is not None
+        }
         count = Ventilation.set_economizer_in_model(
-            model, control_type=control_type, audit=audit)
-        applied.append(f'economizer {control_type} on {count} loop(s)')
+            model, control_type=control_type, audit=audit,
+            reset_omitted=True, **limits)
+        applied.append(
+            f'economizer {control_type} on {count} loop(s)'
+            + (f' with {len(limits)} limit(s)' if limits else ''))
         if any(row.get('dcv_enabled') for row in rows):
             for air_loop in sorted_by_name(model.getAirLoopHVACs()):
                 Ventilation.set_demand_controlled_ventilation(
