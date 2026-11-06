@@ -119,7 +119,7 @@ def set_economizer(controller, *, control_type, action_type=None,
                    minimum_limit_drybulb_c=None,
                    maximum_limit_enthalpy_j_per_kg=None,
                    maximum_limit_dewpoint_c=None, audit=None,
-                   step='ventilation'):
+                   step='ventilation', reset_omitted=False):
     """The air-side economizer on one ``ControllerOutdoorAir``.
 
     #192's controls cluster. `canmet-energy/campus` carries an
@@ -145,6 +145,14 @@ def set_economizer(controller, *, control_type, action_type=None,
         `'ModulateFlow'`, so this is only passed to change it.
     :param maximum_limit_drybulb_c: the high-limit shutoff. A dry-bulb
         economizer with no limit runs in weather it should not.
+    :param reset_omitted: treat an omitted limit as "this building has NONE"
+        and CLEAR it on the controller, instead of leaving whatever the target
+        carried. Off by default, so a retrofit caller changing one field does
+        not silently clear the others. A reconstruction caller passes True:
+        skipping a None only preserves absence when the target had nothing
+        there either, and rebuilding onto a populated model would otherwise
+        leave the target's own limit standing as though the source had
+        declared it.
     :returns: the ``ControllerOutdoorAir``, for chaining.
     """
     if control_type not in ECONOMIZER_CONTROL_TYPES:
@@ -174,6 +182,21 @@ def set_economizer(controller, *, control_type, action_type=None,
     if maximum_limit_dewpoint_c is not None:
         controller.setEconomizerMaximumLimitDewpointTemperature(
             float(maximum_limit_dewpoint_c))
+
+    # `reset_omitted` separates "I am not changing this field" from "the
+    # source building HAS no such limit". A None means the first by default,
+    # which is what a retrofit caller changing one field wants; a
+    # RECONSTRUCTION caller wants the second, because a limit the target
+    # happens to carry is not evidence about the building being reproduced.
+    if reset_omitted:
+        if maximum_limit_drybulb_c is None:
+            controller.resetEconomizerMaximumLimitDryBulbTemperature()
+        if minimum_limit_drybulb_c is None:
+            controller.resetEconomizerMinimumLimitDryBulbTemperature()
+        if maximum_limit_enthalpy_j_per_kg is None:
+            controller.resetEconomizerMaximumLimitEnthalpy()
+        if maximum_limit_dewpoint_c is None:
+            controller.resetEconomizerMaximumLimitDewpointTemperature()
 
     if audit is not None:
         audit.info(step,

@@ -293,7 +293,14 @@ def _apply_controls(model, controls, applied, skipped, audit):
         #
         # A limit the source left unset is recorded as null by the writer's
         # `opt()`, and `set_economizer` skips a None rather than coercing it,
-        # so an absent limit stays absent instead of becoming 0.0.
+        # so an absent limit never becomes 0.0.
+        #
+        # `reset_omitted=True` because skipping a None only means "absent
+        # stays absent" when the TARGET had nothing there either. Rebuilding
+        # onto a model that already carries a limit, a skip leaves the
+        # target's value standing as though the source had declared it. A
+        # recipe is a reconstruction, so an omitted limit is a statement about
+        # the source BUILDING, not an instruction to leave the target alone.
         limits = {
             name: row.get(field)
             for name, field in (
@@ -310,7 +317,8 @@ def _apply_controls(model, controls, applied, skipped, audit):
             if row.get(field) is not None
         }
         count = Ventilation.set_economizer_in_model(
-            model, control_type=control_type, audit=audit, **limits)
+            model, control_type=control_type, audit=audit,
+            reset_omitted=True, **limits)
         applied.append(
             f'economizer {control_type} on {count} loop(s)'
             + (f' with {len(limits)} limit(s)' if limits else ''))

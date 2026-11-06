@@ -77,12 +77,23 @@ class TestTheFactIsRecorded(unittest.TestCase):
 
 
 class TestTheScorerUsesIt(unittest.TestCase):
+    # The fact vocabulary the SCORER reads, verified against
+    # `identify.py`'s own `group.get(...)` keys rather than guessed. My first
+    # version of this dict supplied `heat_fuels`, `cool_fuels`,
+    # `loop_hydronic_heating` and `baseboard_media` — four names nothing
+    # reads — so the recovery comparison ran with no fuel or media context at
+    # all. It still passed, and the mutations still failed, because both
+    # candidate rows lost the same absent credits; the ordering was right for
+    # the wrong reason. Caught by an Astra review.
     BASE = {
-        'family_guess': 'multizone_vav', 'zones': 5,
+        'family_guess': 'multizone_vav',
         'heated': True, 'cooled': True,
-        'heat_fuels': ['gas'], 'cool_fuels': ['Electricity'],
-        'loop_dx_cooling': True, 'loop_hydronic_heating': True,
-        'zonal_units': ['baseboard'], 'baseboard_media': 'Hot Water',
+        'heating_energy_types': ['NaturalGas'],
+        'cooling_energy_types': ['Electricity'],
+        'loop_dx_cooling': True,
+        'supply_heating_media': ['Hot Water'],
+        'terminal_type': 'reheat',
+        'zonal_units': ['baseboard'],
     }
 
     def _score(self, system, **overrides):

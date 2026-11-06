@@ -121,5 +121,66 @@ class TestAnAbsentLimitStaysAbsent(unittest.TestCase):
                 .getEconomizerMaximumLimitDryBulbTemperature()))
 
 
+@needs_sdk
+class TestAPopulatedTargetIsNotLeftAlone(unittest.TestCase):
+    """The case the first version of these tests could not see.
+
+    Astra's review: "If the target already carries a limit, an observed unset
+    source limit leaves that target value in place. The new tests start with an
+    unset target, so they do not establish the claim on a populated target.
+    This requires distinguishing **unset this field** from **do not touch this
+    field**."
+
+    It was right. Skipping a None preserves absence only when the target had
+    nothing there; rebuilding onto a populated model left the target's own
+    limit standing as though the source had declared it. A recipe is a
+    reconstruction, so `reader.py` now passes `reset_omitted=True`.
+    """
+
+    def _target_with_limits(self):
+        import openstudio
+
+        model = openstudio.model.Model()
+        loop = openstudio.model.AirLoopHVAC(model)
+        controller = openstudio.model.ControllerOutdoorAir(model)
+        # a target carrying limits of its OWN, which the source does not have
+        controller.setEconomizerMaximumLimitDewpointTemperature(11.0)
+        controller.setEconomizerMaximumLimitEnthalpy(51000.0)
+        oa = openstudio.model.AirLoopHVACOutdoorAirSystem(model, controller)
+        oa.addToNode(loop.supplyInletNode())
+        return model, oa
+
+    def test_a_limit_the_SOURCE_lacks_is_cleared_from_the_target(self):
+        recipe = write_recipe(_build())
+        row = recipe['controls']['economizers']['by_air_loop'][0]
+        row['economizer_maximum_limit_dewpoint_temperature'] = None
+
+        model, oa = self._target_with_limits()
+        controller = oa.getControllerOutdoorAir()
+        self.assertTrue(
+            controller.getEconomizerMaximumLimitDewpointTemperature(
+                ).is_initialized(),
+            'fixture should start POPULATED or it proves nothing')
+
+        build_from_recipe(recipe, model)
+
+        self.assertFalse(
+            oa.getControllerOutdoorAir()
+            .getEconomizerMaximumLimitDewpointTemperature().is_initialized(),
+            "the target kept its own limit, so the rebuilt model claims a "
+            'limit the source building does not have')
+
+    def test_a_limit_the_source_HAS_still_overwrites_the_target(self):
+        """The control. Clearing omitted limits must not stop declared ones
+        landing on a target that already had a different value."""
+        recipe = write_recipe(_build())
+        model, oa = self._target_with_limits()
+        build_from_recipe(recipe, model)
+        self.assertAlmostEqual(
+            KNOWN['economizer_max_drybulb_c'],
+            opt(oa.getControllerOutdoorAir()
+                .getEconomizerMaximumLimitDryBulbTemperature()))
+
+
 if __name__ == '__main__':
     unittest.main()
