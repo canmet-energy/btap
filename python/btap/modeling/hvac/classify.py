@@ -202,6 +202,18 @@ def characterize(model, audit=None):
                            target=group['air_loop'] or group['zones'][0])
         group.pop('cooling_capacity_complete', None)
 
+    # Contradiction warnings run HERE, once every group is FINAL, and NOT
+    # inside `_air_loop_group`. That relocation is correct independently of the
+    # feature: `_record_plant_heat_pump` has three callers and two of them —
+    # terminal reheat and the zonal merge above — run after `_air_loop_group`
+    # returns, so a check inside it reads facts the model has not finished
+    # setting. PR #162 warned on a four-pipe fan-coil system whose heat pump
+    # sits on the HOT-water plant for exactly that reason.
+    for group in groups:
+        if group.get('air_loop') is not None:
+            _warn_on_a_contradicted_declaration(group, group['air_loop'],
+                                                audit)
+
     # HP SOURCE loops are excluded from purchased-energy detection: a district
     # object standing in for a ground field / condenser water (the legacy
     # GLHX pattern) is not purchased heating for the building (D-58).
@@ -561,6 +573,54 @@ def _equipment_class_facts(group, air_loop, audit):
             f"make-up air")
 
 
+
+def _warn_on_a_contradicted_declaration(group, air_loop_name, audit):
+    """Warn where the model asserts two INCOMPATIBLE things, never on silence.
+
+    A declaration exists for equipment identity the topology CANNOT establish —
+    a matched split system represented by bare components is the motivating
+    case — so the ABSENCE of corroborating topology must not warn. Requiring
+    the topology to prove the declaration would recreate the defect the
+    declaration closes.
+
+    Two positive mismatches are reportable, and nothing else:
+
+    - `air_cooled_unitary` on a loop that cools by CHILLED WATER with no DX
+      coil at all;
+    - `built_up` or `evaporative` on a loop carrying a factory-packaged unitary
+      container.
+
+    **No per-value exemptions.** PR #162 accumulated three — `ventilation_sized`,
+    `group['heat_pump']` and `cooling_plant_heat_pump` — and each existed to
+    undo a wrong generalisation rather than to describe a real case. With the
+    hydronic claim narrowed to the one value that is about the LOOP, the loop's
+    own facts decide it and there is nothing left to exempt.
+    """
+    declared = group.get('declared_equipment_class')
+    if declared is None or audit is None:
+        return
+
+    if (declared in equipment_class.LOOP_REFRIGERANT_CYCLE_VALUES
+            and group['loop_hydronic_cooling']
+            and not group['loop_dx_cooling']):
+        audit.warn(
+            'characterize',
+            f'equipment_class {declared!r} on {air_loop_name} says the loop '
+            'cools with a refrigerant cycle, but its own cooling is CHILLED '
+            'WATER and it carries no DX coil',
+            target=air_loop_name,
+            inputs={'declared': declared, 'loop_hydronic_cooling': True,
+                    'loop_dx_cooling': False})
+    elif (declared in equipment_class.NOT_PACKAGED_VALUES
+            and group['packaged_unitary']):
+        audit.warn(
+            'characterize',
+            f'equipment_class {declared!r} on {air_loop_name} says the '
+            'equipment is not factory-packaged, but the loop carries a '
+            'packaged unitary container',
+            target=air_loop_name,
+            inputs={'declared': declared, 'packaged_unitary': True})
+
 def _recognize_gem_name(group, air_loop, audit):
     name = air_loop.nameString()
     candidate = name.split(' | ')[0]
@@ -600,6 +660,9 @@ def _base_group(zone_names, air_loop_name):
             # this as the recipe identifier's primary error (2026-11-04).
             'supply_heating_media': [],
             'zonal_units': [], 'loop_dx_cooling': False,
+            # Symmetric with `loop_dx_cooling` and needed separately: `cooled`
+            # alone cannot say the LOOP cools, because zonal units set it too.
+            'loop_hydronic_cooling': False,
             'packaged_unitary': False, 'ventilation_sized': False,
             'declared_equipment_class': None,
             'cooling_plants': [],
@@ -995,6 +1058,7 @@ def _scan_cooling_component(group, comp, plant_by_name, evidence):
                           c.autosizedGrossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel())
     elif (hydronic := _hydronic_cooling_coil(comp)) is not None:
         c, capacity_kind = hydronic
+        group['loop_hydronic_cooling'] = True
         fuels = _hydronic_fuels(c, plant_by_name)
         plant_coil = c
         kw = _hydronic_cooling_kw(c, capacity_kind)
