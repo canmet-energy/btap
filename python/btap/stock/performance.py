@@ -39,7 +39,7 @@ from collections.abc import Mapping
 
 #: The criteria a row is matched on, in precedence order — most specific
 #: first. Order matters only for reporting; specificity decides matches.
-CRITERIA = ('vintage', 'climate_zone', 'building_type')
+CRITERIA = ('vintage_name', 'climate_zone', 'building_type')
 
 #: The one accepted wildcard. Not `None`, not a missing key, not 'Any' —
 #: a single spelling so a reader cannot mistake absence for intent.
@@ -101,7 +101,7 @@ def _matches(row, criteria):
     return all(row[key] in (ANY, value) for key, value in criteria.items())
 
 
-def resolve_performance_profile(table, *, vintage, climate_zone,
+def resolve_performance_profile(table, *, vintage_name, climate_zone,
                                 building_type, audit=None, step='stock'):
     """The profile for one (vintage, climate zone, building type).
 
@@ -116,7 +116,7 @@ def resolve_performance_profile(table, *, vintage, climate_zone,
         reintroduce `find_row`'s first-row-wins.
     """
     validate_table(table)
-    criteria = {'vintage': vintage, 'climate_zone': climate_zone,
+    criteria = {'vintage_name': vintage_name, 'climate_zone': climate_zone,
                 'building_type': building_type}
 
     candidates = [row for row in table if _matches(row, criteria)]
@@ -151,7 +151,7 @@ def resolve_performance_profile(table, *, vintage, climate_zone,
                   else 'WILDCARD fallback on ' + ', '.join(wildcards))
         audit.info(
             step, f'vintage performance profile resolved — {detail}',
-            target=f'{vintage} / {climate_zone} / {building_type}',
+            target=f'{vintage_name} / {climate_zone} / {building_type}',
             value=row.get('source') or f'specificity {best}/{len(CRITERIA)}',
             inputs=provenance)
 
@@ -170,14 +170,14 @@ def uncovered_combinations(table, *, vintages, climate_zones, building_types):
     """
     validate_table(table)
     unmatched, wildcard_only = [], []
-    for vintage in vintages:
+    for vintage_name in vintages:
         for zone in climate_zones:
             for building_type in building_types:
-                want = {'vintage': vintage, 'climate_zone': zone,
+                want = {'vintage_name': vintage_name, 'climate_zone': zone,
                         'building_type': building_type}
                 try:
                     _, provenance = resolve_performance_profile(
-                        table, vintage=vintage, climate_zone=zone,
+                        table, vintage_name=vintage_name, climate_zone=zone,
                         building_type=building_type)
                 except ProfileResolutionError:
                     unmatched.append(want)

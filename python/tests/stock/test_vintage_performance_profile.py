@@ -27,8 +27,8 @@ from btap.stock.performance import (
 )
 
 
-def row(vintage, zone, building_type, cop, source=None):
-    return {'vintage': vintage, 'climate_zone': zone,
+def row(vintage_name, zone, building_type, cop, source=None):
+    return {'vintage_name': vintage_name, 'climate_zone': zone,
             'building_type': building_type,
             'values': {'vrf_rated_heating_cop': cop},
             'source': source}
@@ -42,7 +42,7 @@ class TestTheTableMustBeExplicit(unittest.TestCase):
         `find_row` would treat the absent key as a wildcard. Here it is a
         mistake, because absence cannot express intent.
         """
-        bad = [{'vintage': '1960-1979', 'climate_zone': '6',
+        bad = [{'vintage_name': '1960-1979', 'climate_zone': '6',
                 'values': {'vrf_rated_heating_cop': 2.4}}]
         with self.assertRaises(ProfileTableError) as caught:
             validate_table(bad)
@@ -59,7 +59,7 @@ class TestTheTableMustBeExplicit(unittest.TestCase):
 
     def test_every_offending_row_is_reported_at_once(self):
         """One pass, not a fix-and-rerun loop."""
-        bad = [{'vintage': 'any', 'values': {'x': 1}},
+        bad = [{'vintage_name': 'any', 'values': {'x': 1}},
                {'climate_zone': 'any', 'values': {'x': 1}}]
         with self.assertRaises(ProfileTableError) as caught:
             validate_table(bad)
@@ -68,7 +68,7 @@ class TestTheTableMustBeExplicit(unittest.TestCase):
         self.assertIn('row 1', message)
 
     def test_a_row_with_no_values_is_refused(self):
-        bad = [{'vintage': ANY, 'climate_zone': ANY, 'building_type': ANY,
+        bad = [{'vintage_name': ANY, 'climate_zone': ANY, 'building_type': ANY,
                 'values': {}}]
         with self.assertRaises(ProfileTableError):
             validate_table(bad)
@@ -90,7 +90,7 @@ class TestMostSpecificWins(unittest.TestCase):
 
     def test_the_most_specific_row_wins_not_the_first(self):
         values, provenance = self.resolve(
-            vintage='1960-1979', climate_zone='6', building_type='office')
+            vintage_name='1960-1979', climate_zone='6', building_type='office')
         self.assertAlmostEqual(2.9, values['vrf_rated_heating_cop'])
         self.assertEqual(3, provenance['specificity'])
         self.assertTrue(provenance['exact'])
@@ -99,7 +99,7 @@ class TestMostSpecificWins(unittest.TestCase):
 
     def test_a_partial_match_falls_to_the_next_most_specific(self):
         values, provenance = self.resolve(
-            vintage='1960-1979', climate_zone='7A', building_type='warehouse')
+            vintage_name='1960-1979', climate_zone='7A', building_type='warehouse')
         self.assertAlmostEqual(2.4, values['vrf_rated_heating_cop'])
         self.assertEqual(1, provenance['specificity'])
         self.assertEqual(['climate_zone', 'building_type'],
@@ -108,17 +108,17 @@ class TestMostSpecificWins(unittest.TestCase):
 
     def test_the_wildcard_row_is_reached_only_when_nothing_better_matches(self):
         values, provenance = self.resolve(
-            vintage='2005-2014', climate_zone='4', building_type='retail')
+            vintage_name='2005-2014', climate_zone='4', building_type='retail')
         self.assertAlmostEqual(2.0, values['vrf_rated_heating_cop'])
         self.assertEqual(0, provenance['specificity'])
         self.assertEqual(list(CRITERIA), provenance['wildcards'])
 
     def test_the_returned_values_are_a_COPY(self):
         """A caller mutating the profile must not edit the table."""
-        values, _ = self.resolve(vintage='1960-1979', climate_zone='6',
+        values, _ = self.resolve(vintage_name='1960-1979', climate_zone='6',
                                  building_type='office')
         values['vrf_rated_heating_cop'] = 99.0
-        again, _ = self.resolve(vintage='1960-1979', climate_zone='6',
+        again, _ = self.resolve(vintage_name='1960-1979', climate_zone='6',
                                 building_type='office')
         self.assertAlmostEqual(2.9, again['vrf_rated_heating_cop'])
 
@@ -129,7 +129,7 @@ class TestItRefusesRatherThanGuessing(unittest.TestCase):
         table = [row('1960-1979', '6', 'office', 2.9)]
         with self.assertRaises(ProfileResolutionError) as caught:
             resolve_performance_profile(
-                table, vintage='pre-1960', climate_zone='6',
+                table, vintage_name='pre-1960', climate_zone='6',
                 building_type='office')
         self.assertIn('does NOT fall back silently', str(caught.exception))
 
@@ -144,7 +144,7 @@ class TestItRefusesRatherThanGuessing(unittest.TestCase):
                  row('1960-1979', ANY, 'office', 2.7)]
         with self.assertRaises(ProfileResolutionError) as caught:
             resolve_performance_profile(
-                table, vintage='1960-1979', climate_zone='6',
+                table, vintage_name='1960-1979', climate_zone='6',
                 building_type='office')
         message = str(caught.exception)
         self.assertIn('tie at specificity 2', message)
@@ -159,14 +159,14 @@ class TestTheProvenanceIsAudited(unittest.TestCase):
         table = [row(ANY, ANY, ANY, 2.0, source='stock-wide default')]
         audit = AuditLog()
         resolve_performance_profile(
-            table, vintage='1972', climate_zone='6', building_type='office',
+            table, vintage_name='1972', climate_zone='6', building_type='office',
             audit=audit)
 
         entries = [e for e in audit.entries
                    if 'vintage performance profile' in e['action']]
         self.assertEqual(1, len(entries))
         self.assertIn('WILDCARD fallback', entries[0]['action'])
-        self.assertEqual(['vintage', 'climate_zone', 'building_type'],
+        self.assertEqual(['vintage_name', 'climate_zone', 'building_type'],
                          entries[0]['inputs']['wildcards'])
 
     def test_an_exact_match_is_distinguishable_in_the_trail(self):
@@ -177,7 +177,7 @@ class TestTheProvenanceIsAudited(unittest.TestCase):
         table = [row('1960-1979', '6', 'office', 2.9, source='audit')]
         audit = AuditLog()
         resolve_performance_profile(
-            table, vintage='1960-1979', climate_zone='6',
+            table, vintage_name='1960-1979', climate_zone='6',
             building_type='office', audit=audit)
 
         entry = next(e for e in audit.entries
