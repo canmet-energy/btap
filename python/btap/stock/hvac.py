@@ -41,6 +41,9 @@ _DESCRIPTIVE = (
     # through the plant, so it cannot tell a hydronic coil on a gas
     # boiler from a gas burner — the identifier's primary error.
     'supply_heating_media',
+    # Two catalogue rows can differ ONLY by heat recovery, so without this the
+    # signature cannot separate them and the scorer picks by tie-break (#214).
+    'loop_heat_recovery',
 )
 
 

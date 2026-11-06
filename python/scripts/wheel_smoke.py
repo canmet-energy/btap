@@ -83,10 +83,10 @@ def run_checks() -> int:
         # here — that is the tax for the tripwire, not an oversight. Adding one
         # also needs the sizing sweep, the ADJUDICATED D-58 golden, the
         # catalog-generation names and `tests/stock/`.
-        assert len(rows) == 109, (
-            f"catalog has {len(rows)} systems, expected 109 — if a system was "
+        assert len(rows) == 110, (
+            f"catalog has {len(rows)} systems, expected 110 — if a system was "
             "added on purpose, update this count and the four other gates")
-    check("packaged data loads (necb rules + the 109-system catalog)", data_loads)
+    check("packaged data loads (necb rules + the 110-system catalog)", data_loads)
 
     def coverage_reference_loads():
         from btap.codes import coverage

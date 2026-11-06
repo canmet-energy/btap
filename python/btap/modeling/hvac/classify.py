@@ -663,6 +663,13 @@ def _base_group(zone_names, air_loop_name):
             # Symmetric with `loop_dx_cooling` and needed separately: `cooled`
             # alone cannot say the LOOP cools, because zonal units set it too.
             'loop_hydronic_cooling': False,
+            # Does the loop RECOVER heat from its exhaust? Two catalogue rows
+            # differ ONLY by this — `PVAV with gas boiler reheat` and `PVAV
+            # with gas boiler reheat and plate HRV` — and without the fact the
+            # scorer cannot tell them apart. It chose the HRV variant for a
+            # loop with no heat exchanger at all, adding 48.64 GJ/yr of
+            # recovery to a building that has none (#214).
+            'loop_heat_recovery': False,
             'packaged_unitary': False, 'ventilation_sized': False,
             'declared_equipment_class': None,
             'cooling_plants': [],
@@ -685,6 +692,23 @@ def _outdoor_air_facts(group, air_loop, audit):
     mech = oa_system.getControllerOutdoorAir().controllerMechanicalVentilation()
     group['dcv'] = mech.demandControlledVentilation()
     group['system_outdoor_air_method'] = mech.systemOutdoorAirMethod()
+
+    # Heat recovery, read here because this is where the OA system is already
+    # in hand. `HeatExchangerAirToAirSensibleAndLatent` is the air-to-air
+    # recovery device the SDK models on an OA stream.
+    #
+    # BEFORE the `dcv` early return below, deliberately: that return exists to
+    # skip the DCV evidence, and putting this after it would leave
+    # `loop_heat_recovery` silently False on every loop without
+    # demand-controlled ventilation — which is most of them.
+    for component in oa_system.oaComponents():
+        if component.to_HeatExchangerAirToAirSensibleAndLatent(
+                ).is_initialized():
+            group['loop_heat_recovery'] = True
+            group['evidence'].append(
+                f'heat recovery: {component.nameString()}')
+            break
+
     if not group['dcv']:
         return
 

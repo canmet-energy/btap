@@ -572,6 +572,31 @@ def _score(row, group):
             against.append('the loop has DX cooling; this row cools '
                            'evaporatively, which is a different machine')
 
+    # Heat recovery, #214. Two rows can differ ONLY by this
+    # (`PVAV with gas boiler reheat` and `... and plate HRV`), so a scorer
+    # blind to it picks by tie-break — and it picked the HRV variant for a
+    # loop carrying no heat exchanger, adding a device worth 48.64 GJ/yr of
+    # recovery to a building that has none.
+    #
+    # Asymmetric deliberately. Building recovery a loop has no evidence of
+    # adds equipment to the model, so it is marked down. The reverse —
+    # omitting recovery the loop HAS — is a smaller fidelity loss and the
+    # catalogue may carry no equivalent row with it, so it is reported rather
+    # than punished as hard.
+    row_recovers = bool(row.get('needs_erv'))
+    group_recovers = group.get('loop_heat_recovery') is True
+    if row_recovers and not group_recovers:
+        score -= 2.5
+        against.append('this row builds HEAT RECOVERY, but the loop carries '
+                       'no air-to-air heat exchanger — that adds a device the '
+                       'building does not have')
+    elif row_recovers and group_recovers:
+        score += 2.0
+        matched.append('the loop recovers heat and so does this row')
+    elif group_recovers and not row_recovers:
+        score -= 1.0
+        against.append('the loop recovers heat; this row does not')
+
     cooling_medium = str(row.get('cooling_type') or '').lower()
     if cool and cooling_medium:
         score += 1.0
