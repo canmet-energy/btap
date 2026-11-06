@@ -23,6 +23,36 @@ btap/modeling/
 No `lighting/` or `shw/`: their authoring is NECB-table application and
 lives in `btap.codes` — see [CLAUDE.md](CLAUDE.md).
 
+## HVAC performance profiles
+
+`build_system(..., performance_profile={...})` separates topology selection
+from equipment performance. The argument is a partial mapping merged over the
+current 17-value builder profile; omitting it reproduces the previous builder
+output exactly. It does not resolve a building vintage or load external data:
+stock and retrofit callers supply concrete values.
+
+```python
+modeling.build_system(
+    model,
+    'Window AC with baseboard electric',
+    zones,
+    performance_profile={'window_ac_eer_btu_per_w_h': 7.5},
+)
+```
+
+The profile covers the ten single- and multispeed DX curve names, VRF heating
+and cooling COPs, window-AC EER, direct-evaporative-cooler effectiveness,
+heating and cooling plant-heat-pump minimum part-load ratios, and the 640 Pa
+PTAC fan pressure inherited from the NECB reference builder. Curve values name
+entries in `hvac/data/curves.json`; invalid names, curve types, fractions,
+ratings, and unknown keys fail before HVAC teardown or construction.
+
+Defrost EIR curves and VRF heat-recovery startup dynamics remain equipment
+behavior, not profile ratings. The unit-heater fan's 0.2 inH2O pressure is
+also outside the profile: it is a generic prototype convention rather than a
+code/reference target, and stock recipes can retarget fan pressure through
+the code-neutral efficiency primitive after construction.
+
 ## Modern HVAC systems
 
 Five opt-in catalog rows add modern hydronic and air-system topology without

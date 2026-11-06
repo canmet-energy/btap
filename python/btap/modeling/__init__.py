@@ -393,10 +393,13 @@ def systems(filter=None, family=None):
     return catalog.list_systems(filter=filter, family=family)
 
 
-def build_system(model, system_name, zones, **kwargs):
+def build_system(model, system_name, zones, *, performance_profile=None,
+                 **kwargs):
     """Build a system by descriptive name. See hvac.builder.build_system."""
     from btap.modeling.hvac import builder
-    return builder.build_system(model, system_name, zones, **kwargs)
+    return builder.build_system(
+        model, system_name, zones,
+        performance_profile=performance_profile, **kwargs)
 
 
 def remove_hvac_from_zones(model, zones):
@@ -418,10 +421,13 @@ def characterize(model, audit=None):
     return classify.characterize(model, audit=audit)
 
 
-def replace_system(model, system_name, zones, **kwargs):
+def replace_system(model, system_name, zones, *, performance_profile=None,
+                   **kwargs):
     """Replace whatever HVAC currently serves these zones with a catalog system."""
     from btap.modeling.hvac import builder
-    return builder.build_system(model, system_name, zones, **kwargs, remove_existing=True)
+    return builder.build_system(
+        model, system_name, zones, **kwargs, remove_existing=True,
+        performance_profile=performance_profile)
 
 
 def catalog_html(path=None, **opts):

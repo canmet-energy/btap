@@ -12,7 +12,8 @@ from btap.modeling.hvac.systems.base_system import BaseSystem
 class Vrf(BaseSystem):
     def build(self, model, zones, control_zone=None, namer='default',
               hw_loop=None, chw_loop=None):
-        outdoor_unit = ecm_air.add_outdoor_vrf_unit(model)
+        outdoor_unit = ecm_air.add_outdoor_vrf_unit(
+            model, performance_profile=self.performance_profile)
         vent = self.config.get('zone_ventilation', True)
         for zone in sorted_by_name(zones):
             terminal = ecm_air.add_zone_vrf_terminal(model, zone, outdoor_unit)

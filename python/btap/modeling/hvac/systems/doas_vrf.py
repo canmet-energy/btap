@@ -21,7 +21,8 @@ class DoasVrf(BaseSystem):
         supp = ('coil_gas' if self.config.get('supp_htg_fuel', 'Electric') == 'Gas'
                 else 'coil_electric')
 
-        outdoor_unit = ecm_air.add_outdoor_vrf_unit(model)
+        outdoor_unit = ecm_air.add_outdoor_vrf_unit(
+            model, performance_profile=self.performance_profile)
 
         air_loop = ecm_air.assemble(model, zones,
                                     air_eqpt=air_eqpt,

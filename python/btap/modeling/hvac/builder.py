@@ -5,7 +5,7 @@ from __future__ import annotations
 import importlib
 from dataclasses import dataclass
 
-from btap.modeling.hvac import catalog, teardown, validation
+from btap.modeling.hvac import catalog, performance, teardown, validation
 
 # family -> (systems module basename, class name). Resolved LAZILY at build
 # time so an unported system module never blocks importing this module or
@@ -68,7 +68,7 @@ def _system_class(family):
 
 
 def _preflight_resolved(model, resolved, zones, control_zone, namer,
-                        remove_existing):
+                        remove_existing, performance_profile):
     """Validate a resolved row, including every composite part, without mutation."""
     if resolved['family'] == 'composite':
         for part in resolved['parts']:
@@ -80,7 +80,7 @@ def _preflight_resolved(model, resolved, zones, control_zone, namer,
                 }
             _preflight_resolved(
                 model, part_resolved, zones, control_zone, namer,
-                remove_existing)
+                remove_existing, performance_profile)
         return
 
     from btap.modeling.hvac.systems import plant_loops
@@ -89,15 +89,16 @@ def _preflight_resolved(model, resolved, zones, control_zone, namer,
     system_class = _system_class(resolved['family'])
     if system_class is None:
         raise ValueError(f"no builder registered for family '{resolved['family']}'")
-    system_class(resolved).preflight(
+    system_class(resolved, performance_profile).preflight(
         model, zones, control_zone=control_zone, namer=namer,
         remove_existing=remove_existing)
 
 
 def build_system(model, system_name, zones, control_zone=None, remove_existing=False,
-                 namer='default', config=None, exclude_plants=None):
-    """Build a complete HVAC system topology on a set of thermal zones by
-    descriptive name.
+                 namer='default', config=None, exclude_plants=None,
+                 performance_profile=None):
+    """Build a complete HVAC system on a set of thermal zones by descriptive
+    name.
 
     ``exclude_plants`` names plant-loop handles this build must NOT adopt even
     when they match. The NECB reference path uses it to keep a reference system
@@ -108,9 +109,10 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
     hot-water, chilled-water and district loops alike, and travels into
     composite parts. The default adopts as before.
 
-    Topology only: run your sizing and code-efficiency passes afterwards (e.g. with
-    openstudio-standards, whose efficiency application is data-driven and applies to
-    any topology, including systems built by this package).
+    The builder applies the selected ``performance_profile`` while creating
+    equipment. With no profile, the current builder defaults are reproduced
+    exactly. Run code-efficiency passes afterwards when building a compliance
+    reference.
 
     :param model: openstudio.model.Model
     :param system_name: a catalog name (see btap.modeling.systems)
@@ -120,8 +122,11 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
         system replaces rather than stacks (zone-scoped; other zones untouched)
     :param namer: 'default' or 'necb_pipe_name'
     :param config: per-call overrides merged over the catalog row (dict or None)
+    :param performance_profile: partial mapping of performance overrides,
+        merged over the current builder defaults
     :return: Result(system_name, family, air_loops, control_zone)
     """
+    performance_profile = performance.resolve(performance_profile)
     validation.require_zones(zones)
     validation.require_thermostats(zones)
     if control_zone is None:
@@ -133,7 +138,8 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
         resolved = {**resolved, **{str(k): v for k, v in config.items()}}
 
     _preflight_resolved(
-        model, resolved, zones, control_zone, namer, remove_existing)
+        model, resolved, zones, control_zone, namer, remove_existing,
+        performance_profile)
 
     if remove_existing:
         teardown.remove_hvac_from_zones(model, zones)
@@ -151,7 +157,8 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
                 build_system(model, part['name'], zones,
                              control_zone=control_zone, namer=namer,
                              config=part.get('config'),
-                             exclude_plants=exclude_plants).air_loops)
+                             exclude_plants=exclude_plants,
+                             performance_profile=performance_profile).air_loops)
         return Result(system_name=system_name, family='composite',
                       air_loops=air_loops, control_zone=control_zone)
 
@@ -161,7 +168,7 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
 
     from btap.modeling.hvac.systems import plant_loops
 
-    system = system_class(resolved)
+    system = system_class(resolved, performance_profile)
     hw_loop = None
     if resolved.get('needs_boiler'):
         hw_loop = plant_loops.hot_water(model,

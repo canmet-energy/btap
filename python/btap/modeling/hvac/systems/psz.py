@@ -83,18 +83,25 @@ class PSZ(BaseSystem):
         if reference_hp:
             if staged:
                 clg_coil = coils.dx_cooling_multi_speed(
-                    model, always_on, name='CoilCoolingDXMultiSpeed_ashp')
+                    model, always_on, name='CoilCoolingDXMultiSpeed_ashp',
+                    performance_profile=self.performance_profile)
                 htg_coil = coils.dx_heating_multi_speed(
-                    model, always_on, name='CoilHeatingDXMultiSpeed_ashp')
+                    model, always_on, name='CoilHeatingDXMultiSpeed_ashp',
+                    performance_profile=self.performance_profile)
             else:
                 clg_coil = coils.dx_cooling_single_speed(
-                    model, always_on, name='CoilCoolingDXSingleSpeed_ashp')
+                    model, always_on, name='CoilCoolingDXSingleSpeed_ashp',
+                    performance_profile=self.performance_profile)
                 htg_coil = coils.dx_heating_single_speed(
-                    model, always_on, name='CoilHeatingDXSingleSpeed_ashp')
+                    model, always_on, name='CoilHeatingDXSingleSpeed_ashp',
+                    performance_profile=self.performance_profile)
             supp_coil = coils.heating_coil(model, config.get('supp_htg_fuel', 'Electric'),
-                                           always_on, hw_loop=hw_loop)
+                                           always_on, hw_loop=hw_loop,
+                                           performance_profile=self.performance_profile)
         elif staged:
-            clg_coil = coils.dx_cooling_multi_speed(model, always_on)
+            clg_coil = coils.dx_cooling_multi_speed(
+                model, always_on,
+                performance_profile=self.performance_profile)
             # D-49: electric resistance is not a furnace — 8.4.4.9.(7) staging does
             # not reach it, so an electric-heat staged PSZ pairs the multispeed DX
             # cooling coil with a plain single-stage electric coil.
@@ -102,12 +109,16 @@ class PSZ(BaseSystem):
                 htg_coil = coils.gas_heating_multi_stage(model, always_on)
             else:
                 htg_coil = coils.heating_coil(model, heating_coil_type, always_on,
-                                              hw_loop=hw_loop)
+                                              hw_loop=hw_loop,
+                                              performance_profile=self.performance_profile)
             supp_coil = None
         else:
-            clg_coil = coils.dx_cooling_single_speed(model, always_on)
+            clg_coil = coils.dx_cooling_single_speed(
+                model, always_on,
+                performance_profile=self.performance_profile)
             htg_coil = coils.heating_coil(model, heating_coil_type, always_on,
-                                          hw_loop=hw_loop)
+                                          hw_loop=hw_loop,
+                                          performance_profile=self.performance_profile)
             supp_coil = None
 
         oa_system = self.build_oa_system(model)

@@ -21,8 +21,6 @@ from btap._compat import sorted_by_name
 from btap.modeling.hvac.systems import baseboards
 from btap.modeling.hvac.systems.base_system import BaseSystem
 
-WINDOW_AC_EER = 8.5  # Btu/W-h (generic model_add_window_ac default)
-
 
 class ZoneTerminal(BaseSystem):
     def build(self, model, zones, control_zone=None, namer='default',
@@ -112,7 +110,9 @@ class ZoneTerminal(BaseSystem):
         always_on = model.alwaysOnDiscreteSchedule()
         clg_coil = openstudio.model.CoilCoolingDXSingleSpeed(model)
         clg_coil.setName(f"{zone.nameString()} Window AC Clg Coil")
-        clg_coil.setRatedCOP(openstudio.convert(WINDOW_AC_EER, 'Btu/h', 'W').get())
+        clg_coil.setRatedCOP(openstudio.convert(
+            self.performance_profile['window_ac_eer_btu_per_w_h'],
+            'Btu/h', 'W').get())
 
         ac = openstudio.model.ZoneHVACPackagedTerminalAirConditioner(
             model, always_on, self._cycling_fan(model, zone, 'Window AC'),

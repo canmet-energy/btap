@@ -8,15 +8,24 @@ from __future__ import annotations
 
 import openstudio
 
+from btap.modeling.hvac import performance
+
 
 class BaseSystem:
-    def __init__(self, config):
-        """:param config: a resolved catalog row (dict, string keys; 'sizing' is a dict)"""
+    def __init__(self, config, performance_profile=None):
+        """:param config: a resolved catalog row (dict, string keys; 'sizing' is a dict)
+        :param performance_profile: validated per-call builder performance values
+        """
         self._config = config
+        self._performance_profile = performance.resolve(performance_profile)
 
     @property
     def config(self):
         return self._config
+
+    @property
+    def performance_profile(self):
+        return self._performance_profile
 
     @property
     def sizing(self):

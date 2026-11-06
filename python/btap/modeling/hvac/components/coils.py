@@ -1,56 +1,72 @@
-"""SDK-only coil factories. DX coils carry the NECB reference curves from data/curves.json
-(ported from openstudio-standards add_onespeed_DX_coil / add_onespeed_htg_DX_coil)."""
+"""SDK-only coil factories.
+
+DX curve names come from the builder performance profile. Its defaults retain
+the NECB reference curves ported from openstudio-standards.
+"""
 
 from __future__ import annotations
 
 import openstudio
 
+from btap.modeling.hvac import performance
 from btap.modeling.hvac.components import curves as curves_mod
 
 
-def dx_cooling_single_speed(model, schedule, name='CoilCoolingDXSingleSpeed_dx'):
-    """Single-speed DX cooling coil with NECB reference curves.
+def dx_cooling_single_speed(model, schedule,
+                            name='CoilCoolingDXSingleSpeed_dx', *,
+                            performance_profile=None):
+    """Single-speed DX cooling coil with profile-selected curves.
 
     :param model: openstudio.model.Model
     :param schedule: availability schedule
     :return: openstudio.model.CoilCoolingDXSingleSpeed
     """
+    profile = performance.resolve(performance_profile)
     coil = openstudio.model.CoilCoolingDXSingleSpeed(
         model,
         schedule,
-        curves_mod.build(model, 'DXCOOL-REF-CAPFT'),
-        curves_mod.build(model, 'DXCOOL-REF-CAPFFLOW'),
-        curves_mod.build(model, 'DXCOOL-REF-COOLEIRFT'),
-        curves_mod.build(model, 'DXCOOL-REF-EIRFFLOW'),
-        curves_mod.build(model, 'DXCOOL-REF-COOLPLFFPLR'),
+        curves_mod.build(
+            model, profile['dx_cooling_capacity_temperature_curve']),
+        curves_mod.build(model, profile['dx_cooling_capacity_flow_curve']),
+        curves_mod.build(model, profile['dx_cooling_eir_temperature_curve']),
+        curves_mod.build(model, profile['dx_cooling_eir_flow_curve']),
+        curves_mod.build(
+            model, profile['dx_cooling_part_load_fraction_curve']),
     )
     coil.setName(name)
     return coil
 
 
-def dx_heating_single_speed(model, schedule, name='CoilHeatingDXSingleSpeed_dx'):
-    """Single-speed DX heating coil with NECB reference curves.
+def dx_heating_single_speed(model, schedule,
+                            name='CoilHeatingDXSingleSpeed_dx', *,
+                            performance_profile=None):
+    """Single-speed DX heating coil with profile-selected curves.
 
     :param model: openstudio.model.Model
     :param schedule: availability schedule
     :return: openstudio.model.CoilHeatingDXSingleSpeed
     """
+    profile = performance.resolve(performance_profile)
     coil = openstudio.model.CoilHeatingDXSingleSpeed(
         model,
         schedule,
-        curves_mod.build(model, 'DXHEAT-REF-CAPFT'),
-        curves_mod.build(model, 'DXHEAT-REF-CAPFFLOW'),
-        curves_mod.build(model, 'DXHEAT-REF-EIRFT'),
-        curves_mod.build(model, 'DXHEAT-REF-EIRFFLOW'),
-        curves_mod.build(model, 'DXHEAT-REF-PLFFPLR'),
+        curves_mod.build(
+            model, profile['dx_heating_capacity_temperature_curve']),
+        curves_mod.build(model, profile['dx_heating_capacity_flow_curve']),
+        curves_mod.build(model, profile['dx_heating_eir_temperature_curve']),
+        curves_mod.build(model, profile['dx_heating_eir_flow_curve']),
+        curves_mod.build(
+            model, profile['dx_heating_part_load_fraction_curve']),
     )
     coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(-10.0)
     coil.setName(name)
     return coil
 
 
-def dx_cooling_multi_speed(model, _schedule, stages=2, name='CoilCoolingDXMultiSpeed_dx'):
-    """Multi-speed DX cooling coil with the NECB reference curves on EVERY stage
+def dx_cooling_multi_speed(model, _schedule, stages=2,
+                           name='CoilCoolingDXMultiSpeed_dx', *,
+                           performance_profile=None):
+    """Multi-speed DX cooling coil with profile-selected curves on EVERY stage
     (8.4.4.10.(8) / 2025 8.4.5.10.(8) staged DX). Stage capacities and flows are
     AUTOSIZED — E+ sizes stage k to k/N of the top stage through the containing
     unitary's UnitarySystemPerformanceMultispeed flow ratios, which is what
@@ -60,6 +76,7 @@ def dx_cooling_multi_speed(model, _schedule, stages=2, name='CoilCoolingDXMultiS
     :param stages: initial stage count (the efficiency pass adjusts it post-sizing)
     :return: openstudio.model.CoilCoolingDXMultiSpeed
     """
+    profile = performance.resolve(performance_profile)
     coil = openstudio.model.CoilCoolingDXMultiSpeed(model)
     coil.setName(name)
     coil.setFuelType('Electricity')
@@ -67,19 +84,28 @@ def dx_cooling_multi_speed(model, _schedule, stages=2, name='CoilCoolingDXMultiS
     # belongs to the lowest stage only
     coil.setApplyPartLoadFractiontoSpeedsGreaterthan1(False)
     for _ in range(stages):
-        coil.addStage(dx_cooling_stage(model))
+        coil.addStage(dx_cooling_stage(
+            model, performance_profile=profile))
     return coil
 
 
-def dx_cooling_stage(model):
-    """One CoilCoolingDXMultiSpeedStageData carrying the NECB reference curves.
+def dx_cooling_stage(model, *, performance_profile=None):
+    """One CoilCoolingDXMultiSpeedStageData with profile-selected curves.
     :return: openstudio.model.CoilCoolingDXMultiSpeedStageData"""
+    profile = performance.resolve(performance_profile)
     stage = openstudio.model.CoilCoolingDXMultiSpeedStageData(model)
-    stage.setTotalCoolingCapacityFunctionofTemperatureCurve(curves_mod.build(model, 'DXCOOL-REF-CAPFT'))
-    stage.setTotalCoolingCapacityFunctionofFlowFractionCurve(curves_mod.build(model, 'DXCOOL-REF-CAPFFLOW'))
-    stage.setEnergyInputRatioFunctionofTemperatureCurve(curves_mod.build(model, 'DXCOOL-REF-COOLEIRFT'))
-    stage.setEnergyInputRatioFunctionofFlowFractionCurve(curves_mod.build(model, 'DXCOOL-REF-EIRFFLOW'))
-    stage.setPartLoadFractionCorrelationCurve(curves_mod.build(model, 'DXCOOL-REF-COOLPLFFPLR'))
+    stage.setTotalCoolingCapacityFunctionofTemperatureCurve(
+        curves_mod.build(
+            model, profile['dx_cooling_capacity_temperature_curve']))
+    stage.setTotalCoolingCapacityFunctionofFlowFractionCurve(
+        curves_mod.build(model, profile['dx_cooling_capacity_flow_curve']))
+    stage.setEnergyInputRatioFunctionofTemperatureCurve(
+        curves_mod.build(model, profile['dx_cooling_eir_temperature_curve']))
+    stage.setEnergyInputRatioFunctionofFlowFractionCurve(
+        curves_mod.build(model, profile['dx_cooling_eir_flow_curve']))
+    stage.setPartLoadFractionCorrelationCurve(
+        curves_mod.build(
+            model, profile['dx_cooling_part_load_fraction_curve']))
     stage.autosizeGrossRatedTotalCoolingCapacity()
     stage.autosizeGrossRatedSensibleHeatRatio()
     stage.autosizeRatedAirFlowRate()
@@ -104,11 +130,14 @@ def gas_heating_stage(model):
     return stage
 
 
-def dx_heating_multi_speed(model, _schedule, stages=2, name='CoilHeatingDXMultiSpeed_ashp'):
+def dx_heating_multi_speed(model, _schedule, stages=2,
+                           name='CoilHeatingDXMultiSpeed_ashp', *,
+                           performance_profile=None):
     """Multi-speed DX HEATING coil (reference ASHP staging). Same autosizing
     contract; the -10 degC compressor cutoff is applied by the reference
     transform, matching the single-speed coil.
     :return: openstudio.model.CoilHeatingDXMultiSpeed"""
+    profile = performance.resolve(performance_profile)
     coil = openstudio.model.CoilHeatingDXMultiSpeed(model)
     coil.setName(name)
     if hasattr(coil, 'setFuelType'):
@@ -116,18 +145,30 @@ def dx_heating_multi_speed(model, _schedule, stages=2, name='CoilHeatingDXMultiS
     coil.setApplyPartLoadFractiontoSpeedsGreaterthan1(False)
     coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(-10.0)
     for _ in range(stages):
-        coil.addStage(dx_heating_stage(model))
+        coil.addStage(dx_heating_stage(
+            model, performance_profile=profile))
     return coil
 
 
-def dx_heating_stage(model):
-    """:return: openstudio.model.CoilHeatingDXMultiSpeedStageData"""
+def dx_heating_stage(model, *, performance_profile=None):
+    """One heating stage with profile-selected curves.
+
+    :return: openstudio.model.CoilHeatingDXMultiSpeedStageData
+    """
+    profile = performance.resolve(performance_profile)
     stage = openstudio.model.CoilHeatingDXMultiSpeedStageData(model)
-    stage.setHeatingCapacityFunctionofTemperatureCurve(curves_mod.build(model, 'DXHEAT-REF-CAPFT'))
-    stage.setHeatingCapacityFunctionofFlowFractionCurve(curves_mod.build(model, 'DXHEAT-REF-CAPFFLOW'))
-    stage.setEnergyInputRatioFunctionofTemperatureCurve(curves_mod.build(model, 'DXHEAT-REF-EIRFT'))
-    stage.setEnergyInputRatioFunctionofFlowFractionCurve(curves_mod.build(model, 'DXHEAT-REF-EIRFFLOW'))
-    stage.setPartLoadFractionCorrelationCurve(curves_mod.build(model, 'DXHEAT-REF-PLFFPLR'))
+    stage.setHeatingCapacityFunctionofTemperatureCurve(
+        curves_mod.build(
+            model, profile['dx_heating_capacity_temperature_curve']))
+    stage.setHeatingCapacityFunctionofFlowFractionCurve(
+        curves_mod.build(model, profile['dx_heating_capacity_flow_curve']))
+    stage.setEnergyInputRatioFunctionofTemperatureCurve(
+        curves_mod.build(model, profile['dx_heating_eir_temperature_curve']))
+    stage.setEnergyInputRatioFunctionofFlowFractionCurve(
+        curves_mod.build(model, profile['dx_heating_eir_flow_curve']))
+    stage.setPartLoadFractionCorrelationCurve(
+        curves_mod.build(
+            model, profile['dx_heating_part_load_fraction_curve']))
     stage.autosizeGrossRatedHeatingCapacity()
     stage.autosizeRatedAirFlowRate()
     return stage
@@ -302,7 +343,8 @@ def unitary_children(unitary):
     return out
 
 
-def heating_coil(model, heating_coil_type, schedule, hw_loop=None):
+def heating_coil(model, heating_coil_type, schedule, hw_loop=None, *,
+                 performance_profile=None):
     """Air-loop heating coil by fuel keyword. Hot-water coils are attached to hw_loop.
 
     :param heating_coil_type: 'Electric', 'Gas'/'NaturalGas', 'Hot Water', 'DX'
@@ -320,5 +362,6 @@ def heating_coil(model, heating_coil_type, schedule, hw_loop=None):
         hw_loop.addDemandBranchForComponent(coil)
         return coil
     if heating_coil_type == 'DX':
-        return dx_heating_single_speed(model, schedule)
+        return dx_heating_single_speed(
+            model, schedule, performance_profile=performance_profile)
     raise ValueError(f"'{heating_coil_type}' is not a valid heating coil type")

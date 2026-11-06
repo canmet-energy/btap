@@ -146,7 +146,9 @@ class HpPlantFanCoils(BaseSystem):
             hp.setHeatPumpDefrostControl('OnDemand')
             hp.setFlowMode('VariableSpeedPumping')
             hp.setControlType('Setpoint')
-            hp.setMinimumPartLoadRatio(0.2)
+            hp.setMinimumPartLoadRatio(
+                self.performance_profile[
+                    'plant_heating_heat_pump_minimum_part_load_ratio'])
             hp.setCapacityModifierFunctionofTemperatureCurve(
                 curves_mod.build(model, 'CAWHP-HS15-HCAPFT'))
             hp.setElectricInputtoOutputRatioModifierFunctionofTemperatureCurve(
@@ -188,7 +190,9 @@ class HpPlantFanCoils(BaseSystem):
         hp.setReferenceCoefficientofPerformance(3.0)
         hp.setFlowMode('VariableSpeedPumping')
         hp.setControlType('Load')
-        hp.setMinimumPartLoadRatio(0.2)
+        hp.setMinimumPartLoadRatio(
+            self.performance_profile[
+                'plant_cooling_heat_pump_minimum_part_load_ratio'])
         hp.setCapacityModifierFunctionofTemperatureCurve(
             curves_mod.build(model, 'CAWHP-HS15-CCAPFT'))
         hp.setElectricInputtoOutputRatioModifierFunctionofTemperatureCurve(
