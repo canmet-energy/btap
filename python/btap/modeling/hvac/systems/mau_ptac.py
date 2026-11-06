@@ -39,13 +39,18 @@ class MauPtac(BaseSystem):
 
         if reference_hp:
             htg_coil = coils.dx_heating_single_speed(
-                model, always_on, name='CoilHeatingDXSingleSpeed_ashp')
+                model, always_on, name='CoilHeatingDXSingleSpeed_ashp',
+                performance_profile=self.performance_profile)
             clg_coil = coils.dx_cooling_single_speed(
-                model, always_on, name='CoilCoolingDXSingleSpeed_ashp')
+                model, always_on, name='CoilCoolingDXSingleSpeed_ashp',
+                performance_profile=self.performance_profile)
         else:
             htg_coil = coils.heating_coil(model, mau_heating_coil_type, always_on,
-                                          hw_loop=hw_loop)
-            clg_coil = coils.dx_cooling_single_speed(model, always_on)
+                                          hw_loop=hw_loop,
+                                          performance_profile=self.performance_profile)
+            clg_coil = coils.dx_cooling_single_speed(
+                model, always_on,
+                performance_profile=self.performance_profile)
         oa_system = self.build_oa_system(model)
 
         supply_inlet_node = air_loop.supplyInletNode()
@@ -73,7 +78,9 @@ class MauPtac(BaseSystem):
         for zone in zones:
             self.apply_zone_sizing(zone)
             if reference_hp:
-                rh_coil = coils.heating_coil(model, supp_fuel, always_on, hw_loop=hw_loop)
+                rh_coil = coils.heating_coil(
+                    model, supp_fuel, always_on, hw_loop=hw_loop,
+                    performance_profile=self.performance_profile)
                 terminal = openstudio.model.AirTerminalSingleDuctConstantVolumeReheat(
                     model, always_on, rh_coil)
                 air_loop.addBranchForZone(zone, terminal.to_StraightComponent())
@@ -129,15 +136,18 @@ class MauPtac(BaseSystem):
         ptac_heating_type = self.config.get('ptac_heating_type')
         if ptac_heating_type:
             htg_coil = coils.heating_coil(model, ptac_heating_type, always_on,
-                                          hw_loop=hw_loop)
+                                          hw_loop=hw_loop,
+                                          performance_profile=self.performance_profile)
             htg_coil.setName(f"{zone.nameString()} PTAC Htg Coil")
         else:
             htg_coil = openstudio.model.CoilHeatingElectric(model, always_off)
         clg_coil = coils.dx_cooling_single_speed(
-            model, always_on, name=f"{zone.nameString()} PTAC DX Clg Coil")
+            model, always_on, name=f"{zone.nameString()} PTAC DX Clg Coil",
+            performance_profile=self.performance_profile)
 
         fan = openstudio.model.FanOnOff(model)
-        fan.setPressureRise(640)
+        fan.setPressureRise(
+            self.performance_profile['ptac_fan_pressure_rise_pa'])
 
         ptac = openstudio.model.ZoneHVACPackagedTerminalAirConditioner(
             model, always_on, fan, htg_coil, clg_coil)

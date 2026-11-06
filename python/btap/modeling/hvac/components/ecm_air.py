@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import openstudio
 
+from btap.modeling.hvac import performance
 from btap.modeling.hvac.components import curves as curves_mod
 from btap.modeling.hvac.components import schedules
 
@@ -226,7 +227,8 @@ def add_zone_vrf_terminal(model, zone, outdoor_unit):
     return terminal
 
 
-def add_outdoor_vrf_unit(model, condenser_type='AirCooled'):
+def add_outdoor_vrf_unit(model, condenser_type='AirCooled', *,
+                         performance_profile=None):
     """Outdoor VRF unit with the ECM hs08 settings (port of add_outdoor_vrf_unit, minus
     the defrost-EIR curve lookup — curve application is the host efficiency pass's job).
 
@@ -235,11 +237,12 @@ def add_outdoor_vrf_unit(model, condenser_type='AirCooled'):
     values bare (no derivation given there either); the ECM models a
     'Mitsubishi_Hyper_Heating_VRF_Outdoor_Unit', so the odd-looking constants are
     manufacturer-flavoured performance settings."""
+    profile = performance.resolve(performance_profile)
     unit = openstudio.model.AirConditionerVariableRefrigerantFlow(model)
     unit.setName('VRF Outdoor Unit')
     unit.setHeatPumpWasteHeatRecovery(True)
-    unit.setRatedHeatingCOP(4.0)          # legacy hvac_systems.rb:272
-    unit.setGrossRatedCoolingCOP(4.0)     # legacy hvac_systems.rb:276
+    unit.setRatedHeatingCOP(profile['vrf_rated_heating_cop'])
+    unit.setGrossRatedCoolingCOP(profile['vrf_gross_rated_cooling_cop'])
     unit.setMinimumOutdoorTemperatureinHeatingMode(-25.0)   # cold-climate cutoff, legacy :278
     unit.setHeatingPerformanceCurveOutdoorTemperatureType('WetBulbTemperature')
     unit.setMasterThermostatPriorityControlType('ThermostatOffsetPriority')

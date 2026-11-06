@@ -52,7 +52,8 @@ def build_dehumidifying_doas(system, model, *, system_name, namer,
     reheat = openstudio.model.CoilHeatingElectric(model, always_on)
     reheat.setName(f'{system_name} Reheat Coil')
     cooling = coils.dx_cooling_single_speed(
-        model, always_on, name=f'{system_name} Dehumidification Coil')
+        model, always_on, name=f'{system_name} Dehumidification Coil',
+        performance_profile=system.performance_profile)
 
     oa_system = system.build_oa_system(model)
     oa_controller = oa_system.getControllerOutdoorAir()
@@ -111,8 +112,11 @@ class Doas(BaseSystem):
         fan = openstudio.model.FanConstantVolume(model, always_on)
         fan.setName('DOAS Supply Fan')
         htg = coils.heating_coil(model, self.config.get('heating_type', 'Electric'),
-                                 always_on, hw_loop=hw_loop)
-        clg = coils.dx_cooling_single_speed(model, always_on, name='DOAS DX Clg Coil')
+                                 always_on, hw_loop=hw_loop,
+                                 performance_profile=self.performance_profile)
+        clg = coils.dx_cooling_single_speed(
+            model, always_on, name='DOAS DX Clg Coil',
+            performance_profile=self.performance_profile)
 
         supply_inlet_node = air_loop.supplyInletNode()
         fan.addToNode(supply_inlet_node)

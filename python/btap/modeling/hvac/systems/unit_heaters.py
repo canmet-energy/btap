@@ -19,9 +19,14 @@ class UnitHeaters(BaseSystem):
         for zone in sorted_by_name(zones):
             fan = openstudio.model.FanConstantVolume(model, always_on)
             fan.setName(f"{zone.nameString()} Unit Heater Fan")
+            # Generic prototype equipment convention, not a code/reference
+            # performance target. A stock recipe can retarget fan pressure
+            # after construction through the code-neutral efficiency primitive.
             fan.setPressureRise(openstudio.convert(0.2, 'inH_{2}O', 'Pa').get())
 
-            htg_coil = coils.heating_coil(model, heating_type, always_on, hw_loop=hw_loop)
+            htg_coil = coils.heating_coil(
+                model, heating_type, always_on, hw_loop=hw_loop,
+                performance_profile=self.performance_profile)
             htg_coil.setName(f"{zone.nameString()} Unit Heater Coil")
 
             heater = openstudio.model.ZoneHVACUnitHeater(model, always_on, fan, htg_coil)

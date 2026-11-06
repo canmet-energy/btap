@@ -35,10 +35,13 @@ class EvapCooler(BaseSystem):
             evap = openstudio.model.EvaporativeCoolerDirectResearchSpecial(
                 model, always_on)
             evap.setName(f"{air_loop.nameString()} Evap Media")
-            # 90% design effectiveness, per legacy model_add_evap_cooler
+            # The default 90% design effectiveness comes from legacy
+            # model_add_evap_cooler
             # (Prototype.hvac_systems.rb:4501), which cites
             # https://basc.pnnl.gov/resource-guides/evaporative-cooling-systems#edit-group-description
-            evap.setCoolerDesignEffectiveness(0.90)
+            evap.setCoolerDesignEffectiveness(
+                self.performance_profile[
+                    'evaporative_cooler_design_effectiveness'])
 
             supply_inlet_node = air_loop.supplyInletNode()
             fan.addToNode(supply_inlet_node)

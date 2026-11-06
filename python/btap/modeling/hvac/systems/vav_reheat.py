@@ -313,7 +313,9 @@ class VAVReheat(BaseSystem):
         return_fan = openstudio.model.FanVariableVolume(model, always_on)
         return_fan.setName('Sys6 Return Fan')   # for host fan rules
 
-        htg_coil = coils.heating_coil(model, heating_coil_type, always_on, hw_loop=hw_loop)
+        htg_coil = coils.heating_coil(
+            model, heating_coil_type, always_on, hw_loop=hw_loop,
+            performance_profile=self.performance_profile)
         if self.config.get('cooling_type', 'chilled_water') == 'dx':
             clg_coil = openstudio.model.CoilCoolingDXTwoSpeed(model)
             clg_coil.setName('CoilCoolingDXTwoSpeed_PVAV')
@@ -345,7 +347,8 @@ class VAVReheat(BaseSystem):
             baseboards.add(model, zone, baseboard_type, hw_loop=hw_loop)
 
             reheat_coil = coils.heating_coil(model, heating_coil_type, always_on,
-                                             hw_loop=hw_loop)
+                                             hw_loop=hw_loop,
+                                             performance_profile=self.performance_profile)
             terminal = openstudio.model.AirTerminalSingleDuctVAVReheat(
                 model, always_on, reheat_coil)
             air_loop.addBranchForZone(zone, terminal.to_StraightComponent())

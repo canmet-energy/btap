@@ -67,10 +67,13 @@ class FanCoils(BaseSystem):
 
         htg_coil = (None if mau_heating_coil_type == 'None'
                     else coils.heating_coil(model, mau_heating_coil_type, always_on,
-                                            hw_loop=hw_loop))
+                                            hw_loop=hw_loop,
+                                            performance_profile=self.performance_profile))
 
         if mau_cooling_type == 'DX':
-            clg_coil = coils.dx_cooling_single_speed(model, clg_avail_sch)
+            clg_coil = coils.dx_cooling_single_speed(
+                model, clg_avail_sch,
+                performance_profile=self.performance_profile)
         elif mau_cooling_type in ('Hydronic', 'Hot Water', 'HotWater', 'Chilled Water'):
             clg_coil = openstudio.model.CoilCoolingWater(model, clg_avail_sch)
             chw_loop.addDemandBranchForComponent(clg_coil)

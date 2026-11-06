@@ -91,7 +91,8 @@ class Furnace(BaseSystem):
             # missing. The coil was hard-coded `CoilHeatingGas`; 'Gas' is the
             # default so every shipped row keeps the coil it had.
             htg = coils.heating_coil(model, heating_type, always_on,
-                                     hw_loop=hw_loop)
+                                     hw_loop=hw_loop,
+                                     performance_profile=self.performance_profile)
             htg.setName(f"{air_loop.nameString()} Heating Coil")
             htg.addToNode(supply_inlet_node)
         if cooling:
@@ -132,7 +133,8 @@ class Furnace(BaseSystem):
         for zone in zones:
             if reheat:
                 rh_coil = coils.heating_coil(model, reheat, always_on,
-                                             hw_loop=hw_loop)
+                                             hw_loop=hw_loop,
+                                             performance_profile=self.performance_profile)
                 rh_coil.setName(f"{zone.nameString()} Reheat Coil")
                 terminal = openstudio.model.\
                     AirTerminalSingleDuctConstantVolumeReheat(

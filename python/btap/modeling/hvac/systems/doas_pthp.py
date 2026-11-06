@@ -47,7 +47,9 @@ class DoasPthp(BaseSystem):
             curves_mod.defrost_eir_ft(model))
         htg_coil.setCrankcaseHeaterCapacity(1.0e-6)
 
-        supp_coil = coils.heating_coil(model, supp_htg_fuel, always_on, hw_loop=hw_loop)
+        supp_coil = coils.heating_coil(
+            model, supp_htg_fuel, always_on, hw_loop=hw_loop,
+            performance_profile=self.performance_profile)
         if re.search('Electric', supp_htg_fuel, re.IGNORECASE):
             supp_coil.setName('CoilHeatingElectric')
 
