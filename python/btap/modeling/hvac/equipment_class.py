@@ -57,6 +57,26 @@ VALUES = (
 )
 
 
+#: The ONE value that is a claim about the LOOP's own cooling equipment.
+#: Declaring it on a loop that cools by chilled water, with no DX coil at all,
+#: means believing the declaration requires disbelieving the topology.
+#:
+#: **Narrowed to this single value deliberately.** PR #162 grouped four
+#: refrigerant-cycle values here — adding `packaged_terminal`,
+#: `room_air_conditioner` and `heat_pump` — and was withdrawn after four review
+#: rounds, each of which exempted one more arrival path. The premise was the
+#: defect: those three name equipment routinely found ZONAL under a hydronic
+#: make-up-air unit, so the declaration and the model AGREE and the warning was
+#: false. Only `air_cooled_unitary` claims the loop itself cools with a
+#: refrigerant cycle, and the loop's own facts settle it — which is why this
+#: boundary needs no exemptions where the wider one needed three.
+LOOP_REFRIGERANT_CYCLE_VALUES = ('air_cooled_unitary',)
+
+#: Values a factory-packaged unitary container contradicts. Sound through all
+#: four rounds of #162 and needing no exemption, so it is kept as it was.
+NOT_PACKAGED_VALUES = ('built_up', 'evaporative')
+
+
 def declare(air_loop, value):
     """Record `value` as `air_loop`'s equipment class.
 
