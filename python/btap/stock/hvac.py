@@ -44,6 +44,16 @@ _DESCRIPTIVE = (
     # Two catalogue rows can differ ONLY by heat recovery, so without this the
     # signature cannot separate them and the scorer picks by tie-break (#214).
     'loop_heat_recovery',
+    # Whether the AIR HANDLER cools hydronically. `loop_dx_cooling` alone made
+    # the scorer call a chilled-water air handler zonally cooled and object
+    # that its loop has no cooling coil (#221). Supply-scoped, because the
+    # unscoped `loop_hydronic_cooling` is also set by terminal coils.
+    'loop_hydronic_cooling_supply',
+    # Electric or hydronic. `zonal_units` carries the KIND only, so a gas PSZ
+    # with ELECTRIC baseboards scored rows whose hot-water baseboards need a
+    # boiler the building has not got (#221). The zone-equipment counterpart
+    # of `supply_heating_media`.
+    'baseboard_media',
 )
 
 

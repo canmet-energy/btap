@@ -470,7 +470,8 @@ def _air_loop_group(air_loop, plant_by_name, audit):
         evidence = f"{comp.iddObjectType().valueName()} on {air_loop.nameString()}"
         _scan_heating_component(group, comp, plant_by_name, evidence,
                                 supply=True)
-        _scan_cooling_component(group, comp, plant_by_name, evidence)
+        _scan_cooling_component(group, comp, plant_by_name, evidence,
+                                supply=True)
 
     for zone in sorted_by_name(air_loop.thermalZones()):
         for eq in zone.equipment():
@@ -663,6 +664,8 @@ def _base_group(zone_names, air_loop_name):
             # Symmetric with `loop_dx_cooling` and needed separately: `cooled`
             # alone cannot say the LOOP cools, because zonal units set it too.
             'loop_hydronic_cooling': False,
+            'loop_hydronic_cooling_supply': False,
+            'baseboard_media': [],
             # Does the loop RECOVER heat from its exhaust? Two catalogue rows
             # differ ONLY by this — `PVAV with gas boiler reheat` and `PVAV
             # with gas boiler reheat and plate HRV` — and without the fact the
@@ -1052,7 +1055,8 @@ def _hydronic_cooling_kw(coil, capacity_kind):
     return None
 
 
-def _scan_cooling_component(group, comp, plant_by_name, evidence):
+def _scan_cooling_component(group, comp, plant_by_name, evidence,
+                            supply=False):
     kw = None
     fuels = None
     hp = None
@@ -1083,6 +1087,19 @@ def _scan_cooling_component(group, comp, plant_by_name, evidence):
     elif (hydronic := _hydronic_cooling_coil(comp)) is not None:
         c, capacity_kind = hydronic
         group['loop_hydronic_cooling'] = True
+        # #221: `loop_hydronic_cooling` is set from BOTH the supply scan and
+        # `_terminal_facts`, so it cannot answer "does the AIR HANDLER cool?".
+        # The identifier needs that question answered, because it reads
+        # `loop_dx_cooling` alone and calls everything else zonal — telling a
+        # chilled-water air handler that its loop has no cooling coil.
+        #
+        # Scoped the same way `supply_heating_media` is, by the call site
+        # rather than by inspecting the coil: a terminal reheat or cooled-beam
+        # coil is not the loop's coil, and only the caller knows which path it
+        # is walking. OR-ing the two flags would trade this false negative for
+        # a false positive.
+        if supply:
+            group['loop_hydronic_cooling_supply'] = True
         fuels = _hydronic_fuels(c, plant_by_name)
         plant_coil = c
         kw = _hydronic_cooling_kw(c, capacity_kind)
@@ -1397,6 +1414,11 @@ ZONAL = (
 )
 
 
+# `ZONAL`'s media vocabulary -> the catalogue's `baseboard_type` vocabulary.
+_BASEBOARD_MEDIA_SPELLING = {'hydronic': 'Hot Water',
+                             'Electricity': 'Electric'}
+
+
 def _merge_zonal_equipment(group, zone, plant_by_name, _audit):
     for eq in zone.equipment():
         if _terminal_like(eq):
@@ -1410,6 +1432,28 @@ def _merge_zonal_equipment(group, zone, plant_by_name, _audit):
             evidence = f"{eq.iddObjectType().valueName()} in {zone.nameString()}"
             if roles.get('kind'):
                 _union(group['zonal_units'], [roles['kind']])
+            # #221: the KIND alone said 'baseboard' for both the electric and
+            # the hydronic classes, so a gas PSZ with ELECTRIC baseboards
+            # scored rows whose hot-water baseboards need a boiler the
+            # building has not got. The distinction is already in this
+            # table — `heat` is 'Electricity' or 'hydronic' per class — and
+            # was simply not carried out.
+            #
+            # Reported in the CATALOGUE's spelling of `baseboard_type`,
+            # because that is what every consumer compares against. This
+            # table says 'hydronic' and 'Electricity'; `baseboard_type` says
+            # 'Hot Water' and 'Electric'.
+            #
+            # Translating only the hydronic half was my first version, and the
+            # scorer then penalised the CORRECT electric row for "building
+            # 'Electric' where the group has Electricity" — the identical
+            # vocabulary mismatch that an Astra review had just found in my
+            # heat-recovery test fixture. Verify a fix by asking whether the
+            # right row WINS, never by asking whether the penalty fires.
+            if roles.get('kind') == 'baseboard' and roles.get('heat'):
+                medium = _BASEBOARD_MEDIA_SPELLING.get(
+                    roles['heat'], roles['heat'])
+                _union(group['baseboard_media'], [medium])
             if roles.get('heat'):
                 fuels = _zonal_fuels(
                     unit, roles['heat'], 'heat', plant_by_name)
