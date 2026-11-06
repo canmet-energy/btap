@@ -195,6 +195,32 @@ def _apply_envelope(model, envelope, applied, skipped, audit):
                 model, existing, conductance)
             surface.setConstruction(replacement)
             count += 1
+
+        # SUB-surfaces with an opaque assembly reach this loop too, because
+        # the writer now files them here — an exterior `Door` is opaque and
+        # must keep an opaque construction. Giving it a glazing construction
+        # made the ForwardTranslator reclassify it as `GlassDoor`, adding
+        # solar gain to 29 doors that do not admit any.
+        #
+        # Matched on the sub-surface TYPE, which is what the recipe key
+        # carries, and the parent surface's boundary, because a sub-surface
+        # has no `outsideBoundaryCondition` of its own.
+        for sub in sorted_by_name(model.getSubSurfaces()):
+            if sub.subSurfaceType() != surface_type:
+                continue
+            parent = opt(sub.surface())
+            if (parent is None
+                    or parent.outsideBoundaryCondition() != boundary):
+                continue
+            existing = opt(sub.construction())
+            if existing is None:
+                skipped.append(f'{sub.nameString()}: no construction to base '
+                               'an assembly on')
+                continue
+            replacement = constructions.opaque_at_conductance(
+                model, existing, conductance)
+            sub.setConstruction(replacement)
+            count += 1
         if count:
             applied.append(f'{key}: U {u} on {count} surface(s)')
 
