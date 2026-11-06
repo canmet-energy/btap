@@ -282,10 +282,38 @@ def _apply_controls(model, controls, applied, skipped, audit):
     economizers = controls.get('economizers') or {}
     rows = economizers.get('by_air_loop') or []
     if rows:
-        control_type = rows[0]['economizer_control_type']
+        row = rows[0]
+        control_type = row['economizer_control_type']
+        # #219: the writer records the economizer's LIMITS as well as its
+        # control type, and this call used to pass only the type — so a
+        # 19 C high-limit shutoff came back as the builder's 28 C and the
+        # regenerated building got free cooling across a 9 K band the real one
+        # does not have. The primitive already accepted these; nothing but the
+        # call was missing.
+        #
+        # A limit the source left unset is recorded as null by the writer's
+        # `opt()`, and `set_economizer` skips a None rather than coercing it,
+        # so an absent limit stays absent instead of becoming 0.0.
+        limits = {
+            name: row.get(field)
+            for name, field in (
+                ('action_type', 'economizer_control_action_type'),
+                ('maximum_limit_drybulb_c',
+                 'economizer_maximum_limit_dry_bulb_temperature'),
+                ('minimum_limit_drybulb_c',
+                 'economizer_minimum_limit_dry_bulb_temperature'),
+                ('maximum_limit_enthalpy_j_per_kg',
+                 'economizer_maximum_limit_enthalpy'),
+                ('maximum_limit_dewpoint_c',
+                 'economizer_maximum_limit_dewpoint_temperature'),
+            )
+            if row.get(field) is not None
+        }
         count = Ventilation.set_economizer_in_model(
-            model, control_type=control_type, audit=audit)
-        applied.append(f'economizer {control_type} on {count} loop(s)')
+            model, control_type=control_type, audit=audit, **limits)
+        applied.append(
+            f'economizer {control_type} on {count} loop(s)'
+            + (f' with {len(limits)} limit(s)' if limits else ''))
         if any(row.get('dcv_enabled') for row in rows):
             for air_loop in sorted_by_name(model.getAirLoopHVACs()):
                 Ventilation.set_demand_controlled_ventilation(
