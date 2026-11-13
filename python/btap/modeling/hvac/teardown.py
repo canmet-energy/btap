@@ -12,7 +12,8 @@ def remove_hvac_from_zones(model, zones):
     :return: the model"""
     zone_handles = [str(zone.handle()) for zone in zones]
 
-    from btap.modeling.hvac.systems import plant_loops, vav_reheat
+    from btap.modeling.hvac import energy_recovery
+    from btap.modeling.hvac.systems import plant_loops
 
     for plant_loop in model.getPlantLoops():
         plant_loops.remove_zones_from_dewpoint_reset(plant_loop, zones)
@@ -160,9 +161,9 @@ def remove_hvac_from_zones(model, zones):
     }
     for variable in list(model.getTableIndependentVariables()):
         source = variable.additionalProperties().getFeatureAsString(
-            vav_reheat.ENERGY_RECOVERY_SOURCE_FEATURE)
+            energy_recovery.ENERGY_RECOVERY_SOURCE_FEATURE)
         if (source.is_initialized()
-                and source.get() == vav_reheat.ENERGY_RECOVERY_SOURCE_CATALOG
+                and source.get() == energy_recovery.ENERGY_RECOVERY_SOURCE_CATALOG
                 and str(variable.handle()) not in used_independent_variables):
             variable.remove()
 

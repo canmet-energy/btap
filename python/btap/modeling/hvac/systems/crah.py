@@ -110,7 +110,7 @@ class Crah(BaseSystem):
         # recirculates room air. A row may still ask for ventilation where the
         # computer room's own make-up air is served by this handler.
         if self.config.get('ventilation', False):
-            self.build_oa_system(model).addToNode(supply_inlet_node)
+            self.add_oa_system(model, supply_inlet_node)
 
         spm = openstudio.model.SetpointManagerScheduled(
             model, schedules.constant_ruleset(

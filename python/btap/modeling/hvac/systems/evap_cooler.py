@@ -46,7 +46,7 @@ class EvapCooler(BaseSystem):
             supply_inlet_node = air_loop.supplyInletNode()
             fan.addToNode(supply_inlet_node)
             evap.addToNode(supply_inlet_node)
-            self.build_oa_system(model).addToNode(supply_inlet_node)
+            self.add_oa_system(model, supply_inlet_node)
 
             # Supply setpoint follows the outdoor WET BULB plus a 3 R wet-bulb approach,
             # clamped to the legacy evap-cooler design supply temperatures of 70 F

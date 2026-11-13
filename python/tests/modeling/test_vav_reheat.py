@@ -114,7 +114,10 @@ class TestVAVReheat(unittest.TestCase):
 
         from btap._compat import sorted_by_name
         from btap.modeling.hvac import catalog
-        from btap.modeling.hvac.systems.vav_reheat import add_energy_recovery
+
+        # #217: moved to `hvac/energy_recovery.py`, so every OA-bearing family
+        # can carry recovery rather than this one.
+        from btap.modeling.hvac.energy_recovery import add_energy_recovery
 
         original = load_fixture()
         original_zones = sorted_by_name(original.getThermalZones())

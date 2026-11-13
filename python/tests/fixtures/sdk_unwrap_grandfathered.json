@@ -86,13 +86,8 @@
   },
   "modeling/hvac/systems/vav_reheat.py": {
    "VAVReheat._build_air_loop:returnAirModelObject": 1,
-   "VAVReheat._build_air_loop:to_Node": 1,
-   "add_energy_recovery:mixedAirModelObject": 1,
-   "add_energy_recovery:outboardOANode": 2,
-   "add_energy_recovery:primaryAirOutletModelObject": 1,
-   "add_energy_recovery:returnAirModelObject": 1,
-   "add_energy_recovery:to_Node": 3
+   "VAVReheat._build_air_loop:to_Node": 1
   }
  },
- "total": 58
+ "total": 50
 }
