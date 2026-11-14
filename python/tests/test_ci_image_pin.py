@@ -17,7 +17,9 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 DOCKERFILE = REPO_ROOT / "infra" / "ci-image" / "Dockerfile"
 TEST_WORKFLOW = REPO_ROOT / ".github" / "workflows" / "test.yml"
 IMAGE_WORKFLOW = REPO_ROOT / ".github" / "workflows" / "ci-image.yml"
-PYPROJECT = REPO_ROOT / "python" / "pyproject.toml"
+# #229: the build entry moved to the repository root so `pip install
+# git+<url>` works without `#subdirectory=python`.
+PYPROJECT = REPO_ROOT / "pyproject.toml"
 
 
 def openstudio_version():

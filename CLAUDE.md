@@ -185,9 +185,9 @@ covered by it: `packaging/windows/samples/04-fancoil-chiller.osm` and
 ```bash
 cd python
 python3 -m venv .venv
-.venv/bin/pip install -e '.[tbd]' pytest pytest-xdist import-linter ruff build coverage pytest-cov
+.venv/bin/pip install -e '..[tbd]' pytest pytest-xdist import-linter ruff build coverage pytest-cov
 .venv/bin/pytest -n auto -q tests/
-.venv/bin/lint-imports
+.venv/bin/lint-imports --config ../pyproject.toml
 .venv/bin/ruff check .
 
 # Repository tools, from the repository root

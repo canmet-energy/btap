@@ -103,7 +103,7 @@ jobs:
         with:
           python-version: '3.11'   # the project floor; local dev may be newer
           cache: pip
-          cache-dependency-path: python/pyproject.toml
+          cache-dependency-path: pyproject.toml
       - name: Install the openstudio wheel + test runner
         run: pip install -q 'openstudio~=3.11.0' pytest pytest-xdist import-linter ruff build
       # The Python thermal-bridging engine is required on the bare runner too.
@@ -121,7 +121,11 @@ jobs:
       # crept into the stdlib-only _compat module.
       - name: Import contracts (D-77 direction, audit SDK-free)
         working-directory: python
-        run: lint-imports
+        # `--config`: import-linter looks for its config ONLY in the current
+        # directory (importlinter/application/file_finding.find_any uses
+        # getcwd, no upward search), and since #229 the single
+        # pyproject.toml is at the repository root.
+        run: lint-imports --config ../pyproject.toml
       # pytest-xdist runs test files in parallel worker PROCESSES (the same
       # per-file forking the Ruby Rakefile does) — the suites are stdlib
       # unittest classes, collected by pytest unchanged; plain

@@ -26,12 +26,20 @@ From PyPI:
 pip install 'canmet-btap[tbd]'
 ```
 
-For development:
+Straight from GitHub — a branch, a tag or a commit:
+
+```bash
+pip install 'canmet-btap[tbd] @ git+https://github.com/canmet-energy/btap'
+pip install 'canmet-btap[tbd] @ git+https://github.com/canmet-energy/btap@main'
+```
+
+For development, from a clone (the build entry, `pyproject.toml`, is at the
+repository root; the package source is under `python/`):
 
 ```bash
 cd python
 python3 -m venv .venv
-.venv/bin/pip install -e '.[tbd]' pytest pytest-xdist import-linter ruff build
+.venv/bin/pip install -e '..[tbd]' pytest pytest-xdist import-linter ruff build
 ```
 
 The distribution requires Python 3.11 or newer and OpenStudio 3.11. The exact
@@ -55,7 +63,7 @@ week is never reported as a code determination.
 ```bash
 cd python
 .venv/bin/pytest -n auto -q tests/
-.venv/bin/lint-imports
+.venv/bin/lint-imports --config ../pyproject.toml
 .venv/bin/ruff check .
 python3 -m unittest discover tests
 python3 scripts/wheel_smoke.py

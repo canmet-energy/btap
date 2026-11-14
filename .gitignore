@@ -75,6 +75,11 @@ python/.ci-venv/
 python/*.egg-info/
 python/build/
 python/dist/
+# #229: the build entry is at the repository root, so a build run from
+# here writes its scratch and output here too.
+/build/
+/dist/
+/*.egg-info/
 
 *.DS_Store
 

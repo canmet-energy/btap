@@ -411,8 +411,10 @@ def main(argv) -> int:
     with tempfile.TemporaryDirectory(prefix="btap-wheel-gate-") as work:
         work_dir = Path(work)
         print("building the wheel...")
+        # From the REPOSITORY ROOT (#229), where the one pyproject.toml now
+        # lives. Building python/ would fail outright: it has no build entry.
         subprocess.run([sys.executable, "-m", "build", "--wheel", "--outdir", str(work_dir),
-                        str(PYTHON_ROOT)], check=True, stdout=subprocess.DEVNULL)
+                        str(REPO_ROOT)], check=True, stdout=subprocess.DEVNULL)
         wheel = next(work_dir.glob("*.whl"))
         print(f"built {wheel.name}")
 
