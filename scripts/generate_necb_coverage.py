@@ -8,14 +8,14 @@ import json
 import re
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = REPO_ROOT / "docs" / "NECB_COVERAGE.md"
 #: Where each code family keeps one snapshot directory per edition, relative to
 #: the manifest root. Discovery is MANIFEST-driven (multi-edition plan, Stage
 #: 3): rule files no longer carry the edition in their names. This generator
 #: runs under a bare `python3` in the `lint` job, so it reads the manifests off
 #: disk rather than importing `btap.codes`.
-EDITION_DATA = Path("python") / "btap" / "codes" / "necb" / "data"
+EDITION_DATA = Path("src") / "btap" / "codes" / "necb" / "data"
 #: manifest `rules` key -> the domain name the document prints. The umbrella's
 #: file is the family name; hvac declares two files (rules + efficiencies).
 MANIFEST_DOMAINS = {"umbrella": "necb", "hvac_efficiencies": "hvac"}

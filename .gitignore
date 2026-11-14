@@ -70,13 +70,13 @@ necb_run_*/
 # Python product + verification interpreter droppings
 __pycache__/
 *.pyc
-python/.venv/
-python/.ci-venv/
-python/*.egg-info/
-python/build/
-python/dist/
-# #229: the build entry is at the repository root, so a build run from
-# here writes its scratch and output here too.
+/.ci-venv/
+/src/*.egg-info/
+# #229: the src layout. The build entry is at the repository root, so a build
+# writes its scratch and output here. An existing checkout keeps its old,
+# now-untracked python/ directory (its venv, caches) after the move; nothing
+# tracked lives there any more, so it is ignored whole.
+/python/
 /build/
 /dist/
 /*.egg-info/
@@ -94,7 +94,7 @@ python/dist/
 /packaging/windows/Output/
 /packaging/windows/samples/
 tests/generated/
-python/.parity-venv/
+/.parity-venv/
 
 # D-80 R4: the frozen scenario baselines COMMIT the very filenames ignored
 # above (audit.json/audit.txt/report.json are unanchored patterns, so
@@ -109,8 +109,8 @@ packaging/pypi/energyplus/dist/
 .claude/worktrees/
 .coverage
 .coverage.*
-python/htmlcov/
-python/coverage.xml
+/htmlcov/
+/coverage.xml
 
 # Generated/working model files (archetypes, weather) — not repo content
 models/

@@ -16,8 +16,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
-PYTHON_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PYTHON_ROOT))
+SRC_ROOT = Path(__file__).resolve().parents[1] / "src"
+sys.path.insert(0, str(SRC_ROOT))
 
 import openstudio  # noqa: E402
 

@@ -11,9 +11,9 @@ test keeps its own copy to rot with it.
 import sys
 from pathlib import Path
 
-PYTHON_ROOT = Path(__file__).resolve().parents[2] / "python"
-if str(PYTHON_ROOT) not in sys.path:
-    sys.path.insert(0, str(PYTHON_ROOT))
+SRC_ROOT = Path(__file__).resolve().parents[2] / "src"
+if str(SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(SRC_ROOT))
 
 from btap.audit import AuditLog, emit_coverage  # noqa: E402
 

@@ -14,11 +14,11 @@ import subprocess
 import sys
 import unittest
 
-ROOT = pathlib.Path(__file__).resolve().parents[3]
-SCRIPT = ROOT / "python" / "scripts" / "generate_ahj_referrals.py"
+ROOT = pathlib.Path(__file__).resolve().parents[2]
+SCRIPT = ROOT / "scripts" / "generate_ahj_referrals.py"
 OUTPUT = ROOT / "docs" / "NECB_AHJ_REFERRALS.md"
 REGISTER = ROOT / "docs" / "NECB_AHJ_QUESTIONS.md"
-PROJECTION = ROOT / "python" / "btap" / "codes" / "data" / "ahj.json"
+PROJECTION = ROOT / "src" / "btap" / "codes" / "data" / "ahj.json"
 
 
 def entries():

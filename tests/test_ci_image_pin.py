@@ -13,7 +13,7 @@ import re
 import unittest
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[1]
 DOCKERFILE = REPO_ROOT / "infra" / "ci-image" / "Dockerfile"
 TEST_WORKFLOW = REPO_ROOT / ".github" / "workflows" / "test.yml"
 IMAGE_WORKFLOW = REPO_ROOT / ".github" / "workflows" / "ci-image.yml"
@@ -63,7 +63,7 @@ class TestTheCiImagePin(unittest.TestCase):
         self.assertIn(f'--no-deps "{pins[0]}"', dockerfile)
         # ...and it must be the version the engine-identity test checks. Read
         # from the SOURCE, not imported: this test runs where the SDK is not.
-        source = (REPO_ROOT / "python" / "btap" / "codes" / "necb" / "envelope"
+        source = (REPO_ROOT / "src" / "btap" / "codes" / "necb" / "envelope"
                   / "thermal_bridging.py").read_text(encoding="utf-8")
         declared = re.search(r'^PINNED_TBD_VERSION = "([^"]+)"', source, re.MULTILINE)
         self.assertIsNotNone(declared, "PINNED_TBD_VERSION moved")

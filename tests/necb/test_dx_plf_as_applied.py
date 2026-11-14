@@ -437,7 +437,7 @@ class TestDxPartLoadFractionAsApplied(unittest.TestCase):
         """
         import pathlib as _p
 
-        source = (_p.Path(__file__).resolve().parents[3]
+        source = (_p.Path(__file__).resolve().parents[2]
                   / "docs" / "decisions" / "D-102.md")
         if not source.is_file():
             self.skipTest(f"{source} is not present in this layout")

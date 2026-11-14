@@ -18,7 +18,7 @@ from pathlib import Path
 
 from tests.support import needs_sdk
 
-PY_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 @needs_sdk
@@ -307,7 +307,7 @@ class TestFloorPlan(unittest.TestCase):
             [sys.executable, "-c",
              "import sys; from btap.modeling.geometry import plan_svg; "
              "sys.stdout.write(plan_svg.zone_color('Zone A'))"],
-            capture_output=True, text=True, cwd=str(PY_ROOT), check=True).stdout
+            capture_output=True, text=True, cwd=str(REPO_ROOT / "src"), check=True).stdout
         self.assertEqual(svg_mod.zone_color("Zone A"), other,
                          "stable across processes (the language seeds its string hash per process)")
 

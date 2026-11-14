@@ -47,9 +47,9 @@ import tempfile
 import unicodedata
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = REPO_ROOT / "docs" / "NECB_VINTAGE_MATCH.md"
-DATA_ROOT = REPO_ROOT / "python" / "btap" / "codes" / "necb" / "data"
+DATA_ROOT = REPO_ROOT / "src" / "btap" / "codes" / "necb" / "data"
 ARCHIVE_DIRNAME = "vintage_match"
 
 # --------------------------------------------------------------------------
@@ -2960,7 +2960,7 @@ def missing_payloads() -> list[str]:
 
 
 def fetch(only: str | None = None, refresh: bool = False) -> int:
-    sys.path.insert(0, str(REPO_ROOT / "python"))
+    sys.path.insert(0, str(REPO_ROOT / "src"))
     from btap._mcp import MCPClient, MCPError  # noqa: PLC0415
 
     client = MCPClient("codes")

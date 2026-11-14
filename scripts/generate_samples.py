@@ -45,9 +45,8 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-PYTHON_ROOT = HERE.parent
-sys.path.insert(0, str(PYTHON_ROOT))  # runnable from anywhere
-REPO_ROOT = PYTHON_ROOT.parent
+REPO_ROOT = HERE.parent
+sys.path.insert(0, str(REPO_ROOT / "src"))  # runnable from anywhere
 
 MANIFEST = HERE / "sample_manifest.json"
 
@@ -530,7 +529,7 @@ def simulatable() -> set[str]:
     silently generating every catalog system would make this gate vacuous.
     An unknown schema is equally loud: this reader may not guess what a
     future verdict shape means."""
-    path = PYTHON_ROOT / "tests" / "fixtures" / "system_simulation_status.json"
+    path = REPO_ROOT / "tests" / "fixtures" / "system_simulation_status.json"
     if not path.is_file():
         raise FileNotFoundError(f"missing Python system status fixture: {path}")
     verdict = json.loads(path.read_text(encoding="utf-8"))

@@ -65,7 +65,7 @@ import tempfile
 import unittest
 from unittest import mock
 
-REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
+REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 FREEZE = REPO_ROOT / "verification" / "scenarios" / "freeze.py"
 MANIFEST = REPO_ROOT / "verification" / "scenarios" / "manifest.json"
 

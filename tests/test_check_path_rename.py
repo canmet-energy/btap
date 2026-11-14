@@ -55,7 +55,7 @@ class TheDiffCheck(unittest.TestCase):
         "python/tests/test_core.py": "# covers python/btap/core.py\n",
         "python/LICENSE": "GPL\n",
         "LICENSE": "GPL\n",
-        "verification/baseline.json": '{"code": ["python/btap/core.py#f"], "eui": 101.5}\n',
+        "frozen/baseline.json": '{"code": ["python/btap/core.py#f"], "eui": 101.5}\n',
         "pyproject.toml": 'where = ["python"]\n',
         "models/blob.bin": None,  # binary, written below
     }
@@ -96,7 +96,7 @@ class TheDiffCheck(unittest.TestCase):
         self._git("mv", "python/btap", "src/btap")
         self._git("mv", "python/tests", "tests")
         self._git("rm", "-q", "python/LICENSE")
-        for path in ("tests/test_core.py", "verification/baseline.json"):
+        for path in ("tests/test_core.py", "frozen/baseline.json"):
             p = self.repo / path
             p.write_text(cpr.map_text(p.read_text(encoding="utf-8")), encoding="utf-8")
         self._write("pyproject.toml", 'where = ["src"]\n')
@@ -112,6 +112,24 @@ class TheDiffCheck(unittest.TestCase):
         self.assertEqual(2, counts["renamed"])
         self.assertEqual(1, counts["hand-edited"])
 
+    def _with_a_keep_file(self):
+        self._write("python/tests/test_check_path_rename.py", "# feeds python/btap/x in\n")
+        self._commit("add a keep file")
+        self._pure_move()
+
+    def test_a_KEEP_file_moved_byte_for_byte_passes(self):
+        self._with_a_keep_file()
+        problems, _ = self._check()
+        self.assertEqual([], problems)
+
+    def test_a_KEEP_file_may_not_be_rewritten(self):
+        self._with_a_keep_file()
+        self._write("tests/test_check_path_rename.py", "# feeds src/btap/x in\n")
+        problems, _ = self._check()
+        self.assertEqual(["python/tests/test_check_path_rename.py -> "
+                          "tests/test_check_path_rename.py: in KEEP_OLD_PATHS, so it "
+                          "must move byte-for-byte"], problems)
+
     def test_a_behaviour_change_smuggled_into_a_moved_file_is_refused(self):
         self._pure_move()
         self._write("src/btap/core.py", "def f():\n    return 2\n")
@@ -121,19 +139,19 @@ class TheDiffCheck(unittest.TestCase):
 
     def test_a_refrozen_baseline_that_moved_a_NUMBER_is_refused(self):
         self._pure_move()
-        p = self.repo / "verification/baseline.json"
+        p = self.repo / "frozen/baseline.json"
         p.write_text(p.read_text().replace("101.5", "101.6"), encoding="utf-8")
         problems, _ = self._check()
-        self.assertEqual(["verification/baseline.json: content is not a path-only change"],
+        self.assertEqual(["frozen/baseline.json: content is not a path-only change"],
                          problems)
 
     def test_a_pointer_left_on_the_OLD_path_is_refused(self):
         self._pure_move()
-        self._write("verification/baseline.json", self.BEFORE["verification/baseline.json"])
+        self._write("frozen/baseline.json", self.BEFORE["frozen/baseline.json"])
         problems, _ = self._check()
         # Unchanged since BEFORE, so it is not even in the diff: only the
         # leftover scan can see it.
-        self.assertEqual(["verification/baseline.json: still names the old layout 1 time(s)"],
+        self.assertEqual(["frozen/baseline.json: still names the old layout 1 time(s)"],
                          problems)
 
     def test_a_move_to_the_wrong_place_is_refused(self):

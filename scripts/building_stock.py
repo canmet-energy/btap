@@ -36,8 +36,8 @@ import sys
 from pathlib import Path
 
 # Importable without installing the package
-PYTHON_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PYTHON_ROOT))
+SRC_ROOT = Path(__file__).resolve().parents[1] / "src"
+sys.path.insert(0, str(SRC_ROOT))
 
 from btap._mcp import MCPClient, MCPError  # noqa: E402
 
@@ -61,7 +61,7 @@ def _ensure_sdk():
         ) from e
 
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[1]
 DATASET = "nrcan-buildings"
 
 # Height fields to try, in order

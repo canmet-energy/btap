@@ -26,7 +26,7 @@ from unittest import mock
 
 from tests.support import REPO_ROOT, needs_sdk
 
-SCRIPT = REPO_ROOT / "python" / "scripts" / "simulate_all_systems.py"
+SCRIPT = REPO_ROOT / "scripts" / "simulate_all_systems.py"
 
 
 def _load():
@@ -307,7 +307,7 @@ class TestTheSweepsExitStatus(unittest.TestCase):
     def test_the_verdict_fixture_is_the_one_the_script_writes(self):
         """A smaller claim, worth pinning: both point at the same file."""
         self.assertEqual(
-            (REPO_ROOT / "python" / "tests" / "fixtures"
+            (REPO_ROOT / "tests" / "fixtures"
              / "system_simulation_status.json").resolve(),
             pathlib.Path(self.sweep.STATUS).resolve(),
             "the producer and the test must name the same verdict file")

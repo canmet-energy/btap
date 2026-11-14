@@ -13,7 +13,7 @@ import pathlib
 import re
 import unittest
 
-PACKAGE_ROOT = pathlib.Path(__file__).resolve().parents[2] / 'btap' / 'codes' / 'necb'
+PACKAGE_ROOT = pathlib.Path(__file__).resolve().parents[2] / 'src' / 'btap' / 'codes' / 'necb'
 DATA_DIR = PACKAGE_ROOT / 'data'
 
 with open(DATA_DIR / 'necb2020' / 'efficiencies.json', encoding='utf-8') as f:

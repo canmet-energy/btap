@@ -38,7 +38,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 REPO_ROOT = HERE.parents[1]
-PYTHON_ROOT = REPO_ROOT / "python"
+SRC_ROOT = REPO_ROOT / "src"
 
 OBSERVATIONS = "observations.json"
 
@@ -112,8 +112,11 @@ def _select_backend():
 def main(argv):
     call_path, run_dir = Path(argv[1]), Path(argv[2])
     run_dir.mkdir(parents=True, exist_ok=True)
-    if str(PYTHON_ROOT) not in sys.path:
-        sys.path.insert(0, str(PYTHON_ROOT))
+    # Both roots: `btap` is under src/, and the worker imports test fixtures
+    # (`tests.necb.support`) from the repository root (#229 src layout).
+    for root in (REPO_ROOT, SRC_ROOT):
+        if str(root) not in sys.path:
+            sys.path.insert(0, str(root))
     try:
         call = json.loads(call_path.read_text(encoding="utf-8"))
         _select_backend()          # after sys.path, before any pipeline work

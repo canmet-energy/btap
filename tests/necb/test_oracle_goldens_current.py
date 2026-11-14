@@ -21,7 +21,7 @@ import sys
 import unittest
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 GOLDEN_DIR = REPO_ROOT / "verification" / "oracle" / "goldens"
 REQUEST = REPO_ROOT / "verification" / "oracle" / "request_manifest.json"
 PIN_REF = REPO_ROOT / "legacy_pin" / "REF"

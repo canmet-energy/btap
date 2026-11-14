@@ -20,9 +20,9 @@ import pathlib
 import re
 import unittest
 
-REPO_ROOT = pathlib.Path(__file__).resolve().parents[3]
+REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 REGISTER = REPO_ROOT / "docs" / "NECB_AHJ_QUESTIONS.md"
-PRODUCT = REPO_ROOT / "python" / "btap"
+PRODUCT = REPO_ROOT / "src" / "btap"
 
 ID_RE = re.compile(r"\bAHJ-\d+\b")
 
@@ -483,7 +483,7 @@ class TestTheREADMECountsMatchTheRegistry(unittest.TestCase):
 
         self.readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
         raw = json.loads(
-            (REPO_ROOT / "python" / "btap" / "codes" / "data"
+            (REPO_ROOT / "src" / "btap" / "codes" / "data"
              / "decisions.json").read_text(encoding="utf-8"))
         self.rows = (raw if isinstance(raw, list)
                      else raw.get("decisions") or list(raw.values()))

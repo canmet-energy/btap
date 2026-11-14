@@ -28,14 +28,15 @@ from unittest import mock
 
 from tests.support import needs_sdk
 
-PYTHON_ROOT = Path(__file__).resolve().parents[2]
-GENERATOR = PYTHON_ROOT / "scripts" / "generate_samples.py"
+REPO_ROOT = Path(__file__).resolve().parents[2]
+SRC_ROOT = REPO_ROOT / "src"
+GENERATOR = REPO_ROOT / "scripts" / "generate_samples.py"
 
 
 def _load_generator():
     """scripts/ is not a package — load the generator by path (the same
     treatment scripts get from the CLI)."""
-    sys.path.insert(0, str(PYTHON_ROOT))
+    sys.path.insert(0, str(SRC_ROOT))
     spec = importlib.util.spec_from_file_location("generate_samples", GENERATOR)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -61,7 +62,7 @@ class TestSimulationVerdictReader(unittest.TestCase):
                 "system_simulation_status.json"
             status.parent.mkdir(parents=True)
             status.write_text(json.dumps(verdict), encoding="utf-8")
-            with mock.patch.object(self.generator, "PYTHON_ROOT", root):
+            with mock.patch.object(self.generator, "REPO_ROOT", root):
                 return self.generator.simulatable()
 
     def test_an_UNKNOWN_schema_is_refused_by_this_reader(self):

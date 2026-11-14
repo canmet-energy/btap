@@ -348,7 +348,7 @@ fi
 echo ""
 echo "📋 Next steps:"
 cat <<'STEPS'
-  Run the Python suite        cd python && python3 -m unittest discover tests
+  Run the Python suite        PYTHONPATH=src python3 -m unittest discover tests
   Rule-key verification       python3 scripts/necb_orphan_keys.py
   Regenerate coverage docs    python3 scripts/generate_necb_gem_coverage.py
                      python3 scripts/generate_necb_8_4_coverage.py

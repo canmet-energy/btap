@@ -12,7 +12,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 BASELINES = REPO_ROOT / "verification" / "scenarios" / "baselines"
 MANIFEST = REPO_ROOT / "verification" / "scenarios" / "manifest.json"
-MAPPING = REPO_ROOT / "python" / "tests" / "data" / "coverage_code_ref_mapping.json"
+MAPPING = REPO_ROOT / "tests" / "data" / "coverage_code_ref_mapping.json"
 TRANSITION_FIELDS = {
     "retired_seal", "last_cross_language_commit", "last_cross_language_run_id",
     "last_cross_language_run_url", "seal_transition_reason",

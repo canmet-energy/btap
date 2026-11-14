@@ -42,7 +42,7 @@ import re
 import unittest
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[1]
 WORKFLOWS = REPO_ROOT / ".github" / "workflows"
 GATE = WORKFLOWS / "decisions.yml"
 MAIN = WORKFLOWS / "test.yml"

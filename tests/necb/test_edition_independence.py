@@ -49,20 +49,21 @@ from pathlib import Path
 import btap.codes as codes
 from tests.necb.support import needs_sdk
 
-REPO_PYTHON = Path(__file__).resolve().parents[2]
-NECB_DATA = REPO_PYTHON / "btap" / "codes" / "necb" / "data"
+REPO_ROOT = Path(__file__).resolve().parents[2]
+SRC_ROOT = REPO_ROOT / "src"
+NECB_DATA = SRC_ROOT / "btap" / "codes" / "necb" / "data"
 CODE_IDS = codes.code_ids()  # the REAL tree's registry
 
 
 def _env():
     env = dict(os.environ)
     existing = env.get("PYTHONPATH", "")
-    env["PYTHONPATH"] = str(REPO_PYTHON) + (os.pathsep + existing if existing else "")
+    env["PYTHONPATH"] = str(SRC_ROOT) + (os.pathsep + existing if existing else "")
     return env
 
 
 def _run(script, timeout):
-    proc = subprocess.run([sys.executable, "-c", script], cwd=str(REPO_PYTHON),
+    proc = subprocess.run([sys.executable, "-c", script], cwd=str(REPO_ROOT),
                           env=_env(), capture_output=True, text=True, timeout=timeout)
     return proc.returncode, proc.stdout, proc.stderr
 

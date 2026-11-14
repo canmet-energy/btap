@@ -7,14 +7,15 @@ import subprocess
 import sys
 from pathlib import Path
 
-PYTHON_ROOT = Path(__file__).resolve().parents[2]
-PROBE = PYTHON_ROOT / "scripts" / "necb_8_4_6_curve_probe.py"
+REPO_ROOT = Path(__file__).resolve().parents[2]
+SRC_ROOT = REPO_ROOT / "src"
+PROBE = REPO_ROOT / "scripts" / "necb_8_4_6_curve_probe.py"
 
 
 def test_curve_probe_json_is_complete_and_current() -> None:
     completed = subprocess.run(
         [sys.executable, str(PROBE), "--json"],
-        cwd=PYTHON_ROOT,
+        cwd=REPO_ROOT,
         text=True,
         capture_output=True,
         check=False,

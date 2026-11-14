@@ -28,7 +28,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-SCENARIOS = Path(__file__).resolve().parents[2] / "verification" / "scenarios"
+SCENARIOS = Path(__file__).resolve().parents[1] / "verification" / "scenarios"
 
 
 def _harness():

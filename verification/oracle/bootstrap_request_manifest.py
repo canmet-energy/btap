@@ -64,7 +64,7 @@ def main():
     collected = subprocess.run(
         [".venv/bin/python", "-m", "pytest", "--collect-only", "-q",
          "-p", "no:cacheprovider", *PYTEST_FILES],
-        cwd=HERE.parent.parent / "python", capture_output=True, text=True, check=True)
+        cwd=HERE.parent.parent, capture_output=True, text=True, check=True)
     count = int([ln for ln in collected.stdout.splitlines()
                  if "tests collected" in ln or "test collected" in ln][-1].split()[0])
 

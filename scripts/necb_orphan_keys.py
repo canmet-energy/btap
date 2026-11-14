@@ -8,8 +8,8 @@ import json
 import re
 from pathlib import Path
 
-PYTHON_ROOT = Path(__file__).resolve().parents[1]
-PACKAGE_ROOT = PYTHON_ROOT / "btap"
+SRC_ROOT = Path(__file__).resolve().parents[1] / "src"
+PACKAGE_ROOT = SRC_ROOT / "btap"
 META_KEYS = {"provenance", "article_coverage", "non_rule_keys"}
 #: Manifest `rules` keys this gate deliberately does NOT scan. `efficiencies`
 #: is a transcribed code TABLE (the Table 5.2.12.1 series), not a rule

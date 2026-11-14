@@ -7,7 +7,7 @@ from pathlib import Path
 
 from tests.support import REPO_ROOT
 
-SCRIPT = REPO_ROOT / "python" / "scripts" / "generate_necb_coverage.py"
+SCRIPT = REPO_ROOT / "scripts" / "generate_necb_coverage.py"
 SPEC = importlib.util.spec_from_file_location("generate_necb_coverage", SCRIPT)
 coverage = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(coverage)

@@ -25,7 +25,7 @@ FREEZE_SPEC.loader.exec_module(freeze)
 
 def scenarios():
     slugs = json.loads(
-        (REPO_ROOT / "python" / "scripts" / "sample_manifest.json")
+        (REPO_ROOT / "scripts" / "sample_manifest.json")
         .read_text(encoding="utf-8"))["samples"]
     return scenario_defs.all_scenarios(slugs)
 
@@ -145,7 +145,7 @@ class TestFreezeSealTransition(unittest.TestCase):
         attested = set(scenario_defs.R6_CORPUS_SLUGS)
         exempt = set(scenario_defs.POST_R6_PYTHON_LANE_SEALS)
         slugs = json.loads(
-            (REPO_ROOT / "python" / "scripts" / "sample_manifest.json")
+            (REPO_ROOT / "scripts" / "sample_manifest.json")
             .read_text(encoding="utf-8"))["samples"]
         unclaimed = [s for s in slugs if s not in attested and s not in exempt]
         self.assertEqual(

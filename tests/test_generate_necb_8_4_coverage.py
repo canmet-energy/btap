@@ -10,7 +10,7 @@ from pathlib import Path
 from tests.citation_counts import compute_citation_counts, load_baseline
 from tests.support import REPO_ROOT
 
-SCRIPT = REPO_ROOT / "python" / "scripts" / "generate_necb_8_4_coverage.py"
+SCRIPT = REPO_ROOT / "scripts" / "generate_necb_8_4_coverage.py"
 SPEC = importlib.util.spec_from_file_location("generate_necb_8_4_coverage", SCRIPT)
 coverage = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = coverage
@@ -94,8 +94,8 @@ class TestGenerateNecb84Coverage(unittest.TestCase):
         # disposition did NOT move: it is one curated responsibility map the
         # generator reads across editions, so putting it inside necb2025 would
         # make the 2020 document depend on the 2025 snapshot.
-        editions = REPO_ROOT / "python" / "btap" / "codes" / "necb" / "data"
-        neutral = REPO_ROOT / "python" / "btap" / "codes" / "data" / "coverage"
+        editions = REPO_ROOT / "src" / "btap" / "codes" / "necb" / "data"
+        neutral = REPO_ROOT / "src" / "btap" / "codes" / "data" / "coverage"
         self.assertEqual(editions / "necb2020" / "coverage" / "articles_8_4.json",
                          coverage.DEFAULT_CACHE_2020)
         self.assertEqual(editions / "necb2025" / "coverage" / "articles_8_4.json",

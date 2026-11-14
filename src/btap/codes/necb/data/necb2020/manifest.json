@@ -44,7 +44,7 @@
       "method": "transcribed",
       "source_verification": "manual",
       "note": "The umbrella carries only article_coverage: what the pipeline itself determines. Article numbers and titles were transcribed from NECB 2020 Division B Section 8.4 and cross-checked against the building-codes MCP; the status/how/code fields are the pipeline's self-declaration and have no external source to re-fetch. The code pointers are checked by tests/test_coverage_code_refs.py, the article text by the packaged coverage/articles_8_4.json. The 20 h floor under 8.4.1.2.(4)'s cooling unmet-hours allowance moved from a code literal in compliance.py into this file (unmet_cooling.minimum_allowance_h) on 2026-09-08, multi-edition plan Stage 5; the value is unchanged and the source is unchanged.",
-      "result_sha256": "d798c5be6ca7a35de5609c4dcd2f81fe706121c2fcefb8714a0a90107eec5759"
+      "result_sha256": "60a7845ab376076a8fa0984ce87ad0d2e83b722cda42bf20ae12aadc0529a3fa"
     },
     "envelope_rules.json": {
       "source": "mcp:necb:2020",
@@ -120,7 +120,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "The archived set is exactly the tables and articles this file's own provenance block names. Values were additionally cross-checked cell-by-cell against the legacy openstudio-standards NECB2020/data/surface_thermal_transmittance.json (exact match) and re-verified 2026-08-02 against the post-hbix-fix extraction (D-61). The MCP server exposes no build id, so source_revision is null; the archived payloads are the retained artifact.",
-      "result_sha256": "ad4a789fda4e52953b28f286b1c60ec9e648c87965210fe9a24db06b72b8ac6e"
+      "result_sha256": "007fabdb1fac7ae6dca560c575fc6036b41a880ed0ed250c3dd6083bf1ad76ee"
     },
     "reference_rules.json": {
       "source": "mcp:necb:2020",
@@ -210,7 +210,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "The archived set is the three tables this file's provenance names plus the eight articles in its own `articles` list. The category keywords extending the Table 8.4.4.7.-A space lists with synonyms are a maintainer addition, not code text, and are marked as such in the file.",
-      "result_sha256": "558bfc55729e8258e53dd79c51d8036e1ea7233d7c81ea5ac418996eafed212d"
+      "result_sha256": "8fa6c6ac02529f8b5a87b27a44bde6e4109d715f9b36cb7839c9e4c76d1b35b1"
     },
     "efficiencies.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
@@ -583,7 +583,7 @@
           "detail": "fetched as this edition's lighting-power companion table; no constant in this file is transcribed from it"
         }
       ],
-      "result_sha256": "40b811bea795976802e555c15966a3cd6ceada3d6a64df44eba266513a40650b"
+      "result_sha256": "c5bdfb6ceba225b6e88ed6778de15cda746dfe0e6a6a6721f6234e08610bb6ce"
     },
     "loads_rules.json": {
       "source": "mcp:necb:2020",
@@ -610,7 +610,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "This file carries only this edition's schedule-table numbering and the Subsection 8.4.3 coverage manifest; the load data itself lives in tables/space_types.json and tables/schedules.json, each with its own entry. The archived payloads are the two tables this file's own verification block names.",
-      "result_sha256": "2d23b9ed5bf210a679eea6bed966159ef38291e4b4da0148acf69bba0caa5416"
+      "result_sha256": "66e63446f8ce3dfe6248296479c3377c514ba50b63f937c56540e46afdd448bb"
     },
     "shw_rules.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
@@ -650,7 +650,7 @@
           "detail": "the part-load article: this edition's own quadratic FHeatPLC coefficients [0.021826, 0.97763, 0.000543] are already carried verbatim in the file as code_fheatplc, and the shipped cubic is the probe-verified image of PLF(x) = x / FHeatPLC(x) for the EnergyPlus degradation-divisor field (D-53); this edition publishes no table for the curve itself"
         }
       ],
-      "result_sha256": "f6a3a8719a47493560097af9952e03228f0e66f7f1fa9245089c2e9b281f9ba3"
+      "result_sha256": "a90a951adafced7356efac8fa5c2a103c1659bd111c72f1d8a187759b187ef92"
     },
     "tables/space_types.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",

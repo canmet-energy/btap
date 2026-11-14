@@ -40,12 +40,11 @@ import subprocess
 import sys
 import tempfile
 
-REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
-PYTHON_ROOT = REPO_ROOT / "python"
-GENERATOR = PYTHON_ROOT / "scripts" / "generate_samples.py"
-MANIFEST = PYTHON_ROOT / "scripts" / "sample_manifest.json"
-STATUS = PYTHON_ROOT / "tests" / "fixtures" / "sample_simulation_status.json"
-EPW = (PYTHON_ROOT / "tests" / "fixtures" / "weather"
+REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
+GENERATOR = REPO_ROOT / "scripts" / "generate_samples.py"
+MANIFEST = REPO_ROOT / "scripts" / "sample_manifest.json"
+STATUS = REPO_ROOT / "tests" / "fixtures" / "sample_simulation_status.json"
+EPW = (REPO_ROOT / "tests" / "fixtures" / "weather"
        / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw")
 
 SEVERE_RE = re.compile(r"\*\*\s*Severe\s*\*\*")
@@ -60,7 +59,7 @@ SCHEMA = 1
 
 
 def python_exe() -> str:
-    venv = PYTHON_ROOT / ".venv" / "bin" / "python"
+    venv = REPO_ROOT / ".venv" / "bin" / "python"
     return str(venv) if venv.is_file() else sys.executable
 
 
@@ -88,7 +87,7 @@ def size_one(osm: pathlib.Path) -> dict:
     """Size one sample and read its `eplusout.err` for Severe and Fatal."""
     run_dir = pathlib.Path(tempfile.mkdtemp(prefix="sample-sizing-"))
     try:
-        cli = PYTHON_ROOT / ".venv" / "bin" / "btap-compliance"
+        cli = REPO_ROOT / ".venv" / "bin" / "btap-compliance"
         command = ([str(cli)] if cli.is_file()
                    else [python_exe(), "-m", "btap.codes.cli"])
         proc = subprocess.run(

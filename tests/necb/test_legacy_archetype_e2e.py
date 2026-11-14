@@ -34,11 +34,11 @@ from pathlib import Path
 
 from tests import support
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 GEN_SCRIPT = REPO_ROOT / "verification" / "oracle" / "gen_legacy_archetype.rb"
 PIN_GEMFILE = REPO_ROOT / "legacy_pin" / "Gemfile"
 PIN_REF = REPO_ROOT / "legacy_pin" / "REF"
-FIXTURES = REPO_ROOT / "python" / "tests" / "fixtures" / "weather"
+FIXTURES = REPO_ROOT / "tests" / "fixtures" / "weather"
 EPW = FIXTURES / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw"
 DDY = FIXTURES / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.ddy"
 

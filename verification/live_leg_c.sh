@@ -19,7 +19,7 @@
 # documents.
 #
 # Requires: the pin bundle (BUNDLE_GEMFILE=legacy_pin/Gemfile bundle check),
-# python/.venv, and the OpenStudio SDK in both runtimes.
+# .venv, and the OpenStudio SDK in both runtimes.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -27,7 +27,7 @@ WORK="${1:-$(mktemp -d)}"
 PREP="$WORK/prep"
 FRESH="$WORK/goldens"
 MANIFEST="$ROOT/verification/oracle/request_manifest.json"
-PY="${BTAP_PYTHON:-$ROOT/python/.venv/bin/python}"
+PY="${BTAP_PYTHON:-$ROOT/.venv/bin/python}"
 
 echo "== live Leg C — work dir $WORK"
 
@@ -52,7 +52,7 @@ import json
 print(json.load(open('$MANIFEST'))['pytest']['collected'])
 ")
 REPORT="$WORK/pytest"
-(cd "$ROOT/python" && BTAP_ORACLE_GOLDENS="$FRESH" BTAP_GOLDENS_REQUIRED=1 \
+(cd "$ROOT" && BTAP_ORACLE_GOLDENS="$FRESH" BTAP_GOLDENS_REQUIRED=1 \
   "$PY" -m pytest -q -p no:cacheprovider "${FILES[@]}" \
   --junitxml="$REPORT.xml" | tail -3)
 

@@ -32,8 +32,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-PYTHON_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PYTHON_ROOT))  # runnable from anywhere
+SRC_ROOT = Path(__file__).resolve().parents[1] / "src"
+sys.path.insert(0, str(SRC_ROOT))  # runnable from anywhere
 
 import openstudio  # noqa: E402
 
@@ -41,7 +41,7 @@ from btap._sdk import load_model  # noqa: E402
 from btap.audit import AuditLog  # noqa: E402
 from btap.codes.necb import envelope, lighting, loads  # noqa: E402
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[1]
 OFFICE = ["Space Function", "Office enclosed > 25 m2"]
 
 

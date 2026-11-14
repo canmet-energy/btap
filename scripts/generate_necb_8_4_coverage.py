@@ -13,14 +13,14 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = REPO_ROOT / "docs" / "NECB_8_4_COVERAGE.html"
-DEFAULT_COVERAGE_DATA = REPO_ROOT / "python" / "btap" / "codes" / "data" / "coverage"
+DEFAULT_COVERAGE_DATA = REPO_ROOT / "src" / "btap" / "codes" / "data" / "coverage"
 # The per-edition ruleset manifests btap.codes discovers (multi-edition plan,
 # Stage 2). This generator is run by the `lint` CI job with a bare `python3`
 # and NO install, so it reads the same files off disk by the same path
 # convention rather than importing `btap.codes.editions()`.
-DEFAULT_EDITION_DATA = REPO_ROOT / "python" / "btap" / "codes" / "necb" / "data"
+DEFAULT_EDITION_DATA = REPO_ROOT / "src" / "btap" / "codes" / "necb" / "data"
 # Each edition's OWN Section 8.4 article text, inside its own snapshot
 # (Stage 3). The disposition stays family-neutral: it is one curated
 # responsibility map read across editions, so it is not an edition's own file.
@@ -34,7 +34,7 @@ DEFAULT_DISPOSITION = DEFAULT_COVERAGE_DATA / "necb_8_4_disposition.json"
 # edition, which is why it is not a manifest key.
 LITERAL_REFERENCE_SUBSECTION = "8.4.4"
 #: The edition data directory, relative to a manifest root.
-EDITION_DATA_REL = Path("python") / "btap" / "codes" / "necb" / "data"
+EDITION_DATA_REL = Path("src") / "btap" / "codes" / "necb" / "data"
 PYTHON_INPUT_MODE = "python"
 DEFAULT_INPUT_MODE = PYTHON_INPUT_MODE
 REPO_URL = "https://github.com/canmet-energy/openstudio-necb-gems"

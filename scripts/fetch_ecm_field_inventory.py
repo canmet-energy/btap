@@ -49,7 +49,7 @@ CAMPUS_DIR = 'src/resources/buildings/measures'
 # `btap.stock` deliberately has no `data/` directory (the plan's rule — a stock
 # package that ships values is the thing #183 exists to prevent). So it lands
 # in docs/ beside the other generated references.
-OUT = (pathlib.Path(__file__).resolve().parents[2]
+OUT = (pathlib.Path(__file__).resolve().parents[1]
        / 'docs' / 'reference' / 'ecm_field_inventory.json')
 
 # osruby categories that are not building performance.

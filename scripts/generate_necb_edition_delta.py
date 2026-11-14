@@ -53,7 +53,7 @@ import re
 import tempfile
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = REPO_ROOT / "docs" / "NECB_EDITION_DELTAS.md"
 #: The one code family this generator knows about today (Stage 4 scope is
 #: NECB only; Stage 9 generalises across families).

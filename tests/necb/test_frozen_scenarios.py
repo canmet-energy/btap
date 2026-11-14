@@ -133,7 +133,7 @@ class TestFrozenScenarios(unittest.TestCase):
         # deliberately; forgetting makes this test fail rather than start
         # ignoring a contract.
         slugs = json.loads(
-            (self.runner.PYTHON_ROOT / "scripts" / "sample_manifest.json")
+            (self.runner.REPO_ROOT / "scripts" / "sample_manifest.json")
             .read_text(encoding="utf-8"))["samples"]
         authored = {s["id"]: s for s in self.defs.all_scenarios(slugs)}
         stored = {s["id"]: s for s in m["scenarios"]}

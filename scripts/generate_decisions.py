@@ -59,8 +59,8 @@ import urllib.parse
 from pathlib import Path
 from typing import NamedTuple
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-PYTHON_DIR = REPO_ROOT / "python"
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SRC_DIR = REPO_ROOT / "src"
 
 # Structured sources are validated against THIS checkout's offline provision
 # index, through `btap.codes`, which is stdlib-only, so the path-unfiltered
@@ -69,19 +69,19 @@ PYTHON_DIR = REPO_ROOT / "python"
 # everything. A `btap` imported from another tree (an editable install of a
 # different checkout, say) would answer from that tree's data, so it is
 # refused too.
-sys.path.insert(0, str(PYTHON_DIR))
+sys.path.insert(0, str(SRC_DIR))
 import btap.codes as btap_codes  # noqa: E402
 from btap.codes import provisions  # noqa: E402
 from btap.codes.decisions import SCHEMA as REGISTRY_SCHEMA  # noqa: E402
 
-if not Path(btap_codes.__file__).resolve().is_relative_to(PYTHON_DIR / "btap"):
+if not Path(btap_codes.__file__).resolve().is_relative_to(SRC_DIR / "btap"):
     raise ImportError(
         "generate_decisions.py must validate against {} but imported btap "
-        "from {}".format(PYTHON_DIR / "btap", btap_codes.__file__))
+        "from {}".format(SRC_DIR / "btap", btap_codes.__file__))
 
 SOURCE_DIR = REPO_ROOT / "docs" / "decisions"
 DOC = REPO_ROOT / "docs" / "necb_decisions.md"
-REGISTRY = REPO_ROOT / "python" / "btap" / "codes" / "data" / "decisions.json"
+REGISTRY = REPO_ROOT / "src" / "btap" / "codes" / "data" / "decisions.json"
 PROVISION_VIEW = REPO_ROOT / "docs" / "CODE_DECISIONS_BY_PROVISION.md"
 
 PREAMBLE_FILE = "_preamble.md"
@@ -272,7 +272,7 @@ def _article_titles(code: str) -> dict:
 
 def _article_cache(code: str) -> dict:
     """One edition's Section 8.4 article records, number -> record."""
-    path = (pathlib.Path(__file__).resolve().parents[1] / "btap" / "codes"
+    path = (pathlib.Path(__file__).resolve().parents[1] / "src" / "btap" / "codes"
             / "necb" / "data" / code / "coverage" / "articles_8_4.json")
     if not path.is_file():
         raise ValueError(
@@ -1046,7 +1046,7 @@ def registered_codes() -> set:
     rather than listed, so registering a new edition does not leave this
     validation stale."""
     root = (pathlib.Path(__file__).resolve().parents[1]
-            / "btap" / "codes" / "necb" / "data")
+            / "src" / "btap" / "codes" / "necb" / "data")
     return {p.parent.name for p in root.glob("*/manifest.json")}
 
 

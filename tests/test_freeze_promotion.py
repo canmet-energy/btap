@@ -20,7 +20,7 @@ import tempfile
 import unittest
 from unittest import mock
 
-REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
+REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 FREEZE = REPO_ROOT / "verification" / "scenarios" / "freeze.py"
 
 
@@ -333,7 +333,7 @@ class TestPublishFreezeLandsAtTheDestination(unittest.TestCase):
                 return "" if args[0] == "status" else "c" * 40
 
             with mock.patch.object(
-                    self.freeze.runner, "PYTHON_ROOT", work), \
+                    self.freeze.runner, "REPO_ROOT", work), \
                     mock.patch.object(
                         self.freeze.runner, "MANIFEST",
                         work / "absent-manifest.json"), \

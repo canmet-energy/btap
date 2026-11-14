@@ -12,8 +12,9 @@ from pathlib import Path
 from unittest.mock import patch
 from urllib.error import HTTPError
 
-PYTHON_ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(PYTHON_ROOT))
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SRC_ROOT = REPO_ROOT / "src"
+sys.path.insert(0, str(SRC_ROOT))
 
 from btap._mcp import MCPClient, MCPError  # noqa: E402
 

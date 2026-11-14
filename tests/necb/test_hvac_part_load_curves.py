@@ -20,7 +20,7 @@ import pathlib
 import unittest
 
 DATA_DIR = (pathlib.Path(__file__).resolve().parents[2]
-            / 'btap' / 'codes' / 'necb' / 'data')
+            / 'src' / 'btap' / 'codes' / 'necb' / 'data')
 EDITIONS = ('necb2020', 'necb2025')
 DATA = {edition: json.loads((DATA_DIR / edition / 'efficiencies.json')
                             .read_text(encoding='utf-8'))

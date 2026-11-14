@@ -31,7 +31,7 @@ import unittest
 from tests.support import FIXTURES, REPO_ROOT, needs_sdk
 
 STATUS = FIXTURES / "system_simulation_status.json"
-SCRIPT = REPO_ROOT / "python" / "scripts" / "simulate_all_systems.py"
+SCRIPT = REPO_ROOT / "scripts" / "simulate_all_systems.py"
 
 # Known broken, with the root cause. EMPTY, and the goal is to keep it that
 # way: every one of the 108 catalog systems completes the recorded mode cleanly.

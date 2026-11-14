@@ -14,7 +14,7 @@ import unittest
 from importlib import resources
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[1]
 #: PYTHON-OWNED fixtures (D-80 R2.1). The Python verification stack no longer
 #: reaches into the gem tree for its test data: these are copies, and
 #: ``tests/test_fixture_drift.py`` pins them byte-for-byte to the Ruby

@@ -72,6 +72,9 @@ ADDED: dict[str, str] = {}
 KEEP_OLD_PATHS = {
     "scripts/check_path_rename.py": "the checker defines the mapping",
     "tests/test_check_path_rename.py": "its tests feed the old paths in",
+    "infra/ci-image/Dockerfile": "its image tag is a CONTENT hash, so even a comment edit "
+                                 "forces an image republish and a tag move in three jobs; "
+                                 "fix its one stale comment when the image next changes",
 }
 
 
@@ -166,6 +169,11 @@ def check(base: str, head: str, hand_edited: set[str]) -> tuple[list[str], dict[
             counts["renamed"] += 1
             if map_path(old) != new:
                 problems.append(f"{old} -> {new}: expected {map_path(old)}")
+            elif new in KEEP_OLD_PATHS:
+                # These spell the old paths ON PURPOSE, so they move unchanged.
+                if _blob(base, old) != _blob(head, new):
+                    problems.append(f"{old} -> {new}: in KEEP_OLD_PATHS, so it "
+                                    f"must move byte-for-byte")
             elif not _same_after_mapping(_blob(base, old), _blob(head, new)):
                 problems.append(f"{old} -> {new}: content is not a path-only change")
         elif status == "M":

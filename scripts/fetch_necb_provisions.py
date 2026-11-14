@@ -33,8 +33,9 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
-PYTHON_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PYTHON_ROOT))
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SRC_ROOT = REPO_ROOT / "src"
+sys.path.insert(0, str(SRC_ROOT))
 
 from btap._mcp import MCPClient  # noqa: E402
 from btap.codes.provisions import (  # noqa: E402
@@ -44,8 +45,8 @@ from btap.codes.provisions import (  # noqa: E402
     table_note_ids,
 )
 
-DATA_ROOT = PYTHON_ROOT / "btap" / "codes" / "necb" / "data"
-DECISIONS_DIR = PYTHON_ROOT.parent / "docs" / "decisions"
+DATA_ROOT = SRC_ROOT / "btap" / "codes" / "necb" / "data"
+DECISIONS_DIR = REPO_ROOT / "docs" / "decisions"
 INDEX_PATH = Path("coverage/provisions.json")
 ARCHIVE_PATH = Path("provenance/provisions.result.json")
 SECTION_CACHE_PATH = Path("coverage/articles_8_4.json")
@@ -1035,13 +1036,13 @@ def main(argv: list[str] | None = None) -> int:
             client, edition, data_root=args.data_root
         )
         relative_archive = (
-            archive.relative_to(PYTHON_ROOT)
-            if archive.is_relative_to(PYTHON_ROOT)
+            archive.relative_to(REPO_ROOT)
+            if archive.is_relative_to(REPO_ROOT)
             else archive
         )
         relative_index = (
-            index.relative_to(PYTHON_ROOT)
-            if index.is_relative_to(PYTHON_ROOT)
+            index.relative_to(REPO_ROOT)
+            if index.is_relative_to(REPO_ROOT)
             else index
         )
         print(f"NECB {edition}: wrote {relative_archive} and {relative_index}")

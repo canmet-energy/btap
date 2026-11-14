@@ -24,8 +24,8 @@ import urllib.parse
 from pathlib import Path
 from unittest import mock
 
-PYTHON_ROOT = Path(__file__).resolve().parent.parent.parent
-sys.path.insert(0, str(PYTHON_ROOT / "scripts"))
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 import generate_decisions as G  # noqa: E402
 
 # G put this checkout's python/ first on sys.path.
@@ -1901,7 +1901,7 @@ class TestTheProvisionIndexIsThisCheckouts(unittest.TestCase):
     index. A `btap` imported from another tree would answer from that tree's
     data, so the generator refuses to load at all."""
 
-    SCRIPT = PYTHON_ROOT / "scripts" / "generate_decisions.py"
+    SCRIPT = REPO_ROOT / "scripts" / "generate_decisions.py"
 
     def load(self, name):
         spec = importlib.util.spec_from_file_location(name, self.SCRIPT)
@@ -1913,11 +1913,11 @@ class TestTheProvisionIndexIsThisCheckouts(unittest.TestCase):
         for module in (G.btap_codes, G.provisions, Loader):
             with self.subTest(module=module.__name__):
                 self.assertTrue(Path(module.__file__).resolve().is_relative_to(
-                    G.PYTHON_DIR / "btap"))
+                    G.SRC_DIR / "btap"))
         self.load("generate_decisions_same_tree")       # the control
 
     def test_a_btap_from_another_tree_is_refused(self):
-        elsewhere = PYTHON_ROOT.parent.parent / "another-checkout" / "python"
+        elsewhere = REPO_ROOT.parent / "another-checkout" / "src"
         btap = types.ModuleType("btap")
         btap.__file__ = str(elsewhere / "btap" / "__init__.py")
         btap.__path__ = [str(elsewhere / "btap")]

@@ -8,7 +8,7 @@ from pathlib import Path
 
 from tests.support import REPO_ROOT
 
-SCRIPT = REPO_ROOT / "python" / "scripts" / "necb_orphan_keys.py"
+SCRIPT = REPO_ROOT / "scripts" / "necb_orphan_keys.py"
 SPEC = importlib.util.spec_from_file_location("necb_orphan_keys", SCRIPT)
 orphan_keys = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(orphan_keys)

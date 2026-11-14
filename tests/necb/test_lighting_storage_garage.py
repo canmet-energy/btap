@@ -234,7 +234,7 @@ class TestStorageGarage(unittest.TestCase):
     # storage-garage manifest entry report citations it never earned.
     def test_the_general_occupancy_path_no_longer_claims_this_article(self):
         source = (Path(__file__).resolve().parents[2]
-                  / "btap" / "codes" / "necb" / "lighting" / "apply_lights.py").read_text(encoding="UTF-8")
+                  / "src" / "btap" / "codes" / "necb" / "lighting" / "apply_lights.py").read_text(encoding="UTF-8")
         self.assertFalse(re.search(r"article='4\.2\.2\.2\.", source),
                          "apply_lights must not cite 4.2.2.2 — that is the storage-garage article")
 

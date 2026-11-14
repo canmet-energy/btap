@@ -10,8 +10,9 @@ import unittest
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-PYTHON_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PYTHON_ROOT / "scripts"))
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SRC_ROOT = REPO_ROOT / "src"
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 # Import the script module
 import fetch_necb_8_4_text as script  # noqa: E402

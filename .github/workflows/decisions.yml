@@ -88,9 +88,8 @@ jobs:
       # short-link resolution. stdlib unittest, so no dependency install is
       # needed.
       - name: decision source and registry gates
-        working-directory: python
         run: |
-          python3 -m unittest -v \
+          PYTHONPATH=src python3 -m unittest -v \
             tests.necb.test_decisions_registry \
             tests.necb.test_decisions_registry_sync \
             tests.necb.test_decisions_generator \

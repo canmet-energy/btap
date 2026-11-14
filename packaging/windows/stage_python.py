@@ -219,7 +219,7 @@ def main() -> int:
 
     wheel = Path(args.wheel).resolve() if args.wheel else None
     if wheel is None:
-        dist = REPO_ROOT / "python" / "dist"
+        dist = REPO_ROOT / "dist"
         matches = sorted(dist.glob(f"canmet_btap-{args.version}-*.whl"))
         if not matches:
             die(f"no canmet_btap-{args.version} wheel in {dist}; "
@@ -234,7 +234,7 @@ def main() -> int:
 
     # Weather: the CLI reads BTAP_HOME/weather, so the installed tree must
     # carry it — a user has no checkout to fall back on.
-    weather_src = REPO_ROOT / "python" / "tests" / "fixtures" / "weather"
+    weather_src = REPO_ROOT / "tests" / "fixtures" / "weather"
     shutil.copytree(weather_src, stage / "weather")
 
     # The LAYOUT is load-bearing: the iss Start-menu shortcut puts {app}\bin

@@ -135,7 +135,7 @@ class TestForeignGateCatchesRealRegressions(unittest.TestCase):
         """Copy ``btap`` to a temp tree, apply one edit, return the new counts."""
         tmp = Path(tempfile.mkdtemp())
         self.addCleanup(shutil.rmtree, tmp, ignore_errors=True)
-        shutil.copytree(Path(__file__).resolve().parents[1] / "btap", tmp / "btap")
+        shutil.copytree(Path(__file__).resolve().parents[1] / "src" / "btap", tmp / "btap")
         target = tmp / relative
         text = target.read_text(encoding="utf-8")
         self.assertIn(old, text, f"anchor missing in {relative} — the fixture has moved")
@@ -276,7 +276,7 @@ class TestDataGateCatchesRealRegressions(unittest.TestCase):
     def copy(self):
         tmp = Path(tempfile.mkdtemp())
         self.addCleanup(shutil.rmtree, tmp, ignore_errors=True)
-        shutil.copytree(Path(__file__).resolve().parents[1] / "btap", tmp / "btap")
+        shutil.copytree(Path(__file__).resolve().parents[1] / "src" / "btap", tmp / "btap")
         return tmp
 
     def edit(self, tmp, relative, old, new, *, count=1):
@@ -437,7 +437,7 @@ class TestDataGateCatchesRealRegressions(unittest.TestCase):
         """
         source = "\n".join(
             path.read_text(encoding="utf-8")
-            for path in (Path(__file__).resolve().parents[1] / "btap").rglob("*.py"))
+            for path in (Path(__file__).resolve().parents[1] / "src" / "btap").rglob("*.py"))
         emitted = [key for key in DOCUMENTARY_ARTICLE_KEYS
                    if f"'{key}'" in source or f'"{key}"' in source]
         self.assertEqual(
@@ -450,7 +450,7 @@ class TestDataGateCatchesRealRegressions(unittest.TestCase):
         """The converse, so the emitted list cannot rot into ceremony either."""
         source = "\n".join(
             path.read_text(encoding="utf-8")
-            for path in (Path(__file__).resolve().parents[1] / "btap").rglob("*.py"))
+            for path in (Path(__file__).resolve().parents[1] / "src" / "btap").rglob("*.py"))
         unread = [key for key in EMITTED_ARTICLE_KEYS
                   if f"'{key}'" not in source and f'"{key}"' not in source]
         self.assertEqual([], unread,
@@ -580,7 +580,7 @@ class TestDataCitationsAreValidForTheirEdition(unittest.TestCase):
     def copy(self):
         tmp = Path(tempfile.mkdtemp())
         self.addCleanup(shutil.rmtree, tmp, ignore_errors=True)
-        shutil.copytree(Path(__file__).resolve().parents[1] / "btap", tmp / "btap")
+        shutil.copytree(Path(__file__).resolve().parents[1] / "src" / "btap", tmp / "btap")
         return tmp
 
     def edit(self, tmp, relative, old, new, *, count=1):
@@ -590,7 +590,7 @@ class TestDataCitationsAreValidForTheirEdition(unittest.TestCase):
         target.write_text(text.replace(old, new, count), encoding="utf-8")
 
     def snapshot_articles(self, scope, root=None):
-        base = Path(root) / "btap" if root else (Path(__file__).resolve().parents[1] / "btap")
+        base = Path(root) / "btap" if root else (Path(__file__).resolve().parents[1] / "src" / "btap")
         cache = (base / "codes" / "necb" / "data" / scope / "coverage"
                  / "articles_8_4.json")
         return set(json.loads(cache.read_text(encoding="utf-8"))["articles"])

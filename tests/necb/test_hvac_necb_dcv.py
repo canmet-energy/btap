@@ -149,7 +149,7 @@ class TestNecbDcv(unittest.TestCase):
     # documented 'NECB_Default'), so the guard never fires. Filed as a legacy defect,
     # deliberately NOT ported.
     def test_legacy_misspelled_sentinel_is_not_ported(self):
-        root = pathlib.Path(__file__).resolve().parents[2] / 'btap'
+        root = pathlib.Path(__file__).resolve().parents[2] / 'src' / 'btap'
         hits = [str(p) for p in root.rglob('*.py')
                 if 'NECB_Defualt' in p.read_text(encoding='utf-8')]
         self.assertEqual([], hits,

@@ -11,7 +11,7 @@ from pathlib import Path
 
 from tests import support
 
-SCRIPT_PATH = support.REPO_ROOT / "python" / "scripts" / "building_stock.py"
+SCRIPT_PATH = support.REPO_ROOT / "scripts" / "building_stock.py"
 SPEC = importlib.util.spec_from_file_location("building_stock_script", SCRIPT_PATH)
 building_stock = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(building_stock)

@@ -20,9 +20,9 @@ import json
 import pathlib
 import unittest
 
-PYTHON_ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
-REPO_ROOT = PYTHON_ROOT.parent
-PRODUCT = PYTHON_ROOT / "btap"
+REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
+SRC_ROOT = REPO_ROOT / "src"
+PRODUCT = SRC_ROOT / "btap"
 REGISTRY = PRODUCT / "codes" / "data" / "ahj.json"
 
 #: The shared audit surface. An unrelated API reusing the keyword name must not
@@ -60,11 +60,11 @@ def _citation_sites():
                       else getattr(node.func, "id", None))
             for keyword in node.keywords:
                 if keyword.arg is None and method in AUDIT_METHODS:
-                    star_kwargs.append((path.relative_to(PYTHON_ROOT),
+                    star_kwargs.append((path.relative_to(SRC_ROOT),
                                         keyword.value.lineno, method))
                 if keyword.arg != "ahj":
                     continue
-                sites.append((path.relative_to(PYTHON_ROOT),
+                sites.append((path.relative_to(SRC_ROOT),
                               keyword.value.lineno, method, keyword.value))
     return sites, star_kwargs
 

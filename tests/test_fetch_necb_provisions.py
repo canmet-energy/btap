@@ -10,8 +10,9 @@ import tempfile
 import unittest
 from pathlib import Path
 
-PYTHON_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PYTHON_ROOT / "scripts"))
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SRC_ROOT = REPO_ROOT / "src"
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 import fetch_necb_provisions as script  # noqa: E402
 

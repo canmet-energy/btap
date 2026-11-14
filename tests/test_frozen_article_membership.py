@@ -26,9 +26,9 @@ import re
 import unittest
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[1]
 BASELINES = REPO_ROOT / "verification" / "scenarios" / "baselines"
-SNAPSHOTS = REPO_ROOT / "python" / "btap" / "codes" / "necb" / "data"
+SNAPSHOTS = REPO_ROOT / "src" / "btap" / "codes" / "necb" / "data"
 
 #: Any `8.4.x.y`, at the depth the snapshots carry.
 ARTICLE = re.compile(r"8\.4\.\d+\.\d+")

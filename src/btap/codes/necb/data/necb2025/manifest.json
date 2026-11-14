@@ -53,7 +53,7 @@
       "method": "transcribed",
       "source_verification": "manual",
       "note": "The umbrella carries only article_coverage: what the pipeline itself determines. This edition carries the reference building at Subsection 8.4.5 and the Energy Use Intensity path at 8.4.4. The status/how/code fields are the pipeline's self-declaration and have no external source to re-fetch. The 20 h floor under 8.4.1.2.(4)'s cooling unmet-hours allowance moved from a code literal in compliance.py into this file (unmet_cooling.minimum_allowance_h) on 2026-09-08, multi-edition plan Stage 5; the value is unchanged and the source is unchanged.",
-      "result_sha256": "61406f19aed768766e80ca4729c9acc7fb9feffc01c8e8e9c28f81a5efe096f7"
+      "result_sha256": "bf40a432c4be7bd17498b539e8c813836933019389f87d1de0860a854522060c"
     },
     "envelope_rules.json": {
       "source": "mcp:necb:2025",
@@ -136,7 +136,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "This edition states the door requirements in their own Table 3.2.2.4. Re-verified 2026-08-02 against the post-hbix-fix extraction (D-61). The performance-path articles this file cites are in Subsection 8.4.5.",
-      "result_sha256": "9eb72350e156a270a922858e1583fe69377d70753ec52162b563c8ba2fe07521"
+      "result_sha256": "ff36667d2ade33c7094aa16a9a0fe8310b1d3dcbc592e28e8f539d8c2ae1da76"
     },
     "reference_rules.json": {
       "source": "mcp:necb:2025",
@@ -226,7 +226,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "This edition carries the reference-building rules at Subsection 8.4.5 and the part-load curves at 8.4.6; the archived set is the three tables this file's provenance names plus the articles in its own `articles` list. The category keywords extending the Table 8.4.5.7.-A space lists with synonyms are a maintainer addition, not code text, and are marked as such in the file.",
-      "result_sha256": "dcc1d308679e3372d35a77e26aeaddd6c29882e6981160f260637a62fe6195f4"
+      "result_sha256": "7b1e8468b25eb0d4d2f3ca1d64be13e88bfc0fe569d9c50d84e806de28e77bd2"
     },
     "efficiencies.json": {
       "source": "mcp:necb:2025",
@@ -471,7 +471,7 @@
           "detail": "fetched as this edition's lighting-power companion table; no constant in this file is transcribed from it"
         }
       ],
-      "result_sha256": "98c61ac40b17bb973e34657bb6c7609136f5e6920436bda1c5265ccd26a040c9"
+      "result_sha256": "5c03705c9be29cfdaaff718230a17daf513f90eaf6a713b25bfcc7a57c75db2d"
     },
     "loads_rules.json": {
       "source": "mcp:necb:2025",
@@ -498,7 +498,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "This edition numbers the Appendix A schedule tables A-8.4.3.2.(1)(b)-A..K, Article 8.4.3.2 being written in clauses. This file carries only that numbering and the Subsection 8.4.3 coverage manifest; the load data itself lives in tables/space_types.json and tables/schedules.json, each with its own entry. The archived payloads are the tables this file's own provenance names.",
-      "result_sha256": "cd21c2ac83607659b5dda79d8135711a2f5364e361668e9ba2f8600f1d55e6b5"
+      "result_sha256": "5f71646ac733849b6500c17d63125a0df4ee5d9c33083c70cb59aeaa779f505b"
     },
     "shw_rules.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
@@ -538,7 +538,7 @@
           "detail": "the part-load article: this edition's own quadratic FHeatPLC coefficients [0.021826, 0.97763, 0.000543] are already carried verbatim in the file as code_fheatplc, and the shipped cubic is the probe-verified image of PLF(x) = x / FHeatPLC(x) for the EnergyPlus degradation-divisor field (D-53); this edition publishes no table for the curve itself"
         }
       ],
-      "result_sha256": "dbf5cec4b37893c8c4abcf64d26b32306c8044342f3d4ad7b9284a5b64490d01"
+      "result_sha256": "9c59d79fae141dac9d51a40e10736c7c40dacc0f1c64b3e787bb8ba28e1a7548"
     },
     "tables/space_types.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",

@@ -28,8 +28,8 @@ import sys
 from pathlib import Path
 from types import ModuleType
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-SCRIPT = REPO_ROOT / "python" / "scripts" / "generate_necb_8_4_coverage.py"
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SCRIPT = REPO_ROOT / "scripts" / "generate_necb_8_4_coverage.py"
 BASELINE_PATH = Path(__file__).with_name("data") / "citation_counts_baseline.json"
 
 #: Editions the scanner resolves citations for today (``edition_part``'s own
@@ -205,7 +205,7 @@ def compute_foreign_citation_counts(source_root: Path | None = None) -> dict:
     consecutive days, so that is ordinary churn here, not a hypothetical.
     """
     coverage = load_coverage_module()
-    root = source_root or (REPO_ROOT / "python")
+    root = source_root or (REPO_ROOT / "src")
     # The gate's own coverage, asked once. A caller probing a throwaway copy of
     # the source gets the same answer for the paths that still exist, which is
     # what makes the deletion experiment meaningful.
@@ -217,7 +217,7 @@ def compute_foreign_citation_counts(source_root: Path | None = None) -> dict:
         try:
             relative = path.relative_to(REPO_ROOT).as_posix()
         except ValueError:  # a temp-directory copy, used by the mutation tests
-            relative = f"python/{path.relative_to(root).as_posix()}"
+            relative = f"src/{path.relative_to(root).as_posix()}"
         source = path.read_text(encoding="utf-8")
         tree = ast.parse(source, filename=str(path))
         for call in (node for node in ast.walk(tree) if isinstance(node, ast.Call)):
@@ -411,7 +411,7 @@ def compute_data_citation_counts(source_root: Path | None = None) -> dict:
     not this increment, and the honest reason to defer it is blast radius, not
     impossibility.
     """
-    root = source_root or (REPO_ROOT / "python")
+    root = source_root or (REPO_ROOT / "src")
     counts: dict[str, dict[str, int]] = {}
     for path in sorted(root.glob(DATA_GLOB)):
         try:
@@ -427,7 +427,7 @@ def compute_data_citation_counts(source_root: Path | None = None) -> dict:
         try:
             relative = path.relative_to(REPO_ROOT).as_posix()
         except ValueError:  # a temp-directory copy, used by the mutation tests
-            relative = f"python/{path.relative_to(root).as_posix()}"
+            relative = f"src/{path.relative_to(root).as_posix()}"
         scope = _data_scope(relative)
         for value in found:
             counts.setdefault(scope, {}).setdefault(value, 0)
@@ -448,7 +448,7 @@ def article_named_data_keys(source_root: Path | None = None) -> set[str]:
     a separately named container, handled by its own branch, and its key is
     neither ``article`` nor ``*_article``.
     """
-    root = source_root or (REPO_ROOT / "python")
+    root = source_root or (REPO_ROOT / "src")
     keys: set[str] = set()
 
     def walk(node) -> None:

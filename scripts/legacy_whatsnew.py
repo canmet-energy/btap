@@ -11,7 +11,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[1]
 PIN_REF = REPO_ROOT / "legacy_pin" / "REF"
 DEFAULT_REMOTE = "https://github.com/NatLabRockies/openstudio-standards.git"
 DEFAULT_CACHE = REPO_ROOT / "tmp" / "legacy_fork.git"

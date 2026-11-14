@@ -41,7 +41,8 @@ import re
 import unittest
 from pathlib import Path
 
-PYTHON_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent
+SRC_ROOT = REPO_ROOT / "src"
 
 # `Model.load(...)` followed by `.get()` with no emptiness check between.
 # Narrow on purpose: this is the pattern that fails SILENTLY, and a narrow
@@ -57,13 +58,20 @@ ALLOWED = {"btap/_sdk.py", "tests/test_sdk_invariants.py"}
 class TestNoUncheckedOptionalGet(unittest.TestCase):
     def test_no_unchecked_model_load_get(self):
         offenders = []
-        for path in sorted(PYTHON_ROOT.rglob("*.py")):
-            rel = path.relative_to(PYTHON_ROOT).as_posix()
+        # The scope is what `python/` held before the src layout (#229): the
+        # package, the tests and the scripts. Each is walked from the root
+        # that keeps its `rel` spelling unchanged (`btap/...`, `tests/...`).
+        roots = ((SRC_ROOT, SRC_ROOT / "btap"), (REPO_ROOT, REPO_ROOT / "tests"),
+                 (REPO_ROOT, REPO_ROOT / "scripts"))
+        walked = [(base, path) for base, top in roots for path in sorted(top.rglob("*.py"))]
+        self.assertTrue(walked, "the scan found no files — a vacuous pass")
+        for base, path in walked:
+            rel = path.relative_to(base).as_posix()
             # Match on path PARTS, not substrings: a build/ or .venv/ at the
             # root has no leading slash, and substring matching silently
             # missed it (found the hard way — a stale build/ tree from an
             # earlier wheel build flagged the sanctioned loader's own copy).
-            parts = set(path.relative_to(PYTHON_ROOT).parts)
+            parts = set(path.relative_to(base).parts)
             if rel in ALLOWED or parts & {".venv", ".ci-venv", "build", "dist"}:
                 continue
             text = path.read_text(encoding="utf-8")

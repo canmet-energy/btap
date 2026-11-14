@@ -25,9 +25,9 @@ import pathlib
 import re
 import sys
 
-ROOT = pathlib.Path(__file__).resolve().parents[2]
+ROOT = pathlib.Path(__file__).resolve().parents[1]
 REGISTER = ROOT / "docs" / "NECB_AHJ_QUESTIONS.md"
-PROJECTION = ROOT / "python" / "btap" / "codes" / "data" / "ahj.json"
+PROJECTION = ROOT / "src" / "btap" / "codes" / "data" / "ahj.json"
 OUTPUT = ROOT / "docs" / "NECB_AHJ_REFERRALS.md"
 
 #: Only these two statuses need an authority. `ruled` and `tool-gap` do not,

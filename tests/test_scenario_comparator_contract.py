@@ -35,7 +35,7 @@ import tempfile
 import unittest
 from dataclasses import dataclass, field
 
-REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
+REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 SCENARIOS_DIR = REPO_ROOT / "verification" / "scenarios"
 SPEC_PATH = REPO_ROOT / "verification" / "spec.json"
 

@@ -31,8 +31,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-SCRIPT = REPO_ROOT / "python" / "scripts" / "mutate.py"
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SCRIPT = REPO_ROOT / "scripts" / "mutate.py"
 
 
 def _load():
@@ -72,7 +72,8 @@ class _Harness(unittest.TestCase):
             "    assert MARKER == 'ORIGINAL'\n",
             encoding="utf-8")
         # point the harness at this tree instead of the repository's
-        self.mutate.PYTHON_ROOT = self.root
+        self.mutate.REPO_ROOT = self.root
+        self.mutate.SRC_ROOT = self.root
 
     #: Every verdict the tool can print for one row. Used to assert that
     #: EXACTLY ONE appears — `assertIn` cannot see a second verdict emitted

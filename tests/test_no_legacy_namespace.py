@@ -24,7 +24,7 @@ import subprocess
 import unittest
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
 #: Tracked paths the gate walks. Anything outside them (docs prose, the
 #: frozen scenario baselines) is R-B evidence or narrative, not an active
@@ -127,7 +127,7 @@ class TestNoLegacyNamespace(unittest.TestCase):
                 "its allowlist entry rather than leaving a dead exception")
 
     def test_the_renamed_package_is_the_one_on_disk(self):
-        package = REPO_ROOT / "python" / "btap" / "codes"
+        package = REPO_ROOT / "src" / "btap" / "codes"
         self.assertTrue((package / "__init__.py").is_file())
         # Tracked files, not the filesystem: a branch switch leaves the old
         # package's __pycache__ behind, and that is not a legacy package.

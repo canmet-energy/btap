@@ -39,12 +39,12 @@ from datetime import date
 from pathlib import Path
 
 # Importable without installing the package
-PYTHON_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PYTHON_ROOT))
+SRC_ROOT = Path(__file__).resolve().parents[1] / "src"
+sys.path.insert(0, str(SRC_ROOT))
 
 from btap._mcp import MCPClient, MCPError  # noqa: E402
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
 # The two editions do not share Section 8.4's structure: 2020's 8.4.4 is the
 # reference building (20 articles) and 8.4.5 the part-load curves; 2025 inserts
@@ -265,7 +265,7 @@ def main():
     if args.out:
         out_path = args.out
     else:
-        out_path = (PYTHON_ROOT / "btap" / "codes" / "necb" / "data" /
+        out_path = (SRC_ROOT / "btap" / "codes" / "necb" / "data" /
                     f"necb{edition}" / "coverage" / "articles_8_4.json")
 
     client = MCPClient("codes")

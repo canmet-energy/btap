@@ -22,8 +22,8 @@ import sys
 import unittest
 from pathlib import Path
 
-REPO_PYTHON = Path(__file__).resolve().parent.parent
-SCRIPT = REPO_PYTHON / 'scripts' / 'sdk_api.py'
+REPO_ROOT = Path(__file__).resolve().parent.parent
+SCRIPT = REPO_ROOT / 'scripts' / 'sdk_api.py'
 SDK = Path('/usr/local/openstudio-3.11.0')
 
 

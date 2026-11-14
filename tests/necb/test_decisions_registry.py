@@ -50,11 +50,12 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-PYTHON_ROOT = Path(__file__).resolve().parents[2]
-REGISTRY = PYTHON_ROOT / "btap" / "codes" / "data" / "decisions.json"
+REPO_ROOT = Path(__file__).resolve().parents[2]
+SRC_ROOT = REPO_ROOT / "src"
+REGISTRY = SRC_ROOT / "btap" / "codes" / "data" / "decisions.json"
 
 # This checkout's loader, whatever else is installed: it is stdlib-only.
-sys.path.insert(0, str(PYTHON_ROOT))
+sys.path.insert(0, str(SRC_ROOT))
 from btap.codes import decisions as Loader  # noqa: E402
 
 ID_TOKEN = re.compile(r"\bD-\d+\b")
@@ -75,7 +76,7 @@ def _citation_sites():
     keyword on any ``ast.Call`` under src/btap."""
     sites = []
     star_kwargs = []
-    for path in sorted((PYTHON_ROOT / "btap").rglob("*.py")):
+    for path in sorted((SRC_ROOT / "btap").rglob("*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         for node in ast.walk(tree):
             if not isinstance(node, ast.Call):
@@ -87,10 +88,10 @@ def _citation_sites():
                     # **kwargs expansion on the audit surface could smuggle a
                     # ruling past every gate — refused, not ignored.
                     star_kwargs.append(
-                        (path.relative_to(PYTHON_ROOT), keyword.value.lineno, method))
+                        (path.relative_to(SRC_ROOT), keyword.value.lineno, method))
                 if keyword.arg != "ruling":
                     continue
-                sites.append((path.relative_to(PYTHON_ROOT), keyword.value.lineno,
+                sites.append((path.relative_to(SRC_ROOT), keyword.value.lineno,
                               method, keyword.value))
     return sites, star_kwargs
 
@@ -210,8 +211,8 @@ class TestDecisionShortIdsResolve(unittest.TestCase):
     id set.
     """
 
-    DOC = PYTHON_ROOT.parent / "docs" / "necb_decisions.md"
-    TREE = PYTHON_ROOT.parent
+    DOC = REPO_ROOT / "docs" / "necb_decisions.md"
+    TREE = REPO_ROOT
 
     #: ``](#x)``, ``[x]: #x`` and ``href="#x"`` all render as links; matching
     #: only the first let a reference-style definition through (Fable, PR #60).
@@ -457,7 +458,7 @@ class TestTheRuntimeLoaderReadsSchemaTwo(unittest.TestCase):
 
     def test_it_is_this_checkouts_loader_and_the_committed_schema(self):
         self.assertTrue(Path(Loader.__file__).resolve().is_relative_to(
-            PYTHON_ROOT / "btap"), Loader.__file__)
+            SRC_ROOT / "btap"), Loader.__file__)
         self.assertEqual(2, Loader.SCHEMA)
         self.assertEqual(Loader.SCHEMA,
                          json.loads(REGISTRY.read_text(encoding="utf-8"))["schema"])

@@ -47,12 +47,12 @@ def test_consumer_map_matches_manifest_files():
         "the consumer map and request_manifest.json['pytest']['files'] "
         "disagree — update both together")
     for rel in CONSUMERS:
-        assert (REPO_ROOT / "python" / rel).is_file(), f"{rel} does not exist"
+        assert (REPO_ROOT / rel).is_file(), f"{rel} does not exist"
 
 
 def test_consumer_files_actually_read_their_groups():
     for rel, groups in CONSUMERS.items():
-        text = (REPO_ROOT / "python" / rel).read_text(encoding="utf-8")
+        text = (REPO_ROOT / rel).read_text(encoding="utf-8")
         for group in groups:
             assert group in text, (
                 f"{rel} is declared the consumer of {group!r} but never "
@@ -64,7 +64,7 @@ def test_collected_count_is_current():
     result = subprocess.run(
         [sys.executable, "-m", "pytest", "--collect-only", "-q",
          "-p", "no:cacheprovider", *manifest["pytest"]["files"]],
-        cwd=REPO_ROOT / "python", capture_output=True, text=True, check=True)
+        cwd=REPO_ROOT, capture_output=True, text=True, check=True)
     line = [ln for ln in result.stdout.splitlines() if "collected" in ln][-1]
     count = int(line.split()[0])
     assert count == manifest["pytest"]["collected"], (
@@ -128,10 +128,10 @@ def test_oracle_prep_cites_only_real_gates():
     review round 2, finding 2)."""
     import re
 
-    source = (REPO_ROOT / "python" / "scripts" / "oracle_prep.py").read_text(
+    source = (REPO_ROOT / "scripts" / "oracle_prep.py").read_text(
         encoding="utf-8")
     cited = set(re.findall(r"tests/[\w/]+\.py", source))
     assert cited, "no cited gates found — the contract format changed?"
     missing = [c for c in sorted(cited)
-               if not (REPO_ROOT / "python" / c.removeprefix("python/")).is_file()]
+               if not (REPO_ROOT / c).is_file()]
     assert not missing, f"composition contracts cite nonexistent gates: {missing}"

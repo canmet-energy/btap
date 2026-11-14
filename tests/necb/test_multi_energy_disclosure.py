@@ -988,7 +988,7 @@ class TestTheSINGLEEnergyELECTIONIsNotAlwaysIdentical(_Fixture):
 
         root = pathlib.Path(__file__).resolve().parents[2]
         for ed, a9 in (("necb2020", "8.4.4.9"), ("necb2025", "8.4.5.9")):
-            d = json.loads((root / "btap" / "codes" / "necb" / "data" / ed
+            d = json.loads((root / "src" / "btap" / "codes" / "necb" / "data" / ed
                             / "reference_rules.json").read_text(encoding="utf-8"))
             entry = next(a for a in d["article_coverage"]["articles"]
                          if str(a.get("article")) == f"{a9}.(4)")

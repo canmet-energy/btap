@@ -15,7 +15,7 @@ from unittest.mock import patch
 
 from tests import support
 
-SCRIPT = support.REPO_ROOT / "python" / "scripts" / "necb_archetype_sweep.py"
+SCRIPT = support.REPO_ROOT / "scripts" / "necb_archetype_sweep.py"
 SPEC = importlib.util.spec_from_file_location("necb_archetype_sweep", SCRIPT)
 sweep = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = sweep
@@ -127,7 +127,7 @@ class TestSelectionAndScheduling(unittest.TestCase):
             ["--mode", "annual", "--code", "necb2025", "--location", "toronto"],
             first_command[4:10],
         )
-        self.assertEqual(str(sweep.PYTHON_ROOT), first_kwargs["cwd"])
+        self.assertEqual(str(sweep.REPO_ROOT), first_kwargs["cwd"])
         self.assertEqual(requested, [result["type"] for result in results])
         summary = sweep.structured_summary(requested, results, config)
         self.assertEqual(2, summary["passed"])

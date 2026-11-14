@@ -28,9 +28,9 @@ import pathlib
 import re
 import sys
 
-REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
+REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 REGISTER = REPO_ROOT / "docs" / "NECB_AHJ_QUESTIONS.md"
-OUTPUT = (REPO_ROOT / "python" / "btap" / "codes" / "data" / "ahj.json")
+OUTPUT = (REPO_ROOT / "src" / "btap" / "codes" / "data" / "ahj.json")
 
 #: The four statuses, and the two that require approval. The register's own
 #: status table is the contract; this mirrors it and nothing else may.

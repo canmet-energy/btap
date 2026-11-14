@@ -34,7 +34,7 @@ jobs:
       - name: Build the distribution ONCE
         run: |
           pip install -q build
-          python3 -m build --outdir dist/ python/
+          python3 -m build --outdir dist/ .
           ls -la dist/
       - name: The upload set is exactly the wheel and the sdist
         run: |

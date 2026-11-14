@@ -432,7 +432,7 @@ class TestTheBuilderDefaultsAreNotGuessed(unittest.TestCase):
         from btap.stock.identify import _BUILDER_COIL_DEFAULTS
 
         root = (pathlib.Path(__file__).resolve().parents[2]
-                / 'btap' / 'modeling' / 'hvac' / 'systems')
+                / 'src' / 'btap' / 'modeling' / 'hvac' / 'systems')
         pattern = re.compile(
             r"config\.get\('(?:heating_type|heating_coil_type"
             r"|mau_heating_coil_type)',\s*'([^']*)'\)")
@@ -621,7 +621,7 @@ class TestTheZonalVocabularyIsComplete(unittest.TestCase):
 
         from btap.stock.identify import _ZONAL_UNIT_FAMILY
 
-        source = (pathlib.Path(__file__).resolve().parents[2] / 'btap'
+        source = (pathlib.Path(__file__).resolve().parents[2] / 'src' / 'btap'
                   / 'modeling' / 'hvac' / 'classify.py').read_text(
                       encoding='utf-8')
         kinds = set(re.findall(r"'kind': '([a-z_]+)'", source))
@@ -641,7 +641,7 @@ class TestTheZonalVocabularyIsComplete(unittest.TestCase):
         from btap.stock.identify import _ZONAL_UNIT_FAMILY
 
         rows = json.loads(
-            (pathlib.Path(__file__).resolve().parents[2] / 'btap' / 'modeling'
+            (pathlib.Path(__file__).resolve().parents[2] / 'src' / 'btap' / 'modeling'
              / 'hvac' / 'data' / 'systems.json').read_text(encoding='utf-8')
         )['systems']
         families = {r['family'] for r in rows}

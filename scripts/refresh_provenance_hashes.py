@@ -11,7 +11,7 @@ import re
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2] / "python" / "btap" / "codes" / "necb" / "data"
+ROOT = Path(__file__).resolve().parents[1] / "src" / "btap" / "codes" / "necb" / "data"
 
 
 def sha256(path: Path) -> str:

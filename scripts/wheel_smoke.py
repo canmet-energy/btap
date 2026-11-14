@@ -27,8 +27,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-PYTHON_ROOT = Path(__file__).resolve().parent.parent
-REPO_ROOT = PYTHON_ROOT.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
 def companion_expected() -> bool:
@@ -316,7 +315,7 @@ def run_checks() -> int:
                 [str(exe),
                  str(modeling.hvac.catalog_report.FIXTURE),
                  "--simulate", "sizing",
-                 "--epw", str(PYTHON_ROOT / "tests/fixtures/weather/"
+                 "--epw", str(REPO_ROOT / "tests/fixtures/weather/"
                                "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw"),
                  "--hdd", "3890", "--storeys", "1", "--no-report", "--quiet",
                  "--space-type", "Space Function/Office enclosed > 25 m2",

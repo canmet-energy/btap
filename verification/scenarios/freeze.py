@@ -50,9 +50,9 @@ import scenario_defs
 
 REPO_ROOT = runner.REPO_ROOT
 RUBY_CLI = REPO_ROOT / "btap-necb" / "exe" / "btap-compliance.rb"
-RUBY_TBD_DRIVER = (REPO_ROOT / "python" / "tests" / "necb" / "cross_language"
+RUBY_TBD_DRIVER = (REPO_ROOT / "tests" / "necb" / "cross_language"
                    / "ruby_tbd_compliance.rb")
-RUBY_AUDIT_DRIVER = (REPO_ROOT / "python" / "tests" / "audit"
+RUBY_AUDIT_DRIVER = (REPO_ROOT / "tests" / "audit"
                      / "cross_language" / "ruby_reference.rb")
 TRANSITION_FIELDS = (
     "retired_seal", "last_cross_language_commit", "last_cross_language_run_id",
@@ -458,7 +458,7 @@ def assemble_manifest(frozen, previous, carried, this_producer,
             REPO_ROOT / "verification" / "spec.json")
     if sample_manifest_sha256 is None:
         sample_manifest_sha256 = runner.sha256(
-            runner.PYTHON_ROOT / "scripts" / "sample_manifest.json")
+            runner.REPO_ROOT / "scripts" / "sample_manifest.json")
 
     manifest = {
         "version": 2,
@@ -674,7 +674,7 @@ def producer_identity():
         runner._sys_path_python()
         worker = runner.python_exe()
         env = dict(os.environ)
-        env["PYTHONPATH"] = (str(runner.PYTHON_ROOT) + os.pathsep
+        env["PYTHONPATH"] = (str(runner.SRC_ROOT) + os.pathsep
                              + env.get("PYTHONPATH", "")).rstrip(os.pathsep)
         out = subprocess.run([str(worker), "-c", probe], capture_output=True,
                              text=True, check=False, timeout=600, env=env)
@@ -733,7 +733,7 @@ def invocation_producer():
 
 def load_freeze_environment():
     """Load external state once; tests may supply the same data in memory."""
-    sample_manifest = runner.PYTHON_ROOT / "scripts" / "sample_manifest.json"
+    sample_manifest = runner.REPO_ROOT / "scripts" / "sample_manifest.json"
     previous = {"scenarios": [], "provenance": {}}
     if runner.MANIFEST.is_file():
         previous = json.loads(runner.MANIFEST.read_text(encoding="utf-8"))

@@ -31,7 +31,7 @@ import subprocess
 import unittest
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
 #: Files excluded from the walk, each with why it is legitimately exempt.
 #: ``tests/data/coverage_code_ref_mapping*.json`` need no entry here:
@@ -45,18 +45,18 @@ ALLOWLIST: dict[str, str] = {
 
 
 def tracked_py_files() -> list[str]:
-    """Tracked ``.py`` files under ``python/``, via ``git ls-files`` only.
+    """Tracked ``.py`` files in the package, the tests and the scripts.
 
-    ``git ls-files python/ -- '*.py'`` is two OR'd pathspecs in this git
-    (it matches the ``python/`` prefix pathspec as well as the bare
-    ``*.py`` glob pathspec), which pulls in every non-Python file under
-    ``python/`` too. Listing ``python/`` and filtering the ``.py`` suffix
-    in Python gives the intended set — verified identical to
-    ``git ls-files -- 'python/*.py'`` — without relying on that pathspec
-    interaction.
+    That is what ``python/`` held before the src layout (#229). Listing it
+    unchanged afterwards returned NOTHING, and the gate would have passed
+    over zero files, so the three roots are named explicitly.
+
+    The suffix is filtered in Python rather than with a ``-- '*.py'``
+    pathspec: in this git that is OR'd with the directory pathspecs and pulls
+    in every non-Python file too.
     """
     out = subprocess.run(
-        ["git", "-C", str(REPO_ROOT), "ls-files", "python/"],
+        ["git", "-C", str(REPO_ROOT), "ls-files", "src/btap/", "tests/", "scripts/"],
         capture_output=True, text=True, check=True,
     ).stdout
     return sorted(line for line in out.splitlines() if line.endswith(".py"))
@@ -144,6 +144,16 @@ class TestNoVintageParameter(unittest.TestCase):
             "docs/NECB_MULTI_EDITION_PLAN.md); rename to 'code=' (or "
             "'edition=' for the five edition-selector sites) rather than "
             "allowlisting:\n  " + "\n  ".join(hits))
+
+    def test_the_scan_covers_all_three_roots(self):
+        """A scan of zero files reports zero offenders. Listing ``python/``
+        after the src layout (#229) returned nothing and would have passed
+        for ever; each root must contribute files."""
+        files = tracked_py_files()
+        for root in ("src/btap/", "tests/", "scripts/"):
+            with self.subTest(root=root):
+                self.assertTrue(any(f.startswith(root) for f in files),
+                                f"no tracked .py under {root} — the scan is vacuous")
 
     def test_allowlist_entries_all_exist(self):
         for relative, reason in ALLOWLIST.items():

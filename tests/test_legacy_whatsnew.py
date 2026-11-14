@@ -8,7 +8,7 @@ from pathlib import Path
 
 from tests.support import REPO_ROOT
 
-SCRIPT = REPO_ROOT / "python" / "scripts" / "legacy_whatsnew.py"
+SCRIPT = REPO_ROOT / "scripts" / "legacy_whatsnew.py"
 SPEC = importlib.util.spec_from_file_location("legacy_whatsnew", SCRIPT)
 legacy = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(legacy)

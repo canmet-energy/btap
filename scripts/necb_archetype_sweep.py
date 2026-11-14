@@ -31,8 +31,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-PYTHON_ROOT = HERE.parent
-REPO_ROOT = PYTHON_ROOT.parent
+REPO_ROOT = HERE.parent
 
 GEN_SCRIPT = REPO_ROOT / "verification" / "oracle" / "gen_legacy_archetype.rb"
 PIN_GEMFILE = REPO_ROOT / "legacy_pin" / "Gemfile"
@@ -73,7 +72,7 @@ COST_HINT = {
 
 LOCATIONS = {
     "toronto": {
-        "epw": PYTHON_ROOT / "tests" / "fixtures" / "weather"
+        "epw": REPO_ROOT / "tests" / "fixtures" / "weather"
         / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw",
         "hdd": 3890,
     },
@@ -447,7 +446,7 @@ def run_workers(building_types: list[str], config: SweepConfig,
             building_type = pending.pop(0)
             child = popen(
                 _worker_command(building_type, config),
-                cwd=str(PYTHON_ROOT),
+                cwd=str(REPO_ROOT),
                 stdout=subprocess.PIPE,
                 text=True,
             )

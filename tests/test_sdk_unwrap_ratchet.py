@@ -41,8 +41,9 @@ import sys
 import unittest
 from pathlib import Path
 
-PYTHON_ROOT = Path(__file__).resolve().parent.parent
-PRODUCT = PYTHON_ROOT / 'btap'
+REPO_ROOT = Path(__file__).resolve().parent.parent
+SRC_ROOT = REPO_ROOT / "src"
+PRODUCT = SRC_ROOT / 'btap'
 BASELINE = Path(__file__).resolve().parent / 'fixtures' / 'sdk_crash_family_methods.json'
 SDK_HEADERS = Path('/usr/local/openstudio-3.11.0/include/openstudio/model')
 
@@ -52,7 +53,7 @@ SDK_HEADERS = Path('/usr/local/openstudio-3.11.0/include/openstudio/model')
 #: defect issue #166 is about, committed inside the ratchet meant to guard
 #: against it. Regenerate after a deliberate change:
 #:
-#:     python3 -c "import sys; sys.path.insert(0,'python'); \
+#:     python3 -c "import sys; sys.path[:0] = ['src', '.']; \
 #:       from tests.test_sdk_unwrap_ratchet import *; print(regenerate())"
 #:
 #: Per-(file, accessor) rather than per-file, so a SEVENTH unguarded unwrap in
@@ -818,7 +819,7 @@ class TestTheBaselineMatchesTheHeaders(unittest.TestCase):
     """
 
     def test_regenerating_reproduces_the_committed_baseline(self):
-        script = PYTHON_ROOT / 'scripts' / 'sdk_api.py'
+        script = REPO_ROOT / 'scripts' / 'sdk_api.py'
         out = subprocess.run(
             [sys.executable, '-I', str(script), 'optionals',
              '--family', 'crash', '--json'],

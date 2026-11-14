@@ -31,7 +31,7 @@ jobs:
       - name: build the canmet-btap wheel
         run: |
           pip install -q build
-          python3 -m build --wheel --outdir python/dist python/
+          python3 -m build --wheel --outdir dist .
       - name: generate the sample models
         # Gitignored and generated, not committed — they need the SDK, which
         # is a pip install on linux now that nothing here uses the container.

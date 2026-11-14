@@ -29,7 +29,7 @@ import sys
 import unittest
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[1]
 SCENARIOS = REPO_ROOT / "verification" / "scenarios"
 MANIFEST = SCENARIOS / "manifest.json"
 
@@ -259,7 +259,7 @@ class TestItIsARecordAndNotAGate(unittest.TestCase):
         before = MANIFEST.read_bytes()
         before_mtime = MANIFEST.stat().st_mtime_ns
 
-        spec_path = (REPO_ROOT / "python" / "tests" / "necb"
+        spec_path = (REPO_ROOT / "tests" / "necb"
                      / "test_frozen_scenarios.py")
         spec = importlib.util.spec_from_file_location(
             "frozen_scenarios_under_test", spec_path)

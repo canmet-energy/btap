@@ -79,7 +79,8 @@ import tempfile
 import time
 from pathlib import Path
 
-PYTHON_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SRC_ROOT = REPO_ROOT / "src"
 #: Measured peak RSS of one `tests/simulation/` run, used for the headroom
 #: check. Deliberately generous.
 PER_RUN_MB = 600
@@ -111,7 +112,7 @@ def build_mutant(work: Path, index: int, target: str, old: str, new: str):
     """
     root = work / f"mut{index}"
     root.mkdir(parents=True)
-    shutil.copytree(PYTHON_ROOT / "btap", root / "btap",
+    shutil.copytree(SRC_ROOT / "btap", root / "btap",
                     ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
     # THE TARGET MUST STAY INSIDE THE COPIED PACKAGE. `target` was trusted,
     # and `tests/` in the shadow is a SYMLINK to the real checkout — so
@@ -121,7 +122,7 @@ def build_mutant(work: Path, index: int, target: str, old: str, new: str):
     # Checked AFTER the copytree and BEFORE any read, with `resolve()` so a
     # symlink or `..` cannot smuggle a path past `is_relative_to`.
     if Path(target).is_absolute():
-        raise ValueError(f"target must be relative to python/, got {target!r}")
+        raise ValueError(f"target must be relative to src/, got {target!r}")
     resolved = (root / target).resolve()
     package = (root / "btap").resolve()
     if not resolved.is_relative_to(package):
@@ -136,18 +137,13 @@ def build_mutant(work: Path, index: int, target: str, old: str, new: str):
     # So the mutant dir needs everything pytest resolves relatively: the tests
     # themselves and the pytest configuration, symlinked rather than copied.
     #
-    # Since #229 the only pyproject.toml is at the REPOSITORY root, so the
-    # `exists()` check below skips it and the mutant runs with no ini file.
-    # That changes nothing: its sole pytest setting was `testpaths`, and every
-    # run here passes its test paths explicitly. Do NOT link the root file in
-    # instead — its `testpaths = ["tests"]` names a directory a mutant
-    # tree does not have.
-    for name in ("tests", "pyproject.toml", "pytest.ini", "setup.cfg",
-                 "conftest.py"):
-        source = PYTHON_ROOT / name
-        if source.exists():
-            (root / name).symlink_to(source)
-    # `target` is relative to python/, e.g. btap/simulation/backends.py
+    # Only `tests/` is linked. Since the src layout (#229) the one
+    # pyproject.toml is at the repository root beside `tests/`, and there is no
+    # pytest.ini, setup.cfg or conftest.py at either level; the mutant runs
+    # with no ini file, which changes nothing because every run here passes its
+    # test paths explicitly.
+    (root / "tests").symlink_to(REPO_ROOT / "tests")
+    # `target` is relative to src/, e.g. btap/simulation/backends.py
     path = resolved
     text = path.read_text(encoding="utf-8")
     if new == old:
@@ -172,9 +168,12 @@ def run_suite(root: Path | None, tests: list[str], timeout: int):
     `root` is the mutant directory, which becomes the CWD so its `btap` leads
     sys.path; None runs the unmutated baseline from the real tree.
     """
-    cwd = root or PYTHON_ROOT
+    # The baseline runs from the repository root, where `tests/` is; under
+    # the src layout no `btap/` sits there, so CWD cannot shadow anything and
+    # the import comes from SRC_ROOT.
+    cwd = root or REPO_ROOT
     env = dict(os.environ)
-    env["PYTHONPATH"] = str(cwd)       # belt as well as braces
+    env["PYTHONPATH"] = str(root or SRC_ROOT)   # belt as well as braces
     env.pop("PYTEST_ADDOPTS", None)
     proc = subprocess.run(
         [sys.executable, "-m", "pytest", "-q", "-p", "no:randomly",

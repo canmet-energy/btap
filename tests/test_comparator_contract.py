@@ -65,7 +65,7 @@ import tempfile
 import unittest
 from dataclasses import dataclass, field
 
-REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
+REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 COMPARATOR = REPO_ROOT / "verification" / "compare_runs.py"
 SPEC_PATH = REPO_ROOT / "verification" / "spec.json"
 

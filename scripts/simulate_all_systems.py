@@ -65,17 +65,17 @@ import tempfile
 import time
 import traceback
 
-REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO_ROOT / "python"))
+REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT / "src"))
 
-CATALOGUE = (REPO_ROOT / "python" / "btap" / "modeling" / "hvac" / "data"
+CATALOGUE = (REPO_ROOT / "src" / "btap" / "modeling" / "hvac" / "data"
              / "systems.json")
-FIXTURE = (REPO_ROOT / "python" / "btap" / "modeling" / "hvac" / "data"
+FIXTURE = (REPO_ROOT / "src" / "btap" / "modeling" / "hvac" / "data"
            / "5ZoneNoHVAC.osm")
-WEATHER_DIR = REPO_ROOT / "python" / "tests" / "fixtures" / "weather"
+WEATHER_DIR = REPO_ROOT / "tests" / "fixtures" / "weather"
 EPW = WEATHER_DIR / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw"
 DDY = WEATHER_DIR / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.ddy"
-STATUS = REPO_ROOT / "python" / "tests" / "fixtures" / "system_simulation_status.json"
+STATUS = REPO_ROOT / "tests" / "fixtures" / "system_simulation_status.json"
 
 #: Severity markers in `eplusout.err`, as REGEXES. EnergyPlus pads them
 #: differently — `** Severe  **` has one leading space and `**  Fatal  **`

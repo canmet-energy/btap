@@ -152,8 +152,8 @@ def _write_json(value: Any, out: TextIO) -> None:
 
 def _fetch(edition: str, output: Path | None, err: TextIO) -> int:
     """Run the maintainer fetcher when this package is in a source checkout."""
-    python_root = Path(__file__).resolve().parents[2]
-    fetcher = python_root / "scripts" / "fetch_necb_8_4_text.py"
+    checkout = Path(__file__).resolve().parents[3]   # src/btap/codes -> root
+    fetcher = checkout / "scripts" / "fetch_necb_8_4_text.py"
     if not fetcher.is_file():
         print(
             "error: fetching requires a canmet-btap source checkout; "

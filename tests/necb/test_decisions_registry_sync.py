@@ -32,21 +32,21 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-PYTHON_ROOT = Path(__file__).resolve().parent.parent.parent
-REPO_ROOT = PYTHON_ROOT.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+SRC_ROOT = REPO_ROOT / "src"
 
-sys.path.insert(0, str(PYTHON_ROOT / "scripts"))
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 import generate_decisions as G  # noqa: E402
 
 # G put this checkout's python/ first on sys.path.
 import btap.codes as codes  # noqa: E402
 from btap.codes import decisions as Loader  # noqa: E402
 
-PYTHON_REGISTRY = PYTHON_ROOT / "btap" / "codes" / "data" / "decisions.json"
+PYTHON_REGISTRY = SRC_ROOT / "btap" / "codes" / "data" / "decisions.json"
 DECISIONS_DOC = REPO_ROOT / "docs" / "necb_decisions.md"
 PROVISION_VIEW = REPO_ROOT / "docs" / "CODE_DECISIONS_BY_PROVISION.md"
 SOURCE_DIR = REPO_ROOT / "docs" / "decisions"
-SCRIPT = PYTHON_ROOT / "scripts" / "generate_decisions.py"
+SCRIPT = REPO_ROOT / "scripts" / "generate_decisions.py"
 
 #: Unbounded digits, matching the generator: D-01..D-99 were all taken.
 ID_PATTERN = re.compile(r"^D-\d+$")
@@ -1146,7 +1146,7 @@ def raw_body(decision_id):
 
 #: A run of this many words shared with the recorded Code text is a copy.
 AUTHORITY_RUN = 8
-NECB_DATA = PYTHON_ROOT / "btap" / "codes" / "necb" / "data"
+NECB_DATA = SRC_ROOT / "btap" / "codes" / "necb" / "data"
 
 
 def word_runs(text, length):
@@ -1410,7 +1410,7 @@ class TestGeneratedOutputsAreInStep(unittest.TestCase):
 
     def test_the_runtime_loader_serves_the_generated_array(self):
         self.assertTrue(Path(Loader.__file__).resolve().is_relative_to(
-            PYTHON_ROOT / "btap"), Loader.__file__)
+            SRC_ROOT / "btap"), Loader.__file__)
         with mock.patch.object(Loader, "_all", None), \
                 mock.patch.object(Loader, "_by_id", None):
             self.assertEqual(json.loads(self.registry)["decisions"],
@@ -2299,7 +2299,7 @@ class TestTheMigrationCannotRunAgain(unittest.TestCase):
 
     def test_the_retired_toc_generator_is_gone(self):
         """One writer. A second one would let the two drift apart silently."""
-        self.assertFalse((PYTHON_ROOT / "scripts" / "generate_decisions_toc.py").exists())
+        self.assertFalse((REPO_ROOT / "scripts" / "generate_decisions_toc.py").exists())
 
 
 if __name__ == "__main__":

@@ -9,7 +9,7 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[1]
 MAPPING_PATH = Path(__file__).with_name("data") / "coverage_code_ref_mapping.json"
 #: The R7 (Stage 1 / R-B, D-86) ledger: the R6 ledger's `new` column carried
 #: through the btap.necb -> btap.codes rename and the eui/tiers move. Two
@@ -24,7 +24,7 @@ ADDITIONS_PATH = (Path(__file__).with_name("data")
                   / "coverage_code_ref_additions.json")
 RETIREMENTS_PATH = (Path(__file__).with_name("data")
                     / "coverage_code_ref_retirements.json")
-GENERATOR = REPO_ROOT / "python" / "scripts" / "generate_necb_8_4_coverage.py"
+GENERATOR = REPO_ROOT / "scripts" / "generate_necb_8_4_coverage.py"
 SPEC = importlib.util.spec_from_file_location("generate_necb_8_4_coverage_refs", GENERATOR)
 coverage = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = coverage
@@ -40,7 +40,7 @@ SIZING_TIME = re.compile(
 #: no longer carry the edition in their names, so a filename grammar
 #: (``*_rules_*.json``) cannot find them and an edition that renames a file
 #: must say so in its manifest.
-EDITION_DATA = REPO_ROOT / "python" / "btap" / "codes" / "necb" / "data"
+EDITION_DATA = REPO_ROOT / "src" / "btap" / "codes" / "necb" / "data"
 
 
 def coverage_manifests():
@@ -121,7 +121,7 @@ def test_manifest_inventory_and_every_code_ref_resolves():
 
 
 def test_qualified_backend_refs_reject_the_ambiguous_stub_name():
-    path = REPO_ROOT / "python" / "btap" / "simulation" / "backends.py"
+    path = REPO_ROOT / "src" / "btap" / "simulation" / "backends.py"
     assert len(coverage.python_definition_lines(path, "execute")) == 3
     for symbol in ("Backend.execute", "Local.execute", "Remote.execute"):
         assert len(coverage.python_definition_lines(path, symbol)) == 1

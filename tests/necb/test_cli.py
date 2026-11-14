@@ -163,9 +163,9 @@ class TestCLIPreflight(CLICase):
             script = os.path.join(dir, "guarded_cli.py")
             Path(script).write_text(wrapper, encoding="utf-8")
             env = dict(os.environ)
-            python_root = str(Path(cli.__file__).parents[2])
+            src_root = str(Path(cli.__file__).parents[2])
             env["PYTHONPATH"] = os.pathsep.join(
-                p for p in (python_root, env.get("PYTHONPATH")) if p)
+                p for p in (src_root, env.get("PYTHONPATH")) if p)
             proc = subprocess.run(
                 [sys.executable, script,
                  FIXTURE, *self.weather_args(), "--simulate", "none",
