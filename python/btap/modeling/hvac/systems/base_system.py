@@ -147,8 +147,67 @@ class BaseSystem:
 
     def build_oa_system(self, model):
         """ZoneSum outdoor-air controller with autosized minimum OA (the NECB
-        convention)."""
+        convention).
+
+        Returns an UNATTACHED outdoor-air system: its outboard-OA, mixed-air
+        and return-air nodes do not exist until a caller adds it to a supply
+        node. Anything that needs those nodes — energy recovery does —
+        belongs in `add_oa_system` below, not here.
+        """
         oa_controller = openstudio.model.ControllerOutdoorAir(model)
         oa_controller.autosizeMinimumOutdoorAirFlowRate()
         oa_controller.controllerMechanicalVentilation().setSystemOutdoorAirMethod('ZoneSum')
         return openstudio.model.AirLoopHVACOutdoorAirSystem(model, oa_controller)
+
+    def add_oa_system(self, model, supply_inlet_node, *, name=None):
+        """Build the OA system, attach it, and add energy recovery if asked.
+
+        #217: recovery was implemented inside `systems/vav_reheat.py`, so of
+        the ten families that build an outdoor-air system only that one could
+        carry it — 55 of 77 OA-bearing catalogue rows across nine families had
+        no heat-recovery option at all.
+
+        The natural chokepoint looked like `build_oa_system`, and it is the
+        wrong one: the exchanger needs `outboardOANode`, `mixedAirModelObject`
+        and `returnAirModelObject`, none of which exist before the OA system
+        is attached to a supply node. So the shared step is create-AND-attach,
+        which is what this is.
+
+        `needs_erv` alone does not get a device.
+        `energy_recovery.validate_energy_recovery` requires all eleven `erv_*`
+        parameters and raises otherwise, because effectiveness, frost control,
+        bypass behaviour and parasitic power cannot be inferred from a
+        boolean. A caller that sets the flag without them FAILS here rather
+        than receiving an exchanger built from invented defaults.
+
+        :returns: the attached ``AirLoopHVACOutdoorAirSystem``.
+        """
+        return self.attach_oa_system(
+            model, self.build_oa_system(model), supply_inlet_node, name=name)
+
+    def attach_oa_system(self, model, oa_system, supply_inlet_node, *,
+                         name=None):
+        """Attach an already-built OA system, then add recovery if asked.
+
+        Separate from `add_oa_system` so a family that creates its OA system
+        EARLY and attaches it LATE keeps doing exactly that. Several do —
+        `fan_coils` and `mau_ptac` build it before the fan and attach it after
+        the coils. Folding creation into the attach point would reorder the
+        objects the ForwardTranslator emits and rename the controllers, which
+        is a diff in every frozen scenario for no behavioural gain.
+        """
+        from btap.modeling.hvac import energy_recovery
+
+        oa_system.addToNode(supply_inlet_node)
+        if self.config.get('needs_erv'):
+            # `resolve_energy_recovery` expands a named `erv_profile` and then
+            # validates, so a row can say `erv_profile: plate_erv` instead of
+            # restating eleven keys — and an explicit `erv_*` key still wins
+            # over the profile. With neither, it raises: there is no implicit
+            # default, because effectiveness, frost control and parasitic
+            # power cannot be inferred from `needs_erv: true`.
+            resolved = energy_recovery.resolve_energy_recovery(self.config)
+            energy_recovery.add_energy_recovery(
+                model, oa_system, resolved,
+                name=name or self.config.get('name') or 'Air Loop')
+        return oa_system

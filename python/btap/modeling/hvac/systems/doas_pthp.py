@@ -68,7 +68,9 @@ class DoasPthp(BaseSystem):
         spm.addToNode(air_loop.supplyOutletNode())
 
         oa_system = self.build_oa_system(model)
-        oa_system.addToNode(air_loop.supplyInletNode())
+        # #217: attach through BaseSystem so energy recovery reaches
+        # the OA nodes, which only exist once attached.
+        self.attach_oa_system(model, oa_system, air_loop.supplyInletNode())
 
         # --- zones: sizing, diffuser, PTHP ---
         for zone in sorted_by_name(zones):

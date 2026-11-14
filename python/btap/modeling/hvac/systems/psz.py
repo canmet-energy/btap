@@ -147,7 +147,9 @@ class PSZ(BaseSystem):
                 supp_coil.addToNode(supply_inlet_node)
             htg_coil.addToNode(supply_inlet_node)
             clg_coil.addToNode(supply_inlet_node)
-        oa_system.addToNode(supply_inlet_node)
+        # #217: attach through BaseSystem so energy recovery reaches
+        # the OA nodes, which only exist once attached.
+        self.attach_oa_system(model, oa_system, supply_inlet_node)
 
         # PSZ is "packaged single zone": the catalogue row names factory-made
         # unitary equipment, so the model SAYS so rather than leaving a reader

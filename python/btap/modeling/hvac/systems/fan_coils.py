@@ -87,7 +87,9 @@ class FanCoils(BaseSystem):
         if htg_coil is not None:
             htg_coil.addToNode(supply_inlet_node)
         clg_coil.addToNode(supply_inlet_node)
-        oa_system.addToNode(supply_inlet_node)
+        # #217: attach through BaseSystem so energy recovery reaches
+        # the OA nodes, which only exist once attached.
+        self.attach_oa_system(model, oa_system, supply_inlet_node)
 
         spm = openstudio.model.SetpointManagerSingleZoneReheat(model)
         if self.sizing.get('setpoint_manager_single_zone_reheat_supply_temp_min') is not None:

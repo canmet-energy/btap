@@ -70,7 +70,12 @@ def build_dehumidifying_doas(system, model, *, system_name, namer,
     fan.addToNode(inlet)
     reheat.addToNode(inlet)
     cooling.addToNode(inlet)
-    oa_system.addToNode(inlet)
+    # #217: through BaseSystem, so a dehumidifying DOAS can carry recovery
+    # like every other outdoor-air family. This module-level builder is the
+    # chilled-beam path and is a SECOND attach site — migrating only
+    # `DOAS.build` left it behind, which is why a chilled-beam system
+    # requesting recovery silently got none.
+    system.attach_oa_system(model, oa_system, inlet)
 
     humidity_schedule = openstudio.model.ScheduleConstant(model)
     humidity_schedule.setName(f'{system_name} Maximum Supply Humidity Ratio')
@@ -122,7 +127,7 @@ class Doas(BaseSystem):
         fan.addToNode(supply_inlet_node)
         htg.addToNode(supply_inlet_node)
         clg.addToNode(supply_inlet_node)
-        self.build_oa_system(model).addToNode(supply_inlet_node)
+        self.add_oa_system(model, supply_inlet_node)
 
         spm = openstudio.model.SetpointManagerScheduled(
             model,

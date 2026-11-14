@@ -100,7 +100,7 @@ class Furnace(BaseSystem):
             clg.setName(f"{air_loop.nameString()} Cooling Coil")
             clg.addToNode(supply_inlet_node)
         if ventilation:
-            self.build_oa_system(model).addToNode(supply_inlet_node)
+            self.add_oa_system(model, supply_inlet_node)
 
         # A row may DECLARE what its equipment physically is, and that
         # declaration is written into the model rather than consulted from the

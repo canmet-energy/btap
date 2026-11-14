@@ -63,6 +63,12 @@ FAMILY_KEYS = {
                    'erv_frost_threshold_temperature', 'erv_heat_exchanger_type',
                    'erv_initial_defrost_time_fraction',
                    'erv_latent_effectiveness', 'erv_nominal_electric_power',
+                   # #217: names a profile in data/energy_recovery.json
+                   # instead of restating the eleven erv_* values. The
+                   # profile's values are validated by
+                   # `energy_recovery.resolve_energy_recovery`, and an
+                   # explicit erv_* key still overrides it.
+                   'erv_profile',
                    'erv_sensible_effectiveness',
                    'erv_supply_air_outlet_temperature_control', 'family',
                    'heating_coil_type', 'name', 'needs_boiler', 'needs_chiller',
@@ -74,7 +80,10 @@ FAMILY_KEYS = {
              'crah_maximum_humidity_ratio', 'crah_supply_air_temperature',
              'family', 'heating', 'name', 'needs_boiler', 'needs_chiller',
              'origin', 'sizing', 'sys_abbr', 'ventilation'],
-    'zone_ervs': ['comment', 'family', 'name', 'needs_boiler', 'origin'],
+    # 'erv_profile' since #217: the row names a profile in
+    # data/energy_recovery.json rather than carrying eleven erv_* keys.
+    'zone_ervs': ['comment', 'erv_profile', 'family', 'name',
+                  'needs_boiler', 'origin'],
     'zone_terminal': ['baseboard_type', 'boiler_fuel', 'comment', 'family',
                       'heating_type', 'name', 'needs_boiler', 'origin', 'unit_type'],
 }
@@ -105,6 +114,12 @@ ENUMS = {
                         'built_up', 'evaporative'],
     'beam_type': ['Active', 'Passive'],
     'erv_heat_exchanger_type': ['Plate', 'Rotary'],
+    # Not hardcoded: read from the profile file, so adding a profile does not
+    # need this test edited, and a row naming one that does not exist fails
+    # HERE rather than at build time.
+    'erv_profile': sorted(
+        __import__('btap.modeling.hvac.energy_recovery', fromlist=['x'])
+        .profiles()),
     'erv_frost_control_type': [
         'None', 'ExhaustAirRecirculation', 'ExhaustOnly',
         'MinimumExhaustTemperature'],

@@ -17,7 +17,7 @@ from pathlib import Path
 
 import btap.modeling as modeling
 from btap.codes import performance_compliance
-from btap.modeling.hvac.systems import vav_reheat
+from btap.modeling.hvac import energy_recovery
 from btap.simulation import runner
 from tests.necb.hvac_helpers import load_fixture, sorted_zones
 from tests.necb.reference_matrix_support import (
@@ -45,9 +45,9 @@ def _catalog_owned(objects):
     owned = []
     for obj in objects:
         source = obj.additionalProperties().getFeatureAsString(
-            vav_reheat.ENERGY_RECOVERY_SOURCE_FEATURE)
+            energy_recovery.ENERGY_RECOVERY_SOURCE_FEATURE)
         if (source.is_initialized()
-                and source.get() == vav_reheat.ENERGY_RECOVERY_SOURCE_CATALOG):
+                and source.get() == energy_recovery.ENERGY_RECOVERY_SOURCE_CATALOG):
             owned.append(obj.nameString())
     return owned
 

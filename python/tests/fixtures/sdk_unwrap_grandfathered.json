@@ -7,13 +7,6 @@
    "_align_heat_pump_heating_capacity:to_CoilHeatingDXMultiSpeed": 1,
    "_align_heat_pump_heating_capacity:to_CoilHeatingDXSingleSpeed": 1
   },
-  "codes/necb/hvac/energy_recovery.py": {
-   "_add_energy_recovery:mixedAirModelObject": 1,
-   "_add_energy_recovery:outboardOANode": 2,
-   "_add_energy_recovery:primaryAirOutletModelObject": 1,
-   "_add_energy_recovery:returnAirModelObject": 1,
-   "_add_energy_recovery:to_Node": 3
-  },
   "codes/necb/hvac/reference.py": {
    "_attach_humidity_control:outletModelObject": 1,
    "_attach_humidity_control:to_Node": 1,
@@ -86,13 +79,8 @@
   },
   "modeling/hvac/systems/vav_reheat.py": {
    "VAVReheat._build_air_loop:returnAirModelObject": 1,
-   "VAVReheat._build_air_loop:to_Node": 1,
-   "add_energy_recovery:mixedAirModelObject": 1,
-   "add_energy_recovery:outboardOANode": 2,
-   "add_energy_recovery:primaryAirOutletModelObject": 1,
-   "add_energy_recovery:returnAirModelObject": 1,
-   "add_energy_recovery:to_Node": 3
+   "VAVReheat._build_air_loop:to_Node": 1
   }
  },
- "total": 58
+ "total": 42
 }

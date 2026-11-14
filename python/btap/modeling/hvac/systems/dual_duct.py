@@ -54,7 +54,9 @@ class DualDuctVAV(BaseSystem):
         fan.setName('Dual-Duct Supply Fan')
         fan.addToNode(air_loop.supplyInletNode())
         oa_system = self.build_oa_system(model)
-        oa_system.addToNode(air_loop.supplyInletNode())
+        # #217: attach through BaseSystem so energy recovery reaches
+        # the OA nodes, which only exist once attached.
+        self.attach_oa_system(model, oa_system, air_loop.supplyInletNode())
 
         hot_outlet, cold_outlet = air_loop.supplyOutletNodes()
         hot_outlet.setName('Dual-Duct Hot Deck Outlet')

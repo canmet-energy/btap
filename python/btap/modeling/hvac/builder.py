@@ -194,6 +194,68 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
                              hw_loop=hw_loop,
                              chw_loop=chw_loop)
 
+    # #217, phylroy: "we can apply an ERV to any system, right?" — nearly, and
+    # it takes TWO devices. `BaseSystem.attach_oa_system` puts an exchanger on
+    # an air loop's outdoor-air stream, which the eleven OA-bearing families
+    # reach. The other twelve build no outdoor air at all, and for those the
+    # device is a per-zone ERV with its own fans.
+    #
+    # Hooked HERE, at the single place a family's `build` is called, rather
+    # than in each family: a zone ERV attaches to a ThermalZone and needs
+    # nothing from the family that conditions it, so nine near-identical edits
+    # would buy nothing. An earlier attempt to migrate ten call sites by regex
+    # broke two files, which is the other reason to prefer one hook.
+    #
+    # `needs_zone_erv` is SEPARATE from `needs_erv` deliberately: they are
+    # different devices with different parameters, and reusing the flag would
+    # silently change what the two shipped `needs_erv` rows build.
+    if resolved.get('needs_zone_erv'):
+        from btap._compat import sorted_by_name
+        from btap.modeling.hvac import energy_recovery
+
+        # A zone ERV is that zone's VENTILATION SOURCE, with its own supply
+        # and exhaust fans — not an accessory. So a family that already
+        # ventilates centrally does not benefit from one, it DOUBLE-ventilates.
+        # Measured before this guard: `psz`, `doas` and `vav_reheat` each
+        # built a central outdoor-air system AND five zone ERVs, silently.
+        #
+        # Refused rather than warned, because the result is a model that
+        # simulates and reports plausible numbers while moving roughly twice
+        # the outdoor air the building asked for. Use `needs_erv` for a
+        # central exchanger on those families.
+        ventilating = [
+            loop.nameString() for loop in air_loops
+            if loop.airLoopHVACOutdoorAirSystem().is_initialized()
+        ]
+        if ventilating:
+            raise ValueError(
+                f"{system_name!r} cannot take `needs_zone_erv`: it already "
+                f'ventilates centrally through '
+                f"{', '.join(sorted(ventilating))}, and a zone ERV brings its "
+                'own outdoor air, so the result would ventilate twice. Use '
+                '`needs_erv` for an exchanger on the central outdoor-air '
+                'stream instead.')
+
+        # The OPTION resolves a profile, exactly as the central path does, so
+        # `needs_zone_erv` cannot quietly inherit the SDK's defaults —
+        # sensible 0.76, latent 0.68 and `frostControlType 'None'`, which
+        # leaves an exchanger with no frost protection in a climate reaching
+        # -40 C. The standalone "Zone ERVs" catalogue row still builds on
+        # those defaults; migrating it changes its output and needs the
+        # catalogue's gates.
+        #
+        # Named `recovery`, not `resolved`, to avoid shadowing the catalogue
+        # row that `return Result(... family=resolved['family'] ...)` reads
+        # below. I first wrote this as a rebinding of `resolved` and then
+        # claimed in a comment that it raised KeyError. It does NOT:
+        # `resolve_energy_recovery` returns `dict(config)` with the profile
+        # merged in, so the result is a SUPERSET of the row and `family`
+        # survives. A mutation test proved the rebinding harmless. The
+        # distinct name is clearer; it did not fix a defect.
+        recovery = energy_recovery.resolve_energy_recovery(resolved)
+        for zone in sorted_by_name(zones):
+            energy_recovery.add_zone_energy_recovery(model, zone, recovery)
+
     return Result(system_name=system_name, family=resolved['family'],
                   air_loops=air_loops, control_zone=control_zone,
                   grouping_evidence=getattr(system, 'grouping_evidence', None))
