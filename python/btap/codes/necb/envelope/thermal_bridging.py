@@ -14,11 +14,12 @@ apart on the same wall; see py-tbd's UPSTREAM.md). No Ruby subprocess
 bridge: ``tbd.process(model, argh)`` mutates the same in-process SDK model
 the Ruby gem's TBD.process does.
 
-The optional dependency is declared in pyproject's ``[project.optional-
-dependencies] tbd`` extra, ``canmet-tbd==3.5.2`` on PyPI since R5 (D-83) —
-installed with ``pip install 'canmet-btap[tbd]'``. (This paragraph used to say
-there was no PyPI release and that install was pinned by commit SHA; that was
-true before R5 and stayed in the docstring after.) When unavailable,
+``canmet-tbd==3.5.2`` is a DEFAULT dependency of canmet-btap since D-109, so
+an ordinary install brings it. (It was the optional ``[tbd]`` extra before
+that, and this paragraph said for a while that it had no PyPI release — true
+before R5, stale after.) It can still be absent — a ``--no-deps`` install, a
+source checkout used without installing, an environment older than D-109 —
+and when it is,
 ``apply`` takes the SAME branch the Ruby takes without the gem: returns
 False with the LOUD 3.1.1.7-not-accounted warning. Never a silent
 clear-field result. Logs are CALL-LOCAL: ``_process`` returns (result,
@@ -135,16 +136,21 @@ def _apply(model, ruleset, *, hdd=None, psi_set="regular (BETBG)", audit=None):
     calls this already holds the ruleset (Stage 6)."""
     audit = audit if audit is not None else AuditLog()
     if not is_available():
-        # The remedy names the EXACT command. It used to say "Install tbd",
-        # and `pip install tbd` installs an UNRELATED PyPI package — PyPI
-        # blocked the py-tbd name as too similar to it, which is why this
-        # engine ships as canmet-tbd. A user who follows the message must land
-        # on the right package (phylroy, #229: people would not know to add
-        # the extra).
+        # The remedy names the EXACT package and version. It once said
+        # "Install tbd", and `pip install tbd` installs an UNRELATED PyPI
+        # package — PyPI blocked the py-tbd name as too similar to it. It must
+        # also carry the version: an unpinned `pip install canmet-tbd` could
+        # fetch a later release, and upstream 3.6.x changes the physics ~43%.
+        #
+        # Since D-109 the engine is a default dependency, so reaching this
+        # branch means the install is incomplete rather than that an extra was
+        # skipped. The version comes from PINNED_TBD_VERSION, the constant the
+        # engine-identity test already checks, so the message cannot drift.
         audit.warn("thermal_bridging",
                    "NECB 3.1.1.7 EFFECTIVE transmittance NOT accounted: the thermal-bridging "
                    "engine (canmet-tbd) is not installed, so applied U-values remain "
-                   "clear-field (Uo). Install it with: pip install 'canmet-btap[tbd]'",
+                   "clear-field (Uo). canmet-btap depends on it; install it with: "
+                   f"pip install 'canmet-tbd=={PINNED_TBD_VERSION}'",
                    article="3.1.1.7.")
         return False
 

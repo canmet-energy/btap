@@ -72,7 +72,11 @@ class TestThermalBridging(unittest.TestCase):
         finally:
             os.environ.pop('OPENSTUDIO_ENVELOPE_DISABLE_TBD', None)
 
-        self.assertIn("pip install 'canmet-btap[tbd]'", message)
+        # Since D-109 the engine is a default dependency, so the remedy names
+        # the engine itself, PINNED: an unpinned `canmet-tbd` could fetch a
+        # later release, and upstream 3.6.x changes the physics ~43%.
+        from btap.codes.necb.envelope.thermal_bridging import PINNED_TBD_VERSION
+        self.assertIn(f"pip install 'canmet-tbd=={PINNED_TBD_VERSION}'", message)
         self.assertNotIn('Install tbd', message,
                          'a bare "tbd" names the wrong PyPI package')
 

@@ -193,8 +193,9 @@ def run_checks() -> int:
           domain_operation)
 
     def tbd_engine_operates():
-        # M7 (D-79 Option A): the pinned py-tbd engine — installed via the
-        # [tbd] extra — must import with the verified 3.5.2-compat identity
+        # M7 (D-79 Option A): the pinned py-tbd engine — a DEFAULT dependency
+        # since D-109, so it arrives with a PLAIN install — must import with
+        # the verified 3.5.2-compat identity
         # and run a REAL process operation on the packaged seed model.
         import tbd
 
@@ -422,11 +423,11 @@ def main(argv) -> int:
         subprocess.run([sys.executable, "-m", "venv", str(venv)], check=True)
         pip, python = venv / "bin" / "pip", venv / "bin" / "python"
         print("installing into a clean venv...")
-        # [tbd] pulls the PINNED py-tbd (git SHA, py-topolys pinned
-        # transitively) — the M7 engine must install and operate from the
-        # DISTRIBUTION, not just the checkout: a broken git pin, missing
-        # package data or import-resolution failure in the optional extra is
-        # invisible to every source-tree test.
+        # The install pulls the PINNED canmet-tbd (a default dependency since
+        # D-109; py-topolys pinned transitively) — the M7 engine must install
+        # and operate from the DISTRIBUTION, not just the checkout: a broken
+        # pin, missing package data or import-resolution failure in the
+        # engine is invisible to every source-tree test.
         # The companion hard dep (R5, D-83) resolves from PyPI like any
         # other dependency now that canmet-energyplus is published from its
         # own repository; H-6 below proves the dependency is real by
@@ -462,10 +463,16 @@ def main(argv) -> int:
             print("H-6 skipped: the marker excludes the companion here")
         # Everything resolves from PyPI now — canmet-tbd 3.5.2 (which pins
         # py-topolys==0.1.0 transitively) and canmet-energyplus 25.2.0.2 are
-        # published, so this install is EXACTLY what a user's `pip install
-        # canmet-btap[tbd]` does. The tag-sourced interim installs are gone.
+        # published, so this install is EXACTLY what a user's plain
+        # `pip install canmet-btap` does.
+        #
+        # PLAIN, since D-109 made the thermal-bridging engine a default
+        # dependency (and removed the `[tbd]` extra). This gate used to
+        # install `{wheel}[tbd]`, which would pass whether or not a default
+        # worked; `tbd_engine_operates` below now fails if a plain install
+        # did not bring the engine — the property D-109 depends on.
         subprocess.run([str(pip), "install", "-q",
-                        "openstudio~=3.11.0", f"{wheel}[tbd]"], check=True)
+                        "openstudio~=3.11.0", str(wheel)], check=True)
 
         # CWD outside the repo: a local btap/ must not be importable.
         print(f"running checks from {work_dir} (outside the checkout)\n")

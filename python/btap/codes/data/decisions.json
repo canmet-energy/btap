@@ -4425,6 +4425,18 @@
           ]
         }
       ]
+    },
+    {
+      "id": "D-109",
+      "title": "The thermal-bridging engine is a default dependency, not the [tbd] extra",
+      "kind": "process",
+      "articles": {
+        "not_applicable": []
+      },
+      "editions": [
+        "not_applicable"
+      ],
+      "summary": "Decided: phylroy, 2026-11-14. canmet-tbd==3.5.2, the NECB 3.1.1.7 thermal-bridging engine, moves from the optional [tbd] extra into canmet-btap's default dependencies, so `pip install canmet-btap` — and `pip install git+https://github.com/canmet-energy/btap` — installs everything a compliance determination needs. As an extra, the people who needed it most were the least likely to know to add it, and without it every determination's reference envelope is under-insulated relative to the Code's intent. D-83 rejected an [engine] extra for canmet-energyplus on exactly that ground; this applies the same reasoning to the other engine. The pin stays exact. The [tbd] extra is removed rather than kept empty: phylroy confirmed there are no clients yet, so nothing outside the repository depended on it, and its only callers were internal."
     }
   ]
 }

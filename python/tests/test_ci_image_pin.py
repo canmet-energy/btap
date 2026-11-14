@@ -53,10 +53,22 @@ class TestTheCiImagePin(unittest.TestCase):
 
     def test_the_image_carries_the_package_pins(self):
         dockerfile = DOCKERFILE.read_text(encoding="utf-8")
-        pin = re.search(r'^tbd = \["(canmet-tbd==[^"]+)"\]',
-                        PYPROJECT.read_text(encoding="utf-8"), re.MULTILINE)
-        self.assertIsNotNone(pin, "the [tbd] extra pin moved in pyproject.toml")
-        self.assertIn(f'--no-deps "{pin.group(1)}"', dockerfile)
+        # Since D-109 the engine is a DEFAULT dependency, declared once in
+        # `[project] dependencies`; there is no `[tbd]` extra any more. Read
+        # the pin from wherever it appears — there must be exactly one.
+        pins = re.findall(r'"(canmet-tbd==[^"]+)"',
+                          PYPROJECT.read_text(encoding="utf-8"))
+        self.assertEqual(1, len(pins),
+                         f"canmet-tbd must be pinned exactly once in pyproject.toml, found {pins}")
+        self.assertIn(f'--no-deps "{pins[0]}"', dockerfile)
+        # ...and it must be the version the engine-identity test checks. Read
+        # from the SOURCE, not imported: this test runs where the SDK is not.
+        source = (REPO_ROOT / "python" / "btap" / "codes" / "necb" / "envelope"
+                  / "thermal_bridging.py").read_text(encoding="utf-8")
+        declared = re.search(r'^PINNED_TBD_VERSION = "([^"]+)"', source, re.MULTILINE)
+        self.assertIsNotNone(declared, "PINNED_TBD_VERSION moved")
+        self.assertEqual(f"canmet-tbd=={declared.group(1)}", pins[0],
+                         "the dependency pin and PINNED_TBD_VERSION disagree")
         self.assertEqual("3.11.0", openstudio_version(),
                          "the image's OpenStudio must be the SDK the project targets")
 

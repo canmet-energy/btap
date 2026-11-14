@@ -102,7 +102,7 @@ def install_tree(wheel: Path, site_packages: Path) -> None:
            "--target", str(site_packages),
            "--platform", "win_amd64", "--implementation", "cp",
            "--python-version", "3.12", "--only-binary=:all:",
-           f"{wheel}[tbd]"]
+           str(wheel)]
     print("staging the windows dependency set (cross-platform pip)…",
           flush=True)
     subprocess.run(cmd, check=True)
