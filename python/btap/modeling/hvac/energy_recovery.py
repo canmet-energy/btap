@@ -319,6 +319,75 @@ def add_energy_recovery(model, oa_system, config, *, name):
 
 # ---------------- zone-level recovery ----------------
 
+def zone_ventilation_rates(zone):
+    """The zone's own outdoor-air requirement, as the two rates an ERV takes.
+
+    A `ZoneHVAC:EnergyRecoveryVentilator` autosizes its flows from its OWN
+    `VentilationRateperUnitFloorArea` and `VentilationRateperOccupant`, whose
+    SDK defaults are 0.000508 m3/s-m2 and 0.00236 m3/s-person. It never looks
+    at the zone's `DesignSpecificationOutdoorAir`, so an ERV built on those
+    defaults ventilates at a rate unrelated to what the building asks for.
+
+    The rates are read from the MODEL rather than from a standard, and that is
+    deliberate. NECB 8.4.3.6 sets peak outdoor-air rates to "the minimum rates
+    required by the applicable ventilation standard" — ASHRAE 62.1 for
+    commercial work, and NBC Division B 9.32.3 for dwelling units, which is
+    the Canadian path rather than ASHRAE 62.2 (A-5.2.10.4.(1)). Whichever
+    applied, its rates are already encoded as the zone's DSOA, so reading the
+    model keeps `btap.modeling` free of a standard choice it has no business
+    making.
+
+    Multiple spaces may carry DIFFERENT DSOAs — one zone of
+    `Office_pre-1960` does — so the per-area rate is weighted by floor AREA
+    and the per-person rate by PEOPLE, which is what reproduces the zone's
+    total requirement rather than an unweighted mean of rates.
+
+    :returns: `(per_area_m3_s_m2, per_person_m3_s_person)`, or None when the
+        zone declares no outdoor-air requirement at all.
+    :raises ValueError: when the requirement cannot be expressed as these two
+        rates — an `outdoorAirMethod` of anything but `Sum`, or an absolute or
+        air-changes component. The ERV ADDS its two rates, so mapping a
+        `Maximum` requirement onto both would over-ventilate, and silently
+        moving more outdoor air than the building asked for is worse than a
+        refusal that names the zone.
+    """
+    area_flow = person_flow = 0.0
+    total_area = total_people = 0.0
+    seen = False
+
+    for space in zone.spaces():
+        spec = opt(space.designSpecificationOutdoorAir())
+        if spec is None:
+            continue
+        seen = True
+        method = spec.outdoorAirMethod()
+        if method != 'Sum':
+            raise ValueError(
+                f'cannot size a zone ERV for {zone.nameString()!r}: its '
+                f'outdoor-air specification {spec.nameString()!r} uses '
+                f'outdoorAirMethod {method!r}, and a zone ERV ADDS its '
+                'per-area and per-person rates, so the result would not be '
+                f'the {method!r} of them.')
+        if spec.outdoorAirFlowRate() or spec.outdoorAirFlowAirChangesperHour():
+            raise ValueError(
+                f'cannot size a zone ERV for {zone.nameString()!r}: its '
+                f'outdoor-air specification {spec.nameString()!r} carries an '
+                'absolute flow or an air-changes rate, and a zone ERV takes '
+                'only a per-area and a per-occupant rate.')
+
+        space_area = space.floorArea() * space.multiplier()
+        space_people = space.numberOfPeople() * space.multiplier()
+        area_flow += spec.outdoorAirFlowperFloorArea() * space_area
+        person_flow += spec.outdoorAirFlowperPerson() * space_people
+        total_area += space_area
+        total_people += space_people
+
+    if not seen:
+        return None
+    return (area_flow / total_area if total_area else 0.0,
+            person_flow / total_people if total_people else 0.0)
+
+
 def add_zone_energy_recovery(model, zone, config=None, *, name=None):
     """One `ZoneHVAC:EnergyRecoveryVentilator` on ``zone``.
 
@@ -368,6 +437,7 @@ def add_zone_energy_recovery(model, zone, config=None, *, name=None):
     # outdoor-air controller, which a zone ERV does not have.
     if config:
         _apply_exchanger_fields(heat_exchanger, config, name=label)
+
     # NOT tagged with ENERGY_RECOVERY_SOURCE_FEATURE, though the central path
     # tags its exchanger. The shipped 'Zone ERVs' row never did, and the point
     # of lifting this function out was to make the device REUSABLE, not to
@@ -380,5 +450,20 @@ def add_zone_energy_recovery(model, zone, config=None, *, name=None):
         model, heat_exchanger, supply_fan, exhaust_fan)
     erv.setName(f'{label} ERV')
     erv.setController(controller)
+
+    # The flows, from the ZONE's own requirement rather than the SDK's
+    # per-area and per-person defaults, which no model ever asked for. None
+    # means the zone declares no requirement; the defaults then stand, since
+    # inventing zero would silently stop ventilating a zone the caller asked
+    # to ventilate.
+    #
+    # Set AFTER the ERV exists: my first version read the rates before
+    # constructing it and used `erv` three lines early, which ruff caught.
+    rates = zone_ventilation_rates(zone)
+    if rates is not None:
+        per_area, per_person = rates
+        erv.setVentilationRateperUnitFloorArea(per_area)
+        erv.setVentilationRateperOccupant(per_person)
+
     erv.addToThermalZone(zone)
     return erv
