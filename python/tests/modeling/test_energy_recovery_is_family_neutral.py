@@ -172,5 +172,76 @@ class TestTheTwoCatalogueRowsAreUnchanged(unittest.TestCase):
             energy_recovery.ENERGY_RECOVERY_SOURCE_CATALOG, source.get())
 
 
+@needs_sdk
+class TestZoneLevelRecoveryIsTheOtherMechanism(unittest.TestCase):
+    """phylroy, 2026-11-13: "we can apply an ERV to any system, right?"
+
+    Nearly — and it takes TWO devices. `attach_oa_system` puts an exchanger on
+    an air loop's outdoor-air stream, which the eleven OA-bearing families
+    reach. The other twelve build no outdoor air at all, and for those the
+    device is a `ZoneHVAC:EnergyRecoveryVentilator`, which carries its own
+    supply and exhaust fans and IS that zone's ventilation source.
+
+    `needs_zone_erv` is separate from `needs_erv` because they are different
+    devices with different parameters; reusing the flag would have changed
+    what the two shipped `needs_erv` rows build.
+    """
+
+    ZONAL = ('baseboards', 'unit_heaters', 'vrf', 'wshp', 'zone_terminal')
+
+    def test_a_zonal_family_can_carry_one(self):
+        for family in self.ZONAL:
+            with self.subTest(family=family):
+                model = _build(_a_row_of(family), needs_zone_erv=True)
+                self.assertEqual(
+                    len(sorted_zones(load_fixture())),
+                    len(model.getZoneHVACEnergyRecoveryVentilators()),
+                    f'{family} did not get one per zone')
+
+    def test_none_appears_unless_asked(self):
+        for family in self.ZONAL:
+            with self.subTest(family=family):
+                model = _build(_a_row_of(family))
+                self.assertEqual(
+                    0, len(model.getZoneHVACEnergyRecoveryVentilators()))
+
+    def test_a_CENTRALLY_ventilated_family_is_REFUSED(self):
+        """The guard that matters.
+
+        A zone ERV brings its own outdoor air, so adding one to a family that
+        already ventilates centrally moves roughly twice the outdoor air the
+        building asked for. Measured before the guard: `psz`, `doas` and
+        `vav_reheat` each built a central OA system AND one ERV per zone, and
+        the result simulates and reports plausible numbers.
+        """
+        for family in ('psz', 'doas', 'vav_reheat', 'mau_ptac'):
+            with self.subTest(family=family):
+                with self.assertRaises(ValueError) as caught:
+                    _build(_a_row_of(family), needs_zone_erv=True)
+                self.assertIn('ventilate twice', str(caught.exception))
+
+    def test_the_standalone_row_and_the_option_build_the_SAME_device(self):
+        """`systems/zone_ervs.py` now delegates to the shared function, so the
+        shipped 'Zone ERVs' row cannot drift from the option."""
+        standalone = _build('Zone ERVs')
+        option = _build(_a_row_of('baseboards'), needs_zone_erv=True)
+        self.assertEqual(
+            len(standalone.getZoneHVACEnergyRecoveryVentilators()),
+            len(option.getZoneHVACEnergyRecoveryVentilators()))
+        for model in (standalone, option):
+            hx = model.getHeatExchangerAirToAirSensibleAndLatents()[0]
+            # The SDK defaults the shipped row has always used. Pinned so a
+            # future change to them is a deliberate act on this row's output,
+            # not a side effect: nominalElectricPower 0.0 means no fan
+            # parasitic, and frostControlType 'None' is questionable in the
+            # climate NECB addresses, where the CENTRAL path sets
+            # 'ExhaustOnly' at -23.3 C.
+            self.assertAlmostEqual(
+                0.76, hx.sensibleEffectivenessat100HeatingAirFlow())
+            self.assertAlmostEqual(
+                0.68, hx.latentEffectivenessat100HeatingAirFlow())
+            self.assertEqual('None', hx.frostControlType())
+
+
 if __name__ == '__main__':
     unittest.main()

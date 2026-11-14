@@ -204,3 +204,57 @@ def add_energy_recovery(model, oa_system, config, *, name):
     oa_system.getControllerOutdoorAir().setHeatRecoveryBypassControlType(
         config['erv_bypass_control_type'])
     return exchanger
+
+
+# ---------------- zone-level recovery ----------------
+
+def add_zone_energy_recovery(model, zone, *, name=None):
+    """One `ZoneHVAC:EnergyRecoveryVentilator` on ``zone``.
+
+    The OTHER recovery mechanism. `add_energy_recovery` above puts an
+    exchanger on an air loop's outdoor-air stream, which needs a loop; TWELVE
+    families build no outdoor air at all — `baseboards`, `unit_heaters`,
+    `vrf`, `wshp`, `zone_terminal` among them — and for those the device is a
+    zone ERV, which brings its own supply and exhaust fans and is that zone's
+    ventilation source rather than an accessory to a loop.
+
+    Lifted from `systems/zone_ervs.py` UNCHANGED, so the standalone
+    "Zone ERVs" catalogue row and this option build the same device. That
+    family now calls this.
+
+    **It inherits the SDK's defaults, and they are worth knowing**: sensible
+    0.76, latent 0.68, `nominalElectricPower` 0.0 — no fan parasitic — and
+    `frostControlType` 'None', which in the climate NECB addresses is
+    questionable where the central path explicitly sets 'ExhaustOnly' at
+    -23.3 C. Those defaults are PRE-EXISTING behaviour of the shipped row, so
+    they are preserved here rather than silently changed by the refactor that
+    made the device reusable. Correcting them is an adjudicated change to that
+    row's output, not a side effect of this one.
+    """
+    label = name or zone.nameString()
+
+    supply_fan = openstudio.model.FanOnOff(model)
+    supply_fan.setName(f'{label} ERV Supply Fan')
+    exhaust_fan = openstudio.model.FanOnOff(model)
+    exhaust_fan.setName(f'{label} ERV Exhaust Fan')
+
+    controller = openstudio.model.ZoneHVACEnergyRecoveryVentilatorController(
+        model)
+    heat_exchanger = openstudio.model.HeatExchangerAirToAirSensibleAndLatent(
+        model)
+    heat_exchanger.setName(f'{label} ERV HX')
+    heat_exchanger.setSupplyAirOutletTemperatureControl(False)
+    # NOT tagged with ENERGY_RECOVERY_SOURCE_FEATURE, though the central path
+    # tags its exchanger. The shipped 'Zone ERVs' row never did, and the point
+    # of lifting this function out was to make the device REUSABLE, not to
+    # change what that row emits — the central move was proven byte-identical
+    # and this one is held to the same standard. Whether a zone ERV should
+    # carry the tag is a separate question; `teardown` reads it on
+    # `TableIndependentVariable`, which this device does not create.
+
+    erv = openstudio.model.ZoneHVACEnergyRecoveryVentilator(
+        model, heat_exchanger, supply_fan, exhaust_fan)
+    erv.setName(f'{label} ERV')
+    erv.setController(controller)
+    erv.addToThermalZone(zone)
+    return erv
