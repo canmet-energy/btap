@@ -523,7 +523,18 @@ delegation.
   manager. The frost values (-23.3 C ExhaustOnly, defrost fractions) are
   EnergyPlus modeling assumptions, NOT code values — 5.2.10.1 is silent on
   frost — now labelled as such in the rules JSONs (modeling_note) so they can
-  no longer be mistaken for code transcriptions. Sentences (5) (test-method
+  no longer be mistaken for code transcriptions. **The note's own provenance
+  claim was wrong and was corrected 2026-11-14**: it said "(E+ defaults)", and
+  none of the three values is one — the E+ IDD defaults Threshold Temperature
+  to 1.7 C, Initial Defrost Time Fraction to 0.083 and Rate of Defrost Time
+  Fraction Increase to 0.012. They are the pinned gem's values
+  (`necb/ECMS/data/erv.json`, which declares `refs: ["assumption"]`). This
+  decision's substance is unaffected — they are still modelling assumptions
+  and still not code values — but a reader following the Evidence pointer
+  would have been told they came from EnergyPlus. The -23.3 C is independently
+  corroborated by RenewAire as a static-plate ERV's frost-free limit below 40%
+  indoor RH; the 1.44 rate is not, and reaches a defrost fraction of 1.0 by
+  -23.88 C, making it a cutoff rather than a rate. Sentences (5) (test-method
   certification) and (3) (specialized-exhaust exemption) are modeller/equipment
   scope.
 - **Who/when:** Claude under D-10 delegation, 2026-07-23.
