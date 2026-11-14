@@ -15,9 +15,10 @@ bridge: ``tbd.process(model, argh)`` mutates the same in-process SDK model
 the Ruby gem's TBD.process does.
 
 The optional dependency is declared in pyproject's ``[project.optional-
-dependencies] tbd`` extra; because py-tbd has no PyPI release yet, install
-is pinned by commit SHA (py-topolys first, then ``--no-deps`` py-tbd — pip
-refuses two spellings of the same git direct reference). When unavailable,
+dependencies] tbd`` extra, ``canmet-tbd==3.5.2`` on PyPI since R5 (D-83) —
+installed with ``pip install 'canmet-btap[tbd]'``. (This paragraph used to say
+there was no PyPI release and that install was pinned by commit SHA; that was
+true before R5 and stayed in the docstring after.) When unavailable,
 ``apply`` takes the SAME branch the Ruby takes without the gem: returns
 False with the LOUD 3.1.1.7-not-accounted warning. Never a silent
 clear-field result. Logs are CALL-LOCAL: ``_process`` returns (result,
@@ -134,10 +135,16 @@ def _apply(model, ruleset, *, hdd=None, psi_set="regular (BETBG)", audit=None):
     calls this already holds the ruleset (Stage 6)."""
     audit = audit if audit is not None else AuditLog()
     if not is_available():
+        # The remedy names the EXACT command. It used to say "Install tbd",
+        # and `pip install tbd` installs an UNRELATED PyPI package — PyPI
+        # blocked the py-tbd name as too similar to it, which is why this
+        # engine ships as canmet-tbd. A user who follows the message must land
+        # on the right package (phylroy, #229: people would not know to add
+        # the extra).
         audit.warn("thermal_bridging",
-                   "NECB 3.1.1.7 EFFECTIVE transmittance NOT accounted: the 'tbd' gem is not "
-                   "available, so applied U-values remain clear-field (Uo). Install tbd to "
-                   "uprate/derate for thermal bridging.",
+                   "NECB 3.1.1.7 EFFECTIVE transmittance NOT accounted: the thermal-bridging "
+                   "engine (canmet-tbd) is not installed, so applied U-values remain "
+                   "clear-field (Uo). Install it with: pip install 'canmet-btap[tbd]'",
                    article="3.1.1.7.")
         return False
 

@@ -52,6 +52,30 @@ class TestThermalBridging(unittest.TestCase):
         finally:
             os.environ.pop('OPENSTUDIO_ENVELOPE_DISABLE_TBD', None)
 
+    def test_the_warning_names_the_package_a_user_must_INSTALL(self):
+        """#229: the remedy is the part a user acts on, so it must be right.
+
+        The message said "Install tbd". `pip install tbd` installs an UNRELATED
+        PyPI package — PyPI blocked the py-tbd name as too similar to it, which
+        is why this engine ships as `canmet-tbd`. phylroy: people would not
+        know to add the extra. The one place they are told must name it.
+        """
+        from btap.audit import AuditLog
+
+        os.environ['OPENSTUDIO_ENVELOPE_DISABLE_TBD'] = '1'
+        try:
+            audit = AuditLog()
+            self.n.thermal_bridging.apply(load_raw_fixture(), code='necb2020',
+                                          hdd=HDD, audit=audit)
+            message = next(w['action'] for w in audit.warnings
+                           if w['article'] == '3.1.1.7.')
+        finally:
+            os.environ.pop('OPENSTUDIO_ENVELOPE_DISABLE_TBD', None)
+
+        self.assertIn("pip install 'canmet-btap[tbd]'", message)
+        self.assertNotIn('Install tbd', message,
+                         'a bare "tbd" names the wrong PyPI package')
+
     def test_coverage_manifest_reflects_tbd_status(self):
         for v in ('2020', '2025'):
             art = next(a for a in self.n.rules(v)['article_coverage']['articles']

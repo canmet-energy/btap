@@ -23,15 +23,34 @@ historical record, not a description of a second live implementation.
 From PyPI:
 
 ```bash
-pip install 'canmet-btap[tbd]'
+pip install canmet-btap
 ```
 
-Straight from GitHub — a branch, a tag or a commit:
+Straight from GitHub — the default branch, or any branch, tag or commit after
+`@`:
 
 ```bash
-pip install 'canmet-btap[tbd] @ git+https://github.com/canmet-energy/btap'
-pip install 'canmet-btap[tbd] @ git+https://github.com/canmet-energy/btap@main'
+pip install git+https://github.com/canmet-energy/btap
+pip install git+https://github.com/canmet-energy/btap@main
 ```
+
+### For NECB compliance runs, add thermal bridging
+
+NECB 3.1.1.7 makes the Table 3.2.2.x U-values *effective* transmittances,
+thermal bridges included. Accounting for that needs the `canmet-tbd` engine,
+which is an optional extra rather than a default dependency because it is an
+exact pin whose upgrade is an adjudicated rebaseline:
+
+```bash
+pip install 'canmet-btap[tbd]'
+pip install 'canmet-btap[tbd] @ git+https://github.com/canmet-energy/btap'
+```
+
+**Without it, a compliance run still completes, but it does not account for
+3.1.1.7** — the reference building's envelope is under-insulated relative to
+the Code's intent, and the run says so with a loud warning in its audit trail.
+It is never silently left out. Work that does not determine compliance —
+`btap.modeling`, `btap.stock`, recipes, HVAC — does not use it.
 
 For development, from a clone (the build entry, `pyproject.toml`, is at the
 repository root; the package source is under `python/`):
