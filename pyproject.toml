@@ -12,9 +12,9 @@ name = "canmet-btap"  # PyPI similarity check blocks "btap" (bta exists); the im
 # to be 0.3.0 — pip could treat an installed PyPI 0.3.0 as satisfying it.
 version = "0.4.0.dev0"
 description = "NECB 2020/2025 Part 8 performance-path compliance toolchain (Python port of the btap gem family)"
-# The PyPI long description stays python/README.md; the root README.md is
+# The PyPI long description stays src/README.md; the root README.md is
 # for building engineers (CLAUDE.md), a different audience.
-readme = "python/README.md"
+readme = "src/README.md"
 requires-python = ">=3.11"
 license = "GPL-3.0-or-later"
 # The wheel must CARRY the licence, not merely name it: the Windows
@@ -130,7 +130,7 @@ ignore = ["B905"]
 [tool.pytest.ini_options]
 # Relative to THIS file. `cd python && pytest tests/` still works: pytest
 # finds this config by walking upward, and explicit paths override testpaths.
-testpaths = ["python/tests"]
+testpaths = ["tests"]
 
 # The D-77 one-way dependency arrows, enforced in-package (one distribution,
 # five subpackages): necb -> costing -> modeling -> audit; simulation beside.

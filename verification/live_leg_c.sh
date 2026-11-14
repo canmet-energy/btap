@@ -4,7 +4,7 @@
 #   verification/live_leg_c.sh [WORK_DIR]
 #
 # Stages (python-prep / ruby-probe):
-#   1. python/scripts/oracle_prep.py       — Python builds the prep models
+#   1. scripts/oracle_prep.py       — Python builds the prep models
 #   2. verification/oracle/export_goldens.rb (pin bundle) — Ruby probes the
 #      pinned oracle into a FRESH goldens directory (never touches committed)
 #   3. verification/oracle/compare_goldens.py — committed goldens ≡ live oracle
@@ -32,7 +32,7 @@ PY="${BTAP_PYTHON:-$ROOT/python/.venv/bin/python}"
 echo "== live Leg C — work dir $WORK"
 
 echo "== 1/4 python prep"
-"$PY" "$ROOT/python/scripts/oracle_prep.py" --out "$PREP"
+"$PY" "$ROOT/scripts/oracle_prep.py" --out "$PREP"
 
 echo "== 2/4 oracle export (pin bundle)"
 BUNDLE_GEMFILE="$ROOT/legacy_pin/Gemfile" bundle exec \

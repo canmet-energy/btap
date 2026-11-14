@@ -349,10 +349,10 @@ echo ""
 echo "📋 Next steps:"
 cat <<'STEPS'
   Run the Python suite        cd python && python3 -m unittest discover tests
-  Rule-key verification       python3 python/scripts/necb_orphan_keys.py
-  Regenerate coverage docs    python3 python/scripts/generate_necb_gem_coverage.py
-                     python3 python/scripts/generate_necb_8_4_coverage.py
-  What has the fork done?     python3 python/scripts/legacy_whatsnew.py
+  Rule-key verification       python3 scripts/necb_orphan_keys.py
+  Regenerate coverage docs    python3 scripts/generate_necb_gem_coverage.py
+                     python3 scripts/generate_necb_8_4_coverage.py
+  What has the fork done?     python3 scripts/legacy_whatsnew.py
 
    Legacy-parity gates need the PINNED oracle, which is a multi-gigabyte clone
    and therefore NOT installed automatically:
@@ -382,8 +382,8 @@ cat <<'STEPS'
    The two Python maintainer clients read HBIX_API_KEY too,
    so the one key covers them:
 
-     python/scripts/fetch_necb_8_4_text.py
-     python/scripts/building_stock.py
+     scripts/fetch_necb_8_4_text.py
+     scripts/building_stock.py
 
    HBIX_MCP_BASE_URL is the only other knob — it repoints all six servers at
    once, for the scripts and .mcp.json alike. There are no per-server overrides.

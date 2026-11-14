@@ -8,7 +8,7 @@ implementation (`btap.codes.necb`). The five `btap-*` Ruby gems this record
 began under retired at R6 (D-84), and the package was renamed at D-86; entries
 written before those points keep their period wording. Machine-checkable
 coverage lives elsewhere — article dispositions in
-`python/btap/codes/data/coverage/necb_8_4_disposition.json`, per-domain
+`src/btap/codes/data/coverage/necb_8_4_disposition.json`, per-domain
 `article_coverage` manifests, the
 generated `NECB_8_4_COVERAGE.html`, and the evidence rules in
 `docs/necb_rule_verification.md`. **This file records the judgement calls**: the
@@ -25,11 +25,11 @@ matter — `id`, `title`, `kind`, `articles`, `summary` — followed by the
 authored Markdown body, whose first line is the section's own `## D-NN —`
 heading. Three artifacts are generated from those sources and are never
 hand-edited: this document, the runtime registry
-`python/btap/codes/data/decisions.json`, and the Codes Committee view by
+`src/btap/codes/data/decisions.json`, and the Codes Committee view by
 provision, `docs/CODE_DECISIONS_BY_PROVISION.md`. The full editing workflow
 for a decision: (1) add or edit the one source file; (2) run `python3
-python/scripts/generate_decisions.py`; (3) run the Python registry/citation
-tests. `python3 python/scripts/generate_decisions.py --check` is the drift gate
+scripts/generate_decisions.py`; (3) run the Python registry/citation
+tests. `python3 scripts/generate_decisions.py --check` is the drift gate
 and runs in CI. The front-matter `title` is the compact title this index and
 the runtime registry carry; the body's heading is authored prose and the two
 deliberately differ for most decisions. Anchors and this index are inserted by

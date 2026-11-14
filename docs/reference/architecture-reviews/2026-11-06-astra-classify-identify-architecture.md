@@ -16,7 +16,7 @@ target geometry + target semantic bindings
 
 This is not a per-object clone and does not require the destination's zone names or zone count to match the source. It also does not require deleting the existing catalogue or moving NECB policy into `stock`.
 
-The repository already has more of the assembly machinery than the fixed-row framing suggests: `python/btap/modeling/hvac/builder.py:97-129,136-142` accepts configuration overrides, and `:147-163` builds composite parts. The limitation is not simply "only 110 machines can be built." It is that the stock path chooses a row and passes only its name and a list of zones (`python/btap/stock/reader.py:497-507`), while the observations have already lost distinctions and bindings (`python/btap/stock/hvac.py:80-115`).
+The repository already has more of the assembly machinery than the fixed-row framing suggests: `src/btap/modeling/hvac/builder.py:97-129,136-142` accepts configuration overrides, and `:147-163` builds composite parts. The limitation is not simply "only 110 machines can be built." It is that the stock path chooses a row and passes only its name and a list of zones (`src/btap/stock/reader.py:497-507`), while the observations have already lost distinctions and bindings (`src/btap/stock/hvac.py:80-115`).
 
 **Correction to my earlier review:** retaining source zone-to-loop assignments is useful evidence and supports same-geometry validation, but is not a sufficient portability design. For building B, those assignments must be replaced by an explicit transfer policy. Source bindings are provenance, not destination selectors.
 
@@ -30,7 +30,7 @@ The cost is real: more explicit input, runtime validation, and interaction testi
 
 **Yes, parameterized system descriptions are the better primary representation for stock.** Fixed bundles are useful for a curated catalogue, examples, stable public names, and NECB reference construction. They are the wrong exhaustive vocabulary for describing arbitrary existing buildings.
 
-The concrete coupling is visible, not hypothetical: `python/btap/modeling/hvac/data/systems.json:999-1050` has a base PVAV row, a plate-HRV row that also selects hot-water baseboards, and the newly added baseboard/no-HRV row. But the VAV builder already treats the choices separately: `systems/vav_reheat.py:333-336` adds recovery conditionally, and `:346-348` adds the selected baseboards. The missing combination was largely a limitation of the selection interface, not a missing machine-building capability.
+The concrete coupling is visible, not hypothetical: `src/btap/modeling/hvac/data/systems.json:999-1050` has a base PVAV row, a plate-HRV row that also selects hot-water baseboards, and the newly added baseboard/no-HRV row. But the VAV builder already treats the choices separately: `systems/vav_reheat.py:333-336` adds recovery conditionally, and `:346-348` adds the selected baseboards. The missing combination was largely a limitation of the selection interface, not a missing machine-building capability.
 
 For that specific combination, selecting a known VAV backend with explicit `baseboard_type='Hot Water'` and `needs_erv=False` is conceptually sufficient; the writer should not need a new globally named catalogue item to express it. A normalized recipe should expose the physical choices, not these legacy field spellings, and its backend adapter should produce the validated configuration.
 
@@ -39,7 +39,7 @@ For that specific combination, selecting a known VAV backend with explicit `base
 Several existing details make that qualification essential:
 
 - `builder.py:136-138` merges arbitrary configuration keys, while `systems/base_system.py:34-37` supplies a no-op default preflight. There is no universal "every requested option was consumed" check.
-- The catalogue key allowlist is a TEST over shipped rows, not a runtime contract for user overrides (`python/tests/modeling/test_catalog_schema.py:1-9,151-158`). A new recipe API must validate keys and cross-field combinations at runtime. `python/btap/modeling/hvac/performance.py:61-78` already provides a useful local precedent for rejecting unknown authoring inputs.
+- The catalogue key allowlist is a TEST over shipped rows, not a runtime contract for user overrides (`tests/modeling/test_catalog_schema.py:1-9,151-158`). A new recipe API must validate keys and cross-field combinations at runtime. `src/btap/modeling/hvac/performance.py:61-78` already provides a useful local precedent for rejecting unknown authoring inputs.
 - Your `needs_erv` observation is supported: the system-builder reads of that key are in `systems/vav_reheat.py:59-60,333,372`. It is not a universal HVAC option just because it has a generic-looking name. A non-VAV recovery request must reach an implemented compatible attachment path or fail as unsupported; passing the flag through is not implementation. Other recovery topologies may exist independently of that flag.
 - The current composite backend applies every part to the SAME `zones` argument (`builder.py:151-163`). A central service for four zones plus PTACs for two requires separate service bindings, not simply another composite row.
 
@@ -49,13 +49,13 @@ Several existing details make that qualification essential:
 
 The current dependency trace matters:
 
-1. NECB consumes `characterize` facts, then applies its OWN rule selector (`python/btap/codes/necb/hvac/reference.py:97-126`). It does not depend on stock's fuzzy scorer.
+1. NECB consumes `characterize` facts, then applies its OWN rule selector (`src/btap/codes/necb/hvac/reference.py:97-126`). It does not depend on stock's fuzzy scorer.
 2. Its finalization already produces both a catalogue name and a configuration (`reference.py:912-915`), and the build call passes that configuration (`:1518-1520`). Parameterization is therefore not foreign to the NECB consumer; it is already part of its public builder use.
-3. The matrix's per-row path builds a shipped row as a proposed model, characterizes it under both retained and scrubbed names, and compares reference assignments in both editions (`python/tests/necb/test_hvac_reference_selection_matrix.py:127-176,186-220`). The normal run uses a representative subset; `FULL_MATRIX` selects all rows (`:96-110`). It separately demands that every catalogue name has adjudicated coverage (`:240-247`). Keep those requirements intact.
+3. The matrix's per-row path builds a shipped row as a proposed model, characterizes it under both retained and scrubbed names, and compares reference assignments in both editions (`tests/necb/test_hvac_reference_selection_matrix.py:127-176,186-220`). The normal run uses a representative subset; `FULL_MATRIX` selects all rows (`:96-110`). It separately demands that every catalogue name has adjudicated coverage (`:240-247`). Keep those requirements intact.
 
 A recipe-authored parameter combination need not become a new shipped catalogue product. It is an authored model input, just as a foreign OSM is. That does NOT mean it inherits adjudicated behavior from the preset it resembles. If a resulting model later enters compliance, it must traverse normal characterization, input gates, and NECB selection. New advertised stock template capabilities need focused integration coverage; anything promoted to a new catalogue row still needs the existing adjudication.
 
-The golden is not an exhaustive physical correctness oracle for arbitrary parameter combinations: its compared assignment keys are `system`, `action`, `energy_type`, `catalog`, and `blocks` (`python/tests/necb/reference_matrix_support.py:18`). Preserving those outputs is necessary when refactoring shared code, but does not prove that controls, curves, plant sharing, or all equipment outputs stayed identical. Retain the builder/engine/frozen-scenario checks too. Never regenerate the adjudicated matrix to make a refactor pass.
+The golden is not an exhaustive physical correctness oracle for arbitrary parameter combinations: its compared assignment keys are `system`, `action`, `energy_type`, `catalog`, and `blocks` (`tests/necb/reference_matrix_support.py:18`). Preserving those outputs is necessary when refactoring shared code, but does not prove that controls, curves, plant sharing, or all equipment outputs stayed identical. Retain the builder/engine/frozen-scenario checks too. Never regenerate the adjudicated matrix to make a refactor pass.
 
 ### A deeper backend limitation than row count
 

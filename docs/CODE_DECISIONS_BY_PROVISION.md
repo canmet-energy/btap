@@ -1,7 +1,7 @@
 # Codes Committee view: decisions by code, edition and provision
 
 > **This file is GENERATED. Do not edit it.** It is written by
-> `python3 python/scripts/generate_decisions.py` from the front matter of the
+> `python3 scripts/generate_decisions.py` from the front matter of the
 > canonical decision files, `docs/decisions/D-NN.md`. The same command with
 > `--check` is the drift gate, and the path-unfiltered `decisions` workflow
 > runs it on every push and pull request.
@@ -45,7 +45,7 @@ How a citation reached this file, and what was checked:
 
 - **Structured source records.** Each NECB reference is validated offline
   against its edition's provision index,
-  `python/btap/codes/necb/data/<code id>/coverage/provisions.json`, which is
+  `src/btap/codes/necb/data/<code id>/coverage/provisions.json`, which is
   built from authorized Codes-service payloads retained under the same
   edition's `provenance/` directory. A source that no registered index covers
   is carried as authored.

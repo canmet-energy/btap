@@ -2,7 +2,7 @@
   "registry_comment": [
     "GENERATED FILE - do not edit. Source: docs/decisions/D-NN.md, one file per",
     "decision, carrying TOML front matter plus the authored Markdown body. Regenerate with",
-    "  python3 python/scripts/generate_decisions.py",
+    "  python3 scripts/generate_decisions.py",
     "and gate drift with its --check. The same sources generate docs/necb_decisions.md,",
     "the authored record, and docs/CODE_DECISIONS_BY_PROVISION.md, the Codes Committee",
     "view by provision. This file is the runtime projection of their front matter,",
@@ -25,7 +25,7 @@
     "",
     "MAINTENANCE: add or edit the one source file, then regenerate. Every kind:runtime entry",
     "must be cited by at least one `ruling:` literal in Python code.",
-    "python/tests/necb/test_decisions_registry.py, test_decisions_registry_sync.py and",
+    "tests/necb/test_decisions_registry.py, test_decisions_registry_sync.py and",
     "test_decisions_generator.py enforce the source schema, all three generated outputs,",
     "the runtime-citation invariant and short-link resolution. The path-unfiltered and reachable on pushes to main/develop, pull requests, merge groups and manual dispatch drift",
     "gate is .github/workflows/decisions.yml, which carries no path filter.",

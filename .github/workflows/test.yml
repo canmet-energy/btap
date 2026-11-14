@@ -38,7 +38,7 @@ jobs:
       - name: Install fast-lane test runner
         run: pip install -q pytest
       - name: Rule-key orphan lint
-        run: python3 python/scripts/necb_orphan_keys.py
+        run: python3 scripts/necb_orphan_keys.py
       # The coverage manifests' code refs ("where is this sentence dealt with")
       # are pure Python file reads. A rename that strands a pointer should fail
       # before anything pays for the container.
@@ -57,8 +57,8 @@ jobs:
       # or this check fails on every branch that is not main.
       - name: Coverage docs match the manifests
         run: |
-          python3 python/scripts/generate_necb_coverage.py
-          python3 python/scripts/generate_necb_8_4_coverage.py
+          python3 scripts/generate_necb_coverage.py
+          python3 scripts/generate_necb_8_4_coverage.py
           git diff --exit-code -- docs/NECB_COVERAGE.md \
                                   docs/NECB_8_4_COVERAGE.html \
             || { echo "::error::Coverage docs are stale. Run: rake necb:coverage_doc"; exit 1; }
@@ -66,22 +66,22 @@ jobs:
       # manifests (multi-edition plan, Stage 4) — same drift contract, its own
       # --check flag (the generate_decisions.py --check contract).
       - name: NECB edition delta doc matches the manifests
-        run: python3 python/scripts/generate_necb_edition_delta.py --check
+        run: python3 scripts/generate_necb_edition_delta.py --check
       # docs/NECB_VINTAGE_MATCH.md compares each snapshot's INHERITED content
       # against the edition's own tables, entirely from the payloads archived
       # under necb<edition>/provenance/vintage_match/ — offline, stdlib, and so
       # the same --check drift contract. Refreshing the archive is a maintainer
       # MCP operation (--fetch) and never runs in CI.
       - name: NECB vintage-match doc matches the archived payloads
-        run: python3 python/scripts/generate_necb_vintage_match.py --check
+        run: python3 scripts/generate_necb_vintage_match.py --check
       # docs/decisions/D-NN.md is canonical; docs/necb_decisions.md,
-      # python/btap/codes/data/decisions.json and
+      # src/btap/codes/data/decisions.json and
       # docs/CODE_DECISIONS_BY_PROVISION.md are all generated from it by the
       # one writer. --check is the drift gate for all three outputs at once, so
       # a hand-edit of any of them is caught here (D-81, amended 2026-09-29).
       - name: "Decisions: generated outputs + sources + runtime citations"
         run: |
-          python3 python/scripts/generate_decisions.py --check
+          python3 scripts/generate_decisions.py --check
           cd python && python3 -m unittest \
             tests.necb.test_decisions_registry_sync \
             tests.necb.test_decisions_generator \
@@ -198,7 +198,7 @@ jobs:
       - name: Generate the sample corpus (Python)
         run: |
           PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
-            python3 python/scripts/generate_samples.py python/tests/generated/samples
+            python3 scripts/generate_samples.py tests/generated/samples
       # The thermal-bridging stack and the rasterizer (librsvg2-bin) are baked
       # into the CI image. The legacy Ruby bundle is isolated to the parity job
       # where the oracle still needs it.
@@ -254,7 +254,7 @@ jobs:
           # packages.
           PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
             /opt/btap-ci/venv/bin/python \
-            python/scripts/simulate_all_systems.py --check
+            scripts/simulate_all_systems.py --check
       # The catalogue sweep above proves a SYSTEM on the shared bare fixture.
       # It cannot prove the GENERATED SAMPLE — that system built onto a seed,
       # with NECB loads and sample-specific setup applied — which is the gap
@@ -267,7 +267,7 @@ jobs:
           PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
             BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
             /opt/btap-ci/venv/bin/python \
-            python/scripts/simulate_all_samples.py --check
+            scripts/simulate_all_samples.py --check
       - name: Coverage summary
         if: always()
         working-directory: python
@@ -347,7 +347,7 @@ jobs:
           BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
           LEGACY_PIN_REQUIRED=1 \
             /opt/btap-ci/pytest/bin/python -m pytest -q \
-              python/tests/necb/test_legacy_archetype_e2e.py
+              tests/necb/test_legacy_archetype_e2e.py
       # LIVE Leg C (D-80 R1): Python vs the LIVE pinned oracle across ALL
       # golden groups — python-prep / ruby-probe, the committed-goldens
       # freshness comparison, then the five goldens test files against the
@@ -370,7 +370,7 @@ jobs:
         if: inputs.export_goldens
         run: |
           export PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python"
-          python3 python/scripts/oracle_prep.py --out /tmp/oracle-prep --canonical
+          python3 scripts/oracle_prep.py --out /tmp/oracle-prep --canonical
           bundle exec ruby verification/oracle/export_goldens.rb \
             --prep /tmp/oracle-prep --out verification/oracle/goldens
       - uses: actions/upload-artifact@v6

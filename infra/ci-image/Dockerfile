@@ -4,7 +4,7 @@
 # job. Published by .github/workflows/ci-image.yml as
 #   ghcr.io/canmet-energy/btap-ci:<openstudio version>-<sha256 of this file, 12>
 # so editing this file means moving the tag in test.yml
-# (python/tests/test_ci_image_pin.py fails until you do).
+# (tests/test_ci_image_pin.py fails until you do).
 FROM nrel/openstudio:3.11.0
 
 # python3-venv for the virtual environments below; librsvg2-bin because the

@@ -2,7 +2,7 @@ name: ci-image
 
 # Builds infra/ci-image/Dockerfile and publishes it to GHCR under a
 # content-addressed tag: <openstudio version>-<first 12 hex of the Dockerfile's
-# sha256>. test.yml pins that exact tag (python/tests/test_ci_image_pin.py
+# sha256>. test.yml pins that exact tag (tests/test_ci_image_pin.py
 # enforces the match), so a Dockerfile change publishes a NEW tag and CI moves
 # only when test.yml moves with it. An existing tag is never overwritten.
 #

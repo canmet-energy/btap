@@ -6,7 +6,7 @@ subpackages: `btap.audit`, `btap.simulation`, `btap.modeling`, `btap.costing`,
 `btap.codes`, and `btap.stock`. `btap.codes` is the code-compliance layer, with the NECB
 family under `btap.codes.necb` (D-86 renamed and re-shaped that package at
 Stage 1 of the multi-edition plan; the old namespace is gone, and
-`python/tests/test_no_legacy_namespace.py` keeps it gone). The former
+`tests/test_no_legacy_namespace.py` keeps it gone). The former
 `btap-*` Ruby gems retired at R6 under D-84.
 
 Ruby still has one deliberate role. `legacy_pin/` bundles the pinned
@@ -191,26 +191,26 @@ python3 -m venv .venv
 .venv/bin/ruff check .
 
 # Repository tools, from the repository root
-python3 python/scripts/necb_orphan_keys.py
+python3 scripts/necb_orphan_keys.py
 
-python3 python/scripts/generate_necb_coverage.py
-python3 python/scripts/generate_necb_8_4_coverage.py
-python3 python/scripts/generate_necb_edition_delta.py --check
-python3 python/scripts/generate_necb_vintage_match.py --check
-python3 python/scripts/generate_decisions.py --check
-python3 python/scripts/legacy_whatsnew.py
+python3 scripts/generate_necb_coverage.py
+python3 scripts/generate_necb_8_4_coverage.py
+python3 scripts/generate_necb_edition_delta.py --check
+python3 scripts/generate_necb_vintage_match.py --check
+python3 scripts/generate_decisions.py --check
+python3 scripts/legacy_whatsnew.py
 # SDK API lookups, from the files the image ships — no import, network or MCP
-python3 python/scripts/sdk_api.py tree LayeredConstruction --subclasses
-python3 python/scripts/sdk_api.py optionals --family crash --list
-python3 python/scripts/sdk_api.py method insulation
+python3 scripts/sdk_api.py tree LayeredConstruction --subclasses
+python3 scripts/sdk_api.py optionals --family crash --list
+python3 scripts/sdk_api.py method insulation
 
 # Authenticated maintainer refreshes; ordinary runtime and CI stay offline
-python3 python/scripts/fetch_necb_provisions.py
+python3 scripts/fetch_necb_provisions.py
 
 # The HVAC catalogue sizing sweep (needs the SDK and EnergyPlus). It writes
-# python/tests/fixtures/system_simulation_status.json, which GATES which
+# tests/fixtures/system_simulation_status.json, which GATES which
 # catalogue systems ship as samples; --check re-derives it without writing.
-python3 python/scripts/simulate_all_systems.py --check
+python3 scripts/simulate_all_systems.py --check
 ```
 
 The zero-install serial fallback is `cd python && python3 -m unittest discover
@@ -225,7 +225,7 @@ Markdown body,
 whose first line is its own `## D-NN —` heading. That file is CANONICAL.
 Three outputs are GENERATED from the sources by `generate_decisions.py` and are
 never hand-edited: `docs/necb_decisions.md` and
-`python/btap/codes/data/decisions.json`, in numeric id order, and
+`src/btap/codes/data/decisions.json`, in numeric id order, and
 `docs/CODE_DECISIONS_BY_PROVISION.md`, the Codes Committee view by code,
 edition and provision. Anchors and the index are inserted by the generator; by
 convention a body does not declare its own `d-NN` anchor. The front-matter
@@ -297,7 +297,7 @@ structured in all), so no committed
 decision still uses the
 per-code-id lists above: every other decision holds `unverified` or
 `not_applicable`.
-`python/tests/necb/test_decisions_registry_sync.py` pins the converted ids and
+`tests/necb/test_decisions_registry_sync.py` pins the converted ids and
 each converted mapping, and fails if any other decision takes a per-code-id
 mapping. A requirement keeps its
 key and `label`, adds a committee-facing `decided` paraphrase, and carries one
@@ -386,8 +386,8 @@ The test files `test_decisions_registry*.py` carry the same grammar and must
 move with it.
 
 ```bash
-python3 python/scripts/generate_decisions.py        # regenerate all three outputs
-python3 python/scripts/generate_decisions.py --check
+python3 scripts/generate_decisions.py        # regenerate all three outputs
+python3 scripts/generate_decisions.py --check
 cd python && python3 -m unittest \
   tests.necb.test_decisions_registry_sync \
   tests.necb.test_decisions_registry \
@@ -402,8 +402,8 @@ Generated coverage documents live in `docs/`; regenerate both and review their
 diffs rather than hand-editing them.
 
 The Section 8.4 article caches live in each edition's snapshot at
-`python/btap/codes/necb/data/necb<edition>/coverage/articles_8_4.json` and ship
-in the wheel. Refresh them with `python3 python/scripts/fetch_necb_8_4_text.py`;
+`src/btap/codes/necb/data/necb<edition>/coverage/articles_8_4.json` and ship
+in the wheel. Refresh them with `python3 scripts/fetch_necb_8_4_text.py`;
 ordinary runtime remains offline.
 
 The first decision-by-provision evidence slice lives beside them at
@@ -412,7 +412,7 @@ Articles, Sentences, Clauses, Tables, table notes, Appendix notes, and
 explicitly qualified Division A provisions. Exact authorized hbix results are
 retained at `provenance/provisions.result.json`; the index pins both that
 archive and the reused Section 8.4 cache by hash. Refresh both editions with
-`python3 python/scripts/fetch_necb_provisions.py`. An absent record is positive
+`python3 scripts/fetch_necb_provisions.py`. An absent record is positive
 authority evidence; a citation missing from the bounded cache is merely
 `not-indexed`, and a source-hash mismatch is `stale`.
 
@@ -456,7 +456,7 @@ never by inference and never by a probe script. The image already ships the
 answers under `/usr/local/openstudio-3.11.0` (written `$SDK` below) — both
 `canmet/os_sdk_container:3.11.0` in the devcontainer and
 `nrel/openstudio:3.11.0` in the CI image put it there, and `test.yml` already
-hardcodes that path. `python/scripts/sdk_api.py` wraps the two file-based
+hardcodes that path. `scripts/sdk_api.py` wraps the two file-based
 lookups and needs no import, network or MCP server; pass `--sdk` for another
 install.
 
@@ -557,7 +557,7 @@ and the HTML report badges it beside the pass/fail badge, because the report
 is the AHJ-facing artifact. The exit code is deliberately unchanged, pinned by
 `test_the_exit_code_is_UNCHANGED_by_the_label`.
 
-`python/tests/necb/test_ahj_register.py` keeps the register honest: it fails
+`tests/necb/test_ahj_register.py` keeps the register honest: it fails
 if the runtime cites an id with no entry, if the file becomes gitignored, or
 if an entry omits its article, who established it, or its interim behaviour.
 Add the entry in the same change as the condition that cites it.
@@ -618,7 +618,7 @@ boundary; post-R6 freezes do not recreate cross-language evidence.
 `verify`, `parity` and `parity-scenarios` run in the CI image
 `ghcr.io/canmet-energy/btap-ci` (`infra/ci-image/Dockerfile`: the OpenStudio
 3.11.0 image plus the test dependencies). Its tag is content-addressed and
-`python/tests/test_ci_image_pin.py` fails until `test.yml` names the tag of the
+`tests/test_ci_image_pin.py` fails until `test.yml` names the tag of the
 current Dockerfile. With the repository variable `CI_RUNNER=necb-ci`, every job
 but `lint` runs on a 36-vCPU CodeBuild runner (`infra/aws-ci/README.md`);
 deleting the variable falls back to `ubuntu-latest`.
@@ -633,7 +633,7 @@ push and pull request, stdlib-only with no dependency install. It exists because
 `docs/decisions/D-NN.md` is the canonical source of the RUNTIME registry while
 `test.yml` path-ignores `docs/**`: a source edit WITHOUT a regenerate touches
 only ignored paths, so `test.yml` would not run at all, and `main` has no branch
-protection to require it. `python/tests/test_decisions_gate_is_path_unfiltered.py`
+protection to require it. `tests/test_decisions_gate_is_path_unfiltered.py`
 asserts the filter stays absent.
 
 There is no scheduled parity trigger. Dispatch parity whenever `legacy_pin/REF`
@@ -671,8 +671,8 @@ Upstream 3.6.x changes the physics by roughly 43% on the same wall, so upgrading
 either side is an adjudicated rebaseline, never routine dependency maintenance.
 
 **One MCP key, exported.** `HBIX_API_KEY` covers all six NRCan MCP servers and
-the two Python maintainers' scripts, `python/scripts/building_stock.py` and
-`python/scripts/fetch_necb_8_4_text.py`. `HBIX_MCP_BASE_URL` repoints all six.
+the two Python maintainers' scripts, `scripts/building_stock.py` and
+`scripts/fetch_necb_8_4_text.py`. `HBIX_MCP_BASE_URL` repoints all six.
 Use `set -a && source .env && set +a`; plain `source` does not export variables
 for child processes such as Claude Code.
 

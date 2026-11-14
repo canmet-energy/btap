@@ -58,7 +58,7 @@ shape installed cleanly.
 
 ### Route B — move the package to the root (1–2 weeks, large but mechanical)
 
-`python/btap` → `btap/` (or `src/btap/`), with `tests/`, `scripts/` and
+`src/btap` → `btap/` (or `src/btap/`), with `tests/`, `scripts/` and
 `pyproject.toml` alongside.
 
 The blast radius is **~16,700 `python/` references across 300+ files**, and
@@ -69,9 +69,9 @@ verification/   14,281   56 frozen baselines whose audit output EMBEDS
                          the coverage code pointers
 docs/            1,376   generated coverage documents with deep links
 packaging/         253   the Windows installer tree
-python/btap/       363   authored `article_coverage.articles[].code[]`
+src/btap/       363   authored `article_coverage.articles[].code[]`
                          citations in the rules JSONs, BOTH editions
-python/tests/      376
+tests/      376
 .github/            30   six workflow files
 CLAUDE.md           27
 ```
@@ -79,7 +79,7 @@ CLAUDE.md           27
 Four interlocking consequences, each of which has bitten this project before:
 
 1. the rules JSONs carry authored `code` pointers of the form
-   `python/btap/codes/compliance.py#_evaluate`. Editing them changes the files,
+   `src/btap/codes/compliance.py#_evaluate`. Editing them changes the files,
    which carry a `result_sha256` in each edition's `manifest.json` — the
    provenance gate that must be recomputed (as it was on 2026-11-14 for an
    unrelated note);
@@ -108,7 +108,7 @@ whether the canonical layout still matters afterwards.
 step its own commit:
 
 1. **make the rename machine-checkable first.** A script that asserts the
-   whole diff is exactly `s|python/btap|btap|`-shaped, so the enormous diff can
+   whole diff is exactly `s|src/btap|btap|`-shaped, so the enormous diff can
    be reviewed as a property rather than read. Without this, step 4 is
    unreviewable and the project's re-freeze discipline cannot be honoured.
 2. move source, tests and scripts; update `pyproject.toml`, `.github/`, the

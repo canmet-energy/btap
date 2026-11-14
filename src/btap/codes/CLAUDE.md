@@ -1,0 +1,376 @@
+# CLAUDE.md — btap.codes (the umbrella)
+
+The code-compliance layer. `necb/` is the NECB code family and holds every
+NECB rule as internal domains (`necb/envelope/ necb/hvac/ necb/loads/
+necb/lighting/ necb/shw/`), plus `necb/editions/necb2025/` for what exists in
+one edition only; the umbrella here composes them with `btap.modeling`'s
+authoring machinery and `btap.costing` into the full NECB Part 8
+determination. **This is the ONLY subpackage allowed to run EnergyPlus**
+(pure SDK — no measures, no openstudio-standards). One clone carries both
+reference transforms; ONE AuditLog spans everything.
+
+[README.md](README.md) is the API guide. This file is the traps.
+
+## The AHJ citation axis (D-100)
+
+This subpackage OWNS the third citation axis, which is why it is documented
+here: `btap.audit` carries the field and decides nothing about it.
+
+- `btap/codes/ahj.py` is the resolver. `btap/codes/data/ahj.json` is its data
+  and is GENERATED from `docs/NECB_AHJ_QUESTIONS.md` by
+  `scripts/generate_ahj_registry.py` — documentation is not a wheel
+  dependency, and a second `{id: status}` map anywhere else is the drift this
+  design removes. No `sets_conditional` boolean is serialized, because a
+  boolean can contradict the status it came from.
+- **The deciding rule site declares applicability**, on its own NARROWED
+  branch, not merely "this function ran". The determination owns policy only:
+  resolve the cited ids, keep those whose status is `referral` or
+  `alternative-solution`, and make an ANNUAL determination conditional when
+  that set is non-empty. It does not inspect the model, re-characterize HVAC
+  or parse action text.
+- The resolver REJECTS rather than drops an unknown id, an unknown status, a
+  malformed citation, or an id whose `editions` exclude the run's code. A
+  citation that resolved to nothing would turn a missing disclosure into a
+  clean non-conditional success.
+- `tests/necb/test_ahj_citations.py` is the AST gate: every `ahj=` is a
+  literal (or a literal-only conditional, or one of the named narrowing
+  helpers), sits on the audit surface, resolves in the generated register, and
+  never appears on a coverage path. It also holds the register's own
+  conditional column to the code in both directions.
+- A missing citation looks identical to a forgotten one, so every EXCLUSION is
+  explained at the site that makes it, and a test asserts the explanation is
+  there.
+
+## Three modules, one determination (Stage 9a)
+
+`compliance.performance_compliance` is still the entry point, but the
+determination is split by OWNERSHIP, not by convenience:
+
+- **`pipeline.py`** — code-family-NEUTRAL lifecycle only: the `_Run` context,
+  phase ordering, the `run_dir` layout, the input-simulate-ability gate,
+  coverage emission, `report.json`/`audit.json`/`audit.txt`, the failure
+  flush, and the `CodePath` protocol. **It imports no code family** — an
+  import contract enforces that, indirect chains included — and reaches one
+  only through `Ruleset.path()`, which resolves the module the edition's
+  manifest names (`"path": "btap.codes.necb.path"`), exactly as `behaviours`
+  are resolved.
+- **`necb/path.py`** — NECB's `CodePath`: `validate` (on-ramp, space-type
+  pre-flight), `climate` (Table C-1 HDD), `prepare_annual`/`consume_annual`
+  (the heat-pump election variables around the pipeline's EnergyPlus call),
+  `determine` (reference build → sizing → 8.4.1.2 verdicts → GHG → costing →
+  EUI supplement), `abort` (the failure-flush citation, 8.4.2.1),
+  `citations`, `report_sections`, and `alternate_path` (the 8.4.4
+  archetype-EUI path, whose phase sequence is genuinely not this one).
+- **`compliance.py`** — the entry point plus the six symbols the Section 8.4
+  coverage `code` pointers name. `_build_reference`, `_evaluate` and
+  `_evaluate_unmet` are FORWARDING functions **on the executed call path**:
+  the family calls them and they delegate back through the registry. A dead
+  stub that resolved the pointer without running would make the evidence
+  technically valid and substantively false — `tests/necb/test_code_path.py`
+  is the gate. Never "tidy" a forwarder away, and never let `compliance.py`
+  or `pipeline.py` import `btap.codes.necb`.
+
+**Full compliance does not imply a reference building.** `Verdict` carries
+what a regime produces (`compliant` + the report it filled in); the report
+renders what is present. A future absolute-metric regime compares against
+thresholds and builds no reference at all.
+
+### What 9a is, stated narrowly: an NECB-PRESERVING scaffold
+
+The lifecycle and the family boundary are REAL — the `CodePath` protocol, the
+manifest `path` key resolved through `Ruleset.path()`, the forwarders on the
+executed call path, and the import-linter contract that keeps
+`pipeline.py` free of `btap.codes.necb`. Nothing in the neutral pipeline
+writes a NECB citation into an audit trail any more:
+`tests/necb/test_code_path.py::TestTheFamilySpeaksForTheCode` fails on any
+`article=` keyword or `[58].x.y` literal reaching an audit call in
+`pipeline.py`.
+
+**Three things 9a does NOT deliver — deferred to 9b/9c, where a second family
+makes the neutral shape testable rather than speculative. Do not describe them
+as done, and do not "just neutralize" one in passing: each moves a report
+leaf.**
+
+1. **`report/sections.py` hardcodes NECB Section 8.4 article paths — 13
+   sites, in four functions**: `verdict_banner` (6), `path_declaration` (2),
+   `energy` (3), `hvac_building_block` (2). The renderer takes the code NAME
+   from `report['code_label']`; the article NUMBERS are still literals.
+   `TestDeferredRendererInventory` pins the inventory, so changing it is a
+   deliberate act with a plan entry behind it.
+2. **`citations()` and `report_sections()` have no product call site.** They
+   are declared, implemented and unit-tested, and nothing calls them. Wiring
+   either needs the ruleset plumbed into the render context and new manifest
+   article keys (`render_all` composes from its own fixed `ORDER`, a different
+   list from `report_sections()`'s report keys) — a report change.
+3. **`pipeline._validate_input_model` still RAISES NECB prose** (Table
+   8.4.4.7.-A, the 8.4.1.2 determination). Exceptions, not audit entries, and
+   the rev-7 ownership table keeps the neutral model-loading half here — but
+   the text is NECB's.
+
+**The abort citation must stay a literal `article=` in family source.** The
+Section 8.4 scanner reads `article=` constants by AST, so routing 8.4.2.1
+through `citations()` or a module constant drops the
+`(edition, 8.4.2.1, warn)` count to zero and breaks the citation no-loss
+gate. That constraint is why `abort` is a hook rather than a lookup.
+
+## Pipeline (`compliance.performance_compliance`)
+
+clone → on-ramp → **space-type pre-flight** (every floor-area space type must
+resolve against the NECB catalog; hard `PreflightError` with did-you-mean
+suggestions — BREAKING for untagged models BY DESIGN, since unmatched types
+silently keep the proposed's lighting/loads in the reference clone; the raise
+lands inside the diagnostics block so the audit still flushes) → weather
+attach → HDD (explicit → Table C-1 → `.stat`) → proposed sizing →
+**proposed ANNUAL (D-52: runs BEFORE the reference build — it depends on
+nothing downstream; when the proposed carries a heat pump, per-equipment
+delivered-heat variables are requested first and joined with the heating
+election inventory for the 8.4.4.13.(2)(g) aux-fuel election)** →
+reference_hvac + reference_envelope + reference_lighting (Part 4 allowance
+LPDs, always) + reference_shw (Part 6 minimum efficiencies, always) +
+reference_daylighting (ON by default, D-51) on ONE clone/audit → reference
+sizing → efficiencies RE-applied on sized capacities (with `proposed=` for
+the 8.4.4.14 pump W/(L/s) transfer) + 5.2.10.1 energy-recovery determination
+on sized flows → reference annual → 8.4.1.2.(2)–(4) verdicts → sentence-(5)
+capacity auto-iteration → Section 10 tier → 2025 Part 11 GHG → optional
+costing of both models → `report.json` / `audit.json` / `audit.txt` →
+optional `compliance_report.html`.
+
+**The second efficiency pass is a real trap.** `apply_efficiencies` runs
+again after reference sizing, so anything set once during
+`reference_hvac` and not re-derivable from the model is silently overwritten
+before the annual run. A purchased-cooling chiller COP shipped that way and
+reverted to the generic value in every simulated run while its unit test —
+which asserted right after the build — stayed green. Persist such identity
+ON the object (`additionalProperties`) and have the applier read it, or the
+fix does not survive to the simulation.
+
+All reference transforms run inside `audit.with_building('reference
+building')` so their entries and coverage are stamped and reconcilable. Only
+schedules and occupancy/receptacle loads stay identical-by-clone (8.4.3.2);
+lighting power and SHW efficiencies ARE regenerated to code on the reference.
+
+- Modes `simulate='annual' | 'sizing' | 'none'` — only `'annual'` determines.
+- `path='eui'` (2025 only) — the 8.4.4 archetype-EUI path, reached through the
+  edition's `behaviours.archetype_eui_path` binding, never by importing
+  `necb/editions/necb2025/eui_archetypes.py`; an edition that binds nothing
+  has no such path. Areas are COMPUTED from the
+  model per 8.4.4.1.(3), unmapped area pro-rata per (4); <90% coverage or
+  HDD ≥ 9000 HARD-REFUSE.
+  The proposed is CHECKED against Table 8.4.4.2 and, when non-conformant,
+  NORMALIZED to it before the annual run — normalization REPLACES the run, no
+  extra cost. NO reference building.
+- `eui_supplement` on a 2025 reference-path run: the two paths simulate
+  DIFFERENT proposeds (as-specified vs Table-8.4.4.2-normalized), so the
+  shared-run shortcut is only lawful when the conformance check passes;
+  otherwise the EUI path reports NOT COMPUTED with the mismatch list rather
+  than silently doubling EnergyPlus cost.
+- `necb_loads=` — bare-geometry on-ramp before the pipeline.
+
+## Audit building-stamp (load-bearing)
+
+The pipeline stamps EVERY phase boundary: `'input model'` (load + on-ramp),
+`'proposed building'`, `'reference building'`, `None` for cross-building
+verdicts. Keep new phases stamped — the report's "Applies to" chips and
+issue-traceability depend on it. Audit text convention: violations SHOUTED,
+passes lowercase; the checklist classifier parses this CASE-SENSITIVELY.
+
+## Decision rulings (`ruling=`, D-44)
+
+Audit entries carry a second citation axis next to `article=`: `ruling=`
+names the adjudicated decision(s) governing the code path, so a report reader
+learns *why* we read the article that way.
+
+- TOP-LEVEL keyword, never inside `inputs=`; a string LITERAL; several ids as
+  one space-separated string (`ruling='D-19 D-21'`), scanned as
+  `\bD-\d+\b`, unbounded.
+- **`data/decisions.json` is GENERATED — do not edit it.** The canonical
+  source is one file per decision, `docs/decisions/D-NN.md`: TOML front matter
+  (`id`, `title`, `kind`, `articles`, `editions`, `summary`) plus the authored
+  body. `articles` groups citations by an AUTHORED requirement key carrying a
+  `label` and one list per code id, never a flat list: the same number names a
+  different requirement in each edition. Edit
+  that file, then run `python3 scripts/generate_decisions.py`, which
+  rewrites this registry, `docs/necb_decisions.md` (both in numeric id order)
+  and the Codes Committee view `docs/CODE_DECISIONS_BY_PROVISION.md` (ordered
+  by code, edition and provision) together. `--check` is the drift gate for
+  all three.
+- **The registry is schema 2**, and `decisions.py` refuses any other
+  number. Every entry keeps `id`, `title`, `kind` and `summary`, which are all
+  the loader and the rulings appendix read.
+
+  A decision converted to the structured source form carries a `decided`
+  paraphrase and `[[articles.<key>.sources]]` records (`code`, `edition`,
+  `role`, `references`). Its entry carries `requirements` instead of
+  `articles`, and its `editions` is derived from `governing` records only.
+  Phase C converted all 23 decisions that carried an established per-code-id
+  mapping, and Phase D's seven batches established 42 held decisions
+  directly in this form (65 structured in all); every other decision holds
+  `unverified` or `not_applicable`.
+  Requirements, sources and `decided` are committee metadata and never reach
+  the compliance report. `tests/necb/test_report_units.py` holds the HTML
+  byte-identical under any rewrite of them. They reach the Codes Committee
+  view instead, where only a `governing` record makes a primary row and a
+  decision that cites no provision is omitted.
+- **A source file is a registry entry**, and a
+  `kind: runtime` entry must be cited by ≥1 `ruling=` tag.
+  `tests/necb/test_decisions_registry.py` enforces both directions with an
+  **AST walker** — a name, an f-string, or a `**{'ruling': …}` expansion on an
+  audit-surface call is refused, not ignored, and docstring examples and
+  `ruling=None` defaults are excluded so documenting the rule cannot satisfy
+  it.
+- The report's rulings appendix renders the decisions that FIRED in the run
+  and is ALWAYS rendered; a test asserts every href resolves.
+- `step='coverage'` entries are deliberately untagged (manifest boilerplate
+  would swamp the appendix fire counts — why D-09 is `runtime_unwired`).
+
+## Two directories named `data` — and data lives by EDITION
+
+- **`btap/codes/necb/data/<code id>/`** ships in the wheel: ONE INDEPENDENT
+  SNAPSHOT PER EDITION (`necb2020/`, `necb2025/`) — that edition's manifest,
+  its seven rule files, its `tables/` and its `coverage/articles_8_4.json`.
+  Each snapshot also carries the bounded offline normative-evidence index at
+  `coverage/provisions.json`; exact authorized hbix payloads stay in that
+  edition's `provenance/provisions.result.json`. The index reuses the existing
+  Section 8.4 cache by hash instead of copying its text.
+  Multi-edition Stage 3 moved data here from the domain directories: code
+  lives by domain, data by edition. **Nothing at runtime reads another
+  edition's files** — no `extends`, no alias, no fallback rung; a missing file
+  raises naming the edition and the path. Two editions verified identical ship
+  two byte-identical copies. `git rm -r necb2020/` is the removal operation.
+  Each manifest also carries a **checked `provenance` block** over exactly its
+  declared outputs (never itself, never `provenance/`), pinning the SOURCE side
+  as well as the result: `archived` entries retain the canonical MCP payload in
+  that edition's `provenance/`, `revision_addressable` ones name the oracle
+  revision and file. `btap-necb-coverage verify-source <code id> <file>`
+  re-checks one (0 verified, 1 mismatch, 3 not checkable here). A `copied`
+  file carries its OWN source fields; `byte_identical_to` is an annotation,
+  never a dependency.
+- **`btap/codes/data/`** holds what is code-family-NEUTRAL: `decisions.json`
+  and `coverage/`. Adding a second family must not move them again. What is
+  left in `coverage/` is `necb_8_4_disposition.json` (one curated
+  responsibility map the generator reads ACROSS editions — putting it inside
+  `necb2025/` would make the 2020 document depend on the 2025 snapshot) and
+  `ATTRIBUTION.md` (one Crown-copyright notice covering all cached NECB text;
+  `coverage.attribution()` takes no edition). Keep them there.
+- The NECB 8.4 article text is versioned, offline reference data with a
+  packaged read API (`btap.codes.coverage`) and a console entry point
+  (`btap-necb-coverage`). The Crown NECB text is attributed and explicitly
+  outside the GPL that covers the code.
+- `btap.codes.provisions` is the code-family-neutral offline citation API.
+  NECB is the only registered citation grammar today. Its checks distinguish
+  `present`, authority-confirmed `absent`, bounded-cache `not-indexed`, and
+  source-hash `stale`; silence is never converted into absence. Division A
+  citations require the literal `Division A` qualification, while `A-...`
+  identifies an Appendix note.
+- The HBIX fetch that refreshes those caches stays an explicit **maintainer**
+  operation. Refresh the bounded provision corpus with
+  `python3 scripts/fetch_necb_provisions.py`. Ordinary runtime is
+  offline.
+- **Every loader resolves through `btap.codes.necb._data_root()` at CALL
+  time**, and every cache is keyed by that root. `_set_data_root(path,
+  _testing=True)` is the TEST-ONLY hook; it is deliberately not an environment
+  variable, because a production override would let a deployed run silently
+  replace adjudicated package data. Never build a data path from
+  `Path(__file__)` in a loader again.
+
+## Before casting or unwrapping an SDK object
+
+Root `CLAUDE.md`, "Three references for any SDK behaviour", and
+`scripts/sdk_api.py`. The rule-application code here holds some 78
+`X.method().get()` chains — and about 258 `.get()` calls in all once a value
+held in a local counts, which is the same hazard one step removed. The count
+is given with its pattern on purpose: a bare figure here read 74, reproduced
+as 78, and a precise number nobody can regenerate is what gets quoted back.
+`optionals --family crash` says which accessors return a type whose empty
+`.get()` SEGFAULTS rather than raising; #169 is the open audit. Route every
+one through `btap._compat.opt`.
+
+## Key facts / traps
+
+- **One selector, one spelling: `code="necb2020"` / `--code necb2020`**
+  (D-87). `resolve(code)` is the only way to a `Ruleset`; there is no
+  `from_edition` and no edition-string fallback. `ruleset.id` is what a
+  public argument and an audit `inputs.code` carry, `ruleset.edition` is
+  what the per-edition DATA accessors (`loads.table`, `lighting.table`,
+  `SpaceTypes.*`, `efficiency.data`, the six `rules` shims,
+  `climate.hdd18`) take as `edition=`. Passing one where the other
+  belongs raises in the registry's voice rather than reading the wrong
+  edition's data.
+- **The report renderer names the code from the report, never from a
+  literal.** `report['code_label']` ('NECB 2020') drives every heading,
+  title, declaration and Part 11 label; `sections.code_family` peels the
+  family name off it for the sentences that cite an article without an
+  edition. A second code family renders itself with no renderer edit.
+- **The CLI logic is `cli.py`; the console script is
+  `btap-compliance = btap.codes.cli:main`.** `run(argv, out=, err=)` returns
+  an int and never exits, so a 40-minute pipeline is testable in-process
+  against `io.StringIO` rather than as a subprocess.
+- **`main` uses `os._exit`, and must flush first.** It sets the status
+  without unwinding — but it skips `atexit` and does NOT flush, so both
+  streams are flushed before the call. Removing the flush loses the verdict
+  line on a perfectly normal exit.
+- **`--quick` must never print COMPLIANT.** `evaluate` returns a boolean
+  regardless of run period and only sets `report['annual'] = False` plus a
+  warning, so the CLI treats that flag as overriding the boolean and exits 6.
+  A week-long run passed off as a determination would be the worst bug this
+  tool could have.
+- **The verdict is decided on `total_site_kwh`, not EUI.** The CLI prints
+  both but phrases the margin on total site energy — labelling an EUI
+  comparison as the verdict diverges the moment floor areas differ.
+- **`PreflightError` subclasses `ValueError`** and distinguishes "repair the
+  MODEL" from "repair the CALL" (bad weather path, unresolvable HDD).
+  Subclassing keeps existing `except ValueError` working — so catch
+  `PreflightError` FIRST, or the parent swallows it.
+- **Exit codes are the diagnosis**, and the `EXIT` dict in `cli.py` is their
+  single definition: `0` compliant, `1` not compliant (a VERDICT, not an
+  error), `2` usage, `3` pre-flight refusal, `4` simulation, `5` internal,
+  `6` no determination.
+- Sentence (4) unmet cooling is VACUOUS when the proposed has no mechanical
+  cooling (passive overheating ≠ capacity shortfall) — audited determination.
+- **Capacity iteration (D-43) is per THERMAL BLOCK**: failing zones get
+  `Sizing:Zone` factor bumps, first by `capacity_step`, then
+  secant-extrapolated from that zone's own (factor, hours) history, growth
+  clamped per round. Zone factors OVERRIDE the global sizing factor. Falls
+  back to global bumps when per-zone data is missing or a gate fails with no
+  single zone failing (facility hours are a union over zones, not a sum →
+  'mixed' mode). Hard-sized equipment responds to neither, so stall detection
+  stops the loop with a loud warning.
+- **Cloning a SpaceType for load overrides? Clone its DefaultScheduleSet
+  too** — a fresh set severs Lights schedule inheritance and EnergyPlus
+  FATALS on schedule-less Lights. Found by the E+ battery, invisible to
+  SDK-only tests.
+- Schedule-PROFILE comparison across models must clone the candidate into the
+  target's model first: differing assumed years shift day-of-week rules, so
+  weekday profiles get compared against weekends.
+- SpaceType density getters may return an optional — unwrap them.
+- **`report/model_query.py` is the ONLY SDK-touching renderer file** (plain
+  dicts out, never raises); html/svg/charts/checklist/diagrams/sections are
+  SDK-free. The report is a single self-contained file: inline SVG/CSS, no
+  scripts (native `<details>` only), no external references — tests enforce
+  this.
+- Licensing: `costs_csv=` runtime injection only; the report embeds cost
+  TOTALS, never line-item licensed prices. NEVER stage `.mcp.json`.
+- The legacy-parity ORACLE is pinned: `legacy_pin/REF` names the exact
+  openstudio-standards fork revision the remaining gates compare against.
+  Bump it deliberately — see `legacy_pin/README.md`.
+
+## Tests
+
+```bash
+cd python && .venv/bin/python -m pytest -q tests/necb/
+```
+
+EnergyPlus tests skip without an engine; annual tests use week runs.
+`BTAP_SDK_REQUIRED=1` / `BTAP_ENGINE_REQUIRED=1` turn those skips into
+failures, which is what CI sets so a missing dependency cannot pass
+vacuously.
+
+`tests/necb/test_legacy_archetype_e2e.py` generates and caches one pinned
+NECB2020 SmallOffice whole-building gate against the ORACLE — the only gate
+fed a model built by the legacy prototype generator, which is why it is the
+only place Kiva foundations are exercised. It runs under
+`BUNDLE_GEMFILE=legacy_pin/Gemfile`; `LEGACY_PIN_REQUIRED=1` turns a missing
+bundle into a failure instead of a skip. Its cache key includes
+`legacy_pin/REF`, the generator digest and the EPW, so a pin bump cannot
+silently reuse a stale model. The 17-building fleet lives in
+`scripts/necb_archetype_sweep.py`.

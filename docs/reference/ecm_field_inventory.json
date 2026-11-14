@@ -1,5 +1,5 @@
 {
-  "_generated_by": "python/scripts/fetch_ecm_field_inventory.py",
+  "_generated_by": "scripts/fetch_ecm_field_inventory.py",
   "_note": "DO NOT EDIT. Derived from two PRIVATE repositories through an authenticated gh session; ordinary runtime and CI read this file and stay offline.",
   "campus": {
     "counts": {

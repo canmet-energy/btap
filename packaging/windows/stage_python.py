@@ -257,7 +257,7 @@ def main() -> int:
     models = sorted(samples.glob("*.osm")) if samples.is_dir() else []
     if not models:
         die(f"no sample models in {samples.relative_to(REPO_ROOT)}. Generate "
-            "them first:\n  python3 python/scripts/generate_samples.py "
+            "them first:\n  python3 scripts/generate_samples.py "
             f"{samples.relative_to(REPO_ROOT)}\n(needs the openstudio SDK "
             "importable)")
     shutil.copytree(samples, stage / "samples")

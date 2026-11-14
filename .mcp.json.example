@@ -12,8 +12,8 @@
     "",
     "The two Python maintainer clients read HBIX_API_KEY too,",
     "and expand the placeholders below themselves, so the one key covers everything:",
-    "  python/scripts/fetch_necb_8_4_text.py",
-    "  python/scripts/building_stock.py",
+    "  scripts/fetch_necb_8_4_text.py",
+    "  scripts/building_stock.py",
     "",
     "HBIX_MCP_BASE_URL is the only other knob and moves all six at once. There is no",
     "per-server override of either value — one key, one base URL, on purpose."

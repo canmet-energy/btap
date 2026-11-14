@@ -2,7 +2,7 @@
 
 Executes the scenarios `scenario_defs.py` authors and compares the results
 against the frozen baselines `manifest.json` declares. Consumed by
-`python/tests/necb/test_frozen_scenarios.py` (the CI gate) and by
+`tests/necb/test_frozen_scenarios.py` (the CI gate) and by
 `freeze.py` (which adds the Ruby seal, double-run determinism, provenance,
 and the atomic write).
 

@@ -126,7 +126,7 @@ real verdict. (3) R-A rewrites every manifest global — commit, four
 machinery hashes, `gate_sha256`, counts, scenario list — and renaming
 `lighting_prefix` makes a citation newly scanner-visible, so generated docs
 move too. (4) **279 files** reference `btap.necb`, not ~10; the scanner
-hardcodes `python/btap/necb/**/*.py` and a `"necb"` gem prefix. (5) `hdd18`
+hardcodes `src/btap/necb/**/*.py` and a `"necb"` gem prefix. (5) `hdd18`
 has five product call sites; the daylight chain is four functions plus
 callers. (6) A result hash + a source hash still proves nothing about origin
 without the artifact or a receipt. (7) `inputs.vintage` is 4–5 audit entries
@@ -415,7 +415,7 @@ referenced in **279 files** across product modules, tests, scripts,
 launchers and workflows — too many to enumerate by hand and stay honest.
 R-B ships `tests/test_no_legacy_namespace.py`: after the rename, no
 *active* reference remains in **tracked** sources — the gate walks
-`git ls-files` under `python/btap/`, `python/tests/`, `python/scripts/`,
+`git ls-files` under `src/btap/`, `tests/`, `scripts/`,
 `packaging/`, `verification/*.py`, `.github/`, `pyproject.toml`,
 `CLAUDE.md` and the per-domain docs. Never the working tree:
 `packaging/windows/stage/` holds untracked build output full of legacy
@@ -432,20 +432,20 @@ resolve to a named destination):
 deliberately, never rewritten**: `PORT_STATUS.md`,
 `docs/d80_retirement_plan_review.md`, **both ledgers** (the R6 one and
 `coverage_code_ref_mapping_r7.json`, whose `old` column necessarily names
-`python/btap/necb/…` — the chain test validates them structurally instead),
+`src/btap/necb/…` — the chain test validates them structurally instead),
 and dated period wording in `necb_decisions.md` / `decisions.json` — the
 gate carries an explicit allowlist with a reason per entry. Known load-bearing sites the
 gate must cover: `pyproject.toml:9-10,53-54,104-119`;
 `packaging/windows/btap-compliance.cmd:28`; `scripts/wheel_smoke.py:74,83,129,148`;
 `verification/scenarios/runner.py:215,235,260`, `freeze.py:116` (hash-pinned,
 absorbed by R-B's promotion); **`generate_necb_8_4_coverage.py:162`**, which
-globs `python/btap/necb/**/*.py`, **and `:193-203`**, which keys on
+globs `src/btap/necb/**/*.py`, **and `:193-203`**, which keys on
 `citation["gem"] == "necb"` — both change here, before Stage 3's
 manifest-driven discovery. Version bump to 0.3.0: an intentional breaking
 release with no consumers.
 
 **Evidence pointers.** After R-A, derive the affected set: every baseline
-`audit.json` **and `audit.txt`** containing `python/btap/necb/` (96 path
+`audit.json` **and `audit.txt`** containing `src/btap/necb/` (96 path
 occurrences per no-simulation `audit.txt` today; the 46 pre-R-A files plus
 the new 2025 scenarios' — do not carry the "46" forward). A **second**
 ledger `tests/data/coverage_code_ref_mapping_r7.json` maps each of the 87
@@ -664,7 +664,7 @@ is what exercising it actually takes):
 Step 1 is what "no runtime dependency" buys; steps 2–4 are the bookkeeping
 any edition removal owes, and the plan names them so nobody mistakes the
 directory delete for the whole job.
-- **New** `python/scripts/generate_necb_edition_delta.py` →
+- **New** `scripts/generate_necb_edition_delta.py` →
   `docs/NECB_EDITION_DELTAS.md`: per consecutive edition pair and domain, a
   leaf-level diff with renumbering separated from value changes;
   `provenance`/`article_coverage` prose excluded. Modelled on
@@ -873,9 +873,9 @@ cd python
 BTAP_SCENARIO_LANES=verify BTAP_SCENARIOS_REQUIRED=1 .venv/bin/pytest -q tests/necb/test_frozen_scenarios.py
 BTAP_SCENARIO_LANES=parity BTAP_SCENARIOS_REQUIRED=1 .venv/bin/pytest -q tests/necb/test_frozen_scenarios.py
 .venv/bin/lint-imports && .venv/bin/ruff check .
-cd .. && python3 python/scripts/necb_orphan_keys.py && python3 python/scripts/generate_decisions.py --check
-python3 python/scripts/generate_necb_coverage.py && python3 python/scripts/generate_necb_8_4_coverage.py \
-  && python3 python/scripts/generate_necb_edition_delta.py && git diff --exit-code docs/
+cd .. && python3 scripts/necb_orphan_keys.py && python3 scripts/generate_decisions.py --check
+python3 scripts/generate_necb_coverage.py && python3 scripts/generate_necb_8_4_coverage.py \
+  && python3 scripts/generate_necb_edition_delta.py && git diff --exit-code docs/
 ```
 
 R-A, R-B, R-C are the only `freeze.py` runs **in Stages 0–7**; each from a
@@ -888,13 +888,13 @@ frozen lanes byte-identical, scanner no-loss gate, citation table, and
 ## Critical files
 
 - `verification/scenarios/{scenario_defs,runner,freeze}.py` — Stage 0
-- `python/scripts/generate_necb_8_4_coverage.py:117-180` — the scanner
-- `python/btap/necb/compliance.py`, `hvac/reference.py`, `hvac/efficiency.py`
-- `python/btap/necb/envelope/climate.py`, `lighting/daylight_control_requirement.py`
-- `python/tests/test_coverage_code_refs.py`, `tests/necb/test_frozen_scenarios.py:85,126-145`
+- `scripts/generate_necb_8_4_coverage.py:117-180` — the scanner
+- `src/btap/necb/compliance.py`, `hvac/reference.py`, `hvac/efficiency.py`
+- `src/btap/necb/envelope/climate.py`, `lighting/daylight_control_requirement.py`
+- `tests/test_coverage_code_refs.py`, `tests/necb/test_frozen_scenarios.py:85,126-145`
 - `python/pyproject.toml:8-12,52-54,104-119`
-- R-B rename inventory: `packaging/windows/btap-compliance.cmd:28`, `python/scripts/wheel_smoke.py:74,83,129,148`, `verification/scenarios/runner.py:215,235,260`, `freeze.py:116`
-- `python/btap/necb/data/ghg_factors_2025.json`, `tests/necb/test_tiers_eui.py:60-69` — the exact `province_state` key the EUI scenario must use
+- R-B rename inventory: `packaging/windows/btap-compliance.cmd:28`, `scripts/wheel_smoke.py:74,83,129,148`, `verification/scenarios/runner.py:215,235,260`, `freeze.py:116`
+- `src/btap/necb/data/ghg_factors_2025.json`, `tests/necb/test_tiers_eui.py:60-69` — the exact `province_state` key the EUI scenario must use
 
 ## Handoff
 
@@ -1498,7 +1498,7 @@ rather than main. Same execution model and the one-heavy-job rule.
   `git rebase --onto main <stage0 tip>` rather than merged, so only its
   own commits replay.
 - **Rename (Opus) delivered and reviewed** — `stage1-btap-codes` (`3bf7bd5`),
-  one commit, 208 files, +1606/−1165, 53 renames; `python/btap/necb/` gone,
+  one commit, 208 files, +1606/−1165, 53 renames; `src/btap/necb/` gone,
   tree matches the plan (`codes/{cli,compliance,coverage,decisions,report}`,
   `codes/necb/{envelope,hvac,lighting,loads,shw,tiers.py,editions/necb2025/
   {eui_archetypes,part11_ghg}.py,data/}`, `codes/data/{decisions.json,
@@ -1551,7 +1551,7 @@ rather than main. Same execution model and the one-heavy-job rule.
   PR, dispatch.
 - **Full suite on `1cc5709`: 880 passed, 1 failed** —
   `test_the_renamed_package_is_the_one_on_disk` asserted the old directory
-  does not *exist*, and a branch switch leaves `python/btap/necb/__pycache__`
+  does not *exist*, and a branch switch leaves `src/btap/necb/__pycache__`
   behind (zero tracked or source files — verified). The gate's own rule is
   tracked files only, so the absence check now uses `git ls-files`
   (`369cd9e`). Not a rename gap. **#33 is MERGED on GitHub**; the fetch of
@@ -1612,7 +1612,7 @@ byte-identical, no re-freeze.
   byte-identical against the frozen `usage-no-model` stderr. **Verified
   by Fable:** the only generated-doc movement is `#L`/`:N` source-line
   anchors (token-classified: 960 differing tokens, every one an `L\d+` or
-  bare number; no inserted/deleted blocks); `git diff -- python/tests/`
+  bare number; no inserted/deleted blocks); `git diff -- tests/`
   against the base is empty (the four protected tests unchanged); the
   registry API tests written from the spec pass against the
   implementation. Out-of-scope findings recorded: `disposition_key_for`'s
@@ -2378,7 +2378,7 @@ product Python and no `verification/scenarios/` touched:
    note MEASURES the state instead of asserting the old difference; the 11
    `verified_against` records per manifest say "33 cells corrected 2026-09-10
    from the archived edition table; dormant — no product reader". Dormancy
-   re-proven: nothing in `python/btap` reads `exhaust_schedule`, so the
+   re-proven: nothing in `src/btap` reads `exhaust_schedule`, so the
    schedule is never requested by name, and the space-type rows still spell
    `NECB-I-FAN` against the table's `NECB-I-Fan`. The frozen python lane is
    green unchanged (5 tests / 32 subtests) — the output-identity proof.
@@ -2463,7 +2463,7 @@ design chooses, it says so and D-89 records the choice.
   purchased-COOLING path is the precedent for propagation: config value →
   `additionalProperties` feature on the new object (`reference.py:556-576`)
   → read by the applier (`efficiency.py:1221`), which is what survives the
-  second efficiency pass (`python/btap/codes/CLAUDE.md`, "second pass trap").
+  second efficiency pass (`src/btap/codes/CLAUDE.md`, "second pass trap").
 - The Code (archived payloads, re-checked live): 2020 8.4.5.2.(1)–(3) and
   8.4.5.3, 2025 8.4.6.2 and 8.4.6.3. FHeatPLC is the fuel-INPUT ratio
   (`Fuel_partload = Fuel_design × FHeatPLC`), so the EnergyPlus multiplier is
@@ -2596,7 +2596,7 @@ representation swap, not a data change.
   build site (`:556-576` precedent) stamps `btap_part_load_curve_class` on
   every boiler `replace_system` created for that assignment. Nothing else
   propagates a class (contract item 3).
-- `python/tests/data/coverage_code_ref_mapping_r7.json:46` if
+- `tests/data/coverage_code_ref_mapping_r7.json:46` if
   `_apply_boiler` is renamed (prefer not to rename it).
 
 ### Tests (spec-first where the behaviour is new)
@@ -3408,7 +3408,7 @@ cannot see.** Found while hardening the 5.2.6.3 cap — the new warning cited
 where the PR comment guessed: `_scan_citations` filters at SCAN time with
 `re.findall(r"(?:PREFIX|8\.4)...")`, so a Part 4/5/6 literal yields no tokens
 and is never recorded at all; the `article in articles` resolution filter is a
-second gate behind it. The glob is also `python/btap/codes/**/*.py`, so
+second gate behind it. The glob is also `src/btap/codes/**/*.py`, so
 `btap/costing` citations were never scanned either.
 
 Exact physical-site accounting, which the first two drafts of this entry both
@@ -3416,7 +3416,7 @@ got wrong:
 
 | population | sites |
 |---|---|
-| `article=` sites in `python/btap/**/*.py` | **278** |
+| `article=` sites in `src/btap/**/*.py` | **278** |
 | resolve onto a Section 8.4 article (the existing gate) | 105 |
 | **entirely outside that gate** | **173** (173/278 = **62.2 %**) |
 | **mixed** — cite an 8.4 article *and* something else | **9** |

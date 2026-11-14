@@ -92,22 +92,22 @@ same variables and never need `.mcp.json` (that file is Claude Code's own
 native-tool config, unrelated to the Python client below):
 
 ```bash
-python3 python/scripts/fetch_necb_8_4_text.py
-python3 python/scripts/fetch_necb_provisions.py
-python3 python/scripts/building_stock.py --help
+python3 scripts/fetch_necb_8_4_text.py
+python3 scripts/fetch_necb_provisions.py
+python3 scripts/building_stock.py --help
 ```
 
 CI uses mocked protocol tests and never requires live HBIX.
 
-`python/btap/_mcp.py` is a byte-identical vendored copy of hbix's own
+`src/btap/_mcp.py` is a byte-identical vendored copy of hbix's own
 `mcp_client.py` (`canmet-energy/hbix`, served at `GET <base>/mcp_client.py`;
 see `canmet-energy/btap#66`). Do not hand-edit it. Check staleness and
 re-sync with its own CLI:
 
 ```bash
-python3 python/btap/_mcp.py --check-update   # sha256 vs the served copy
+python3 src/btap/_mcp.py --check-update   # sha256 vs the served copy
 curl https://3ucoopudrb.execute-api.ca-central-1.amazonaws.com/prod/mcp_client.py \
-    -o python/btap/_mcp.py                   # re-vendor if stale
+    -o src/btap/_mcp.py                   # re-vendor if stale
 ```
 
 ## Testing
@@ -144,11 +144,11 @@ HTML report, and fails below its floor (`--cov-fail-under` in
 Repository checks from the root:
 
 ```bash
-python3 python/scripts/necb_orphan_keys.py
-python3 python/scripts/necb_8_4_6_curve_probe.py
-python3 python/scripts/generate_necb_coverage.py
-python3 python/scripts/generate_necb_8_4_coverage.py
-python3 python/scripts/generate_decisions.py --check
+python3 scripts/necb_orphan_keys.py
+python3 scripts/necb_8_4_6_curve_probe.py
+python3 scripts/generate_necb_coverage.py
+python3 scripts/generate_necb_8_4_coverage.py
+python3 scripts/generate_decisions.py --check
 cd python && python3 scripts/wheel_smoke.py
 ```
 
@@ -160,7 +160,7 @@ frozen scenarios are required rather than skipped.
 fails without its fix — needs more than `PYTHONPATH`. The venv installs `btap`
 as an editable install whose finder resolves the package to this checkout
 whatever `sys.path` says, so the tests silently exercise the current code and
-pass. Export the old tree (`git archive <ref> python/btap | tar -x -C <dir>`),
+pass. Export the old tree (`git archive <ref> src/btap | tar -x -C <dir>`),
 then, before importing `btap`, drop the editable finder and put the export
 first:
 
@@ -179,10 +179,10 @@ One decision is one file, `docs/decisions/D-NN.md`: TOML front matter
 authored Markdown
 body, whose first line is its own `## D-NN —` heading. Those files are
 canonical. [necb_decisions.md](necb_decisions.md),
-`python/btap/codes/data/decisions.json` and
+`src/btap/codes/data/decisions.json` and
 [CODE_DECISIONS_BY_PROVISION.md](CODE_DECISIONS_BY_PROVISION.md), the Codes
 Committee view by code, edition and provision, are generated from them by
-`python3 python/scripts/generate_decisions.py`; use `--check` in gates. The
+`python3 scripts/generate_decisions.py`; use `--check` in gates. The
 registry and the log are in numeric id order. To add or change a decision, edit
 the one source file and regenerate -- never the three outputs. The registry
 tests enforce the source schema, all three generated outputs, short-link
@@ -238,18 +238,18 @@ part of the evidence history; their inputs and code pointers are Python-owned
 after R6. Do not edit either output by hand.
 
 Section 8.4 source caches ship inside each edition's own snapshot at
-`python/btap/codes/necb/data/necb<edition>/coverage/articles_8_4.json` for
+`src/btap/codes/necb/data/necb<edition>/coverage/articles_8_4.json` for
 offline, versioned use; the Crown-copyright notice and the cross-edition
-disposition stay code-family-neutral in `python/btap/codes/data/coverage/`.
+disposition stay code-family-neutral in `src/btap/codes/data/coverage/`.
 Refresh them only as a maintainer operation with
-`python3 python/scripts/fetch_necb_8_4_text.py` and review the generated-doc
+`python3 scripts/fetch_necb_8_4_text.py` and review the generated-doc
 diff.
 
 The bounded decision-by-provision evidence indexes ship beside those caches at
 `coverage/provisions.json`. They contain identities and hierarchy, not copied
 requirement text; exact authorized hbix results are retained under each
 edition's `provenance/provisions.result.json`. Refresh both editions with
-`python3 python/scripts/fetch_necb_provisions.py`, then review the index,
+`python3 scripts/fetch_necb_provisions.py`, then review the index,
 archive, manifest provenance, and targeted tests. Runtime and CI never call
 hbix. A missing entry means `not-indexed`; only an explicit authority-backed
 record or a complete parent inventory establishes `absent`.
@@ -359,7 +359,7 @@ What it guarantees, and what it refuses:
 - It refuses outright if `spec.json` moved: the comparison rules changed, so
   every baseline needs re-verifying and a scope cannot establish that.
 
-`python/tests/test_scoped_freeze.py` executes these with no engine, against
+`tests/test_scoped_freeze.py` executes these with no engine, against
 two extracted helpers — and it is worth knowing which half you are relying
 on:
 
@@ -396,8 +396,8 @@ git worktree add --detach "$WT" HEAD
 # PYTHONPATH IS MANDATORY, not belt-and-braces. One interpreter does not mean
 # one source. Measured both ways from "$WT/python" on 2026-10-04:
 #
-#   $PY -c "import btap"   ->  $WT/python/btap     (cwd leads sys.path)
-#   $PY some/script.py     ->  $REPO/python/btap   <- THE TRAP
+#   $PY -c "import btap"   ->  $WT/src/btap     (cwd leads sys.path)
+#   $PY some/script.py     ->  $REPO/src/btap   <- THE TRAP
 #
 # In script mode sys.path[0] is the SCRIPT's directory, not the cwd, so `btap`
 # resolves through the venv's editable install — the main checkout. freeze.py
@@ -624,7 +624,7 @@ dependency install, no SDK. It exists because `docs/decisions/D-NN.md` is the
 canonical source of the runtime registry while `test.yml` path-ignores
 `docs/**`: editing a source without regenerating touches only ignored paths, so
 `test.yml` would not run, and `main` has no branch protection to require it.
-`python/tests/test_decisions_gate_is_path_unfiltered.py` keeps the filter
+`tests/test_decisions_gate_is_path_unfiltered.py` keeps the filter
 absent and the check runnable as a failing command.
 
 What the gate does NOT do: block a merge. `main` carries no branch protection

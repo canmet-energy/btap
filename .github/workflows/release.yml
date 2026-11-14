@@ -37,7 +37,7 @@ jobs:
         # is a pip install on linux now that nothing here uses the container.
         run: |
           pip install -q "openstudio~=3.11.0"
-          python3 python/scripts/generate_samples.py packaging/windows/samples
+          python3 scripts/generate_samples.py packaging/windows/samples
           ls packaging/windows/samples | head -3
       - name: stage the Windows payload
         run: |

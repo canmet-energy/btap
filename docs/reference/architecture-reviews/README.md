@@ -33,7 +33,7 @@ Read the reviews with these in mind, because large parts of both rest on them:
    Fable's zone-selector ruling are both moot.
 2. **I framed the round trip as reproduction fidelity.** phylroy: recipes are
    independent of NECB and exist for **model articulation**.
-   `python/btap/stock/CLAUDE.md` already said a generated building is
+   `src/btap/stock/CLAUDE.md` already said a generated building is
    "representative for loads, envelope and equipment performance, and only
    approximately for HVAC", and said not to quote a headline gap against a
    hand-built archetype as a property of the package. Both reviews judge an
@@ -54,7 +54,7 @@ OA-bearing rows cannot carry it), #220 a PTAC-only group gaining a central
 MAU, #212 the unweighted aggregates.
 
 Fable's measurement is the durable part and now lives as a test —
-`python/tests/stock/test_suggester_self_consistency.py`. Build each catalogue
+`tests/stock/test_suggester_self_consistency.py`. Build each catalogue
 row, scrub the loop names so name-recognition cannot answer, and ask whether
 the row that built the model comes back:
 

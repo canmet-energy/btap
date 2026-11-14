@@ -78,7 +78,7 @@ jobs:
           mkdir -p /tmp/run
           XDG_CACHE_HOME=/tmp/cache btap-compliance \
             verification/oracle/fixtures/5ZoneNoHVAC.osm --simulate sizing \
-            --epw python/tests/fixtures/weather/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw \
+            --epw tests/fixtures/weather/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw \
             --hdd 3890 --storeys 1 --no-report --quiet \
             --space-type "Space Function/Office enclosed > 25 m2" -o /tmp/run || test $? -eq 6
           test -d /tmp/run/proposed_sizing
@@ -111,7 +111,7 @@ jobs:
           mkdir -p /tmp/run
           LOCALAPPDATA='/tmp/cache' /tmp/v/Scripts/btap-compliance \
             verification/oracle/fixtures/5ZoneNoHVAC.osm --simulate sizing \
-            --epw python/tests/fixtures/weather/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw \
+            --epw tests/fixtures/weather/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw \
             --hdd 3890 --storeys 1 --no-report --quiet \
             --space-type "Space Function/Office enclosed > 25 m2" -o /tmp/run || test $? -eq 6
           test -d /tmp/run/proposed_sizing

@@ -4,13 +4,13 @@
 # Exports the Leg-C ORACLE GOLDENS (D-78/D-80): every oracle-side value the
 # Python golden tests compare, frozen to verification/oracle/goldens/*.json.
 #
-#   .venv/bin/python python/scripts/oracle_prep.py --out PREP
+#   .venv/bin/python scripts/oracle_prep.py --out PREP
 #   BUNDLE_GEMFILE=<repo>/legacy_pin/Gemfile bundle exec \
 #     ruby verification/oracle/export_goldens.rb --prep PREP --out DIR
 #
 # python-prep / ruby-probe (D-80): this exporter is GEM-FREE. Every input
 # whose preparation historically needed a btap-gem call arrives as an .osm
-# built by python/scripts/oracle_prep.py (with its composition contract in
+# built by scripts/oracle_prep.py (with its composition contract in
 # prep_manifest.json); probe requests (schedule names, costing candidates)
 # come from the committed request_manifest.json; SDK-only prep (weather
 # attachment, the synthetic daylighting boxes) happens here. Runs ONLY under
@@ -41,7 +41,7 @@ REF = File.read(File.join(ROOT, 'legacy_pin/REF')).strip
 
 options = {}
 OptionParser.new do |op|
-  op.on('--prep DIR', 'directory written by python/scripts/oracle_prep.py') { |v| options[:prep] = v }
+  op.on('--prep DIR', 'directory written by scripts/oracle_prep.py') { |v| options[:prep] = v }
   op.on('--out DIR', 'goldens destination (backup-swapped if non-empty)') { |v| options[:out] = v }
 end.parse!
 abort('--prep and --out are required') unless options[:prep] && options[:out]
@@ -61,14 +61,14 @@ abort('the BTAP costing oracle failed to load') if coster == :unavailable
 
 # ---- prep manifest schema: fail with the field name, not NoMethodError ---
 prov = PREP_MANIFEST['provenance']
-abort('prep_manifest.json has no provenance block — re-run python/scripts/oracle_prep.py') unless prov.is_a?(Hash)
+abort('prep_manifest.json has no provenance block — re-run scripts/oracle_prep.py') unless prov.is_a?(Hash)
 %w[request_manifest_sha256 oracle_prep_sha256 seed_sha256 openstudio commit dirty].each do |field|
   next if prov.key?(field)
 
   abort("prep_manifest.json provenance is missing #{field.inspect} — the prep directory " \
-        'was built by an older/foreign oracle_prep.py; re-run python/scripts/oracle_prep.py.')
+        'was built by an older/foreign oracle_prep.py; re-run scripts/oracle_prep.py.')
 end
-abort('prep_manifest.json has no models block — re-run python/scripts/oracle_prep.py') unless PREP_MANIFEST['models'].is_a?(Hash)
+abort('prep_manifest.json has no models block — re-run scripts/oracle_prep.py') unless PREP_MANIFEST['models'].is_a?(Hash)
 
 # ---- provenance binding: the prep must come from THESE inputs ------------
 # The prep manifest records what oracle_prep.py ran against; a stale prep
@@ -78,14 +78,14 @@ abort('prep_manifest.json has no models block — re-run python/scripts/oracle_p
 # cheap; a golden with mixed provenance is not.
 {
   'request_manifest_sha256' => File.join(__dir__, 'request_manifest.json'),
-  'oracle_prep_sha256' => File.join(ROOT, 'python/scripts/oracle_prep.py'),
+  'oracle_prep_sha256' => File.join(ROOT, 'scripts/oracle_prep.py'),
   'seed_sha256' => File.join(__dir__, 'fixtures/5ZoneNoHVAC.osm')
 }.each do |field, current_path|
   recorded = prov[field]
   current = Digest::SHA256.hexdigest(File.read(current_path, encoding: 'BINARY'))
   next if recorded == current
 
-  abort("prep provenance mismatch on #{field}: the prep directory was built against "         "#{recorded ? recorded[0, 12] : 'nothing'} but the current file is #{current[0, 12]} "         "(#{current_path}) — STALE PREP. Re-run python/scripts/oracle_prep.py at this revision.")
+  abort("prep provenance mismatch on #{field}: the prep directory was built against "         "#{recorded ? recorded[0, 12] : 'nothing'} but the current file is #{current[0, 12]} "         "(#{current_path}) — STALE PREP. Re-run scripts/oracle_prep.py at this revision.")
 end
 
 # ---- OpenStudio identity: prep and probe must be the same build ----------
@@ -102,7 +102,7 @@ end
 # trees — R6 deletes them). The weather TRIO travels together: the oracle's
 # get_necb_hdd18 derives the .stat path from the EPW's directory, so
 # fixtures/ must also hold the .stat even though nothing names it here. Byte-identity with the gem originals is
-# drift-gated until R6 by python/tests/test_fixture_drift.py; at R6 these
+# drift-gated until R6 by tests/test_fixture_drift.py; at R6 these
 # copies become authoritative.
 FIXTURE = File.join(__dir__, 'fixtures/5ZoneNoHVAC.osm')
 EPW = File.join(__dir__, 'fixtures/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw')

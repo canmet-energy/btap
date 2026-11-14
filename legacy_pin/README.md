@@ -51,7 +51,7 @@ LEGACY_PIN_REQUIRED=1 \
 BUNDLE_GEMFILE="$PWD/legacy_pin/Gemfile" \
 PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
 BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
-   python/.venv/bin/pytest -q python/tests/necb/test_legacy_archetype_e2e.py
+   python/.venv/bin/pytest -q tests/necb/test_legacy_archetype_e2e.py
 ```
 
 `LEGACY_PIN_REQUIRED=1` turns an unavailable oracle into failure instead of a

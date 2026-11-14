@@ -1,7 +1,7 @@
 """The canonical scripted audit scenario (D-80 R4, replaces B5/B6's live
 Ruby comparison as the frozen audit-unit baseline).
 
-MOVED here from python/tests/audit/test_cross_language.py, where the
+MOVED here from tests/audit/test_cross_language.py, where the
 docstring's contract was: MUST mirror cross_language/ruby_reference.rb line
 for line. At freeze time the Ruby driver still runs (the seal); after the
 handoff this file plus the frozen baselines ARE the contract — the dormant

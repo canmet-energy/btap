@@ -1,6 +1,6 @@
 # MCP server configuration — holds live API keys. NEVER commit.
-# The two Python clients that read it (python/scripts/building_stock.py and
-# python/scripts/fetch_necb_8_4_text.py) fall back to environment
+# The two Python clients that read it (scripts/building_stock.py and
+# scripts/fetch_necb_8_4_text.py) fall back to environment
 # variables, so an absent .mcp.json is a supported configuration.
 .mcp.json
 
@@ -39,10 +39,10 @@ Gemfile.lock
 # Test + run output
 output/
 coverage/
-!python/btap/codes/data/coverage/
-!python/btap/codes/data/coverage/**
-!python/btap/codes/necb/data/*/coverage/
-!python/btap/codes/necb/data/*/coverage/**
+!src/btap/codes/data/coverage/
+!src/btap/codes/data/coverage/**
+!src/btap/codes/necb/data/*/coverage/
+!src/btap/codes/necb/data/*/coverage/**
 /tmp/
 run/
 *.osw
@@ -93,7 +93,7 @@ python/dist/
 /packaging/windows/stage/
 /packaging/windows/Output/
 /packaging/windows/samples/
-python/tests/generated/
+tests/generated/
 python/.parity-venv/
 
 # D-80 R4: the frozen scenario baselines COMMIT the very filenames ignored

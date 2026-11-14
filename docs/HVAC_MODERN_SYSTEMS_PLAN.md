@@ -109,14 +109,14 @@ into Python; design and test the SDK object graph independently.
   **before** altering the model; no success-shaped partial builds.
 - For each new family/key update `builder.FAMILIES`,
   `canonical.py` (unique canonical names), the closed vocabulary in
-  `python/tests/modeling/test_catalog_schema.py`, `catalog_report.py`
+  `tests/modeling/test_catalog_schema.py`, `catalog_report.py`
   (family/terminal labels and diagrams), `classify.py` (correct
   heating/cooling/plant facts for foreign as well as catalog models), and
   `teardown.py` where new terminals/coils or constructions change replacement
-  behavior. Add to `python/btap/modeling/README.md`; leave NECB reference
+  behavior. Add to `src/btap/modeling/README.md`; leave NECB reference
   selection and existing catalog rows alone. No `article=` citations belong
   in `btap.modeling`.
-- Follow the actual test layout, `python/tests/modeling/test_*.py` (there is
+- Follow the actual test layout, `tests/modeling/test_*.py` (there is
   no `tests/modeling/hvac/` directory). Test SDK construction and
   `characterize()` facts, catalog resolution/canonical collisions, report
   rendering, replacing an existing system, and a **subset of zones** with
@@ -124,9 +124,9 @@ into Python; design and test the SDK object graph independently.
   one heating and cooling simulation per *shipped* row; require zero
   EnergyPlus Severe/Fatal errors, connected water/air paths, nonzero
   delivered capacity under design loads, and no newly orphaned equipment.
-- `python/tests/modeling/test_system_simulation_status.py` expects a verdict
+- `tests/modeling/test_system_simulation_status.py` expects a verdict
   for **every** catalog name. The original gate was met on 2026-10-12:
-  `python/scripts/simulate_all_systems.py` exists, and the committed verdict
+  `scripts/simulate_all_systems.py` exists, and the committed verdict
   was the output of a real sweep — 97/97 `ok`, 458 s total, sizing only,
   OpenStudio 3.11.0+241b8abb4d, Toronto CWEC2020, on the
   `5ZoneNoHVAC.osm` OpenStudio Model.
@@ -290,14 +290,14 @@ load.
 
 ### 2.2 VRF heat recovery: regression and documentation, not a new builder
 
-1. Add assertions to `python/tests/modeling/test_vrf_erv_gshp_composites.py`
+1. Add assertions to `tests/modeling/test_vrf_erv_gshp_composites.py`
    and the ECM VRF tests that the outdoor unit's
    `heatPumpWasteHeatRecovery()` is true for `VRF`, `DOAS with VRF`,
    and the ECM variants; terminal OA must remain autosized for
    standalone VRF and near zero when DOAS supplies ventilation.
 2. Add an opposing-zone heating/cooling simulation to check the
    simultaneous-operation path where test weather/loads permit it.
-   Explain the existing behavior in `python/btap/modeling/README.md`.
+   Explain the existing behavior in `src/btap/modeling/README.md`.
    A **heat-pump-only** (non-heat-recovery) VRF would be a *new*, clearly
    named option if requested later: the [pinned gem's generic VRF
    helper][gem-vrf] exposes the boolean, while our existing ECM
@@ -396,7 +396,7 @@ blocker documented and *no misleading catalog entry*.
 2. For each slice, record the catalog rows, modeled plant
    temperatures, ventilation/latent strategy, construction assumptions
    (where applicable), simulation evidence, and known exclusions in
-   `python/btap/modeling/README.md`. This document records the acceptance
+   `src/btap/modeling/README.md`. This document records the acceptance
    contract and implemented outcome.
 3. Displacement ventilation, absorption/heat-recovery chillers, and
    CHP/cogeneration remain outside phases 1-3. In particular, a

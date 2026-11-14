@@ -99,7 +99,7 @@ pytest venv for parity). `.github/workflows/ci-image.yml` publishes it to
 `ghcr.io/canmet-energy/btap-ci:<openstudio>-<sha256(Dockerfile)[:12]>` on a
 GitHub-hosted runner whenever the Dockerfile changes on any branch, and never
 overwrites a tag. `test.yml` pins that exact tag, and
-`python/tests/test_ci_image_pin.py` fails when the two disagree — so edit the
+`tests/test_ci_image_pin.py` fails when the two disagree — so edit the
 Dockerfile, push, wait for `ci-image`, then move the tag in `test.yml`.
 
 The jobs pull it with the workflow's own `GITHUB_TOKEN` (`packages: read`),

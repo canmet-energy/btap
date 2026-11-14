@@ -4,7 +4,7 @@ Frozen oracle-side values — every quantity the eleven parity gates compare,
 exported from the PINNED openstudio-standards revision (`legacy_pin/REF`,
 recorded in `manifest.json`) by the GEM-FREE `../export_goldens.rb` (D-80:
 python-prep / ruby-probe — prep models come from
-`python/scripts/oracle_prep.py`, probe requests from
+`scripts/oracle_prep.py`, probe requests from
 `../request_manifest.json`) via the same probe code the gates run
 (`../oracle_probes.rb`).
 
@@ -13,7 +13,7 @@ with the gates' tolerance table — giving Python ≡ oracle *directly*, so a
 bug faithfully ported from Ruby fails here even when Ruby↔Python agree
 (Leg B) and Ruby↔oracle agree (Leg A).
 
-**Currency is enforced twice**: `python/tests/necb/test_oracle_goldens_current.py`
+**Currency is enforced twice**: `tests/necb/test_oracle_goldens_current.py`
 asserts `manifest.legacy_ref == legacy_pin/REF`, the checksums, the exact
 file set, and the request-manifest recursive inventory; the parity job's
 `verification/live_leg_c.sh` re-exports fresh from the live oracle and
