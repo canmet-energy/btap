@@ -200,8 +200,14 @@ class BaseSystem:
 
         oa_system.addToNode(supply_inlet_node)
         if self.config.get('needs_erv'):
-            energy_recovery.validate_energy_recovery(self.config)
+            # `resolve_energy_recovery` expands a named `erv_profile` and then
+            # validates, so a row can say `erv_profile: plate_erv` instead of
+            # restating eleven keys — and an explicit `erv_*` key still wins
+            # over the profile. With neither, it raises: there is no implicit
+            # default, because effectiveness, frost control and parasitic
+            # power cannot be inferred from `needs_erv: true`.
+            resolved = energy_recovery.resolve_energy_recovery(self.config)
             energy_recovery.add_energy_recovery(
-                model, oa_system, self.config,
+                model, oa_system, resolved,
                 name=name or self.config.get('name') or 'Air Loop')
         return oa_system

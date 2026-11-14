@@ -23,6 +23,8 @@ built from invented defaults.
 from __future__ import annotations
 
 import math
+import pathlib
+from types import MappingProxyType
 
 import openstudio
 
@@ -55,10 +57,108 @@ def _number(config, key, *, minimum=None, maximum=None):
     return value
 
 
+_PROFILES_FILE = (pathlib.Path(__file__).resolve().parent / 'data'
+                  / 'energy_recovery.json')
+
+#: Keys a profile carries for documentation, not for the model.
+_PROFILE_METADATA = ('label', 'source')
+
+_profiles_cache = None
+
+
+def profiles():
+    """The named product profiles, keyed CORE x TRANSFER.
+
+    `plate_erv`, `rotary_erv`, `plate_hrv` — see the `comment` in
+    `data/energy_recovery.json` for why core alone is not enough to key on,
+    and why NECB's own numbers are deliberately not here.
+    """
+    global _profiles_cache
+    if _profiles_cache is None:
+        import json
+
+        data = json.loads(_PROFILES_FILE.read_text(encoding='utf-8'))
+        _profiles_cache = MappingProxyType({
+            name: MappingProxyType(dict(values))
+            for name, values in data['profiles'].items()
+        })
+    return _profiles_cache
+
+
+def default_profile_name():
+    """The profile used when a caller asks for recovery without naming one.
+
+    Declared in the data file rather than here, so changing it is a data edit
+    and the reason travels with the values.
+    """
+    import json
+
+    return json.loads(_PROFILES_FILE.read_text(encoding='utf-8'))['default']
+
+
+def resolve_energy_recovery(config):
+    """`config` with a named `erv_profile` expanded, then validated.
+
+    There is no implicit default. A caller either names a profile or supplies
+    the eleven `erv_*` values itself; `needs_erv: true` alone raises, because
+    effectiveness, frost control and parasitic power cannot be inferred from a
+    boolean — the rule that kept #217 from spreading a fabrication across
+    eleven families.
+
+    An explicit `erv_*` key OVERRIDES the profile, so a row can take a product
+    and change one field without restating the other ten.
+
+    :returns: a plain dict of the merged values, carrying
+        `erv_profile_used` so a caller and the audit can report WHICH profile
+        a build came from, named or defaulted.
+    """
+    merged = dict(config)
+    name = merged.pop('erv_profile', None)
+    available = profiles()
+    if name is None:
+        # phylroy, 2026-11-14: a default so a user can move ahead to a
+        # functioning HVAC. Asking for recovery and getting a refusal that
+        # demands eleven values blocks the common case for no benefit.
+        #
+        # This is not the fabrication that `needs_erv: true` used to be
+        # refused for. That refusal existed because the alternative was the
+        # SDK's defaults, which are uncited and pair a plate core with
+        # rotary-wheel latent performance and no frost control. A named,
+        # cited, overridable profile is a DISCLOSED assumption, and
+        # `profile_used` below carries it into the audit so it is never
+        # silent.
+        name = default_profile_name()
+    if name not in available:
+        raise ValueError(
+            f'unknown erv_profile {name!r}. Available: '
+            f"{', '.join(sorted(available))}")
+    for key, value in available[name].items():
+        if key in _PROFILE_METADATA:
+            continue
+        merged.setdefault(key, value)
+    merged['erv_profile_used'] = name
+    # Unconditional: this is only called when recovery IS wanted, and routing
+    # through `validate_energy_recovery` would early-return for the zonal
+    # path, whose flag is `needs_zone_erv`.
+    _validate_recovery_fields(merged)
+    return merged
+
+
 def validate_energy_recovery(config):
+    """Validate IF `needs_erv` asks for central recovery, else do nothing.
+
+    The `needs_erv` gate is why `resolve_energy_recovery` does NOT route
+    through this: the ZONAL path sets `needs_zone_erv`, so this returned early
+    and left the missing fields to surface as a `KeyError` from deep inside
+    the builder instead of a refusal naming what was absent.
+    """
     if not config.get('needs_erv'):
         return
+    _validate_recovery_fields(config)
 
+
+def _validate_recovery_fields(config):
+    """The field checks themselves, independent of which flag asked."""
     if config.get('erv_heat_exchanger_type') not in ERV_TYPES:
         raise ValueError(
             f"erv_heat_exchanger_type must be one of {ERV_TYPES!r}")
@@ -110,22 +210,18 @@ def _effectiveness_curve(model, name, value):
     return table
 
 
-def add_energy_recovery(model, oa_system, config, *, name):
-    """Attach one catalog-selected exchanger across the OA and relief streams."""
-    existing = [
-        opt(component.to_HeatExchangerAirToAirSensibleAndLatent())
-        for component in oa_system.oaComponents()
-        if component.to_HeatExchangerAirToAirSensibleAndLatent().is_initialized()
-    ]
-    if existing:
-        return existing[0]
+def _apply_exchanger_fields(exchanger, config, *, name):
+    """Set every `erv_*` field that belongs to the EXCHANGER.
 
+    Shared by the central and zonal paths, which build the same
+    `HeatExchangerAirToAirSensibleAndLatent`. `erv_bypass_control_type` is NOT
+    here: it is set on the outdoor-air controller, which a zone ERV has none
+    of, so it is the one value of the eleven that is central-only.
+    """
+    model = exchanger.model()
     sensible = float(config['erv_sensible_effectiveness'])
     latent = float(config['erv_latent_effectiveness'])
-    exchanger = openstudio.model.HeatExchangerAirToAirSensibleAndLatent(model)
-    exchanger.setName(
-        f"{name} {config['erv_heat_exchanger_type']} "
-        f"{'ERV' if latent > 0.0 else 'HRV'}")
+
     exchanger.setHeatExchangerType(config['erv_heat_exchanger_type'])
     exchanger.setEconomizerLockout(config['erv_economizer_lockout'])
     exchanger.setSupplyAirOutletTemperatureControl(
@@ -139,24 +235,39 @@ def add_energy_recovery(model, oa_system, config, *, name):
         float(config['erv_defrost_time_fraction_increase_rate']))
     exchanger.setNominalElectricPower(
         float(config['erv_nominal_electric_power']))
+
     for load in ('Heating', 'Cooling'):
-        exchanger_method = (
-            f'setSensibleEffectivenessat100{load}AirFlow')
-        getattr(exchanger, exchanger_method)(sensible)
-        getattr(
-            exchanger,
-            f'setSensibleEffectivenessof{load}AirFlowCurve')(
-                _effectiveness_curve(
-                    model, f'{name} Sensible {load} Effectiveness',
-                    sensible))
-        getattr(
-            exchanger, f'setLatentEffectivenessat100{load}AirFlow')(latent)
-        getattr(
-            exchanger,
-            f'setLatentEffectivenessof{load}AirFlowCurve')(
-                _effectiveness_curve(
-                    model, f'{name} Latent {load} Effectiveness',
-                    latent))
+        getattr(exchanger, f'setSensibleEffectivenessat100{load}AirFlow')(
+            sensible)
+        getattr(exchanger, f'setSensibleEffectivenessof{load}AirFlowCurve')(
+            _effectiveness_curve(
+                model, f'{name} Sensible {load} Effectiveness', sensible))
+        getattr(exchanger, f'setLatentEffectivenessat100{load}AirFlow')(latent)
+        getattr(exchanger, f'setLatentEffectivenessof{load}AirFlowCurve')(
+            _effectiveness_curve(
+                model, f'{name} Latent {load} Effectiveness', latent))
+
+
+def add_energy_recovery(model, oa_system, config, *, name):
+    """Attach one catalog-selected exchanger across the OA and relief streams."""
+    existing = [
+        opt(component.to_HeatExchangerAirToAirSensibleAndLatent())
+        for component in oa_system.oaComponents()
+        if component.to_HeatExchangerAirToAirSensibleAndLatent().is_initialized()
+    ]
+    if existing:
+        return existing[0]
+
+    # `latent` only, for the name: an exchanger that moves moisture is an ERV
+    # and one that does not is an HRV, which is why a profile is keyed on
+    # CORE x TRANSFER rather than on core alone. The effectiveness values
+    # themselves are set by `_apply_exchanger_fields`.
+    latent = float(config['erv_latent_effectiveness'])
+    exchanger = openstudio.model.HeatExchangerAirToAirSensibleAndLatent(model)
+    exchanger.setName(
+        f"{name} {config['erv_heat_exchanger_type']} "
+        f"{'ERV' if latent > 0.0 else 'HRV'}")
+    _apply_exchanger_fields(exchanger, config, name=name)
     exchanger.additionalProperties().setFeature(
         ENERGY_RECOVERY_SOURCE_FEATURE, ENERGY_RECOVERY_SOURCE_CATALOG)
     # #217 made this reachable from ELEVEN families instead of one, so the
@@ -208,7 +319,7 @@ def add_energy_recovery(model, oa_system, config, *, name):
 
 # ---------------- zone-level recovery ----------------
 
-def add_zone_energy_recovery(model, zone, *, name=None):
+def add_zone_energy_recovery(model, zone, config=None, *, name=None):
     """One `ZoneHVAC:EnergyRecoveryVentilator` on ``zone``.
 
     The OTHER recovery mechanism. `add_energy_recovery` above puts an
@@ -244,6 +355,19 @@ def add_zone_energy_recovery(model, zone, *, name=None):
         model)
     heat_exchanger.setName(f'{label} ERV HX')
     heat_exchanger.setSupplyAirOutletTemperatureControl(False)
+
+    # `config` is the resolved `erv_*` set, or None. None keeps the SDK
+    # defaults, which is what the shipped "Zone ERVs" row has always built —
+    # preserved so this stays a pure refactor of that row. Those defaults are
+    # NOT good: sensible 0.76, latent 0.68 and `frostControlType 'None'`, the
+    # last of which gives an exchanger no frost protection in a climate that
+    # reaches -40 C. Migrating the row onto a profile fixes that and changes
+    # its output, so it needs the catalogue's gates and is not done here.
+    #
+    # `erv_bypass_control_type` is deliberately not applied: it belongs to the
+    # outdoor-air controller, which a zone ERV does not have.
+    if config:
+        _apply_exchanger_fields(heat_exchanger, config, name=label)
     # NOT tagged with ENERGY_RECOVERY_SOURCE_FEATURE, though the central path
     # tags its exchanger. The shipped 'Zone ERVs' row never did, and the point
     # of lifting this function out was to make the device REUSABLE, not to

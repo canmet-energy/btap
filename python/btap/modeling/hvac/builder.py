@@ -236,8 +236,25 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
                 '`needs_erv` for an exchanger on the central outdoor-air '
                 'stream instead.')
 
+        # The OPTION resolves a profile, exactly as the central path does, so
+        # `needs_zone_erv` cannot quietly inherit the SDK's defaults —
+        # sensible 0.76, latent 0.68 and `frostControlType 'None'`, which
+        # leaves an exchanger with no frost protection in a climate reaching
+        # -40 C. The standalone "Zone ERVs" catalogue row still builds on
+        # those defaults; migrating it changes its output and needs the
+        # catalogue's gates.
+        #
+        # Named `recovery`, not `resolved`, to avoid shadowing the catalogue
+        # row that `return Result(... family=resolved['family'] ...)` reads
+        # below. I first wrote this as a rebinding of `resolved` and then
+        # claimed in a comment that it raised KeyError. It does NOT:
+        # `resolve_energy_recovery` returns `dict(config)` with the profile
+        # merged in, so the result is a SUPERSET of the row and `family`
+        # survives. A mutation test proved the rebinding harmless. The
+        # distinct name is clearer; it did not fix a defect.
+        recovery = energy_recovery.resolve_energy_recovery(resolved)
         for zone in sorted_by_name(zones):
-            energy_recovery.add_zone_energy_recovery(model, zone)
+            energy_recovery.add_zone_energy_recovery(model, zone, recovery)
 
     return Result(system_name=system_name, family=resolved['family'],
                   air_loops=air_loops, control_zone=control_zone,

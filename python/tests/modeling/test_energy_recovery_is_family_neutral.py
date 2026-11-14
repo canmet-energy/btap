@@ -123,9 +123,16 @@ class TestTheFlagAloneIsNotARequest(unittest.TestCase):
     rather than receive a device built from invented defaults — otherwise
     making recovery family-neutral would just spread a fabrication."""
 
-    def test_needs_erv_without_parameters_is_refused(self):
-        with self.assertRaises(ValueError):
-            _build(_a_row_of('psz'), needs_erv=True)
+    def test_needs_erv_without_parameters_uses_the_DEFAULT_profile(self):
+        """Changed 2026-11-14. This asserted a refusal, on the reasoning that
+        a boolean cannot supply effectiveness, frost control or parasitic
+        power. It cannot — but a NAMED, CITED profile can, and phylroy asked
+        for a default so a user reaches a functioning HVAC. What the refusal
+        actually protected against was the SDK's uncited defaults, which a
+        declared profile does not reintroduce."""
+        model = _build(_a_row_of('psz'), needs_erv=True)
+        hx = model.getHeatExchangerAirToAirSensibleAndLatents()[0]
+        self.assertEqual('ExhaustOnly', hx.frostControlType())
 
     def test_an_out_of_range_effectiveness_is_refused(self):
         with self.assertRaises(ValueError):
@@ -230,17 +237,23 @@ class TestZoneLevelRecoveryIsTheOtherMechanism(unittest.TestCase):
             len(option.getZoneHVACEnergyRecoveryVentilators()))
         for model in (standalone, option):
             hx = model.getHeatExchangerAirToAirSensibleAndLatents()[0]
-            # The SDK defaults the shipped row has always used. Pinned so a
-            # future change to them is a deliberate act on this row's output,
-            # not a side effect: nominalElectricPower 0.0 means no fan
-            # parasitic, and frostControlType 'None' is questionable in the
-            # climate NECB addresses, where the CENTRAL path sets
-            # 'ExhaustOnly' at -23.3 C.
+            # These WERE the SDK defaults — 0.76 / 0.68 / frostControlType
+            # 'None' — pinned here so that changing them would have to be a
+            # deliberate act on this row's output rather than a side effect.
+            # 2026-11-14 is that act: phylroy raised that no frost protection
+            # makes no sense for northern Canada, the pinned gem sets
+            # ExhaustOnly in all five of its rows, and the row now carries
+            # `erv_profile: plate_erv`.
+            #
+            # The SDK pair was also internally inconsistent: a Plate core with
+            # latent 0.68, which is enthalpy-WHEEL performance. The profile's
+            # 0.564 is the gem's measured plate figure.
             self.assertAlmostEqual(
-                0.76, hx.sensibleEffectivenessat100HeatingAirFlow())
+                0.755, hx.sensibleEffectivenessat100HeatingAirFlow())
             self.assertAlmostEqual(
-                0.68, hx.latentEffectivenessat100HeatingAirFlow())
-            self.assertEqual('None', hx.frostControlType())
+                0.564, hx.latentEffectivenessat100HeatingAirFlow())
+            self.assertEqual('ExhaustOnly', hx.frostControlType())
+            self.assertAlmostEqual(-23.3, hx.thresholdTemperature())
 
 
 if __name__ == '__main__':

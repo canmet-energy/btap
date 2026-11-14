@@ -1195,7 +1195,8 @@
       "family": "zone_ervs",
       "needs_boiler": false,
       "origin": "generic",
-      "comment": "per-zone energy recovery ventilators - the 'with ERVs' suffix part for composites"
+      "comment": "per-zone energy recovery ventilators - the 'with ERVs' suffix part for composites Carries `erv_profile: plate_erv` since 2026-11-14. Before that it built on the SDK defaults, which pair a plate core with rotary-wheel latent performance (0.76/0.68) and set `frostControlType` to None — no frost protection in a climate reaching -40 C, where every row of the pinned gem sets ExhaustOnly. phylroy raised the cold-climate problem and approved the fix; it changes this row's output, which is why it took the catalogue gates rather than riding along with the refactor that made the device reusable.",
+      "erv_profile": "plate_erv"
     },
     {
       "name": "DOAS with VRF",

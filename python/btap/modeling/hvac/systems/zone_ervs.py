@@ -14,6 +14,10 @@ from btap.modeling.hvac.systems.base_system import BaseSystem
 class ZoneErvs(BaseSystem):
     def build(self, model, zones, control_zone=None, namer='default',
               hw_loop=None, chw_loop=None):
+        # #217: the row carries `erv_profile`, so resolve it and apply the
+        # exchanger values. Before 2026-11-14 this built on SDK defaults,
+        # including `frostControlType` None — no frost protection at all.
+        recovery = energy_recovery.resolve_energy_recovery(self.config)
         for zone in sorted_by_name(zones):
-            energy_recovery.add_zone_energy_recovery(model, zone)
+            energy_recovery.add_zone_energy_recovery(model, zone, recovery)
         return []
