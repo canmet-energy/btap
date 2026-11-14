@@ -1,5 +1,6 @@
 import io
 import json
+import os
 import subprocess
 import sys
 import unittest
@@ -79,11 +80,22 @@ class TestCoverageCLI(unittest.TestCase):
         self.assertEqual(["--edition", "2020", "--out", str(destination)], command[-4:])
 
     def test_module_help_works(self):
+        # The child must import the SAME `btap` this process did. Before the
+        # src layout (#229) it found one through its cwd, python/; CI's
+        # `python` and `verify` jobs run from source without installing, so
+        # the directory holding the imported package is passed explicitly.
+        import btap
+
+        env = dict(os.environ)
+        package_root = str(Path(btap.__file__).resolve().parents[1])
+        env["PYTHONPATH"] = os.pathsep.join(
+            p for p in (package_root, env.get("PYTHONPATH")) if p)
         proc = subprocess.run(
             [sys.executable, "-m", "btap.codes.coverage", "--help"],
             capture_output=True,
             text=True,
             timeout=30,
+            env=env,
         )
         self.assertEqual(0, proc.returncode, proc.stderr)
         self.assertIn("get", proc.stdout)
