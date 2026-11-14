@@ -253,7 +253,7 @@ authoring by contract.
 ## Tests
 
 ```bash
-cd python && .venv/bin/python -m pytest -q tests/modeling/
+.venv/bin/python -m pytest -q tests/modeling/
 ```
 
 ## Documented future

@@ -45,13 +45,12 @@ physics by roughly 43% on the same wall. If it is ever missing — a `--no-deps`
 install, say — a compliance run still completes but warns loudly in its audit
 trail and names the command that restores it.
 
-For development, from a clone (the build entry, `pyproject.toml`, is at the
-repository root; the package source is under `python/`):
+For development, from the root of a clone (the standard src layout: the
+package is under `src/btap/`, with `tests/` and `scripts/` beside it):
 
 ```bash
-cd python
 python3 -m venv .venv
-.venv/bin/pip install -e .. pytest pytest-xdist import-linter ruff build
+.venv/bin/pip install -e . pytest pytest-xdist import-linter ruff build
 ```
 
 The distribution requires Python 3.11 or newer and OpenStudio 3.11. The exact
@@ -73,11 +72,10 @@ week is never reported as a code determination.
 ## Test
 
 ```bash
-cd python
 .venv/bin/pytest -n auto -q tests/
-.venv/bin/lint-imports --config ../pyproject.toml
-.venv/bin/ruff check .
-python3 -m unittest discover tests
+.venv/bin/lint-imports
+.venv/bin/ruff check src tests scripts
+PYTHONPATH=src python3 -m unittest discover tests
 python3 scripts/wheel_smoke.py
 ```
 

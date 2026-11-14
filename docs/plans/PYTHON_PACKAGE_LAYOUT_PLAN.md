@@ -7,6 +7,18 @@ that could be used straight from GitHub for development… Could you develop a
 plan to make this a true python library in structure, while still supporting
 APIs."*
 
+## Status
+
+- **Route A shipped** on PR #230: the build entry at the repository root,
+  thermal bridging a default dependency (D-109), version `0.4.0.dev0`.
+- **Route B started** 2026-11-14 on branch `src-layout` (stacked on #230),
+  phylroy: *"Can we start the src reorg?"* The layout question below is
+  settled as **`src/btap/`**, with `tests/` and `scripts/` at the root and
+  `python/README.md` moving to `src/README.md`. Steps 1 (the checker,
+  `scripts/check_path_rename.py`), 2, 3 and 5 are done; step 4, the
+  re-freeze, follows on a clean tree. The rest of this document is the plan
+  as written, in its period wording.
+
 ## What is already true
 
 The distribution is a proper package in every respect **except where it sits**.

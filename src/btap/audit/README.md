@@ -125,5 +125,5 @@ nothing.
 ## Tests
 
 ```bash
-cd python && .venv/bin/python -m pytest -q tests/audit/    # SDK-free and fast
+.venv/bin/python -m pytest -q tests/audit/    # SDK-free and fast
 ```

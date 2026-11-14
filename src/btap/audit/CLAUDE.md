@@ -81,7 +81,7 @@ runner with no OpenStudio precisely because this layer needs none.
 ## Tests
 
 ```bash
-cd python && .venv/bin/python -m pytest -q tests/audit/    # SDK-free, fast
+.venv/bin/python -m pytest -q tests/audit/    # SDK-free, fast
 ```
 
 The suite needs no SDK, no engine and no fixtures. If a change here forces

@@ -54,16 +54,19 @@ bash .devcontainer/setup.sh --serena
 ### Python environment
 
 ```bash
-cd python
 python3 -m venv .venv
-.venv/bin/pip install -e .. pytest pytest-xdist pytest-cov import-linter ruff build
+.venv/bin/pip install -e . pytest pytest-xdist pytest-cov import-linter ruff build
 ```
 
-`..`, not `.`: the build entry, `pyproject.toml`, is at the repository root so
-that `pip install git+https://github.com/canmet-energy/btap` works without
-`#subdirectory=python` (#229). The package source stays under `python/`, and so
-does the venv. For the same reason `lint-imports` takes
-`--config ../pyproject.toml` — it reads config only from the current directory.
+Everything runs from the repository root. The layout is the standard src
+layout (#229): `pyproject.toml`, `tests/`, `scripts/` and the venv at the root,
+the package under `src/btap/`. `pip install git+https://github.com/canmet-energy/btap`
+works with no `#subdirectory=`, and because no `btap/` sits at the root, the
+checkout can never shadow an installed package by accident. pytest puts `src/`
+on the path itself (`pythonpath` in `pyproject.toml`), so a test run always
+imports THIS checkout's `btap`, even if the venv's editable install points at
+another worktree. Anything that is not pytest and runs without the install
+needs `PYTHONPATH=src`.
 
 The exact `canmet-tbd==3.5.2` thermal-bridging line is a default dependency
 (D-109), so it arrives with the install above; there is no `[tbd]` extra. Do
@@ -115,23 +118,21 @@ curl https://3ucoopudrb.execute-api.ca-central-1.amazonaws.com/prod/mcp_client.p
 Fast local suite:
 
 ```bash
-cd python
 .venv/bin/pytest -n auto -q tests/
-.venv/bin/lint-imports --config ../pyproject.toml
-.venv/bin/ruff check .
+.venv/bin/lint-imports
+.venv/bin/ruff check src tests scripts
 ```
 
 Serial zero-install fallback:
 
 ```bash
-cd python && python3 -m unittest discover tests
+PYTHONPATH=src python3 -m unittest discover tests
 ```
 
 Line coverage of `btap` (the frozen scenarios run in subprocesses, so they are
 left out as they measure nothing):
 
 ```bash
-cd python
 .venv/bin/pytest -n auto -q --cov=btap --cov-report=term:skip-covered \
   --ignore=tests/necb/test_frozen_scenarios.py tests/
 ```
@@ -149,7 +150,7 @@ python3 scripts/necb_8_4_6_curve_probe.py
 python3 scripts/generate_necb_coverage.py
 python3 scripts/generate_necb_8_4_coverage.py
 python3 scripts/generate_decisions.py --check
-cd python && python3 scripts/wheel_smoke.py
+python3 scripts/wheel_smoke.py
 ```
 
 The `verify` CI job is the authoritative full-runtime lane: SDK, EnergyPlus,
@@ -280,7 +281,7 @@ pile of correspondence: the `.reviews/` trail held the same questions for
 weeks and was gitignored, so none of it was a record.
 
 ```bash
-cd python && .venv/bin/python -m pytest -q tests/necb/test_ahj_register.py
+.venv/bin/python -m pytest -q tests/necb/test_ahj_register.py
 ```
 
 Do not open an entry for something implementable. A requirement the tool
@@ -299,7 +300,7 @@ A structured decision may omit the field. The generator derives it from the
 authored, but it must then equal that derived list exactly, order included.
 
 ```bash
-cd python && .venv/bin/python -m unittest tests.necb.test_decisions_generator
+.venv/bin/python -m unittest tests.necb.test_decisions_generator
 ```
 
 98 of 99 decisions are `unverified`. Filling one in means checking the
@@ -335,9 +336,9 @@ corpus expensive enough to defer correctness fixes (D-103).
 ```bash
 # From the repository root, with the venv's python — self-contained, unlike
 # the worktree recipe further down which assigns $PY first.
-PYTHONPATH=python python/.venv/bin/python \
+PYTHONPATH=src .venv/bin/python \
   verification/scenarios/freeze.py --scenario verdict-compliant
-PYTHONPATH=python python/.venv/bin/python \
+PYTHONPATH=src .venv/bin/python \
   verification/scenarios/freeze.py --scenario a --scenario b
 ```
 
@@ -389,22 +390,20 @@ REPO=$(pwd)                       # the main checkout
 WT=/tmp/freeze-$(git rev-parse --short HEAD)
 GUARD=$(mktemp -t freeze-guard-XXXXXX.py)   # OUTSIDE $WT — see below
 trap 'rm -f "$GUARD"' EXIT                  # removed on failure too
-PY=$REPO/python/.venv/bin/python  # one interpreter for every step
+PY=$REPO/.venv/bin/python  # one interpreter for every step
 
 git worktree add --detach "$WT" HEAD
 
 # PYTHONPATH IS MANDATORY, not belt-and-braces. One interpreter does not mean
-# one source. Measured both ways from "$WT/python" on 2026-10-04:
-#
-#   $PY -c "import btap"   ->  $WT/src/btap     (cwd leads sys.path)
-#   $PY some/script.py     ->  $REPO/src/btap   <- THE TRAP
-#
-# In script mode sys.path[0] is the SCRIPT's directory, not the cwd, so `btap`
-# resolves through the venv's editable install — the main checkout. freeze.py
-# is a script, and its check_required_python_engines() imports btap (line 117)
-# BEFORE check_required_energyplus() reaches runner._sys_path_python() (line
-# 151), so that module also lands in sys.modules first and persists.
-export PYTHONPATH="$WT/python"
+# one source: the venv's editable install points at the MAIN checkout.
+# Measured from the old python/ directory on 2026-10-04, script mode was
+# already the trap — sys.path[0] is the SCRIPT's directory, so `btap`
+# resolved through the editable install. Under the src layout (#229) it is
+# worse: no `btap/` sits at the worktree root, so `-c "import btap"` resolves
+# there too. freeze.py's check_required_python_engines() imports btap BEFORE
+# check_required_energyplus() reaches runner._sys_path_python(), so that
+# module lands in sys.modules first and persists.
+export PYTHONPATH="$WT/src:$WT"
 
 # THE GUARD FILE LIVES OUTSIDE $WT. Writing it inside makes `git status
 # --porcelain` report `?? _assert_source.py`, and freeze.py checks exactly
@@ -419,7 +418,7 @@ cat > "$GUARD" <<'GUARD_EOF'
 import pathlib, sys
 import btap
 p = pathlib.Path(btap.__file__).resolve()
-want = pathlib.Path(sys.argv[1]).resolve() / "python"
+want = pathlib.Path(sys.argv[1]).resolve() / "src"
 sys.exit(0 if p.is_relative_to(want) else f"WRONG SOURCE: {p} not under {want}")
 GUARD_EOF
 "$PY" "$GUARD" "$WT"               # script mode, like the freezer
@@ -428,8 +427,8 @@ GUARD_EOF
 test -z "$(git -C "$WT" status --porcelain)" || {
   echo "worktree is dirty before freezing:"; git -C "$WT" status --porcelain; exit 1; }
 
-cd "$WT/python"
-"$PY" ../verification/scenarios/freeze.py
+cd "$WT"
+"$PY" verification/scenarios/freeze.py
 
 # TRANSFER the output before removing anything — freeze.py writes tracked
 # baselines and the manifest, and they exist only here until copied.
@@ -473,8 +472,8 @@ fi
 # lanes with
 #   git -C "$REPO" status --porcelain verification/scenarios/baselines
 # and name them here.
-cd "$REPO/python"
-if PYTHONPATH="$REPO/python" BTAP_SCENARIO_LANES=python,verify \
+cd "$REPO"
+if PYTHONPATH="$REPO/src:$REPO" BTAP_SCENARIO_LANES=python,verify \
    "$PY" -m pytest -q tests/necb/test_frozen_scenarios.py; then
   echo "zero drift on python,verify — PARTIAL: parity is dispatch-only"
 else
@@ -586,8 +585,8 @@ BUNDLE_GEMFILE=legacy_pin/Gemfile bundle install
 
 LEGACY_PIN_REQUIRED=1 \
 BUNDLE_GEMFILE="$PWD/legacy_pin/Gemfile" \
-PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
-BTAP_PYTHON="$PWD/python/.venv/bin/python" \
+PYTHONPATH="$PWD/src:/usr/local/openstudio-3.11.0/Python" \
+BTAP_PYTHON="$PWD/.venv/bin/python" \
   bash verification/live_leg_c.sh /tmp/live-leg-c
 ```
 

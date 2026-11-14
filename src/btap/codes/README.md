@@ -231,5 +231,5 @@ edition's `provenance/`, and neither API performs network access.
 ## Tests
 
 ```bash
-cd python && .venv/bin/python -m pytest -q tests/necb/
+.venv/bin/python -m pytest -q tests/necb/
 ```

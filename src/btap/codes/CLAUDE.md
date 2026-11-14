@@ -357,7 +357,7 @@ one through `btap._compat.opt`.
 ## Tests
 
 ```bash
-cd python && .venv/bin/python -m pytest -q tests/necb/
+.venv/bin/python -m pytest -q tests/necb/
 ```
 
 EnergyPlus tests skip without an engine; annual tests use week runs.

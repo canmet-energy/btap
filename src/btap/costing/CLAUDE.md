@@ -64,5 +64,5 @@ is dead: do not resurrect it.
 ## Tests
 
 ```bash
-cd python && .venv/bin/python -m pytest -q tests/costing/
+.venv/bin/python -m pytest -q tests/costing/
 ```

@@ -220,7 +220,7 @@ still wins.
 ## Tests
 
 ```bash
-cd python && .venv/bin/python -m pytest -q tests/simulation/
+.venv/bin/python -m pytest -q tests/simulation/
 ```
 
 Engine-dependent tests skip without an engine; `BTAP_ENGINE_REQUIRED=1`

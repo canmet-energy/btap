@@ -250,7 +250,7 @@ publishes, that is a signal the default belongs to a code layer instead.
 ## Tests
 
 ```bash
-cd python && .venv/bin/python -m pytest -q tests/modeling/
+.venv/bin/python -m pytest -q tests/modeling/
 ```
 
 `tests/fixtures/footprint_ottawa_tower.json` is a REAL NRCan record (feature

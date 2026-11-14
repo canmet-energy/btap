@@ -183,12 +183,11 @@ covered by it: `packaging/windows/samples/04-fancoil-chiller.osm` and
 ## Commands
 
 ```bash
-cd python
 python3 -m venv .venv
-.venv/bin/pip install -e .. pytest pytest-xdist import-linter ruff build coverage pytest-cov
+.venv/bin/pip install -e . pytest pytest-xdist import-linter ruff build coverage pytest-cov
 .venv/bin/pytest -n auto -q tests/
-.venv/bin/lint-imports --config ../pyproject.toml
-.venv/bin/ruff check .
+.venv/bin/lint-imports
+.venv/bin/ruff check src tests scripts
 
 # Repository tools, from the repository root
 python3 scripts/necb_orphan_keys.py
@@ -213,7 +212,7 @@ python3 scripts/fetch_necb_provisions.py
 python3 scripts/simulate_all_systems.py --check
 ```
 
-The zero-install serial fallback is `cd python && python3 -m unittest discover
+The zero-install serial fallback is `PYTHONPATH=src python3 -m unittest discover
 tests`. Full SDK, EnergyPlus, rasterizer, sample, and thermal-bridging coverage
 runs in the `verify` CI job. Live oracle checks run only in `parity`.
 
@@ -388,7 +387,7 @@ move with it.
 ```bash
 python3 scripts/generate_decisions.py        # regenerate all three outputs
 python3 scripts/generate_decisions.py --check
-cd python && python3 -m unittest \
+PYTHONPATH=src python3 -m unittest \
   tests.necb.test_decisions_registry_sync \
   tests.necb.test_decisions_registry \
   tests.necb.test_decisions_generator

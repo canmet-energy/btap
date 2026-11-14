@@ -196,7 +196,7 @@ Each exists because without it a mutation passes. Do not tidy them:
 ## Tests
 
 ```bash
-cd python && .venv/bin/python -m pytest -q tests/simulation/
+.venv/bin/python -m pytest -q tests/simulation/
 ```
 
 Engine-dependent tests skip without a CLI; `BTAP_ENGINE_REQUIRED=1` turns

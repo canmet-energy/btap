@@ -36,5 +36,5 @@ given, rather than silently under-costing.
 ## Tests
 
 ```bash
-cd python && .venv/bin/python -m pytest -q tests/costing/
+.venv/bin/python -m pytest -q tests/costing/
 ```
