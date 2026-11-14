@@ -274,5 +274,44 @@ class TestNecbEnergyRecovery(unittest.TestCase):
                         'the post-sizing efficiency pass must retain Table 8.4.3.5 COP 2.802')
 
 
+@needs_sdk
+class TestTheOANodeGuard(unittest.TestCase):
+    """An unattached outdoor-air system must RAISE, not segfault.
+
+    The reference recipe reads `outboardOANode`, `mixedAirModelObject`,
+    `returnAirModelObject` and `primaryAirOutletModelObject`, all of which
+    return `boost::optional` and none of which exists until the OA system is
+    attached to a supply node. A bare `.get()` on an empty SDK optional
+    SEGFAULTS for 615 of the 617 `Optional*` types rather than raising, so the
+    failure mode was an interpreter death inside a builder with no message.
+
+    The unwrap ratchet (`tests/test_sdk_unwrap_ratchet.py`) pins that the bare
+    unwraps are gone. This pins that what replaced them is DIAGNOSABLE — a
+    sentence naming the missing node — which the ratchet cannot check.
+    """
+
+    def test_an_unattached_OA_system_raises_naming_the_node(self):
+        from btap.codes.necb.hvac import energy_recovery
+
+        model = openstudio.model.Model()
+        air_loop = openstudio.model.AirLoopHVAC(model)
+        # built but deliberately NOT added to the supply inlet node
+        oa_system = openstudio.model.AirLoopHVACOutdoorAirSystem(
+            model, openstudio.model.ControllerOutdoorAir(model))
+        rule = {
+            'effectiveness': 0.5,
+            'hx': {'type': 'Rotary', 'economizer_lockout': True,
+                   'frost_control': 'ExhaustOnly',
+                   'threshold_temperature_c': -23.3,
+                   'initial_defrost_time_fraction': 0.167,
+                   'rate_of_defrost_increase': 1.44},
+        }
+        with self.assertRaises(RuntimeError) as caught:
+            energy_recovery._add_energy_recovery(air_loop, oa_system, rule)
+        message = str(caught.exception)
+        self.assertIn('node', message)
+        self.assertIn('attached', message)
+
+
 if __name__ == '__main__':
     unittest.main()

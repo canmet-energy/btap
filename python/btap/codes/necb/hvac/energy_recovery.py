@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import openstudio
 
-from btap._compat import ruby_round, sorted_by_name
+from btap._compat import opt, ruby_round, sorted_by_name
 from btap.codes import resolve
 from btap.codes.necb.hvac.reference import optional_flow
 
@@ -187,7 +187,34 @@ def _add_energy_recovery(air_loop, oa_system, rule):
     erv.setThresholdTemperature(hx['threshold_temperature_c'])
     erv.setInitialDefrostTimeFraction(hx['initial_defrost_time_fraction'])
     erv.setRateofDefrostTimeFractionIncrease(hx['rate_of_defrost_increase'])
-    erv.addToNode(oa_system.outboardOANode().get())
+
+    # The OA system's nodes exist only once it is attached to a supply node,
+    # and a bare `.get()` on an empty SDK optional SEGFAULTS for 615 of the
+    # 617 `Optional*` types rather than raising. All four accessors return
+    # `boost::optional` — checked in `AirLoopHVACOutdoorAirSystem.hpp` and
+    # `AirToAirComponent.hpp`.
+    #
+    # The same eight unwraps were guarded in
+    # `btap/modeling/hvac/energy_recovery.py` under #217. This file is NOT
+    # merged into that one: it is the LEGACY recipe, and it differs
+    # materially — at-75% effectiveness fields where modeling uses
+    # effectiveness CURVES, and a PNNL-20405 power surrogate computed from the
+    # sized OA flow where modeling takes a configured value. Consolidating
+    # them would change the NECB reference path's output.
+    nodes = {
+        'outboard OA': opt(oa_system.outboardOANode()),
+        'mixed air': opt(oa_system.mixedAirModelObject()),
+        'return air': opt(oa_system.returnAirModelObject()),
+    }
+    missing = sorted(k for k, v in nodes.items() if v is None)
+    if missing:
+        raise RuntimeError(
+            f'cannot add energy recovery to {air_loop.nameString()!r}: the '
+            f"outdoor-air system has no {', '.join(missing)} node. An OA "
+            'system has these only once it is attached to an air loop supply '
+            'node.')
+    outboard_oa_node = nodes['outboard OA']
+    erv.addToNode(outboard_oa_node)
 
     # T6 (audit 2026-07-25): the wheel is not free — PNNL-20405 surrogate
     # for rotary-HX fan/motor parasitics (legacy parity), computed from the
@@ -208,10 +235,16 @@ def _add_energy_recovery(air_loop, oa_system, rule):
     spm.setMaximumSetpointTemperature(99.0)
     spm.setMinimumSetpointHumidityRatio(0.00001)
     spm.setMaximumSetpointHumidityRatio(1.0)
-    mixed_air_node = oa_system.mixedAirModelObject().get().to_Node().get()
+    mixed_air_node = opt(nodes['mixed air'].to_Node())
     spm.setReferenceSetpointNode(mixed_air_node)
     spm.setMixedAirStreamNode(mixed_air_node)
-    spm.setOutdoorAirStreamNode(oa_system.outboardOANode().get())
-    spm.setReturnAirStreamNode(oa_system.returnAirModelObject().get().to_Node().get())
-    spm.addToNode(erv.primaryAirOutletModelObject().get().to_Node().get())
+    spm.setOutdoorAirStreamNode(outboard_oa_node)
+    spm.setReturnAirStreamNode(opt(nodes['return air'].to_Node()))
+    primary_outlet = opt(erv.primaryAirOutletModelObject())
+    if primary_outlet is None:
+        raise RuntimeError(
+            f'cannot add energy recovery to {air_loop.nameString()!r}: the '
+            'exchanger has no primary air outlet after being added to the '
+            'outdoor-air node.')
+    spm.addToNode(opt(primary_outlet.to_Node()))
     return erv
