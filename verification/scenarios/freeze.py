@@ -39,7 +39,7 @@ import tempfile
 from pathlib import Path
 
 #: Keys this script ADDS to an authored scenario definition. The gate in
-#: `python/tests/necb/test_frozen_scenarios.py` carries the same set, and a
+#: `tests/necb/test_frozen_scenarios.py` carries the same set, and a
 #: new generated key has to be added to both.
 GENERATED_SCENARIO_KEYS = frozenset({"baseline_sha256", "produced_by"})
 
@@ -50,9 +50,9 @@ import scenario_defs
 
 REPO_ROOT = runner.REPO_ROOT
 RUBY_CLI = REPO_ROOT / "btap-necb" / "exe" / "btap-compliance.rb"
-RUBY_TBD_DRIVER = (REPO_ROOT / "python" / "tests" / "necb" / "cross_language"
+RUBY_TBD_DRIVER = (REPO_ROOT / "tests" / "necb" / "cross_language"
                    / "ruby_tbd_compliance.rb")
-RUBY_AUDIT_DRIVER = (REPO_ROOT / "python" / "tests" / "audit"
+RUBY_AUDIT_DRIVER = (REPO_ROOT / "tests" / "audit"
                      / "cross_language" / "ruby_reference.rb")
 TRANSITION_FIELDS = (
     "retired_seal", "last_cross_language_commit", "last_cross_language_run_id",
@@ -353,7 +353,7 @@ IMMUTABLE_PROVENANCE = ("final_cross_language_attestation",
 #: re-ran a subset and cannot speak for the rest.
 SCOPE_ONLY_PROVENANCE = ("active_seals", "retired_seals")
 
-#: Declared as data so `python/tests/test_scoped_freeze.py` can drop one
+#: Declared as data so `tests/test_scoped_freeze.py` can drop one
 #: field at a time and prove each is guarded.
 CORPUS_WIDE_PROVENANCE = SCOPE_ONLY_PROVENANCE + IMMUTABLE_PROVENANCE
 
@@ -367,7 +367,7 @@ def assemble_scope(frozen, carried, baselines, previous, all_ids, runner,
     both the selected and carried sides, and `231` recorded that the
     refusals were still only strings grepped out of this file. Neither is
     testable while the logic lives inside the function that runs
-    EnergyPlus; `python/tests/test_scoped_freeze.py` now drives this.
+    EnergyPlus; `tests/test_scoped_freeze.py` now drives this.
 
     `fail` is the caller's abort — `die` in production — so a test can
     observe a refusal as an exception instead of a process exit.
@@ -458,7 +458,7 @@ def assemble_manifest(frozen, previous, carried, this_producer,
             REPO_ROOT / "verification" / "spec.json")
     if sample_manifest_sha256 is None:
         sample_manifest_sha256 = runner.sha256(
-            runner.PYTHON_ROOT / "scripts" / "sample_manifest.json")
+            runner.REPO_ROOT / "scripts" / "sample_manifest.json")
 
     manifest = {
         "version": 2,
@@ -476,7 +476,7 @@ def assemble_manifest(frozen, previous, carried, this_producer,
             # weakened comparison, and it made every file it covered
             # expensive to touch: 28 of 89 manifest commits here touched no
             # baseline file. The comparator's behaviour is tested directly in
-            # `python/tests/test_comparator_contract.py`.
+            # `tests/test_comparator_contract.py`.
             #
             # `spec_sha256` above is deliberately kept: it pins the
             # adjudicated comparison RULES, which is a different claim from
@@ -598,7 +598,7 @@ def producer_identity():
 
     WHY THIS EXISTS. The manifest already pins the SOURCE — a commit, three
     harness hashes, the sample manifest — and because the scenarios' weather
-    is COMMITTED (`python/tests/fixtures/weather/*.epw`/`.ddy`), that commit
+    is COMMITTED (`tests/fixtures/weather/*.epw`/`.ddy`), that commit
     pins the weather bytes too. What it did not pin is the PRODUCER.
     `openstudio_cli` is a version STRING a machine reports; two laptops can
     report `3.11.0+241b8abb4d` while running different EnergyPlus builds, and
@@ -674,7 +674,7 @@ def producer_identity():
         runner._sys_path_python()
         worker = runner.python_exe()
         env = dict(os.environ)
-        env["PYTHONPATH"] = (str(runner.PYTHON_ROOT) + os.pathsep
+        env["PYTHONPATH"] = (str(runner.SRC_ROOT) + os.pathsep
                              + env.get("PYTHONPATH", "")).rstrip(os.pathsep)
         out = subprocess.run([str(worker), "-c", probe], capture_output=True,
                              text=True, check=False, timeout=600, env=env)
@@ -733,7 +733,7 @@ def invocation_producer():
 
 def load_freeze_environment():
     """Load external state once; tests may supply the same data in memory."""
-    sample_manifest = runner.PYTHON_ROOT / "scripts" / "sample_manifest.json"
+    sample_manifest = runner.REPO_ROOT / "scripts" / "sample_manifest.json"
     previous = {"scenarios": [], "provenance": {}}
     if runner.MANIFEST.is_file():
         previous = json.loads(runner.MANIFEST.read_text(encoding="utf-8"))

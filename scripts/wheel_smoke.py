@@ -1,0 +1,484 @@
+#!/usr/bin/env python3
+"""Distribution-integrity gate: exercise btap as an INSTALLED WHEEL.
+
+    python3 scripts/wheel_smoke.py            # build, install clean, smoke
+    python3 scripts/wheel_smoke.py --run-checks   # (internal) the checks only
+
+Why this exists: the test suite runs against the source checkout, where every
+data file is present because the repository is present. A wheel is a different
+artifact — setuptools ships only .py unless told otherwise — and the gap was
+not hypothetical. `catalog_html()` resolved its seed model by walking OUTSIDE
+the installed package, so from a wheel it silently produced a 1 MB document
+with 97 'diagram unavailable' cards instead of a catalog. Nothing in CI could
+have caught that, because nothing in CI ever installed the wheel.
+
+The checks run in a throwaway venv whose CWD is OUTSIDE the repository, so a
+local `btap/` directory cannot shadow the installed package — verified
+explicitly rather than assumed.
+"""
+
+from __future__ import annotations
+
+import argparse
+import os
+import platform
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+
+
+def companion_expected() -> bool:
+    """Is canmet-energyplus a hard dependency on THIS platform?
+
+    Computed from the platform, mirroring the marker in pyproject.toml —
+    never from "did the import work", because gating a check on the thing it
+    is testing is how a check silently becomes a no-op. (The companion checks
+    below used to return early unless BTAP_COMPANION_WHEELHOUSE was set, which
+    printed "ok" for work never done once the wheelhouse went away.)
+    """
+    return (sys.platform == "win32"
+            or (sys.platform.startswith("linux")
+                and platform.machine() == "x86_64"))
+
+
+def run_checks() -> int:
+    """Executed INSIDE the clean venv, with CWD outside the repo."""
+    import btap
+    import btap.modeling as modeling
+
+    failures = []
+
+    def check(label, fn):
+        try:
+            fn()
+            print(f"  ok    {label}")
+        except Exception as e:  # noqa: BLE001 - the gate reports, never crashes
+            failures.append(f"{label}: {type(e).__name__}: {e}")
+            print(f"  FAIL  {label}: {type(e).__name__}: {e}")
+
+    installed = Path(btap.__file__).resolve()
+    print(f"btap imported from: {installed.parent}")
+
+    def not_shadowed():
+        if REPO_ROOT in installed.parents:
+            raise AssertionError(
+                f"the SOURCE TREE shadowed the wheel ({installed}) — this gate proves "
+                "nothing unless it runs outside the checkout")
+    check("imported from the installed wheel, not the source tree", not_shadowed)
+
+    def data_loads():
+        from btap.codes.necb import loads
+        rules = loads.rules("2020")
+        assert rules, "necb loads rules are empty"
+        from btap.modeling.hvac import catalog
+        rows = catalog.rows()
+        # An EXACT count, deliberately: this is a distribution-integrity check
+        # and the count is the tripwire that catches a truncated or stale
+        # `systems.json` in the built wheel, which a `> 0` test would pass.
+        # It MOVES with the catalogue, so adding a system means updating it
+        # here — that is the tax for the tripwire, not an oversight. Adding one
+        # also needs the sizing sweep, the ADJUDICATED D-58 golden, the
+        # catalog-generation names and `tests/stock/`.
+        assert len(rows) == 110, (
+            f"catalog has {len(rows)} systems, expected 110 — if a system was "
+            "added on purpose, update this count and the four other gates")
+    check("packaged data loads (necb rules + the 110-system catalog)", data_loads)
+
+    def coverage_reference_loads():
+        from btap.codes import coverage
+
+        assert coverage.editions() == ("2020", "2025")
+        for edition, expected_count in (("2020", 52), ("2025", 57)):
+            numbers = coverage.article_numbers(edition)
+            assert len(numbers) == expected_count, (
+                f"NECB {edition} has {len(numbers)} articles, expected {expected_count}")
+            first = coverage.get_article(edition, numbers[0])
+            assert first["raw"].startswith("1)"), (
+                f"NECB {edition} first article text is unreadable")
+            assert coverage.provenance(edition)["edition"] == edition
+        notice = coverage.attribution()
+        assert "National Energy Code of Canada for Buildings" in notice
+        assert "Crown copyright" in notice
+    check("packaged NECB coverage reference is complete and attributed",
+          coverage_reference_loads)
+
+    def costing_tables():
+        from btap.costing.envelope.database import Database
+        db = Database()
+        assert db.materials_opaque, "costing envelope tables are empty"
+        assert db.cost_record("070026"), "priced placeholder table not resolvable"
+    check("packaged costing tables resolve", costing_tables)
+
+    def catalog_html_is_real():
+        html = modeling.catalog_html()
+        unavailable = html.count("Diagram unavailable")
+        svgs = html.count("<svg")
+        if unavailable or svgs < 100:
+            raise AssertionError(
+                f"degraded catalog: {unavailable} 'Diagram unavailable', {svgs} svgs — "
+                "the seed model did not resolve from the installed package")
+    check("catalog_html() renders real diagrams (the regression this gate exists for)",
+          catalog_html_is_real)
+
+    def documented_chain_starts_from_the_wheel():
+        """`btap/modeling/README.md` documents an authoring chain whose first
+        precondition is a seed construction set. Until issue #143 the only
+        implementation was a method on a test class, so the chain could be
+        started from a repository checkout and NOT from the installed
+        distribution — exactly the class of defect this gate exists for."""
+        model = modeling.create(shape="rectangle", length=30.0, width=20.0,
+                                storeys=2)
+        modeling.apply_wwr(model, wwr=0.4)
+        modeling.seed_constructions(model)
+        surfaces = model.getSurfaces()
+        sub_surfaces = model.getSubSurfaces()
+        assert surfaces, "wizard produced no surfaces"
+        assert sub_surfaces, "apply_wwr produced no sub-surfaces to seed"
+        bare = [s.nameString() for s in surfaces
+                if not s.construction().is_initialized()]
+        assert not bare, f"{len(bare)} surfaces left with no construction"
+        bare_sub = [s.nameString() for s in sub_surfaces
+                    if not s.construction().is_initialized()]
+        assert not bare_sub, (
+            f"{len(bare_sub)} sub-surfaces left with no construction")
+        # The point of the seed is that a retargeting pass can now run — and
+        # it runs on what the SDK HANDS YOU, with no downcast.
+        #
+        # This gate used to write `.construction().get().to_Construction()
+        # .get()` here, because `surface.construction()` yields a
+        # `ConstructionBase` with no `.layers` and `opaque_at_conductance`
+        # raised `AttributeError` on it. That was recorded as friction on
+        # issue #143 and has since been fixed at the public entry points, so
+        # the gate passes the base object deliberately: if the normalization
+        # regresses, the INSTALLED WHEEL is where it shows. Keeping the manual
+        # downcast would have left this gate unable to witness the fix.
+        from btap.modeling.envelope import constructions
+        seeded = surfaces[0].construction().get()
+        assert not hasattr(seeded, 'layers'), (
+            "surface.construction() is expected to yield a layerless "
+            "ConstructionBase here; if it now has layers, this check no "
+            "longer exercises the normalization it exists for")
+        retargeted = constructions.opaque_at_conductance(model, seeded, 0.21)
+        assert retargeted.nameString() != seeded.nameString(), (
+            "retargeting returned the seed itself rather than a copy")
+    check("the documented authoring chain starts from the installed wheel",
+          documented_chain_starts_from_the_wheel)
+
+    def bad_seed_is_loud():
+        try:
+            modeling.catalog_html(fixture="/nonexistent/seed.osm")
+        except ValueError:
+            return
+        raise AssertionError("an unreadable seed must RAISE, not degrade silently")
+    check("an unreadable seed model fails loudly", bad_seed_is_loud)
+
+    def domain_operation():
+        from btap._sdk import load_model
+        from btap.audit import AuditLog
+        from btap.codes.necb import loads
+        model = load_model(modeling.hvac.catalog_report.FIXTURE)
+        for st in model.getSpaceTypes():
+            if st.spaces():
+                st.setStandardsBuildingType("Space Function")
+                st.setStandardsSpaceType("Office enclosed > 25 m2")
+        audit = AuditLog()
+        loads.apply_loads(model, code="necb2020", audit=audit)
+        assert model.getPeoples(), "apply_loads produced no occupancy"
+        assert audit.entries, "apply_loads wrote nothing to the audit"
+    check("a real domain operation runs end to end (necb loads on the packaged seed)",
+          domain_operation)
+
+    def tbd_engine_operates():
+        # M7 (D-79 Option A): the pinned py-tbd engine — a DEFAULT dependency
+        # since D-109, so it arrives with a PLAIN install — must import with
+        # the verified 3.5.2-compat identity
+        # and run a REAL process operation on the packaged seed model.
+        import tbd
+
+        from btap.codes.necb.envelope import thermal_bridging as tb
+        assert tbd.VERSION == tb.PINNED_TBD_VERSION, (
+            f"engine {tbd.VERSION} != pinned {tb.PINNED_TBD_VERSION}")
+        assert tbd.UPSTREAM_SHA == tb.PINNED_TBD_UPSTREAM_SHA, "upstream SHA drift"
+        from btap._sdk import load_model
+        model = load_model(modeling.hvac.catalog_report.FIXTURE)
+        tbd.oslg.clean()
+        result = tbd.process(model, {"option": "efficient (BETBG)"})
+        surfaces = result.get("surfaces") or {}
+        derated = sum(1 for s in surfaces.values()
+                      if abs(float(s.get("heatloss") or 0.0)) > 1e-9)
+        assert derated > 0, "tbd.process derated nothing on the seed model"
+    check("the pinned py-tbd engine installs and processes (M7)", tbd_engine_operates)
+
+    print(f"companion expected on this platform: {companion_expected()} "
+          f"({sys.platform}/{platform.machine()})")
+
+    def companion_engine_resolves():
+        # R5 (D-83): the installed btap wheel must resolve to the installed
+        # companion's binary with no engine-resolution overrides.
+        if not companion_expected():
+            print("    (skipped: the marker excludes this platform)")
+            return
+        import canmet_energyplus  # noqa: I001
+        from btap.simulation import engine
+
+        companion_installed = Path(canmet_energyplus.__file__).resolve()
+        if REPO_ROOT in companion_installed.parents:
+            raise AssertionError(
+                f"the SOURCE TREE shadowed the companion wheel ({companion_installed})")
+        print(f"canmet-energyplus imported from: {companion_installed.parent}")
+
+        os.environ.pop("BTAP_ENERGYPLUS", None)
+        os.environ.pop("BTAP_ENERGYPLUS_ARCHIVE", None)
+        engine._reset_memo()
+        resolved = engine.ensure_energyplus()
+        expected = canmet_energyplus.binary_path()
+        assert str(resolved) == str(expected), (
+            f"engine resolved {resolved}, not the companion {expected}")
+    check("the companion engine resolves with no engine overrides (R5)",
+          companion_engine_resolves)
+
+    def companion_authority_agrees():
+        # Two repositories now carry EnergyPlus identity: canmet-energyplus
+        # owns which upstream build is REPACKAGED, btap owns the version it
+        # is compatible with plus the assets its download rung fetches for
+        # platforms the wheel does not cover. That duplication is deliberate,
+        # so it has to be CHECKED — engine._verify_version compares only the
+        # version string and would not notice a different asset or build.
+        # This is the only environment in btap's CI with a genuinely
+        # installed companion, so the check belongs here and nowhere else.
+        if not companion_expected():
+            print("    (skipped: the marker excludes this platform)")
+            return
+        import json
+        from importlib.metadata import version as dist_version
+
+        import canmet_energyplus
+
+        from btap.simulation import engine
+
+        assert canmet_energyplus.ENERGYPLUS_VERSION == engine.PINNED_VERSION, (
+            f"companion carries E+ {canmet_energyplus.ENERGYPLUS_VERSION}, "
+            f"btap pins {engine.PINNED_VERSION}")
+        assert canmet_energyplus.BUILD_SHA == engine._BUILD_SHA, (
+            f"companion built from {canmet_energyplus.BUILD_SHA}, "
+            f"btap pins {engine._BUILD_SHA}")
+
+        # The distribution version is metadata, NOT ENERGYPLUS_VERSION (which
+        # is the three-part engine version by design).
+        installed_dist = dist_version("canmet-energyplus")
+        print(f"    canmet-energyplus {installed_dist}, engine "
+              f"{canmet_energyplus.ENERGYPLUS_VERSION}, build "
+              f"{canmet_energyplus.BUILD_SHA}")
+
+        prov = json.loads(
+            (Path(canmet_energyplus.__file__).parent / "PROVENANCE.json")
+            .read_text(encoding="utf-8"))
+        key = ("windows", "amd64") if sys.platform == "win32" else ("linux", "x86_64")
+        _, btap_digest = engine._ASSETS[key]
+        companion_digest = prov["source_asset"]["sha256"]
+        assert companion_digest == btap_digest, (
+            f"the companion repackaged an asset btap does not know: "
+            f"{companion_digest} != {btap_digest}")
+        print(f"    both repositories name the same upstream asset "
+              f"({companion_digest[:16]}…)")
+    check("the two repositories agree on the EnergyPlus identity (R5)",
+          companion_authority_agrees)
+
+    def installed_pair_sizes():
+        # The release premise, exercised as users receive it: installed btap
+        # drives the installed companion from outside the checkout. Inputs may
+        # be fixtures; neither implementation is allowed to resolve from it.
+        if not companion_expected():
+            print("    (skipped: the marker excludes this platform)")
+            return
+        import canmet_energyplus
+
+        venv_root = Path(sys.prefix).resolve()
+        for package, module_path in (
+                ("btap", Path(btap.__file__).resolve()),
+                ("canmet-energyplus", Path(canmet_energyplus.__file__).resolve())):
+            if not module_path.is_relative_to(venv_root):
+                raise AssertionError(
+                    f"{package} imported from {module_path}, outside scratch venv {venv_root}")
+        exe = Path(sys.executable).parent / "btap-compliance"
+        with tempfile.TemporaryDirectory(prefix="btap-installed-sizing-") as tmp:
+            tmp = Path(tmp)
+            run_dir = tmp / "run"
+            env = {**os.environ, "XDG_CACHE_HOME": str(tmp / "cache")}
+            for name in ("PYTHONPATH", "BTAP_ENERGYPLUS", "BTAP_ENERGYPLUS_ARCHIVE",
+                         "BTAP_COMPANION_WHEELHOUSE"):
+                env.pop(name, None)
+            proc = subprocess.run(
+                [str(exe),
+                 str(modeling.hvac.catalog_report.FIXTURE),
+                 "--simulate", "sizing",
+                 "--epw", str(REPO_ROOT / "tests/fixtures/weather/"
+                               "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw"),
+                 "--hdd", "3890", "--storeys", "1", "--no-report", "--quiet",
+                 "--space-type", "Space Function/Office enclosed > 25 m2",
+                 "-o", str(run_dir)],
+                cwd=str(tmp), env=env, capture_output=True, text=True, timeout=1200)
+            assert proc.returncode == 6, (
+                f"installed-pair sizing exited {proc.returncode}, expected 6 "
+                f"(no determination): {proc.stderr[-1200:]}")
+            assert (run_dir / "audit.json").is_file(), (
+                "installed-pair sizing produced no audit.json")
+            for name in ("proposed_sizing", "reference_sizing"):
+                energyplus_run = run_dir / name / "run"
+                sql = energyplus_run / "eplusout.sql"
+                err = energyplus_run / "eplusout.err"
+                assert sql.is_file() and sql.stat().st_size > 0, (
+                    f"installed-pair {name} produced no non-empty eplusout.sql")
+                assert err.is_file() and "EnergyPlus Completed Successfully" in (
+                    err.read_text(encoding="utf-8", errors="replace")), (
+                    f"installed-pair {name} did not complete EnergyPlus successfully")
+            # The download rung must NOT have been the engine source: the
+            # isolated cache stays EMPTY, proving the companion (already
+            # asserted venv-resident) supplied EnergyPlus — no provisioning
+            # occurred (review of the merged gate: closes the theoretical
+            # absent-companion-falls-to-download false-green).
+            provisioned = list((tmp / "cache").rglob("energyplus*"))
+            assert not provisioned, (
+                f"the isolated cache contains a provisioned engine "
+                f"({provisioned[:2]}) — the run did NOT use the companion")
+            print(f"installed-pair sizing used btap from {Path(btap.__file__).parent}")
+            print("installed-pair sizing used companion from "
+                  f"{Path(canmet_energyplus.__file__).parent}")
+            print("installed-pair REAL sizing completed with isolated cache "
+                "and no engine-resolution overrides")
+    check("installed btap + installed companion complete real sizing (R5)",
+          installed_pair_sizes)
+
+    def console_script_answers():
+        # M6: the wheel declares the btap-compliance entry point. It must be
+        # on the venv's bin path and --help must exit 0 — a broken entry
+        # point is invisible to every in-process test.
+        exe = Path(sys.executable).parent / "btap-compliance"
+        if not exe.exists():
+            raise AssertionError(f"console script not installed: {exe}")
+        proc = subprocess.run([str(exe), "--help"], capture_output=True,
+                              text=True, timeout=120)
+        assert proc.returncode == 0, f"--help exited {proc.returncode}: {proc.stderr[-500:]}"
+        assert "--epw" in proc.stdout, "help does not document --epw"
+    check("the btap-compliance console script answers --help", console_script_answers)
+
+    def console_script_reports_the_distribution_version():
+        # Post-9a review Medium: the CLI once asked package metadata for
+        # "btap" (the import name) and printed "dev" from a 0.3.0 wheel. The
+        # distribution is canmet-btap; --version must say what pip installed.
+        from importlib.metadata import version as dist_version
+        exe = Path(sys.executable).parent / "btap-compliance"
+        proc = subprocess.run([str(exe), "--version"], capture_output=True,
+                              text=True, timeout=120)
+        assert proc.returncode == 0, f"--version exited {proc.returncode}: {proc.stderr[-300:]}"
+        expected = dist_version("canmet-btap")
+        assert expected in proc.stdout + proc.stderr, (
+            f"--version printed {proc.stdout.strip()!r}, distribution is {expected}")
+    check("btap-compliance --version reports the canmet-btap version",
+          console_script_reports_the_distribution_version)
+
+    def coverage_console_answers():
+        exe = Path(sys.executable).parent / "btap-necb-coverage"
+        if not exe.exists():
+            raise AssertionError(f"console script not installed: {exe}")
+        proc = subprocess.run([str(exe), "--help"], capture_output=True,
+                              text=True, timeout=120)
+        assert proc.returncode == 0, f"--help exited {proc.returncode}: {proc.stderr[-500:]}"
+        assert "get" in proc.stdout, "help does not document article retrieval"
+        assert "attribution" in proc.stdout, "help does not document attribution"
+    check("the btap-necb-coverage console script answers --help",
+          coverage_console_answers)
+
+    if failures:
+        print(f"\nWHEEL SMOKE FAILED ({len(failures)}):")
+        for f in failures:
+            print(f"  - {f}")
+        return 1
+    print("\nWHEEL SMOKE OK — the installed distribution is self-sufficient")
+    return 0
+
+
+def main(argv) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--run-checks", action="store_true", help=argparse.SUPPRESS)
+    args = parser.parse_args(argv)
+    if args.run_checks:
+        return run_checks()
+
+    with tempfile.TemporaryDirectory(prefix="btap-wheel-gate-") as work:
+        work_dir = Path(work)
+        print("building the wheel...")
+        # From the REPOSITORY ROOT (#229), where the one pyproject.toml now
+        # lives. Building python/ would fail outright: it has no build entry.
+        subprocess.run([sys.executable, "-m", "build", "--wheel", "--outdir", str(work_dir),
+                        str(REPO_ROOT)], check=True, stdout=subprocess.DEVNULL)
+        wheel = next(work_dir.glob("*.whl"))
+        print(f"built {wheel.name}")
+
+        venv = work_dir / "venv"
+        subprocess.run([sys.executable, "-m", "venv", str(venv)], check=True)
+        pip, python = venv / "bin" / "pip", venv / "bin" / "python"
+        print("installing into a clean venv...")
+        # The install pulls the PINNED canmet-tbd (a default dependency since
+        # D-109; py-topolys pinned transitively) — the M7 engine must install
+        # and operate from the DISTRIBUTION, not just the checkout: a broken
+        # pin, missing package data or import-resolution failure in the
+        # engine is invisible to every source-tree test.
+        # The companion hard dep (R5, D-83) resolves from PyPI like any
+        # other dependency now that canmet-energyplus is published from its
+        # own repository; H-6 below proves the dependency is real by
+        # withholding ONLY that package from an isolated index.
+        # H-6, done HONESTLY (review round 4: an empty index fails for
+        # every dependency, proving nothing about the companion). Build a
+        # wheelhouse holding EVERY dependency EXCEPT the companion; the
+        # failure must NAME the companion requirement. This no longer needs
+        # a locally built companion — the dependency now comes from PyPI
+        # like any other — but it DOES need the platform guard: where the
+        # marker excludes the companion, resolution legitimately succeeds
+        # and asserting failure would be a false alarm.
+        if companion_expected():
+            with tempfile.TemporaryDirectory(prefix="h6-") as deps_dir:
+                subprocess.run(
+                    [str(pip), "download", "-q", "-d", deps_dir,
+                     "openstudio~=3.11.0"], check=True)
+                h6 = subprocess.run(
+                    [str(pip), "install", "--dry-run", "--no-index",
+                     "--find-links", deps_dir, str(wheel)],
+                    capture_output=True, text=True)
+                blame = (h6.stdout + h6.stderr)
+                if h6.returncode == 0:
+                    print("H-6 FAILED: btap resolved without the companion")
+                    return 1
+                if "canmet-energyplus" not in blame:
+                    print("H-6 FAILED: resolution failed but did NOT name "
+                          f"canmet-energyplus:\n{blame[-800:]}")
+                    return 1
+                print("H-6 ok: with every dep present EXCEPT the companion, "
+                      "resolution fails NAMING canmet-energyplus")
+        else:
+            print("H-6 skipped: the marker excludes the companion here")
+        # Everything resolves from PyPI now — canmet-tbd 3.5.2 (which pins
+        # py-topolys==0.1.0 transitively) and canmet-energyplus 25.2.0.2 are
+        # published, so this install is EXACTLY what a user's plain
+        # `pip install canmet-btap` does.
+        #
+        # PLAIN, since D-109 made the thermal-bridging engine a default
+        # dependency (and removed the `[tbd]` extra). This gate used to
+        # install `{wheel}[tbd]`, which would pass whether or not a default
+        # worked; `tbd_engine_operates` below now fails if a plain install
+        # did not bring the engine — the property D-109 depends on.
+        subprocess.run([str(pip), "install", "-q",
+                        "openstudio~=3.11.0", str(wheel)], check=True)
+
+        # CWD outside the repo: a local btap/ must not be importable.
+        print(f"running checks from {work_dir} (outside the checkout)\n")
+        return subprocess.run(
+            [str(python), str(Path(__file__).resolve()), "--run-checks"],
+            cwd=str(work_dir)).returncode
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

@@ -1,6 +1,6 @@
 # NECB questions this tool does not decide — for an authority
 
-**GENERATED** by `python/scripts/generate_ahj_referrals.py` from
+**GENERATED** by `scripts/generate_ahj_referrals.py` from
 `docs/NECB_AHJ_QUESTIONS.md`. Do not edit: edit the register and
 regenerate. Every question, article, attribution and interim
 behaviour below is the register's own text, so none of it can drift;

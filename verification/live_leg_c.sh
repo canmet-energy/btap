@@ -4,7 +4,7 @@
 #   verification/live_leg_c.sh [WORK_DIR]
 #
 # Stages (python-prep / ruby-probe):
-#   1. python/scripts/oracle_prep.py       — Python builds the prep models
+#   1. scripts/oracle_prep.py       — Python builds the prep models
 #   2. verification/oracle/export_goldens.rb (pin bundle) — Ruby probes the
 #      pinned oracle into a FRESH goldens directory (never touches committed)
 #   3. verification/oracle/compare_goldens.py — committed goldens ≡ live oracle
@@ -19,7 +19,7 @@
 # documents.
 #
 # Requires: the pin bundle (BUNDLE_GEMFILE=legacy_pin/Gemfile bundle check),
-# python/.venv, and the OpenStudio SDK in both runtimes.
+# .venv, and the OpenStudio SDK in both runtimes.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -27,12 +27,12 @@ WORK="${1:-$(mktemp -d)}"
 PREP="$WORK/prep"
 FRESH="$WORK/goldens"
 MANIFEST="$ROOT/verification/oracle/request_manifest.json"
-PY="${BTAP_PYTHON:-$ROOT/python/.venv/bin/python}"
+PY="${BTAP_PYTHON:-$ROOT/.venv/bin/python}"
 
 echo "== live Leg C — work dir $WORK"
 
 echo "== 1/4 python prep"
-"$PY" "$ROOT/python/scripts/oracle_prep.py" --out "$PREP"
+"$PY" "$ROOT/scripts/oracle_prep.py" --out "$PREP"
 
 echo "== 2/4 oracle export (pin bundle)"
 BUNDLE_GEMFILE="$ROOT/legacy_pin/Gemfile" bundle exec \
@@ -52,7 +52,7 @@ import json
 print(json.load(open('$MANIFEST'))['pytest']['collected'])
 ")
 REPORT="$WORK/pytest"
-(cd "$ROOT/python" && BTAP_ORACLE_GOLDENS="$FRESH" BTAP_GOLDENS_REQUIRED=1 \
+(cd "$ROOT" && BTAP_ORACLE_GOLDENS="$FRESH" BTAP_GOLDENS_REQUIRED=1 \
   "$PY" -m pytest -q -p no:cacheprovider "${FILES[@]}" \
   --junitxml="$REPORT.xml" | tail -3)
 

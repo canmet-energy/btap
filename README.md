@@ -1,7 +1,7 @@
 # NECB compliance for OpenStudio models
 
 > **Two READMEs, on purpose.** This one is the repository: what the tool does,
-> how to install it, and how to run it. [`python/README.md`](python/README.md)
+> how to install it, and how to run it. [`src/README.md`](src/README.md)
 > is the distribution's own front page — it is `canmet-btap`'s
 > `long_description` on PyPI, so it describes the package, not the repo.
 > Contributor setup lives in [`docs/DEVELOPERS.md`](docs/DEVELOPERS.md).

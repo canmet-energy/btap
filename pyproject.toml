@@ -12,9 +12,9 @@ name = "canmet-btap"  # PyPI similarity check blocks "btap" (bta exists); the im
 # to be 0.3.0 — pip could treat an installed PyPI 0.3.0 as satisfying it.
 version = "0.4.0.dev0"
 description = "NECB 2020/2025 Part 8 performance-path compliance toolchain (Python port of the btap gem family)"
-# The PyPI long description stays python/README.md; the root README.md is
+# The PyPI long description stays src/README.md; the root README.md is
 # for building engineers (CLAUDE.md), a different audience.
-readme = "python/README.md"
+readme = "src/README.md"
 requires-python = ">=3.11"
 license = "GPL-3.0-or-later"
 # The wheel must CARRY the licence, not merely name it: the Windows
@@ -73,19 +73,16 @@ dependencies = [
 btap-compliance = "btap.codes.cli:main"
 btap-necb-coverage = "btap.codes.coverage:main"
 
-# #229: this file lives at the REPOSITORY ROOT so that
+# #229: the standard src layout. This file is at the repository root, so
 #   pip install git+https://github.com/canmet-energy/btap
-# works without `#subdirectory=python`. The package itself stays in
-# python/ — moving it touches ~16,700 references, most of them frozen
-# baselines that embed coverage code pointers; see
-# docs/plans/PYTHON_PACKAGE_LAYOUT_PLAN.md. package-dir points the build at
-# it, and there is deliberately ONE pyproject: a second copy in python/
-# would let the dependency pins and package-data below drift apart.
+# works with no `#subdirectory=`, and the package is under src/ so that a
+# checkout's root never shadows the installed `btap` on sys.path. tests/ and
+# scripts/ sit beside this file. See docs/plans/PYTHON_PACKAGE_LAYOUT_PLAN.md.
 [tool.setuptools]
-package-dir = {"" = "python"}
+package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
-where = ["python"]
+where = ["src"]
 include = ["btap*"]
 
 # The rules/catalog/cost tables are the product, not incidental assets: every
@@ -104,10 +101,9 @@ include = ["btap*"]
 "*" = ["data/**/*.json", "data/**/*.csv", "data/**/*.md", "data/**/*.osm"]
 
 [tool.ruff]
-# `src` makes ruff's isort rules classify `btap` and `tests` as FIRST-party.
-# Without it the project root would be this directory, where neither
-# package lives, and import-block sorting would change.
-src = ["python"]
+# `src` makes ruff's isort rules classify `btap` (under src/) and `tests`
+# (at the root) as FIRST-party; without both, import-block sorting changes.
+src = ["src", "."]
 line-length = 100
 target-version = "py311"
 
@@ -128,9 +124,13 @@ select = ["E4", "E7", "E9", "F", "B", "I"]
 ignore = ["B905"]
 
 [tool.pytest.ini_options]
-# Relative to THIS file. `cd python && pytest tests/` still works: pytest
-# finds this config by walking upward, and explicit paths override testpaths.
-testpaths = ["python/tests"]
+# Relative to THIS file; run pytest from the repository root.
+testpaths = ["tests"]
+# THIS checkout's `btap` leads sys.path, ahead of any installed copy. Strict
+# src-layout practice tests only the installed package, but an editable
+# install of ANOTHER checkout (a worktree's venv pointing at the main tree)
+# would then be what the suite exercises, silently. Explicit is safer here.
+pythonpath = ["src"]
 
 # The D-77 one-way dependency arrows, enforced in-package (one distribution,
 # five subpackages): necb -> costing -> modeling -> audit; simulation beside.

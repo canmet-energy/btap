@@ -8,7 +8,7 @@ implementation (`btap.codes.necb`). The five `btap-*` Ruby gems this record
 began under retired at R6 (D-84), and the package was renamed at D-86; entries
 written before those points keep their period wording. Machine-checkable
 coverage lives elsewhere — article dispositions in
-`python/btap/codes/data/coverage/necb_8_4_disposition.json`, per-domain
+`src/btap/codes/data/coverage/necb_8_4_disposition.json`, per-domain
 `article_coverage` manifests, the
 generated `NECB_8_4_COVERAGE.html`, and the evidence rules in
 `docs/necb_rule_verification.md`. **This file records the judgement calls**: the
@@ -25,11 +25,11 @@ matter — `id`, `title`, `kind`, `articles`, `summary` — followed by the
 authored Markdown body, whose first line is the section's own `## D-NN —`
 heading. Three artifacts are generated from those sources and are never
 hand-edited: this document, the runtime registry
-`python/btap/codes/data/decisions.json`, and the Codes Committee view by
+`src/btap/codes/data/decisions.json`, and the Codes Committee view by
 provision, `docs/CODE_DECISIONS_BY_PROVISION.md`. The full editing workflow
 for a decision: (1) add or edit the one source file; (2) run `python3
-python/scripts/generate_decisions.py`; (3) run the Python registry/citation
-tests. `python3 python/scripts/generate_decisions.py --check` is the drift gate
+scripts/generate_decisions.py`; (3) run the Python registry/citation
+tests. `python3 scripts/generate_decisions.py --check` is the drift gate
 and runs in CI. The front-matter `title` is the compact title this index and
 the runtime registry carry; the body's heading is authored prose and the two
 deliberately differ for most decisions. Anchors and this index are inserted by
@@ -170,7 +170,7 @@ audit are drained and archived — see `docs/README.md`.
 - **Who/when:** phylroy, 2026-07-22.
 - **Why:** NRCan is the Crown; NECB copyright is the Government of Canada's.
 - **Evidence:** `NECB_8_4_COVERAGE.html` renders full clause text; cache in
-  `python/btap/necb/data/coverage/necb_8_4_articles_2025.json`. Commit `09c011740`.
+  `src/btap/necb/data/coverage/necb_8_4_articles_2025.json`. Commit `09c011740`.
 
 <a id="d-02"></a>
 
@@ -302,7 +302,7 @@ requirement identity across competing rulings.
   because the single-speed fan cycles. Applies to the **performance path only**
   (8.4.6.1 scopes curves to the reference building; the EUI path has none).
 - **Evidence:** `openstudio-necb/scripts/necb_8_4_6_curve_probe.rb` (tower section, in
-  `rake necb:verify`); `python/btap/necb/data/coverage/necb_8_4_disposition.json`
+  `rake necb:verify`); `src/btap/necb/data/coverage/necb_8_4_disposition.json`
   8.4.6.6.
 
 ### Applicability correction
@@ -321,7 +321,7 @@ not compliance.
 ## D-08 — Batch sign-off of the remaining 19 article dispositions
 
 - **Decision:** all 19 remaining draft dispositions in
-  `python/btap/necb/data/coverage/necb_8_4_disposition.json` signed off in four groups:
+  `src/btap/necb/data/coverage/necb_8_4_disposition.json` signed off in four groups:
   - **A. Probe-evidenced `covered_by` (7):** 8.4.6.1, 8.4.6.2, 8.4.6.3,
     8.4.6.4, 8.4.6.5, 8.4.6.7, 8.4.6.9 — each rationale carries its numeric
     result from `rake necb:curves`, which re-verifies on every run.
@@ -335,7 +335,7 @@ not compliance.
 - **Why:** a disposition is a claim of *responsibility*, not correctness — the
   deliberate weaker claim. Group D remains publicly documented as uncovered;
   implementing any of those articles later is separate, evidence-backed work.
-- **Evidence:** `python/btap/necb/data/coverage/necb_8_4_disposition.json` (no `draft` entries
+- **Evidence:** `src/btap/necb/data/coverage/necb_8_4_disposition.json` (no `draft` entries
   remain); rendered without DRAFT pills in `NECB_8_4_COVERAGE.html`.
 
 <a id="d-09"></a>
@@ -3746,8 +3746,8 @@ stand.
 - **Files:** `openstudio-hvac/lib/openstudio_hvac/classify.rb`,
   `.../necb/reference.rb`; test + golden as above. The Ruby paths are the
   ORIGINAL artifact; the product is Python-only since D-84, and the matrix now
-  lives at `python/tests/fixtures/reference_selection_matrix.json` with
-  `python/tests/necb/test_hvac_reference_selection_matrix.py`.
+  lives at `tests/fixtures/reference_selection_matrix.json` with
+  `tests/necb/test_hvac_reference_selection_matrix.py`.
 - **Superseded in part by D-101, 2026-10-09**, which made the thermal block the
   selection unit. The adjudicated CONTENT of this matrix — which system,
   action, energy type and catalog each configuration elects — stands unchanged,
@@ -5247,7 +5247,7 @@ parts under durable ownership in `verification/oracle/`:
   incidental oracle iteration order nor hide a real ordering contract.
 - **A gem-free Ruby exporter** (`export_goldens.rb`) that runs the oracle
   probes under the pin. Any preparation chain that historically contained a
-  btap-gem call moved wholly to Python (`python/scripts/oracle_prep.py`
+  btap-gem call moved wholly to Python (`scripts/oracle_prep.py`
   builds the prep `.osm`s, each with a composition contract and full
   provenance — commit, dirty state, script/manifest/seed SHA-256s, and the
   OpenStudio identity as sdk_version AND build_sha); SDK-only prep stays in
@@ -5284,7 +5284,7 @@ change is an adjudicated manifest update, never a re-bootstrap.
 **Registry authority.** The decisions registry is maintained by GENERATION,
 not dual hand-edits: the Ruby copy
 (`btap-necb/lib/btap_necb/data/decisions.json`) is authoritative through
-the Ruby support window, `python/scripts/sync_decisions_registry.py` copies
+the Ruby support window, `scripts/sync_decisions_registry.py` copies
 it byte-identically to the packaged Python location, and CI demands
 equivalence. The Python registry becomes authoritative at the R3 primacy
 flip. (This repaired an existing defect: the Python copy had silently
@@ -5330,9 +5330,9 @@ bridge to the pinned oracle until R6.
 **The registry authority reversed as MACHINERY, not policy text** (the
 R1/R2 closure review's acceptance criterion for R3). Since this decision:
 
-- `python/btap/necb/data/decisions.json` is the ONE hand-maintained
+- `src/btap/necb/data/decisions.json` is the ONE hand-maintained
   registry; the copy at `btap-necb/lib/btap_necb/data/decisions.json` is
-  GENERATED by `python/scripts/sync_decisions_registry.py` (direction
+  GENERATED by `scripts/sync_decisions_registry.py` (direction
   reversed) and never hand-edited — byte identity is CI-enforced on every
   PR by a named lint gate plus the pytest sync test.
 - The canonical editing workflow for a decision: (1) edit the canonical
@@ -5343,8 +5343,8 @@ R1/R2 closure review's acceptance criterion for R3). Since this decision:
   registry/citation tests; (6) run the Ruby registry/TOC tests.
 - The two-sided runtime-citation invariant is now enforced on BOTH sides:
   the Ruby test scans gem `lib/` as before, and a new AST-based Python
-  scanner (`python/tests/necb/test_decisions_registry.py`) walks
-  `python/btap` call keywords — literals only (no variable pass-through),
+  scanner (`tests/necb/test_decisions_registry.py`) walks
+  `src/btap` call keywords — literals only (no variable pass-through),
   on the audit surface only, docstrings and comments invisible by
   construction.
 - **This entry itself landed through the new direction** — canonical JSON
@@ -5394,8 +5394,8 @@ true of the R3 arrangement and of the R6 move that followed it.
 **Now:** one decision is one file, `docs/decisions/D-NN.md`, carrying TOML
 front matter (`id`, `title`, `kind`, `articles`, `summary`) and the authored
 Markdown body. That file is CANONICAL. `docs/necb_decisions.md` and
-`python/btap/codes/data/decisions.json` are both GENERATED from it by
-`python3 python/scripts/generate_decisions.py`, and `--check` is the single
+`src/btap/codes/data/decisions.json` are both GENERATED from it by
+`python3 scripts/generate_decisions.py`, and `--check` is the single
 drift gate in CI. There is one writer, where R3's arrangement had the JSON
 hand-maintained and the document's prose hand-authored against it, and R6's
 had a second generator emitting the index alone.
@@ -5440,7 +5440,7 @@ handoff, seal and period evidence remain historical.
 
 **Decided:** The R4 verification handoff is COMPLETE (2026-08-29). The
 frozen scenario suite (`verification/scenarios/` +
-`python/tests/necb/test_frozen_scenarios.py`) replaces the live
+`tests/necb/test_frozen_scenarios.py`) replaces the live
 Ruby-vs-Python Leg-B gates, which are now DORMANT; **Ruby backports stop
 at this decision's merge** — behaviour changes are Python-only from here.
 
@@ -5721,14 +5721,14 @@ R-B's, run on a clean tree by the orchestrator, never by the agent that makes
 the rename.
 
 **Evidence:** a SECOND ledger,
-`python/tests/data/coverage_code_ref_mapping_r7.json`, maps all 87 unique
+`tests/data/coverage_code_ref_mapping_r7.json`, maps all 87 unique
 coverage `code` pointers old → new with their use counts. The R6 ledger is
-never rewritten; `python/tests/test_coverage_code_refs.py` now walks the whole
+never rewritten; `tests/test_coverage_code_refs.py` now walks the whole
 chain instead — every R7 `old` equals an R6 `new`, every R7 `new` resolves in a
 live manifest, and the R7 use counts still sum to 313. `tiers.py` drops out of
 the pointer set entirely (32 owning files become 31) because its one pointer
 followed `eui_building_energy_target` into `eui_archetypes.py`.
-`python/tests/test_no_legacy_namespace.py` is the standing gate: no active
+`tests/test_no_legacy_namespace.py` is the standing gate: no active
 `btap.necb` or `btap/necb` reference survives in tracked sources, with an
 explicit allowlist naming the historical records that are deliberately never
 rewritten — `PORT_STATUS.md`, the R6 and D-80 reviews, the M6/M7 port review,
@@ -5789,9 +5789,9 @@ clean tree by the orchestrator, and any leaf outside those categories is a
 finding.
 
 **Nothing numeric moves.** No value, article string, audit action text,
-ordering or count changes. `python/tests/necb/test_codes_registry.py`'s
+ordering or count changes. `tests/necb/test_codes_registry.py`'s
 30-entry `(edition, site) → article` table and
-`python/tests/test_citation_no_loss.py` are unchanged; only the call sites
+`tests/test_citation_no_loss.py` are unchanged; only the call sites
 are re-keyed to code ids, which is why that table is the proof that the
 citation surface survived the rename.
 
@@ -6924,7 +6924,7 @@ tool does with each:
   |---|---|---|
   | **compliance** | product code that can change an audit entry, a verdict, a sized capacity, a citation, or a frozen baseline's content | the full loop — Sol, then Fable, every round until all three agree |
   | **verification** | the harness, provenance, freeze machinery, CI wiring — anything whose defects are visible and recoverable without a wrong answer reaching a reader | ONE adversarial round, then merge on clearance; further variants of a found class are filed, not chased |
-  | **tooling** | developer scripts nothing imports (`python/scripts/mutate.py` and the like) | self-review under the red-test rule below; no adversarial round |
+  | **tooling** | developer scripts nothing imports (`scripts/mutate.py` and the like) | self-review under the red-test rule below; no adversarial round |
 
   The tiering is about DEPTH, never about rigour: a tooling change still needs
   its mutation evidence and its tests, and a verification change still needs
@@ -7264,7 +7264,7 @@ The manifest pinned the **source** of a baseline and never its **producer**:
 | fact | pinned before this | by what |
 |---|---|---|
 | source code | yes | `commit` + `runner_sha256`, `freezer_sha256`, `api_worker_sha256` |
-| weather bytes | yes | the same commit — `python/tests/fixtures/weather/*.epw`/`.ddy` are **tracked** |
+| weather bytes | yes | the same commit — `tests/fixtures/weather/*.epw`/`.ddy` are **tracked** |
 | engine stack | **no** | `openstudio_cli`, a version string only |
 
 That the weather is committed matters more than it first appears: it means a
@@ -7813,7 +7813,7 @@ states no PLR floor — and output `[0.7, 1.0]`, the engine's own constraint.
 Every measured figure this decision rests on is here, once. It is checked
 field by field against the shipped curve and the Article cubic by
 `test_the_EVIDENCE_BLOCK_is_computed` in
-`python/tests/necb/test_dx_plf_as_applied.py`, so a stale number fails rather
+`tests/necb/test_dx_plf_as_applied.py`, so a stale number fails rather
 than waiting to be noticed.
 
 ```text
@@ -7929,7 +7929,7 @@ the Articles apply.
 
 ### How it is verified
 
-`python/tests/necb/test_dx_plf_as_applied.py` builds a real coil through
+`tests/necb/test_dx_plf_as_applied.py` builds a real coil through
 `btap.modeling.hvac.components.coils`, gives it a capacity so the NECB pass
 proceeds, runs `efficiency.apply`, and reads the curve the COIL carries. It
 pins all four bounds, both seam roots and the evidence block above, and the
@@ -8049,7 +8049,7 @@ sealing is now empty.
 **The seven machinery source hashes** — `freezer_sha256`, `defs_sha256`,
 `runner_sha256`, `api_worker_sha256`, `compare_runs_sha256`,
 `audit_scenario_sha256`, `gate_sha256`. Replaced BEFORE deletion by
-`python/tests/test_comparator_contract.py`, which tests the comparator's
+`tests/test_comparator_contract.py`, which tests the comparator's
 contract case by case: changed, added and removed baseline files; added and
 removed mapping keys; booleans, strings, numbers, null and nested containers;
 list order where order is significant; each tolerance boundary inside and
@@ -8460,7 +8460,7 @@ marker — `btap.simulation.translation` — is D-106's, and D-106 carries the
 `runtime` citation for it.
 
 `test_every_runtime_entry_is_cited` made the distinction concrete: declared
-`runtime`, D-107 failed with "no ruling literal cites them in python/btap",
+`runtime`, D-107 failed with "no ruling literal cites them in src/btap",
 because a script is not product source. The gate was right and the kind was
 wrong.
 
@@ -8495,9 +8495,9 @@ is to be closed, not worked around.
 
 ### Where a reader meets it
 
-`python/scripts/generate_samples.py#_mark_fan_coils_for_mode_specific_sizing`
+`scripts/generate_samples.py#_mark_fan_coils_for_mode_specific_sizing`
 marks every fan coil in `save()`, and
-`python/scripts/simulate_all_samples.py` refuses any authored sample that
+`scripts/simulate_all_samples.py` refuses any authored sample that
 sizes with a Severe or Fatal error. The catalogue sweep proves a SYSTEM on the
 shared bare fixture and cannot prove the generated sample, which is the gap
 issue #68 lived in for three weeks.

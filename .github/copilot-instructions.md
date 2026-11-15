@@ -3,7 +3,7 @@
 Read [CLAUDE.md](../CLAUDE.md) first. It is the repository guide, and its
 package contract, commands and traps apply to every agent working here.
 
-Each subpackage under `python/btap/` carries its own `CLAUDE.md` —
+Each subpackage under `src/btap/` carries its own `CLAUDE.md` —
 `audit/`, `codes/`, `costing/`, `modeling/` and `simulation/`. Read the one
 nearest the code you are changing in addition to the root file.
 

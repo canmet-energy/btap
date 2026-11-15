@@ -10,8 +10,8 @@ publish step only reports what it would upload.
 The manual Linux path mirrors the workflow:
 
 ```bash
-python3 -m build --wheel --outdir python/dist python/
-python3 python/scripts/generate_samples.py packaging/windows/samples
+python3 -m build --wheel --outdir dist .
+python3 scripts/generate_samples.py packaging/windows/samples
 python3 packaging/windows/stage_python.py --version 0.3.0
 python3 packaging/windows/release_guards.py --version 0.3.0
 python3 packaging/windows/installer_smoke.py

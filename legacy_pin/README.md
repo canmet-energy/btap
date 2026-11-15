@@ -43,15 +43,15 @@ From the repository root, with a prepared Python environment:
 ```bash
 LEGACY_PIN_REQUIRED=1 \
 BUNDLE_GEMFILE="$PWD/legacy_pin/Gemfile" \
-PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
-BTAP_PYTHON="$PWD/python/.venv/bin/python" \
+PYTHONPATH="$PWD/src:/usr/local/openstudio-3.11.0/Python" \
+BTAP_PYTHON="$PWD/.venv/bin/python" \
    bash verification/live_leg_c.sh /tmp/live-leg-c
 
 LEGACY_PIN_REQUIRED=1 \
 BUNDLE_GEMFILE="$PWD/legacy_pin/Gemfile" \
-PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
+PYTHONPATH="$PWD/src:/usr/local/openstudio-3.11.0/Python" \
 BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
-   python/.venv/bin/pytest -q python/tests/necb/test_legacy_archetype_e2e.py
+   .venv/bin/pytest -q tests/necb/test_legacy_archetype_e2e.py
 ```
 
 `LEGACY_PIN_REQUIRED=1` turns an unavailable oracle into failure instead of a

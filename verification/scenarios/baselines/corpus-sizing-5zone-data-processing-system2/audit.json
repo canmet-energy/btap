@@ -216,9 +216,9 @@
    "status": "partial",
    "decisions_citing": 6,
    "code": [
-    "python/btap/codes/necb/loads/apply.py#apply_loads",
-    "python/btap/codes/necb/loads/apply.py#assign_space_types",
-    "python/btap/codes/necb/loads/schedules.py#add"
+    "src/btap/codes/necb/loads/apply.py#apply_loads",
+    "src/btap/codes/necb/loads/apply.py#assign_space_types",
+    "src/btap/codes/necb/loads/schedules.py#add"
    ]
   },
   "article": "8.4.3.2.(1)",
@@ -232,7 +232,7 @@
    "status": "partial",
    "decisions_citing": 6,
    "code": [
-    "python/btap/codes/necb/loads/apply.py#apply_loads"
+    "src/btap/codes/necb/loads/apply.py#apply_loads"
    ]
   },
   "article": "8.4.3.2.(2)",
@@ -258,8 +258,8 @@
    "status": "host_scope",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/envelope/reference.py#apply_air_leakage_default",
-    "python/btap/codes/necb/envelope/prescriptive.py#apply"
+    "src/btap/codes/necb/envelope/reference.py#apply_air_leakage_default",
+    "src/btap/codes/necb/envelope/prescriptive.py#apply"
    ]
   },
   "article": "8.4.3.3.",
@@ -273,8 +273,8 @@
    "status": "host_scope",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/lighting/apply_lights.py#_apply_to_space_type",
-    "python/btap/codes/necb/lighting/reference.py#_apply_dwelling_rule"
+    "src/btap/codes/necb/lighting/apply_lights.py#_apply_to_space_type",
+    "src/btap/codes/necb/lighting/reference.py#_apply_dwelling_rule"
    ]
   },
   "article": "8.4.3.4.",
@@ -288,8 +288,8 @@
    "status": "host_scope",
    "decisions_citing": 0,
    "code": [
-    "python/btap/modeling/hvac/systems/plant_loops.py#hot_water",
-    "python/btap/modeling/hvac/systems/plant_loops.py#chilled_water"
+    "src/btap/modeling/hvac/systems/plant_loops.py#hot_water",
+    "src/btap/modeling/hvac/systems/plant_loops.py#chilled_water"
    ]
   },
   "article": "8.4.3.5.",
@@ -303,7 +303,7 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/loads/apply.py#apply_loads"
+    "src/btap/codes/necb/loads/apply.py#apply_loads"
    ]
   },
   "article": "8.4.2.7. (internal loads)",
@@ -317,7 +317,7 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/loads/apply.py#apply_loads"
+    "src/btap/codes/necb/loads/apply.py#apply_loads"
    ]
   },
   "article": "8.4.3.6.",
@@ -370,7 +370,7 @@
    "status": "implemented",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/lighting/apply_lights.py#apply_lights"
+    "src/btap/codes/necb/lighting/apply_lights.py#apply_lights"
    ]
   },
   "article": "4.2.1.4.",
@@ -384,7 +384,7 @@
    "status": "implemented",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/lighting/apply_lights.py#_apply_to_space_type"
+    "src/btap/codes/necb/lighting/apply_lights.py#_apply_to_space_type"
    ]
   },
   "article": "4.2.1.5.",
@@ -398,7 +398,7 @@
    "status": "implemented",
    "decisions_citing": 2,
    "code": [
-    "python/btap/codes/necb/lighting/apply_lights.py#_apply_to_space_type"
+    "src/btap/codes/necb/lighting/apply_lights.py#_apply_to_space_type"
    ]
   },
   "article": "4.2.1.6.",
@@ -412,8 +412,8 @@
    "status": "partial",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/lighting/apply_lights.py#_wire_lighting_schedule",
-    "python/btap/codes/necb/lighting/apply_lights.py#_synthesize_sensor_ruleset"
+    "src/btap/codes/necb/lighting/apply_lights.py#_wire_lighting_schedule",
+    "src/btap/codes/necb/lighting/apply_lights.py#_synthesize_sensor_ruleset"
    ]
   },
   "article": "4.2.2.1.(16)-(23)",
@@ -427,7 +427,7 @@
    "status": "partial",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/lighting/storage_garage/__init__.py#apply"
+    "src/btap/codes/necb/lighting/storage_garage/__init__.py#apply"
    ]
   },
   "article": "4.2.2.2.",
@@ -441,9 +441,9 @@
    "status": "partial",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/lighting/daylight_control_requirement.py#evaluate",
-    "python/btap/codes/necb/lighting/daylighted_areas.py#areas",
-    "python/btap/codes/necb/lighting/daylighting.py#add_controls"
+    "src/btap/codes/necb/lighting/daylight_control_requirement.py#evaluate",
+    "src/btap/codes/necb/lighting/daylighted_areas.py#areas",
+    "src/btap/codes/necb/lighting/daylighting.py#add_controls"
    ]
   },
   "article": "4.2.2.1.(10)-(15); 4.2.2.3.; 4.2.2.4.; 4.2.2.5.",
@@ -457,8 +457,8 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/lighting/exterior.py#allowance",
-    "python/btap/codes/necb/lighting/exterior.py#apply_exterior_lights"
+    "src/btap/codes/necb/lighting/exterior.py#allowance",
+    "src/btap/codes/necb/lighting/exterior.py#apply_exterior_lights"
    ]
   },
   "article": "4.2.3.1.",
@@ -472,7 +472,7 @@
    "status": "implemented",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/lighting/apply_lights.py#_synthesize_sensor_ruleset"
+    "src/btap/codes/necb/lighting/apply_lights.py#_synthesize_sensor_ruleset"
    ]
   },
   "article": "4.3.2.10.",
@@ -486,8 +486,8 @@
    "status": "implemented",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/lighting/apply_lights.py#_apply_to_space_type",
-    "python/btap/codes/necb/lighting/reference.py#reference_lighting"
+    "src/btap/codes/necb/lighting/apply_lights.py#_apply_to_space_type",
+    "src/btap/codes/necb/lighting/reference.py#reference_lighting"
    ]
   },
   "article": "8.4.4.5.(1)",
@@ -501,7 +501,7 @@
    "status": "implemented",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/lighting/reference.py#_apply_dwelling_rule"
+    "src/btap/codes/necb/lighting/reference.py#_apply_dwelling_rule"
    ]
   },
   "article": "8.4.4.5.(2)",
@@ -515,8 +515,8 @@
    "status": "partial",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/lighting/apply_lights.py#_wire_lighting_schedule",
-    "python/btap/codes/necb/lighting/apply_lights.py#_synthesize_sensor_ruleset"
+    "src/btap/codes/necb/lighting/apply_lights.py#_wire_lighting_schedule",
+    "src/btap/codes/necb/lighting/apply_lights.py#_synthesize_sensor_ruleset"
    ]
   },
   "article": "8.4.4.5.(3)",
@@ -530,7 +530,7 @@
    "status": "implemented",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/lighting/apply_lights.py#_apply_to_space_type"
+    "src/btap/codes/necb/lighting/apply_lights.py#_apply_to_space_type"
    ]
   },
   "article": "8.4.4.5.(4)",
@@ -544,7 +544,7 @@
    "status": "partial",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/lighting/reference_daylighting.py#apply"
+    "src/btap/codes/necb/lighting/reference_daylighting.py#apply"
    ]
   },
   "article": "8.4.4.5.(5)-(12)",
@@ -558,8 +558,8 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/lighting/apply_lights.py#apply_lights",
-    "python/btap/codes/necb/lighting/reference.py#reference_lighting"
+    "src/btap/codes/necb/lighting/apply_lights.py#apply_lights",
+    "src/btap/codes/necb/lighting/reference.py#reference_lighting"
    ]
   },
   "article": "8.4.1.1. (lighting)",
@@ -1442,7 +1442,7 @@
    "status": "host_scope",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/compliance.py#_build_reference"
+    "src/btap/codes/compliance.py#_build_reference"
    ]
   },
   "article": "8.4.4.1.",
@@ -1456,7 +1456,7 @@
    "status": "satisfied_by_clone",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/hvac/reference.py#_clone_model"
+    "src/btap/codes/necb/hvac/reference.py#_clone_model"
    ]
   },
   "article": "8.4.4.2.",
@@ -1470,7 +1470,7 @@
    "status": "host_scope",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/envelope/reference.py#reference_envelope"
+    "src/btap/codes/necb/envelope/reference.py#reference_envelope"
    ]
   },
   "article": "8.4.4.3.",
@@ -1484,7 +1484,7 @@
    "status": "host_scope",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/envelope/reference.py#_apply_lightweight_construction"
+    "src/btap/codes/necb/envelope/reference.py#_apply_lightweight_construction"
    ]
   },
   "article": "8.4.4.4.",
@@ -1498,7 +1498,7 @@
    "status": "host_scope",
    "decisions_citing": 6,
    "code": [
-    "python/btap/codes/necb/lighting/reference.py#reference_lighting"
+    "src/btap/codes/necb/lighting/reference.py#reference_lighting"
    ]
   },
   "article": "8.4.4.5.",
@@ -1512,8 +1512,8 @@
    "status": "partial",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/hvac/reference.py#_reference_energy_type",
-    "python/btap/modeling/hvac/systems/plant_loops.py#hot_water"
+    "src/btap/codes/necb/hvac/reference.py#_reference_energy_type",
+    "src/btap/modeling/hvac/systems/plant_loops.py#hot_water"
    ]
   },
   "article": "8.4.4.6.(1)",
@@ -1527,8 +1527,8 @@
    "status": "partial",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/hvac/reference.py#_reference_energy_type",
-    "python/btap/modeling/hvac/systems/plant_loops.py#chilled_water"
+    "src/btap/codes/necb/hvac/reference.py#_reference_energy_type",
+    "src/btap/modeling/hvac/systems/plant_loops.py#chilled_water"
    ]
   },
   "article": "8.4.4.6.(2)",
@@ -1542,7 +1542,7 @@
    "status": "host_scope",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/shw/reference.py#reference_shw"
+    "src/btap/codes/necb/shw/reference.py#reference_shw"
    ]
   },
   "article": "8.4.4.6.(3)",
@@ -1556,7 +1556,7 @@
    "status": "partial",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/hvac/reference.py#_clone_model"
+    "src/btap/codes/necb/hvac/reference.py#_clone_model"
    ]
   },
   "article": "8.4.4.6.(4)",
@@ -1570,8 +1570,8 @@
    "status": "implemented",
    "decisions_citing": 13,
    "code": [
-    "python/btap/codes/necb/hvac/reference.py#select_reference_systems",
-    "python/btap/codes/necb/hvac/reference.py#_assign"
+    "src/btap/codes/necb/hvac/reference.py#select_reference_systems",
+    "src/btap/codes/necb/hvac/reference.py#_assign"
    ]
   },
   "article": "8.4.4.7.",
@@ -1585,7 +1585,7 @@
    "status": "implemented",
    "decisions_citing": 2,
    "code": [
-    "python/btap/codes/necb/hvac/reference.py#_apply_oversizing_caps"
+    "src/btap/codes/necb/hvac/reference.py#_apply_oversizing_caps"
    ]
   },
   "article": "8.4.4.8.",
@@ -1599,7 +1599,7 @@
    "status": "implemented",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/hvac/reference.py#_assign"
+    "src/btap/codes/necb/hvac/reference.py#_assign"
    ]
   },
   "article": "8.4.4.9.(1)",
@@ -1613,7 +1613,7 @@
    "status": "implemented",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/hvac/reference.py#_reference_energy_type"
+    "src/btap/codes/necb/hvac/reference.py#_reference_energy_type"
    ]
   },
   "article": "8.4.4.9.(2)",
@@ -1627,8 +1627,8 @@
    "status": "partial",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/hvac/reference.py#_audit_terminal_secondary_split",
-    "python/btap/codes/necb/hvac/reference.py#_apply_zone_fan_rules"
+    "src/btap/codes/necb/hvac/reference.py#_audit_terminal_secondary_split",
+    "src/btap/codes/necb/hvac/reference.py#_apply_zone_fan_rules"
    ]
   },
   "article": "8.4.4.9.(3)",
@@ -1642,7 +1642,7 @@
    "status": "partial",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/hvac/reference.py#_reference_energy_type"
+    "src/btap/codes/necb/hvac/reference.py#_reference_energy_type"
    ]
   },
   "article": "8.4.4.9.(4)",
@@ -1667,8 +1667,8 @@
    "status": "partial",
    "decisions_citing": 1,
    "code": [
-    "python/btap/modeling/hvac/systems/plant_loops.py#hot_water",
-    "python/btap/codes/necb/hvac/efficiency.py#_apply_boiler"
+    "src/btap/modeling/hvac/systems/plant_loops.py#hot_water",
+    "src/btap/codes/necb/hvac/efficiency.py#_apply_boiler"
    ]
   },
   "article": "8.4.4.9.(6)",
@@ -1682,8 +1682,8 @@
    "status": "partial",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/hvac/efficiency.py#apply_staging",
-    "python/btap/codes/necb/hvac/efficiency.py#_stage_multispeed_coil"
+    "src/btap/codes/necb/hvac/efficiency.py#apply_staging",
+    "src/btap/codes/necb/hvac/efficiency.py#_stage_multispeed_coil"
    ]
   },
   "article": "8.4.4.9.(7)",
@@ -1697,8 +1697,8 @@
    "status": "implemented",
    "decisions_citing": 1,
    "code": [
-    "python/btap/modeling/hvac/components/curves.py#build",
-    "python/btap/codes/necb/hvac/efficiency.py#apply"
+    "src/btap/modeling/hvac/components/curves.py#build",
+    "src/btap/codes/necb/hvac/efficiency.py#apply"
    ]
   },
   "article": "8.4.4.9.(8)",
@@ -1712,7 +1712,7 @@
    "status": "implemented",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/hvac/reference.py#_assign"
+    "src/btap/codes/necb/hvac/reference.py#_assign"
    ]
   },
   "article": "8.4.4.10.(1)",
@@ -1726,7 +1726,7 @@
    "status": "implemented",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/hvac/reference.py#_reference_energy_type"
+    "src/btap/codes/necb/hvac/reference.py#_reference_energy_type"
    ]
   },
   "article": "8.4.4.10.(2)",
@@ -1740,7 +1740,7 @@
    "status": "implemented",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/hvac/reference.py#_reference_energy_type"
+    "src/btap/codes/necb/hvac/reference.py#_reference_energy_type"
    ]
   },
   "article": "8.4.4.10.(3)",
@@ -1765,8 +1765,8 @@
    "status": "implemented",
    "decisions_citing": 1,
    "code": [
-    "python/btap/modeling/hvac/components/curves.py#build",
-    "python/btap/codes/necb/hvac/efficiency.py#apply"
+    "src/btap/modeling/hvac/components/curves.py#build",
+    "src/btap/codes/necb/hvac/efficiency.py#apply"
    ]
   },
   "article": "8.4.4.10.(5)",
@@ -1780,8 +1780,8 @@
    "status": "implemented",
    "decisions_citing": 1,
    "code": [
-    "python/btap/modeling/hvac/systems/plant_loops.py#chilled_water",
-    "python/btap/codes/necb/hvac/efficiency.py#_apply_chiller"
+    "src/btap/modeling/hvac/systems/plant_loops.py#chilled_water",
+    "src/btap/codes/necb/hvac/efficiency.py#_apply_chiller"
    ]
   },
   "article": "8.4.4.10.(6)",
@@ -1795,7 +1795,7 @@
    "status": "partial",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/hvac/reference.py#_audit_terminal_secondary_split"
+    "src/btap/codes/necb/hvac/reference.py#_audit_terminal_secondary_split"
    ]
   },
   "article": "8.4.4.10.(7)",
@@ -1809,8 +1809,8 @@
    "status": "partial",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/hvac/efficiency.py#apply_staging",
-    "python/btap/codes/necb/hvac/efficiency.py#_apply_dx_cooling_multi"
+    "src/btap/codes/necb/hvac/efficiency.py#apply_staging",
+    "src/btap/codes/necb/hvac/efficiency.py#_apply_dx_cooling_multi"
    ]
   },
   "article": "8.4.4.10.(8)",
@@ -1824,7 +1824,7 @@
    "status": "implemented",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/hvac/efficiency.py#_apply_tower_rules"
+    "src/btap/codes/necb/hvac/efficiency.py#_apply_tower_rules"
    ]
   },
   "article": "8.4.4.10.(9)",
@@ -1838,7 +1838,7 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/hvac/efficiency.py#_apply_tower_rules"
+    "src/btap/codes/necb/hvac/efficiency.py#_apply_tower_rules"
    ]
   },
   "article": "8.4.4.11.(1)",
@@ -1852,7 +1852,7 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/hvac/efficiency.py#_apply_tower_rules"
+    "src/btap/codes/necb/hvac/efficiency.py#_apply_tower_rules"
    ]
   },
   "article": "8.4.4.11.(2)",
@@ -1866,7 +1866,7 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/hvac/efficiency.py#_apply_tower_rules"
+    "src/btap/codes/necb/hvac/efficiency.py#_apply_tower_rules"
    ]
   },
   "article": "8.4.4.11.(3)",
@@ -1880,7 +1880,7 @@
    "status": "partial",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/hvac/efficiency.py#_apply_pump_rules"
+    "src/btap/codes/necb/hvac/efficiency.py#_apply_pump_rules"
    ]
   },
   "article": "8.4.4.11.(4)",
@@ -1894,7 +1894,7 @@
    "status": "partial",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/hvac/efficiency.py#_apply_pump_rules"
+    "src/btap/codes/necb/hvac/efficiency.py#_apply_pump_rules"
    ]
   },
   "article": "8.4.4.11.(5)",
@@ -1908,7 +1908,7 @@
    "status": "partial",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/hvac/efficiency.py#_apply_tower_rules"
+    "src/btap/codes/necb/hvac/efficiency.py#_apply_tower_rules"
    ]
   },
   "article": "8.4.4.11.(6)",
@@ -1922,8 +1922,8 @@
    "status": "partial",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/hvac/efficiency.py#_apply_tower_rules",
-    "python/btap/modeling/hvac/components/curves.py#build"
+    "src/btap/codes/necb/hvac/efficiency.py#_apply_tower_rules",
+    "src/btap/modeling/hvac/components/curves.py#build"
    ]
   },
   "article": "8.4.4.11.(7)",
@@ -1937,8 +1937,8 @@
    "status": "implemented",
    "decisions_citing": 2,
    "code": [
-    "python/btap/codes/necb/hvac/reference.py#_apply_economizers",
-    "python/btap/codes/necb/hvac/efficiency.py#_economizer_stage_floor"
+    "src/btap/codes/necb/hvac/reference.py#_apply_economizers",
+    "src/btap/codes/necb/hvac/efficiency.py#_economizer_stage_floor"
    ]
   },
   "article": "8.4.4.12.",
@@ -1952,8 +1952,8 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/hvac/reference.py#_heat_pump_redirects",
-    "python/btap/modeling/hvac/classify.py#_plant_facts"
+    "src/btap/codes/necb/hvac/reference.py#_heat_pump_redirects",
+    "src/btap/modeling/hvac/classify.py#_plant_facts"
    ]
   },
   "article": "8.4.4.13.(1)",
@@ -1967,10 +1967,10 @@
    "status": "partial",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/hvac/reference.py#_apply_heat_pump_limits",
-    "python/btap/codes/necb/hvac/reference.py#heat_pump_aux_energy_type",
-    "python/btap/codes/necb/hvac/reference.py#_apply_oversizing_caps",
-    "python/btap/codes/necb/hvac/efficiency.py#_align_heat_pump_heating_capacity"
+    "src/btap/codes/necb/hvac/reference.py#_apply_heat_pump_limits",
+    "src/btap/codes/necb/hvac/reference.py#heat_pump_aux_energy_type",
+    "src/btap/codes/necb/hvac/reference.py#_apply_oversizing_caps",
+    "src/btap/codes/necb/hvac/efficiency.py#_align_heat_pump_heating_capacity"
    ]
   },
   "article": "8.4.4.13.(2)",
@@ -1984,7 +1984,7 @@
    "status": "implemented",
    "decisions_citing": 3,
    "code": [
-    "python/btap/codes/necb/hvac/efficiency.py#_apply_pump_rules"
+    "src/btap/codes/necb/hvac/efficiency.py#_apply_pump_rules"
    ]
   },
   "article": "8.4.4.14.",
@@ -1998,8 +1998,8 @@
    "status": "partial",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/hvac/reference.py#_clone_model",
-    "python/btap/codes/necb/hvac/reference.py#reference_hvac"
+    "src/btap/codes/necb/hvac/reference.py#_clone_model",
+    "src/btap/codes/necb/hvac/reference.py#reference_hvac"
    ]
   },
   "article": "8.4.4.15.(1)",
@@ -2013,8 +2013,8 @@
    "status": "partial",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/hvac/reference.py#_apply_dcv",
-    "python/btap/codes/necb/hvac/reference.py#_audit_dcv_caveats"
+    "src/btap/codes/necb/hvac/reference.py#_apply_dcv",
+    "src/btap/codes/necb/hvac/reference.py#_audit_dcv_caveats"
    ]
   },
   "article": "8.4.4.15.(2)",
@@ -2040,7 +2040,7 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/hvac/reference.py#_clone_model"
+    "src/btap/codes/necb/hvac/reference.py#_clone_model"
    ]
   },
   "article": "8.4.4.16.(2)",
@@ -2054,8 +2054,8 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/hvac/efficiency.py#_apply_fan_power_curve",
-    "python/btap/codes/necb/hvac/reference.py#_apply_fan_rules"
+    "src/btap/codes/necb/hvac/efficiency.py#_apply_fan_power_curve",
+    "src/btap/codes/necb/hvac/reference.py#_apply_fan_rules"
    ]
   },
   "article": "8.4.4.17.",
@@ -2069,7 +2069,7 @@
    "status": "partial",
    "decisions_citing": 2,
    "code": [
-    "python/btap/codes/necb/hvac/reference.py#_apply_zone_fan_rules"
+    "src/btap/codes/necb/hvac/reference.py#_apply_zone_fan_rules"
    ]
   },
   "article": "8.4.4.18.(1)",
@@ -2083,7 +2083,7 @@
    "status": "partial",
    "decisions_citing": 2,
    "code": [
-    "python/btap/codes/necb/hvac/reference.py#_apply_zone_fan_rules"
+    "src/btap/codes/necb/hvac/reference.py#_apply_zone_fan_rules"
    ]
   },
   "article": "8.4.4.18.(2)",
@@ -2097,7 +2097,7 @@
    "status": "implemented",
    "decisions_citing": 2,
    "code": [
-    "python/btap/codes/necb/hvac/reference.py#_apply_fan_rules"
+    "src/btap/codes/necb/hvac/reference.py#_apply_fan_rules"
    ]
   },
   "article": "8.4.4.18.(3)",
@@ -2111,7 +2111,7 @@
    "status": "implemented",
    "decisions_citing": 2,
    "code": [
-    "python/btap/codes/necb/hvac/reference.py#_apply_fan_rules"
+    "src/btap/codes/necb/hvac/reference.py#_apply_fan_rules"
    ]
   },
   "article": "8.4.4.18.(4)",
@@ -2147,7 +2147,7 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/hvac/energy_recovery.py#apply_energy_recovery"
+    "src/btap/codes/necb/hvac/energy_recovery.py#apply_energy_recovery"
    ]
   },
   "article": "8.4.4.19.",
@@ -2161,7 +2161,7 @@
    "status": "host_scope",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/shw/reference.py#reference_shw"
+    "src/btap/codes/necb/shw/reference.py#reference_shw"
    ]
   },
   "article": "8.4.4.20.",
@@ -2175,7 +2175,7 @@
    "status": "implemented",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/hvac/reference.py#reference_hvac"
+    "src/btap/codes/necb/hvac/reference.py#reference_hvac"
    ]
   },
   "article": "8.4.1.1. (HVAC)",
@@ -2189,8 +2189,8 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/modeling/hvac/builder.py#build_system",
-    "python/btap/codes/necb/hvac/reference.py#reference_hvac"
+    "src/btap/modeling/hvac/builder.py#build_system",
+    "src/btap/codes/necb/hvac/reference.py#reference_hvac"
    ]
   },
   "article": "8.4.2.10.",
@@ -2542,8 +2542,8 @@
    "status": "host_scope",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/envelope/thermal_bridging.py#apply",
-    "python/btap/codes/necb/envelope/prescriptive.py#_target_conductance"
+    "src/btap/codes/necb/envelope/thermal_bridging.py#apply",
+    "src/btap/codes/necb/envelope/prescriptive.py#_target_conductance"
    ]
   },
   "article": "3.1.1.5.",
@@ -2557,8 +2557,8 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/envelope/prescriptive.py#apply",
-    "python/btap/codes/necb/envelope/rules.py#max_fdwr"
+    "src/btap/codes/necb/envelope/prescriptive.py#apply",
+    "src/btap/codes/necb/envelope/rules.py#max_fdwr"
    ]
   },
   "article": "3.1.1.6.",
@@ -2572,7 +2572,7 @@
    "status": "implemented",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/envelope/thermal_bridging.py#apply"
+    "src/btap/codes/necb/envelope/thermal_bridging.py#apply"
    ]
   },
   "article": "3.1.1.7.",
@@ -2586,9 +2586,9 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/envelope/rules.py#max_fdwr",
-    "python/btap/codes/necb/envelope/rules.py#max_srr",
-    "python/btap/codes/necb/envelope/prescriptive.py#apply"
+    "src/btap/codes/necb/envelope/rules.py#max_fdwr",
+    "src/btap/codes/necb/envelope/rules.py#max_srr",
+    "src/btap/codes/necb/envelope/prescriptive.py#apply"
    ]
   },
   "article": "3.2.1.4.",
@@ -2602,7 +2602,7 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/envelope/prescriptive.py#_target_conductance"
+    "src/btap/codes/necb/envelope/prescriptive.py#_target_conductance"
    ]
   },
   "article": "3.2.2.1.",
@@ -2616,7 +2616,7 @@
    "status": "implemented",
    "decisions_citing": 2,
    "code": [
-    "python/btap/codes/necb/envelope/prescriptive.py#_target_conductance"
+    "src/btap/codes/necb/envelope/prescriptive.py#_target_conductance"
    ]
   },
   "article": "3.2.2.2.",
@@ -2630,8 +2630,8 @@
    "status": "implemented",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/envelope/prescriptive.py#_target_conductance",
-    "python/btap/codes/necb/envelope/prescriptive.py#_apply_ground_strip"
+    "src/btap/codes/necb/envelope/prescriptive.py#_target_conductance",
+    "src/btap/codes/necb/envelope/prescriptive.py#_apply_ground_strip"
    ]
   },
   "article": "3.2.2.3.",
@@ -2645,7 +2645,7 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/envelope/prescriptive.py#_subsurface_target_construction"
+    "src/btap/codes/necb/envelope/prescriptive.py#_subsurface_target_construction"
    ]
   },
   "article": "3.2.2.4.",
@@ -2659,7 +2659,7 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/envelope/prescriptive.py#apply"
+    "src/btap/codes/necb/envelope/prescriptive.py#apply"
    ]
   },
   "article": "3.2.3.1.",
@@ -2673,12 +2673,12 @@
    "status": "partial",
    "decisions_citing": 6,
    "code": [
-    "python/btap/codes/necb/envelope/rules.py#ground_floor_extent",
-    "python/btap/codes/necb/envelope/prescriptive.py#_embedded_floor_inventory",
-    "python/btap/codes/necb/envelope/prescriptive.py#_assign_ground_floor",
-    "python/btap/codes/necb/envelope/prescriptive.py#_apply_simple_ground_equivalent",
-    "python/btap/codes/necb/path.py#prepare_model",
-    "python/btap/codes/necb/path.py#build_reference"
+    "src/btap/codes/necb/envelope/rules.py#ground_floor_extent",
+    "src/btap/codes/necb/envelope/prescriptive.py#_embedded_floor_inventory",
+    "src/btap/codes/necb/envelope/prescriptive.py#_assign_ground_floor",
+    "src/btap/codes/necb/envelope/prescriptive.py#_apply_simple_ground_equivalent",
+    "src/btap/codes/necb/path.py#prepare_model",
+    "src/btap/codes/necb/path.py#build_reference"
    ]
   },
   "article": "3.2.3.3.",
@@ -2716,7 +2716,7 @@
    "status": "implemented",
    "decisions_citing": 2,
    "code": [
-    "python/btap/codes/necb/envelope/reference.py#reference_envelope"
+    "src/btap/codes/necb/envelope/reference.py#reference_envelope"
    ]
   },
   "article": "8.4.4.1.",
@@ -2730,7 +2730,7 @@
    "status": "host_scope",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/hvac/reference.py#reference_hvac"
+    "src/btap/codes/necb/hvac/reference.py#reference_hvac"
    ]
   },
   "article": "8.4.4.2.",
@@ -2744,10 +2744,10 @@
    "status": "implemented",
    "decisions_citing": 6,
    "code": [
-    "python/btap/codes/necb/envelope/reference.py#_apply_roof_absorptance",
-    "python/btap/codes/necb/envelope/reference.py#_scale_fenestration_to_limits",
-    "python/btap/codes/necb/envelope/reference.py#_strip_shading",
-    "python/btap/codes/necb/envelope/reference.py#apply_air_leakage_default"
+    "src/btap/codes/necb/envelope/reference.py#_apply_roof_absorptance",
+    "src/btap/codes/necb/envelope/reference.py#_scale_fenestration_to_limits",
+    "src/btap/codes/necb/envelope/reference.py#_strip_shading",
+    "src/btap/codes/necb/envelope/reference.py#apply_air_leakage_default"
    ]
   },
   "article": "8.4.4.3.",
@@ -2761,7 +2761,7 @@
    "status": "implemented",
    "decisions_citing": 2,
    "code": [
-    "python/btap/codes/necb/envelope/reference.py#_apply_lightweight_construction"
+    "src/btap/codes/necb/envelope/reference.py#_apply_lightweight_construction"
    ]
   },
   "article": "8.4.4.4.",
@@ -2775,8 +2775,8 @@
    "status": "implemented",
    "decisions_citing": 2,
    "code": [
-    "python/btap/codes/necb/envelope/reference.py#reference_envelope",
-    "python/btap/codes/necb/envelope/prescriptive.py#apply"
+    "src/btap/codes/necb/envelope/reference.py#reference_envelope",
+    "src/btap/codes/necb/envelope/prescriptive.py#apply"
    ]
   },
   "article": "8.4.1.1. (envelope)",
@@ -2790,7 +2790,7 @@
    "status": "implemented",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/envelope/reference.py#apply_air_leakage_default"
+    "src/btap/codes/necb/envelope/reference.py#apply_air_leakage_default"
    ]
   },
   "article": "8.4.2.9.",
@@ -2829,7 +2829,7 @@
    "status": "implemented",
    "decisions_citing": 3,
    "code": [
-    "python/btap/codes/necb/lighting/apply_lights.py#apply_lights"
+    "src/btap/codes/necb/lighting/apply_lights.py#apply_lights"
    ]
   },
   "article": "4.2.1.4.",
@@ -2843,7 +2843,7 @@
    "status": "implemented",
    "decisions_citing": 3,
    "code": [
-    "python/btap/codes/necb/lighting/apply_lights.py#_apply_to_space_type"
+    "src/btap/codes/necb/lighting/apply_lights.py#_apply_to_space_type"
    ]
   },
   "article": "4.2.1.5.",
@@ -2857,7 +2857,7 @@
    "status": "implemented",
    "decisions_citing": 5,
    "code": [
-    "python/btap/codes/necb/lighting/apply_lights.py#_apply_to_space_type"
+    "src/btap/codes/necb/lighting/apply_lights.py#_apply_to_space_type"
    ]
   },
   "article": "4.2.1.6.",
@@ -2871,8 +2871,8 @@
    "status": "partial",
    "decisions_citing": 3,
    "code": [
-    "python/btap/codes/necb/lighting/apply_lights.py#_wire_lighting_schedule",
-    "python/btap/codes/necb/lighting/apply_lights.py#_synthesize_sensor_ruleset"
+    "src/btap/codes/necb/lighting/apply_lights.py#_wire_lighting_schedule",
+    "src/btap/codes/necb/lighting/apply_lights.py#_synthesize_sensor_ruleset"
    ]
   },
   "article": "4.2.2.1.(16)-(23)",
@@ -2886,7 +2886,7 @@
    "status": "partial",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/lighting/storage_garage/__init__.py#apply"
+    "src/btap/codes/necb/lighting/storage_garage/__init__.py#apply"
    ]
   },
   "article": "4.2.2.2.",
@@ -2900,9 +2900,9 @@
    "status": "partial",
    "decisions_citing": 3,
    "code": [
-    "python/btap/codes/necb/lighting/daylight_control_requirement.py#evaluate",
-    "python/btap/codes/necb/lighting/daylighted_areas.py#areas",
-    "python/btap/codes/necb/lighting/daylighting.py#add_controls"
+    "src/btap/codes/necb/lighting/daylight_control_requirement.py#evaluate",
+    "src/btap/codes/necb/lighting/daylighted_areas.py#areas",
+    "src/btap/codes/necb/lighting/daylighting.py#add_controls"
    ]
   },
   "article": "4.2.2.1.(10)-(15); 4.2.2.3.; 4.2.2.4.; 4.2.2.5.",
@@ -2916,8 +2916,8 @@
    "status": "implemented",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/lighting/exterior.py#allowance",
-    "python/btap/codes/necb/lighting/exterior.py#apply_exterior_lights"
+    "src/btap/codes/necb/lighting/exterior.py#allowance",
+    "src/btap/codes/necb/lighting/exterior.py#apply_exterior_lights"
    ]
   },
   "article": "4.2.3.1.",
@@ -2931,7 +2931,7 @@
    "status": "implemented",
    "decisions_citing": 2,
    "code": [
-    "python/btap/codes/necb/lighting/apply_lights.py#_synthesize_sensor_ruleset"
+    "src/btap/codes/necb/lighting/apply_lights.py#_synthesize_sensor_ruleset"
    ]
   },
   "article": "4.3.2.10.",
@@ -2945,8 +2945,8 @@
    "status": "implemented",
    "decisions_citing": 7,
    "code": [
-    "python/btap/codes/necb/lighting/apply_lights.py#_apply_to_space_type",
-    "python/btap/codes/necb/lighting/reference.py#reference_lighting"
+    "src/btap/codes/necb/lighting/apply_lights.py#_apply_to_space_type",
+    "src/btap/codes/necb/lighting/reference.py#reference_lighting"
    ]
   },
   "article": "8.4.4.5.(1)",
@@ -2960,7 +2960,7 @@
    "status": "implemented",
    "decisions_citing": 7,
    "code": [
-    "python/btap/codes/necb/lighting/reference.py#_apply_dwelling_rule"
+    "src/btap/codes/necb/lighting/reference.py#_apply_dwelling_rule"
    ]
   },
   "article": "8.4.4.5.(2)",
@@ -2974,8 +2974,8 @@
    "status": "partial",
    "decisions_citing": 7,
    "code": [
-    "python/btap/codes/necb/lighting/apply_lights.py#_wire_lighting_schedule",
-    "python/btap/codes/necb/lighting/apply_lights.py#_synthesize_sensor_ruleset"
+    "src/btap/codes/necb/lighting/apply_lights.py#_wire_lighting_schedule",
+    "src/btap/codes/necb/lighting/apply_lights.py#_synthesize_sensor_ruleset"
    ]
   },
   "article": "8.4.4.5.(3)",
@@ -2989,7 +2989,7 @@
    "status": "implemented",
    "decisions_citing": 7,
    "code": [
-    "python/btap/codes/necb/lighting/apply_lights.py#_apply_to_space_type"
+    "src/btap/codes/necb/lighting/apply_lights.py#_apply_to_space_type"
    ]
   },
   "article": "8.4.4.5.(4)",
@@ -3003,7 +3003,7 @@
    "status": "partial",
    "decisions_citing": 7,
    "code": [
-    "python/btap/codes/necb/lighting/reference_daylighting.py#apply"
+    "src/btap/codes/necb/lighting/reference_daylighting.py#apply"
    ]
   },
   "article": "8.4.4.5.(5)-(12)",
@@ -3017,8 +3017,8 @@
    "status": "implemented",
    "decisions_citing": 3,
    "code": [
-    "python/btap/codes/necb/lighting/apply_lights.py#apply_lights",
-    "python/btap/codes/necb/lighting/reference.py#reference_lighting"
+    "src/btap/codes/necb/lighting/apply_lights.py#apply_lights",
+    "src/btap/codes/necb/lighting/reference.py#reference_lighting"
    ]
   },
   "article": "8.4.1.1. (lighting)",
@@ -3318,8 +3318,8 @@
    "status": "partial",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/shw/efficiency.py#apply_efficiency",
-    "python/btap/codes/necb/shw/efficiency.py#part_load_curve"
+    "src/btap/codes/necb/shw/efficiency.py#apply_efficiency",
+    "src/btap/codes/necb/shw/efficiency.py#part_load_curve"
    ]
   },
   "article": "6.2.2.1.",
@@ -3345,7 +3345,7 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/shw/demand.py#_build_loop"
+    "src/btap/codes/necb/shw/demand.py#_build_loop"
    ]
   },
   "article": "6.2.4.1.",
@@ -3371,7 +3371,7 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/shw/prescriptive.py#check_booster_heaters"
+    "src/btap/codes/necb/shw/prescriptive.py#check_booster_heaters"
    ]
   },
   "article": "6.2.5.1.",
@@ -3397,7 +3397,7 @@
    "status": "partial",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/shw/efficiency.py#apply_solar_pool_minimums"
+    "src/btap/codes/necb/shw/efficiency.py#apply_solar_pool_minimums"
    ]
   },
   "article": "6.2.7.",
@@ -3411,8 +3411,8 @@
    "status": "implemented",
    "decisions_citing": 11,
    "code": [
-    "python/btap/codes/necb/shw/demand.py#apply_shw",
-    "python/btap/codes/necb/shw/demand.py#_add_water_use"
+    "src/btap/codes/necb/shw/demand.py#apply_shw",
+    "src/btap/codes/necb/shw/demand.py#_add_water_use"
    ]
   },
   "article": "8.4.3.2. (SWH loads)",
@@ -3426,7 +3426,7 @@
    "status": "satisfied_by_clone",
    "decisions_citing": 2,
    "code": [
-    "python/btap/codes/necb/shw/reference.py#reference_shw"
+    "src/btap/codes/necb/shw/reference.py#reference_shw"
    ]
   },
   "article": "8.4.4.20.(1)",
@@ -3440,8 +3440,8 @@
    "status": "implemented",
    "decisions_citing": 2,
    "code": [
-    "python/btap/codes/necb/shw/demand.py#_wrap_heat_pump",
-    "python/btap/codes/necb/shw/efficiency.py#apply_heat_pump_efficiency"
+    "src/btap/codes/necb/shw/demand.py#_wrap_heat_pump",
+    "src/btap/codes/necb/shw/efficiency.py#apply_heat_pump_efficiency"
    ]
   },
   "article": "8.4.4.20.(2)",
@@ -3455,7 +3455,7 @@
    "status": "partial",
    "decisions_citing": 2,
    "code": [
-    "python/btap/codes/necb/shw/reference.py#reference_shw"
+    "src/btap/codes/necb/shw/reference.py#reference_shw"
    ]
   },
   "article": "8.4.4.20.(3)-(4)",
@@ -3469,7 +3469,7 @@
    "status": "implemented",
    "decisions_citing": 4,
    "code": [
-    "python/btap/codes/necb/shw/demand.py#apply_shw"
+    "src/btap/codes/necb/shw/demand.py#apply_shw"
    ]
   },
   "article": "8.4.1.1. (SWH)",
@@ -3483,7 +3483,7 @@
    "status": "implemented",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/necb/shw/demand.py#_add_water_use"
+    "src/btap/codes/necb/shw/demand.py#_add_water_use"
    ]
   },
   "article": "8.4.2.7. (SWH loads)",
@@ -3869,8 +3869,8 @@
    "status": "partial",
    "decisions_citing": 4,
    "code": [
-    "python/btap/codes/compliance.py#_evaluate",
-    "python/btap/codes/compliance.py#_evaluate_unmet"
+    "src/btap/codes/compliance.py#_evaluate",
+    "src/btap/codes/compliance.py#_evaluate_unmet"
    ]
   },
   "article": "8.4.1.2.",
@@ -3883,7 +3883,7 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/compliance.py#performance_compliance"
+    "src/btap/codes/compliance.py#performance_compliance"
    ]
   },
   "article": "8.4.2.1.",
@@ -3896,8 +3896,8 @@
    "status": "partial",
    "decisions_citing": 0,
    "code": [
-    "python/btap/simulation/runner.py#energy_results",
-    "python/btap/codes/compliance.py#_run_annual"
+    "src/btap/simulation/runner.py#energy_results",
+    "src/btap/codes/compliance.py#_run_annual"
    ]
   },
   "article": "8.4.2.2.(1)",
@@ -3910,9 +3910,9 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/compliance.py#_evaluate",
-    "python/btap/codes/cli.py#verdict_exit",
-    "python/btap/simulation/runner.py#run_energyplus"
+    "src/btap/codes/compliance.py#_evaluate",
+    "src/btap/codes/cli.py#verdict_exit",
+    "src/btap/simulation/runner.py#run_energyplus"
    ]
   },
   "article": "8.4.2.2.(2)",
@@ -3925,8 +3925,8 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/codes/necb/loads/schedules.py#add",
-    "python/btap/simulation/runner.py#attach_weather"
+    "src/btap/codes/necb/loads/schedules.py#add",
+    "src/btap/simulation/runner.py#attach_weather"
    ]
   },
   "article": "8.4.2.2.(3)",
@@ -3939,8 +3939,8 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/simulation/backends.py#Local.execute",
-    "python/btap/simulation/backends.py#Remote.execute"
+    "src/btap/simulation/backends.py#Local.execute",
+    "src/btap/simulation/backends.py#Remote.execute"
    ]
   },
   "article": "8.4.2.2.(4)",
@@ -3964,8 +3964,8 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/simulation/runner.py#attach_weather",
-    "python/btap/codes/necb/envelope/climate.py#hdd18"
+    "src/btap/simulation/runner.py#attach_weather",
+    "src/btap/codes/necb/envelope/climate.py#hdd18"
    ]
   },
   "article": "8.4.2.3.(1)",
@@ -3989,7 +3989,7 @@
    "status": "implemented",
    "decisions_citing": 1,
    "code": [
-    "python/btap/codes/compliance.py#_load_and_validate"
+    "src/btap/codes/compliance.py#_load_and_validate"
    ]
   },
   "article": "8.4.3.1.",

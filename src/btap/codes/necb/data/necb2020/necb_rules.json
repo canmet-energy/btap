@@ -1,0 +1,112 @@
+{
+  "provenance": {
+    "code": "NECB",
+    "edition": "2020",
+    "source": "btap-necb umbrella pipeline self-declaration — the compliance determination itself (Part 8 Section 8.4), which no domain gem can declare because it spans them. Article titles cross-checked against the building-codes MCP; this edition carries the reference building at Subsection 8.4.4.",
+    "generated": "2026-07-22",
+    "note": "This file carries ONLY article_coverage — the umbrella has no rule data of its own (verdicts and iteration logic live in compliance.py)."
+  },
+  "unmet_cooling": {
+    "minimum_allowance_h": 0.0,
+    "note": "2020's 8.4.1.2.(4) wording is +10% of the reference building's unmet cooling hours with no absolute floor, so this edition declares 0.0."
+  },
+  "article_coverage": {
+    "articles": [
+      {
+        "article": "8.4.1.2.",
+        "title": "Determination of Compliance",
+        "status": "partial",
+        "how": "The pipeline computes the (2) annual-energy verdict (proposed vs reference building). On the reference-building path, the (3)/(4) verdicts read each building’s Facility unmet_occupied_hours row; that path does not yet evaluate the zone rows per thermal block, and (4) is vacuous when the proposed building has no mechanical cooling. The sentence-(5) capacity auto-iteration raises each failing zone’s Sizing:Zone factors where zone data attributes the Facility failure, secant-targeted from that zone’s own (factor, unmet-hours) history across rounds, with a global SizingParameters fallback when it cannot, and hard-sized-equipment stall detection.",
+        "gaps": "On the reference-building path, sentences (3) and (4) read each building’s Facility row instead of evaluating every thermal block, so a block that exceeds its own limit can pass when the Facility-level comparison passes.",
+        "code": [
+          "src/btap/codes/compliance.py#_evaluate",
+          "src/btap/codes/compliance.py#_evaluate_unmet"
+        ]
+      },
+      {
+        "article": "8.4.2.1.",
+        "title": "General",
+        "status": "implemented",
+        "how": "Compliance is assessed through modeling: the umbrella is the only gem permitted to run EnergyPlus, and a determination requires sizing + annual runs of BOTH models (simulate: :annual); any other mode is flagged non-determining.",
+        "code": [
+          "src/btap/codes/compliance.py#performance_compliance"
+        ]
+      },
+      {
+        "article": "8.4.2.2.(1)",
+        "title": "Calculation Methods",
+        "status": "partial",
+        "how": "the energy model accounts for the annual energy use of what the model contains",
+        "gaps": "elevators/escalators ((1)(j)) and other loads absent from the model are not added by the pipeline",
+        "code": [
+          "src/btap/simulation/runner.py#energy_results",
+          "src/btap/codes/compliance.py#_run_annual"
+        ]
+      },
+      {
+        "article": "8.4.2.2.(2)",
+        "title": "Calculation Methods",
+        "status": "implemented",
+        "how": "annual 8760-hour runs at an hourly timestep; a shortened run_period computes the arithmetic but is flagged NOT code-compliant and exits as no-determination",
+        "code": [
+          "src/btap/codes/compliance.py#_evaluate",
+          "src/btap/codes/cli.py#verdict_exit",
+          "src/btap/simulation/runner.py#run_energyplus"
+        ]
+      },
+      {
+        "article": "8.4.2.2.(3)",
+        "title": "Calculation Methods",
+        "status": "implemented",
+        "how": "operating schedules and climatic data enter at an hourly interval",
+        "code": [
+          "src/btap/codes/necb/loads/schedules.py#add",
+          "src/btap/simulation/runner.py#attach_weather"
+        ]
+      },
+      {
+        "article": "8.4.2.2.(4)",
+        "title": "Calculation Methods",
+        "status": "implemented",
+        "how": "software conformance rests on EnergyPlus’s ANSI/ASHRAE 140 testing",
+        "code": [
+          "src/btap/simulation/backends.py#Local.execute",
+          "src/btap/simulation/backends.py#Remote.execute"
+        ]
+      },
+      {
+        "article": "8.4.2.2.(5)",
+        "title": "Calculation Methods",
+        "status": "not_implemented",
+        "gaps": "excluding redundant/back-up equipment is a modeller decision about the model’s contents; the pipeline cannot know which equipment is redundant",
+        "gap_owner": "modeller"
+      },
+      {
+        "article": "8.4.2.3.(1)",
+        "title": "Climatic Data",
+        "status": "implemented",
+        "how": "weather attach (CWEC EPW + DDY design days) via OpenStudioSimulation::Runner.attach_weather!; HDD resolution: explicit arg -> Table C-1 -> .stat fallback",
+        "code": [
+          "src/btap/simulation/runner.py#attach_weather",
+          "src/btap/codes/necb/envelope/climate.py#hdd18"
+        ]
+      },
+      {
+        "article": "8.4.2.3.(2)",
+        "title": "Climatic Data",
+        "status": "not_implemented",
+        "gaps": "the choice among multiple urban climatic data sets is the modeller’s; the pipeline attaches exactly the file it is given",
+        "gap_owner": "modeller"
+      },
+      {
+        "article": "8.4.3.1.",
+        "title": "General (Proposed Building)",
+        "status": "implemented",
+        "how": "The proposed model is simulated as supplied — the pipeline applies no transforms to it (weather attach only); reference transforms operate on a clone. Guaranteed by test_caller_model_never_mutated (test_compliance.rb).",
+        "code": [
+          "src/btap/codes/compliance.py#_load_and_validate"
+        ]
+      }
+    ]
+  }
+}

@@ -18,7 +18,7 @@ ARTICLE = {"heating": (0.0856522, 0.9388137, -0.1834361, 0.1589702),
            "cooling": (0.2012301, -0.0312175, 1.9504979, -1.1205105)}
 CURVE = {"heating": "DXHEAT-REF-PLFFPLR", "cooling": "DXCOOL-REF-COOLPLFFPLR"}
 CARRIER_LO, CARRIER_HI = 0.7, 1.0
-DATA = (pathlib.Path(__file__).resolve().parents[2] / "python" / "btap"
+DATA = (pathlib.Path(__file__).resolve().parents[2] / "src" / "btap"
         / "codes" / "necb" / "data")
 
 

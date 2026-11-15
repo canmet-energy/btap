@@ -53,7 +53,7 @@ verdict is `identical` for both.
 retroactively join any entry's list, and `unverified` is the correct value for
 an entry nobody has checked against it. `test_ahj_register.py` validates every
 listed id against the editions actually registered under
-`python/btap/codes/necb/data/`, so a typo or a retired id fails rather than
+`src/btap/codes/necb/data/`, so a typo or a retired id fails rather than
 quietly misinforming a reader.
 
 AHJ-10 to AHJ-16 came from the decision-log audit and were `unverified` when

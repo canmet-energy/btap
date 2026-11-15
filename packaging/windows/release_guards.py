@@ -42,7 +42,7 @@ def main() -> int:
     m = re.search(r'^version = "([^"]+)"', pyproject, re.M)
     if not m or m.group(1) != v:
         fail(problems, f"pyproject version {m and m.group(1)!r} != {v!r}")
-    init = (REPO_ROOT / "python" / "btap" / "__init__.py").read_text(encoding="utf-8")
+    init = (REPO_ROOT / "src" / "btap" / "__init__.py").read_text(encoding="utf-8")
     m = re.search(r'__version__ = "([^"]+)"', init)
     if not m or m.group(1) != v:
         fail(problems, f"btap.__version__ {m and m.group(1)!r} != {v!r}")

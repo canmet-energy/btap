@@ -121,7 +121,7 @@ writing anything.
 ## Phases 1 and 2 — LANDED
 
 `btap/modeling/envelope/foundations.py` plus
-`python/tests/modeling/test_kiva_foundations.py` (13 tests). They run in the
+`tests/modeling/test_kiva_foundations.py` (13 tests). They run in the
 **`python` CI lane** — SDK only, no EnergyPlus, and that job sets
 `BTAP_SDK_REQUIRED=1` — so they are on every PR, not dispatch-only.
 
@@ -340,7 +340,7 @@ requires a source redistribution to retain the copyright notice, the list of
 conditions and the disclaimer. A docstring naming the repository does not
 satisfy that.
 
-So ported code carries `python/btap/modeling/envelope/data/ATTRIBUTION.md`,
+So ported code carries `src/btap/modeling/envelope/data/ATTRIBUTION.md`,
 which ships in the wheel under the `data/**/*.md` package-data glob and
 reproduces the licence in full, names the ported revision
 (`17e4deeae8465f6931c84a69ce3f7d06bbbb26da`, `develop` at fetch time), the

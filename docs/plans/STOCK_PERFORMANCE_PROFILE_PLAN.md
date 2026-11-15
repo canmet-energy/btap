@@ -347,7 +347,7 @@ system and listing that vintage's performance and envelope properties:
 A complete, parsing sample is at
 [`examples/stock_recipe_office.json`](examples/stock_recipe_office.json) — four
 vintages for one building type, with the four `system` names verified against
-`python/btap/modeling/hvac/data/systems.json`. Every NUMBER in it is a
+`src/btap/modeling/hvac/data/systems.json`. Every NUMBER in it is a
 placeholder: the library ships no vintage data, so the sample shows the shape
 and nothing more.
 

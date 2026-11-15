@@ -21,8 +21,8 @@ and a fresh run of its generator.
 **`necb_decisions.md` is an OUTPUT, not the register.** The canonical source
 of one decision is one file, `docs/decisions/D-NN.md`, with TOML front matter
 plus an authored body. To add or change a decision, edit that file and run
-`python3 python/scripts/generate_decisions.py`;
-`python/tests/necb/test_decisions_registry_sync.py` gates the three outputs
+`python3 scripts/generate_decisions.py`;
+`tests/necb/test_decisions_registry_sync.py` gates the three outputs
 against the sources. An earlier version of this page said to add a `## D-XX`
 heading here, which would have had you hand-editing a generated file.
 
@@ -36,7 +36,7 @@ break it.
 
 - `NECB_AHJ_QUESTIONS.md` — the register of Code questions this tool does not
   decide, four statuses, `AHJ-NN` ids. Cited from runtime source as the third
-  citation axis and gated by `python/tests/necb/test_ahj_register.py`, which
+  citation axis and gated by `tests/necb/test_ahj_register.py`, which
   fails if the runtime cites an id with no entry. The most load-bearing
   authored document in this directory.
 - `necb_rule_verification.md` — the evidence tiers a coverage claim must
@@ -127,7 +127,7 @@ Terms that recur across the five Python subpackages, docs and decision register:
   reference generation.
 - **archetype (two senses)** — (1) the NECB 2025 8.4.4 *building archetypes*
   (Table 8.4.4.1 EUI targets; implemented in
-  `python/btap/codes/necb/editions/necb2025/eui_archetypes.py`); (2) the
+  `src/btap/codes/necb/editions/necb2025/eui_archetypes.py`); (2) the
   project's 17 legacy NECB prototype buildings used as the validation fleet
   (the "fleet"). Reading code
   or docs, check which sense is live.

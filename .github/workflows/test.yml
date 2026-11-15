@@ -38,12 +38,12 @@ jobs:
       - name: Install fast-lane test runner
         run: pip install -q pytest
       - name: Rule-key orphan lint
-        run: python3 python/scripts/necb_orphan_keys.py
+        run: python3 scripts/necb_orphan_keys.py
       # The coverage manifests' code refs ("where is this sentence dealt with")
       # are pure Python file reads. A rename that strands a pointer should fail
       # before anything pays for the container.
       - name: Coverage code refs resolve
-        run: cd python && pytest -q tests/test_coverage_code_refs.py
+        run: pytest -q tests/test_coverage_code_refs.py
       # NECB_COVERAGE.md and NECB_8_4_COVERAGE.html are GENERATED from the
       # gems' article_coverage manifests, and they are what an AHJ reads. Nothing
       # made the committed copies track the manifests, so they drifted: an
@@ -57,8 +57,8 @@ jobs:
       # or this check fails on every branch that is not main.
       - name: Coverage docs match the manifests
         run: |
-          python3 python/scripts/generate_necb_coverage.py
-          python3 python/scripts/generate_necb_8_4_coverage.py
+          python3 scripts/generate_necb_coverage.py
+          python3 scripts/generate_necb_8_4_coverage.py
           git diff --exit-code -- docs/NECB_COVERAGE.md \
                                   docs/NECB_8_4_COVERAGE.html \
             || { echo "::error::Coverage docs are stale. Run: rake necb:coverage_doc"; exit 1; }
@@ -66,23 +66,23 @@ jobs:
       # manifests (multi-edition plan, Stage 4) — same drift contract, its own
       # --check flag (the generate_decisions.py --check contract).
       - name: NECB edition delta doc matches the manifests
-        run: python3 python/scripts/generate_necb_edition_delta.py --check
+        run: python3 scripts/generate_necb_edition_delta.py --check
       # docs/NECB_VINTAGE_MATCH.md compares each snapshot's INHERITED content
       # against the edition's own tables, entirely from the payloads archived
       # under necb<edition>/provenance/vintage_match/ — offline, stdlib, and so
       # the same --check drift contract. Refreshing the archive is a maintainer
       # MCP operation (--fetch) and never runs in CI.
       - name: NECB vintage-match doc matches the archived payloads
-        run: python3 python/scripts/generate_necb_vintage_match.py --check
+        run: python3 scripts/generate_necb_vintage_match.py --check
       # docs/decisions/D-NN.md is canonical; docs/necb_decisions.md,
-      # python/btap/codes/data/decisions.json and
+      # src/btap/codes/data/decisions.json and
       # docs/CODE_DECISIONS_BY_PROVISION.md are all generated from it by the
       # one writer. --check is the drift gate for all three outputs at once, so
       # a hand-edit of any of them is caught here (D-81, amended 2026-09-29).
       - name: "Decisions: generated outputs + sources + runtime citations"
         run: |
-          python3 python/scripts/generate_decisions.py --check
-          cd python && python3 -m unittest \
+          python3 scripts/generate_decisions.py --check
+          PYTHONPATH=src python3 -m unittest \
             tests.necb.test_decisions_registry_sync \
             tests.necb.test_decisions_generator \
             tests.necb.test_decisions_registry
@@ -108,7 +108,6 @@ jobs:
         run: pip install -q 'openstudio~=3.11.0' pytest pytest-xdist import-linter ruff build
       # The Python thermal-bridging engine is required on the bare runner too.
       - name: Install the pinned py-tbd engine (a default dependency, D-109; this job runs from source)
-        working-directory: python
         # py-tbd from its released v3.5.2 tag (exactly the version the
         # pyproject ==3.5.2 pin names) until the PyPI publication lands;
         # the release checklist flips this to the plain PyPI install.
@@ -120,21 +119,21 @@ jobs:
       # has already caught real drift — a lazily-imported SDK helper that had
       # crept into the stdlib-only _compat module.
       - name: Import contracts (D-77 direction, audit SDK-free)
-        working-directory: python
-        # `--config`: import-linter looks for its config ONLY in the current
-        # directory (importlinter/application/file_finding.find_any uses
-        # getcwd, no upward search), and since #229 the single
-        # pyproject.toml is at the repository root.
-        run: lint-imports --config ../pyproject.toml
+        # From the repository root, where import-linter looks for its config
+        # (ONLY the current directory: file_finding.find_any uses getcwd).
+        # This job runs from source without installing the package, so the
+        # src layout's package root goes on the path explicitly.
+        run: PYTHONPATH=src lint-imports
       # pytest-xdist runs test files in parallel worker PROCESSES (the same
       # per-file forking the Ruby Rakefile does) — the suites are stdlib
       # unittest classes, collected by pytest unchanged; plain
       # `python3 -m unittest discover tests` remains the zero-install way.
       - name: Ruff (the lint policy in pyproject is enforced, not decorative)
-        working-directory: python
-        run: ruff check .
+        # The scope is what `python/` held before the src layout (#229); a bare
+        # `ruff check .` from the root would widen it to verification/ and
+        # docs/, which this policy never covered.
+        run: ruff check src tests scripts
       - name: Python suites (SDK required, engine tests skip here)
-        working-directory: python
         env:
           BTAP_SDK_REQUIRED: '1'
           BTAP_TBD_REQUIRED: '1'
@@ -150,7 +149,6 @@ jobs:
       # shadow the install. It exists because catalog_html() once resolved
       # its seed model outside the package and degraded silently from a wheel.
       - name: Installed-wheel smoke (distribution integrity)
-        working-directory: python
         run: python3 scripts/wheel_smoke.py
 
   # Full Python rule verification in the CI image (infra/ci-image: the nrel
@@ -197,17 +195,16 @@ jobs:
       # sample-dependent reference-rules tests run instead of skipping.
       - name: Generate the sample corpus (Python)
         run: |
-          PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
-            python3 python/scripts/generate_samples.py python/tests/generated/samples
+          PYTHONPATH="$PWD/src:/usr/local/openstudio-3.11.0/Python" \
+            python3 scripts/generate_samples.py tests/generated/samples
       # The thermal-bridging stack and the rasterizer (librsvg2-bin) are baked
       # into the CI image. The legacy Ruby bundle is isolated to the parity job
       # where the oracle still needs it.
       - name: Python NECB rule verification
         run: |
-          PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
+          PYTHONPATH="$PWD/src:/usr/local/openstudio-3.11.0/Python" \
           BTAP_PYTHON=/opt/btap-ci/venv/bin/python rake necb:verify
       - name: Python suites and verify-lane scenarios, everything required
-        working-directory: python
         run: |
           # FULL_MATRIX=1: the D-58 reference-selection matrix defaults to a
           # representative subset for PR speed. The acceptance claim is about
@@ -252,9 +249,9 @@ jobs:
           # `.venv/bin/python`, which does not exist in this image, gave
           # exit 127, and bare `python3` would not have the venv's
           # packages.
-          PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
+          PYTHONPATH="$PWD/src:/usr/local/openstudio-3.11.0/Python" \
             /opt/btap-ci/venv/bin/python \
-            python/scripts/simulate_all_systems.py --check
+            scripts/simulate_all_systems.py --check
       # The catalogue sweep above proves a SYSTEM on the shared bare fixture.
       # It cannot prove the GENERATED SAMPLE — that system built onto a seed,
       # with NECB loads and sample-specific setup applied — which is the gap
@@ -264,13 +261,12 @@ jobs:
       # ~12 s each, about four and a half minutes (D-107).
       - name: The authored-sample sizing sweep, re-run and diffed
         run: |
-          PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
+          PYTHONPATH="$PWD/src:/usr/local/openstudio-3.11.0/Python" \
             BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
             /opt/btap-ci/venv/bin/python \
-            python/scripts/simulate_all_samples.py --check
+            scripts/simulate_all_samples.py --check
       - name: Coverage summary
         if: always()
-        working-directory: python
         run: |
           if [ ! -f .coverage ]; then
             echo "no coverage data (the suite did not run)" >> "$GITHUB_STEP_SUMMARY"
@@ -291,8 +287,8 @@ jobs:
         with:
           name: coverage-btap
           path: |
-            python/htmlcov/
-            python/coverage.xml
+            htmlcov/
+            coverage.xml
           retention-days: 14
           if-no-files-found: warn
 
@@ -343,11 +339,11 @@ jobs:
       # thermal-bridging stack, exactly what this gate always ran with.
       - name: Pinned NECB2020 SmallOffice whole-building gate (Python)
         run: |
-          PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
+          PYTHONPATH="$PWD/src:/usr/local/openstudio-3.11.0/Python" \
           BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
           LEGACY_PIN_REQUIRED=1 \
             /opt/btap-ci/pytest/bin/python -m pytest -q \
-              python/tests/necb/test_legacy_archetype_e2e.py
+              tests/necb/test_legacy_archetype_e2e.py
       # LIVE Leg C (D-80 R1): Python vs the LIVE pinned oracle across ALL
       # golden groups — python-prep / ruby-probe, the committed-goldens
       # freshness comparison, then the five goldens test files against the
@@ -356,7 +352,7 @@ jobs:
       # whether frozen or, as here, live.
       - name: Live Leg C (python-prep / ruby-probe, all golden groups)
         run: |
-          export PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python"
+          export PYTHONPATH="$PWD/src:/usr/local/openstudio-3.11.0/Python"
           BTAP_PYTHON=/opt/btap-ci/pytest/bin/python \
             bash verification/live_leg_c.sh /tmp/live-leg-c
       # Leg-C golden export (D-78/D-80): the pin bundle lives HERE, so this
@@ -369,8 +365,8 @@ jobs:
       - name: Export the oracle goldens
         if: inputs.export_goldens
         run: |
-          export PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python"
-          python3 python/scripts/oracle_prep.py --out /tmp/oracle-prep --canonical
+          export PYTHONPATH="$PWD/src:/usr/local/openstudio-3.11.0/Python"
+          python3 scripts/oracle_prep.py --out /tmp/oracle-prep --canonical
           bundle exec ruby verification/oracle/export_goldens.rb \
             --prep /tmp/oracle-prep --out verification/oracle/goldens
       - uses: actions/upload-artifact@v6
@@ -404,7 +400,6 @@ jobs:
       - name: Trust the workspace (container UID != workspace owner)
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Frozen scenarios (parity lane)
-        working-directory: python
         run: |
           PYTHONPATH="/usr/local/openstudio-3.11.0/Python" \
           BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \

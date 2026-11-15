@@ -22,7 +22,7 @@ all.
 
 There is no public API to seed one. The only implementation in the repository
 is `seed_constructions`, a METHOD ON A TEST CLASS at
-`python/tests/modeling/test_bar.py:20`. So the documented chain cannot be
+`tests/modeling/test_bar.py:20`. So the documented chain cannot be
 started from the shipped wheel; it can only be started from an OSM someone
 else authored.
 

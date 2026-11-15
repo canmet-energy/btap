@@ -1,7 +1,7 @@
 """The canonical scripted audit scenario (D-80 R4, replaces B5/B6's live
 Ruby comparison as the frozen audit-unit baseline).
 
-MOVED here from python/tests/audit/test_cross_language.py, where the
+MOVED here from tests/audit/test_cross_language.py, where the
 docstring's contract was: MUST mirror cross_language/ruby_reference.rb line
 for line. At freeze time the Ruby driver still runs (the seal); after the
 handoff this file plus the frozen baselines ARE the contract — the dormant
@@ -11,9 +11,9 @@ test keeps its own copy to rot with it.
 import sys
 from pathlib import Path
 
-PYTHON_ROOT = Path(__file__).resolve().parents[2] / "python"
-if str(PYTHON_ROOT) not in sys.path:
-    sys.path.insert(0, str(PYTHON_ROOT))
+SRC_ROOT = Path(__file__).resolve().parents[2] / "src"
+if str(SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(SRC_ROOT))
 
 from btap.audit import AuditLog, emit_coverage  # noqa: E402
 

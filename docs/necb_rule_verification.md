@@ -165,7 +165,7 @@ citation no-loss test, not these numbers. Re-run per stage and report movement.
 
 Command:
 
-    cd python && BTAP_SDK_REQUIRED=1 BTAP_TBD_REQUIRED=1 \
+    BTAP_SDK_REQUIRED=1 BTAP_TBD_REQUIRED=1 \
       .venv/bin/python -m coverage run --source=btap/codes -m pytest -q -p no:cacheprovider tests/ \
       && .venv/bin/python -m coverage report --sort=cover --skip-empty
 
@@ -226,7 +226,7 @@ whole distribution, not only `btap/codes`.
 
 Command:
 
-    cd python && BTAP_SDK_REQUIRED=1 BTAP_TBD_REQUIRED=1 \
+    BTAP_SDK_REQUIRED=1 BTAP_TBD_REQUIRED=1 \
       .venv/bin/pytest -n 8 -q -p no:cacheprovider --cov=btap --cov-report=term:skip-covered \
         --ignore=tests/necb/test_frozen_scenarios.py tests/
 

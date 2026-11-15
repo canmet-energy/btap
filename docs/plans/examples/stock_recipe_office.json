@@ -6,7 +6,7 @@
     "the SHAPE. Resolving vintage x location x building type to real values is",
     "the caller's business.",
     "The four `system` names ARE real catalogue entries, verified against",
-    "python/btap/modeling/hvac/data/systems.json."
+    "src/btap/modeling/hvac/data/systems.json."
   ],
 
   "recipe_version": 1,

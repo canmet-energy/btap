@@ -2,7 +2,7 @@
 
 Executes the scenarios `scenario_defs.py` authors and compares the results
 against the frozen baselines `manifest.json` declares. Consumed by
-`python/tests/necb/test_frozen_scenarios.py` (the CI gate) and by
+`tests/necb/test_frozen_scenarios.py` (the CI gate) and by
 `freeze.py` (which adds the Ruby seal, double-run determinism, provenance,
 and the atomic write).
 
@@ -33,8 +33,8 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 REPO_ROOT = HERE.parents[1]
-PYTHON_ROOT = REPO_ROOT / "python"
-EPW = (PYTHON_ROOT / "tests" / "fixtures" / "weather"
+SRC_ROOT = REPO_ROOT / "src"
+EPW = (REPO_ROOT / "tests" / "fixtures" / "weather"
        / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw")
 SEED = REPO_ROOT / "verification" / "oracle" / "fixtures" / "5ZoneNoHVAC.osm"
 MANIFEST = HERE / "manifest.json"
@@ -54,7 +54,7 @@ DEFAULT_TIMEOUT_S = 600
 def python_exe():
     if os.environ.get("BTAP_PYTHON"):
         return os.environ["BTAP_PYTHON"]
-    venv = PYTHON_ROOT / ".venv" / "bin" / "python"
+    venv = REPO_ROOT / ".venv" / "bin" / "python"
     return str(venv) if venv.exists() else sys.executable
 
 #: Which backend scenario subprocesses execute on. "local" is the default and
@@ -130,7 +130,7 @@ def ensure_corpus(scratch):
     corpus = Path(scratch) / "_samples"
     marker = corpus / ".generated_by"
     expected = sorted(json.loads(
-        (PYTHON_ROOT / "scripts" / "sample_manifest.json")
+        (REPO_ROOT / "scripts" / "sample_manifest.json")
         .read_text(encoding="utf-8"))["samples"])
     if corpus.exists() and any(corpus.glob("*.osm")):
         stamped = marker.read_text(encoding="utf-8").strip() if marker.exists() else None
@@ -141,7 +141,7 @@ def ensure_corpus(scratch):
                 "delete it or use a fresh scratch root")
     else:
         proc = subprocess.run(
-            [python_exe(), str(PYTHON_ROOT / "scripts" / "generate_samples.py"),
+            [python_exe(), str(REPO_ROOT / "scripts" / "generate_samples.py"),
              str(corpus)],
             capture_output=True, text=True,
             env=build_env({}, {}),  # prepends inherited PYTHONPATH (CI SDK)
@@ -202,9 +202,11 @@ def build_env(scenario, resolved_env):
     # PREPEND, never clobber: in the CI containers the openstudio SDK
     # arrives via the caller's PYTHONPATH (no wheel there) — the same rule
     # run_corpus.rb documented.
+    # Two roots since the src layout (#229): `btap` under src/, and `tests`
+    # (whose fixtures the API scenarios import) at the repository root.
     inherited = os.environ.get("PYTHONPATH")
-    env["PYTHONPATH"] = (str(PYTHON_ROOT) + os.pathsep + inherited
-                         if inherited else str(PYTHON_ROOT))
+    ours = os.pathsep.join((str(SRC_ROOT), str(REPO_ROOT)))
+    env["PYTHONPATH"] = ours + os.pathsep + inherited if inherited else ours
     env.update(resolved_env)
     return env
 
@@ -308,8 +310,9 @@ def _scratch_of(ctx):
 
 
 def _sys_path_python():
-    if str(PYTHON_ROOT) not in sys.path:
-        sys.path.insert(0, str(PYTHON_ROOT))
+    for root in (REPO_ROOT, SRC_ROOT):
+        if str(root) not in sys.path:
+            sys.path.insert(0, str(root))
 
 
 def resolve_deep(value, ctx):

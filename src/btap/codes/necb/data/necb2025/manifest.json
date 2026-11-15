@@ -1,0 +1,1646 @@
+{
+  "id": "necb2025",
+  "family": "necb",
+  "edition": "2025",
+  "label": "NECB 2025",
+  "articles": {
+    "assembly_inclination": "3.1.1.7.(4)",
+    "enclosed_unconditioned_credit": "3.1.1.7.(3)",
+    "heat_pump_aux_fuel": "8.4.5.13.(2)(c)",
+    "lighting_subsection": "8.4.5",
+    "reference_subsection": "8.4.5",
+    "thermal_mass_note": "A-8.4.5.4.(1)"
+  },
+  "literal_remaps": {
+    "8.4.4.": "8.4.5."
+  },
+  "path": "btap.codes.necb.path",
+  "behaviours": {
+    "archetype_eui_path": "btap.codes.necb.editions.necb2025.eui_archetypes",
+    "part11_ghg": "btap.codes.necb.editions.necb2025.part11_ghg"
+  },
+  "rules": {
+    "umbrella": "necb_rules.json",
+    "envelope": "envelope_rules.json",
+    "hvac": "reference_rules.json",
+    "hvac_efficiencies": "efficiencies.json",
+    "lighting": "lighting_rules.json",
+    "loads": "loads_rules.json",
+    "shw": "shw_rules.json"
+  },
+  "tables": [
+    "tables/space_types.json",
+    "tables/schedules.json",
+    "tables/led_lighting.json",
+    "tables/exterior_lighting.json",
+    "tables/table_c1.json",
+    "tables/daylighting_controls_4_2_1_6.json",
+    "tables/lpd_building_types.json",
+    "tables/lpd_space_functions.json"
+  ],
+  "coverage_text": "coverage/articles_8_4.json",
+  "eui_targets": "eui_targets.json",
+  "ghg_factors": "ghg_factors.json",
+  "provision_index": "coverage/provisions.json",
+  "provenance": {
+    "necb_rules.json": {
+      "source": "self:btap.codes.compliance Part 8 Section 8.4 coverage declaration",
+      "request": null,
+      "source_revision": null,
+      "source_sha256": null,
+      "extractor": "manual (maintainer-authored coverage declaration)",
+      "retrieved": "2026-07-22",
+      "method": "transcribed",
+      "source_verification": "manual",
+      "note": "The umbrella carries only article_coverage: what the pipeline itself determines. This edition carries the reference building at Subsection 8.4.5 and the Energy Use Intensity path at 8.4.4. The status/how/code fields are the pipeline's self-declaration and have no external source to re-fetch. The 20 h floor under 8.4.1.2.(4)'s cooling unmet-hours allowance moved from a code literal in compliance.py into this file (unmet_cooling.minimum_allowance_h) on 2026-09-08, multi-edition plan Stage 5; the value is unchanged and the source is unchanged.",
+      "result_sha256": "bf40a432c4be7bd17498b539e8c813836933019389f87d1de0860a854522060c"
+    },
+    "envelope_rules.json": {
+      "source": "mcp:necb:2025",
+      "request": [
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "3.2.2.2"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "3.2.2.3"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "3.2.2.4"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "3.2.3.1"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "3.1.1.6"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "3.1.1.7"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "3.2.1.4"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.5.1"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.5.3"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.5.4"
+        }
+      ],
+      "source_revision": null,
+      "source_sha256": "97d6344c91d3ba1fac0b0d7e04df9e70cc50e4ea6e687de1aa785859a06a9f38",
+      "extractor": "manual (transcription from the archived MCP payloads)",
+      "retrieved": "2026-07-12",
+      "method": "transcribed",
+      "source_verification": "archived",
+      "note": "This edition states the door requirements in their own Table 3.2.2.4. Re-verified 2026-08-02 against the post-hbix-fix extraction (D-61). The performance-path articles this file cites are in Subsection 8.4.5.",
+      "result_sha256": "ff36667d2ade33c7094aa16a9a0fe8310b1d3dcbc592e28e8f539d8c2ae1da76"
+    },
+    "reference_rules.json": {
+      "source": "mcp:necb:2025",
+      "request": [
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.5.7.-A"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.5.7.-B"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.5.13"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.5.6"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.5.7"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.5.8"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.5.9"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.5.10"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.5.13"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.5.14"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.5.18"
+        }
+      ],
+      "source_revision": null,
+      "source_sha256": "78c9c86d756357d1cc9c1c17e1c421270ca58db52fc2e1338189409ed793656a",
+      "extractor": "manual (transcription from the archived MCP payloads)",
+      "retrieved": "2026-07-12",
+      "method": "transcribed",
+      "source_verification": "archived",
+      "note": "This edition carries the reference-building rules at Subsection 8.4.5 and the part-load curves at 8.4.6; the archived set is the three tables this file's provenance names plus the articles in its own `articles` list. The category keywords extending the Table 8.4.5.7.-A space lists with synonyms are a maintainer addition, not code text, and are marked as such in the file.",
+      "result_sha256": "7b1e8468b25eb0d4d2f3ca1d64be13e88bfc0fe569d9c50d84e806de28e77bd2"
+    },
+    "efficiencies.json": {
+      "source": "mcp:necb:2025",
+      "request": [
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.1.-A"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.1.-G"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.1.-I"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.1.-K"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.1.-M"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.1.-N"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.1.-O"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.2"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.6.2"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.6.3"
+        }
+      ],
+      "source_revision": null,
+      "source_sha256": "0b1a844e239ad721c8ec3714bc5b62833530436086b021cb72fea3d445dfdbb3",
+      "extractor": "manual (transcription from the archived MCP payloads)",
+      "retrieved": "2026-07-12",
+      "method": "transcribed",
+      "source_verification": "archived",
+      "note": "The archived set is the letter map this file's own provenance records, re-verified against the post-hbix#88 extraction 2026-08-02 (D-60). The performance CURVES in this file have no code source in the 5.2.12.1 series: they are vendored from openstudio-standards NECB2011/data/curves.json and are not covered by source_sha256. The curve block was checked against this edition's own part-load and chiller tables 2026-09-09: the archived payloads and the per-table verdicts are in verified_against. The 15 DX cooling, DX heating, VAV fan and SWH curves have no table in this edition at all, so their origin is retained and stated rather than adopted. D-89 adopted this edition's own part-load requirement for the reference boiler and furnace and retired the four part-load cubics the curve block carried From NECB 2011 Table 8.4.4.21.-A: BOILER-EFFFPLR [0.3831, 2.0567, -2.6469, 1.2148] and BOILER-EFFFPLR-COND [1.0186, 0.2426, -0.5059, 0.2465] from its Sentence (2), FURNACE-EFFPLR [0.722, 0.8211, -1.0396, 0.5] and FURNACE-EFFPLR-COND [1.0186, 0.2426, -0.5059, 0.2465] from its Sentence (4), each an EIR curve refitted as a PLF cubic. In their place the block ships BOILER-PLF-NONCONDENSING, FURNACE-PLF-ATMOSPHERIC and the code-qualified modulating boiler curve as Table:Lookup objects transcribed from the part-load payloads listed in request, each carrying an implements block that names its table row, the transform PLF = PLR / FHeatPLC(PLR) and its own published interpolation error. The 90.1-sourced heat_rejection block left the snapshot in the same change: nothing read it, and the reference tower fan comes from Table 5.2.12.2 (D-26).",
+      "verified_against": [
+        {
+          "table": "8.4.6.2",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/8.4.6.2.result.json",
+          "sha256": "3e7947d7d80d2b6ba012d7457873cbef6f9463a6bd60805dec1b4cfa0cd4a49c",
+          "verdict": "partial",
+          "detail": "boiler FHeatPLC, three classes. Non-condensing (a 0.082597, b 0.996764, c -0.079361) and Modulating (a 0.01798667, b 0.96742420, c 0.01545455) are ADOPTED under D-89: each row is carried through PLF = PLR / FHeatPLC(PLR), the transform Sentence (1) states, into a Table:Lookup on PLR 0.01-1.00 step 0.01 - BOILER-PLF-NONCONDENSING and BOILER-PLF-MODULATING-necb2025. Their published Linear-interpolation errors against the exact rationals are 1.4824 % and 2.8899 % over the whole span, 0.0550 % and 0.0291 % above PLR 0.10; the worst case sits in the first two intervals either way. The modulating curve's name is code-qualified (D-88): this edition states as a coefficient row what the previous one stated as printed points. Partial for the CONDENSING row, which this edition states over the part-load ratio AND the boiler return-hot-water temperature with six coefficients and no published bounds on that temperature: it is retained in part_load_fheatplc with its deferred_reason, since no reference rule elects condensing equipment and nothing normative fixes the surface's domain"
+        },
+        {
+          "table": "8.4.6.3",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/8.4.6.3.result.json",
+          "sha256": "a3422bb5801644db57b05ab34f0925c5a8d76c2a35c0d986a0bd8a7823a240ff",
+          "verdict": "partial",
+          "detail": "furnace FHeatPLC, three classes. Atmospheric (a 0.0186100, b 1.0942090, c -0.1128190) is ADOPTED under D-89 as FURNACE-PLF-ATMOSPHERIC, a Table:Lookup on PLR 0.10-1.00 step 0.01 carrying PLF = PLR / FHeatPLC(PLR), published Linear-interpolation error 0.0268 %. The grid starts at 0.10 because EnergyPlus floors a fuel heating coil's part-load fraction at 0.7 and the rational crosses 0.7 near PLR 0.055; below 0.10 the Constant extrapolation holds 0.788005 and the departure is bounded by a x Fuel_rated = 1.86 % of rated fuel, stated in D-89. Partial for the Condensing and Modulating rows, both retained in part_load_fheatplc with their deferred_reason: the reference building elects neither"
+        },
+        {
+          "table": "8.4.6.5.-A",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/8.4.6.5.-A.result.json",
+          "sha256": "db8e9b39aa3213699fa2b6f19236a3cfb817fb2f3e3546da47ac07854a3d4621",
+          "verdict": "identical",
+          "detail": "chiller CAP_FT: the four shipped water-cooled surfaces are the exact affine °F->°C image of this table's rows (max relative deviation 4.2e-06), so the two sources state one surface in two units"
+        },
+        {
+          "table": "8.4.6.5.-B",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/8.4.6.5.-B.result.json",
+          "sha256": "97a91ee3a0b1b0231b97844559d1672371b8d14b12f8598fbdcea0df13aa4f27",
+          "verdict": "identical",
+          "detail": "chiller EIR_FPLR: all four shipped curves agree with this table on every digit both sources publish (max relative deviation 9.7e-06; the snapshot carries 6 decimal places, the table 8)"
+        },
+        {
+          "table": "8.4.6.5.-C",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/8.4.6.5.-C.result.json",
+          "sha256": "7d5ffcc986ddc396bda74f8fe2d7741588c25d6a4e52ee0ab96abfdff74faa4c",
+          "verdict": "identical",
+          "detail": "chiller EIR_FT: the four shipped surfaces are the exact affine °F->°C image of this table's rows; the water-cooled Scroll and Reciprocating rows agree only after the codes service's own published errata for those two rows (b: -0.0882156 -> -0.00882156; d: -0.0128136 -> -0.00128136), so the misprint is the printed source's and the shipped curve already carries the corrected value"
+        },
+        {
+          "table": "8.4.6.8.-A",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/8.4.6.8.-A.result.json",
+          "sha256": "109ecbeed45c5ba172fd05a3c8955aae2ecd58cd4e66edcd71c8d6118df7c0fa",
+          "verdict": "partial",
+          "detail": "absorption chillers: this table's equipment classes are not modelled by the snapshot, so no shipped curve corresponds to any of its rows"
+        },
+        {
+          "table": "8.4.6.8.-B",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/8.4.6.8.-B.result.json",
+          "sha256": "0bae1a478ef656748b19c8d92b214710dcf7d08bb45bad0918af12c0aae0ce86",
+          "verdict": "partial",
+          "detail": "absorption chillers: this table's equipment classes are not modelled by the snapshot, so no shipped curve corresponds to any of its rows"
+        },
+        {
+          "table": "8.4.6.8.-C",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/8.4.6.8.-C.result.json",
+          "sha256": "c0f83e2d9d87963e032160724eb77483c3d32d87bcbf1d293befa8e73d6c82f7",
+          "verdict": "partial",
+          "detail": "absorption chillers: this table's equipment classes are not modelled by the snapshot, so no shipped curve corresponds to any of its rows"
+        },
+        {
+          "table": "section 8.4.6.2",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/section_8.4.6.2.result.json",
+          "sha256": "7690d6d655e2b1e0b47c9011c5cde55d19a02dd9b130c5f97a9ad97910dc07d9",
+          "verdict": "differs",
+          "detail": "the governing article: it defines FHeatPLC as a fuel RATIO over PLR, which is what settles the boiler form difference"
+        },
+        {
+          "table": "section 8.4.6.3",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/section_8.4.6.3.result.json",
+          "sha256": "9965aed90efdfd90dc4da6757723fd553ff55f62c36f0e5ee05adc2f89973417",
+          "verdict": "differs",
+          "detail": "the governing article: it defines FHeatPLC as a fuel RATIO over PLR, which is what settles the furnace form difference"
+        },
+        {
+          "table": "section 8.4.6.5",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/section_8.4.6.5.result.json",
+          "sha256": "1d4b49e18a1459673a171199fc366df8b9be200d5c816db2e88f4da87d4b1bfc",
+          "verdict": "identical",
+          "detail": "the governing article: it states the chiller surfaces over t_chws and t_cws in °F, which is what reconciles them with the shipped °C coefficients"
+        }
+      ],
+      "result_sha256": "510699645dc5689c13ada58c48c3ec70b15ffdc5dd32f8a23e04deea0ed645b7"
+    },
+    "lighting_rules.json": {
+      "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
+      "request": [
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2015/lighting.rb",
+          "sha256": "e91f8885ef4f620bd2525b3364d558cfb327ef7fd22aea246a219d4408d7ca5a"
+        },
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2017/necb_2017.rb",
+          "sha256": "f4e311d8921eb713a6bd53dfdda38ac485d80d4fad2ede9f9657b4f267d11089"
+        }
+      ],
+      "source_revision": "f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
+      "source_sha256": "4812c1c506f012a528ee32999696a7a09d5e3a6a4dca8f439db59864f3855a12",
+      "extractor": "manual (constants transcribed from the pinned oracle)",
+      "retrieved": "2026-07-12",
+      "method": "transcribed",
+      "source_verification": "revision_addressable",
+      "note": "The three constants this file carries are legacy-derived, from the oracle paths in `request`. NECB 2025 Table 4.2.1.6 was transcribed in full into tables/lpd_space_functions.json and has its own archived entry. dwelling_unit_lpd_w_per_m2 = 5.0 is code text (8.4.5.5.(2)) and is not covered by source_sha256.",
+      "inherited_reason": "the three LED atrium coefficients are an NREL-63807 retrofit alternative this edition does not publish, so their origin is retained - pending D-89",
+      "verified_against": [
+        {
+          "table": "4.2.1.6",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/4.2.1.6.result.json",
+          "sha256": "ab939817ee666545223d0ce09009ab39ba55c366455f441e9c5251dc44ea7d59",
+          "verdict": "partial",
+          "detail": "the LED atrium equations have no cell here: this edition publishes atrium LPDs by height bin and no LED-alternative equation at all, so the below-12 m intercept and slope and the at-or-above-12 m slope are unsourced; the fourth coefficient's value matches a string in this table only incidentally"
+        },
+        {
+          "table": "section 4.2.2.2",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/section_4.2.2.2.result.json",
+          "sha256": "efac6da59ede88d102f67f83b76042889beb04a5dac5ee879ad55959b8dfba8b",
+          "verdict": "identical",
+          "detail": "the sensor-schedule LPD threshold 0.799256505 W/ft² (8.6 W/m²) resolves in this edition's own lighting-control text"
+        },
+        {
+          "table": "section 4.2.1.6",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/section_4.2.1.6.result.json",
+          "sha256": "e00bd34b7e48d98e86db6b2e7bfb4fabeabeb5fa2063fc08375b8505b54b5708",
+          "verdict": "identical",
+          "detail": "the sensor-schedule LPD threshold 0.799256505 W/ft² (8.6 W/m²) resolves in this edition's own lighting-control text"
+        },
+        {
+          "table": "section 8.4.5.5",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/section_8.4.5.5.result.json",
+          "sha256": "17746784f98148bc2b6ca27f46239f69060cee949379f0ea4255902e63c21145",
+          "verdict": "identical",
+          "detail": "the dwelling-unit LPD 5.0 W/m² is this article's own text"
+        },
+        {
+          "table": "4.3.2.10.-A",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/4.3.2.10.-A.result.json",
+          "sha256": "ea5766527c3879207f2c2fe08b4b531df46c96922e854e31ab74ab3c095dad48",
+          "verdict": "partial",
+          "detail": "fetched as this edition's lighting-power companion table; no constant in this file is transcribed from it"
+        },
+        {
+          "table": "4.3.2.10.-B",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/4.3.2.10.-B.result.json",
+          "sha256": "fa33cb2cea5c1a3ca9c206417571ce6d227f9a329f80b8873d6dbd603ddf895d",
+          "verdict": "partial",
+          "detail": "fetched as this edition's lighting-power companion table; no constant in this file is transcribed from it"
+        }
+      ],
+      "result_sha256": "5c03705c9be29cfdaaff718230a17daf513f90eaf6a713b25bfcc7a57c75db2d"
+    },
+    "loads_rules.json": {
+      "source": "mcp:necb:2025",
+      "request": [
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "A-8.4.3.2.(1)(b)-A"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "A-8.4.3.2.(2)-B"
+        }
+      ],
+      "source_revision": null,
+      "source_sha256": "3812e0f203f97ee76b2d3231aa98582fe1b6476fbafa8a97b8cf3f21f0201b01",
+      "extractor": "manual (transcription from the archived MCP payloads)",
+      "retrieved": "2026-07-12",
+      "method": "transcribed",
+      "source_verification": "archived",
+      "note": "This edition numbers the Appendix A schedule tables A-8.4.3.2.(1)(b)-A..K, Article 8.4.3.2 being written in clauses. This file carries only that numbering and the Subsection 8.4.3 coverage manifest; the load data itself lives in tables/space_types.json and tables/schedules.json, each with its own entry. The archived payloads are the tables this file's own provenance names.",
+      "result_sha256": "5f71646ac733849b6500c17d63125a0df4ee5d9c33083c70cb59aeaa779f505b"
+    },
+    "shw_rules.json": {
+      "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
+      "request": [
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2011/service_water_heating.rb",
+          "sha256": "979436e237d1a7e2c13e9b831852ba4fa57577269931e73c8088232361ca6464"
+        },
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2020/service_water_heating.rb",
+          "sha256": "7e7a9c078938052fb0b3a1bc58c25a078a4ac6ef20e7c210d32f079cd3f62321"
+        }
+      ],
+      "source_revision": "f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
+      "source_sha256": "00e476ddd9e4a03dde648c87878402398105fd94d5c87d7f8de569ea67cda2f0",
+      "extractor": "manual (algorithm parameters transcribed from the pinned oracle)",
+      "retrieved": "2026-07-12",
+      "method": "transcribed",
+      "source_verification": "revision_addressable",
+      "note": "Per this file's own provenance: the autosize and efficiency parameters were transcribed from the legacy water_heater_mixed_apply_efficiency / auto_size_shw_capacity implementations at REF, then cross-verified against printed NECB 2025 Table 6.2.2.1 via the MCP, with this edition's citations (8.4.5.20, 8.4.6.9). This edition's storage-type heat-pump water heater requirement, UEF >= 2.23, is an equipment class this package does not model and is recorded in the file. The printed-table side is a cross-check, not the origin, and is not archived here. The storage-type heat-pump water heater floor and its metric label moved from code literals in shw/efficiency.py into this file (efficiency.heat_pump) on 2026-09-08, multi-edition plan Stage 5; the values are unchanged and the source is unchanged.",
+      "inherited_reason": "engine constants and DOE test draws (ua_divisor_f 70, thermal_efficiency 1.0, off-cycle heat fraction 0.8, the 38 and 84 gal draws) have no cell in this edition's Table 6.2.2.1, and the part-load curve has no edition table at all - pending D-89",
+      "verified_against": [
+        {
+          "table": "6.2.2.1",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/6.2.2.1.result.json",
+          "sha256": "6f2b09d3f5b907622f4161c3f1f043b47a6e5906ed937b998894121e0cae5980",
+          "verdict": "partial",
+          "detail": "39 of the 46 consumed numeric leaves are corroborated in this table's cells; the 7 that are not are engine constants and DOE test-draw parameters (ua_divisor_f 70, thermal_efficiency 1.0, and the 38 and 84 gal draws), not code cells"
+        },
+        {
+          "table": "section 8.4.6.9",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/section_8.4.6.9.result.json",
+          "sha256": "669fd93f56d2fb617480dfe52ab1135d5203ab8b37b353c8270e95415cbb70b9",
+          "verdict": "identical",
+          "detail": "the part-load article: this edition's own quadratic FHeatPLC coefficients [0.021826, 0.97763, 0.000543] are already carried verbatim in the file as code_fheatplc, and the shipped cubic is the probe-verified image of PLF(x) = x / FHeatPLC(x) for the EnergyPlus degradation-divisor field (D-53); this edition publishes no table for the curve itself"
+        }
+      ],
+      "result_sha256": "9c59d79fae141dac9d51a40e10736c7c40dacc0f1c64b3e787bb8ba28e1a7548"
+    },
+    "tables/space_types.json": {
+      "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
+      "request": [
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2011/data/space_types.json",
+          "sha256": "66f0ab94c5ce4b43939eeb8d6fdbe213371d37e6f3f5d6dd14a2c4ab3a569ea6"
+        },
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2015/data/space_types.json",
+          "sha256": "1598980860dbbb4ed85cb31002790e98acd3cf1c0ad46f716c82e8d39bd92dab"
+        },
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2017/data/space_types.json",
+          "sha256": "53039aec90c40bc6927d06a0b1e293ccafcbfb8823c8e1cc068aa96e122c6664"
+        },
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2020/data/space_types.json",
+          "sha256": "76b75d5e41c6ce43c43d0b67e241bf539c60c7ea8a4bce92946b0d534fd008bf"
+        }
+      ],
+      "source_revision": "f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
+      "source_sha256": "e71d06b3a362072217b06a2e35a5aa82a8846b495432a3bb504b0733dddebc19",
+      "extractor": "manual (this edition's copy of the same retained source artifact)",
+      "retrieved": "2026-07-12",
+      "method": "copied",
+      "source_verification": "revision_addressable",
+      "byte_identical_to": "necb2020/tables/space_types.json",
+      "note": "This edition ships its own copy of the retained merge. The 308 records are the legacy MERGED standards_data (deep merge along NECB2011<-2015<-2017<-2020, later keys win) — what legacy actually runs; the per-vintage files are partial. Checked against the oracle at REF while writing this block: 286 of the 308 records are byte-identical to NECB2020/data/space_types.json. The remaining 22 records add keys inherited from earlier source layers. Units are IP as in legacy. The two vendored template columns lighting_standard and target_illuminance_setpoint_ref were removed 2026-09-09; no reader (D-88), which is why the shipped rows carry 78 of the merge's 80 keys.",
+      "inherited_reason": "engine table: 68 of the 75 shipped columns have no edition source at all, and `service_water_heating_peak_flow_per_area` is derived rather than transcribed; every cell that does have a source is identical - pending D-89",
+      "verified_against": [
+        {
+          "table": "A-8.4.3.2.(2)-B",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/A-8.4.3.2.(2)-B.result.json",
+          "sha256": "f0f1b700e4aaeb309d3aa94a688334b7527bd4950785500560fb17d40375827a",
+          "verdict": "partial",
+          "detail": "occupant density, receptacle and service-water-heating loads, schedule letter and illuminance: 301 of the 308 shipped records join a row here and all 1176 compared cells are identical - **0 differing**. The four cells previously reported as differing on the `Health care facility medical supply room` row were a matcher defect, not a data difference: the join imported Table 4.2.1.6's control-only cross-reference to the Storage Room rows and reused it for loads and LPD. This edition publishes an explicit medical-supply row of its own (schedule H, illuminance 400 lx, occupant density 20 m2/occupant, peak receptacle 1 W/m2) and the shipped values match it, so the cross-reference is now used for control states only"
+        },
+        {
+          "table": "A-8.4.3.2.(2)-A",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/A-8.4.3.2.(2)-A.result.json",
+          "sha256": "99d37746305a8c40bc27ed718ef14cb7679c65beff90c5341cb4d15de4caa826",
+          "verdict": "partial",
+          "detail": "building-area space functions: the WholeBuilding records resolve against this table"
+        },
+        {
+          "table": "4.2.1.6",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/4.2.1.6.result.json",
+          "sha256": "ab939817ee666545223d0ce09009ab39ba55c366455f441e9c5251dc44ea7d59",
+          "verdict": "identical",
+          "detail": "space-by-space LPD: the shipped `lighting_per_area` agrees with this table for every joined record, including the `Health care facility medical supply room` row once the control-only cross-reference is kept out of the loads join"
+        },
+        {
+          "table": "4.2.1.5",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/4.2.1.5.result.json",
+          "sha256": "33a6f50336c82de3295e2c30c05d4b0291b8e25c055cc8913d755b8f9f09b827",
+          "verdict": "partial",
+          "detail": "building-area LPD: the WholeBuilding lighting_per_area resolves against this table"
+        },
+        {
+          "table": "4.3.2.10.-A",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/4.3.2.10.-A.result.json",
+          "sha256": "ea5766527c3879207f2c2fe08b4b531df46c96922e854e31ab74ab3c095dad48",
+          "verdict": "partial",
+          "detail": "fetched as this edition's lighting-power companion table; no constant in this file is transcribed from it"
+        }
+      ],
+      "result_sha256": "3b3bba2aa078a1308f024fd32ebb6239c3d2ca5a67016454b426c5fa0efd2965"
+    },
+    "tables/schedules.json": {
+      "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
+      "request": [
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2011/data/schedules.json",
+          "sha256": "a01d01275a9063559d57174609c05ff77401043207eef1ae3a3c837d57c6e747"
+        },
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2015/data/schedules.json",
+          "sha256": "32ebad859d32dae979014fa22c37206fc16551d09004a8623346035cc4021c9b"
+        }
+      ],
+      "source_revision": "f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
+      "source_sha256": "523279226b66461f102f6792c4b1465c6cadffc62d8968a159d209d43f085667",
+      "extractor": "manual (this edition's copy of the same retained source artifact)",
+      "retrieved": "2026-07-12",
+      "method": "copied",
+      "source_verification": "revision_addressable",
+      "byte_identical_to": "necb2020/tables/schedules.json",
+      "note": "This edition numbers the schedule tables A-8.4.3.2.(1)(b)-A..K and ships its own copy of the retained source. NECB2017 and NECB2020 ship no schedules table, so the merge resolves to NECB2015's source rows. Checked against the oracle at REF while writing this block, all 240 shipped records are byte-identical to NECB2015/data/schedules.json. Set A was cell-verified against the printed schedule table via the MCP (see loads_rules.json).",
+      "inherited_reason": "the shipped records still come from the oracle merge rather than a transcription of this edition's own tables: the edition publishes hourly fractions only, so the 9 Constant design-day records have no edition row at all and 333 cells it states as words have no numeric form to transcribe. Every compared cell now agrees - the 33 `NECB-I-Fan` cells were corrected 2026-09-10 from the archived edition table; dormant, no product reader - so re-sourcing the file would be provenance-only, pending D-89",
+      "verified_against": [
+        {
+          "table": "A-8.4.3.2.(1)(b)-A",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-A.result.json",
+          "sha256": "abcbcd5667524011d7e7fbe2dac1d022694576aa348e9eb4b12364357019ff60",
+          "verdict": "identical",
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and all 5 211 compared cells agree. The 33 `NECB-I-Fan` cells this edition's Schedule I `Fans` row prints as `On` were corrected from 0.0 to 1.0 on 2026-09-10 from the archived edition table - the value every other shipped fan schedule uses for an on fan - and the same row's 39 `Off` cells were already 0.0. The row is DORMANT: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule (D-14, Article 8.4.3.2.(1)), and the space-type references spell `NECB-I-FAN` against the table's `NECB-I-Fan`, so no output moved with the correction. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
+        },
+        {
+          "table": "A-8.4.3.2.(1)(b)-B",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-B.result.json",
+          "sha256": "4a0616150320c84221ba3fc754aa3de298cfac2105496dbdd8442576f9f112e0",
+          "verdict": "identical",
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and all 5 211 compared cells agree. The 33 `NECB-I-Fan` cells this edition's Schedule I `Fans` row prints as `On` were corrected from 0.0 to 1.0 on 2026-09-10 from the archived edition table - the value every other shipped fan schedule uses for an on fan - and the same row's 39 `Off` cells were already 0.0. The row is DORMANT: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule (D-14, Article 8.4.3.2.(1)), and the space-type references spell `NECB-I-FAN` against the table's `NECB-I-Fan`, so no output moved with the correction. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
+        },
+        {
+          "table": "A-8.4.3.2.(1)(b)-C",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-C.result.json",
+          "sha256": "134228d07d7a167141111803740b39c865f4eae2959e2140fde76a4da6d6ca69",
+          "verdict": "identical",
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and all 5 211 compared cells agree. The 33 `NECB-I-Fan` cells this edition's Schedule I `Fans` row prints as `On` were corrected from 0.0 to 1.0 on 2026-09-10 from the archived edition table - the value every other shipped fan schedule uses for an on fan - and the same row's 39 `Off` cells were already 0.0. The row is DORMANT: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule (D-14, Article 8.4.3.2.(1)), and the space-type references spell `NECB-I-FAN` against the table's `NECB-I-Fan`, so no output moved with the correction. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
+        },
+        {
+          "table": "A-8.4.3.2.(1)(b)-D",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-D.result.json",
+          "sha256": "d24fc877fd7ffed04c79a58e9d338a86db53d434bc44d30b300605ebf4471eff",
+          "verdict": "identical",
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and all 5 211 compared cells agree. The 33 `NECB-I-Fan` cells this edition's Schedule I `Fans` row prints as `On` were corrected from 0.0 to 1.0 on 2026-09-10 from the archived edition table - the value every other shipped fan schedule uses for an on fan - and the same row's 39 `Off` cells were already 0.0. The row is DORMANT: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule (D-14, Article 8.4.3.2.(1)), and the space-type references spell `NECB-I-FAN` against the table's `NECB-I-Fan`, so no output moved with the correction. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
+        },
+        {
+          "table": "A-8.4.3.2.(1)(b)-E",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-E.result.json",
+          "sha256": "41934a4a97738a048cc9406119f7b6e70bfcce3f220786e3f9e61f4ccc9850ba",
+          "verdict": "identical",
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and all 5 211 compared cells agree. The 33 `NECB-I-Fan` cells this edition's Schedule I `Fans` row prints as `On` were corrected from 0.0 to 1.0 on 2026-09-10 from the archived edition table - the value every other shipped fan schedule uses for an on fan - and the same row's 39 `Off` cells were already 0.0. The row is DORMANT: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule (D-14, Article 8.4.3.2.(1)), and the space-type references spell `NECB-I-FAN` against the table's `NECB-I-Fan`, so no output moved with the correction. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
+        },
+        {
+          "table": "A-8.4.3.2.(1)(b)-F",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-F.result.json",
+          "sha256": "63eb5a5871c64b36c04e44c25e1c717f9e246cc1bb55ea38602de60c6d17fbef",
+          "verdict": "identical",
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and all 5 211 compared cells agree. The 33 `NECB-I-Fan` cells this edition's Schedule I `Fans` row prints as `On` were corrected from 0.0 to 1.0 on 2026-09-10 from the archived edition table - the value every other shipped fan schedule uses for an on fan - and the same row's 39 `Off` cells were already 0.0. The row is DORMANT: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule (D-14, Article 8.4.3.2.(1)), and the space-type references spell `NECB-I-FAN` against the table's `NECB-I-Fan`, so no output moved with the correction. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
+        },
+        {
+          "table": "A-8.4.3.2.(1)(b)-G",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-G.result.json",
+          "sha256": "de9190a61fced33a2839bef550b81b0130908056f0d98fe45fa0a8cd2c6262f1",
+          "verdict": "identical",
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and all 5 211 compared cells agree. The 33 `NECB-I-Fan` cells this edition's Schedule I `Fans` row prints as `On` were corrected from 0.0 to 1.0 on 2026-09-10 from the archived edition table - the value every other shipped fan schedule uses for an on fan - and the same row's 39 `Off` cells were already 0.0. The row is DORMANT: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule (D-14, Article 8.4.3.2.(1)), and the space-type references spell `NECB-I-FAN` against the table's `NECB-I-Fan`, so no output moved with the correction. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
+        },
+        {
+          "table": "A-8.4.3.2.(1)(b)-H",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-H.result.json",
+          "sha256": "a653c39e72b7c35778a80e0b0befa6727bc8ee283c7a21a624e2b7c57e1d7042",
+          "verdict": "identical",
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and all 5 211 compared cells agree. The 33 `NECB-I-Fan` cells this edition's Schedule I `Fans` row prints as `On` were corrected from 0.0 to 1.0 on 2026-09-10 from the archived edition table - the value every other shipped fan schedule uses for an on fan - and the same row's 39 `Off` cells were already 0.0. The row is DORMANT: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule (D-14, Article 8.4.3.2.(1)), and the space-type references spell `NECB-I-FAN` against the table's `NECB-I-Fan`, so no output moved with the correction. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
+        },
+        {
+          "table": "A-8.4.3.2.(1)(b)-I",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-I.result.json",
+          "sha256": "14a1221f844bd13079e1011b0961d2f11dca963d05aa55e7e0d17af55baefa5a",
+          "verdict": "identical",
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and all 5 211 compared cells agree. The 33 `NECB-I-Fan` cells this edition's Schedule I `Fans` row prints as `On` were corrected from 0.0 to 1.0 on 2026-09-10 from the archived edition table - the value every other shipped fan schedule uses for an on fan - and the same row's 39 `Off` cells were already 0.0. The row is DORMANT: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule (D-14, Article 8.4.3.2.(1)), and the space-type references spell `NECB-I-FAN` against the table's `NECB-I-Fan`, so no output moved with the correction. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
+        },
+        {
+          "table": "A-8.4.3.2.(1)(b)-J",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-J.result.json",
+          "sha256": "8b47a67e1564d22983bdf85f513cfc46744f5d15aa79e1ad90b493884f0405a1",
+          "verdict": "identical",
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and all 5 211 compared cells agree. The 33 `NECB-I-Fan` cells this edition's Schedule I `Fans` row prints as `On` were corrected from 0.0 to 1.0 on 2026-09-10 from the archived edition table - the value every other shipped fan schedule uses for an on fan - and the same row's 39 `Off` cells were already 0.0. The row is DORMANT: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule (D-14, Article 8.4.3.2.(1)), and the space-type references spell `NECB-I-FAN` against the table's `NECB-I-Fan`, so no output moved with the correction. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
+        },
+        {
+          "table": "A-8.4.3.2.(1)(b)-K",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-K.result.json",
+          "sha256": "136f896da01b36b5702bd6285a019447b157357cdd1f2a82b590c3a8e4efa289",
+          "verdict": "identical",
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and all 5 211 compared cells agree. The 33 `NECB-I-Fan` cells this edition's Schedule I `Fans` row prints as `On` were corrected from 0.0 to 1.0 on 2026-09-10 from the archived edition table - the value every other shipped fan schedule uses for an on fan - and the same row's 39 `Off` cells were already 0.0. The row is DORMANT: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule (D-14, Article 8.4.3.2.(1)), and the space-type references spell `NECB-I-FAN` against the table's `NECB-I-Fan`, so no output moved with the correction. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
+        }
+      ],
+      "result_sha256": "0fa6114edca17d210403932bb560105b41f83c8c3d9a17d7bc75e145e020baa0"
+    },
+    "tables/led_lighting.json": {
+      "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
+      "request": [
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2011/data/led_lighting_data.json",
+          "sha256": "e5fca5ebc6613d78c2cf93a87c29c18f4c7bd96d3564959de1e35801cdade151"
+        },
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2015/data/led_lighting_data.json",
+          "sha256": "4dff01e4e42fec44015b6f9d7c8230a9a62760c91df4f822e0e53646211fb79a"
+        },
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2017/data/led_lighting_data.json",
+          "sha256": "5b3125bcc9e8fe70bf4cb2c5566b181e78730d3142dbbca918a0335382e8f704"
+        },
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2020/data/led_lighting_data.json",
+          "sha256": "46beeed60cd3f6fd37d29dbad21df6c60d4921059e6efb203be4be244b71ab8c"
+        }
+      ],
+      "source_revision": "f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
+      "source_sha256": "1ebe86f4ecbfc3903badf14c7c3a6f7c4c340a66c7adf07c951c6016c2d10a90",
+      "extractor": "manual (this edition's copy of the same retained source artifact)",
+      "retrieved": "2026-07-12",
+      "method": "copied",
+      "source_verification": "revision_addressable",
+      "byte_identical_to": "necb2020/tables/led_lighting.json",
+      "note": "The LED alternative table is legacy data with no counterpart in this edition's code text; this edition ships its own copy of the retained merge (LED alternative LPDs in W/ft2 plus heat fractions per NREL 63807). Checked against the oracle at REF while writing this block: all 308 shipped records are byte-identical to NECB2020/data/led_lighting_data.json. The vendored lighting_standard template column was removed 2026-09-09; no reader (D-88).",
+      "inherited_reason": "LED-alternative table: this edition publishes no LED alternative at all and 3 shipped columns have no edition source; every LPD that can be compared is consistent with this edition's published maximum - pending D-89",
+      "verified_against": [
+        {
+          "table": "4.2.1.6",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/4.2.1.6.result.json",
+          "sha256": "ab939817ee666545223d0ce09009ab39ba55c366455f441e9c5251dc44ea7d59",
+          "verdict": "partial",
+          "detail": "LED-alternative LPDs against this edition's published space-by-space values: 298 of the 308 shipped records join a row and all 298 are consistent with this table - **0 differing**. The single record previously reported as differing was the `Health care facility medical supply room` row, which the join had steered through Table 4.2.1.6's control-only cross-reference; against this edition's own medical-supply row (6.7 W/m2, i.e. 0.622450368 W/ft2) the shipped value agrees"
+        },
+        {
+          "table": "4.2.1.5",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/4.2.1.5.result.json",
+          "sha256": "33a6f50336c82de3295e2c30c05d4b0291b8e25c055cc8913d755b8f9f09b827",
+          "verdict": "partial",
+          "detail": "building-area LPD: the WholeBuilding rows resolve against this table"
+        }
+      ],
+      "result_sha256": "0d3f6dd379c5457af9378773f51ef61283759a9806a47be402b8014f54c8d4c7"
+    },
+    "tables/exterior_lighting.json": {
+      "source": "mcp:necb:2020",
+      "request": [
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2020",
+          "division": "B",
+          "table_number": "4.2.3.1.-A"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2020",
+          "division": "B",
+          "table_number": "4.2.3.1.-B"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2020",
+          "division": "B",
+          "table_number": "4.2.3.1.-C"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2020",
+          "division": "B",
+          "table_number": "4.2.3.1.-D"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2020",
+          "division": "B",
+          "table_number": "4.2.3.1.-E"
+        }
+      ],
+      "source_revision": null,
+      "source_sha256": "ccb9cdeec56cf7f3d8b09b0dd1307f2ca5badd19d295fa74dd8ab068823dfa8d",
+      "extractor": "manual (this edition's copy of the same retained source artifact)",
+      "retrieved": "2026-07-12",
+      "method": "copied",
+      "source_verification": "archived",
+      "byte_identical_to": "necb2020/tables/exterior_lighting.json",
+      "note": "This edition ships its own copy of the transcription named in `request`, and the archived payload travels with it. Re-verified 2026-08-02 against the post-hbix-fix extraction (D-61). Table -C rows other than facades are merged cells in the source extraction and were transcribed with their applicable zones.",
+      "inherited_reason": "3 of the 91 compared values are unresolved against this edition's own extraction - pending D-89",
+      "verified_against": [
+        {
+          "table": "4.2.3.1.-A",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/4.2.3.1.-A.result.json",
+          "sha256": "fe169898f9fb8eb7780978618cccbeb2ba9affba236741c6e46372307f860e0c",
+          "verdict": "partial",
+          "detail": "one of this edition's five exterior-lighting tables, compared as a set: 21 of 21 shipped allowance entries join a row, 88 of the 91 compared values equal this edition's, and all five zone descriptions the file compresses exist in Table 4.2.3.1.-A; the 3 that do not agree are loading_docks in zones 1, 3 and 4, where this edition's extraction serves an empty cell (the merged-cell limitation the file's own provenance already records) - pending D-89"
+        },
+        {
+          "table": "4.2.3.1.-B",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/4.2.3.1.-B.result.json",
+          "sha256": "8f1f9219515a1135ac102169710a7d6306fac3ab45188b0b2d261814e4ae0726",
+          "verdict": "partial",
+          "detail": "one of this edition's five exterior-lighting tables, compared as a set: 21 of 21 shipped allowance entries join a row, 88 of the 91 compared values equal this edition's, and all five zone descriptions the file compresses exist in Table 4.2.3.1.-A; the 3 that do not agree are loading_docks in zones 1, 3 and 4, where this edition's extraction serves an empty cell (the merged-cell limitation the file's own provenance already records) - pending D-89"
+        },
+        {
+          "table": "4.2.3.1.-C",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/4.2.3.1.-C.result.json",
+          "sha256": "82755b70d1e19d3d1ef2e90fa7f3dbf68653431d453609a76e29de6f86fa9074",
+          "verdict": "partial",
+          "detail": "one of this edition's five exterior-lighting tables, compared as a set: 21 of 21 shipped allowance entries join a row, 88 of the 91 compared values equal this edition's, and all five zone descriptions the file compresses exist in Table 4.2.3.1.-A; the 3 that do not agree are loading_docks in zones 1, 3 and 4, where this edition's extraction serves an empty cell (the merged-cell limitation the file's own provenance already records) - pending D-89"
+        },
+        {
+          "table": "4.2.3.1.-D",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/4.2.3.1.-D.result.json",
+          "sha256": "e61804756fc9df7d30f4bc50d98d05b403d8b5ec49fba54c87818b444a831878",
+          "verdict": "partial",
+          "detail": "one of this edition's five exterior-lighting tables, compared as a set: 21 of 21 shipped allowance entries join a row, 88 of the 91 compared values equal this edition's, and all five zone descriptions the file compresses exist in Table 4.2.3.1.-A; the 3 that do not agree are loading_docks in zones 1, 3 and 4, where this edition's extraction serves an empty cell (the merged-cell limitation the file's own provenance already records) - pending D-89"
+        },
+        {
+          "table": "4.2.3.1.-E",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/4.2.3.1.-E.result.json",
+          "sha256": "4eddde8a361f462bcf97f447b8032c18f4ed0d483497019589a414b0a1230b28",
+          "verdict": "partial",
+          "detail": "one of this edition's five exterior-lighting tables, compared as a set: 21 of 21 shipped allowance entries join a row, 88 of the 91 compared values equal this edition's, and all five zone descriptions the file compresses exist in Table 4.2.3.1.-A; the 3 that do not agree are loading_docks in zones 1, 3 and 4, where this edition's extraction serves an empty cell (the merged-cell limitation the file's own provenance already records) - pending D-89"
+        }
+      ],
+      "result_sha256": "4c12b192a0f053e9e21ccdc5f1da84deb36a0804ad12a724f0c974ef85c32fe8"
+    },
+    "tables/table_c1.json": {
+      "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
+      "request": {
+        "path": "lib/openstudio-standards/standards/necb/NECB2011/data/necb_2015_table_c1.json"
+      },
+      "source_revision": "f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
+      "source_sha256": "8beb548fcc3df2818fd7380da2482287f05be761c76ba59bf0b635ff9455a59e",
+      "extractor": "manual (this edition's copy of the same retained source artifact)",
+      "retrieved": "2026-07-12",
+      "method": "copied",
+      "source_verification": "revision_addressable",
+      "byte_identical_to": "necb2020/tables/table_c1.json",
+      "note": "This edition ships its own copy of the corrected 2015-lineage table the nearest-city HDD lookup runs on. Vendored from the NECB 2015 Table C-1 the oracle ships, then CORRECTED 2026-09-01: seven British Columbia HDD18 values this edition revises (Comox, Courtenay, Hope, Ladysmith, Nanaimo, Parksville, Qualicum Beach), each read from the codes MCP (necb:2020 Table C-1) and confirmed row by row. Diffed against the oracle at REF while writing this block: exactly those 7 of 679 rows differ, so source_sha256 hashes the pre-correction source and result_sha256 the corrected shipped file.",
+      "inherited_reason": "row-set and unread-column adoption pending D-89: 39 shipped and 40 edition rows do not join even keyed by (city, province), and this edition's table carries no coordinates, which is half of what runtime reads",
+      "verified_against": [
+        {
+          "table": "C-1",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/C-1.result.json",
+          "sha256": "f3dd1ff89cfd618c0405ec40d6c4c946392e153e0527d83b3e46a69d764501ae",
+          "verdict": "partial",
+          "detail": "climatic data, keyed by (normalised city, PROVINCE) - the city alone is not a key, because Alma, Princeton, Waterloo and Windsor each name two places in two provinces. 640 rows join, and every degree-days-below-18 value and every design temperature among them is identical. 1250 cells differ: hourly wind pressures (612 at 1/10 and 634 at 1/50), which no reader in this package consumes, and 4 degree-days-below-15 values. The residue is 39 unmatched shipped rows and 40 unmatched edition rows, every one of them listed with its nearest candidate in the alias/unmatched ledger of docs/NECB_VINTAGE_MATCH.md; the row sets differ (this edition prints 680 rows resolving to 680 distinct keys, the snapshot ships 679), and this edition additionally prints July Future dry and wet columns that nothing shipped carries. What runtime reads from this file is lat_long and degree_days_below_18_c, and this edition's table publishes no coordinates at all, so its row set cannot supply the column the nearest-city lookup keys on"
+        }
+      ],
+      "result_sha256": "ffd0ba3e3fccbc1c61ae0b00a696b155f3adc542b1e4a967bd3a6d19653720fd"
+    },
+    "tables/daylighting_controls_4_2_1_6.json": {
+      "source": "mcp:necb:2025",
+      "request": {
+        "tool": "get_table",
+        "code": "necb",
+        "edition": "2025",
+        "division": "B",
+        "table_number": "4.2.1.6"
+      },
+      "source_revision": null,
+      "source_sha256": "ab939817ee666545223d0ce09009ab39ba55c366455f441e9c5251dc44ea7d59",
+      "extractor": "manual (transcription from the archived MCP payload)",
+      "retrieved": "2026-09-09",
+      "method": "transcribed",
+      "source_verification": "archived",
+      "note": "This edition's Table 4.2.1.6 daylight-control columns, transcribed from the archived payload named in `request`. Of the 106 entries the file carries, all 101 join a table row by the file's own `table_row` label and all 198 of their control states agree with this edition's table; 5 further entries the file's own `residue` declares are absent from the table by construction. D-89 step 3 fixed a stale row-LABEL bug in three of those 101 entries: an earlier extraction had merged the `Healthcare facility` rows `exam/treatment room` and `imaging room` into one `table_row` string shared by both entries, and had given the `Sales area` row's category without the table's own footnote marker. `table_row` now reads `Healthcare facility | exam/treatment room`, `Healthcare facility | imaging room`, and `Sales area⁷⁷ | Sales area⁷⁷` respectively. This is a label fix only: the affected control states were already read back by hand against this edition's own rows before the fix and agreed exactly, so no control state moved. The two daylight-control columns are keyed by the 105 NECB space-function catalog names rather than by table row, and each catalog name was mapped to a row by hand and checked by comparing the catalog's lighting_per_area against the row's LPD (102 of 102 agree). The file's own in-file provenance block still narrates the 2026-07-30 transcription that produced these bytes.",
+      "result_sha256": "be1a3c92b03533cd9cc2a69d24eadb290feb0a801b0be9f5a4323ac1789673e2"
+    },
+    "tables/lpd_building_types.json": {
+      "source": "mcp:necb:2025",
+      "request": {
+        "tool": "get_table",
+        "code": "necb",
+        "edition": "2025",
+        "division": "B",
+        "table_number": "4.2.1.5"
+      },
+      "source_revision": null,
+      "source_sha256": "33a6f50336c82de3295e2c30c05d4b0291b8e25c055cc8913d755b8f9f09b827",
+      "extractor": "manual (transcription from the archived MCP payload)",
+      "retrieved": "2026-07-12",
+      "method": "transcribed",
+      "source_verification": "archived",
+      "note": "NECB 2025 Table 4.2.1.5, the building-type method LPD in W/m2.",
+      "result_sha256": "99503854353164ebaa7a55dd82edb7ace2d17d4f36a17e241516d67d2ddf9517"
+    },
+    "tables/lpd_space_functions.json": {
+      "source": "mcp:necb:2025",
+      "request": {
+        "tool": "get_table",
+        "code": "necb",
+        "edition": "2025",
+        "division": "B",
+        "table_number": "4.2.1.6"
+      },
+      "source_revision": null,
+      "source_sha256": "ab939817ee666545223d0ce09009ab39ba55c366455f441e9c5251dc44ea7d59",
+      "extractor": "manual (transcription from the archived MCP payload)",
+      "retrieved": "2026-07-12",
+      "method": "transcribed",
+      "source_verification": "archived",
+      "note": "NECB 2025 Table 4.2.1.6 in full: LPD in W/m2 plus the per-row 4.2.2.1 lighting-control requirement matrix (X = required, A/B = alternative groups). Re-verified 2026-08-02 against the post-hbix-fix extraction (D-61).",
+      "result_sha256": "7f1fa9576d023bb83dad2ad64c52ee8fa91ebc9d2b507d587a10863406b8a101"
+    },
+    "coverage/articles_8_4.json": {
+      "source": "mcp:necb:2025",
+      "request": {
+        "tool": "get_section",
+        "code": "necb",
+        "edition": "2025",
+        "division": "B",
+        "include_sentences": false,
+        "section_numbers": [
+          "8.4.1.1",
+          "8.4.1.2",
+          "8.4.1.3",
+          "8.4.1.4",
+          "8.4.1.5",
+          "8.4.2.1",
+          "8.4.2.2",
+          "8.4.2.3",
+          "8.4.2.4",
+          "8.4.2.5",
+          "8.4.2.6",
+          "8.4.2.7",
+          "8.4.2.8",
+          "8.4.2.9",
+          "8.4.2.10",
+          "8.4.2.11",
+          "8.4.2.12",
+          "8.4.3.1",
+          "8.4.3.2",
+          "8.4.3.3",
+          "8.4.3.4",
+          "8.4.3.5",
+          "8.4.3.6",
+          "8.4.3.7",
+          "8.4.3.8",
+          "8.4.3.9",
+          "8.4.4.1",
+          "8.4.4.2",
+          "8.4.5.1",
+          "8.4.5.2",
+          "8.4.5.3",
+          "8.4.5.4",
+          "8.4.5.5",
+          "8.4.5.6",
+          "8.4.5.7",
+          "8.4.5.8",
+          "8.4.5.9",
+          "8.4.5.10",
+          "8.4.5.11",
+          "8.4.5.12",
+          "8.4.5.13",
+          "8.4.5.14",
+          "8.4.5.15",
+          "8.4.5.16",
+          "8.4.5.17",
+          "8.4.5.18",
+          "8.4.5.19",
+          "8.4.5.20",
+          "8.4.6.1",
+          "8.4.6.2",
+          "8.4.6.3",
+          "8.4.6.4",
+          "8.4.6.5",
+          "8.4.6.6",
+          "8.4.6.7",
+          "8.4.6.8",
+          "8.4.6.9"
+        ]
+      },
+      "source_revision": null,
+      "source_sha256": "6b9ca8c71c6ace55c85f5b4a7e2b4bd9c2fc01711d0dcbde0678c95056bfd904",
+      "extractor": "fetch_necb_8_4_text.rb@9d69093",
+      "retrieved": "2026-07-22",
+      "method": "generated",
+      "source_verification": "archived",
+      "note": "THE CACHE IS THE RETAINED ARTIFACT, so source_sha256 == result_sha256 and no separate payload is stored: this document is the canonicalised output of one get_section call per Section 8.4 article, with page furniture stripped and each article parsed into a sentence/clause tree under strict sanity checks. What is NOT retained is the raw per-article JSON-RPC result; re-fetching reproduces the cache, not a byte-identical payload set. Written by the Ruby fetcher at 9d69093 (2026-07-22), which the current scripts/fetch_necb_8_4_text.py ports with cache-schema parity; the Ruby original retired with the gems under D-84 and is reachable at that commit.",
+      "result_sha256": "6b9ca8c71c6ace55c85f5b4a7e2b4bd9c2fc01711d0dcbde0678c95056bfd904"
+    },
+    "eui_targets.json": {
+      "source": "mcp:necb:2025",
+      "request": [
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.4.1"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.4.2"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.4.1"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.4.2"
+        }
+      ],
+      "source_revision": null,
+      "source_sha256": "2c7ee2a7e41f28e6647fa7aa9919e4d32bf0c1a61dd3030312615e36293c6216",
+      "extractor": "manual (transcription from the archived MCP payloads)",
+      "retrieved": "2026-07-12",
+      "method": "transcribed",
+      "source_verification": "archived",
+      "note": "This edition's Energy Use Intensity path at Subsection 8.4.4: archetype EUI targets, the applicability thresholds of 8.4.4.1, and the Table 8.4.4.2 receptacle defaults that fix the process-load excess. Re-verified 2026-08-02 against the post-hbix-fix extraction (D-61).",
+      "result_sha256": "e78439f03a203260a2b83f1f67ac373029814d575c966934c2d5ef5a3adb92b7"
+    },
+    "ghg_factors.json": {
+      "source": "mcp:necb:2025",
+      "request": [
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "11.4.1.1"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "11.4.2.1.-A"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "11.4.2.1.-B"
+        }
+      ],
+      "source_revision": null,
+      "source_sha256": "8b3b9890b7805c167cd8648fa0c37ce4cbe97b53bbe895221d74b8e51deb5721",
+      "extractor": "manual (transcription from the archived MCP payloads)",
+      "retrieved": "2026-07-12",
+      "method": "transcribed",
+      "source_verification": "archived",
+      "note": "NECB 2025 Part 11 operational GHG emissions: performance levels A-F and the provincial electricity / utility gas / fuel emission factors. Re-verified 2026-08-02 against the post-hbix-fix extraction (D-61).",
+      "result_sha256": "feb064c470bd394e8b2e253f9822a0baa2e46676e76bbd0829aa9ff5a444fe00"
+    },
+    "coverage/provisions.json": {
+      "source": "mcp:necb:2025",
+      "request": [
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "A",
+          "section_number": "1.1.1.1",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "1.1.1.1",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.5.7.-B"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "A-8.4.5.13",
+          "include_sentences": false
+        },
+        {
+          "tool": "query_sections",
+          "code": "necb",
+          "edition": "2025",
+          "hierarchy_level": "article",
+          "section_pattern": "8.4.1.%",
+          "limit": 100
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "4.2.1.6",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.6.5.-C"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.4.1"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.4.2"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "5.2.10.1",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.10.1.-A"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.10.1.-B"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.5.14"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.6.5.-A"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.6.5.-B"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "3.2.4.2",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.2"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "5.2.12.2",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "5.2.2.7",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.5.12"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "A",
+          "section_number": "1.4.1.2",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "3.1.1.7",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "3.2.2.2"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "3.2.2.2",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "A-3.1.1.7.(3)",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.1.-A"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "5.2.12.1",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "3.2.3.1"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "3.2.3.1",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "3.2.3.3",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "3.4.1.2",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "A-8.4.5.4.(1)",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "5.2.6.3",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.6.3"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.5.7.-A"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "A-8.4.5.20.(4)(a)",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.5.9",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "5.2.3.4",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "5.2.2.9",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "4.2.2.1",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "4.2.2.3",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "4.2.2.4",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "4.2.2.5",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.1.-G"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.1.-I"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.1.-K"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.1.-N"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.1.-O"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "3.2.2.3"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "3.2.2.3",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "4.2.3.1.-A"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "4.2.3.1",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "4.2.3.1.-B"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "4.2.3.1.-C"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "4.2.3.1.-D"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "4.2.3.1.-E"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "11.4.1.1"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "11.4.1.1",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "11.4.2.1.-A"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "11.4.2.1",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "11.4.2.1.-B"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "4.2.1.6"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "5.2.2.8",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "6.2.2.1"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "6.2.2.1",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "3.2.1.4",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "3.2.4.1",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "A-8.4.5.14.(2)",
+          "include_sentences": false
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "5.2.1.1",
+          "include_sentences": false
+        }
+      ],
+      "source_revision": null,
+      "source_sha256": "a975a18995d8d6384bfda1ed1080e676349049632e3d190a5dea86699607cd9e",
+      "source_artifacts": [
+        {
+          "path": "coverage/articles_8_4.json",
+          "sha256": "6b9ca8c71c6ace55c85f5b4a7e2b4bd9c2fc01711d0dcbde0678c95056bfd904"
+        },
+        {
+          "path": "provenance/provisions.result.json",
+          "sha256": "ca3894f733926276580e2ce8149fd538d3ec7d0a927f61199301f77e284f9f6d"
+        }
+      ],
+      "extractor": "scripts/fetch_necb_provisions.py",
+      "retrieved": "2026-10-25",
+      "method": "generated",
+      "source_verification": "archived",
+      "note": "The retained provisions.result.json is the exact bounded set of authorized MCP tool results. source_artifacts is the canonical two-input descriptor and also pins coverage/articles_8_4.json, which supplies Section 8.4 structure and table-note identities without duplicating that cache.",
+      "result_sha256": "28600e642ff20f7393a76abcc7b5c6196febda9368fef423a397037c8c112b1c"
+    }
+  }
+}
