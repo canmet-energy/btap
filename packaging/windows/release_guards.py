@@ -38,7 +38,7 @@ def main() -> int:
     # 1. The version triple must agree: pyproject, __init__, and the iss
     #    AppVersion. A mismatch ships an installer whose name lies about
     #    what is inside it.
-    pyproject = (REPO_ROOT / "python" / "pyproject.toml").read_text(encoding="utf-8")
+    pyproject = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
     m = re.search(r'^version = "([^"]+)"', pyproject, re.M)
     if not m or m.group(1) != v:
         fail(problems, f"pyproject version {m and m.group(1)!r} != {v!r}")

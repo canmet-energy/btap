@@ -27,8 +27,8 @@ and in [necb_decisions.md](necb_decisions.md).
 | Decisions with concrete rows from an established legacy mapping | 0 |
 | Decisions held under Edition not yet attributed | 3 |
 | Decisions included in this view | 73 |
-| Decisions omitted because they cite no provision | 35 |
-| All decisions | 108 |
+| Decisions omitted because they cite no provision | 36 |
+| All decisions | 109 |
 
 ## Definitions
 

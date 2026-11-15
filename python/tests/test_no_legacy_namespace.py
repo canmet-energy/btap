@@ -37,7 +37,7 @@ SCANNED_PREFIXES = (
     ".github/",
 )
 SCANNED_EXACT = (
-    "python/pyproject.toml",
+    "pyproject.toml",
     "CLAUDE.md",
     "README.md",
     ".gitignore",

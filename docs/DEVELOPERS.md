@@ -56,12 +56,21 @@ bash .devcontainer/setup.sh --serena
 ```bash
 cd python
 python3 -m venv .venv
-.venv/bin/pip install -e '.[tbd]' pytest pytest-xdist pytest-cov import-linter ruff build
+.venv/bin/pip install -e .. pytest pytest-xdist pytest-cov import-linter ruff build
 ```
 
-`[tbd]` installs the exact `canmet-tbd==3.5.2` thermal-bridging line. Do not
-casually move it to upstream 3.6.x: the uprate physics differ materially and
-require an adjudicated rebaseline.
+`..`, not `.`: the build entry, `pyproject.toml`, is at the repository root so
+that `pip install git+https://github.com/canmet-energy/btap` works without
+`#subdirectory=python` (#229). The package source stays under `python/`, and so
+does the venv. For the same reason `lint-imports` takes
+`--config ../pyproject.toml` — it reads config only from the current directory.
+
+The exact `canmet-tbd==3.5.2` thermal-bridging line is a default dependency
+(D-109), so it arrives with the install above; there is no `[tbd]` extra. Do
+not casually move it to upstream
+3.6.x: the uprate physics differ materially and require an adjudicated
+rebaseline. `test_ci_image_pin.py` fails if the dependency pin and
+`PINNED_TBD_VERSION` disagree.
 
 ### MCP servers
 
@@ -108,7 +117,7 @@ Fast local suite:
 ```bash
 cd python
 .venv/bin/pytest -n auto -q tests/
-.venv/bin/lint-imports
+.venv/bin/lint-imports --config ../pyproject.toml
 .venv/bin/ruff check .
 ```
 

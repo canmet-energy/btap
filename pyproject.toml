@@ -6,9 +6,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "canmet-btap"  # PyPI similarity check blocks "btap" (bta exists); the import stays `btap`
-version = "0.3.0"
+# 0.4.0.dev0 (#229): 0.3.0 is already on PyPI with thermal bridging as an
+# extra, and PyPI never accepts a re-upload of a version with different
+# contents, so a git install with the D-109 dependency must not also claim
+# to be 0.3.0 — pip could treat an installed PyPI 0.3.0 as satisfying it.
+version = "0.4.0.dev0"
 description = "NECB 2020/2025 Part 8 performance-path compliance toolchain (Python port of the btap gem family)"
-readme = "README.md"
+# The PyPI long description stays python/README.md; the root README.md is
+# for building engineers (CLAUDE.md), a different audience.
+readme = "python/README.md"
 requires-python = ">=3.11"
 license = "GPL-3.0-or-later"
 # The wheel must CARRY the licence, not merely name it: the Windows
@@ -29,6 +35,28 @@ license-files = ["LICENSE"]
 dependencies = [
   "openstudio~=3.11.0",
   "canmet-energyplus==25.2.0.2 ; sys_platform == 'win32' or (sys_platform == 'linux' and platform_machine == 'x86_64')",
+  # NECB 3.1.1.7 thermal bridging. A DEFAULT dependency since D-109
+  # (phylroy, 2026-11-14): as an extra, the people who needed it most — anyone
+  # determining compliance — were the least likely to know to add `[tbd]`,
+  # and without it every determination's reference envelope is under-insulated
+  # relative to the Code's intent. D-83 rejected an `[engine]` extra for
+  # canmet-energyplus on exactly that ground ("pip has no default extras");
+  # this applies the same reasoning to the other engine.
+  #
+  # Released pin since R5 (D-83): canmet-tbd 3.5.2 — PyPI blocked the py-tbd
+  # name as too similar to pytbd/tbd — IS the pinned verification tree bfb23e6
+  # plus one diff-proven metadata-only commit (its v3.5.2 tag), published from
+  # canmet-energy/py-tbd; py-topolys==0.1.0 rides transitively (its v0.1.0 tag
+  # sits at exactly the D-79 pinned SHA). There is no `[tbd]` extra any more:
+  # it was removed rather than kept empty, since nothing outside this
+  # repository depended on it (phylroy, 2026-11-14: no clients yet).
+  #
+  # Pure Python (py3-none-any, as is py-topolys), so unlike the EnergyPlus
+  # companion it needs no platform marker. The pin is EXACT and must match
+  # `PINNED_TBD_VERSION` in btap/codes/necb/envelope/thermal_bridging.py —
+  # upstream 3.6.x changes the physics by ~43% on the same wall, so an upgrade
+  # is an adjudicated rebaseline, never routine maintenance.
+  "canmet-tbd==3.5.2",
 ]
 
 # NECB 3.1.1.7 thermal bridging (M7, D-79 Option A): py-tbd's
@@ -40,20 +68,24 @@ dependencies = [
 # verification baseline move without a commit here.
 # tests/necb/test_envelope_thermal_bridging.py asserts the installed engine
 # identity; BTAP_TBD_REQUIRED=1 turns its absence from a skip into a failure.
-[project.optional-dependencies]
-# Released pin since R5 (D-83): canmet-tbd 3.5.2 (PyPI blocked the py-tbd
-# name as too similar to pytbd/tbd) IS the pinned verification
-# tree bfb23e6 plus one diff-proven metadata-only commit (its v3.5.2
-# tag), published from canmet-energy/py-tbd; py-topolys==0.1.0 rides
-# transitively (its v0.1.0 tag sits at exactly the D-79 pinned SHA).
-# The Option A pin discipline survives publication as exact == pins.
-tbd = ["canmet-tbd==3.5.2"]
 
 [project.scripts]
 btap-compliance = "btap.codes.cli:main"
 btap-necb-coverage = "btap.codes.coverage:main"
 
+# #229: this file lives at the REPOSITORY ROOT so that
+#   pip install git+https://github.com/canmet-energy/btap
+# works without `#subdirectory=python`. The package itself stays in
+# python/ — moving it touches ~16,700 references, most of them frozen
+# baselines that embed coverage code pointers; see
+# docs/plans/PYTHON_PACKAGE_LAYOUT_PLAN.md. package-dir points the build at
+# it, and there is deliberately ONE pyproject: a second copy in python/
+# would let the dependency pins and package-data below drift apart.
+[tool.setuptools]
+package-dir = {"" = "python"}
+
 [tool.setuptools.packages.find]
+where = ["python"]
 include = ["btap*"]
 
 # The rules/catalog/cost tables are the product, not incidental assets: every
@@ -72,6 +104,10 @@ include = ["btap*"]
 "*" = ["data/**/*.json", "data/**/*.csv", "data/**/*.md", "data/**/*.osm"]
 
 [tool.ruff]
+# `src` makes ruff's isort rules classify `btap` and `tests` as FIRST-party.
+# Without it the project root would be this directory, where neither
+# package lives, and import-block sorting would change.
+src = ["python"]
 line-length = 100
 target-version = "py311"
 
@@ -92,7 +128,9 @@ select = ["E4", "E7", "E9", "F", "B", "I"]
 ignore = ["B905"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+# Relative to THIS file. `cd python && pytest tests/` still works: pytest
+# finds this config by walking upward, and explicit paths override testpaths.
+testpaths = ["python/tests"]
 
 # The D-77 one-way dependency arrows, enforced in-package (one distribution,
 # five subpackages): necb -> costing -> modeling -> audit; simulation beside.

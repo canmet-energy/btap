@@ -23,15 +23,35 @@ historical record, not a description of a second live implementation.
 From PyPI:
 
 ```bash
-pip install 'canmet-btap[tbd]'
+pip install canmet-btap
 ```
 
-For development:
+Straight from GitHub — the default branch, or any branch, tag or commit after
+`@`:
+
+```bash
+pip install git+https://github.com/canmet-energy/btap
+pip install git+https://github.com/canmet-energy/btap@main
+```
+
+Both install everything a compliance run needs, including the NECB 3.1.1.7
+thermal-bridging engine, `canmet-tbd` — there is no extra to remember. The
+Code makes the Table 3.2.2.x U-values *effective* transmittances, thermal
+bridges included, and without the engine a reference building's envelope would
+be under-insulated relative to the Code's intent.
+
+The engine is pinned EXACTLY, because a later upstream release changes the
+physics by roughly 43% on the same wall. If it is ever missing — a `--no-deps`
+install, say — a compliance run still completes but warns loudly in its audit
+trail and names the command that restores it.
+
+For development, from a clone (the build entry, `pyproject.toml`, is at the
+repository root; the package source is under `python/`):
 
 ```bash
 cd python
 python3 -m venv .venv
-.venv/bin/pip install -e '.[tbd]' pytest pytest-xdist import-linter ruff build
+.venv/bin/pip install -e .. pytest pytest-xdist import-linter ruff build
 ```
 
 The distribution requires Python 3.11 or newer and OpenStudio 3.11. The exact
@@ -55,7 +75,7 @@ week is never reported as a code determination.
 ```bash
 cd python
 .venv/bin/pytest -n auto -q tests/
-.venv/bin/lint-imports
+.venv/bin/lint-imports --config ../pyproject.toml
 .venv/bin/ruff check .
 python3 -m unittest discover tests
 python3 scripts/wheel_smoke.py
@@ -80,7 +100,7 @@ these helpers rather than reimplementing their semantics at call sites.
 
 ## Thermal bridging
 
-NECB 3.1.1.7 uses native Python `canmet-tbd==3.5.2` through the `[tbd]` extra.
+NECB 3.1.1.7 uses native Python `canmet-tbd==3.5.2`, a default dependency (D-109).
 Without it, the pipeline continues but emits the explicit audited warning that
 thermal bridging was not accounted for. The 3.6.x line changes uprate physics
 and requires a deliberate family-wide rebaseline.

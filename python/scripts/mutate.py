@@ -135,6 +135,13 @@ def build_mutant(work: Path, index: int, target: str, old: str, new: str):
     # imported. (Same sys.path subtlety as the freeze-recipe trap, inverted.)
     # So the mutant dir needs everything pytest resolves relatively: the tests
     # themselves and the pytest configuration, symlinked rather than copied.
+    #
+    # Since #229 the only pyproject.toml is at the REPOSITORY root, so the
+    # `exists()` check below skips it and the mutant runs with no ini file.
+    # That changes nothing: its sole pytest setting was `testpaths`, and every
+    # run here passes its test paths explicitly. Do NOT link the root file in
+    # instead — its `testpaths = ["python/tests"]` names a directory a mutant
+    # tree does not have.
     for name in ("tests", "pyproject.toml", "pytest.ini", "setup.cfg",
                  "conftest.py"):
         source = PYTHON_ROOT / name

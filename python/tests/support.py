@@ -124,8 +124,8 @@ def needs_tbd(cls_or_fn):
         return _hard_fail(cls_or_fn,
                           "BTAP_TBD_REQUIRED=1 but the pinned py-tbd engine is not importable")
     return unittest.skip(
-        "needs the pinned py-tbd engine (pip install 'btap[tbd]', or see "
-        "docs/DEVELOPERS.md)")(cls_or_fn)
+        "needs the pinned thermal-bridging engine, a default dependency since D-109 "
+        "(pip install -e .. from python/, or see docs/DEVELOPERS.md)")(cls_or_fn)
 
 
 def oracle_goldens_dir():

@@ -71,7 +71,7 @@ jobs:
       - name: Installed-pair REAL sizing (linux)
         run: |
           python3 -m venv /tmp/v && . /tmp/v/bin/activate
-          pip install -q "openstudio~=3.11.0" "$(ls dist/canmet_btap-*.whl)[tbd]"
+          pip install -q "openstudio~=3.11.0" "$(ls dist/canmet_btap-*.whl)"
           python3 -c "
           import canmet_energyplus, btap
           print('companion', canmet_energyplus.ENERGYPLUS_VERSION, '| btap', btap.__version__)"
@@ -104,7 +104,7 @@ jobs:
         shell: bash
         run: |
           python -m venv /tmp/v
-          /tmp/v/Scripts/pip install -q "openstudio~=3.11.0" "$(ls dist/canmet_btap-*.whl)[tbd]"
+          /tmp/v/Scripts/pip install -q "openstudio~=3.11.0" "$(ls dist/canmet_btap-*.whl)"
           /tmp/v/Scripts/python -c "
           import canmet_energyplus, btap
           print('companion', canmet_energyplus.ENERGYPLUS_VERSION, '| btap', btap.__version__)"
@@ -178,7 +178,7 @@ jobs:
           V=$(ls dist/canmet_btap-*.whl | sed -E 's/.*canmet_btap-([^-]+)-py3.*/\1/')
           python3 -m venv /tmp/tv && . /tmp/tv/bin/activate
           pip install -q --index-url https://test.pypi.org/simple/ \
-            --extra-index-url https://pypi.org/simple/ "canmet-btap[tbd]==$V"
+            --extra-index-url https://pypi.org/simple/ "canmet-btap==$V"
           python3 - "$V" <<'PY'
           import sys
           import btap, canmet_energyplus, tbd

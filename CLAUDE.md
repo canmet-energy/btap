@@ -185,9 +185,9 @@ covered by it: `packaging/windows/samples/04-fancoil-chiller.osm` and
 ```bash
 cd python
 python3 -m venv .venv
-.venv/bin/pip install -e '.[tbd]' pytest pytest-xdist import-linter ruff build coverage pytest-cov
+.venv/bin/pip install -e .. pytest pytest-xdist import-linter ruff build coverage pytest-cov
 .venv/bin/pytest -n auto -q tests/
-.venv/bin/lint-imports
+.venv/bin/lint-imports --config ../pyproject.toml
 .venv/bin/ruff check .
 
 # Repository tools, from the repository root
@@ -664,7 +664,9 @@ local checkout, run `bundle install` with that value and keep using it. A
 different remote makes `bundle check` report the source as not checked out.
 
 **Thermal bridging has two distinct pins.** Product Python uses
-`canmet-tbd==3.5.2`. The oracle bundle retains its Ruby tbd/osut/topolys triplet.
+`canmet-tbd==3.5.2` — a DEFAULT dependency since D-109, declared once in
+`[project] dependencies` (the `[tbd]` extra was removed),
+and tied to `PINNED_TBD_VERSION` by `test_ci_image_pin.py`. The oracle bundle retains its Ruby tbd/osut/topolys triplet.
 Upstream 3.6.x changes the physics by roughly 43% on the same wall, so upgrading
 either side is an adjudicated rebaseline, never routine dependency maintenance.
 

@@ -1680,8 +1680,9 @@ class TestTheCommittedProvisionView(unittest.TestCase):
     #: to 68 with 3 held. Sixteen requirements have one source and the other 111
     #: have two; one of those records is D-60's related 2020 comparison.
     #: REQUIREMENTS counts instances, including a shared key once per decision
-    #: that uses it.
-    STRUCTURED, ESTABLISHED, HELD, INCLUDED, OMITTED = 70, 0, 3, 73, 35
+    #: that uses it. D-109 (a process decision, `not_applicable`) is OMITTED from
+    #: the provision view, taking that count from 35 to 36.
+    STRUCTURED, ESTABLISHED, HELD, INCLUDED, OMITTED = 70, 0, 3, 73, 36
     SOURCE_ROWS = 242
     GOVERNING_ROWS = 241
     REQUIREMENTS = 129

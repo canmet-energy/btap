@@ -157,6 +157,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-106** — Reference fan-coil water coils size at mode-specific airflow _(runtime)_
 - **D-107** — Authored sample fan coils carry the mode-specific sizing contract _(process)_
 - **D-108** — Bare loop DX is not evidence of unitary equipment; the residential identity branch needs an equipment-class fact _(runtime)_
+- **D-109** — The thermal-bridging engine is a default dependency, not the [tbd] extra _(process)_
 
 <!-- TOC END -->
 
@@ -8655,3 +8656,69 @@ the NECB code is what decides which reference system applies, sent the question
 to Table 8.4.4.7.-A, where the closed list is printed. Sol ruled the zone-count
 reading out (`325`) and then withdrew the packaged premise his own ruling had
 rested on (`327`).
+
+<a id="d-109"></a>
+
+## D-109 — The thermal-bridging engine becomes a default dependency
+
+- **Decision:** `canmet-tbd==3.5.2` is listed in `[project] dependencies` in
+  `pyproject.toml`, unconditionally, and the `[tbd]` extra is REMOVED. The pin
+  is declared exactly once.
+
+- **Why removed rather than kept empty:** an empty extra would have kept
+  every existing `canmet-btap[tbd]` installing without pip's "does not provide
+  the extra" warning. phylroy, 2026-11-14: *"Right now we have no clients..
+  nobody is using this right now."* So the only callers were internal —
+  `packaging/windows/stage_python.py` and three lines of
+  `.github/workflows/publish.yml` — and they were updated instead. A
+  compatibility shim for users who do not exist is a concept every later
+  reader has to understand for no benefit.
+
+- **Who/when:** phylroy, 2026-11-14, under #229 — *"Make tbd a default
+  dependency"*, following *"It just seems odd to have the tbd switch in the
+  http GitHub package url... people would not know to add it."*
+
+- **Why:** NECB 3.1.1.7 makes the Table 3.2.2.x U-values *effective*
+  transmittances, thermal bridges included. Without the engine,
+  `btap/codes/necb/envelope/thermal_bridging.py#apply` returns `False` and the
+  reference building's envelope keeps clear-field U-values — under-insulated
+  relative to the Code's intent — for every determination made in that
+  environment. The audit trail warns, but only a user who reads it and already
+  knows what `[tbd]` means could act on it. The people determining compliance
+  are exactly the population an opt-in extra fails.
+
+- **Consistent with D-83, which adjudicated the same question for the other
+  engine.** D-83 set the goal as *zero-thought distribution* and rejected an
+  `[engine]` extra for `canmet-energyplus` because *"pip has no default extras
+  — it fails the goal on exactly its target population."* It then left thermal
+  bridging as `[tbd]`, and its summary named `pip install btap[tbd]` as the
+  zero-thought command. This decision applies D-83's own reasoning to the
+  engine D-83 left out. D-83 is not amended in place: it is the record of what
+  was decided then.
+
+- **What makes it safe:** `canmet-tbd` and its one transitive pin,
+  `py-topolys==0.1.0`, are both pure Python (`py3-none-any`), so unlike the
+  EnergyPlus companion this needs no platform marker and cannot break an
+  install on any platform that installs canmet-btap at all. Its other
+  requirements — `openstudio`, `jsonschema`, `oslg`, `osut` — are already
+  satisfied or published.
+
+- **What did NOT change:** the pin stays EXACT. Upstream 3.6.x changes the
+  physics by roughly 43% on the same wall, so an upgrade remains an
+  adjudicated rebaseline (D-79 Option A), never routine maintenance.
+  `tests/test_ci_image_pin.py` now fails if the dependency pin and
+  `PINNED_TBD_VERSION` disagree, and requires the pin to appear exactly once.
+
+- **The warning a missing engine emits now names the right command.** Before
+  #229 it said "Install tbd", and `pip install tbd` installs an UNRELATED PyPI
+  package — PyPI blocked the `py-tbd` name as too similar to it. It now names
+  `pip install 'canmet-tbd==<PINNED_TBD_VERSION>'`, pinned so it cannot fetch a
+  later release with different physics.
+
+- **Evidence:** `scripts/wheel_smoke.py` installs the PLAIN wheel — no `[tbd]` —
+  into a clean venv outside the checkout, and its engine-identity check passes:
+  the engine imports with the verified 3.5.2 identity and runs a real
+  thermal-bridging operation. Installing `{wheel}[tbd]` there would have passed
+  whether or not the default worked. The built wheel's METADATA carries
+  `Requires-Dist: canmet-tbd==3.5.2` with no `extra ==` marker, and no
+  `Provides-Extra` at all.
