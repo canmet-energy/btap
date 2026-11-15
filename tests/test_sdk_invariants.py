@@ -308,8 +308,9 @@ class TestNoUncheckedOptionalGet(unittest.TestCase):
                           f"{name} must raise on its FIRST unwrap in a fresh "
                           f"interpreter. stdout: {out.stdout[:300]}")
 
-    # THE RESIDUE TRAP IS PINNED ONLY IN THE HALF THAT IS PORTABLE, because
-    # HOW it fails differs by interpreter while THAT it fails does not.
+    # THE RESIDUE TRAP IS DOCUMENTED HERE AND NOT ASSERTED. Only its CONTROL is
+    # pinned — two unwraps with no `Model()` between leave the next call alone.
+    # Read the last paragraph before adding an assertion back.
     #
     # The trap: D-79 said the RAISING unwrap leaves the C error indicator set.
     # It does not. After `g M g` — unwrap, construct a `Model()`, unwrap again
@@ -337,12 +338,25 @@ class TestNoUncheckedOptionalGet(unittest.TestCase):
     # turned the `python` job red at `def9930d` with `probe died (rc=1)` — the
     # interpreter difference, not a flake.
     #
-    # What IS portable, and is pinned below, is that the sequence is NEVER a
-    # silent default: 30/30 poisoned on 3.12 and 30/30 raising on 3.11, with
-    # the control clean 30/30 on both. The silent default is the dangerous
-    # outcome — a wrong answer rather than a failure — so a test that catches
-    # its return is worth more than one asserting which way the failure comes.
-    # (Shape and the disjunction both from Fable's review of #164.)
+    # It was then pinned as a disjunction — POISONED or RAISED_AT_UNWRAP, never
+    # a silent default (Fable's review of #164), on the strength of 30/30
+    # poisoned on 3.12 and 30/30 raising on 3.11. That claim was FALSE. On
+    # 2026-11-14 the CI `python` job (3.11, run 43629668263, at a commit that
+    # touched no SDK code) got CLEAN: the second unwrap silently returned a
+    # default model. The same commit passed it in the dispatch run, and the
+    # probe run standalone 150 times per interpreter gave 150 RAISED_AT_UNWRAP
+    # on 3.11 and 150 POISONED on 3.12 — so it is rare, and one counterexample
+    # is enough to falsify "never".
+    #
+    # It is the same ~2% branch #167 found in the flip pin above, met through a
+    # sibling shape, and the same mistake: a clean sample taken as proof that a
+    # branch cannot occur. So the assertion was DELETED rather than widened:
+    # with CLEAN admitted every outcome passes and the test pins nothing, and
+    # a test that fails at random with nothing wrong trains everyone to re-run
+    # the job. Nothing in the product depends on which way this undefined
+    # SDK behaviour lands, because product code never unwraps an unchecked
+    # Optional — `test_no_unchecked_model_load_get` and `btap._compat.opt` are
+    # the guards that matter, and the control below keeps the probe honest.
     #
     # Three traps for anyone who tries again, each of which caught someone
     # during #164:
@@ -382,7 +396,6 @@ class TestNoUncheckedOptionalGet(unittest.TestCase):
         "outcome = None\n"
         "try:\n"
         "    m1 = unwrap()\n"
-        "%s"
         "    m2 = unwrap()\n"
         "    try:\n"
         "        [].append(0)\n"
@@ -394,7 +407,7 @@ class TestNoUncheckedOptionalGet(unittest.TestCase):
         "print('OUTCOME', outcome, flush=True)\n"
     )
 
-    def _residue_outcome(self, *, construct_between):
+    def _residue_outcome(self):
         """One subprocess launch, and the probe prints exactly one outcome.
 
         Every branch is classified INSIDE the probe, so the parent never has
@@ -410,8 +423,7 @@ class TestNoUncheckedOptionalGet(unittest.TestCase):
         import subprocess
         import sys
         out = subprocess.run(
-            [sys.executable, "-c", self._RESIDUE_PROBE % (
-                "    openstudio.model.Model()\n" if construct_between else "")],
+            [sys.executable, "-c", self._RESIDUE_PROBE],
             capture_output=True, text=True, check=False, timeout=120)
         self.assertEqual(
             0, out.returncode,
@@ -426,29 +438,11 @@ class TestNoUncheckedOptionalGet(unittest.TestCase):
     def test_unwraps_alone_leave_the_next_call_alone(self):
         """CONTROL, and it stays its own test — see the note above on launches."""
         self.assertEqual(
-            "CLEAN", self._residue_outcome(construct_between=False),
+            "CLEAN", self._residue_outcome(),
             "two surviving unwraps with no Model() between them must leave "
-            "the next checked call alone; without this the test below shows "
-            "only that SOMETHING in the sequence misbehaves")
-
-    def test_an_unwrap_after_a_Model_is_NEVER_a_silent_default(self):
-        """The portable half of the trap: it fails, and which way is not fixed.
-
-        On 3.12 the second unwrap survives and poisons the next checked C call;
-        on 3.11 it raises at the unwrap. Both are failures. What must never
-        happen is CLEAN — a silent default-constructed model handed back to a
-        caller that asked for a file it could not read.
-
-        Asserting the disjunction rather than either branch is deliberate: a
-        pin on one outcome is red on the other interpreter, which is how this
-        file came to turn the `python` job red once already.
-        """
-        outcome = self._residue_outcome(construct_between=True)
-        self.assertIn(
-            outcome, ("POISONED", "RAISED_AT_UNWRAP"),
-            f"got {outcome!r}. CLEAN means an unwrap after a Model() silently "
-            f"returned a default model — a wrong answer rather than a "
-            f"failure, and the one outcome this sequence must never give")
+            "the next checked call alone — the silent-default hazard that "
+            "btap._compat.opt exists for. If this changes, the residue note "
+            "above no longer describes the SDK and must be re-measured")
 
     def test_the_checked_loader_names_the_path(self):
         from btap._sdk import load_model
