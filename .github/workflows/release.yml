@@ -103,18 +103,22 @@ jobs:
       - name: compile the installer (native ISCC)
         # The runner image's Inno Setup, located rather than assumed on PATH.
         # Major version 6 is REQUIRED: the script uses IS6 directives
-        # (`x64compatible`, `WizardStyle=modern`). The exact version is
-        # printed into the log rather than pinned, because pinning a patch
+        # (`x64compatible`, `WizardStyle=modern`). The exact version is read
+        # from ISCC.exe's own file metadata — its banner says only "Inno
+        # Setup 6" — and printed rather than pinned, because pinning a patch
         # release would break on every runner-image update.
         run: |
           ISCC="/c/Program Files (x86)/Inno Setup 6/ISCC.exe"
           test -x "$ISCC" || ISCC=$(command -v iscc || command -v ISCC || true)
           test -n "$ISCC" && test -x "$ISCC" || {
             echo "Inno Setup 6 (ISCC.exe) not found on this runner"; exit 1; }
-          BANNER=$("$ISCC" /? 2>&1 | head -3 | tr -d '\r' || true)
-          echo "$BANNER"
-          echo "$BANNER" | grep -qE "Inno Setup [^0-9]*6\." || {
-            echo "Inno Setup 6 required by btap-compliance.iss"; exit 1; }
+          VERSION=$(powershell -NoProfile -Command \
+            "(Get-Item '$(cygpath -w "$ISCC")').VersionInfo.ProductVersion" | tr -d '\r ')
+          echo "Inno Setup $VERSION at $ISCC"
+          case "$VERSION" in
+            6.*) ;;
+            *) echo "Inno Setup 6 required by btap-compliance.iss, found '$VERSION'"; exit 1 ;;
+          esac
           mkdir -p packaging/windows/Output
           "$ISCC" packaging/windows/btap-compliance.iss
           ls -la packaging/windows/Output/
