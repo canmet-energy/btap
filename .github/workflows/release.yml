@@ -81,7 +81,18 @@ jobs:
 
   installer:
     needs: [stage, smoke-windows]
-    runs-on: ubuntu-latest
+    # NATIVE Inno Setup on Windows (#233). The .iss was always written for
+    # Windows — backslash paths, and its header documents `iscc` — and ISCC
+    # under Wine on Linux was only a way to run it from an ubuntu runner. That
+    # broke three times: 22.04's apt wine 6.0.3 could not run the IS6
+    # installer, winehq's wine 11 died loading kernel32 in a headless prefix,
+    # and in 2026-11 the amake/innosetup image (unchanged since 2026-02) began
+    # failing with `wineserver: socket: Function not implemented` once
+    # ubuntu-latest moved under it. The runner image ships Inno Setup 6.
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v5
       - uses: actions/download-artifact@v7
@@ -89,17 +100,23 @@ jobs:
           name: stage
       - name: unpack the staged tree
         run: tar xzf stage.tar.gz -C packaging/windows && rm stage.tar.gz
-      - name: compile the installer (containerized ISCC)
-        # Three rehearsals proved apt wine is a moving target here: 22.04's
-        # wine 6.0.3 cannot run the IS6 installer at all, and winehq's wine 11
-        # dies loading kernel32 in a headless prefix. The amake/innosetup
-        # image wraps a known-good ISCC-under-wine; ISCC resolves the .iss's
-        # relative paths against the .iss directory, so a repo-root mount is
-        # all it needs.
+      - name: compile the installer (native ISCC)
+        # The runner image's Inno Setup, located rather than assumed on PATH.
+        # Major version 6 is REQUIRED: the script uses IS6 directives
+        # (`x64compatible`, `WizardStyle=modern`). The exact version is
+        # printed into the log rather than pinned, because pinning a patch
+        # release would break on every runner-image update.
         run: |
+          ISCC="/c/Program Files (x86)/Inno Setup 6/ISCC.exe"
+          test -x "$ISCC" || ISCC=$(command -v iscc || command -v ISCC || true)
+          test -n "$ISCC" && test -x "$ISCC" || {
+            echo "Inno Setup 6 (ISCC.exe) not found on this runner"; exit 1; }
+          BANNER=$("$ISCC" /? 2>&1 | head -3 | tr -d '\r' || true)
+          echo "$BANNER"
+          echo "$BANNER" | grep -qE "Inno Setup [^0-9]*6\." || {
+            echo "Inno Setup 6 required by btap-compliance.iss"; exit 1; }
           mkdir -p packaging/windows/Output
-          sudo chmod -R a+rwX packaging/windows
-          docker run --rm -v "$PWD:/work" amake/innosetup:latest packaging/windows/btap-compliance.iss
+          "$ISCC" packaging/windows/btap-compliance.iss
           ls -la packaging/windows/Output/
       - name: publish (tag push) or rehearse (dispatch, DRY_RUN)
         env:
