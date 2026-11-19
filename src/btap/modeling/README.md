@@ -238,6 +238,66 @@ geometry → `btap.codes.necb.loads` → `btap.codes.necb.lighting` → `btap.co
 `btap.codes.performance_compliance` (proposed + reference + costing, one
 audit) — pinned by the full-family composition test in `tests/modeling/`.
 
+## From nothing to a simulation
+
+A complete building from library calls alone — geometry, constructions, NECB
+loads, lighting and hot water, HVAC — then a one-week simulation. This block is
+EXECUTED by `tests/modeling/test_from_nothing_example.py`, so it is kept
+working, not just kept.
+
+```python
+from btap import modeling, simulation
+from btap.audit import AuditLog
+from btap.codes.necb import lighting, loads, shw
+
+epw = "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw"   # your weather file
+ddy = "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.ddy"   # and its design days
+audit = AuditLog()                                    # one trail for every step
+
+# 1. A two-storey 40 m x 20 m office bar, NECB space types assigned by ratio.
+model = modeling.bar(
+    space_type_ratios={("Space Function", "Office enclosed > 25 m2"): 0.75,
+                       ("Space Function", "Corridor/Transition area other-sch-A"): 0.25},
+    length=40.0, width=20.0, storeys=2, wwr=0.35, audit=audit)
+
+# 2. Constructions: bar output has none. This seed is deliberately poor and
+#    NOT a real assembly — replace it before trusting the energy numbers.
+modeling.seed_constructions(model, audit=audit)
+
+# 3. NECB loads (people, equipment, infiltration, thermostats), lighting and
+#    service hot water, from the tagged space types.
+loads.apply_loads(model, code="necb2020", audit=audit)
+lighting.apply_lights(model, code="necb2020", audit=audit)
+shw.apply_shw(model, code="necb2020", fuel="NaturalGas", audit=audit)
+
+# 4. HVAC: a multi-zone VAV system serves every zone from one air handler.
+modeling.build_system(
+    model, "MZ BU RTU Electric Heating Coil Scroll Chiller and Hot Water Baseboard",
+    list(model.getThermalZones()), audit=audit)
+
+# 5. Simulate one January week.
+result = simulation.run(
+    model, run_dir="my_first_run", weather={"epw": epw, "ddy": ddy},
+    run_period={"begin_month": 1, "begin_day": 8, "end_month": 1, "end_day": 14})
+
+print(result.clean)                          # True: no Severe or Fatal errors
+print(result.energy["total_site_kwh"])       # about 10,200 kWh for the week
+print(result.unmet_hours)                    # {'heating': ..., 'cooling': ...}
+```
+
+Two things worth knowing before choosing a different system:
+
+- **A packaged SINGLE-zone system serves one zone.** Most "PSZ RTU ..."
+  rows build ONE unit over every zone they are given; pass
+  `config={'per_zone': True}` or call `build_system` once per zone.
+  `build_system` warns when you have not (#236).
+- **A baseboard plus a single-zone air loop in the same zone can report
+  `CheckWarmupConvergence` Severe errors** on larger buildings: a
+  day-to-day heating-load wobble of tenths of a watt, against EnergyPlus's
+  absolute 0.04 W tolerance, as the two share the zone's heating. Results are
+  still produced and the NECB reference is unaffected; the system above, and
+  per-zone systems without a baseboard, run clean (#236).
+
 ## Citation conventions
 
 `article=` in audit entries is the NECB clause that mandates a value;
