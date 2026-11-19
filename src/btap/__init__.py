@@ -7,7 +7,7 @@ deliberately imports none of them, so ``import btap`` never pulls the SDK.
 Each subpackage's ``__all__`` is its public API (src/README.md, "Public API").
 """
 
-__version__ = "0.4.0.dev0"
+__version__ = "0.4.0a1"
 
 #: The root re-exports nothing but the version: import a subpackage directly.
 __all__ = ["__version__"]

@@ -36,6 +36,23 @@ class CLICase(unittest.TestCase):
 
 
 class TestCLIUsage(CLICase):
+    def test_version_names_a_pre_release_as_such(self):
+        # An alpha says so where a user looks, beside the version. Patched,
+        # not read from installed metadata, which an editable install records
+        # once and never refreshes.
+        from unittest import mock
+        with mock.patch.object(cli, "_version", return_value="0.4.0a1"):
+            self.assertEqual(0, self.run_cli("--version"))
+        line = self.out.getvalue().strip()
+        self.assertTrue(line.startswith("btap-compliance 0.4.0a1 (alpha: "), line)
+        self.assertIn("may change between releases", line)
+
+    def test_version_of_a_final_release_carries_no_notice(self):
+        from unittest import mock
+        with mock.patch.object(cli, "_version", return_value="0.4.0"):
+            self.assertEqual(0, self.run_cli("--version"))
+        self.assertEqual("btap-compliance 0.4.0", self.out.getvalue().strip())
+
     def test_help_exits_zero_and_documents_the_required_arguments(self):
         self.assertEqual(0, self.run_cli("--help"))
         self.assertRegex(self.out.getvalue(),

@@ -1,5 +1,9 @@
 # canmet-btap
 
+> **Alpha software.** canmet-btap 0.4 is an alpha release: the command line,
+> the Python API and the layout of `report.json` may change between releases,
+> and each release's notes say what changed. Pin the version you build on.
+
 > This file is the **distribution's** front page — it ships as
 > `canmet-btap`'s `long_description` on PyPI, which is why it describes the
 > package rather than the repository. The repository README is one level up.
@@ -23,10 +27,11 @@ historical record, not a description of a second live implementation.
 
 ## Install
 
-From PyPI:
+From PyPI — `--pre`, because this is an alpha and pip otherwise skips it and
+installs the older 0.3.0:
 
 ```bash
-pip install canmet-btap
+pip install --pre canmet-btap
 ```
 
 Straight from GitHub — the default branch, or any branch, tag or commit after
@@ -115,9 +120,9 @@ Removing or renaming one of these, or narrowing its values, is an API change.
 Adding a field is not, so a report may carry more than this; unlisted fields
 are internal.
 
-**The promise.** canmet-btap is pre-1.0, so a MINOR release (0.4 → 0.5) may
-change the public API, and its release notes say what changed; a PATCH
-release does not. Internal names may change in any release.
+**The promise.** canmet-btap is an alpha, and pre-1.0: a MINOR release (0.4 →
+0.5) may change the public API, and its release notes say what changed; a
+PATCH release does not. `btap-compliance --version` says so on a pre-release. Internal names may change in any release.
 `tests/test_public_api.py` pins every list above exactly, so a public name
 cannot be removed, renamed or added without that test being updated in the
 same change; `tests/test_report_contract.py` holds every frozen scenario's

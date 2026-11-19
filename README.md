@@ -1,5 +1,9 @@
 # NECB compliance for OpenStudio models
 
+> **Alpha software.** canmet-btap 0.4 is an alpha release: the command line,
+> the Python API and the layout of `report.json` may change between releases,
+> and each release's notes say what changed. Pin the version you build on.
+
 > **Two READMEs, on purpose.** This one is the repository: what the tool does,
 > how to install it, and how to run it. [`src/README.md`](src/README.md)
 > is the distribution's own front page — it is `canmet-btap`'s
@@ -60,8 +64,12 @@ Licensed **GPL-3.0-or-later** — see [LICENSE](LICENSE).
 ## Installing
 
 ```bash
-pip install "canmet-btap[tbd]"
+pip install --pre canmet-btap
 ```
+
+`--pre` is needed because 0.4 is an alpha: without it, pip skips pre-releases
+and installs the older 0.3.0. Installing from GitHub
+(`pip install git+https://github.com/canmet-energy/btap`) needs no flag.
 
 That gives you the `btap-compliance` command, and on Windows or Linux
 **EnergyPlus comes with it** — there is nothing else to install, no separate
@@ -78,9 +86,8 @@ download, and no first-run surprise.
   version-verified on first use instead. If that machine is offline or behind
   a TLS-intercepting proxy, point at an engine you already have with
   `BTAP_ENERGYPLUS`, or at a downloaded archive with `BTAP_ENERGYPLUS_ARCHIVE`.
-- `[tbd]` adds thermal-bridging support (Article 3.1.1.7). Without it the run
-  still works and says so loudly in the audit, rather than quietly leaving
-  bridging out.
+- Thermal bridging (Article 3.1.1.7) is included: its engine, `canmet-tbd`,
+  is an ordinary dependency (D-109).
 
 Prefer to work from source? `git clone https://github.com/canmet-energy/btap.git`
 then `cd btap/python && pip install '.[tbd]'`.
