@@ -53,6 +53,21 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Mapping
 
+#: The PUBLIC API of btap.codes. Everything else here — the registry
+#: machinery (BEHAVIOURS, DATA_DIR, the loaders) and the names this module
+#: merely imports — is internal and may change without notice. Submodules
+#: carry their own public surface: `btap.codes.compliance` (PreflightError),
+#: `btap.codes.cli` (the `btap-compliance` console script), and the NECB
+#: domains under `btap.codes.necb`. tests/test_public_api.py pins this list.
+__all__ = [
+    "performance_compliance",
+    "resolve",
+    "code_ids",
+    "editions",
+    "Ruleset",
+    "UnknownRuleset",
+]
+
 DATA_DIR = Path(__file__).parent / "data"
 
 #: The code families that register editions here, by family name. Each module

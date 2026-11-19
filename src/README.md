@@ -5,16 +5,19 @@
 > package rather than the repository. The repository README is one level up.
 
 `canmet-btap` is the sole product implementation after R6 (D-84). It is one
-Python distribution with five subpackages:
+Python distribution with six subpackages:
 
 - `btap.audit`: SDK-free audit and coverage evidence
 - `btap.modeling`: generic OpenStudio model authoring
 - `btap.costing`: costing and the licensed-data boundary
 - `btap.simulation`: EnergyPlus execution and remote simulation
 - `btap.codes`: NECB rules, reference building, determination, report, and CLI
+- `btap.stock`: building-stock recipes — reading a model into one, and building
+  a model from one
 
 The enforced D-77 dependency direction is `codes` → `costing` → `modeling` →
-`audit`, with `simulation` beside and depending only on `audit`. The completed
+`audit`, with `simulation` beside and depending only on `audit`; `stock`
+consumes `modeling` and is a sibling of `codes`. The completed
 M0–M8 port history remains in [PORT_STATUS.md](../PORT_STATUS.md); it is a
 historical record, not a description of a second live implementation.
 
@@ -68,6 +71,33 @@ btap-necb-coverage --help
 Exit codes are 0 compliant, 1 not compliant, 2 usage, 3 pre-flight rejection,
 4 simulation failure, 5 internal error, and 6 no determination. A `--quick`
 week is never reported as a code determination.
+
+## Public API
+
+What you may import and depend on is declared, not implied. Each module's
+`__all__` lists its public names; anything else — even when importable — is
+internal and may change without notice.
+
+| Module | Public |
+|---|---|
+| `btap` | `__version__` (import a subpackage directly; the root loads no SDK) |
+| `btap.codes` | `performance_compliance`, `resolve`, `code_ids`, `editions`, `Ruleset`, `UnknownRuleset` |
+| `btap.modeling` | `create`, `create_from_footprint`, `bar`, `apply_wwr`, `seed_constructions`, `SHAPES`, `render`, `floor_plans`, `systems`, `build_system`, `replace_system`, `remove_hvac_from_zones`, `plant_is_hvac_candidate`, `characterize`, `catalog_html`, `model_hvac_diagrams`, `hvac_icon_defs` |
+| `btap.costing` | the domain modules `envelope`, `hvac`, `lighting`, `shw` |
+| `btap.simulation` | `run`, `Result`, `Backend`, `Local`, `Remote`, `Http`, `engine`, `runner` |
+| `btap.stock` | `build_from_recipe`, `write_recipe`, `identify_candidates`, `suggest`, `RecipeError`, and the `*_section` builders |
+| `btap.audit` | `AuditLog`, `emit_coverage` |
+
+Also public: the two console scripts with their flags and exit codes (above),
+and `btap.codes.compliance.PreflightError`, which is how a refused input model
+is raised.
+
+**The promise.** canmet-btap is pre-1.0, so a MINOR release (0.4 → 0.5) may
+change the public API, and its release notes say what changed; a PATCH
+release does not. Internal names may change in any release.
+`tests/test_public_api.py` pins every list above exactly, so a public name
+cannot be removed, renamed or added without that test being updated in the
+same change.
 
 ## Test
 

@@ -14,6 +14,35 @@ from __future__ import annotations
 
 from btap.audit import AuditLog
 
+#: The PUBLIC API of btap.modeling: the authoring facade. `AuditLog`
+#: is imported here for the facade's own use and is NOT re-exported — its home
+#: is `btap.audit`. `CREATE_ALIASES*` are internal parameter tables. The
+#: domain submodules (`btap.modeling.loads`, `.lighting`, `.shw`, `.hvac`,
+#: `.envelope`, `.geometry`) are imported directly, as the docstring says.
+#: tests/test_public_api.py pins this list.
+__all__ = [
+    # geometry
+    "SHAPES",
+    "create",
+    "create_from_footprint",
+    "bar",
+    "apply_wwr",
+    "seed_constructions",
+    # rendering
+    "render",
+    "floor_plans",
+    # the HVAC catalogue
+    "systems",
+    "build_system",
+    "replace_system",
+    "remove_hvac_from_zones",
+    "plant_is_hvac_candidate",
+    "characterize",
+    "catalog_html",
+    "model_hvac_diagrams",
+    "hvac_icon_defs",
+]
+
 SHAPES = ("rectangle", "aspect_ratio", "courtyard", "h", "l", "t", "u")
 
 # Canonical facade vocabulary (storeys= / below_grade_storeys=) mapped to the
