@@ -158,6 +158,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-107** — Authored sample fan coils carry the mode-specific sizing contract _(process)_
 - **D-108** — Bare loop DX is not evidence of unitary equipment; the residential identity branch needs an equipment-class fact _(runtime)_
 - **D-109** — The thermal-bridging engine is a default dependency, not the [tbd] extra _(process)_
+- **D-110** — Fan coils the authoring API builds carry the mode-specific sizing contract _(process)_
 
 <!-- TOC END -->
 
@@ -8722,3 +8723,44 @@ rested on (`327`).
   whether or not the default worked. The built wheel's METADATA carries
   `Requires-Dist: canmet-tbd==3.5.2` with no `extra ==` marker, and no
   `Provides-Extra` at all.
+
+<a id="d-110"></a>
+
+## D-110 — Fan coils the authoring API builds carry the mode-specific sizing contract
+
+**Decided:** `btap.modeling`'s builders mark every `ZoneHVAC:FourPipeFanCoil`
+they create — `systems/fan_coils.py` and `components/ecm_air.py` — for
+D-106's mode-specific sizing contract, so each water coil rates at its own
+operating mode's design airflow.
+
+**Who/when:** phylroy, 2026-11-19, under #236 ("fix the two observed issues").
+
+**Why:** #236 built a 24-zone office from nothing with
+`FPFC MAU DX Coils with Scroll Chiller` and got two
+`Calculation of cooling coil design UA failed` Severe errors — #68's
+mechanism: unmarked, EnergyPlus fixes both coils to the larger unit maximum
+early in autosizing, and in a heating-dominated zone the cooling coil is
+rated at the heating airflow. Marked, the same model sizes with **zero**
+Severe. D-106 already marks the reference's fan coils and D-107 the samples
+this repository authors; a fan coil built by the authoring API is authored by
+this repository in exactly the same sense.
+
+**What did NOT change:** D-107's boundary. The marker is set when the builder
+CREATES a fan coil; the compliance pipeline still does not infer or add it to
+fan coils in a model that is loaded or submitted, and a marker already in the
+input remains effective. The NECB reference's System 2/5 fan coils were
+already marked by D-106, so marking them at build time too changes nothing
+there.
+
+**Where it lives:** the marker moved from `btap.simulation.translation` to
+`btap/_fan_coil_sizing.py`, at the package root, because `btap.modeling` may
+not import `btap.simulation` (D-77) and a second copy of the flag name would
+drift. `btap.simulation.translation` re-exports it, so every caller keeps
+working, and a test asserts the two are the same object.
+
+**Not decided here:** the same #236 run left 77 h of heating unmet with this
+system because each zone's make-up-air terminal runs AFTER its fan coil in
+`SequentialLoad` order. That order is inherited unchanged from the pinned
+`openstudio-standards` `add_sys2_FPFC_sys5_TPFC`, and the NECB reference's
+System 2/5 use it, so changing it would move reference results — a separate,
+adjudicated question.

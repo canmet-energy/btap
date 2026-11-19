@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import openstudio
 
+from btap._fan_coil_sizing import mark_fan_coil_for_mode_specific_sizing
 from btap.modeling.hvac import naming
 from btap.modeling.hvac.components import coils, schedules
 from btap.modeling.hvac.systems.base_system import BaseSystem
@@ -152,6 +153,12 @@ class FanCoils(BaseSystem):
         fan_coil = openstudio.model.ZoneHVACFourPipeFanCoil(
             model, always_on, fc_fan, fc_clg_coil, fc_htg_coil)
         fan_coil.addToThermalZone(zone)
+        # D-110: a fan coil this builder AUTHORS carries the mode-specific
+        # sizing contract, so its cooling coil rates at the cooling airflow;
+        # unmarked, a heating-dominated zone's cooling-coil UA inversion can
+        # fail (#68, #236). Authoring, not re-sizing a submission: a model
+        # merely loaded is never marked by this.
+        mark_fan_coil_for_mode_specific_sizing(fan_coil)
         return fan_coil
 
     def _legacy_htg_part(self, mau_heating_coil_type):

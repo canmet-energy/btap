@@ -190,6 +190,8 @@ class PSZ(BaseSystem):
             baseboards.add(model, zone, baseboard_type, hw_loop=hw_loop)
             diffuser = openstudio.model.AirTerminalSingleDuctUncontrolled(model, always_on)
             air_loop.addBranchForZone(zone, diffuser.to_StraightComponent())
+        # No reheat terminal: the central coil is these zones' air-side heat.
+        self.match_central_heating_to_zones(air_loop, zones)
 
         htg_part = heating_coil_type
         clg_part = 'dx'

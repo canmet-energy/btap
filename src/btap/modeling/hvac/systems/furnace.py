@@ -143,4 +143,8 @@ class Furnace(BaseSystem):
                 terminal = openstudio.model.AirTerminalSingleDuctUncontrolled(
                     model, always_on)
             air_loop.addBranchForZone(zone, terminal.to_StraightComponent())
+        if not reheat:
+            # No reheat terminal: the central coil is these zones' only
+            # air-side heat (#236). A reheat loop keeps its central default.
+            self.match_central_heating_to_zones(air_loop, zones)
         return air_loop

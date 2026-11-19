@@ -2,17 +2,15 @@
 
 from __future__ import annotations
 
-FAN_COIL_MODE_SPECIFIC_AIRFLOW_FEATURE = (
-    "btap_fan_coil_mode_specific_sizing_airflows"
+# The marker is defined ONCE, at the package root, because btap.modeling's
+# builders set it too and may not import btap.simulation (D-110). Re-exported
+# here so every existing caller keeps working.
+from btap._fan_coil_sizing import (  # noqa: F401
+    FAN_COIL_MODE_SPECIFIC_AIRFLOW_FEATURE,
+    mark_fan_coil_for_mode_specific_sizing,
 )
+
 FAN_COIL_SIZING_SPEC_NAME = "BTAP Fan Coil Mode-Specific Sizing Airflows"
-
-
-def mark_fan_coil_for_mode_specific_sizing(fan_coil):
-    """Require separate cooling/heating sizing airflow for this fan coil."""
-    fan_coil.additionalProperties().setFeature(
-        FAN_COIL_MODE_SPECIFIC_AIRFLOW_FEATURE, True
-    )
 
 
 def marked_fan_coil_names(model):

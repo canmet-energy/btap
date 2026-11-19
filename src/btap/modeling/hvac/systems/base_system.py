@@ -84,6 +84,35 @@ class BaseSystem:
             s.setCentralHeatingMaximumSystemAirFlowRatio(z['minimum_system_air_flow_ratio'])
         return s
 
+    def match_central_heating_to_zones(self, air_loop, zones):
+        """When the central coil is the zones' ONLY air-side heat source — no
+        reheat terminals — design it to deliver the air the zones are sized to
+        receive (#236).
+
+        A row whose sizing block does not set
+        `central_heating_design_supply_air_temperature` kept OpenStudio's
+        Sizing:System default of 16.7 C. That default suits a central VAV
+        preheat coil with reheat in the zones; on a single-zone or no-reheat
+        loop it sized the only heating coil to deliver air barely warmer than
+        the room, while the same builder designed each zone to receive 40 C
+        supply air. A 24-zone office then left 19.5 h of heating unmet in a
+        January week (one interior corridor could not recover from its night
+        setback); matched, 6.8 h. The value comes from the zones' own sizing —
+        no code-specific number is introduced. Rows whose sizing block sets
+        the central temperature are untouched.
+        """
+        if self.sizing.get('central_heating_design_supply_air_temperature') is not None:
+            return None
+        targets = [zone.sizingZone().zoneHeatingDesignSupplyAirTemperature()
+                   for zone in zones
+                   if zone.sizingZone().zoneHeatingDesignSupplyAirTemperatureInputMethod()
+                   == 'SupplyAirTemperature']
+        if not targets:
+            return None
+        design = max(targets)
+        air_loop.sizingSystem().setCentralHeatingDesignSupplyAirTemperature(design)
+        return design
+
     def apply_zone_sizing(self, zone):
         """Apply the sizing block's zone-level fields: either the TemperatureDifference
         method (NECB reference systems) or absolute supply temperatures (ECM systems),
