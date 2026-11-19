@@ -20,14 +20,16 @@ from tests.support import load_fixture, needs_sdk
 
 FAN_COIL_MAU = "FPFC MAU DX Coils with Scroll Chiller"
 PSZ_BASEBOARD = "PSZ RTU Gas and DX Coils and Hot Water Baseboard"
+HEAT_PUMP_PSZ_BASEBOARD = "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard"
 
 
-def _built(name):
+def _built(name, config=None):
     model = load_fixture()
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         modeling.build_system(model, name, sorted(model.getThermalZones(),
-                                                  key=lambda z: z.nameString()))
+                                                  key=lambda z: z.nameString()),
+                              config=config)
     return model
 
 
@@ -45,13 +47,26 @@ class TestTheBuildersPutTheTerminalFirst(unittest.TestCase):
                 self.assertIn("AirTerminal", _first(zone))
                 self.assertEqual("SequentialLoad", zone.loadDistributionScheme())
 
-    def test_psz_baseboard_zones(self):
-        model = _built(PSZ_BASEBOARD)
+    def test_psz_baseboard_zones_one_unit_per_zone(self):
+        # D-91's scope: one unit serving one zone, not a heat-pump row.
+        model = _built(PSZ_BASEBOARD, config={"per_zone": True})
         for zone in model.getThermalZones():
             with self.subTest(zone=zone.nameString()):
                 kinds = [e.iddObjectType().valueName() for e in zone.equipmentInHeatingOrder()]
                 self.assertIn("AirTerminal", kinds[0])
                 self.assertIn("Baseboard", kinds[1])
+
+    def test_psz_OUTSIDE_d91_scope_keeps_the_legacy_order(self):
+        # D-91 keeps a SHARED unit (DF-8) and the HEAT-PUMP reference (DF-9)
+        # out as separate items; reordering them moved a heat-pump reference's
+        # result (determination-04). The builder must leave both alone.
+        for name, config in ((PSZ_BASEBOARD, None),                      # shared by default
+                             (HEAT_PUMP_PSZ_BASEBOARD, {"per_zone": True})):
+            with self.subTest(system=name, config=config):
+                model = _built(name, config=config)
+                zone = sorted(model.getThermalZones(), key=lambda z: z.nameString())[0]
+                kinds = [e.iddObjectType().valueName() for e in zone.equipmentInHeatingOrder()]
+                self.assertIn("Baseboard", kinds[0], kinds)
 
 
 @needs_sdk

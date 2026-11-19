@@ -8799,8 +8799,17 @@ finding rather than adopted.
 `CheckWarmupConvergence` Severe errors; an identical-topology NECB reference
 gave 0. The difference was the order: the builder put the baseboard first,
 while D-91 already orders reference System 3/4 terminal first. Terminal first:
-0 Severe, hot-water and electric baseboards alike. The reference is unchanged
-by this — it already re-orders those zones — so no reference result moves.
+0 Severe, hot-water and electric baseboards alike.
+
+**Scope of the PSZ half: exactly D-91's.** One unit serving ONE zone, and not a
+heat-pump row. D-91 keeps two cases out as separate items — a SHARED System
+3/4 unit (DF-8, a D-28 question) and the HEAT-PUMP reference (DF-9: its loop
+gas coil is beyond dispatch and its heat pump is starved) — and so does this.
+Within that scope the reference already orders its zones this way, so no
+reference result moves. The first version of this change reordered every PSZ
+zone with a baseboard; it moved a heat-pump reference's result, and the
+frozen scenario `determination-04-16-ashp-supp-aux-election-annual` refused to
+freeze — its pinned AHJ-14 citation and stalled capacity iteration were gone.
 
 **Why a referral, not a ruling.** Sentence 9.(3) sets terminal and
 secondary-system CAPACITIES, not an annual dispatch sequence; AHJ-15 refers

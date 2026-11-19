@@ -190,9 +190,16 @@ class PSZ(BaseSystem):
             baseboard = baseboards.add(model, zone, baseboard_type, hw_loop=hw_loop)
             diffuser = openstudio.model.AirTerminalSingleDuctUncontrolled(model, always_on)
             air_loop.addBranchForZone(zone, diffuser.to_StraightComponent())
-            if baseboard is not None:
-                # D-111: the unit's terminal first, the baseboard trims — the
-                # order the NECB reference already gives System 3/4 (AHJ-15).
+            if baseboard is not None and len(zones) == 1 and not reference_hp:
+                # D-111: the unit's terminal first, the baseboard trims — in
+                # EXACTLY D-91's scope, where the NECB reference already orders
+                # its System 3/4 zones this way, so no reference result moves.
+                # D-91 keeps two cases OUT as separate items, and so does this:
+                # a SHARED unit (DF-8, a D-28 question) and the HEAT-PUMP
+                # reference (DF-9: its loop gas coil is beyond dispatch and its
+                # heat pump is starved). Reordering those changed a heat-pump
+                # reference's result in determination-04, which the freezer's
+                # pinned AHJ-14 and capacity-iteration assertions caught.
                 self.terminal_first(zone, diffuser, baseboard)
         # No reheat terminal: the central coil is these zones' air-side heat.
         self.match_central_heating_to_zones(air_loop, zones)
