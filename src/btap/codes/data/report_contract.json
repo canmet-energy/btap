@@ -1,0 +1,83 @@
+{
+  "contract": 1,
+  "about": "The PUBLIC fields of report.json. Removing or renaming one, or narrowing its type or values, breaks users and is a deliberate API change; ADDING a field is not, so a report may carry more than this. Fields not listed here are internal and may change in any release.",
+  "applies_to": "A COMPLETED run: exit 0 (compliant), 1 (not compliant) or 6 (no determination). A run that fails (exit 3, 4 or 5) flushes whatever partial report exists, which may be empty and is not bound by this contract.",
+  "always": {
+    "code": {
+      "type": "string"
+    },
+    "code_label": {
+      "type": "string"
+    },
+    "edition": {
+      "type": "string"
+    },
+    "compliant": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "means": "true or false is a determination; null means none was made (see compliance_determination and no_determination)"
+    },
+    "hdd": {
+      "type": "number"
+    },
+    "simulate": {
+      "enum": [
+        "annual",
+        "sizing",
+        "none"
+      ]
+    },
+    "proposed": {
+      "type": "object"
+    },
+    "reference": {
+      "type": "object"
+    },
+    "warnings": {
+      "type": "array",
+      "items": "string"
+    }
+  },
+  "when_present": {
+    "compliance_determination": {
+      "enum": [
+        "code",
+        "conditional",
+        "no_determination"
+      ],
+      "means": "code: an unqualified determination; conditional: it holds only if the authority approves the listed items; no_determination: none could be made"
+    },
+    "compliance_determination_reason": {
+      "type": "object"
+    },
+    "no_determination": {
+      "type": "object"
+    },
+    "percent_of_target": {
+      "type": "number"
+    },
+    "tier": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    }
+  },
+  "simulated_sections": {
+    "applies": "proposed and reference, when the run simulated them on the reference-building path (a non-empty proposed, and no `path` field)",
+    "fields": {
+      "total_site_kwh": {
+        "type": "number",
+        "means": "the quantity the verdict compares"
+      },
+      "eui_kwh_per_m2": {
+        "type": "number"
+      },
+      "floor_area_m2": {
+        "type": "number"
+      }
+    }
+  }
+}

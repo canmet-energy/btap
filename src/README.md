@@ -92,12 +92,36 @@ Also public: the two console scripts with their flags and exit codes (above),
 and `btap.codes.compliance.PreflightError`, which is how a refused input model
 is raised.
 
+**`report.json`.** Its public fields are declared in
+`btap/codes/data/report_contract.json`, which ships in the package. They
+apply to a completed run — exit 0, 1 or 6; a failed run flushes whatever
+partial report exists.
+
+| Field | Present | Value |
+|---|---|---|
+| `code`, `code_label`, `edition` | always | strings, e.g. `necb2020`, `NECB 2020`, `2020` |
+| `compliant` | always | `true` or `false` is a determination; `null` means none was made |
+| `hdd` | always | number, the heating degree-days used |
+| `simulate` | always | `annual`, `sizing` or `none` |
+| `proposed`, `reference` | always | objects; on a simulated reference-path run each carries `total_site_kwh` (what the verdict compares), `eui_kwh_per_m2` and `floor_area_m2` |
+| `warnings` | always | list of strings |
+| `compliance_determination` | when applicable | `code` (unqualified), `conditional` (holds only if the authority approves the listed items) or `no_determination` |
+| `compliance_determination_reason` | when conditional | object |
+| `no_determination` | when no determination | object, with the reason and what would fix it |
+| `percent_of_target` | when determined | number |
+| `tier` | when determined | integer, or `null` |
+
+Removing or renaming one of these, or narrowing its values, is an API change.
+Adding a field is not, so a report may carry more than this; unlisted fields
+are internal.
+
 **The promise.** canmet-btap is pre-1.0, so a MINOR release (0.4 → 0.5) may
 change the public API, and its release notes say what changed; a PATCH
 release does not. Internal names may change in any release.
 `tests/test_public_api.py` pins every list above exactly, so a public name
 cannot be removed, renamed or added without that test being updated in the
-same change.
+same change; `tests/test_report_contract.py` holds every frozen scenario's
+`report.json` to the report contract.
 
 ## Test
 
