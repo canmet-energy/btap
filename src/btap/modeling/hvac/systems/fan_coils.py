@@ -104,11 +104,15 @@ class FanCoils(BaseSystem):
         # --- zones: sizing, fan coils, diffusers ---
         for zone in zones:
             self.apply_zone_sizing(zone)
-            self._add_zone_fan_coil(model, zone, fan_coil_type, always_on,
-                                    htg_avail_sch, clg_avail_sch,
-                                    hw_loop=hw_loop, chw_loop=chw_loop)
+            fan_coil = self._add_zone_fan_coil(model, zone, fan_coil_type, always_on,
+                                               htg_avail_sch, clg_avail_sch,
+                                               hw_loop=hw_loop, chw_loop=chw_loop)
             diffuser = openstudio.model.AirTerminalSingleDuctUncontrolled(model, always_on)
             air_loop.addBranchForZone(zone, diffuser.to_StraightComponent())
+            # D-111: the make-up-air terminal first, the fan coil after it.
+            # The legacy order (the pinned gem's add_sys2_FPFC_sys5_TPFC) is
+            # the reverse; see BaseSystem.terminal_first for why it fails.
+            self.terminal_first(zone, diffuser, fan_coil)
 
         # parts insertion order matches legacy sys2/5: hr, clg, htg, sf, zone_htg, zone_clg, rf
         mau_clg_part = ('Hydronic'

@@ -313,8 +313,8 @@ usefully, for each partial article's specific gap.
 ## Decisions and assumptions
 
 Where the code needs interpreting, the interpretation is written down rather than
-buried in the source. **110 decisions** are recorded in
-**[necb_decisions.md](docs/necb_decisions.md)** — 60 of them
+buried in the source. **111 decisions** are recorded in
+**[necb_decisions.md](docs/necb_decisions.md)** — 61 of them
 active at runtime, tagging the audit entries they govern.
 
 A decision records what the code says, how we read it, what we rejected, and why.
@@ -324,7 +324,7 @@ energy is represented.
 
 The HTML report's **"Decisions and assumptions applied"** appendix lists the ones
 that actually fired in *your* run — so a reviewer sees the judgement calls that
-affected this building, not all 110.
+affected this building, not all 111.
 
 ---
 
@@ -352,8 +352,8 @@ That distinction is the point of the register. Calling a tool gap an
 ambiguity would launder a defect as a question for someone else, and twelve
 decisions Sol audited were rejected as referrals for exactly that reason.
 
-**Twelve of them change what a run reports: AHJ-1, AHJ-2, AHJ-3, AHJ-7,
-AHJ-10, AHJ-11, AHJ-12, AHJ-14, AHJ-15, AHJ-16, AHJ-22 and AHJ-25.** Where they apply,
+**Thirteen of them change what a run reports: AHJ-1, AHJ-2, AHJ-3, AHJ-7,
+AHJ-10, AHJ-11, AHJ-12, AHJ-14, AHJ-15, AHJ-16, AHJ-22, AHJ-25 and AHJ-26.** Where they apply,
 the verdict is still reported, marked as not a determination, and the report
 names what your authority must accept:
 
@@ -397,7 +397,7 @@ One caution it states against itself: where an entry says the underlying
 decision is audited, that means the modelling action is recorded — it does NOT
 mean the audit tells you an authority's approval is wanted. AHJ-1, AHJ-2,
 AHJ-3, AHJ-5, AHJ-7, AHJ-10, AHJ-11, AHJ-12, AHJ-14, AHJ-15, AHJ-16,
-AHJ-22 and AHJ-25 are cited in product output today, and AHJ-5 is a settled RULING that
+AHJ-22, AHJ-25 and AHJ-26 are cited in product output today, and AHJ-5 is a settled RULING that
 explains why a choice was made rather than a condition on it.
 
 The HTML report carries the same thing as a **CONDITIONAL — AHJ APPROVAL

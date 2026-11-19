@@ -187,9 +187,13 @@ class PSZ(BaseSystem):
         # --- zones: sizing, baseboards, diffusers ---
         for zone in zones:
             self.apply_zone_sizing(zone)
-            baseboards.add(model, zone, baseboard_type, hw_loop=hw_loop)
+            baseboard = baseboards.add(model, zone, baseboard_type, hw_loop=hw_loop)
             diffuser = openstudio.model.AirTerminalSingleDuctUncontrolled(model, always_on)
             air_loop.addBranchForZone(zone, diffuser.to_StraightComponent())
+            if baseboard is not None:
+                # D-111: the unit's terminal first, the baseboard trims — the
+                # order the NECB reference already gives System 3/4 (AHJ-15).
+                self.terminal_first(zone, diffuser, baseboard)
         # No reheat terminal: the central coil is these zones' air-side heat.
         self.match_central_heating_to_zones(air_loop, zones)
 

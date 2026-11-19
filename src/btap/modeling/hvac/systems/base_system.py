@@ -84,6 +84,28 @@ class BaseSystem:
             s.setCentralHeatingMaximumSystemAirFlowRatio(z['minimum_system_air_flow_ratio'])
         return s
 
+    @staticmethod
+    def terminal_first(zone, terminal, *zone_equipment):
+        """Offer a zone's load to its air-loop TERMINAL first and to its zone
+        equipment after (D-111), under SequentialLoad with every fraction 1.0.
+
+        The later equipment trims what the earlier leaves. With the zone
+        equipment first, an air terminal whose supply the zone cannot refuse —
+        a make-up-air or packaged unit's constant-volume diffuser — delivered
+        its air AFTER the load was met, and nothing corrected it: #236's
+        fan-coil office sat 0.6-0.9 C under setpoint (77 h of heating unmet
+        in a January week; terminal first, 4.0 h), and baseboard-first PSZ
+        zones failed warmup convergence (8 Severe; terminal first, 0). The
+        NECB reference already orders System 3/4 zones this way (AHJ-15,
+        `btap.codes.necb.hvac.reference`), with these same settings.
+        """
+        zone.setLoadDistributionScheme('SequentialLoad')
+        for priority, component in enumerate((terminal, *zone_equipment), start=1):
+            zone.setHeatingPriority(component, priority)
+            zone.setCoolingPriority(component, priority)
+            zone.setSequentialHeatingFraction(component, 1.0)
+            zone.setSequentialCoolingFraction(component, 1.0)
+
     def match_central_heating_to_zones(self, air_loop, zones):
         """When the central coil is the zones' ONLY air-side heat source — no
         reheat terminals — design it to deliver the air the zones are sized to

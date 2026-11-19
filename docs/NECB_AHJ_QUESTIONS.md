@@ -106,6 +106,7 @@ nonconformity with 8.4.x.9.(6)(e).
 | AHJ-23 | Table 8.4.x.7.-A residential identity branch | tool-gap | necb2020, necb2025 | no |
 | AHJ-24 | no validated absorption-chiller reference catalog or efficiency applier | tool-gap | necb2020, necb2025 | no |
 | AHJ-25 | cooling-only plant object: Article 13 heat pump or packaged water chiller | referral | necb2020, necb2025 | yes, where the unresolved identity changes the reference to the Article 13 air-source heat pump |
+| AHJ-26 | 8.4.x.9.(3) make-up-air terminal vs fan-coil dispatch priority (System 2/5) | referral | necb2020, necb2025 | yes, on the System 2/5 branch where a make-up-air terminal and a fan coil both serve a zone |
 
 ---
 
@@ -1361,3 +1362,42 @@ capability even if that side currently serves no demand equipment. Evidence
 that it is cooling-only packaged water-chilling equipment places it under the
 chiller category. In the absence of either, the authority must decide which
 equipment identity governs the submitted model.
+
+## AHJ-26 — dispatch priority between a make-up-air terminal and a fan coil
+
+**Article.** 8.4.x.9.(3) with 8.4.2.10.(2); the System 2/5 descriptions of
+Table 8.4.x.7.-B.
+
+**Status: `referral`** — the acceptable-solution text does not decide this question.
+
+**NARROWED.** Only the reference's System 2/5 zones where a make-up-air
+terminal and a four-pipe fan coil BOTH serve the zone. A fan coil with no
+make-up-air terminal beside it chose nothing and is not cited. This is the
+sibling AHJ-15 anticipated — "a shared unit needs its own analysis and must not
+silently inherit this predicate" — and it carries its own entry for that
+reason. Its narrowing has not yet been reviewed the way Sol's `126`/`127`
+narrowed AHJ-15.
+
+**The ambiguity.** As for AHJ-15: Sentence (3) specifies terminal and
+secondary-system CAPACITY, not an annual dispatch sequence. EnergyPlus needs
+one. The legacy implementation (the pinned `openstudio-standards`
+`add_sys2_FPFC_sys5_TPFC`) put the fan coil FIRST by the order it added the
+equipment — an implementation accident, not a reading. Under `SequentialLoad`
+the later equipment trims what the earlier leaves, so in that order the
+make-up-air unit's air, which the zone cannot refuse, arrives after the fan
+coil has met the load and is never corrected. #236 measured it on a 24-zone
+office: every zone 0.6–0.9 °C under setpoint, 77 h of heating unmet in a
+January week; terminal first, 4.0 h.
+
+**Established by.** Claude's #236 investigation, 2026-11-19; phylroy chose
+terminal-first for the reference as well as for authored models, registered
+here as a referral rather than ruled. D-111 is the interim project ruling.
+
+**Runtime.** cited in `reference.py`, by the System 2/5 fan-coil dispatch
+record, which also REFUSES a zone built in any other order rather than
+recording a choice that was not made.
+
+**What the tool does meanwhile.** It dispatches make-up-air-terminal-first per
+D-111, consistent with D-91's choice for System 3/4, and audits it. An annual
+result whose reference reaches this branch is `conditional` on the authority
+accepting that dispatch order.

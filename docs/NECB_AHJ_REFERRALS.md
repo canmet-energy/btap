@@ -9,7 +9,7 @@ the framing sentences are this generator's.
 The register holds every question in four statuses. Two of them need
 no authority — `ruled` is settled, and `tool-gap` is a defect for us
 to close, not a question for anyone else. This document is the other
-two: **9 `referral`** entries, where the
+two: **10 `referral`** entries, where the
 Code's text does not decide the question, and
 **3 `alternative-solution`**
 entries, where it does decide and this tool does not meet it — which
@@ -260,6 +260,36 @@ capability even if that side currently serves no demand equipment. Evidence
 that it is cooling-only packaged water-chilling equipment places it under the
 chiller category. In the absence of either, the authority must decide which
 equipment identity governs the submitted model.
+
+### AHJ-26 — dispatch priority between a make-up-air terminal and a fan coil
+
+- **Editions:** necb2020, necb2025
+- **Article:** 8.4.x.9.(3) with 8.4.2.10.(2); the System 2/5 descriptions of Table 8.4.x.7.-B.
+- **Makes a run conditional:** yes, on the System 2/5 branch where a make-up-air terminal and a fan coil both serve a zone
+
+**The question.** As for AHJ-15: Sentence (3) specifies terminal and
+secondary-system CAPACITY, not an annual dispatch sequence. EnergyPlus needs
+one. The legacy implementation (the pinned `openstudio-standards`
+`add_sys2_FPFC_sys5_TPFC`) put the fan coil FIRST by the order it added the
+equipment — an implementation accident, not a reading. Under `SequentialLoad`
+the later equipment trims what the earlier leaves, so in that order the
+make-up-air unit's air, which the zone cannot refuse, arrives after the fan
+coil has met the load and is never corrected. #236 measured it on a 24-zone
+office: every zone 0.6–0.9 °C under setpoint, 77 h of heating unmet in a
+January week; terminal first, 4.0 h.
+
+**Established by.** Claude's #236 investigation, 2026-11-19; phylroy chose
+terminal-first for the reference as well as for authored models, registered
+here as a referral rather than ruled. D-111 is the interim project ruling.
+
+**Runtime.** cited in `reference.py`, by the System 2/5 fan-coil dispatch
+record, which also REFUSES a zone built in any other order rather than
+recording a choice that was not made.
+
+**What the tool does meanwhile.** It dispatches make-up-air-terminal-first per
+D-111, consistent with D-91's choice for System 3/4, and audits it. An annual
+result whose reference reaches this branch is `conditional` on the authority
+accepting that dispatch order.
 
 ---
 

@@ -159,6 +159,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-108** — Bare loop DX is not evidence of unitary equipment; the residential identity branch needs an equipment-class fact _(runtime)_
 - **D-109** — The thermal-bridging engine is a default dependency, not the [tbd] extra _(process)_
 - **D-110** — Fan coils the authoring API builds carry the mode-specific sizing contract _(process)_
+- **D-111** — Make-up-air terminal before zone equipment: System 2/5 fan coils, and authored PSZ baseboards _(runtime)_
 
 <!-- TOC END -->
 
@@ -8764,3 +8765,51 @@ system because each zone's make-up-air terminal runs AFTER its fan coil in
 `openstudio-standards` `add_sys2_FPFC_sys5_TPFC`, and the NECB reference's
 System 2/5 use it, so changing it would move reference results — a separate,
 adjudicated question.
+
+<a id="d-111"></a>
+
+## D-111 — The make-up-air terminal runs before the zone equipment
+
+**Decided:** `btap.modeling`'s builders offer a zone's load to its air-loop
+terminal FIRST and to its zone equipment after (`BaseSystem.terminal_first`:
+`SequentialLoad`, priorities 1 then 2, every sequential fraction 1.0 — the
+settings D-91 gives System 3/4), for
+
+- the **fan-coil** families with a make-up-air unit (`systems/fan_coils.py`),
+  which the NECB reference uses for **System 2 and 5**; and
+- **PSZ plus baseboard** (`systems/psz.py`).
+
+**Who/when:** phylroy, 2026-11-19, under #236 — first "everywhere, including
+the reference", then, once it was clear the reference change is the question
+AHJ-15 refers, "reference + AHJ referral".
+
+**Why — the fan coils.** #236 built a 24-zone office with
+`FPFC MAU DX Coils with Scroll Chiller`. Every zone sat 0.6–0.9 °C below its
+heating setpoint all day — 77 h unmet in a January week — although the fan
+coils delivered 55–94 kW and the boilers ran. Under `SequentialLoad` the later
+equipment trims what the earlier leaves; with the fan coil first, the
+make-up-air unit's air (which the zone cannot refuse) arrived after the load
+was met and nothing corrected it. Terminal first: 4.0 h, zones at 22.0 °C. The
+legacy order is the pinned gem's `add_sys2_FPFC_sys5_TPFC` adding the fan coil
+before the diffuser — an implementation accident, recorded here as a gem
+finding rather than adopted.
+
+**Why — PSZ plus baseboard.** The same office with
+`PSZ RTU Gas and DX Coils and Hot Water Baseboard`, one unit per zone, gave 8
+`CheckWarmupConvergence` Severe errors; an identical-topology NECB reference
+gave 0. The difference was the order: the builder put the baseboard first,
+while D-91 already orders reference System 3/4 terminal first. Terminal first:
+0 Severe, hot-water and electric baseboards alike. The reference is unchanged
+by this — it already re-orders those zones — so no reference result moves.
+
+**Why a referral, not a ruling.** Sentence 9.(3) sets terminal and
+secondary-system CAPACITIES, not an annual dispatch sequence; AHJ-15 refers
+exactly that question for System 3/4 and warns that another topology must not
+silently inherit its predicate. So the System 2/5 reference carries its own
+referral, **AHJ-26**, and `reference.py#_record_fan_coil_dispatch` witnesses
+the built order and cites it — refusing a zone built any other way.
+
+**Not decided here:** two other families still put zone equipment first —
+`mau_ptac` (the reference's System 1) and `vav_reheat` with baseboards (System
+6). The reference does not re-order those, so changing them would move System
+1 and 6 reference results; neither failed in #236. Left as recorded findings.

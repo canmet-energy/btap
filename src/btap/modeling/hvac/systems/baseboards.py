@@ -13,7 +13,8 @@ def add(model, zone, baseboard_type, hw_loop=None):
     :param zone: openstudio.model.ThermalZone
     :param baseboard_type: 'Electric' or 'Hot Water'
     :param hw_loop: openstudio.model.PlantLoop or None (required for 'Hot Water')
-    :return: None
+    :return: the baseboard added, or None for 'None' (a caller orders it
+        against the zone's other equipment — D-111)
     """
     if baseboard_type == 'Electric':
         baseboard = openstudio.model.ZoneHVACBaseboardConvectiveElectric(model)
@@ -28,6 +29,7 @@ def add(model, zone, baseboard_type, hw_loop=None):
             model, model.alwaysOnDiscreteSchedule(), coil)
         baseboard.addToThermalZone(zone)
     elif baseboard_type in ('None', None):
-        pass  # no baseboards
+        return None  # no baseboards
     else:
         raise ValueError(f"'{baseboard_type}' is not a valid baseboard type")
+    return baseboard

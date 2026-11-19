@@ -234,6 +234,15 @@
         "necb2020",
         "necb2025"
       ]
+    },
+    {
+      "id": "AHJ-26",
+      "title": "dispatch priority between a make-up-air terminal and a fan coil",
+      "status": "referral",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ]
     }
   ]
 }

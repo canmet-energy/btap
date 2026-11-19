@@ -4478,6 +4478,43 @@
           ]
         }
       ]
+    },
+    {
+      "id": "D-111",
+      "title": "Make-up-air terminal before zone equipment: System 2/5 fan coils, and authored PSZ baseboards",
+      "kind": "runtime",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ],
+      "summary": "Decided: phylroy, 2026-11-19 (#236). Where an air-loop terminal whose supply the zone cannot refuse shares a zone with zone equipment, the terminal is offered the load first under SequentialLoad and the zone equipment trims the residual. For the NECB reference's System 2/5 this reverses the legacy order — the pinned gem added the fan coil first — and, being the dispatch question AHJ-15 refers for System 3/4, it is registered as its own referral, AHJ-26, so a reaching annual result is conditional. Authored PSZ-plus-baseboard zones take the order the reference already uses for System 3/4 (D-91). Measured on #236's 24-zone office: fan-coil heating unmet 77 h to 4.0 h in a January week, and the PSZ-plus-baseboard warmup-convergence Severe 8 to 0.",
+      "requirements": [
+        {
+          "id": "make_up_air_terminal_dispatch",
+          "label": "How a zone's make-up-air terminal and its zone equipment share the zone load",
+          "decided": "The terminal whose supply the zone cannot refuse is offered the load first and the fan coil or baseboard serves the residual, so the make-up air is corrected rather than left below setpoint.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "8.4.2.10.(2)",
+                "8.4.4.9.(3)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "8.4.2.10.(2)",
+                "8.4.5.9.(3)"
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }
