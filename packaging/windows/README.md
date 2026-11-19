@@ -2,22 +2,26 @@
 
 **CI builds and publishes this automatically**: pushing a `v*` tag runs
 `.github/workflows/release.yml`, which builds the wheel, stages the Windows
-CPython payload on Linux, executes it on a Windows runner, compiles with
-containerized Inno Setup, and attaches the exe to a GitHub release. Dispatching the workflow by hand
+CPython payload on Linux, executes it on a Windows runner, compiles it with
+the Windows runner's own Inno Setup 6, and attaches the exe to a GitHub release. Dispatching the workflow by hand
 (`gh workflow run release.yml`) is the rehearsal: the identical build, but the
 publish step only reports what it would upload.
 
-The manual Linux path mirrors the workflow:
+The manual path mirrors the workflow. Staging runs on Linux:
 
 ```bash
+V=$(sed -n 's/#define AppVersion *"\(.*\)"/\1/p' packaging/windows/btap-compliance.iss)
 python3 -m build --wheel --outdir dist .
 python3 scripts/generate_samples.py packaging/windows/samples
-python3 packaging/windows/stage_python.py --version 0.3.0
-python3 packaging/windows/release_guards.py --version 0.3.0
+python3 packaging/windows/stage_python.py --version "$V"
+python3 packaging/windows/release_guards.py --version "$V"
 python3 packaging/windows/installer_smoke.py
-mkdir -p packaging/windows/Output
-docker run --rm -v "$PWD:/work" amake/innosetup:latest \
-  packaging/windows/btap-compliance.iss
+```
+
+and compilation on Windows, with Inno Setup 6 installed:
+
+```bat
+iscc packaging\windows\btap-compliance.iss
 ```
 
 ## Why it is built this way
@@ -39,11 +43,15 @@ machine-wide install from the dialog.
 **The priced costing tables are excluded** — `--costs-csv` injects a licensed
 one. Placeholder schemas remain available for the costing machinery.
 
-## Compiler image
+## Compiler
 
-CI uses `amake/innosetup:latest`, which wraps a known-good ISCC-under-wine
-environment. Local compilation should use the same image so host Wine versions
-cannot change the installer bytes or fail on a different Inno Setup runtime.
+CI compiles with the native Inno Setup 6 that GitHub's Windows runner image
+ships, and requires major version 6 (the script uses IS6 directives); the exact
+version is printed in the job log. It used to run ISCC under Wine on Linux, via
+the `amake/innosetup` image, and that broke three times — two Wine versions
+that could not run IS6, then in 2026-11 an unchanged image that stopped
+starting on a newer `ubuntu-latest` (#233). The script was always written for
+Windows; Wine was only a way to run it from Linux.
 
 ## What still requires real Windows
 
