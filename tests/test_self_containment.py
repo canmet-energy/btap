@@ -183,6 +183,14 @@ ALLOWLIST = {
                 "broadest instrument for that, and a fixture-based gate "
                 "demonstrably missed five real sites it sees"),
     },
+    "tests/test_report_contract.py": {
+        "refs": ["verification/"],
+        "retires": "R1-adjudicated",
+        "why": ("holds every frozen scenario's report.json to the shipped "
+                "report contract — real pipeline output is the only honest "
+                "witness, and a re-freeze that drops a promised field must "
+                "still fail somewhere"),
+    },
     "tests/necb/test_frozen_scenarios.py": {
         "refs": ["verification/"],
         "retires": "R1-adjudicated",

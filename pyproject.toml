@@ -6,15 +6,22 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "canmet-btap"  # PyPI similarity check blocks "btap" (bta exists); the import stays `btap`
-# 0.4.0.dev0 (#229): 0.3.0 is already on PyPI with thermal bridging as an
-# extra, and PyPI never accepts a re-upload of a version with different
-# contents, so a git install with the D-109 dependency must not also claim
-# to be 0.3.0 — pip could treat an installed PyPI 0.3.0 as satisfying it.
-version = "0.4.0.dev0"
+# 0.4.0a1: an ALPHA (phylroy, 2026-11-19) — the command line, the Python API
+# and report.json may still change between releases, and saying so is the
+# point. A PEP 440 pre-release, so pip skips it unless asked: a plain
+# `pip install canmet-btap` keeps installing 0.3.0, and the alpha needs
+# `pip install --pre canmet-btap`. Installs from GitHub are unaffected.
+# The version must agree with btap.__version__ and the installer's
+# AppVersion (packaging/windows/release_guards.py).
+version = "0.4.0a1"
 description = "NECB 2020/2025 Part 8 performance-path compliance toolchain (Python port of the btap gem family)"
 # The PyPI long description stays src/README.md; the root README.md is
 # for building engineers (CLAUDE.md), a different audience.
 readme = "src/README.md"
+classifiers = [
+  # Shown on PyPI: the CLI, the Python API and report.json may change.
+  "Development Status :: 3 - Alpha",
+]
 requires-python = ">=3.11"
 license = "GPL-3.0-or-later"
 # The wheel must CARRY the licence, not merely name it: the Windows

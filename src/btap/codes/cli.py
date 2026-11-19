@@ -13,6 +13,7 @@ import argparse
 import glob as _glob
 import json
 import os
+import re
 import sys
 import threading
 import time
@@ -141,7 +142,9 @@ def parse(argv, out, err):
         print(parser.format_help(), file=out)
         return None, EXIT["compliant"]
     if namespace.version:
-        print(f"btap-compliance {_version()}", file=out)
+        version = _version()
+        notice = _maturity(version)
+        print(f"btap-compliance {version}" + (f" ({notice})" if notice else ""), file=out)
         return None, EXIT["compliant"]
 
     _collect(o, namespace)
@@ -275,6 +278,23 @@ def _collect(o, namespace):
     for flag, key in _HEADER_KEYS.items():
         if ns.get(flag):
             o["report_options"][key] = ns[flag]
+
+
+_MATURITY = {"a": "alpha", "b": "beta", "rc": "release candidate"}
+
+
+def _maturity(version):
+    """The notice a PRE-RELEASE prints beside its version, or None.
+
+    Derived from the PEP 440 version string itself (`0.4.0a1` is an alpha),
+    so it cannot go stale: a final release prints no notice, with nothing to
+    remember to remove. Read with a regex rather than `packaging`, which is
+    not a runtime dependency."""
+    match = re.search(r"\d(a|b|rc)\d+", version or "")
+    if not match:
+        return None
+    return (f"{_MATURITY[match.group(1)]}: the command line, the Python API and "
+            "report.json may change between releases")
 
 
 def _version():

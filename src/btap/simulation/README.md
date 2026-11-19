@@ -31,7 +31,7 @@ result.unmet_hours  # {'heating': ..., 'cooling': ...}
 
 ## The engine — why no setup step
 
-`pip install canmet-btap[tbd]` is meant to be sufficient, with no
+`pip install canmet-btap` is meant to be sufficient, with no
 environment variables and no manual EnergyPlus install. `engine.py` is what
 makes that true. `ensure_energyplus()` resolves a verified binary of the
 pinned version (`PINNED_VERSION`), in this order:

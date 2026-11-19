@@ -12,3 +12,8 @@ geometry (the daylighted-area sensors), the NECB layer passes a provider in.
 Sub-namespaced (hvac/envelope/lighting + shw) because Database/Report exist
 per domain; import the domain modules directly.
 """
+
+#: The PUBLIC API of btap.costing is its four domain SUBMODULES, each
+#: imported directly (`from btap.costing import shw`). Listing them here
+#: imports nothing until a star-import asks. tests/test_public_api.py pins it.
+__all__ = ["envelope", "hvac", "lighting", "shw"]

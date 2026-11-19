@@ -1,29 +1,37 @@
 # canmet-btap
 
+> **Alpha software.** canmet-btap 0.4 is an alpha release: the command line,
+> the Python API and the layout of `report.json` may change between releases,
+> and each release's notes say what changed. Pin the version you build on.
+
 > This file is the **distribution's** front page — it ships as
 > `canmet-btap`'s `long_description` on PyPI, which is why it describes the
 > package rather than the repository. The repository README is one level up.
 
 `canmet-btap` is the sole product implementation after R6 (D-84). It is one
-Python distribution with five subpackages:
+Python distribution with six subpackages:
 
 - `btap.audit`: SDK-free audit and coverage evidence
 - `btap.modeling`: generic OpenStudio model authoring
 - `btap.costing`: costing and the licensed-data boundary
 - `btap.simulation`: EnergyPlus execution and remote simulation
 - `btap.codes`: NECB rules, reference building, determination, report, and CLI
+- `btap.stock`: building-stock recipes — reading a model into one, and building
+  a model from one
 
 The enforced D-77 dependency direction is `codes` → `costing` → `modeling` →
-`audit`, with `simulation` beside and depending only on `audit`. The completed
+`audit`, with `simulation` beside and depending only on `audit`; `stock`
+consumes `modeling` and is a sibling of `codes`. The completed
 M0–M8 port history remains in [PORT_STATUS.md](../PORT_STATUS.md); it is a
 historical record, not a description of a second live implementation.
 
 ## Install
 
-From PyPI:
+From PyPI — `--pre`, because this is an alpha and pip otherwise skips it and
+installs the older 0.3.0:
 
 ```bash
-pip install canmet-btap
+pip install --pre canmet-btap
 ```
 
 Straight from GitHub — the default branch, or any branch, tag or commit after
@@ -68,6 +76,57 @@ btap-necb-coverage --help
 Exit codes are 0 compliant, 1 not compliant, 2 usage, 3 pre-flight rejection,
 4 simulation failure, 5 internal error, and 6 no determination. A `--quick`
 week is never reported as a code determination.
+
+## Public API
+
+What you may import and depend on is declared, not implied. Each module's
+`__all__` lists its public names; anything else — even when importable — is
+internal and may change without notice.
+
+| Module | Public |
+|---|---|
+| `btap` | `__version__` (import a subpackage directly; the root loads no SDK) |
+| `btap.codes` | `performance_compliance`, `resolve`, `code_ids`, `editions`, `Ruleset`, `UnknownRuleset` |
+| `btap.modeling` | `create`, `create_from_footprint`, `bar`, `apply_wwr`, `seed_constructions`, `SHAPES`, `render`, `floor_plans`, `systems`, `build_system`, `replace_system`, `remove_hvac_from_zones`, `plant_is_hvac_candidate`, `characterize`, `catalog_html`, `model_hvac_diagrams`, `hvac_icon_defs` |
+| `btap.costing` | the domain modules `envelope`, `hvac`, `lighting`, `shw` |
+| `btap.simulation` | `run`, `Result`, `Backend`, `Local`, `Remote`, `Http`, `engine`, `runner` |
+| `btap.stock` | `build_from_recipe`, `write_recipe`, `identify_candidates`, `suggest`, `RecipeError`, and the `*_section` builders |
+| `btap.audit` | `AuditLog`, `emit_coverage` |
+
+Also public: the two console scripts with their flags and exit codes (above),
+and `btap.codes.compliance.PreflightError`, which is how a refused input model
+is raised.
+
+**`report.json`.** Its public fields are declared in
+`btap/codes/data/report_contract.json`, which ships in the package. They
+apply to a completed run — exit 0, 1 or 6; a failed run flushes whatever
+partial report exists.
+
+| Field | Present | Value |
+|---|---|---|
+| `code`, `code_label`, `edition` | always | strings, e.g. `necb2020`, `NECB 2020`, `2020` |
+| `compliant` | always | `true` or `false` is a determination; `null` means none was made |
+| `hdd` | always | number, the heating degree-days used |
+| `simulate` | always | `annual`, `sizing` or `none` |
+| `proposed`, `reference` | always | objects; on a simulated reference-path run each carries `total_site_kwh` (what the verdict compares), `eui_kwh_per_m2` and `floor_area_m2` |
+| `warnings` | always | list of strings |
+| `compliance_determination` | when applicable | `code` (unqualified), `conditional` (holds only if the authority approves the listed items) or `no_determination` |
+| `compliance_determination_reason` | when conditional | object |
+| `no_determination` | when no determination | object, with the reason and what would fix it |
+| `percent_of_target` | when determined | number |
+| `tier` | when determined | integer, or `null` |
+
+Removing or renaming one of these, or narrowing its values, is an API change.
+Adding a field is not, so a report may carry more than this; unlisted fields
+are internal.
+
+**The promise.** canmet-btap is an alpha, and pre-1.0: a MINOR release (0.4 →
+0.5) may change the public API, and its release notes say what changed; a
+PATCH release does not. `btap-compliance --version` says so on a pre-release. Internal names may change in any release.
+`tests/test_public_api.py` pins every list above exactly, so a public name
+cannot be removed, renamed or added without that test being updated in the
+same change; `tests/test_report_contract.py` holds every frozen scenario's
+`report.json` to the report contract.
 
 ## Test
 

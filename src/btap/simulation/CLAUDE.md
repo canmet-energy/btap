@@ -26,7 +26,7 @@ costs.
   poll → results) over an injectable `Http`, so the whole backend is
   exercised offline in tests.
 - **`engine.py`** — has NO Ruby ancestor. It is the R5/D-83 engine
-  resolution ladder that makes `pip install canmet-btap[tbd]` sufficient.
+  resolution ladder that makes `pip install canmet-btap` sufficient.
   Read the ladder before touching anything in it.
 
 ## The engine ladder (`ensure_energyplus`) — order is the contract

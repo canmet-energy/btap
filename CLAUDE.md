@@ -45,6 +45,11 @@ unless a moved link itself is wrong.
   test-only hook, never an environment variable. Code-family-neutral data —
   `decisions.json`, the Section 8.4 disposition and `ATTRIBUTION.md` — stays
   in `btap/codes/data/`.
+- **The public API is declared.** Each subpackage's `__all__` is the promise
+  to users; everything else is internal. `tests/test_public_api.py` pins every
+  list exactly, so adding, removing or renaming a public name means updating
+  that test in the same change. Pre-1.0, a MINOR release may change the API
+  and says so in its notes; a PATCH release may not (`src/README.md`).
 - **One AuditLog schema:**
   `{step, target, action, inputs, value, article, ruling, ahj, evidence, building, level}`.
   Levels are `decision`, `info`, and `warning`; warnings are never silent.
