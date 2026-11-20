@@ -906,6 +906,66 @@ SYSTEM_25_SCENARIOS = [
                          "DesignSpecification:ZoneHVAC:Sizing"},
           "count": 1},
      ]},
+
+    # The FULL-YEAR witness for D-111 / AHJ-26 (#237's follow-up). D-111 puts
+    # each reference System 2/5 zone's make-up-air terminal before its fan
+    # coil, and until this scenario only sizing runs saw it — so nothing
+    # frozen showed the order deciding a DETERMINATION.
+    #
+    # It does. The same call with the terminal-first order removed (and the
+    # dispatch guard that would refuse it disabled), authored 2026-11-20:
+    #
+    #                          D-111      order removed
+    #   reference heating h       79.0          1280.0
+    #   reference cooling h       15.75         1289.75
+    #   reference site kWh    286825.0        460938.9
+    #   AHJ-26 cited              yes             no
+    #   tier                        2               4
+    #
+    # So the reference holds setpoint BECAUSE of the order, and the exact
+    # report.json baseline sees the physics rather than only the audit line.
+    #
+    # The verdict is NOT COMPLIANT, and that is the PROPOSED's doing: the
+    # call builds ONE shared PSZ unit for all five zones (the #236 trap,
+    # warned on stderr), which leaves 377 h of heating unmet after three
+    # capacity increases. It does not touch the reference this witnesses;
+    # a per-zone PSZ default would move it, and that is a re-freeze.
+    {"id": "determination-07-system2-terminal-first-annual",
+     "lane": "parity", "kind": "api", "replaces": [],
+     "api_call": {"code": "necb2020", "simulate": "annual", "hdd": 3890,
+                  "model": "<SEED>",
+                  "hvac_system": PROPOSED_FAN_COIL_SYSTEM,
+                  "weather": {"epw": "<EPW>", "ddy": "<DDY>"},
+                  "necb_loads": {"space_type_map": {
+                      space: ["Space Function", "Office enclosed > 25 m2"]
+                      for space in _SEED_SPACES}},
+                  "building": _SYSTEM_25_FAILURE_BUILDING},
+     "env": {}, "expect_exit": 1, "timeout_s": 5400,
+     "files": CORPUS_FILES, "text_files": CORPUS_TEXT, "streams": {},
+     "seal": SYSTEM_25_SEAL,
+     "fragments": {"reference_annual/run/eplusout.err": {
+         "required": ["; 0 Severe Errors; Elapsed Time"]}},
+     "asserts": [
+         {"op": "audit_entry", "step": "selection",
+          "action": "reference system selected",
+          "inputs": {"category": "Data Processing Area"}, "count": 5},
+         {"op": "audit_entry", "ruling": "D-111", "ahj": "AHJ-26",
+          "action": "zone dispatch: the make-up-air terminal runs before "
+                    "the fan coil", "count": 1},
+         {"op": "json_equals", "file": "report.json", "path": "annual",
+          "value": True},
+         {"op": "json_equals", "file": "report.json",
+          "path": "reference.unmet_occupied_hours",
+          "value": {"heating": 79.0, "cooling": 15.75}},
+         {"op": "json_equals", "file": "report.json",
+          "path": "compliance_determination", "value": "conditional"},
+         {"op": "json_equals", "file": "report.json",
+          "path": "compliance_determination_reason.ahj_ids",
+          "value": ["AHJ-7", "AHJ-14", "AHJ-16", "AHJ-22", "AHJ-26"]},
+         {"op": "json_equals", "file": "report.json", "path": "tier",
+          "value": 2},
+         {"op": "observation_equals", "key": "compliant", "value": False},
+     ]},
 ]
 
 
