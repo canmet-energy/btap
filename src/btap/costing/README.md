@@ -15,6 +15,36 @@ committed, never redistributed, never staged into the installer**:
    the legacy name), else
 3. the subpackage's own placeholder pair in `data/`.
 
+## Costing a model
+
+Every domain is costed the same way — `btap.costing.<domain>.cost(model, …)`
+for `envelope`, `hvac`, `lighting` and `shw` — and resolves WHERE it is
+costed the same way (#237):
+
+- `city=` / `province_state=` name a row of `data/locations.csv`, matched
+  ignoring case; a place the table does not list is REFUSED with the nearest
+  spellings, rather than priced at the 100 % regional fallback;
+- with no city, the cost location is the one nearest the model's SITE, and a
+  model whose site was never set (latitude 0, longitude 0) is REFUSED rather
+  than priced for St. John's, NL. Attaching a weather file sets the site.
+
+Lighting takes the code id, `code="necb2020"`, like every public function.
+
+**HVAC is costed from SIZED equipment.** On an autosized model the capacities
+are unknown and items price at or near zero, with warnings. The
+compliance pipeline sizes before it costs; for a model you authored, run a
+sizing simulation in the same session first, so the model carries its sizing
+results:
+
+```python
+from btap import simulation
+from btap.costing import hvac
+
+simulation.run(model, run_dir="runs/size", weather={"epw": epw, "ddy": ddy},
+               sizing_only=True)
+report = hvac.cost(model, city="Toronto", province_state="Ontario")
+```
+
 ## Layout
 
 ```
