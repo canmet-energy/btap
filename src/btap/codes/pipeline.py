@@ -319,6 +319,17 @@ def _size_proposed(run):
             f"input file is not simulate-able as given. {e}") from e
     audit.info("compliance", "proposed sizing run complete", target="proposed")
 
+    # A shared single-zone unit that `build_system` built WITHOUT a chosen
+    # control zone carries a mark asking for one to be elected from sizing:
+    # the zone with the largest design heating load (phylroy, 2026-11-20). The
+    # mark is the model author's own instruction — `--hvac-system` builds that
+    # way, and so does a user's `build_system` call that named no zone — so
+    # carrying it out is not a correction of the proposed. An unmarked loop,
+    # including every zone a user chose, is never touched. Before the annual
+    # run, so the determination simulates the elected zone.
+    from btap import modeling
+    modeling.elect_control_zones(run.proposed, audit=audit)
+
 
 def _base_report(run):
     """The determination report skeleton (rebound over the pre-flight {} once

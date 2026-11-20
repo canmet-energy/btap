@@ -117,7 +117,11 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
     :param model: openstudio.model.Model
     :param system_name: a catalog name (see btap.modeling.systems)
     :param zones: list of openstudio.model.ThermalZone to serve
-    :param control_zone: control zone for single-zone systems (default: zones[0])
+    :param control_zone: the zone a shared single-zone unit follows. Given,
+        it is the user's choice and final. Omitted, the unit follows zones[0]
+        PROVISIONALLY and its loop is marked, so that
+        ``btap.modeling.elect_control_zones`` can move control to the zone with
+        the largest design heating load after a sizing run.
     :param remove_existing: tear down HVAC serving these zones first, so the new
         system replaces rather than stacks (zone-scoped; other zones untouched)
     :param namer: 'default' or 'necb_pipe_name'
@@ -129,7 +133,8 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
     performance_profile = performance.resolve(performance_profile)
     validation.require_zones(zones)
     validation.require_thermostats(zones)
-    if control_zone is None:
+    elect = control_zone is None
+    if elect:
         control_zone = zones[0]
     validation.require_control_zone(zones, control_zone)
 
@@ -159,6 +164,8 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
                              config=part.get('config'),
                              exclude_plants=exclude_plants,
                              performance_profile=performance_profile).air_loops)
+        if elect:
+            _mark_shared_loops(air_loops)
         return Result(system_name=system_name, family='composite',
                       air_loops=air_loops, control_zone=control_zone)
 
@@ -256,6 +263,18 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
         for zone in sorted_by_name(zones):
             energy_recovery.add_zone_energy_recovery(model, zone, recovery)
 
+    if elect:
+        _mark_shared_loops(air_loops)
     return Result(system_name=system_name, family=resolved['family'],
                   air_loops=air_loops, control_zone=control_zone,
                   grouping_evidence=getattr(system, 'grouping_evidence', None))
+
+
+def _mark_shared_loops(air_loops):
+    """Mark every loop that serves several zones FROM ONE control zone, so its
+    control zone can be elected after sizing. A multi-zone system with no
+    single-zone control (VAV, DOAS) has nothing to elect and is not marked."""
+    from btap.modeling.hvac import control_zones
+    for loop in air_loops:
+        if len(loop.thermalZones()) > 1 and control_zones.controls(loop):
+            control_zones.mark_for_election(loop)

@@ -34,6 +34,7 @@ __all__ = [
     # the HVAC catalogue
     "systems",
     "build_system",
+    "elect_control_zones",
     "replace_system",
     "remove_hvac_from_zones",
     "plant_is_hvac_candidate",
@@ -456,11 +457,19 @@ def build_system(model, system_name, zones, *, performance_profile=None,
     (``control_zone``, ``remove_existing``, ``config``, ...).
 
     **Single-zone systems and several zones.** Most "PSZ RTU ..." rows build
-    ONE packaged unit over every zone they are given, controlled from one zone
-    — a packaged SINGLE-zone system serving a whole building. For one unit per
-    zone, pass ``config={'per_zone': True}`` or call once per zone. Building
-    such a row across several zones WARNS (#236); rows that state ``per_zone``
-    themselves, like the "Shared PSZ ..." rows, do not.
+    ONE packaged unit over every zone they are given, following ONE control
+    zone — as a house's furnace serves every floor from one thermostat. Which
+    zone that is decides which zones go unmet, so:
+
+    - pass ``control_zone=`` to choose it yourself; or
+    - omit it, and the unit follows ``zones[0]`` PROVISIONALLY until
+      :func:`elect_control_zones`, after a sizing run, moves control to the
+      zone with the largest design heating load.
+
+    For one unit per zone instead, pass ``config={'per_zone': True}`` or call
+    once per zone. A shared build with no ``control_zone`` WARNS (#236); rows
+    that state ``per_zone`` themselves, like the "Shared PSZ ..." rows, and an
+    explicit ``control_zone`` do not.
 
     ``audit``, when given, records the build and that warning.
     """
@@ -474,7 +483,24 @@ def build_system(model, system_name, zones, *, performance_profile=None,
     return result
 
 
-def _shared_by_default(system_name, zones, config):
+def elect_control_zones(model, *, audit=None):
+    """After a sizing run, move each shared single-zone unit that
+    ``build_system`` left on a provisional control zone to the zone it serves
+    with the LARGEST design heating load. A control zone the user chose is
+    never changed. Returns ``{air loop name: zone name}``.
+
+    The sizing results must be attached to the model, which
+    ``btap.simulation.run(model, ..., sizing_only=True)`` does::
+
+        simulation.run(model, run_dir="runs/size", weather=weather,
+                       sizing_only=True)
+        modeling.elect_control_zones(model)
+    """
+    from btap.modeling.hvac import control_zones
+    return control_zones.elect_control_zones(model, audit=audit)
+
+
+def _shared_by_default(system_name, zones, config, control_zone=None):
     """The #236 trap: a PSZ row that does not state `per_zone`, built across
     several zones, becomes ONE unit for all of them. Returns the warning text,
     or None. The catalogue's explicit rows, shared or per-zone, are never
@@ -487,14 +513,19 @@ def _shared_by_default(system_name, zones, config):
         return None
     if config and "per_zone" in config:
         return None
-    return (f"ONE shared '{system_name}' unit now serves {len(zones)} zones, "
-            f"controlled from a single zone. A packaged single-zone system is "
-            f"normally one unit per zone: pass config={{'per_zone': True}} or "
-            f"call build_system once per zone. (#236)")
+    if control_zone is not None:
+        return None  # a shared unit on a chosen control zone is a design
+    return (f"ONE shared '{system_name}' unit now serves {len(zones)} zones and "
+            f"follows '{zones[0].nameString()}' PROVISIONALLY. After a sizing "
+            f"run, btap.modeling.elect_control_zones(model) moves control to the "
+            f"zone with the largest design heating load; or pass control_zone= "
+            f"to choose it, or config={{'per_zone': True}} for one unit per "
+            f"zone. (#236)")
 
 
 def _record_hvac_build(system_name, zones, result, kwargs, audit, *, replaced):
-    message = _shared_by_default(system_name, zones, kwargs.get("config"))
+    message = _shared_by_default(system_name, zones, kwargs.get("config"),
+                                 kwargs.get("control_zone"))
     if message:
         import warnings
         warnings.warn(message, UserWarning, stacklevel=3)

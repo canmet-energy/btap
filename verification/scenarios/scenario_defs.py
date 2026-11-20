@@ -926,10 +926,12 @@ SYSTEM_25_SCENARIOS = [
     # report.json baseline sees the physics rather than only the audit line.
     #
     # The verdict is NOT COMPLIANT, and that is the PROPOSED's doing: the
-    # call builds ONE shared PSZ unit for all five zones (the #236 trap,
-    # warned on stderr), which leaves 377 h of heating unmet after three
-    # capacity increases. It does not touch the reference this witnesses;
-    # a per-zone PSZ default would move it, and that is a re-freeze.
+    # call builds ONE shared PSZ unit for all five zones. Its control zone is
+    # elected after the proposed sizing run (the largest design heating load,
+    # phylroy 2026-11-20), which took the proposed from 377 h of heating
+    # unmet on the provisional zone to 0 — and, with one thermostat, its
+    # cooling unmet from 111 to 564 h, which is what fails 8.4.1.2.(4). None
+    # of that touches the reference this scenario witnesses.
     {"id": "determination-07-system2-terminal-first-annual",
      "lane": "parity", "kind": "api", "replaces": [],
      "api_call": {"code": "necb2020", "simulate": "annual", "hdd": 3890,
