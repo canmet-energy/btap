@@ -62,7 +62,15 @@ def create(*, shape, model=None, audit=None, **params):
 
     storeys=/below_grade_storeys= are the canonical spellings; the engines'
     own names (above_ground_storys, under_ground_storys, num_floors) are
-    still accepted. Only the rectangle shape has below-grade storeys."""
+    still accepted. Only the rectangle shape has below-grade storeys.
+
+    Every space the wizard creates gets its own thermal zone, named
+    ``Zone <space>`` as ``bar()`` names them (#237); spaces already in a
+    ``model=`` passed in are left as they are. Output carries NO space types
+    or constructions: tag spaces with
+    ``btap.codes.necb.loads.assign_space_types`` and give surfaces
+    constructions with ``seed_constructions`` before the loads and envelope
+    passes."""
     import openstudio
 
     from btap.modeling.geometry import wizards
@@ -72,6 +80,7 @@ def create(*, shape, model=None, audit=None, **params):
     shape = str(shape).lower()
     if shape not in SHAPES:
         raise ValueError(f"unknown shape '{shape}' ({', '.join(SHAPES)})")
+    existing = {str(space.handle()) for space in model.getSpaces()}
 
     params = _normalize_storey_aliases(params, shape)
 
@@ -127,12 +136,29 @@ def create(*, shape, model=None, audit=None, **params):
 
     if result is None:
         raise ValueError(f"{shape} wizard rejected the parameters (see the OpenStudio log)")
+    model = result
+
+    # #237: the ported wizards make SPACES but no thermal zones, unlike bar()
+    # and create_from_footprint(). A zoneless model takes no thermostats from
+    # the NECB loads pass, and EnergyPlus drops every surface of it while
+    # reporting success — an empty building simulated cleanly. So each space
+    # the wizard just made gets its own zone, named as bar() names them; a
+    # caller's existing spaces (`model=`) are left alone.
+    zoned = 0
+    for space in model.getSpaces():
+        if str(space.handle()) in existing or space.thermalZone().is_initialized():
+            continue
+        zone = openstudio.model.ThermalZone(model)
+        zone.setName(f"Zone {space.nameString()}")
+        space.setThermalZone(zone)
+        zoned += 1
 
     storeys_above = params.get("above_ground_storys", params.get("num_floors", 3))
     storeys_below = params.get("under_ground_storys", 1 if shape == "rectangle" else 0)
     audit.decision("geometry", f"{shape} massing created",
                    inputs={**params, "shape": shape,
                            "spaces": len(model.getSpaces()),
+                           "thermal_zones_created": zoned,
                            "storeys_above": storeys_above,
                            "storeys_below": storeys_below})
     return model
