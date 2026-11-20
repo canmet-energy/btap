@@ -570,8 +570,8 @@ Add the entry in the same change as the condition that cites it.
 
 The post-R6 verification model has two independent parts:
 
-- `verification/scenarios/` holds 57 frozen Python pipeline scenarios across
-  `python` (36), `verify` (8), and `parity` (13) lanes. Intentional output changes use
+- `verification/scenarios/` holds 61 frozen Python pipeline scenarios across
+  `python` (39), `verify` (8), and `parity` (14) lanes. Intentional output changes use
   `verification/scenarios/freeze.py` on a clean tree and commit the baseline
   changes with the code.
 - `legacy_pin/` plus `verification/oracle/` compare Python against the live,
