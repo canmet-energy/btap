@@ -300,6 +300,11 @@ Two things worth knowing before choosing a different system:
   modeling.elect_control_zones(model)  # -> the largest design heating load
   ```
 
+  `control_zone="cooling"` asks for the largest design cooling load instead.
+  No choice of zone, fixed or switched by season, makes one thermostat serve
+  zones whose loads differ: the zone holding it is met and the others are
+  not. Where they differ, build one unit per zone.
+
   For one unit per zone instead, pass `config={'per_zone': True}` or call
   `build_system` once per zone. `build_system` warns about a shared unit on a
   provisional zone (#236). The compliance pipeline elects it for HVAC built

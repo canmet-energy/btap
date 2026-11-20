@@ -143,3 +143,44 @@ class TestThePipelineElectsWhatItBuilds(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@needs_sdk
+class TestTheRules(unittest.TestCase):
+
+    def test_each_rule_is_recorded_on_the_loop(self):
+        from btap.modeling.hvac import control_zones
+        self.assertEqual({"heating", "cooling"}, set(control_zones.RULES))
+        for name, mark in control_zones.RULES.items():
+            with self.subTest(rule=name):
+                model, _, loops = _built(SHARED, control_zone=name)
+                self.assertEqual(mark, control_zones.marked_rule(loops[0]))
+
+    def test_an_unknown_rule_is_refused(self):
+        for name in ("warmest", "seasonal"):
+            with self.subTest(rule=name), self.assertRaisesRegex(ValueError, "control zone rule"):
+                _built(SHARED, control_zone=name)
+
+
+@needs_engine
+class TestTheCoolingRule(unittest.TestCase):
+
+    def test_control_moves_to_the_largest_design_cooling_load(self):
+        from btap import modeling, simulation
+        from btap._compat import opt
+        from btap.audit import AuditLog
+        model, zones, loops = _built(SHARED, control_zone="cooling")
+        with tempfile.TemporaryDirectory() as run_dir:
+            simulation.run(model, run_dir=run_dir, sizing_only=True,
+                           weather={"epw": str(EPW), "ddy": str(DDY)})
+        cooling = {z.nameString(): opt(z.autosizedCoolingDesignLoad()) for z in zones}
+        heating = {z.nameString(): opt(z.autosizedHeatingDesignLoad()) for z in zones}
+        largest = max(cooling, key=cooling.get)
+        self.assertNotEqual(max(heating, key=heating.get), largest,
+                            "the fixture must elect different zones by heating and "
+                            "by cooling, or the test cannot tell the rules apart")
+        audit = AuditLog()
+        self.assertEqual({loops[0].nameString(): largest},
+                         modeling.elect_control_zones(model, audit=audit))
+        self.assertEqual([largest], _control_zones(loops[0]))
+        self.assertIn("largest design cooling load", audit.entries[-1]["action"])

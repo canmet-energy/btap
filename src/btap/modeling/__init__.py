@@ -483,11 +483,13 @@ def build_system(model, system_name, zones, *, performance_profile=None,
     return result
 
 
-def elect_control_zones(model, *, audit=None):
-    """After a sizing run, move each shared single-zone unit that
-    ``build_system`` left on a provisional control zone to the zone it serves
-    with the LARGEST design heating load. A control zone the user chose is
-    never changed. Returns ``{air loop name: zone name}``.
+def elect_control_zones(model, *, by=None, audit=None):
+    """After a sizing run, carry out each shared single-zone unit's control
+    rule: the zone with the largest design HEATING load (the default) or the
+    largest COOLING load. ``build_system(..., control_zone="cooling")``
+    chooses the rule; ``by=`` applies one to every marked unit. A control
+    zone the user chose is never changed. Returns ``{air loop name: zone
+    name}``. See ``btap.modeling.hvac.control_zones``.
 
     The sizing results must be attached to the model, which
     ``btap.simulation.run(model, ..., sizing_only=True)`` does::
@@ -497,7 +499,7 @@ def elect_control_zones(model, *, audit=None):
         modeling.elect_control_zones(model)
     """
     from btap.modeling.hvac import control_zones
-    return control_zones.elect_control_zones(model, audit=audit)
+    return control_zones.elect_control_zones(model, by=by, audit=audit)
 
 
 def _shared_by_default(system_name, zones, config, control_zone=None):
@@ -523,6 +525,12 @@ def _shared_by_default(system_name, zones, config, control_zone=None):
             f"zone. (#236)")
 
 
+def _control_zone_label(control_zone):
+    if control_zone is None or isinstance(control_zone, str):
+        return control_zone
+    return control_zone.nameString()
+
+
 def _record_hvac_build(system_name, zones, result, kwargs, audit, *, replaced):
     message = _shared_by_default(system_name, zones, kwargs.get("config"),
                                  kwargs.get("control_zone"))
@@ -538,8 +546,7 @@ def _record_hvac_build(system_name, zones, result, kwargs, audit, *, replaced):
     audit.decision("hvac", f"{'replaced with' if replaced else 'built'} {system_name}",
                    target=system_name,
                    inputs={"zones": len(zones),
-                           "control_zone": kwargs.get("control_zone").nameString()
-                           if kwargs.get("control_zone") is not None else None},
+                           "control_zone": _control_zone_label(kwargs.get("control_zone"))},
                    value={"air_loops": len(list(air_loops)) if air_loops is not None
                           else None})
 
