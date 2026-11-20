@@ -319,7 +319,7 @@ class TestOracleGoldensLighting(unittest.TestCase):
         lighting.apply_lights(model, code="necb2020", lights_type="LED")
         model.getBuilding().setStandardsTemplate("NECB2020")
 
-        report = lighting.cost(model, edition="2020", city=CITY, province_state=PROVINCE)
+        report = lighting.cost(model, code="necb2020", city=CITY, province_state=PROVINCE)
         legacy_total = expected["led_2020_total"]
         self.assertAlmostEqual(
             legacy_total, report.total, delta=max(abs(legacy_total) * 0.001, 0.05),

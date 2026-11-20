@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import openstudio
 
+from btap._fan_coil_sizing import mark_fan_coil_for_mode_specific_sizing
 from btap.modeling.hvac import naming
 from btap.modeling.hvac.components import coils, schedules
 from btap.modeling.hvac.systems.base_system import BaseSystem
@@ -103,11 +104,15 @@ class FanCoils(BaseSystem):
         # --- zones: sizing, fan coils, diffusers ---
         for zone in zones:
             self.apply_zone_sizing(zone)
-            self._add_zone_fan_coil(model, zone, fan_coil_type, always_on,
-                                    htg_avail_sch, clg_avail_sch,
-                                    hw_loop=hw_loop, chw_loop=chw_loop)
+            fan_coil = self._add_zone_fan_coil(model, zone, fan_coil_type, always_on,
+                                               htg_avail_sch, clg_avail_sch,
+                                               hw_loop=hw_loop, chw_loop=chw_loop)
             diffuser = openstudio.model.AirTerminalSingleDuctUncontrolled(model, always_on)
             air_loop.addBranchForZone(zone, diffuser.to_StraightComponent())
+            # D-111: the make-up-air terminal first, the fan coil after it.
+            # The legacy order (the pinned gem's add_sys2_FPFC_sys5_TPFC) is
+            # the reverse; see BaseSystem.terminal_first for why it fails.
+            self.terminal_first(zone, diffuser, fan_coil)
 
         # parts insertion order matches legacy sys2/5: hr, clg, htg, sf, zone_htg, zone_clg, rf
         mau_clg_part = ('Hydronic'
@@ -152,6 +157,12 @@ class FanCoils(BaseSystem):
         fan_coil = openstudio.model.ZoneHVACFourPipeFanCoil(
             model, always_on, fc_fan, fc_clg_coil, fc_htg_coil)
         fan_coil.addToThermalZone(zone)
+        # D-110: a fan coil this builder AUTHORS carries the mode-specific
+        # sizing contract, so its cooling coil rates at the cooling airflow;
+        # unmarked, a heating-dominated zone's cooling-coil UA inversion can
+        # fail (#68, #236). Authoring, not re-sizing a submission: a model
+        # merely loaded is never marked by this.
+        mark_fan_coil_for_mode_specific_sizing(fan_coil)
         return fan_coil
 
     def _legacy_htg_part(self, mau_heating_coil_type):

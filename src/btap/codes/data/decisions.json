@@ -4437,6 +4437,84 @@
         "not_applicable"
       ],
       "summary": "Decided: phylroy, 2026-11-14. canmet-tbd==3.5.2, the NECB 3.1.1.7 thermal-bridging engine, moves from the optional [tbd] extra into canmet-btap's default dependencies, so `pip install canmet-btap` — and `pip install git+https://github.com/canmet-energy/btap` — installs everything a compliance determination needs. As an extra, the people who needed it most were the least likely to know to add it, and without it every determination's reference envelope is under-insulated relative to the Code's intent. D-83 rejected an [engine] extra for canmet-energyplus on exactly that ground; this applies the same reasoning to the other engine. The pin stays exact. The [tbd] extra is removed rather than kept empty: phylroy confirmed there are no clients yet, so nothing outside the repository depended on it, and its only callers were internal."
+    },
+    {
+      "id": "D-110",
+      "title": "Fan coils the authoring API builds carry the mode-specific sizing contract",
+      "kind": "process",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ],
+      "summary": "Decided: phylroy, 2026-11-19 (#236). btap.modeling's builders mark every ZoneHVAC:FourPipeFanCoil they author for D-106's mode-specific sizing contract, as D-107 already requires of the samples this repository authors. A model built from nothing with the fan-coil system otherwise reported a Coil:Cooling:Water design-UA Severe in heating-dominated zones (#68's mechanism). The marker is set when the builder CREATES a fan coil; a model that is only loaded is never marked by this, so D-107's rule — the pipeline does not add the marker to an unmarked submission — is unchanged. The marker moves to btap/_fan_coil_sizing.py, at the package root, so btap.modeling and btap.simulation read one definition.",
+      "requirements": [
+        {
+          "id": "authored_api_fan_coil_sizing",
+          "label": "Mode-specific water-coil sizing in fan coils built by the authoring API",
+          "decided": "Every fan coil the authoring API builds is marked when it is created, so a heating-dominated zone's cooling coil rates at its own mode's design airflow rather than the heating airflow; a model that is merely loaded or submitted is not marked.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "5.2.1.1.(1)",
+                "8.4.2.10.(2)",
+                "8.4.2.10.(5)",
+                "8.4.3.1.(2)(c)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "5.2.1.1.(1)",
+                "8.4.2.10.(2)",
+                "8.4.2.10.(5)",
+                "8.4.3.1.(2)(c)"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D-111",
+      "title": "Make-up-air terminal before zone equipment: System 2/5 fan coils, and authored PSZ baseboards",
+      "kind": "runtime",
+      "editions": [
+        "necb2020",
+        "necb2025"
+      ],
+      "summary": "Decided: phylroy, 2026-11-19 (#236). Where an air-loop terminal whose supply the zone cannot refuse shares a zone with zone equipment, the terminal is offered the load first under SequentialLoad and the zone equipment trims the residual. For the NECB reference's System 2/5 this reverses the legacy order — the pinned gem added the fan coil first — and, being the dispatch question AHJ-15 refers for System 3/4, it is registered as its own referral, AHJ-26, so a reaching annual result is conditional. Authored PSZ-plus-baseboard zones take the order the reference already uses for System 3/4 (D-91). Measured on #236's 24-zone office: fan-coil heating unmet 77 h to 4.0 h in a January week, and the PSZ-plus-baseboard warmup-convergence Severe 8 to 0.",
+      "requirements": [
+        {
+          "id": "make_up_air_terminal_dispatch",
+          "label": "How a zone's make-up-air terminal and its zone equipment share the zone load",
+          "decided": "The terminal whose supply the zone cannot refuse is offered the load first and the fan coil or baseboard serves the residual, so the make-up air is corrected rather than left below setpoint.",
+          "sources": [
+            {
+              "code": "necb",
+              "edition": "2020",
+              "role": "governing",
+              "references": [
+                "8.4.2.10.(2)",
+                "8.4.4.9.(3)"
+              ]
+            },
+            {
+              "code": "necb",
+              "edition": "2025",
+              "role": "governing",
+              "references": [
+                "8.4.2.10.(2)",
+                "8.4.5.9.(3)"
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }

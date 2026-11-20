@@ -79,6 +79,10 @@ result = performance_compliance(
     run_dir='runs/quick_start')
 
 result.compliant        # True / False (None unless simulate='annual')
+result.report['compliance_determination']
+                        # 'code', or 'conditional': the verdict then holds
+                        # only if an authority approves the AHJ-NN items in
+                        # result.report['compliance_determination_reason']
 result.report           # also written to run_dir/report.json
 result.audit            # ONE audit — run_dir/audit.json + audit.txt
 result.reference_model  # the fully-transformed reference building

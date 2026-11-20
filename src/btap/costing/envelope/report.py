@@ -12,6 +12,7 @@ from dataclasses import dataclass
 
 from btap._compat import ruby_round, ruby_str
 from btap.audit import AuditLog
+from btap.costing import _location
 from btap.costing.envelope import assemblies, envelope_costs, thermal_bridging_costs
 from btap.costing.envelope.database import Database
 
@@ -53,13 +54,14 @@ def cost(model, *, city=None, province_state=None, structure=None,
 
     if city is None or province_state is None:
         site = model.getSite()
-        location = database.closest_location(site.latitude(), site.longitude())
+        location = _location.site_location(database.closest_location, site)
         if city is None:
             city = location["city"]
         if province_state is None:
             province_state = location["province_state"]
         audit.info("costing_envelope", "cost location resolved from the model site",
                    value=f"{city}, {province_state}")
+    city, province_state = _location.canonical(database.locations, city, province_state)
 
     tallies = tb_tallies
     if tallies is None and tbd_result is not None:

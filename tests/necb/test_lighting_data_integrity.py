@@ -13,7 +13,7 @@ from btap.codes.necb import lighting
 
 class TestDataIntegrity(unittest.TestCase):
     def test_led_table_matches_legacy_shape(self):
-        led = lighting.table("led_lighting", "2020")
+        led = lighting.table("2020", "led_lighting")
         self.assertEqual(308, len(led))
         record = lighting.led_record(building_type="Space Function",
                                      space_type="Office enclosed > 25 m2",
@@ -23,7 +23,7 @@ class TestDataIntegrity(unittest.TestCase):
         self.assertIn("lighting_fraction_radiant", record)
 
     def test_2025_space_function_table(self):
-        rows = lighting.table("lpd_space_functions", "2025")
+        rows = lighting.table("2025", "lpd_space_functions")
         self.assertGreaterEqual(len(rows), 90)
         atrium = [r["lpd_w_per_m2"] for r in rows if r["space_category"] == "Atrium"]
         self.assertEqual([4.2, 5.2, 6.5], sorted(atrium), "2025 atrium bins == 2020 legacy values")
@@ -49,7 +49,7 @@ class TestDataIntegrity(unittest.TestCase):
                          "the per-space control matrix retains its requirement shapes")
 
     def test_2025_building_type_table(self):
-        rows = lighting.table("lpd_building_types", "2025")
+        rows = lighting.table("2025", "lpd_building_types")
         self.assertEqual(32, len(rows))
         office = next(r for r in rows if r["building_type"] == "Office")
         self.assertAlmostEqual(6.9, office["lpd_w_per_m2"], delta=1e-9)
@@ -84,8 +84,8 @@ class TestDataIntegrity(unittest.TestCase):
                 self.assertTrue(article.get("how") or article.get("gaps"))
         # Since Stage 3 every edition reads its OWN tables — 2025 no longer
         # aliases 2020's, it ships byte-identical copies of them.
-        self.assertEqual(lighting.table("led_lighting", "2020"),
-                         lighting.table("led_lighting", "2025"))
+        self.assertEqual(lighting.table("2020", "led_lighting"),
+                         lighting.table("2025", "led_lighting"))
         # The provenance states this edition's OWN transcription, not a
         # comparison with another edition's (D-88): the table equality the old
         # 'ZERO value differences' sentence asserted is proven structurally
@@ -98,3 +98,25 @@ class TestDataIntegrity(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestTheTableAccessorsShareOneOrder(unittest.TestCase):
+    """#236: `loads.table(edition, name)` and `lighting.table(name, edition)`
+    took the same two arguments in opposite orders. Both are now
+    `(edition, name)`."""
+
+    def test_both_accessors_take_edition_first(self):
+        import inspect
+
+        from btap.codes.necb import loads
+        for accessor in (loads.table, lighting.table):
+            with self.subTest(accessor=accessor.__module__):
+                self.assertEqual(["edition", "name"],
+                                 list(inspect.signature(accessor).parameters)[:2])
+
+    def test_a_call_in_the_old_order_is_refused_by_name(self):
+        with self.assertRaisesRegex(TypeError, r"old order.*table\('2020', 'led_lighting'\)"):
+            lighting.table("led_lighting", "2020")
+
+    def test_the_new_order_reads_the_table(self):
+        self.assertTrue(lighting.table("2020", "led_lighting"))

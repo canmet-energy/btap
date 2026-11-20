@@ -74,7 +74,7 @@ class TestE2ERun(unittest.TestCase):
         modeling.build_system(model, "Baseboard gas boiler",
                               sorted_by_name(model.getThermalZones()))
         envelope.apply_prescriptive(model, code="necb2020", hdd=3890, audit=audit)
-        lighting.cost(model, edition="2020", city="TORONTO", province_state="ONTARIO",
+        lighting.cost(model, code="necb2020", city="TORONTO", province_state="ONTARIO",
                       audit=audit)
 
         steps = {e["step"] for e in audit.entries}

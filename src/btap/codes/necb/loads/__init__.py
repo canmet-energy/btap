@@ -58,7 +58,21 @@ Apply = _apply
 
 
 def assign_space_types(model, map, code='necb2020', audit=None):
-    """Assign NECB space types to a bare-geometry model. See Apply."""
+    """Assign NECB space types to a bare-geometry model.
+
+    :param map: ``{space name: [building type, space type]}`` — a pair from
+        the edition's catalog, e.g. ``["Space Function", "Office enclosed >
+        25 m2"]``; ``SpaceTypes.list_pairs(edition='2020')`` lists them.
+        Spaces absent from the map are left untouched and counted in the
+        audit entry.
+    :param code: the code id whose catalog the pairs are resolved against.
+    :raises ValueError: on a pair the catalog does not list, naming it.
+
+    One OpenStudio ``SpaceType`` is made per distinct pair, named
+    ``"<building type> <space type>"`` and tagged with the standards
+    building/space type the compliance gate resolves. It sets no loads:
+    ``apply_loads`` and ``lighting.apply_lights`` do.
+    """
     return _apply._assign_space_types(model, map, resolve(code),
                                       audit=audit)
 

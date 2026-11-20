@@ -201,6 +201,9 @@ def add_zone_fancoil(model, zone):
     fc.setSupplyAirFanOperatingModeSchedule(always_off)
     fc.setMaximumOutdoorAirFlowRate(1.0e-6)
     fc.addToThermalZone(zone)
+    # D-110: an authored fan coil carries the mode-specific sizing contract.
+    from btap._fan_coil_sizing import mark_fan_coil_for_mode_specific_sizing
+    mark_fan_coil_for_mode_specific_sizing(fc)
     return fc
 
 

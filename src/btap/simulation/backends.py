@@ -54,7 +54,9 @@ class Local(Backend):
 
         from btap._compat import opt
 
-        run_dir = Path(run_dir)
+        # Absolute: EnergyPlus runs with cwd in `run_dir / "run"` (below), so
+        # every path it is given must not depend on the caller's cwd (#236).
+        run_dir = Path(run_dir).resolve()
         osm = run_dir / "in.osm"
         if not osm.is_file():
             raise RuntimeError(f"local backend: {osm} is missing — the runner did not prepare this dir")

@@ -138,6 +138,13 @@ testpaths = ["tests"]
 # install of ANOTHER checkout (a worktree's venv pointing at the main tree)
 # would then be what the suite exercises, silently. Explicit is safer here.
 pythonpath = ["src"]
+# #236's single-zone warning, and ONLY it: some 100 tests build a "PSZ RTU ..."
+# row across the fixture's 5 zones on purpose, to exercise the shared build the
+# warning describes. tests/modeling/test_build_system_facade.py records it
+# explicitly (simplefilter "always"), so the warning itself stays tested.
+filterwarnings = [
+  "ignore:ONE shared .* unit now serves:UserWarning",
+]
 
 # The D-77 one-way dependency arrows, enforced in-package (one distribution,
 # five subpackages): necb -> costing -> modeling -> audit; simulation beside.

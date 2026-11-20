@@ -1519,16 +1519,15 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
                                        config=assignment.config,
                                        exclude_plants=retained_plants)
         if assignment.reference_system in (2, 5):
+            built_fan_coils = [
+                fan_coil
+                for fan_coil in reference.getZoneHVACFourPipeFanCoils()
+                if str(fan_coil.handle()) not in existing_fan_coils
+            ]
             _apply_reference_fan_coil_sizing(
-                [
-                    fan_coil
-                    for fan_coil in reference.getZoneHVACFourPipeFanCoils()
-                    if str(fan_coil.handle()) not in existing_fan_coils
-                ],
-                assignment.reference_system,
-                ruleset,
-                audit,
-            )
+                built_fan_coils, assignment.reference_system, ruleset, audit)
+            _record_fan_coil_dispatch(
+                built_fan_coils, assignment.reference_system, ruleset, audit)
 
         _audit_corner_block_grouping(result, assignment,
                                      _subsection(ruleset), audit)
@@ -1826,6 +1825,57 @@ def _apply_zone_fan_rules(zones, reference_system, rules_data, audit):
                    inputs={'fans': touched, 'pressure_pa': pressure, 'total_efficiency': eff},
                    value=f'{touched} zone fan(s) at {pressure} Pa / {ruby_round(eff * 100)}%',
                    article=spec['article'], ruling='D-22')
+
+
+def _record_fan_coil_dispatch(fan_coils, reference_system, ruleset, audit):
+    """System 2/5 zone dispatch: the make-up-air terminal before the fan coil.
+
+    The ORDER is set by the builder (`BaseSystem.terminal_first`, D-111); this
+    WITNESSES it on the zones actually built and records the choice, because
+    it is the same question AHJ-15 refers for System 3/4 — Sentence 9.(3) sets
+    terminal and secondary-system CAPACITIES, not an annual dispatch sequence —
+    and AHJ-15 says a different topology must not silently inherit its
+    predicate. So it carries its own referral, AHJ-26.
+
+    Narrowed to zones where a make-up-air terminal and a fan coil BOTH serve
+    the zone; a fan coil with no make-up-air terminal beside it chose nothing.
+    A zone built in any other order is a builder regression, not a choice, so
+    it raises rather than being recorded as if it had been made.
+    """
+    zones, wrong = [], []
+    for fan_coil in fan_coils:
+        zone_opt = fan_coil.thermalZone()
+        if not zone_opt.is_initialized():
+            continue
+        zone = zone_opt.get()
+        order = [e for e in zone.equipmentInHeatingOrder()
+                 if not e.to_FanZoneExhaust().is_initialized()]
+        terminals = [e for e in order
+                     if e.iddObjectType().valueName() in _CONSTANT_VOLUME_TERMINALS]
+        if not terminals:
+            continue
+        if order.index(terminals[0]) > order.index(fan_coil):
+            wrong.append(zone.nameString())
+            continue
+        zones.append(zone.nameString())
+    if wrong:
+        raise RuntimeError(
+            f"reference System {reference_system}: the fan coil precedes the "
+            f"make-up-air terminal in {sorted(wrong)} — D-111 builds them terminal first")
+    if not zones:
+        return
+
+    prefix = _subsection(ruleset)
+    audit.decision('rules', 'zone dispatch: the make-up-air terminal runs before the fan coil',
+                   target=','.join(sorted(zones)),
+                   inputs={'zones': len(zones), 'reference_system': reference_system,
+                           'load_distribution': 'SequentialLoad',
+                           'air_terminal_priority': 1, 'fan_coil_priority': 2,
+                           'sequential_fractions': 1.0},
+                   value='the make-up-air unit\'s air is offered to the zone first and the fan '
+                         'coil trims the residual, so ventilation air the zone cannot refuse is '
+                         'corrected rather than left below setpoint',
+                   article=f'{prefix}.9.(3); 8.4.2.10.(2)', ruling='D-111', ahj='AHJ-26')
 
 
 def _apply_reference_fan_coil_sizing(fan_coils, reference_system, ruleset, audit):

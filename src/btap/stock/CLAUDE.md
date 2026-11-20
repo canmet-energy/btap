@@ -66,6 +66,13 @@ values land on objects that are then torn down. The first version had it the
 other way; every section was correct in isolation and only an end-to-end
 simulation could show the sequence was not.
 
+THERMOSTATS are the exception, and go BEFORE HVAC (#237): they sit on zones,
+which the teardown keeps, and the builder refuses a zone without one. Applied
+after, a recipe on a fresh target had its HVAC refused for want of the
+thermostats it was about to receive. And a RESOLVED group is always built —
+it names an identified system, not a guess — where the first version built
+only `accept_candidates` candidates and dropped resolved groups unlisted.
+
 ## The measured limit, and why the first number was MISATTRIBUTED
 
 A generated building is representative for loads, envelope and equipment

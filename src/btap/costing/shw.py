@@ -26,6 +26,7 @@ import openstudio
 
 from btap._compat import opt, opt_or, ruby_round, sorted_by_name
 from btap.audit import AuditLog
+from btap.costing import _location
 from btap.costing.hvac import geometry
 from btap.costing.hvac.database import Database
 from btap.costing.hvac.ledger import Ledger
@@ -51,11 +52,12 @@ def cost(model, *, city=None, province_state=None, costs_csv=None, audit=None):
     database = Database(costs_csv=costs_csv)
     if city is None or province_state is None:
         site = model.getSite()
-        location = database.closest_location(site.latitude(), site.longitude())
+        location = _location.site_location(database.closest_location, site)
         if city is None:
             city = location["city"]
         if province_state is None:
             province_state = location["province_state"]
+    city, province_state = _location.canonical(database.locations, city, province_state)
 
     ledger = Ledger()
     quantifier = EquipmentQuantifier(database, ledger, audit=audit)

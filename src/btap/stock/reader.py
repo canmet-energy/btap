@@ -25,6 +25,13 @@ REFUSED by name rather than built from `family_guess`, which `classify.py`
 states is a guess. This is the rule the writer exists to protect, and the
 reader is where it would be broken.
 
+**A RESOLVED system is always built** (#237). A `resolved: true` group names
+the catalogue system the writer identified — not a guess — so it needs no
+`accept_candidates`. The first version built only candidates, so a resolved
+group (the best case, and what every model built with btap's own builder
+produces) was neither built nor listed: writing a recipe from a btap-built
+model and rebuilding from it dropped all its HVAC in silence.
+
 **Scaling factors are not accepted.** The writer declares them unrecoverable,
 so a recipe cannot ask for one; only the absolute form is applied.
 
@@ -257,6 +264,19 @@ def _apply_envelope(model, envelope, applied, skipped, audit):
 
 
 def _apply_controls(model, controls, applied, skipped, audit):
+    """Economizers and daylighting — the controls that live on HVAC objects,
+    so they land AFTER the HVAC build. Thermostats are `_apply_thermostats`."""
+    _apply_hvac_controls(model, controls, applied, skipped, audit)
+
+
+def _apply_thermostats(model, controls, applied, skipped, audit):
+    """Thermostats, applied BEFORE HVAC (#237).
+
+    They sit on ZONES, which `build_system(remove_existing=True)` does not tear
+    down, and the builder REFUSES zones without a dual-setpoint thermostat. So
+    with thermostats applied after HVAC, a recipe applied to a fresh target had
+    its HVAC refused for lack of the thermostats it was about to receive.
+    """
     thermostats = controls.get('thermostats', {})
     for which, kwarg in (('heating', 'heating'), ('cooling', 'cooling')):
         profile = thermostats.get(f'{which}_setpoint')
@@ -279,6 +299,8 @@ def _apply_controls(model, controls, applied, skipped, audit):
             model, audit=audit, **{kwarg: value})
         applied.append(f'{which} setpoint on {count} zone(s)')
 
+
+def _apply_hvac_controls(model, controls, applied, skipped, audit):
     economizers = controls.get('economizers') or {}
     rows = economizers.get('by_air_loop') or []
     if rows:
@@ -470,6 +492,70 @@ def _apply_equipment(model, equipment, applied, skipped, audit):
             'per-unit-area skin losses hold')
 
 
+def _flag_unscheduled_loads(model, skipped):
+    """Name every load instance EnergyPlus will refuse for want of a schedule.
+
+    A recipe carries densities, not schedules, and the reader invents nothing,
+    so on a target with no schedules of its own (a bare geometry model) the
+    loads landed unscheduled and the run died on "Missing required property
+    'schedule_name'" (#237). The schedules are the TARGET's to supply — e.g.
+    `btap.codes.necb.loads.apply_loads` first — and this says so instead.
+    The getters consult the space type's default schedule set.
+    """
+    checks = (('Lights', model.getLightss(), lambda i: i.schedule().empty()),
+              ('ElectricEquipment', model.getElectricEquipments(),
+               lambda i: i.schedule().empty()),
+              ('People', model.getPeoples(),
+               lambda i: (i.numberofPeopleSchedule().empty()
+                          or i.activityLevelSchedule().empty())))
+    for kind, instances, missing in checks:
+        for instance in sorted_by_name(instances):
+            if missing(instance):
+                skipped.append(
+                    f'{instance.nameString()}: {kind} has NO schedule — the '
+                    'recipe carries none and the target supplied none, so '
+                    'EnergyPlus will refuse it; give the target a schedule set '
+                    '(e.g. NECB loads) before applying a recipe')
+
+
+def _build_identified(model, groups, applied, refused, audit):
+    """Build each RESOLVED group's identified catalogue system (#237).
+
+    The same contract as `_build_hvac`, minus the guess: zones are matched by
+    NAME, the build runs with `remove_existing=True` so it is a generation and
+    not an overlay, and a group whose zones are absent from this geometry is
+    REFUSED by name rather than dropped.
+    """
+    from btap.modeling.hvac import builder
+
+    for group in groups:
+        system = group.get('system')
+        zone_names = group.get('zones') or []
+        if not system:
+            refused.append(f'HVAC for {len(zone_names)} zone(s): marked resolved '
+                           'but names no system')
+            continue
+        zones = [z for z in sorted_by_name(model.getThermalZones())
+                 if z.nameString() in set(zone_names)]
+        if not zones:
+            refused.append(
+                f"HVAC {system!r}: none of its {len(zone_names)} zone(s) exist in "
+                'this geometry — a recipe matches HVAC to zones by name')
+            continue
+        try:
+            builder.build_system(model, system, zones, remove_existing=True)
+        except Exception as exc:
+            refused.append(f"HVAC {system!r} on {len(zones)} zone(s): the builder "
+                           f'refused it — {type(exc).__name__}: {exc}')
+            continue
+        applied.append(f"HVAC {system!r} (IDENTIFIED) on {len(zones)} zone(s)")
+        if audit is not None:
+            audit.decision('recipe', 'HVAC built from the identified catalogue system',
+                           target=system,
+                           inputs={'zones': len(zones),
+                                   'zones_in_recipe': len(zone_names)})
+
+
 def _build_hvac(model, groups, applied, refused, audit):
     """Build HVAC from ACCEPTED candidates, auditing each as a candidate.
 
@@ -583,8 +669,12 @@ def build_from_recipe(recipe, model, *, accept_candidates=False, audit=None):
     #
     # So HVAC is built first, then the performance sections land on the
     # equipment that will actually run.
-    unresolved = [group for group in recipe.get('hvac', {})
-                  .get('zone_groups', []) if not group.get('resolved')]
+    _flag_unscheduled_loads(model, skipped)
+    _apply_thermostats(model, recipe.get('controls', {}), applied, skipped, audit)
+    groups = recipe.get('hvac', {}).get('zone_groups', [])
+    _build_identified(model, [g for g in groups if g.get('resolved')],
+                      applied, refused, audit)
+    unresolved = [group for group in groups if not group.get('resolved')]
     if accept_candidates:
         _build_hvac(model, unresolved, applied, refused, audit)
 
@@ -615,4 +705,14 @@ def build_from_recipe(recipe, model, *, accept_candidates=False, audit=None):
         audit.info('recipe', 'recipe applied',
                    inputs={'applied': len(applied), 'skipped': len(skipped),
                            'refused': len(refused)})
+        # #237: the account is in the RETURN value, and a caller that ignores
+        # it got a model with no constructions or no HVAC and an audit with 0
+        # warnings. What did NOT reach the model is now a warning too.
+        if skipped or refused:
+            audit.warn('recipe',
+                       f'{len(skipped)} recipe field(s) SKIPPED and {len(refused)} '
+                       'REFUSED — they did not reach the model; see the returned '
+                       "account's 'skipped' and 'refused'",
+                       inputs={'skipped': len(skipped), 'refused': len(refused)},
+                       value=(refused + skipped)[:5])
     return {'applied': applied, 'skipped': skipped, 'refused': refused}

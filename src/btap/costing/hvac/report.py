@@ -10,6 +10,7 @@ from dataclasses import dataclass, field
 
 from btap._compat import ruby_round
 from btap.audit import AuditLog
+from btap.costing import _location
 from btap.costing.hvac.database import Database
 from btap.costing.hvac.ledger import Ledger
 from btap.costing.hvac.quantify_equipment import EquipmentQuantifier
@@ -60,7 +61,7 @@ def cost(model, systems=None, city=None, province_state=None, costs_csv=None,
 
     if city is None or province_state is None:
         site = model.getSite()
-        location = database.closest_location(site.latitude(), site.longitude())
+        location = _location.site_location(database.closest_location, site)
         if city is None:
             city = location['city']
         if province_state is None:
@@ -69,6 +70,7 @@ def cost(model, systems=None, city=None, province_state=None, costs_csv=None,
                        inputs={'latitude': ruby_round(site.latitude(), 3),
                                'longitude': ruby_round(site.longitude(), 3)},
                        value=f"{city}, {province_state}")
+    city, province_state = _location.canonical(database.locations, city, province_state)
 
     equipment = EquipmentQuantifier(database, ledger, mech_room_name=mech_room_name,
                                     audit=audit)

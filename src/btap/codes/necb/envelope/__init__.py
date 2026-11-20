@@ -56,14 +56,28 @@ from btap.codes.necb.envelope.rules import (  # noqa: E402
 )
 
 
-def hdd18(model, **kwargs):
-    return climate.hdd18(model, **kwargs)
+def hdd18(model, *, edition, hdd=None, audit=None):
+    """Heating degree-days (18 °C) for the model's site: ``hdd`` when given,
+    else the edition's Table C-1 for the nearest city, else the weather's
+    ``.stat``. Takes ``edition=`` ('2020', '2025'), NOT ``code=`` — it is one of
+    the per-edition DATA accessors. Forwards to
+    :func:`btap.codes.necb.envelope.climate.hdd18`, whose signature this one
+    mirrors exactly (tests/necb/test_facade_signatures.py)."""
+    return climate.hdd18(model, edition=edition, hdd=hdd, audit=audit)
 
 
-def cost(model, **kwargs):
+def cost(model, *, city=None, province_state=None, structure=None, performance="lp",
+         tbd_result=None, tb_tallies=None, tb_quality="good", costs_csv=None,
+         local_factors_csv=None, audit=None):
+    """Cost the model's envelope. Forwards to :func:`btap.costing.envelope.cost`,
+    whose signature this one mirrors exactly (tests/necb/test_facade_signatures.py)."""
     from btap.costing import envelope as costing
 
-    return costing.cost(model, **kwargs)
+    return costing.cost(model, city=city, province_state=province_state,
+                        structure=structure, performance=performance,
+                        tbd_result=tbd_result, tb_tallies=tb_tallies,
+                        tb_quality=tb_quality, costs_csv=costs_csv,
+                        local_factors_csv=local_factors_csv, audit=audit)
 
 
 # `from ... import rules as _rules_module` above set this package's `rules`

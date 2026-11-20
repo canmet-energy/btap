@@ -84,6 +84,57 @@ class BaseSystem:
             s.setCentralHeatingMaximumSystemAirFlowRatio(z['minimum_system_air_flow_ratio'])
         return s
 
+    @staticmethod
+    def terminal_first(zone, terminal, *zone_equipment):
+        """Offer a zone's load to its air-loop TERMINAL first and to its zone
+        equipment after (D-111), under SequentialLoad with every fraction 1.0.
+
+        The later equipment trims what the earlier leaves. With the zone
+        equipment first, an air terminal whose supply the zone cannot refuse —
+        a make-up-air or packaged unit's constant-volume diffuser — delivered
+        its air AFTER the load was met, and nothing corrected it: #236's
+        fan-coil office sat 0.6-0.9 C under setpoint (77 h of heating unmet
+        in a January week; terminal first, 4.0 h), and baseboard-first PSZ
+        zones failed warmup convergence (8 Severe; terminal first, 0). The
+        NECB reference already orders System 3/4 zones this way (AHJ-15,
+        `btap.codes.necb.hvac.reference`), with these same settings.
+        """
+        zone.setLoadDistributionScheme('SequentialLoad')
+        for priority, component in enumerate((terminal, *zone_equipment), start=1):
+            zone.setHeatingPriority(component, priority)
+            zone.setCoolingPriority(component, priority)
+            zone.setSequentialHeatingFraction(component, 1.0)
+            zone.setSequentialCoolingFraction(component, 1.0)
+
+    def match_central_heating_to_zones(self, air_loop, zones):
+        """When the central coil is the zones' ONLY air-side heat source — no
+        reheat terminals — design it to deliver the air the zones are sized to
+        receive (#236).
+
+        A row whose sizing block does not set
+        `central_heating_design_supply_air_temperature` kept OpenStudio's
+        Sizing:System default of 16.7 C. That default suits a central VAV
+        preheat coil with reheat in the zones; on a single-zone or no-reheat
+        loop it sized the only heating coil to deliver air barely warmer than
+        the room, while the same builder designed each zone to receive 40 C
+        supply air. A 24-zone office then left 19.5 h of heating unmet in a
+        January week (one interior corridor could not recover from its night
+        setback); matched, 6.8 h. The value comes from the zones' own sizing —
+        no code-specific number is introduced. Rows whose sizing block sets
+        the central temperature are untouched.
+        """
+        if self.sizing.get('central_heating_design_supply_air_temperature') is not None:
+            return None
+        targets = [zone.sizingZone().zoneHeatingDesignSupplyAirTemperature()
+                   for zone in zones
+                   if zone.sizingZone().zoneHeatingDesignSupplyAirTemperatureInputMethod()
+                   == 'SupplyAirTemperature']
+        if not targets:
+            return None
+        design = max(targets)
+        air_loop.sizingSystem().setCentralHeatingDesignSupplyAirTemperature(design)
+        return design
+
     def apply_zone_sizing(self, zone):
         """Apply the sizing block's zone-level fields: either the TemperatureDifference
         method (NECB reference systems) or absolute supply temperatures (ECM systems),

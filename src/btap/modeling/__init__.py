@@ -62,7 +62,15 @@ def create(*, shape, model=None, audit=None, **params):
 
     storeys=/below_grade_storeys= are the canonical spellings; the engines'
     own names (above_ground_storys, under_ground_storys, num_floors) are
-    still accepted. Only the rectangle shape has below-grade storeys."""
+    still accepted. Only the rectangle shape has below-grade storeys.
+
+    Every space the wizard creates gets its own thermal zone, named
+    ``Zone <space>`` as ``bar()`` names them (#237); spaces already in a
+    ``model=`` passed in are left as they are. Output carries NO space types
+    or constructions: tag spaces with
+    ``btap.codes.necb.loads.assign_space_types`` and give surfaces
+    constructions with ``seed_constructions`` before the loads and envelope
+    passes."""
     import openstudio
 
     from btap.modeling.geometry import wizards
@@ -72,6 +80,7 @@ def create(*, shape, model=None, audit=None, **params):
     shape = str(shape).lower()
     if shape not in SHAPES:
         raise ValueError(f"unknown shape '{shape}' ({', '.join(SHAPES)})")
+    existing = {str(space.handle()) for space in model.getSpaces()}
 
     params = _normalize_storey_aliases(params, shape)
 
@@ -127,12 +136,29 @@ def create(*, shape, model=None, audit=None, **params):
 
     if result is None:
         raise ValueError(f"{shape} wizard rejected the parameters (see the OpenStudio log)")
+    model = result
+
+    # #237: the ported wizards make SPACES but no thermal zones, unlike bar()
+    # and create_from_footprint(). A zoneless model takes no thermostats from
+    # the NECB loads pass, and EnergyPlus drops every surface of it while
+    # reporting success — an empty building simulated cleanly. So each space
+    # the wizard just made gets its own zone, named as bar() names them; a
+    # caller's existing spaces (`model=`) are left alone.
+    zoned = 0
+    for space in model.getSpaces():
+        if str(space.handle()) in existing or space.thermalZone().is_initialized():
+            continue
+        zone = openstudio.model.ThermalZone(model)
+        zone.setName(f"Zone {space.nameString()}")
+        space.setThermalZone(zone)
+        zoned += 1
 
     storeys_above = params.get("above_ground_storys", params.get("num_floors", 3))
     storeys_below = params.get("under_ground_storys", 1 if shape == "rectangle" else 0)
     audit.decision("geometry", f"{shape} massing created",
                    inputs={**params, "shape": shape,
                            "spaces": len(model.getSpaces()),
+                           "thermal_zones_created": zoned,
                            "storeys_above": storeys_above,
                            "storeys_below": storeys_below})
     return model
@@ -423,12 +449,68 @@ def systems(filter=None, family=None):
 
 
 def build_system(model, system_name, zones, *, performance_profile=None,
-                 **kwargs):
-    """Build a system by descriptive name. See hvac.builder.build_system."""
+                 audit=None, **kwargs):
+    """Build a catalogue system by descriptive name on ``zones``.
+
+    See ``btap.modeling.hvac.builder.build_system`` for the keywords
+    (``control_zone``, ``remove_existing``, ``config``, ...).
+
+    **Single-zone systems and several zones.** Most "PSZ RTU ..." rows build
+    ONE packaged unit over every zone they are given, controlled from one zone
+    — a packaged SINGLE-zone system serving a whole building. For one unit per
+    zone, pass ``config={'per_zone': True}`` or call once per zone. Building
+    such a row across several zones WARNS (#236); rows that state ``per_zone``
+    themselves, like the "Shared PSZ ..." rows, do not.
+
+    ``audit``, when given, records the build and that warning.
+    """
     from btap.modeling.hvac import builder
-    return builder.build_system(
+    zones = list(zones)
+    result = builder.build_system(
         model, system_name, zones,
         performance_profile=performance_profile, **kwargs)
+    _record_hvac_build(system_name, zones, result, kwargs, audit,
+                       replaced=bool(kwargs.get("remove_existing")))
+    return result
+
+
+def _shared_by_default(system_name, zones, config):
+    """The #236 trap: a PSZ row that does not state `per_zone`, built across
+    several zones, becomes ONE unit for all of them. Returns the warning text,
+    or None. The catalogue's explicit rows, shared or per-zone, are never
+    flagged: their names and data already say what they build."""
+    if len(zones) < 2:
+        return None
+    from btap.modeling.hvac import catalog
+    row = catalog.resolve(system_name)
+    if row.get("family") != "psz" or "per_zone" in row:
+        return None
+    if config and "per_zone" in config:
+        return None
+    return (f"ONE shared '{system_name}' unit now serves {len(zones)} zones, "
+            f"controlled from a single zone. A packaged single-zone system is "
+            f"normally one unit per zone: pass config={{'per_zone': True}} or "
+            f"call build_system once per zone. (#236)")
+
+
+def _record_hvac_build(system_name, zones, result, kwargs, audit, *, replaced):
+    message = _shared_by_default(system_name, zones, kwargs.get("config"))
+    if message:
+        import warnings
+        warnings.warn(message, UserWarning, stacklevel=3)
+    if audit is None:
+        return
+    if message:
+        audit.warn("hvac", message, target=system_name,
+                   inputs={"zones": len(zones)})
+    air_loops = getattr(result, "air_loops", None)
+    audit.decision("hvac", f"{'replaced with' if replaced else 'built'} {system_name}",
+                   target=system_name,
+                   inputs={"zones": len(zones),
+                           "control_zone": kwargs.get("control_zone").nameString()
+                           if kwargs.get("control_zone") is not None else None},
+                   value={"air_loops": len(list(air_loops)) if air_loops is not None
+                          else None})
 
 
 def remove_hvac_from_zones(model, zones):
@@ -451,12 +533,18 @@ def characterize(model, audit=None):
 
 
 def replace_system(model, system_name, zones, *, performance_profile=None,
-                   **kwargs):
-    """Replace whatever HVAC currently serves these zones with a catalog system."""
+                   audit=None, **kwargs):
+    """Replace whatever HVAC currently serves these zones with a catalog system.
+
+    ``build_system(..., remove_existing=True)``; see its docstring for the
+    single-zone warning and ``audit``."""
     from btap.modeling.hvac import builder
-    return builder.build_system(
+    zones = list(zones)
+    result = builder.build_system(
         model, system_name, zones, **kwargs, remove_existing=True,
         performance_profile=performance_profile)
+    _record_hvac_build(system_name, zones, result, kwargs, audit, replaced=True)
+    return result
 
 
 def catalog_html(path=None, **opts):

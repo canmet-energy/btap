@@ -158,6 +158,8 @@ audit are drained and archived — see `docs/README.md`.
 - **D-107** — Authored sample fan coils carry the mode-specific sizing contract _(process)_
 - **D-108** — Bare loop DX is not evidence of unitary equipment; the residential identity branch needs an equipment-class fact _(runtime)_
 - **D-109** — The thermal-bridging engine is a default dependency, not the [tbd] extra _(process)_
+- **D-110** — Fan coils the authoring API builds carry the mode-specific sizing contract _(process)_
+- **D-111** — Make-up-air terminal before zone equipment: System 2/5 fan coils, and authored PSZ baseboards _(runtime)_
 
 <!-- TOC END -->
 
@@ -8722,3 +8724,101 @@ rested on (`327`).
   whether or not the default worked. The built wheel's METADATA carries
   `Requires-Dist: canmet-tbd==3.5.2` with no `extra ==` marker, and no
   `Provides-Extra` at all.
+
+<a id="d-110"></a>
+
+## D-110 — Fan coils the authoring API builds carry the mode-specific sizing contract
+
+**Decided:** `btap.modeling`'s builders mark every `ZoneHVAC:FourPipeFanCoil`
+they create — `systems/fan_coils.py` and `components/ecm_air.py` — for
+D-106's mode-specific sizing contract, so each water coil rates at its own
+operating mode's design airflow.
+
+**Who/when:** phylroy, 2026-11-19, under #236 ("fix the two observed issues").
+
+**Why:** #236 built a 24-zone office from nothing with
+`FPFC MAU DX Coils with Scroll Chiller` and got two
+`Calculation of cooling coil design UA failed` Severe errors — #68's
+mechanism: unmarked, EnergyPlus fixes both coils to the larger unit maximum
+early in autosizing, and in a heating-dominated zone the cooling coil is
+rated at the heating airflow. Marked, the same model sizes with **zero**
+Severe. D-106 already marks the reference's fan coils and D-107 the samples
+this repository authors; a fan coil built by the authoring API is authored by
+this repository in exactly the same sense.
+
+**What did NOT change:** D-107's boundary. The marker is set when the builder
+CREATES a fan coil; the compliance pipeline still does not infer or add it to
+fan coils in a model that is loaded or submitted, and a marker already in the
+input remains effective. The NECB reference's System 2/5 fan coils were
+already marked by D-106, so marking them at build time too changes nothing
+there.
+
+**Where it lives:** the marker moved from `btap.simulation.translation` to
+`btap/_fan_coil_sizing.py`, at the package root, because `btap.modeling` may
+not import `btap.simulation` (D-77) and a second copy of the flag name would
+drift. `btap.simulation.translation` re-exports it, so every caller keeps
+working, and a test asserts the two are the same object.
+
+**Not decided here:** the same #236 run left 77 h of heating unmet with this
+system because each zone's make-up-air terminal runs AFTER its fan coil in
+`SequentialLoad` order. That order is inherited unchanged from the pinned
+`openstudio-standards` `add_sys2_FPFC_sys5_TPFC`, and the NECB reference's
+System 2/5 use it, so changing it would move reference results — a separate,
+adjudicated question.
+
+<a id="d-111"></a>
+
+## D-111 — The make-up-air terminal runs before the zone equipment
+
+**Decided:** `btap.modeling`'s builders offer a zone's load to its air-loop
+terminal FIRST and to its zone equipment after (`BaseSystem.terminal_first`:
+`SequentialLoad`, priorities 1 then 2, every sequential fraction 1.0 — the
+settings D-91 gives System 3/4), for
+
+- the **fan-coil** families with a make-up-air unit (`systems/fan_coils.py`),
+  which the NECB reference uses for **System 2 and 5**; and
+- **PSZ plus baseboard** (`systems/psz.py`).
+
+**Who/when:** phylroy, 2026-11-19, under #236 — first "everywhere, including
+the reference", then, once it was clear the reference change is the question
+AHJ-15 refers, "reference + AHJ referral".
+
+**Why — the fan coils.** #236 built a 24-zone office with
+`FPFC MAU DX Coils with Scroll Chiller`. Every zone sat 0.6–0.9 °C below its
+heating setpoint all day — 77 h unmet in a January week — although the fan
+coils delivered 55–94 kW and the boilers ran. Under `SequentialLoad` the later
+equipment trims what the earlier leaves; with the fan coil first, the
+make-up-air unit's air (which the zone cannot refuse) arrived after the load
+was met and nothing corrected it. Terminal first: 4.0 h, zones at 22.0 °C. The
+legacy order is the pinned gem's `add_sys2_FPFC_sys5_TPFC` adding the fan coil
+before the diffuser — an implementation accident, recorded here as a gem
+finding rather than adopted.
+
+**Why — PSZ plus baseboard.** The same office with
+`PSZ RTU Gas and DX Coils and Hot Water Baseboard`, one unit per zone, gave 8
+`CheckWarmupConvergence` Severe errors; an identical-topology NECB reference
+gave 0. The difference was the order: the builder put the baseboard first,
+while D-91 already orders reference System 3/4 terminal first. Terminal first:
+0 Severe, hot-water and electric baseboards alike.
+
+**Scope of the PSZ half: exactly D-91's.** One unit serving ONE zone, and not a
+heat-pump row. D-91 keeps two cases out as separate items — a SHARED System
+3/4 unit (DF-8, a D-28 question) and the HEAT-PUMP reference (DF-9: its loop
+gas coil is beyond dispatch and its heat pump is starved) — and so does this.
+Within that scope the reference already orders its zones this way, so no
+reference result moves. The first version of this change reordered every PSZ
+zone with a baseboard; it moved a heat-pump reference's result, and the
+frozen scenario `determination-04-16-ashp-supp-aux-election-annual` refused to
+freeze — its pinned AHJ-14 citation and stalled capacity iteration were gone.
+
+**Why a referral, not a ruling.** Sentence 9.(3) sets terminal and
+secondary-system CAPACITIES, not an annual dispatch sequence; AHJ-15 refers
+exactly that question for System 3/4 and warns that another topology must not
+silently inherit its predicate. So the System 2/5 reference carries its own
+referral, **AHJ-26**, and `reference.py#_record_fan_coil_dispatch` witnesses
+the built order and cites it — refusing a zone built any other way.
+
+**Not decided here:** two other families still put zone equipment first —
+`mau_ptac` (the reference's System 1) and `vav_reheat` with baseboards (System
+6). The reference does not re-order those, so changing them would move System
+1 and 6 reference results; neither failed in #236. Left as recorded findings.

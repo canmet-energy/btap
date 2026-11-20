@@ -180,7 +180,12 @@ def run_energyplus(model, run_dir, *, sizing_only=False, run_period=None, backen
     """
     import openstudio
 
-    run_dir = Path(run_dir)
+    # ABSOLUTE, once, here (#236): the backend runs EnergyPlus with its cwd in
+    # the run's own output directory, so a relative `run_dir` handed on as-is
+    # made `-d` and the IDF path resolve against the wrong directory —
+    # "input_file: File does not exist: my_first_run/in.idf", and no
+    # eplusout.err. A user's first `run_dir="my_first_run"` hit exactly that.
+    run_dir = Path(run_dir).resolve()
     run_dir.mkdir(parents=True, exist_ok=True)
     sim = model.getSimulationControl()
     sim.setDoZoneSizingCalculation(True)

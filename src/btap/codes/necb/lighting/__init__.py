@@ -46,12 +46,23 @@ def rules(edition):
     return rulesdata.load("lighting", code_id(edition))
 
 
-def table(name, edition):
+def table(edition, name):
     """One transcribed lighting table out of ``edition``'s own snapshot.
 
     ``edition`` is REQUIRED: before Stage 3 the edition was baked into the file
     name (``led_lighting_2020``) and every edition read the 2020 file.
+
+    ``(edition, name)``, the same order as ``btap.codes.necb.loads.table``. It
+    was ``(name, edition)`` until #236; a call still in the old order is
+    recognised and refused by name, rather than read as an unknown edition.
     """
+    from btap.codes import editions
+    known = editions("necb")
+    if str(name) in known and str(edition) not in known:
+        raise TypeError(
+            f"lighting.table({edition!r}, {name!r}): the arguments are in the old "
+            f"order. It is table(edition, name) since #236, like loads.table — "
+            f"call table({name!r}, {edition!r}).")
     key = (_data_root(), str(edition), name)
     if key not in _tables:
         path = edition_file(edition, "tables", f"{name}.json")
@@ -62,7 +73,7 @@ def table(name, edition):
 def led_record(building_type, space_type, edition):
     """The merged LED alternative table (lighting_per_area W/ft2 + heat
     fractions), from ``edition``'s own copy."""
-    for r in table("led_lighting", edition):
+    for r in table(edition, "led_lighting"):
         if r["building_type"] == building_type and r["space_type"] == space_type:
             return r
     return None
@@ -106,19 +117,48 @@ def cost(model, **kwargs):
     return Costing.cost(model, **kwargs)
 
 
-def apply_lights(model, **kwargs):
-    return _apply_lights.apply_lights(model, **kwargs)
+def apply_lights(model, code="necb2020", lights_type="NECB_Default", lights_scale=1.0,
+                 audit=None):
+    """Apply NECB interior lighting power to every tagged space type.
+
+    ``lights_type`` selects the fixture technology (``NECB_Default``, or e.g.
+    an LED variant); ``lights_scale`` scales the power density. Forwards to
+    :func:`btap.codes.necb.lighting.apply_lights.apply_lights`, whose signature
+    this one mirrors exactly (tests/necb/test_facade_signatures.py)."""
+    return _apply_lights.apply_lights(model, code=code, lights_type=lights_type,
+                                      lights_scale=lights_scale, audit=audit)
 
 
-def add_daylighting_controls(model, **kwargs):
-    """Facade: add NECB daylighting controls (placement: 'all' by default —
-    every daylighted space; pass placement='necb2020' for the code rule)."""
-    return _daylighting.add_controls(model, **kwargs)
+def add_daylighting_controls(model, code="necb2020", placement=None, option=None,
+                             office_match="legacy", unknown_control_requirement="required",
+                             audit=None):
+    """Add NECB daylighting photocontrols to the PROPOSED model.
+
+    ``placement`` defaults to every daylighted space; pass
+    ``placement='necb2020'`` for the code rule. Forwards to
+    :func:`btap.codes.necb.lighting.daylighting.add_controls`, whose signature
+    this one mirrors exactly."""
+    return _daylighting.add_controls(model, code=code, placement=placement, option=option,
+                                     office_match=office_match,
+                                     unknown_control_requirement=unknown_control_requirement,
+                                     audit=audit)
 
 
-def reference_lighting(model, **kwargs):
-    return _reference.reference_lighting(model, **kwargs)
+def reference_lighting(model, code="necb2020", daylighting=False, audit=None):
+    """Regenerate interior lighting to the Part 4 allowance on a REFERENCE model.
+    Forwards to :func:`btap.codes.necb.lighting.reference.reference_lighting`,
+    whose signature this one mirrors exactly."""
+    return _reference.reference_lighting(model, code=code, daylighting=daylighting,
+                                         audit=audit)
 
 
-def reference_daylighting(reference, **kwargs):
-    return _reference_daylighting.apply(reference, **kwargs)
+def reference_daylighting(reference, code="necb2020", proposed=None, placement="necb2020",
+                          office_match="any_enclosed_office",
+                          unknown_control_requirement="required", audit=None):
+    """Build the reference building's daylighting geometry and photocontrols.
+    Forwards to :func:`btap.codes.necb.lighting.reference_daylighting.apply`,
+    whose signature this one mirrors exactly."""
+    return _reference_daylighting.apply(reference, code=code, proposed=proposed,
+                                        placement=placement, office_match=office_match,
+                                        unknown_control_requirement=unknown_control_requirement,
+                                        audit=audit)

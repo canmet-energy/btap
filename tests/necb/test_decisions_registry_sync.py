@@ -69,7 +69,7 @@ MIGRATED_IDS = (
     "D-90", "D-91", "D-92", "D-93", "D-97", "D-99", "D-100", "D-101",
     "D-102",
 )
-NATIVE_STRUCTURED_IDS = ("D-104", "D-105", "D-106", "D-107", "D-108")
+NATIVE_STRUCTURED_IDS = ("D-104", "D-105", "D-106", "D-107", "D-108", "D-110", "D-111")
 STRUCTURED_IDS = MIGRATED_IDS + NATIVE_STRUCTURED_IDS
 #: Phase D decisions moved from `unverified` to the structured form; the other
 #: 23 migrated decisions are Phase C's. D-104 through D-106 are native
@@ -161,6 +161,8 @@ STRUCTURED_RUNTIME_SHA256 = {
     "D-106": "1d80c9ebe30ce530f75b2a62cea7377a8b2cf3d3f41730cdcb0323a42fecad1f",
     "D-107": "de2848c0ccdf358671d615810418cbd5f42245fb47900fa5cab0e69ecfd96367",
     "D-108": "8e367e940bb45cc1d181d9d3f0711071c21ef672825e5d362804d02592139f5a",
+    "D-110": "67257ada64cd302ff528b4aa71414d644ea7364cee7e700f8a49a6cc8046b2bc",
+    "D-111": "3549112359121d9db0a25dd715e3d762224309e762cc12db17228f308e08ca3c",
 }
 #: Each structured decision's requirement keys in AUTHORED order, as the
 #: sources record them. Phase C's 23 had them in legacy front matter; Phase
@@ -344,6 +346,8 @@ STRUCTURED_KEYS = {
     "D-106": ("reference_fan_coil_mode_specific_airflow",),
     "D-107": ("authored_sample_fan_coil_sizing",),
     "D-108": ("residential_compatible_cooling_identity",),
+    "D-110": ("authored_api_fan_coil_sizing",),
+    "D-111": ("make_up_air_terminal_dispatch",),
 }
 #: Each structured requirement as the sources record it: its label, then its
 #: NECB 2020 and NECB 2025 citations in authored order. A requirement the
@@ -355,6 +359,16 @@ STRUCTURED_KEYS = {
 #: provision grammar would otherwise refuse as an alias. A key shared by
 #: several decisions appears once: it is one requirement.
 STRUCTURED_REQUIREMENTS = {
+    "make_up_air_terminal_dispatch": (
+        "How a zone's make-up-air terminal and its zone equipment share the zone load",
+        ("8.4.2.10.(2)", "8.4.4.9.(3)"),
+        ("8.4.2.10.(2)", "8.4.5.9.(3)"),
+    ),
+    "authored_api_fan_coil_sizing": (
+        "Mode-specific water-coil sizing in fan coils built by the authoring API",
+        ("5.2.1.1.(1)", "8.4.2.10.(2)", "8.4.2.10.(5)", "8.4.3.1.(2)(c)"),
+        ("5.2.1.1.(1)", "8.4.2.10.(2)", "8.4.2.10.(5)", "8.4.3.1.(2)(c)"),
+    ),
     "authored_sample_fan_coil_sizing": (
         "Mode-specific water-coil sizing in repository-authored sample models",
         ("5.2.1.1.(1)", "8.4.2.10.(2)", "8.4.2.10.(5)", "8.4.3.1.(2)(c)"),
@@ -1682,10 +1696,10 @@ class TestTheCommittedProvisionView(unittest.TestCase):
     #: REQUIREMENTS counts instances, including a shared key once per decision
     #: that uses it. D-109 (a process decision, `not_applicable`) is OMITTED from
     #: the provision view, taking that count from 35 to 36.
-    STRUCTURED, ESTABLISHED, HELD, INCLUDED, OMITTED = 70, 0, 3, 73, 36
-    SOURCE_ROWS = 242
-    GOVERNING_ROWS = 241
-    REQUIREMENTS = 129
+    STRUCTURED, ESTABLISHED, HELD, INCLUDED, OMITTED = 72, 0, 3, 75, 36
+    SOURCE_ROWS = 246
+    GOVERNING_ROWS = 245
+    REQUIREMENTS = 131
 
     @classmethod
     def setUpClass(cls):
