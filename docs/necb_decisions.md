@@ -7787,6 +7787,19 @@ true, and is tested separately, is that `copy_proposed` CAN retain a proposed
 plant with both its fuels; it is simply not an outcome of the question AHJ-1
 asks.
 
+**The on-ramp builds the proposed the same way** (#237's follow-up,
+2026-11-20). A modeller's own shared unit stays as built, as above. But when
+the TOOL generates the proposed's HVAC — `--hvac-system`, or
+`necb_loads={'hvac_system': ...}` — it is the author, and a catalogue row
+that is shared only by DEFAULT (a "PSZ RTU ..." row stating no `per_zone`)
+is built one unit per thermal block. Built shared, such a row put one unit
+and one thermostat over the whole building: on a five-zone office the zone
+holding the thermostat was met and the others were not, whichever zone it
+was, and 8.4.1.2 failed on the proposed for a reason no capacity increase or
+control rule could reach. A row that states `per_zone`, like the "Shared PSZ
+..." rows, is built as its name says. `path.onramp_hvac_config` is the rule
+and the scenario harness calls it rather than restating it.
+
 <a id="d-102"></a>
 
 ## D-102 — the Code states EIR_FPLR; EnergyPlus carries PLF, and the floor goes on the output

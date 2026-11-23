@@ -1393,8 +1393,19 @@ def _apply_necb_loads(proposed, ruleset, options, audit):
         shw_demand._apply_shw(proposed, ruleset, fuel=shw_fuel, audit=audit)
     hvac_system = options.get("hvac_system")
     if hvac_system:
+        config = onramp_hvac_config(hvac_system)
         result = modeling.build_system(
-            proposed, hvac_system, sorted_by_name(proposed.getThermalZones()))
+            proposed, hvac_system, sorted_by_name(proposed.getThermalZones()),
+            config=config)
+        if config:
+            audit.decision(
+                "hvac",
+                "single-zone system built one unit per thermal block — the "
+                "catalogue row is shared only by default, and a single-zone "
+                "system serves one thermal block",
+                target=hvac_system,
+                inputs={"zones": len(proposed.getThermalZones()), **config},
+                ruling="D-101")
         # build_system takes no audit — record the built topology here so the
         # on-ramp HVAC generation is visible in the narrative, not just an
         # input on the summary line.
@@ -1414,6 +1425,28 @@ def _apply_necb_loads(proposed, ruleset, options, audit):
                 "shw_fuel": shw_fuel or "none",
                 "hvac_system": hvac_system or "model as given"},
         article="8.4.3.2.")
+
+
+def onramp_hvac_config(system_name):
+    """The ``config`` the on-ramp builds ``system_name`` with (D-101).
+
+    A system is assigned to each THERMAL BLOCK, and a single-zone system
+    serves one. Most "PSZ RTU ..." catalogue rows are shared only by DEFAULT —
+    they state no ``per_zone`` — so building one across every zone put ONE unit
+    and ONE thermostat over the whole building: the #236 trap, which on a
+    five-zone office left 377 h of heating unmet on the proposed and, with its
+    control zone elected, 564 h of cooling, failing 8.4.1.2. Such a row is
+    built one unit per zone. A row that STATES ``per_zone`` either way, like
+    the "Shared PSZ ..." rows, is built as its name and data say.
+
+    Returns None when the row is built as catalogued. Public to the scenario
+    harness, whose API path builds the same way.
+    """
+    from btap.modeling.hvac import catalog
+    row = catalog.resolve(system_name)
+    if row.get("family") == "psz" and "per_zone" not in row:
+        return {"per_zone": True}
+    return None
 
 
 def _heating_election_data(proposed, inventory, audit):

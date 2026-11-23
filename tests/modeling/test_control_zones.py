@@ -17,6 +17,9 @@ import warnings
 from tests.support import DDY, EPW, load_fixture, needs_engine, needs_sdk
 
 SHARED = "PSZ RTU Gas and DX Coils and Hot Water Baseboard"
+#: A row that STATES it is shared: the on-ramp builds it shared (D-101), so it
+#: is the one that reaches the pipeline's election.
+EXPLICITLY_SHARED = "Shared PSZ with gas boiler coils and hot water baseboard"
 PER_ZONE = "PSZ-AC with gas coil"
 MULTI_ZONE = "MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard"
 
@@ -134,7 +137,8 @@ class TestThePipelineElectsWhatItBuilds(unittest.TestCase):
                 model, code="necb2020", simulate="sizing", hdd=3890, run_dir=run_dir,
                 weather={"epw": str(EPW), "ddy": str(DDY)},
                 building={"storeys": 1},
-                necb_loads={"space_type_map": spaces, "hvac_system": SHARED})
+                necb_loads={"space_type_map": spaces,
+                            "hvac_system": EXPLICITLY_SHARED})
         entries = [e for e in result.audit.entries
                    if e["action"].startswith("shared unit controlled from the zone")]
         self.assertEqual(1, len(entries))
