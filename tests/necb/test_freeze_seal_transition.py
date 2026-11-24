@@ -122,12 +122,16 @@ class TestFreezeSealTransition(unittest.TestCase):
         #      sample, not an inevitability: it now sizes and runs a full year
         #      cleanly, so an annual scenario on 22 is available and would
         #      cover the embedded routes too (Fable, `303` F3 and `304` F1)
-        #   = 29
+        #   1  `determination-07-system2-terminal-first-annual`, the FULL-YEAR
+        #      witness for D-111 / AHJ-26 (#237's follow-up, 2026-11-20): with
+        #      the System 2 reference's terminal-first order removed, its
+        #      unmet hours go 79 / 15.75 -> 1280 / 1289.75 h
+        #   = 30
         #
         # This enumeration was ALREADY one behind before sample 09: it listed
         # 4+4+2+4 = 14 beside an assertion of 15, having never recorded sample
         # 11. A provenance narrative that does not add up is not provenance.
-        self.assertEqual({"python-only:post-handoff": 31, "python-only": 29}, active)
+        self.assertEqual({"python-only:post-handoff": 31, "python-only": 30}, active)
         self.assertEqual({"ruby": 29, "ruby-api": 2}, retired)
         self.assertEqual({
             "commit": "85ab14352677093e24038d933cf1071e5b03431a",
