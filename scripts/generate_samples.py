@@ -664,6 +664,13 @@ def generate(out: Path) -> list[tuple[str, str, int]]:
     # sample should include good design").
     from btap.codes.necb.path import onramp_hvac_config
 
+    # A row that STATES it is shared keeps the on-ramp's shared build — the
+    # user chose it. A sample has no such user: sample 16's catalogue row is
+    # the SHARED form of the ASHP unit, and built that way its one thermostat
+    # left four zones unheatable and stalled the capacity search. So it is
+    # built one unit per zone, which is the design the sample should show.
+    PER_ZONE_SAMPLES = {"16-ashp-electric-supp-hw-baseboard"}
+
     for slug, system in SAMPLES:
         try:
             model = seed("necb2020")
@@ -744,8 +751,10 @@ def generate(out: Path) -> list[tuple[str, str, int]]:
             after = bool(getattr(setup, "after_build", False))
             if setup is not None and not after:
                 setup(model)
+            config = ({"per_zone": True} if slug in PER_ZONE_SAMPLES
+                      else onramp_hvac_config(system))
             modeling.build_system(model, system, sorted_by_name(model.getThermalZones()),
-                                  config=onramp_hvac_config(system))
+                                  config=config)
             if setup is not None and after:
                 setup(model)
             size = save(model, out, slug)

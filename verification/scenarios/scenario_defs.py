@@ -498,13 +498,15 @@ DETERMINATION_SCENARIOS = [
     # stalled — which this scenario froze as the D-43 stall witness. That was
     # an accident of a poor design, not this scenario's purpose (the (2)(g)
     # election reaching a determination), so the stall is now witnessed on
-    # purpose by a test with hard-sized equipment; see UNCOVERED.
+    # purpose by a test with hard-sized equipment; see UNCOVERED. As a good
+    # design the proposed COMPLIES (0 / 160.75 h unmet, 69.3 % of target), so
+    # this determination is exit 0, still conditional on AHJ-1, AHJ-2, AHJ-14.
     {"id": "determination-04-16-ashp-supp-aux-election-annual",
      "lane": "parity", "kind": "cli", "replaces": [],
      "argv": ["<CORPUS>/16-ashp-electric-supp-hw-baseboard.osm",
               "--simulate", "annual", "--epw", "<EPW>",
               *BASE_ARGS, "-o", "<RUN_DIR>"],
-     "env": {}, "expect_exit": 1, "timeout_s": 5400,
+     "env": {}, "expect_exit": 0, "timeout_s": 5400,
      "files": CORPUS_FILES, "text_files": CORPUS_TEXT,
      "streams": {"stdout": "exact", "stderr": "exact"},
      "seal": GUARD7_SEAL,
@@ -515,7 +517,9 @@ DETERMINATION_SCENARIOS = [
          # at the deciding rule site, which D-100 makes the thing that
          # declares applicability — `json_in` is the wrong op here, it checks
          # that a value is one of a list rather than that a list contains one.
-         {"op": "audit_entry", "ahj": "AHJ-2", "count": 1},
+         # ONE election per heat-pump unit: five, since sample 16 is built
+         # one unit per zone (2026-11-24); the shared unit made one.
+         {"op": "audit_entry", "ahj": "AHJ-2", "count": 5},
          # Second that this run reaches a DETERMINATION, which is the one
          # thing no frozen artifact proved for AHJ-2. Measured on a full-year
          # probe before this was authored, so the id list is pinned rather
