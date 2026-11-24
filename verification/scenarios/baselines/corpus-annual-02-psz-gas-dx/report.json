@@ -7,24 +7,24 @@
  "proposed": {
   "mechanical_cooling": true,
   "clean_run": true,
-  "total_site_kwh": 4111.1,
-  "electricity_kwh": 1038.9,
-  "natural_gas_kwh": 3072.2,
+  "total_site_kwh": 3961.1,
+  "electricity_kwh": 1005.6,
+  "natural_gas_kwh": 2955.6,
   "district_heating_kwh": 0.0,
   "district_cooling_kwh": 0.0,
   "end_uses_kwh": {
-   "heating": 2766.7,
-   "cooling": 2.8,
+   "heating": 2644.4,
+   "cooling": 5.6,
    "fans": 152.8,
-   "pumps": 33.3,
+   "pumps": 0.0,
    "interior_lighting": 375.0,
    "interior_equipment": 472.2,
-   "water_systems": 305.6
+   "water_systems": 311.1
   },
   "floor_area_m2": 800.0,
-  "eui_kwh_per_m2": 5.1,
+  "eui_kwh_per_m2": 5.0,
   "unmet_occupied_hours": {
-   "heating": 23.0,
+   "heating": 0.0,
    "cooling": 0.0
   },
   "zone_unmet_occupied_hours": {
@@ -33,19 +33,19 @@
     "cooling": 0.0
    },
    "THERMAL ZONE 2": {
-    "heating": 18.0,
+    "heating": 0.0,
     "cooling": 0.0
    },
    "THERMAL ZONE 3": {
-    "heating": 21.5,
+    "heating": 0.0,
     "cooling": 0.0
    },
    "THERMAL ZONE 4": {
-    "heating": 20.0,
+    "heating": 0.0,
     "cooling": 0.0
    },
    "THERMAL ZONE 5": {
-    "heating": 6.75,
+    "heating": 0.0,
     "cooling": 0.0
    }
   }
@@ -96,7 +96,7 @@
   }
  },
  "capacity_iterations": [],
- "percent_of_target": 126.8,
+ "percent_of_target": 122.2,
  "tier": null,
  "annual": false,
  "ahj_applied": [

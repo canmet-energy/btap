@@ -194,11 +194,37 @@
   "inputs": {
    "run_period": "full year",
    "clean_run": true,
-   "total_site_kwh": 189756,
-   "unmet_heating_h": 465.0,
-   "unmet_cooling_h": 632.5
+   "total_site_kwh": 198153,
+   "unmet_heating_h": 0.0,
+   "unmet_cooling_h": 26.25
   },
   "building": "proposed building",
+  "level": "info"
+ },
+ {
+  "step": "characterize",
+  "target": "Chilled Water Loop",
+  "action": "plant loop classified",
+  "inputs": {
+   "fuels": [
+    "Electricity"
+   ],
+   "purchased": false
+  },
+  "value": "chilled_water",
+  "building": "reference building",
+  "level": "info"
+ },
+ {
+  "step": "characterize",
+  "target": "Condenser Water Loop",
+  "action": "plant loop classified",
+  "inputs": {
+   "fuels": [],
+   "purchased": false
+  },
+  "value": "condenser",
+  "building": "reference building",
   "level": "info"
  },
  {
@@ -231,14 +257,14 @@
  },
  {
   "step": "characterize",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
+  "target": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1",
   "action": "zone group characterized",
   "inputs": {
    "zones": 5,
-   "terminal": "cv"
+   "terminal": "vav_reheat"
   },
-  "value": "psz",
-  "evidence": "air loop name resolves to catalog entry 'PSZ RTU Gas and DX Coils and Hot Water Baseboard'; PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1 declares equipment_class 'air_cooled_unitary'; cooled: OS_Coil_Cooling_DX_SingleSpeed on PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1; heated: OS_Coil_Heating_Gas on PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
+  "value": "vav_reheat",
+  "evidence": "air loop name resolves to catalog entry 'MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard'; cooled: OS_Coil_Cooling_Water on MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1; heated: OS_Coil_Heating_Water on MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 1; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 2; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 3; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 4; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 5",
   "building": "reference building",
   "level": "decision"
  },
@@ -247,7 +273,7 @@
   "action": "model characterized",
   "inputs": {
    "zone_groups": 1,
-   "plants": 2,
+   "plants": 4,
    "built_by_gem": true
   },
   "building": "reference building",
@@ -270,10 +296,10 @@
   "inputs": {
    "category": "General Area",
    "energy_type": "gas",
-   "serving_system": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
+   "serving_system": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1",
    "heated": true,
    "cooled": true,
-   "cooling_kw": 50.638018528475136
+   "cooling_kw": 53.866993730000004
   },
   "value": "System 3 -> 'PSZ RTU Gas and DX Coils and Hot Water Baseboard'",
   "article": "8.4.4.7.(1)",
@@ -287,10 +313,10 @@
   "inputs": {
    "category": "General Area",
    "energy_type": "gas",
-   "serving_system": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
+   "serving_system": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1",
    "heated": true,
    "cooled": true,
-   "cooling_kw": 50.638018528475136
+   "cooling_kw": 53.866993730000004
   },
   "value": "System 3 -> 'PSZ RTU Gas and DX Coils and Hot Water Baseboard'",
   "article": "8.4.4.7.(1)",
@@ -304,10 +330,10 @@
   "inputs": {
    "category": "General Area",
    "energy_type": "gas",
-   "serving_system": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
+   "serving_system": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1",
    "heated": true,
    "cooled": true,
-   "cooling_kw": 50.638018528475136
+   "cooling_kw": 53.866993730000004
   },
   "value": "System 3 -> 'PSZ RTU Gas and DX Coils and Hot Water Baseboard'",
   "article": "8.4.4.7.(1)",
@@ -321,10 +347,10 @@
   "inputs": {
    "category": "General Area",
    "energy_type": "gas",
-   "serving_system": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
+   "serving_system": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1",
    "heated": true,
    "cooled": true,
-   "cooling_kw": 50.638018528475136
+   "cooling_kw": 53.866993730000004
   },
   "value": "System 3 -> 'PSZ RTU Gas and DX Coils and Hot Water Baseboard'",
   "article": "8.4.4.7.(1)",
@@ -338,10 +364,10 @@
   "inputs": {
    "category": "General Area",
    "energy_type": "gas",
-   "serving_system": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
+   "serving_system": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1",
    "heated": true,
    "cooled": true,
-   "cooling_kw": 50.638018528475136
+   "cooling_kw": 53.866993730000004
   },
   "value": "System 3 -> 'PSZ RTU Gas and DX Coils and Hot Water Baseboard'",
   "article": "8.4.4.7.(1)",
@@ -350,7 +376,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
+  "target": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1",
   "action": "proposed humidification recorded for the reference rebuild",
   "inputs": {
    "energy_source": "Electricity",
@@ -417,7 +443,7 @@
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": [
-    "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1"
+    "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1"
    ]
   },
   "article": "8.4.4.15.(2)",
@@ -512,7 +538,7 @@
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": [
-    "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1"
+    "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1"
    ]
   },
   "article": "8.4.4.15.(2)",
@@ -607,7 +633,7 @@
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": [
-    "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1"
+    "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1"
    ]
   },
   "article": "8.4.4.15.(2)",
@@ -702,7 +728,7 @@
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": [
-    "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1"
+    "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1"
    ]
   },
   "article": "8.4.4.15.(2)",
@@ -797,7 +823,7 @@
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": [
-    "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1"
+    "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1"
    ]
   },
   "article": "8.4.4.15.(2)",
@@ -857,7 +883,7 @@
   "inputs": {
    "energy_source": "Electricity",
    "proposed_systems": [
-    "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1"
+    "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1"
    ],
    "control": "SetpointManagerSingleZoneHumidityMinimum on Thermal Zone 1's humidistat",
    "capacity": "autosized"
@@ -929,15 +955,15 @@
   "action": "boiler efficiency applied",
   "inputs": {
    "fuel": "Gas",
-   "capacity_kw": 54.8,
-   "design_capacity_kw": 54.8,
+   "capacity_kw": 139.2,
+   "design_capacity_kw": 139.2,
    "capacity_source": "autosized",
    "part_load_curve_class": "non_condensing",
    "class_source": "row",
    "curve": "BOILER-PLF-NONCONDENSING",
    "form": "TableLookup"
   },
-  "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
+  "value": "thermal efficiency 0.9 (0.9 Thermal Eff), part-load curve BOILER-PLF-NONCONDENSING",
   "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
   "ruling": "D-89 D-90",
   "ahj": "AHJ-14",
@@ -952,7 +978,7 @@
   "inputs": {
    "fuel": "Gas",
    "capacity_kw": 0.0,
-   "design_capacity_kw": 54.8,
+   "design_capacity_kw": 139.2,
    "capacity_source": "autosized",
    "part_load_curve_class": "non_condensing",
    "class_source": "row",
@@ -986,7 +1012,7 @@
    "minimum_flow_fraction": 0.47,
    "loop": "Hot Water Loop"
   },
-  "value": "below-D floor (E=0.68) via min flow 0.00039 m3/s",
+  "value": "below-D floor (E=0.68) via min flow 0.00099 m3/s",
   "article": "8.4.4.14.(4)-(5); Table 8.4.4.14.",
   "ruling": "D-11",
   "building": "reference building",
@@ -997,10 +1023,10 @@
   "target": "Hot Water Loop",
   "action": "combined pump power within the Table 5.2.6.3 maximum",
   "inputs": {
-   "combined_w": 213,
-   "cap_w": 247,
+   "combined_w": 540,
+   "cap_w": 627,
    "w_per_kw": 4.5,
-   "thermal_kw": 54.8,
+   "thermal_kw": 139.2,
    "system_type": "Heating"
   },
   "article": "5.2.6.3.(1)",
@@ -3616,8 +3642,8 @@
   "action": "pump power intensity transferred from the proposed system",
   "inputs": {
    "proposed_pumps": 1,
-   "combined_electrical_w": 212.8,
-   "distribution_flow_l_s": 0.83,
+   "combined_electrical_w": 540.4,
+   "distribution_flow_l_s": 2.12,
    "distribution_flow_source": "autosized",
    "proposed_w_per_l_s": 255.49,
    "reference_flow_l_s": 0.99
@@ -3874,33 +3900,17 @@
  },
  {
   "step": "compliance",
-  "action": "capacity increase 1: proposed \u2014 sizing factor(s) raised on 5 failing thermal block(s), secant-targeted from the previous run(s) \u2014 building re-sized and re-run",
+  "action": "capacity increase 1: proposed \u2014 sizing factor(s) raised on 1 failing thermal block(s), secant-targeted from the previous run(s) \u2014 building re-sized and re-run",
   "inputs": {
    "building": "proposed",
    "step": 1.25,
    "iteration": 1,
    "mode": "zonal",
-   "heating_sizing_factor": 1.625,
    "cooling_sizing_factor": 1.375,
-   "zones_bumped": 5,
+   "zones_bumped": 1,
    "zones": {
     "THERMAL ZONE 1": {
      "cooling_sizing_factor": 1.375
-    },
-    "THERMAL ZONE 2": {
-     "heating_sizing_factor": 1.625,
-     "cooling_sizing_factor": 1.375
-    },
-    "THERMAL ZONE 3": {
-     "heating_sizing_factor": 1.625,
-     "cooling_sizing_factor": 1.375
-    },
-    "THERMAL ZONE 4": {
-     "heating_sizing_factor": 1.625,
-     "cooling_sizing_factor": 1.375
-    },
-    "THERMAL ZONE 5": {
-     "heating_sizing_factor": 1.625
     }
    }
   },
@@ -3916,120 +3926,30 @@
   "inputs": {
    "run_period": "full year",
    "clean_run": true,
-   "total_site_kwh": 191067,
-   "unmet_heating_h": 394.0,
-   "unmet_cooling_h": 583.0
+   "total_site_kwh": 200067,
+   "unmet_heating_h": 0.0,
+   "unmet_cooling_h": 1.25
   },
   "building": "proposed building",
   "level": "info"
  },
  {
   "step": "compliance",
-  "action": "capacity increase 2: proposed \u2014 sizing factor(s) raised on 5 failing thermal block(s), secant-targeted from the previous run(s) \u2014 building re-sized and re-run",
+  "action": "capacity iteration converged after 1 increase(s) \u2014 unmet-hours loads are met",
   "inputs": {
-   "building": "proposed",
-   "step": 1.25,
-   "iteration": 2,
-   "mode": "zonal",
-   "heating_sizing_factor": 3.25,
-   "cooling_sizing_factor": 2.75,
-   "zones_bumped": 5,
-   "zones": {
-    "THERMAL ZONE 1": {
-     "cooling_sizing_factor": 1.389
-    },
-    "THERMAL ZONE 2": {
-     "heating_sizing_factor": 3.25,
-     "cooling_sizing_factor": 1.719
-    },
-    "THERMAL ZONE 3": {
-     "heating_sizing_factor": 2.918,
-     "cooling_sizing_factor": 2.75
-    },
-    "THERMAL ZONE 4": {
-     "heating_sizing_factor": 2.798,
-     "cooling_sizing_factor": 2.75
-    },
-    "THERMAL ZONE 5": {
-     "heating_sizing_factor": 3.25
-    }
-   }
+   "iterations": 1
   },
   "article": "8.4.1.2.(5)",
-  "ruling": "D-43",
-  "building": "proposed building",
-  "level": "decision"
- },
- {
-  "step": "compliance",
-  "target": "proposed_annual_iter2",
-  "action": "annual EnergyPlus run complete",
-  "inputs": {
-   "run_period": "full year",
-   "clean_run": true,
-   "total_site_kwh": 195903,
-   "unmet_heating_h": 377.25,
-   "unmet_cooling_h": 276.25
-  },
-  "building": "proposed building",
-  "level": "info"
- },
- {
-  "step": "compliance",
-  "action": "capacity increase 3: proposed \u2014 sizing factor(s) raised on 4 failing thermal block(s), secant-targeted from the previous run(s) \u2014 building re-sized and re-run",
-  "inputs": {
-   "building": "proposed",
-   "step": 1.25,
-   "iteration": 3,
-   "mode": "zonal",
-   "heating_sizing_factor": 6.5,
-   "cooling_sizing_factor": 3.409,
-   "zones_bumped": 4,
-   "zones": {
-    "THERMAL ZONE 2": {
-     "heating_sizing_factor": 6.5,
-     "cooling_sizing_factor": 2.355
-    },
-    "THERMAL ZONE 3": {
-     "heating_sizing_factor": 5.836,
-     "cooling_sizing_factor": 2.822
-    },
-    "THERMAL ZONE 4": {
-     "heating_sizing_factor": 5.596,
-     "cooling_sizing_factor": 3.409
-    },
-    "THERMAL ZONE 5": {
-     "heating_sizing_factor": 4.063
-    }
-   }
-  },
-  "article": "8.4.1.2.(5)",
-  "ruling": "D-43",
-  "building": "proposed building",
-  "level": "decision"
- },
- {
-  "step": "compliance",
-  "target": "proposed_annual_iter3",
-  "action": "annual EnergyPlus run complete",
-  "inputs": {
-   "run_period": "full year",
-   "clean_run": true,
-   "total_site_kwh": 203083,
-   "unmet_heating_h": 358.75,
-   "unmet_cooling_h": 114.75
-  },
-  "building": "proposed building",
   "level": "info"
  },
  {
   "step": "compliance",
   "action": "proposed EXCEEDS the building energy target",
   "inputs": {
-   "proposed_kwh": 203083.3,
+   "proposed_kwh": 200066.7,
    "reference_building_energy_target_kwh": 153808.3
   },
-  "value": "margin -49275.0 kWh (-32.0%)",
+  "value": "margin -46258.4 kWh (-30.1%)",
   "article": "8.4.1.2.(2)",
   "level": "decision"
  },
@@ -4037,17 +3957,17 @@
   "step": "compliance",
   "action": "no energy performance tier achieved (over the target)",
   "inputs": {
-   "percent_of_target": 132.0,
-   "improvement_percent": -32.0
+   "percent_of_target": 130.1,
+   "improvement_percent": -30.1
   },
   "article": "10.1.2.1. (Table verified identical 2020/2025)",
   "level": "decision"
  },
  {
   "step": "compliance",
-  "action": "unmet heating hours EXCEED 100 h",
+  "action": "unmet heating hours within 100 h for both buildings",
   "inputs": {
-   "proposed_h": 358.75,
+   "proposed_h": 0.0,
    "reference_h": 0.0,
    "limit_h": 100
   },
@@ -4056,20 +3976,14 @@
  },
  {
   "step": "compliance",
-  "action": "unmet cooling hours EXCEED the allowance",
+  "action": "unmet cooling hours within the allowance over reference",
   "inputs": {
-   "proposed_h": 114.75,
+   "proposed_h": 1.25,
    "reference_h": 10.25,
    "allowance_h": 1.0
   },
   "article": "8.4.1.2.(4)",
   "level": "decision"
- },
- {
-  "step": "compliance",
-  "action": "8.4.1.2.(5): unmet-hours limits still not met after 3 capacity increase(s) \u2014 the building remains non-compliant; raise max_capacity_iterations, increase capacity_step, or fix the design (no hard-sized capacity was detected among boilers, chillers, baseboards, gas and electric coils and single-speed DX cooling coils (hydronic coils, DX heating coils and staged coils are not checked)).",
-  "article": "8.4.1.2.(5)",
-  "level": "warning"
  },
  {
   "step": "compliance",
@@ -4092,7 +4006,7 @@
   "action": "Determination of Compliance \u2014 partial. Applied: The pipeline computes the (2) annual-energy verdict (proposed vs reference building). On the reference-building path, the (3)/(4) verdicts read each building\u2019s Facility unmet_occupied_hours row; that path does not yet evaluate the zone rows per thermal block, and (4) is vacuous when the proposed building has no mechanical cooling. The sentence-(5) capacity auto-iteration raises each failing zone\u2019s Sizing:Zone factors where zone data attributes the Facility failure, secant-targeted from that zone\u2019s own (factor, unmet-hours) history across rounds, with a global SizingParameters fallback when it cannot, and hard-sized-equipment stall detection.. Gaps: On the reference-building path, sentences (3) and (4) read each building\u2019s Facility row instead of evaluating every thermal block, so a block that exceeds its own limit can pass when the Facility-level comparison passes.",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 11,
+   "decisions_citing": 9,
    "code": [
     "src/btap/codes/compliance.py#_evaluate",
     "src/btap/codes/compliance.py#_evaluate_unmet"
