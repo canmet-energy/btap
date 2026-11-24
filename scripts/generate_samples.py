@@ -429,8 +429,14 @@ STRESS_CASES = (
      "The merged block takes S over W by largest exterior wall area (152 vs "
      "76 m2) — a tie-break Note (3) does not supply, which is the question.",
      _corner_block_above_four_storeys),
+    # The slug keeps "psz" for the corpus's stable ids; the system is a
+    # central VAV air handler since 2026-11-24. Humidification belongs on a
+    # multi-zone air handler, and only ONE humidified system serving several
+    # thermal blocks reaches both halves below (a rebuild for the block with
+    # the humidistat, a refusal for the rest). On a single-zone PSZ stretched
+    # over five zones it did so through a design the sample should not teach.
     ("20-humidified-psz",
-     "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+     "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
      "Table 8.4.4.7.-B Note (1) / D-55 / AHJ-12 — the ONLY sample carrying "
      "humidification; `btap.modeling` builds none, so no other shape reaches "
      "the question of whether reference humidification is added at all. The "
@@ -650,10 +656,19 @@ def generate(out: Path) -> list[tuple[str, str, int]]:
     for slug, system in required:
         gate(slug, system)
 
+    # A sample is built exactly as `--hvac-system` builds the proposed: a row
+    # shared only by DEFAULT ("PSZ RTU ...") becomes one unit per thermal
+    # block (D-101). Built shared, samples 02, 16 and 20 taught one thermostat
+    # for five zones — the design 8.4.1.2 fails whatever the capacity, and
+    # what made sample 16's capacity search stall (phylroy, 2026-11-24: "the
+    # sample should include good design").
+    from btap.codes.necb.path import onramp_hvac_config
+
     for slug, system in SAMPLES:
         try:
             model = seed("necb2020")
-            modeling.build_system(model, system, sorted_by_name(model.getThermalZones()))
+            modeling.build_system(model, system, sorted_by_name(model.getThermalZones()),
+                                  config=onramp_hvac_config(system))
             size = save(model, out, slug)
         except Exception as e:  # noqa: BLE001 - re-raised as a fatal, named
             abort(slug, e)
@@ -729,7 +744,8 @@ def generate(out: Path) -> list[tuple[str, str, int]]:
             after = bool(getattr(setup, "after_build", False))
             if setup is not None and not after:
                 setup(model)
-            modeling.build_system(model, system, sorted_by_name(model.getThermalZones()))
+            modeling.build_system(model, system, sorted_by_name(model.getThermalZones()),
+                                  config=onramp_hvac_config(system))
             if setup is not None and after:
                 setup(model)
             size = save(model, out, slug)

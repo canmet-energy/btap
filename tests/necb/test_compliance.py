@@ -554,6 +554,40 @@ class TestComplianceWithEngine(unittest.TestCase):
                         "proposed ran clean with the requested variables")
         self.assertTrue(result.report["reference"]["clean_run"])
 
+    def test_capacity_iteration_STALLS_on_hard_sized_equipment(self):
+        # D-43's stall branch, witnessed ON PURPOSE. 8.4.1.2.(5) increases
+        # capacity through sizing factors, which cannot reach a HARD-SIZED
+        # capacity — so a proposed whose only heat source is electric
+        # baseboards hard-sized far too small must stop with a stall that names
+        # them, not loop to the cap. (A hard-sized BOILER is not enough: its
+        # hot-water baseboards stay autosized, so a zone bump still buys an
+        # hour or more and the search continues.) This was frozen only by ACCIDENT before: sample 16's
+        # shared heat pump happened to stall its search, and making that sample
+        # a good design (one unit per zone, 2026-11-24) removed the stall.
+        dir = tempfile.mkdtemp(prefix="osnecb-stall-")
+        proposed = proposed_with_hvac("Baseboard electric")
+        heaters = list(proposed.getZoneHVACBaseboardConvectiveElectrics())
+        self.assertTrue(heaters)
+        for heater in heaters:
+            heater.setNominalCapacity(200.0)  # W per zone, in a Toronto January
+
+        result = performance_compliance(
+            proposed, code="necb2020", simulate="annual", weather=weather(),
+            building=building_for(proposed), run_dir=dir,
+            max_capacity_iterations=3, capacity_step=3.0,
+            run_period=week(end_day=28))
+
+        history = result.report["capacity_iterations"]
+        self.assertTrue(history, "the undersized proposed required an increase")
+        self.assertTrue(history[-1].get("stalled"), history)
+        self.assertLess(len(history), 3, "a stall stops the search before the cap")
+        warning = next(e for e in result.audit.entries
+                       if "produced no unmet-hours improvement" in e["action"])
+        self.assertIn("hard-sized capacities", warning["action"])
+        self.assertTrue(any(h.nameString() in warning["action"] for h in heaters),
+                        warning["action"])
+        self.assertEqual("D-43", warning["ruling"])
+
     def test_capacity_iteration_converges_undersized_building(self):
         # 8.4.1.2.(5): a deliberately UNDERSIZED proposed building (global
         # heating sizing factor 0.25 — the reference inherits it through the

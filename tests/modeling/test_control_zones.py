@@ -119,11 +119,17 @@ class TestTheElection(unittest.TestCase):
 
 
 @needs_engine
-class TestThePipelineElectsWhatItBuilds(unittest.TestCase):
-    """The CALL SITE: `--hvac-system` builds a marked shared unit, and the
-    pipeline elects its control zone after the proposed sizing run."""
+class TestThePipelineLeavesTheProposedAlone(unittest.TestCase):
+    """A compliance run never moves a proposed's control zone.
 
-    def test_the_proposed_is_elected_after_sizing(self):
+    It once did, after the proposed sizing run, for any marked shared unit —
+    and sample 16, built by `build_system` exactly as a user's script builds a
+    model, had its thermostat moved and its results changed by the run. That is
+    the babysitting CLAUDE.md rules out. Election is an AUTHORING step the
+    user takes; the on-ramp builds one unit per thermal block instead (D-101),
+    so the pipeline has no shared unit of its own making to elect."""
+
+    def test_a_marked_shared_unit_is_not_elected(self):
         from btap._compat import sorted_by_name
         from btap._sdk import load_model
         from btap.codes import performance_compliance
@@ -139,14 +145,11 @@ class TestThePipelineElectsWhatItBuilds(unittest.TestCase):
                 building={"storeys": 1},
                 necb_loads={"space_type_map": spaces,
                             "hvac_system": EXPLICITLY_SHARED})
-        entries = [e for e in result.audit.entries
-                   if e["action"].startswith("shared unit controlled from the zone")]
-        self.assertEqual(1, len(entries))
-        self.assertEqual("proposed building", entries[0]["building"])
+        self.assertTrue(any(e["action"] == "proposed sizing run complete"
+                            for e in result.audit.entries), "the sizing ran")
+        self.assertEqual([], [e for e in result.audit.entries
+                              if e["action"].startswith("shared unit controlled from")])
 
-
-if __name__ == "__main__":
-    unittest.main()
 
 
 @needs_sdk
@@ -188,3 +191,7 @@ class TestTheCoolingRule(unittest.TestCase):
                          modeling.elect_control_zones(model, audit=audit))
         self.assertEqual([largest], _control_zones(loops[0]))
         self.assertIn("largest design cooling load", audit.entries[-1]["action"])
+
+
+if __name__ == "__main__":
+    unittest.main()

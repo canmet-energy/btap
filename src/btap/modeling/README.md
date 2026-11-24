@@ -307,8 +307,9 @@ Two things worth knowing before choosing a different system:
 
   For one unit per zone instead, pass `config={'per_zone': True}` or call
   `build_system` once per zone. `build_system` warns about a shared unit on a
-  provisional zone (#236). The compliance pipeline elects it for HVAC built
-  with no control zone, after the proposed sizing run. Following the zone
+  provisional zone (#236). Electing is yours to do: a compliance run never
+  changes a proposed's control zone, and `--hvac-system` builds a shared-by-
+  default row one unit per thermal block (D-101). Following the zone
   with the most heating leaves the others over-heated rather than starved,
   but with one thermostat the cooling-dominated zones can then go unmet.
 - **A baseboard plus a single-zone air loop in the same zone can report

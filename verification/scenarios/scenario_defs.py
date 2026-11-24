@@ -492,13 +492,13 @@ DETERMINATION_SCENARIOS = [
     # (2)(g) to weigh — `aux_by_fuel` non-empty is the precondition the branch
     # returns early on.
     #
-    # D-32 Kiva re-freeze provenance: this scenario's +15.6% proposed-heating
-    # movement was NOT a direct perimeter-strip load consequence. The changed
-    # ground solution altered D-43's capacity-search trajectory: three rounds
-    # became two, Zone 2 lost its cooling-factor bump, and the second round
-    # stalled at proposed 513.25 heating / 401.5 cooling unmet hours while the
-    # reference retained 566.75 cooling unmet hours. The exact baseline freezes
-    # all of that; the assertions below make the stall witness explicit.
+    # Sample 16 is one heat-pump unit PER ZONE since 2026-11-24 (phylroy:
+    # "the sample should include good design"). Built shared, its one
+    # thermostat left the other zones unheatable, and the capacity search
+    # stalled — which this scenario froze as the D-43 stall witness. That was
+    # an accident of a poor design, not this scenario's purpose (the (2)(g)
+    # election reaching a determination), so the stall is now witnessed on
+    # purpose by a test with hard-sized equipment; see UNCOVERED.
     {"id": "determination-04-16-ashp-supp-aux-election-annual",
      "lane": "parity", "kind": "cli", "replaces": [],
      "argv": ["<CORPUS>/16-ashp-electric-supp-hw-baseboard.osm",
@@ -525,10 +525,6 @@ DETERMINATION_SCENARIOS = [
          {"op": "json_equals", "file": "report.json",
           "path": "compliance_determination_reason.ahj_ids",
           "value": ["AHJ-1", "AHJ-2", "AHJ-14"]},
-         {"op": "json_equals", "file": "report.json",
-          "path": "capacity_iterations.1.iteration", "value": 2},
-         {"op": "json_equals", "file": "report.json",
-          "path": "capacity_iterations.1.stalled", "value": True},
      ]},
 
     # GUARD 7 for AHJ-10. The corpus-none scenario for sample 19 is useful
@@ -685,15 +681,21 @@ VERDICT_SCENARIOS = [
 ]
 
 UNCOVERED = [
-    {"branch": "8.4.1.2.(5) capacity-iteration FAILURE paths other than "
-               "stall detection",
-     "why": "the failed-bump, post-bump nonconvergence, cap-exhaustion and "
-            "zero-iteration-warning branches require a real annual run "
-            "engineered to reach each state; no CLI flag exposes "
-            "max_capacity_iterations",
-     "witness": "determination-04 now freezes the D-43 stall branch at "
-                "capacity_iterations[1].stalled = true; the other failure "
-                "branches remain covered only by existing unit tests",
+    {"branch": "8.4.1.2.(5) capacity-iteration FAILURE paths, stall "
+               "detection included",
+     "why": "the stall, failed-bump, post-bump nonconvergence, "
+            "cap-exhaustion and zero-iteration-warning branches require a "
+            "real annual run engineered to reach each state; no CLI flag "
+            "exposes max_capacity_iterations",
+     "witness": "the D-43 STALL branch is witnessed on purpose by "
+                "tests/necb/test_compliance.py::TestComplianceWithEngine::"
+                "test_capacity_iteration_STALLS_on_hard_sized_equipment (hard-"
+                "sized electric baseboards, a 4-week run; it fails when stall "
+                "detection is disabled). determination-04 froze it only by "
+                "accident — sample 16's shared heat pump stalled its search — "
+                "and lost it when that sample became one unit per zone "
+                "(2026-11-24). The other failure branches remain covered only "
+                "by existing unit tests",
      "option": "a future API-level scenario (parity lane) is a named "
                "OPTION, not a witness; nothing is frozen unless it "
                "appears in this manifest"},
@@ -704,13 +706,6 @@ UNCOVERED = [
 #: sees what closed a gap and, precisely, what the closure does and does not
 #: claim.
 NEWLY_COVERED = [
-    {"branch": "8.4.1.2.(5) capacity-iteration stall detection",
-     "covered_by": "the exact annual report carries two capacity iterations; "
-                   "the second has stalled = true and the warning explains "
-                   "that unmet hours did not improve",
-     "scenario": "determination-04-16-ashp-supp-aux-election-annual",
-     "limits": "failed-bump, post-bump nonconvergence, cap exhaustion and "
-               "the zero-iteration warning remain unfrozen"},
     {"branch": "full-year determination (exits 0/1 through a real annual "
                "run)",
      "covered_by": "API pipeline execution of a full-year determination, "
@@ -829,6 +824,17 @@ _SYSTEM_25_FAILURE_BUILDING = {
 
 PROPOSED_FAN_COIL_SYSTEM = "PSZ RTU Gas and DX Coils and Hot Water Baseboard"
 
+#: The heating-dominated pair's proposed: ONE multi-zone air handler over the
+#: five office-loaded zones. Table 8.4.4.7.-A gives a Data Processing Area
+#: System 2 only where the proposed "has a cooling capacity exceeding 20 kW",
+#: and since `--hvac-system` builds a shared-by-default PSZ row one unit per
+#: thermal block (D-101) each office-loaded unit falls under 20 kW and the
+#: reference becomes System 1 — no fan coils, nothing for D-106 or D-111 to
+#: witness. These scenarios used to get their one large unit by stretching a
+#: single-zone PSZ over five zones; a central VAV air handler is the good
+#: design that is genuinely one system above 20 kW (2026-11-24).
+HEATING_DOMINATED_PROPOSED = "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard"
+
 SYSTEM_25_SEAL = ("python-only:first frozen to cover reference System 2/5 "
                   "after issue #113 — authored after the Ruby product "
                   "retired; no cross-language attestation exists for this "
@@ -872,7 +878,7 @@ SYSTEM_25_SCENARIOS = [
      "kind": "api", "replaces": [],
      "api_call": {"code": "necb2020", "simulate": "sizing", "hdd": 3890,
                   "model": "<SEED>",
-                  "hvac_system": PROPOSED_FAN_COIL_SYSTEM,
+                  "hvac_system": HEATING_DOMINATED_PROPOSED,
                   "weather": {"epw": "<EPW>", "ddy": "<DDY>"},
                   "necb_loads": {"space_type_map": {
                       space: ["Space Function", "Office enclosed > 25 m2"]
@@ -925,24 +931,24 @@ SYSTEM_25_SCENARIOS = [
     # So the reference holds setpoint BECAUSE of the order, and the exact
     # report.json baseline sees the physics rather than only the audit line.
     #
-    # The verdict is NOT COMPLIANT, and that is the PROPOSED's doing: the
-    # call builds ONE shared PSZ unit for all five zones. Its control zone is
-    # elected after the proposed sizing run (the largest design heating load,
-    # phylroy 2026-11-20), which took the proposed from 377 h of heating
-    # unmet on the provisional zone to 0 — and, with one thermostat, its
-    # cooling unmet from 111 to 564 h, which is what fails 8.4.1.2.(4). None
-    # of that touches the reference this scenario witnesses.
+    # The proposed is ONE central VAV air handler (HEATING_DOMINATED_PROPOSED)
+    # since 2026-11-24, and as a good design it COMPLIES: 0 / 1.25 h unmet,
+    # 60.9 % of the target. The earlier proposed stretched one single-zone
+    # PSZ over all five zones and failed on its own unmet hours, which also put
+    # AHJ-16 (8.4.x.14 N:1 system correspondence) in the conditions. None of
+    # that touched the reference this scenario witnesses: its unmet hours and
+    # its D-111 / AHJ-26 entry are the same either way.
     {"id": "determination-07-system2-terminal-first-annual",
      "lane": "parity", "kind": "api", "replaces": [],
      "api_call": {"code": "necb2020", "simulate": "annual", "hdd": 3890,
                   "model": "<SEED>",
-                  "hvac_system": PROPOSED_FAN_COIL_SYSTEM,
+                  "hvac_system": HEATING_DOMINATED_PROPOSED,
                   "weather": {"epw": "<EPW>", "ddy": "<DDY>"},
                   "necb_loads": {"space_type_map": {
                       space: ["Space Function", "Office enclosed > 25 m2"]
                       for space in _SEED_SPACES}},
                   "building": _SYSTEM_25_FAILURE_BUILDING},
-     "env": {}, "expect_exit": 1, "timeout_s": 5400,
+     "env": {}, "expect_exit": 0, "timeout_s": 5400,
      "files": CORPUS_FILES, "text_files": CORPUS_TEXT, "streams": {},
      "seal": SYSTEM_25_SEAL,
      "fragments": {"reference_annual/run/eplusout.err": {
@@ -963,10 +969,10 @@ SYSTEM_25_SCENARIOS = [
           "path": "compliance_determination", "value": "conditional"},
          {"op": "json_equals", "file": "report.json",
           "path": "compliance_determination_reason.ahj_ids",
-          "value": ["AHJ-7", "AHJ-14", "AHJ-16", "AHJ-22", "AHJ-26"]},
+          "value": ["AHJ-7", "AHJ-14", "AHJ-22", "AHJ-26"]},
          {"op": "json_equals", "file": "report.json", "path": "tier",
           "value": 2},
-         {"op": "observation_equals", "key": "compliant", "value": False},
+         {"op": "observation_equals", "key": "compliant", "value": True},
      ]},
 ]
 
