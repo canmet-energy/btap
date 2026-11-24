@@ -8,15 +8,13 @@
 [openstudio.model.HeatExchangerAirToAirSensibleAndLatent] <0> As of 3.8.0, bool openstudio::model::HeatExchangerAirToAirSensibleAndLatent::setSensibleEffectivenessat75CoolingAirFlow(double) is deprecated. Use sensibleEffectivenessofCoolingAirFlowCurve instead.
 [openstudio.model.HeatExchangerAirToAirSensibleAndLatent] <0> As of 3.8.0, bool openstudio::model::HeatExchangerAirToAirSensibleAndLatent::setLatentEffectivenessat75CoolingAirFlow(double) is deprecated. Use latentEffectivenessofCoolingAirFlowCurve instead.
 [openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
-[openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
-[openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
 
 ------------------------------------------------------------------
                    site kWh      kWh/m2/yr      area m2
-Proposed            128,919          161.1        800.0
+Proposed            128,008          160.0        800.0
 Reference           184,633          230.8        800.0
-Margin               55,714   30.2% under target   Tier 2
-Unmet hours  heating 513.3 / 0.0 h    cooling 401.5 / 566.8 h
+Margin               56,625   30.7% under target   Tier 2
+Unmet hours  heating 0.0 / 0.0 h    cooling 160.8 / 566.8 h
 ------------------------------------------------------------------
 
   *** NOT A CODE-COMPLIANT DETERMINATION ***
@@ -25,7 +23,11 @@ Unmet hours  heating 513.3 / 0.0 h    cooling 401.5 / 566.8 h
   can support compliance. It is INFORMATIONAL only and is not evidence of
   compliance.
   Governing: 8.4.4.13.(2)(g)(i); 8.4.4.9.(5); 8.4.5.2.; 8.4.5.3.; NECB 2020 Table 5.2.12.1.-N; NECB 2020 Table 5.2.12.1.-O
-    - Thermal Zone 1,Thermal Zone 2,Thermal Zone 3,Thermal Zone 4,Thermal Zone 5
+    - Thermal Zone 1
+    - Thermal Zone 2
+    - Thermal Zone 3
+    - Thermal Zone 4
+    - Thermal Zone 5
     - Primary Boiler
     - Coil Heating Gas 1
     - Coil Heating Gas 2
@@ -41,26 +43,17 @@ Unmet hours  heating 513.3 / 0.0 h    cooling 401.5 / 566.8 h
       NON-CONFORMING substitution — an ALTERNATIVE SOLUTION, which
       the text DECIDES and this tool does not meet — accepting it
       means accepting an explicitly identified non-conforming
-      substitution. Applies to: Thermal Zone 1,Thermal Zone
-      2,Thermal Zone 3,Thermal Zone 4,Thermal Zone 5 — UNRESOLVED:
-      the heating equipment serving this group uses MORE THAN ONE
-      ENERGY TYPE. 8.4.4.9.(5) requires the reference heating
-      capacities to follow the proposed energy-type allocation, and
-      this tool does NOT compute or enforce that allocation — it
-      elects ONE energy type for the group. Whether the reference
-      happens to match the proposed allocation is therefore NOT
-      VERIFIED here, in either direction, and a passing annual
-      result is not evidence that it does
+      substitution. Applies to: Thermal Zone 1, Thermal Zone 2,
+      Thermal Zone 3, Thermal Zone 4, Thermal Zone 5 — each of the 5
+      choices above makes this same departure; the conditions list
+      carries what was established at each one
     - AHJ-2 (referral): the annual-energy basis (2)(g) compares, and
       an irreconcilable Article 13 case — an INTERPRETATION the
       acceptable-solution text does not settle. Applies to: Thermal
-      Zone 1,Thermal Zone 2,Thermal Zone 3,Thermal Zone 4,Thermal
-      Zone 5 — auxiliary heating energy type ELECTED from the
-      proposed run's simulated period: the terminal/aux energy type
-      with the largest energy use over that period is NaturalGas
-      (117.97 GJ delivered), and the heat pump's 52.3% share exceeds
-      the 33% proviso ((h) inapplicable: the source is classified
-      air/water/ground)
+      Zone 1, Thermal Zone 2, Thermal Zone 3, Thermal Zone 4,
+      Thermal Zone 5 — each of the 5 choices above makes this same
+      unresolved election; the conditions list carries what was
+      established at each one
     - AHJ-14 (referral): which part-load class a reference boiler or
       furnace takes — an INTERPRETATION the acceptable-solution text
       does not settle. Applies to: Primary Boiler, Coil Heating Gas
@@ -69,11 +62,11 @@ Unmet hours  heating 513.3 / 0.0 h    cooling 401.5 / 566.8 h
       same unresolved election; the conditions list carries what was
       established at each one
 
-  VERDICT: NOT COMPLIANT - INFORMATIONAL, AND CONDITIONAL ON APPROVAL BY THE
+  VERDICT: COMPLIANT - INFORMATIONAL, AND CONDITIONAL ON APPROVAL BY THE
            AUTHORITY HAVING JURISDICTION
   (NECB 2020, Division B, Article 8.4.1.2; see docs/NECB_AHJ_QUESTIONS.md)
 ------------------------------------------------------------------
 
   Audit    <RUN_DIR>/audit.txt
   Data     <RUN_DIR>/report.json
-  53 warning(s) recorded - see audit.txt
+  55 warning(s) recorded - see audit.txt

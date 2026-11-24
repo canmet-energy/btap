@@ -287,10 +287,31 @@ print(result.unmet_hours)                    # {'heating': ..., 'cooling': ...}
 
 Two things worth knowing before choosing a different system:
 
-- **A packaged SINGLE-zone system serves one zone.** Most "PSZ RTU ..."
-  rows build ONE unit over every zone they are given; pass
-  `config={'per_zone': True}` or call `build_system` once per zone.
-  `build_system` warns when you have not (#236).
+- **A packaged single-zone unit follows ONE zone.** Most "PSZ RTU ..."
+  rows build ONE unit over every zone they are given, as a house's furnace
+  serves every floor from one thermostat. The zone it follows decides which
+  zones go unmet, so choose it, or let a sizing run choose it:
+
+  ```python
+  modeling.build_system(model, name, zones, control_zone=main_floor)  # yours
+
+  modeling.build_system(model, name, zones)        # zones[0], provisionally
+  simulation.run(model, run_dir="runs/size", weather=weather, sizing_only=True)
+  modeling.elect_control_zones(model)  # -> the largest design heating load
+  ```
+
+  `control_zone="cooling"` asks for the largest design cooling load instead.
+  No choice of zone, fixed or switched by season, makes one thermostat serve
+  zones whose loads differ: the zone holding it is met and the others are
+  not. Where they differ, build one unit per zone.
+
+  For one unit per zone instead, pass `config={'per_zone': True}` or call
+  `build_system` once per zone. `build_system` warns about a shared unit on a
+  provisional zone (#236). Electing is yours to do: a compliance run never
+  changes a proposed's control zone, and `--hvac-system` builds a shared-by-
+  default row one unit per thermal block (D-101). Following the zone
+  with the most heating leaves the others over-heated rather than starved,
+  but with one thermostat the cooling-dominated zones can then go unmet.
 - **A baseboard plus a single-zone air loop in the same zone can report
   `CheckWarmupConvergence` Severe errors** on larger buildings: a
   day-to-day heating-load wobble of tenths of a watt, against EnergyPlus's

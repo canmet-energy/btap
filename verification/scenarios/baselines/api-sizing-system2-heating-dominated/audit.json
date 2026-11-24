@@ -777,6 +777,32 @@
  },
  {
   "step": "characterize",
+  "target": "Chilled Water Loop",
+  "action": "plant loop classified",
+  "inputs": {
+   "fuels": [
+    "Electricity"
+   ],
+   "purchased": false
+  },
+  "value": "chilled_water",
+  "building": "reference building",
+  "level": "info"
+ },
+ {
+  "step": "characterize",
+  "target": "Condenser Water Loop",
+  "action": "plant loop classified",
+  "inputs": {
+   "fuels": [],
+   "purchased": false
+  },
+  "value": "condenser",
+  "building": "reference building",
+  "level": "info"
+ },
+ {
+  "step": "characterize",
   "target": "Hot Water Loop",
   "action": "plant loop classified",
   "inputs": {
@@ -791,14 +817,14 @@
  },
  {
   "step": "characterize",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
+  "target": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1",
   "action": "zone group characterized",
   "inputs": {
    "zones": 5,
-   "terminal": "cv"
+   "terminal": "vav_reheat"
   },
-  "value": "psz",
-  "evidence": "air loop name resolves to catalog entry 'PSZ RTU Gas and DX Coils and Hot Water Baseboard'; PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1 declares equipment_class 'air_cooled_unitary'; cooled: OS_Coil_Cooling_DX_SingleSpeed on PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1; heated: OS_Coil_Heating_Gas on PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
+  "value": "vav_reheat",
+  "evidence": "air loop name resolves to catalog entry 'MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard'; cooled: OS_Coil_Cooling_Water on MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1; heated: OS_Coil_Heating_Water on MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 1; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 2; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 3; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 4; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 5",
   "building": "reference building",
   "level": "decision"
  },
@@ -807,7 +833,7 @@
   "action": "model characterized",
   "inputs": {
    "zone_groups": 1,
-   "plants": 1,
+   "plants": 3,
    "built_by_gem": true
   },
   "building": "reference building",
@@ -829,7 +855,7 @@
   "action": "the cooling-capacity threshold deciding THIS thermal block's system was measured on the whole serving system (5 blocks), because \"the proposed building or space\" is not established as the block or the serving system. Another space on the same system may be contributing the capacity that put this block over the threshold",
   "inputs": {
    "threshold_kw": 20,
-   "measured_kw": 50.638018528475136,
+   "measured_kw": 53.866993730000004,
    "measured_over_blocks": [
     "Thermal Zone 1",
     "Thermal Zone 2",
@@ -853,7 +879,7 @@
   "action": "the cooling-capacity threshold deciding THIS thermal block's system was measured on the whole serving system (5 blocks), because \"the proposed building or space\" is not established as the block or the serving system. Another space on the same system may be contributing the capacity that put this block over the threshold",
   "inputs": {
    "threshold_kw": 20,
-   "measured_kw": 50.638018528475136,
+   "measured_kw": 53.866993730000004,
    "measured_over_blocks": [
     "Thermal Zone 1",
     "Thermal Zone 2",
@@ -877,7 +903,7 @@
   "action": "the cooling-capacity threshold deciding THIS thermal block's system was measured on the whole serving system (5 blocks), because \"the proposed building or space\" is not established as the block or the serving system. Another space on the same system may be contributing the capacity that put this block over the threshold",
   "inputs": {
    "threshold_kw": 20,
-   "measured_kw": 50.638018528475136,
+   "measured_kw": 53.866993730000004,
    "measured_over_blocks": [
     "Thermal Zone 1",
     "Thermal Zone 2",
@@ -901,7 +927,7 @@
   "action": "the cooling-capacity threshold deciding THIS thermal block's system was measured on the whole serving system (5 blocks), because \"the proposed building or space\" is not established as the block or the serving system. Another space on the same system may be contributing the capacity that put this block over the threshold",
   "inputs": {
    "threshold_kw": 20,
-   "measured_kw": 50.638018528475136,
+   "measured_kw": 53.866993730000004,
    "measured_over_blocks": [
     "Thermal Zone 1",
     "Thermal Zone 2",
@@ -925,7 +951,7 @@
   "action": "the cooling-capacity threshold deciding THIS thermal block's system was measured on the whole serving system (5 blocks), because \"the proposed building or space\" is not established as the block or the serving system. Another space on the same system may be contributing the capacity that put this block over the threshold",
   "inputs": {
    "threshold_kw": 20,
-   "measured_kw": 50.638018528475136,
+   "measured_kw": 53.866993730000004,
    "measured_over_blocks": [
     "Thermal Zone 1",
     "Thermal Zone 2",
@@ -950,10 +976,10 @@
   "inputs": {
    "category": "Data Processing Area",
    "energy_type": "gas",
-   "serving_system": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
+   "serving_system": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1",
    "heated": true,
    "cooled": true,
-   "cooling_kw": 50.638018528475136
+   "cooling_kw": 53.866993730000004
   },
   "value": "System 2 -> 'FPFC MAU Chilled Water Coils with Scroll Chiller'",
   "article": "8.4.4.7.(1); 8.4.4.7.-A: 'Where the proposed building or space has a cooling capacity exceeding 20 kW, the reference building or space shall use System 2'",
@@ -967,10 +993,10 @@
   "inputs": {
    "category": "Data Processing Area",
    "energy_type": "gas",
-   "serving_system": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
+   "serving_system": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1",
    "heated": true,
    "cooled": true,
-   "cooling_kw": 50.638018528475136
+   "cooling_kw": 53.866993730000004
   },
   "value": "System 2 -> 'FPFC MAU Chilled Water Coils with Scroll Chiller'",
   "article": "8.4.4.7.(1); 8.4.4.7.-A: 'Where the proposed building or space has a cooling capacity exceeding 20 kW, the reference building or space shall use System 2'",
@@ -984,10 +1010,10 @@
   "inputs": {
    "category": "Data Processing Area",
    "energy_type": "gas",
-   "serving_system": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
+   "serving_system": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1",
    "heated": true,
    "cooled": true,
-   "cooling_kw": 50.638018528475136
+   "cooling_kw": 53.866993730000004
   },
   "value": "System 2 -> 'FPFC MAU Chilled Water Coils with Scroll Chiller'",
   "article": "8.4.4.7.(1); 8.4.4.7.-A: 'Where the proposed building or space has a cooling capacity exceeding 20 kW, the reference building or space shall use System 2'",
@@ -1001,10 +1027,10 @@
   "inputs": {
    "category": "Data Processing Area",
    "energy_type": "gas",
-   "serving_system": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
+   "serving_system": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1",
    "heated": true,
    "cooled": true,
-   "cooling_kw": 50.638018528475136
+   "cooling_kw": 53.866993730000004
   },
   "value": "System 2 -> 'FPFC MAU Chilled Water Coils with Scroll Chiller'",
   "article": "8.4.4.7.(1); 8.4.4.7.-A: 'Where the proposed building or space has a cooling capacity exceeding 20 kW, the reference building or space shall use System 2'",
@@ -1018,10 +1044,10 @@
   "inputs": {
    "category": "Data Processing Area",
    "energy_type": "gas",
-   "serving_system": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
+   "serving_system": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1",
    "heated": true,
    "cooled": true,
-   "cooling_kw": 50.638018528475136
+   "cooling_kw": 53.866993730000004
   },
   "value": "System 2 -> 'FPFC MAU Chilled Water Coils with Scroll Chiller'",
   "article": "8.4.4.7.(1); 8.4.4.7.-A: 'Where the proposed building or space has a cooling capacity exceeding 20 kW, the reference building or space shall use System 2'",
@@ -1201,7 +1227,7 @@
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": [
-    "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1"
+    "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1"
    ]
   },
   "article": "8.4.4.15.(2)",
@@ -1257,15 +1283,15 @@
   "action": "boiler efficiency applied",
   "inputs": {
    "fuel": "Gas",
-   "capacity_kw": 54.8,
-   "design_capacity_kw": 54.8,
+   "capacity_kw": 139.2,
+   "design_capacity_kw": 139.2,
    "capacity_source": "autosized",
    "part_load_curve_class": "non_condensing",
    "class_source": "row",
    "curve": "BOILER-PLF-NONCONDENSING",
    "form": "TableLookup"
   },
-  "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
+  "value": "thermal efficiency 0.9 (0.9 Thermal Eff), part-load curve BOILER-PLF-NONCONDENSING",
   "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
   "ruling": "D-89 D-90",
   "ahj": "AHJ-14",
@@ -1280,7 +1306,7 @@
   "inputs": {
    "fuel": "Gas",
    "capacity_kw": 0.0,
-   "design_capacity_kw": 54.8,
+   "design_capacity_kw": 139.2,
    "capacity_source": "autosized",
    "part_load_curve_class": "non_condensing",
    "class_source": "row",
@@ -1291,6 +1317,68 @@
   "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
   "ruling": "D-89 D-90",
   "evidence": "Article 8.4.5.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.2.-A, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0 (node value 0), 0.00001 to 0.0001 step 0.00001, 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (169 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.1994 % against the exact requirement (sampled at PLR step 0.00001); a node at PLR 0 carries the Code equation down to zero load; the efficiency curve is evaluated on the EnteringBoiler temperature",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "efficiency",
+  "target": "Primary Chiller WaterCooled Scroll",
+  "action": "published water-cooled chiller EIR_FT coefficients are NOT used literally \u2014 corrected coefficients applied as an alternative solution",
+  "inputs": {
+   "eirft_curve": "WaterCooled_Scroll_EIRFT",
+   "printed_table_defect": "misplaced decimal coefficient"
+  },
+  "article": "Table 8.4.5.5.-C",
+  "ruling": "D-03",
+  "ahj": "AHJ-7",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "efficiency",
+  "target": "Primary Chiller WaterCooled Scroll",
+  "action": "chiller efficiency applied",
+  "inputs": {
+   "cooling_type": "WaterCooled",
+   "compressor": "Scroll",
+   "tons": 15.3,
+   "design_capacity_kw": 53.9,
+   "capacity_source": "autosized"
+  },
+  "value": "COP 4.51 (0.78 kW/ton), curves WaterCooled_Scroll_CAPFT/WaterCooled_Scroll_EIRFT/WaterCooled_Scroll_EIRFPLR",
+  "article": "NECB 2020 Table 5.2.12.1 (chillers)",
+  "ruling": "D-90",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "efficiency",
+  "target": "Secondary Chiller WaterCooled Scroll",
+  "action": "published water-cooled chiller EIR_FT coefficients are NOT used literally \u2014 corrected coefficients applied as an alternative solution",
+  "inputs": {
+   "eirft_curve": "WaterCooled_Scroll_EIRFT",
+   "printed_table_defect": "misplaced decimal coefficient"
+  },
+  "article": "Table 8.4.5.5.-C",
+  "ruling": "D-03",
+  "ahj": "AHJ-7",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "efficiency",
+  "target": "Secondary Chiller WaterCooled Scroll",
+  "action": "chiller efficiency applied",
+  "inputs": {
+   "cooling_type": "WaterCooled",
+   "compressor": "Scroll",
+   "tons": 0.0,
+   "design_capacity_kw": 53.9,
+   "capacity_source": "autosized"
+  },
+  "value": "COP 4.51 (0.78 kW/ton), curves WaterCooled_Scroll_CAPFT/WaterCooled_Scroll_EIRFT/WaterCooled_Scroll_EIRFPLR",
+  "article": "NECB 2020 Table 5.2.12.1 (chillers)",
+  "ruling": "D-90",
   "building": "reference building",
   "level": "decision"
  },
@@ -1311,27 +1399,14 @@
  {
   "step": "efficiency",
   "target": "Cooling Tower Single Speed 1",
-  "action": "condenser loop has a tower but no readable chiller capacity \u2014 tower rules not applied",
-  "ruling": "D-26",
-  "building": "reference building",
-  "level": "warning"
- },
- {
-  "step": "efficiency",
-  "target": "Coil Heating Gas 1",
-  "action": "gas heating coil efficiency applied",
+  "action": "cooling tower cells set from heat rejection",
   "inputs": {
-   "capacity_kw": 82.6,
-   "part_load_curve_class": "atmospheric",
-   "class_source": "row",
-   "curve": "FURNACE-PLF-ATMOSPHERIC",
-   "form": "TableLookup"
+   "tower_cap_kw": 65.8,
+   "chillers_on_loop": 2
   },
-  "value": "burner efficiency 0.81 (0.81 Thermal Eff), part-load curve FURNACE-PLF-ATMOSPHERIC",
-  "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
-  "ruling": "D-89",
-  "ahj": "AHJ-14",
-  "evidence": "Article 8.4.5.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.055) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x rated fuel; the first node's value lies above the engine's 0.7 floor on the coil part-load fraction, so the engine never clamps",
+  "value": "1 cell(s)",
+  "article": "8.4.4.11.(2)",
+  "ruling": "D-26",
   "building": "reference building",
   "level": "decision"
  },
@@ -1355,7 +1430,7 @@
    "minimum_flow_fraction": 0.47,
    "loop": "Chilled Water Loop"
   },
-  "value": "coefficients set; min-flow clamp deferred (flow not sized)",
+  "value": "below-D floor (E=0.68) via min flow 0.00101 m3/s",
   "article": "8.4.4.14.(4)-(5); Table 8.4.4.14.",
   "ruling": "D-11",
   "building": "reference building",
@@ -1364,7 +1439,14 @@
  {
   "step": "efficiency",
   "target": "Chilled Water Loop",
-  "action": "5.2.6.3 pump-power cap not evaluable \u2014 loop's peak thermal demand unsized",
+  "action": "combined pump power within the Table 5.2.6.3 maximum",
+  "inputs": {
+   "combined_w": 546,
+   "cap_w": 754,
+   "w_per_kw": 14.0,
+   "thermal_kw": 53.9,
+   "system_type": "Cooling"
+  },
   "article": "5.2.6.3.(1)",
   "ruling": "D-38",
   "building": "reference building",
@@ -1383,7 +1465,7 @@
    "minimum_flow_fraction": 0.47,
    "loop": "Condenser Water Loop"
   },
-  "value": "coefficients set; min-flow clamp deferred (flow not sized)",
+  "value": "below-D floor (E=0.68) via min flow 0.0024 m3/s",
   "article": "8.4.4.14.(4)-(5); Table 8.4.4.14.",
   "ruling": "D-11",
   "building": "reference building",
@@ -1392,11 +1474,20 @@
  {
   "step": "efficiency",
   "target": "Condenser Water Loop",
-  "action": "5.2.6.3 pump-power cap not evaluable \u2014 loop's peak thermal demand unsized",
-  "article": "5.2.6.3.(1)",
+  "action": "combined pump power exceeds Table 5.2.6.3 \u2014 clamped to the maximum (min-wins over the pump-power transfer)",
+  "inputs": {
+   "before_w": 1303,
+   "cap_w": 790,
+   "w_per_kw": 12.0,
+   "thermal_kw": 65.8,
+   "system_type": "Heat rejection",
+   "scale": 0.606
+  },
+  "value": "1303 W -> 790 W",
+  "article": "5.2.6.3.(1); 8.4.4.1.(2)",
   "ruling": "D-38",
   "building": "reference building",
-  "level": "info"
+  "level": "decision"
  },
  {
   "step": "efficiency",
@@ -1411,7 +1502,7 @@
    "minimum_flow_fraction": 0.47,
    "loop": "Hot Water Loop"
   },
-  "value": "below-D floor (E=0.68) via min flow 0.00039 m3/s",
+  "value": "below-D floor (E=0.68) via min flow 0.00099 m3/s",
   "article": "8.4.4.14.(4)-(5); Table 8.4.4.14.",
   "ruling": "D-11",
   "building": "reference building",
@@ -1422,10 +1513,10 @@
   "target": "Hot Water Loop",
   "action": "combined pump power within the Table 5.2.6.3 maximum",
   "inputs": {
-   "combined_w": 213,
-   "cap_w": 247,
+   "combined_w": 540,
+   "cap_w": 627,
    "w_per_kw": 4.5,
-   "thermal_kw": 54.8,
+   "thermal_kw": 139.2,
    "system_type": "Heating"
   },
   "article": "5.2.6.3.(1)",
@@ -1456,7 +1547,7 @@
   "action": "General \u2014 reference building basis (prescriptive components, all energy uses) \u2014 host scope: Whole-building modeling basis; the HVAC slice is governed by the articles below. Envelope/lighting/SHW conformance is composed by the umbrella from the sibling domain gems.",
   "inputs": {
    "status": "host_scope",
-   "decisions_citing": 0,
+   "decisions_citing": 1,
    "code": [
     "src/btap/codes/compliance.py#_build_reference"
    ]
@@ -1852,7 +1943,7 @@
   "action": "Cooling Tower Systems \u2014 implemented: axial-fan direct-contact tower with 35/29 C water and 24 C wet-bulb design temperatures; fan power at the Table 5.2.12.2 0.013 kW/kW maximum",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 0,
+   "decisions_citing": 1,
    "code": [
     "src/btap/codes/necb/hvac/efficiency.py#_apply_tower_rules"
    ]
@@ -1866,7 +1957,7 @@
   "action": "Cooling Tower Systems \u2014 implemented: a tower at or below 1750 kW is modeled with one cell",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 0,
+   "decisions_citing": 1,
    "code": [
     "src/btap/codes/necb/hvac/efficiency.py#_apply_tower_rules"
    ]
@@ -1880,7 +1971,7 @@
   "action": "Cooling Tower Systems \u2014 implemented: cells = capacity / 1750 kW rounded UP (true ceiling)",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 0,
+   "decisions_citing": 1,
    "code": [
     "src/btap/codes/necb/hvac/efficiency.py#_apply_tower_rules"
    ]
@@ -1894,7 +1985,7 @@
   "action": "Cooling Tower Systems \u2014 partial. Applied: pump modeled with constant-power coefficients. Gaps: the hardware object is variable-speed; the constant-speed pump ruling is pending (T-list)",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 0,
+   "decisions_citing": 1,
    "code": [
     "src/btap/codes/necb/hvac/efficiency.py#_apply_pump_rules"
    ]
@@ -1908,7 +1999,7 @@
   "action": "Cooling Tower Systems \u2014 partial. Applied: pumping flow comes from plant autosizing. Gaps: the sentence\u2019s specific flow-rate criteria are not individually evaluated against the sized value",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 0,
+   "decisions_citing": 1,
    "code": [
     "src/btap/codes/necb/hvac/efficiency.py#_apply_pump_rules"
    ]
@@ -1922,7 +2013,7 @@
   "action": "Cooling Tower Systems \u2014 partial. Applied: cell fan set to maintain 29 C outlet water. Gaps: cycling control relies on the CoolingTowerSingleSpeed default capacity control rather than an explicit cycling model",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 0,
+   "decisions_citing": 1,
    "code": [
     "src/btap/codes/necb/hvac/efficiency.py#_apply_tower_rules"
    ]
@@ -1936,7 +2027,7 @@
   "action": "Cooling Tower Systems \u2014 partial. Applied: tower part-load behaviour comes from the shared Subsection 8.4.6 curve machinery. Gaps: the tower coefficients are not individually verified by the curves probe",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 0,
+   "decisions_citing": 1,
    "code": [
     "src/btap/codes/necb/hvac/efficiency.py#_apply_tower_rules",
     "src/btap/modeling/hvac/components/curves.py#build"
@@ -2218,7 +2309,7 @@
   "action": "plant capacities the efficiency pass derived from sizing released to autosize for the re-sizing run \u2014 the next pass re-stages them from the newly sized design capacities; input capacities are kept",
   "inputs": {
    "boilers": 2,
-   "chillers": 0,
+   "chillers": 2,
    "towers": 0
   },
   "article": "8.4.4.9.(6)(a); 8.4.4.10.(6); 8.4.1.2.(5)",
@@ -2730,7 +2821,7 @@
   "action": "Reference building basis (envelope meets Section 3.2) \u2014 implemented: reference envelope meets prescriptive Section 3.2 (U-values at the building HDD; FDWR/SRR enforced via 8.4.4.3.(3) scaling)",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 2,
+   "decisions_citing": 3,
    "code": [
     "src/btap/codes/necb/envelope/reference.py#reference_envelope"
    ]
@@ -3647,7 +3738,7 @@
  },
  {
   "step": "efficiency",
-  "target": "Coil Heating Gas 1 282kBtu/hr 0.81 Thermal Eff",
+  "target": "Coil Heating Gas 1",
   "action": "gas heating coil efficiency applied",
   "inputs": {
    "capacity_kw": 0.0,
@@ -3685,13 +3776,21 @@
  },
  {
   "step": "efficiency",
-  "target": "Chilled Water Loop",
-  "action": "Chilled Water Loop: 8.4.4.14.(1)-(3) NOT applied \u2014 the proposed building has no chilled_water loop. The pump keeps the modelling default, which is not a Code value; 5.2.6.3 still caps it",
-  "article": "8.4.4.14.(1)-(3)",
+  "target": "Pump Variable Speed 2",
+  "action": "pump power intensity transferred from the proposed system",
+  "inputs": {
+   "proposed_pumps": 1,
+   "combined_electrical_w": 546.4,
+   "distribution_flow_l_s": 2.14,
+   "distribution_flow_source": "autosized",
+   "proposed_w_per_l_s": 255.49,
+   "reference_flow_l_s": 3.79
+  },
+  "value": "255.49 W/(L/s) over the distribution flow (counted once, not the sum of pump flows); head 179352 Pa at a declared 78.0% pump / 90.0% modelling split",
+  "article": "8.4.4.14.(3)",
   "ruling": "D-93",
-  "ahj": "AHJ-16",
   "building": "reference building",
-  "level": "warning"
+  "level": "decision"
  },
  {
   "step": "efficiency",
@@ -3722,7 +3821,7 @@
    "minimum_flow_fraction": 0.47,
    "loop": "Condenser Water Loop"
   },
-  "value": "below-D floor (E=0.68) via min flow 0.00603 m3/s",
+  "value": "below-D floor (E=0.68) via min flow 0.00618 m3/s",
   "article": "8.4.4.14.(4)-(5); Table 8.4.4.14.",
   "ruling": "D-11",
   "building": "reference building",
@@ -3730,27 +3829,35 @@
  },
  {
   "step": "efficiency",
-  "target": "Condenser Water Loop",
-  "action": "Condenser Water Loop: 8.4.4.14.(1)-(3) NOT applied \u2014 the proposed building has no condenser loop. The pump keeps the modelling default, which is not a Code value; 5.2.6.3 still caps it",
-  "article": "8.4.4.14.(1)-(3)",
+  "target": "Pump Variable Speed 3",
+  "action": "pump power intensity transferred from the proposed system",
+  "inputs": {
+   "proposed_pumps": 1,
+   "combined_electrical_w": 1302.6,
+   "distribution_flow_l_s": 5.1,
+   "distribution_flow_source": "autosized",
+   "proposed_w_per_l_s": 255.49,
+   "reference_flow_l_s": 13.14
+  },
+  "value": "255.49 W/(L/s) over the distribution flow (counted once, not the sum of pump flows); head 179352 Pa at a declared 78.0% pump / 90.0% modelling split",
+  "article": "8.4.4.14.(3)",
   "ruling": "D-93",
-  "ahj": "AHJ-16",
   "building": "reference building",
-  "level": "warning"
+  "level": "decision"
  },
  {
   "step": "efficiency",
   "target": "Condenser Water Loop",
   "action": "combined pump power exceeds Table 5.2.6.3 \u2014 clamped to the maximum (min-wins over the pump-power transfer)",
   "inputs": {
-   "before_w": 3280,
+   "before_w": 3358,
    "cap_w": 1401,
    "w_per_kw": 12.0,
    "thermal_kw": 116.7,
    "system_type": "Heat rejection",
-   "scale": 0.427
+   "scale": 0.417
   },
-  "value": "3280 W -> 1401 W",
+  "value": "3358 W -> 1401 W",
   "article": "5.2.6.3.(1); 8.4.4.1.(2)",
   "ruling": "D-38",
   "building": "reference building",
@@ -3781,8 +3888,8 @@
   "action": "pump power intensity transferred from the proposed system",
   "inputs": {
    "proposed_pumps": 1,
-   "combined_electrical_w": 212.8,
-   "distribution_flow_l_s": 0.83,
+   "combined_electrical_w": 540.4,
+   "distribution_flow_l_s": 2.12,
    "distribution_flow_source": "autosized",
    "proposed_w_per_l_s": 255.49,
    "reference_flow_l_s": 1.25

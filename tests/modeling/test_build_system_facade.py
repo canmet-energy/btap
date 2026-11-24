@@ -52,7 +52,21 @@ class TestTheSingleZoneWarning(unittest.TestCase):
         message = str(ours[0].message)
         self.assertIn(f"serves {len(zones)} zones", message)
         self.assertIn("config={'per_zone': True}", message)
+        # It names the provisional control zone and both ways to settle it.
+        self.assertIn(f"follows '{zones[0].nameString()}' PROVISIONALLY", message)
+        self.assertIn("elect_control_zones(model)", message)
+        self.assertIn("control_zone=", message)
         self.assertIs(UserWarning, ours[0].category)
+
+    def test_a_chosen_control_zone_does_not_warn(self):
+        # A shared unit on a zone the user chose is a design, like a house's
+        # furnace on its main-floor thermostat — not the #236 trap.
+        model = load_fixture()
+        zones = _zones(model)
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            modeling.build_system(model, DEFAULT_SHARED, zones, control_zone=zones[2])
+        self.assertEqual([], [w for w in caught if "#236" in str(w.message)])
 
     def test_per_zone_config_does_not_warn_and_builds_one_unit_per_zone(self):
         result, zones, ours = _build(DEFAULT_SHARED, config={"per_zone": True})

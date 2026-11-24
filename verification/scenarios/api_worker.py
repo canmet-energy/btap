@@ -65,11 +65,15 @@ def run(call, run_dir):
 
     if hvac_system is not None:
         # The same catalogue call the CLI's `--hvac-system` makes, over every
-        # zone in name order so the built systems are deterministic.
+        # zone in name order so the built systems are deterministic — with
+        # the on-ramp's own config (D-101: one unit per thermal block for a
+        # row shared only by default), taken from the product, not copied.
         import btap.modeling as modeling
         from btap._compat import sorted_by_name
+        from btap.codes.necb.path import onramp_hvac_config
         modeling.build_system(model, str(hvac_system),
-                              sorted_by_name(model.getThermalZones()))
+                              sorted_by_name(model.getThermalZones()),
+                              config=onramp_hvac_config(str(hvac_system)))
 
     result = performance_compliance(model, run_dir=str(run_dir), **kwargs)
     return {

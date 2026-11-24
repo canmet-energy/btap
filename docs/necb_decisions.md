@@ -7787,6 +7787,19 @@ true, and is tested separately, is that `copy_proposed` CAN retain a proposed
 plant with both its fuels; it is simply not an outcome of the question AHJ-1
 asks.
 
+**The on-ramp builds the proposed the same way** (#237's follow-up,
+2026-11-20). A modeller's own shared unit stays as built, as above. But when
+the TOOL generates the proposed's HVAC — `--hvac-system`, or
+`necb_loads={'hvac_system': ...}` — it is the author, and a catalogue row
+that is shared only by DEFAULT (a "PSZ RTU ..." row stating no `per_zone`)
+is built one unit per thermal block. Built shared, such a row put one unit
+and one thermostat over the whole building: on a five-zone office the zone
+holding the thermostat was met and the others were not, whichever zone it
+was, and 8.4.1.2 failed on the proposed for a reason no capacity increase or
+control rule could reach. A row that states `per_zone`, like the "Shared PSZ
+..." rows, is built as its name says. `path.onramp_hvac_config` is the rule
+and the scenario harness calls it rather than restating it.
+
 <a id="d-102"></a>
 
 ## D-102 — the Code states EIR_FPLR; EnergyPlus carries PLF, and the floor goes on the output
@@ -8818,7 +8831,31 @@ silently inherit its predicate. So the System 2/5 reference carries its own
 referral, **AHJ-26**, and `reference.py#_record_fan_coil_dispatch` witnesses
 the built order and cites it — refusing a zone built any other way.
 
-**Not decided here:** two other families still put zone equipment first —
-`mau_ptac` (the reference's System 1) and `vav_reheat` with baseboards (System
-6). The reference does not re-order those, so changing them would move System
-1 and 6 reference results; neither failed in #236. Left as recorded findings.
+**The full-year effect, frozen.** The parity scenario
+`determination-07-system2-terminal-first-annual` runs a five-zone
+data-centre building whose reference is System 2 through a full NECB 2020
+year. With the terminal-first order removed and everything else unchanged,
+the reference's unmet hours go from 79 / 15.75 to 1280 / 1289.75
+(heating / cooling) and its site energy from 286,825 to 460,939 kWh. So the
+order is what lets the System 2 reference hold setpoint, not a sizing
+nicety, and the scenario pins the reference's unmet hours and the AHJ-26
+citation.
+
+**Not extended, because measured unnecessary:** two other families put zone
+equipment first — `mau_ptac` (the reference's System 1: PTAC, then the
+make-up-air diffuser, then the baseboard) and `vav_reheat` with baseboards
+(System 6: baseboard, then the VAV terminal). Each reference was run for a
+full NECB 2020 year as built and with its terminal moved first (2026-11-20,
+Toronto CWEC2020):
+
+| reference | heating unmet h, as built -> terminal first | site kWh |
+|---|---|---|
+| System 1, five dwelling-unit zones, heated-only proposed | 96.5 -> 96.5 | 149,619 -> 148,925 (-0.46 %) |
+| System 6, corpus `19-corner-block-5storey` | 31.5 -> 31.0 | 289,858 -> 289,869 (+0.004 %) |
+
+Both clean either way. The difference from System 2/5 is physical: System
+1's PTAC only cools and the baseboard alone heats, so nothing contends for
+the heating load; System 6's VAV reheat terminal is CONTROLLED and throttles
+to what the baseboard leaves. D-111's defect needs an uncontrolled terminal
+SHARING the load with equipment ordered ahead of it. So the builders keep
+their order, and no System 1 or 6 reference result moves.

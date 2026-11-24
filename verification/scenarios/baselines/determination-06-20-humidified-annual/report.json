@@ -7,45 +7,45 @@
  "proposed": {
   "mechanical_cooling": true,
   "clean_run": true,
-  "total_site_kwh": 203083.3,
-  "electricity_kwh": 90880.6,
-  "natural_gas_kwh": 112202.8,
+  "total_site_kwh": 200066.7,
+  "electricity_kwh": 74713.9,
+  "natural_gas_kwh": 125352.8,
   "district_heating_kwh": 0.0,
   "district_cooling_kwh": 0.0,
   "end_uses_kwh": {
-   "heating": 98069.4,
-   "cooling": 11319.4,
-   "fans": 23486.1,
-   "pumps": 3177.8,
+   "heating": 111077.8,
+   "cooling": 8750.0,
+   "fans": 7372.2,
+   "pumps": 7441.7,
    "interior_lighting": 16775.0,
    "interior_equipment": 22311.1,
-   "water_systems": 14133.3
+   "water_systems": 14275.0
   },
   "floor_area_m2": 800.0,
-  "eui_kwh_per_m2": 253.9,
+  "eui_kwh_per_m2": 250.1,
   "unmet_occupied_hours": {
-   "heating": 358.75,
-   "cooling": 114.75
+   "heating": 0.0,
+   "cooling": 1.25
   },
   "zone_unmet_occupied_hours": {
    "THERMAL ZONE 1": {
     "heating": 0.0,
-    "cooling": 0.0
-   },
-   "THERMAL ZONE 2": {
-    "heating": 241.5,
-    "cooling": 49.0
-   },
-   "THERMAL ZONE 3": {
-    "heating": 343.5,
     "cooling": 0.5
    },
+   "THERMAL ZONE 2": {
+    "heating": 0.0,
+    "cooling": 0.25
+   },
+   "THERMAL ZONE 3": {
+    "heating": 0.0,
+    "cooling": 0.0
+   },
    "THERMAL ZONE 4": {
-    "heating": 235.0,
-    "cooling": 65.75
+    "heating": 0.0,
+    "cooling": 0.5
    },
    "THERMAL ZONE 5": {
-    "heating": 201.75,
+    "heating": 0.0,
     "cooling": 0.0
    }
   }
@@ -104,108 +104,15 @@
      "zones": {
       "THERMAL ZONE 1": {
        "cooling_sizing_factor": 1.375
-      },
-      "THERMAL ZONE 2": {
-       "heating_sizing_factor": 1.625,
-       "cooling_sizing_factor": 1.375
-      },
-      "THERMAL ZONE 3": {
-       "heating_sizing_factor": 1.625,
-       "cooling_sizing_factor": 1.375
-      },
-      "THERMAL ZONE 4": {
-       "heating_sizing_factor": 1.625,
-       "cooling_sizing_factor": 1.375
-      },
-      "THERMAL ZONE 5": {
-       "heating_sizing_factor": 1.625
       }
      },
-     "heating_sizing_factor": 1.625,
      "cooling_sizing_factor": 1.375
     }
    },
    "unmet_after": {
     "proposed": {
-     "heating": 394.0,
-     "cooling": 583.0
-    },
-    "reference": {
      "heating": 0.0,
-     "cooling": 10.25
-    }
-   }
-  },
-  {
-   "iteration": 2,
-   "bumped": {
-    "proposed": {
-     "mode": "zonal",
-     "zones": {
-      "THERMAL ZONE 1": {
-       "cooling_sizing_factor": 1.389
-      },
-      "THERMAL ZONE 2": {
-       "heating_sizing_factor": 3.25,
-       "cooling_sizing_factor": 1.719
-      },
-      "THERMAL ZONE 3": {
-       "heating_sizing_factor": 2.918,
-       "cooling_sizing_factor": 2.75
-      },
-      "THERMAL ZONE 4": {
-       "heating_sizing_factor": 2.798,
-       "cooling_sizing_factor": 2.75
-      },
-      "THERMAL ZONE 5": {
-       "heating_sizing_factor": 3.25
-      }
-     },
-     "heating_sizing_factor": 3.25,
-     "cooling_sizing_factor": 2.75
-    }
-   },
-   "unmet_after": {
-    "proposed": {
-     "heating": 377.25,
-     "cooling": 276.25
-    },
-    "reference": {
-     "heating": 0.0,
-     "cooling": 10.25
-    }
-   }
-  },
-  {
-   "iteration": 3,
-   "bumped": {
-    "proposed": {
-     "mode": "zonal",
-     "zones": {
-      "THERMAL ZONE 2": {
-       "heating_sizing_factor": 6.5,
-       "cooling_sizing_factor": 2.355
-      },
-      "THERMAL ZONE 3": {
-       "heating_sizing_factor": 5.836,
-       "cooling_sizing_factor": 2.822
-      },
-      "THERMAL ZONE 4": {
-       "heating_sizing_factor": 5.596,
-       "cooling_sizing_factor": 3.409
-      },
-      "THERMAL ZONE 5": {
-       "heating_sizing_factor": 4.063
-      }
-     },
-     "heating_sizing_factor": 6.5,
-     "cooling_sizing_factor": 3.409
-    }
-   },
-   "unmet_after": {
-    "proposed": {
-     "heating": 358.75,
-     "cooling": 114.75
+     "cooling": 1.25
     },
     "reference": {
      "heating": 0.0,
@@ -214,7 +121,7 @@
    }
   }
  ],
- "percent_of_target": 132.0,
+ "percent_of_target": 130.1,
  "tier": null,
  "annual": true,
  "ahj_applied": [
@@ -262,7 +169,7 @@
     "article": "8.4.4.9.(3); 8.4.2.10.(2)",
     "target": "Thermal Zone 1",
     "detail": "zone dispatch: the rooftop air terminal runs before the baseboard",
-    "entry_index": 27
+    "entry_index": 29
    },
    {
     "id": "AHJ-15",
@@ -271,7 +178,7 @@
     "article": "8.4.4.9.(3); 8.4.2.10.(2)",
     "target": "Thermal Zone 2",
     "detail": "zone dispatch: the rooftop air terminal runs before the baseboard",
-    "entry_index": 34
+    "entry_index": 36
    },
    {
     "id": "AHJ-15",
@@ -280,7 +187,7 @@
     "article": "8.4.4.9.(3); 8.4.2.10.(2)",
     "target": "Thermal Zone 3",
     "detail": "zone dispatch: the rooftop air terminal runs before the baseboard",
-    "entry_index": 41
+    "entry_index": 43
    },
    {
     "id": "AHJ-15",
@@ -289,7 +196,7 @@
     "article": "8.4.4.9.(3); 8.4.2.10.(2)",
     "target": "Thermal Zone 4",
     "detail": "zone dispatch: the rooftop air terminal runs before the baseboard",
-    "entry_index": 48
+    "entry_index": 50
    },
    {
     "id": "AHJ-15",
@@ -298,7 +205,7 @@
     "article": "8.4.4.9.(3); 8.4.2.10.(2)",
     "target": "Thermal Zone 5",
     "detail": "zone dispatch: the rooftop air terminal runs before the baseboard",
-    "entry_index": 55
+    "entry_index": 57
    },
    {
     "id": "AHJ-12",
@@ -307,7 +214,7 @@
     "article": "Table 8.4.4.7.-B Note (1)",
     "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
     "detail": "reference humidification rebuilt on the proposed energy source",
-    "entry_index": 56
+    "entry_index": 58
    },
    {
     "id": "AHJ-12",
@@ -316,7 +223,7 @@
     "article": "Table 8.4.4.7.-B Note (1)",
     "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 2",
     "detail": "the proposed humidification on this thermal block has NO determinable humidity control (no zone humidistat survives and the proposed used no scheduled minimum-humidity setpoint) \u2014 an uncontrolled humidifier is INERT, so none is rebuilt",
-    "entry_index": 57
+    "entry_index": 59
    },
    {
     "id": "AHJ-12",
@@ -325,7 +232,7 @@
     "article": "Table 8.4.4.7.-B Note (1)",
     "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 3",
     "detail": "the proposed humidification on this thermal block has NO determinable humidity control (no zone humidistat survives and the proposed used no scheduled minimum-humidity setpoint) \u2014 an uncontrolled humidifier is INERT, so none is rebuilt",
-    "entry_index": 58
+    "entry_index": 60
    },
    {
     "id": "AHJ-12",
@@ -334,7 +241,7 @@
     "article": "Table 8.4.4.7.-B Note (1)",
     "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 4",
     "detail": "the proposed humidification on this thermal block has NO determinable humidity control (no zone humidistat survives and the proposed used no scheduled minimum-humidity setpoint) \u2014 an uncontrolled humidifier is INERT, so none is rebuilt",
-    "entry_index": 59
+    "entry_index": 61
    },
    {
     "id": "AHJ-12",
@@ -343,7 +250,7 @@
     "article": "Table 8.4.4.7.-B Note (1)",
     "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 5",
     "detail": "the proposed humidification on this thermal block has NO determinable humidity control (no zone humidistat survives and the proposed used no scheduled minimum-humidity setpoint) \u2014 an uncontrolled humidifier is INERT, so none is rebuilt",
-    "entry_index": 60
+    "entry_index": 62
    },
    {
     "id": "AHJ-14",
@@ -352,7 +259,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
     "target": "Primary Boiler",
     "detail": "boiler efficiency applied",
-    "entry_index": 222
+    "entry_index": 224
    },
    {
     "id": "AHJ-14",
@@ -361,7 +268,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "CoilHeatingGasMultiStage_gas",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 244
+    "entry_index": 246
    },
    {
     "id": "AHJ-14",
@@ -370,7 +277,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "CoilHeatingGasMultiStage_gas 1",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 245
+    "entry_index": 247
    },
    {
     "id": "AHJ-14",
@@ -379,7 +286,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "CoilHeatingGasMultiStage_gas 2",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 246
+    "entry_index": 248
    },
    {
     "id": "AHJ-14",
@@ -388,7 +295,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "CoilHeatingGasMultiStage_gas 3",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 247
+    "entry_index": 249
    },
    {
     "id": "AHJ-14",
@@ -397,7 +304,7 @@
     "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
     "target": "CoilHeatingGasMultiStage_gas 4",
     "detail": "staged gas heating efficiency applied to every stage",
-    "entry_index": 248
+    "entry_index": 250
    }
   ]
  },
@@ -448,7 +355,6 @@
   "model object named 'DXCOOL-REF-CAPFFLOW' does not state this edition's Quadratic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-CAPFFLOW (D-89)'",
   "model object named 'DXCOOL-REF-COOLEIRFT' does not state this edition's BiQuadratic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-COOLEIRFT (D-89)'",
   "model object named 'DXCOOL-REF-COOLPLFFPLR' does not state this edition's Cubic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-COOLPLFFPLR (D-89)'",
-  "8.4.1.2.(5): unmet-hours limits still not met after 3 capacity increase(s) \u2014 the building remains non-compliant; raise max_capacity_iterations, increase capacity_step, or fix the design (no hard-sized capacity was detected among boilers, chillers, baseboards, gas and electric coils and single-speed DX cooling coils (hydronic coils, DX heating coils and staged coils are not checked)).",
   "INFORMATIONAL AND CONDITIONAL: 3 register question(s) requiring approval by the authority having jurisdiction were raised by this run's modelling choices, so the verdict below is NOT a Code-compliance determination. AHJ-15 (referral); AHJ-15 (referral); AHJ-15 (referral); AHJ-15 (referral); AHJ-15 (referral); AHJ-12 (referral); AHJ-12 (referral); AHJ-12 (referral)",
   "Determination of Compliance \u2014 partial. Applied: The pipeline computes the (2) annual-energy verdict (proposed vs reference building). On the reference-building path, the (3)/(4) verdicts read each building\u2019s Facility unmet_occupied_hours row; that path does not yet evaluate the zone rows per thermal block, and (4) is vacuous when the proposed building has no mechanical cooling. The sentence-(5) capacity auto-iteration raises each failing zone\u2019s Sizing:Zone factors where zone data attributes the Facility failure, secant-targeted from that zone\u2019s own (factor, unmet-hours) history across rounds, with a global SizingParameters fallback when it cannot, and hard-sized-equipment stall detection.. Gaps: On the reference-building path, sentences (3) and (4) read each building\u2019s Facility row instead of evaluating every thermal block, so a block that exceeds its own limit can pass when the Facility-level comparison passes.",
   "Calculation Methods \u2014 partial. Applied: the energy model accounts for the annual energy use of what the model contains. Gaps: elevators/escalators ((1)(j)) and other loads absent from the model are not added by the pipeline"

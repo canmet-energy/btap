@@ -2,7 +2,7 @@
  "version": 2,
  "spec_sha256": "f7d5cb76db9e77c526024a6545047ba19f6517332372b39242c64682168be76c",
  "provenance": {
-  "commit": "c0b13ee1de216a78c6896c1bde14d850cbbb9ec5",
+  "commit": "791731235c4eef0ced450733228ff0f58dc40365",
   "dirty": false,
   "openstudio_cli": "3.11.0+241b8abb4d",
   "producer": {
@@ -19,7 +19,7 @@
   "producer_scope": "this invocation only; see each scenario's `produced_by` for the baseline that bears it",
   "active_seals": {
    "python-only:post-handoff": 31,
-   "python-only": 29
+   "python-only": 30
   },
   "retired_seals": {
    "ruby": 29,
@@ -39,7 +39,7 @@
  "counts": {
   "python": 39,
   "verify": 8,
-  "parity": 13
+  "parity": 14
  },
  "scenarios": [
   {
@@ -141,11 +141,11 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "7eb94807458714f288add2c1b6eb0ad9ce7015201144be79182e6de4d03c94fc",
-    "audit.txt": "a1729681ad26565cc35aef967c3a7e255148aa987e0de403adff342ca2a81e7d",
-    "report.json": "9d894282310b0fb6ced0149fd7021da9476a70ecb83bf2eb35940353944a6b6d",
+    "audit.json": "49e1977eaff70d603a50de83a9687c00e24785d9623bde10ae5886bcc72be668",
+    "audit.txt": "edb099efd9e681261452c909b3bae65b9aab6a33e4e1026321edba083adf5a4a",
+    "report.json": "0ab20ad13b34386af373641a59e0d8dc9f1cefc30e5ec7304e957081e5f9e46d",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "stdout.txt": "a6ffb1c03a084ede2c896970baeb4f5776b9ddea60dd21baa2fb0d4b3cbd1564"
+    "stdout.txt": "3c8aa34626a2e6fb9b191cf6f656f6a9d85535cda3104c33cf44ea166d26496c"
    },
    "produced_by": {
     "producer": {
@@ -981,11 +981,11 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "3e8125a7fdabb920b97003b652ba2548c0e3ca062281f032dcfa8127262e0fbc",
-    "audit.txt": "6bec06fc25b8d33c7346a85d8afef9a48cc22803787daaac51e5dc56bdabeacf",
-    "report.json": "9be733e071deb379e0074eb8d63722d5804afeab57631d2e4f12364e442cf78e",
+    "audit.json": "73a29e9b0b46924a82bb3c90778085d4c6cf06cb19fa45573ec0c7a02e968e8d",
+    "audit.txt": "ceb053dfe275f2436b70e02e786f5ad93bf13cff6969117eccb12d4c381626d5",
+    "report.json": "ead06f0f6d309c94a8c73fed780c90c787b9d2faccd7efd08433d19d6c9c0ef9",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "stdout.txt": "67affdbc4844ecf4a3184b9d647e050ec47b68c6b568f8aa6593c6eedd7227c4"
+    "stdout.txt": "91fcbafc07b41cdcc788435a1ba105e2ceaea3edb84705de738ae8c34f8109cc"
    },
    "produced_by": {
     "producer": {
@@ -1201,11 +1201,11 @@
    },
    "seal": "python-only:first frozen as a guard-7 corpus addition \u2014 authored after the Ruby product retired; no cross-language attestation exists for this sample",
    "baseline_sha256": {
-    "audit.json": "941fddc7cbffda7cf3dca21f331834958040e715e4e489441d4c04cd15a6e376",
-    "audit.txt": "3662ddd8fa33ea907ab4549f7d6c5efd89673cef0f0b0462c0df50f6e012db91",
+    "audit.json": "6659cdb7e6236adb90dcadc1ba84ed12ae9d4c410eded918f488217d408433f0",
+    "audit.txt": "c7435990d262b920f8b79c099cb394cec7f40c226ca4780e4305628a9e6f9fa8",
     "report.json": "e79898bde1756f079e58498fb69bdf0b10e7b9b7f55b9c9c5940c9995ddfb4ca",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "stdout.txt": "755091134565b1d5592c94f89a1805c2762d7fa1189da93fc99a7221cfd4bc4d"
+    "stdout.txt": "4405aeaf4d5a9609b777d614aa61dd0507af74edb92ee2fd2096bab57ed1add7"
    },
    "produced_by": {
     "producer": {
@@ -1497,8 +1497,8 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "3d8906124f4a2a25a82e5f04cdf48af52e768385de0d5411c6c8de631d5a9986",
-    "audit.txt": "597ad2052fcaa46c08bef8491f72813027676c140ae6c0abfcfcbcca33ec7513",
+    "audit.json": "0b0e6352cef5fc368ab43819a5f246a5e5dfbde5996f72b7abbba78f421d39e7",
+    "audit.txt": "d72540b57e17117d8dfa63f800ca8e711d16e5a466fab1e886a1138f1fcba09f",
     "report.json": "1454d7dd63b2f66e6ceb8c4974eebe54a1bbacb5faf6d6531ef4d8d744d32f3d",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "4ed5a3ee2392d07166f25bfbf448a4ee301ac5555a0df3a8cc67645aab6bc84d"
@@ -1713,11 +1713,11 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "fb3171316f6ae1c5aa88941fe98cbc2c145402b0d0038ae58bd0e15ed4c34276",
-    "audit.txt": "52911403c7087e8740aefd6b4695f04193a4a05a652d1cd4ef5c3d669c3a00c7",
-    "report.json": "20118209db6006c90889f328f852812d0ddc38200425df84d213ac7d24fb4445",
+    "audit.json": "720a274e0d93c6979326f76fd2b8a83458f4168c9efae30c1b94e5bf6b670e8d",
+    "audit.txt": "cb12a36fe3f05ad03a21442e016dbfa0f18929b8b4d0c97bffb680ddd12570bc",
+    "report.json": "ed15db6c1a90c9c2635a561f241fa9bed677f3806b5eeafe5eeb1290e911d982",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "stdout.txt": "6194c700aa480d407114c60152688edb185222a3f980a0548f005f583caabc19"
+    "stdout.txt": "e00b3b9dcaf6f2f5fe285e1dff5cb07e48105c911fbe3de3cd64ef2d1ccca122"
    },
    "produced_by": {
     "producer": {
@@ -2337,7 +2337,7 @@
      "python_worker": "3.12.3",
      "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
      "container_digest": null,
-     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/.venv/bin/python",
      "openstudio_driver": "3.11.0+241b8abb4d",
      "energyplus_driver": "25.2.0-cf7368216c"
     },
@@ -2379,7 +2379,7 @@
      "python_worker": "3.12.3",
      "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
      "container_digest": null,
-     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/.venv/bin/python",
      "openstudio_driver": "3.11.0+241b8abb4d",
      "energyplus_driver": "25.2.0-cf7368216c"
     },
@@ -2422,7 +2422,7 @@
      "python_worker": "3.12.3",
      "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
      "container_digest": null,
-     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/.venv/bin/python",
      "openstudio_driver": "3.11.0+241b8abb4d",
      "energyplus_driver": "25.2.0-cf7368216c"
     },
@@ -2466,7 +2466,7 @@
      "python_worker": "3.12.3",
      "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
      "container_digest": null,
-     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/.venv/bin/python",
      "openstudio_driver": "3.11.0+241b8abb4d",
      "energyplus_driver": "25.2.0-cf7368216c"
     },
@@ -2516,7 +2516,7 @@
      "python_worker": "3.12.3",
      "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
      "container_digest": null,
-     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/.venv/bin/python",
      "openstudio_driver": "3.11.0+241b8abb4d",
      "energyplus_driver": "25.2.0-cf7368216c"
     },
@@ -2568,7 +2568,7 @@
      "python_worker": "3.12.3",
      "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
      "container_digest": null,
-     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/.venv/bin/python",
      "openstudio_driver": "3.11.0+241b8abb4d",
      "energyplus_driver": "25.2.0-cf7368216c"
     },
@@ -2620,7 +2620,7 @@
      "python_worker": "3.12.3",
      "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
      "container_digest": null,
-     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/.venv/bin/python",
      "openstudio_driver": "3.11.0+241b8abb4d",
      "energyplus_driver": "25.2.0-cf7368216c"
     },
@@ -2700,7 +2700,7 @@
      "python_worker": "3.12.3",
      "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
      "container_digest": null,
-     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/.venv/bin/python",
      "openstudio_driver": "3.11.0+241b8abb4d",
      "energyplus_driver": "25.2.0-cf7368216c"
     },
@@ -2763,7 +2763,7 @@
      "python_worker": "3.12.3",
      "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
      "container_digest": null,
-     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/.venv/bin/python",
      "openstudio_driver": "3.11.0+241b8abb4d",
      "energyplus_driver": "25.2.0-cf7368216c"
     },
@@ -2824,7 +2824,7 @@
      "python_worker": "3.12.3",
      "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
      "container_digest": null,
-     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/.venv/bin/python",
      "openstudio_driver": "3.11.0+241b8abb4d",
      "energyplus_driver": "25.2.0-cf7368216c"
     },
@@ -2856,7 +2856,7 @@
      "python_worker": "3.12.3",
      "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
      "container_digest": null,
-     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/.venv/bin/python",
      "openstudio_driver": "3.11.0+241b8abb4d",
      "energyplus_driver": "25.2.0-cf7368216c"
     },
@@ -2888,7 +2888,7 @@
      "python_worker": "3.12.3",
      "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
      "container_digest": null,
-     "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/.venv/bin/python",
      "openstudio_driver": "3.11.0+241b8abb4d",
      "energyplus_driver": "25.2.0-cf7368216c"
     },
@@ -3035,7 +3035,7 @@
     "<RUN_DIR>"
    ],
    "env": {},
-   "expect_exit": 1,
+   "expect_exit": 0,
    "timeout_s": 5400,
    "files": [
     "audit.json",
@@ -3059,7 +3059,7 @@
     {
      "op": "audit_entry",
      "ahj": "AHJ-2",
-     "count": 1
+     "count": 5
     },
     {
      "op": "json_equals",
@@ -3076,26 +3076,14 @@
       "AHJ-2",
       "AHJ-14"
      ]
-    },
-    {
-     "op": "json_equals",
-     "file": "report.json",
-     "path": "capacity_iterations.1.iteration",
-     "value": 2
-    },
-    {
-     "op": "json_equals",
-     "file": "report.json",
-     "path": "capacity_iterations.1.stalled",
-     "value": true
     }
    ],
    "baseline_sha256": {
-    "audit.json": "1f617ea48cd3467a2c5d060acc6b723e2932536f85318fd80687a1a8a966499d",
-    "audit.txt": "aa7c2ca3a37d0fd74ca5740f263cdf42e20d4cb237cab9e2ca31837ba45ec4f5",
-    "report.json": "afb52de315a8c861607a2c7d05ea7811056d956439afbf020af163a7e96a56ee",
+    "audit.json": "adc87fd592ea1e360637baec7c509b898ccc2f71b18211d62ee160606eeac8ef",
+    "audit.txt": "f77823c64666601378d6feedabfcfed6c9862df0ea119e1cac9b34937f33892d",
+    "report.json": "a008787c55a3b322fd6752a9fc6596f223c6a37e3251ee56397a8c454defc21d",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "stdout.txt": "3b26d60ba7e243ae8cc6f7a08cb883788794b2e17e05c6ab03f32edd4fda8a2a"
+    "stdout.txt": "1599d900e43d4efce3ed79a36bf0bdf8a53da219810547e0c76a253acaeb22ac"
    },
    "produced_by": {
     "producer": {
@@ -3275,11 +3263,11 @@
     }
    ],
    "baseline_sha256": {
-    "audit.json": "ef72bf805dcc00f414b64309d844f6ab5dc1716395a631f0d64c1f56fbc3aac6",
-    "audit.txt": "4ebac9b297890ffc9120293b52399acf225acc97ba49eaa50f8b41c2226bf5bb",
-    "report.json": "35c56f2705eacaf644118d2c3a5a0df2e02de5b96bb5bd51cb66d789de1b64fb",
+    "audit.json": "659888cd73a60ad466fcac7ebcf8f0aadfa78e27283b65d2bc55a9793b573b81",
+    "audit.txt": "56b72d6c5985bbc793b147d0935cceb4e5ceab273897cd3cb5cda311cd69d0a2",
+    "report.json": "fcfc6125b6514525b27c50d6ae79e0ab209fa59b3c2db46e6dfe0e67bddfe224",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "stdout.txt": "7c08458ed6927a09bf892c09b142b299618c66463b196e2fa50a0702a976401b"
+    "stdout.txt": "77d930d2f730e137f553c425148f094e4c4e948e5f999fd7750da26a9eb96fcf"
    },
    "produced_by": {
     "producer": {
@@ -3878,11 +3866,11 @@
     }
    ],
    "baseline_sha256": {
-    "audit.json": "835184d0ae599febb05afe820ff63f8e7a1178b7fb2c3ee02c7b6197cf45b421",
-    "audit.txt": "74a13127c60b5c95bf524c5d19a6aec474e1ae846411e9b4543667e6926f2289",
-    "report.json": "957a6142f8f974928d24016ffa9a26876fec640ff824ca65ff1e04c2cb5413f2",
-    "stderr.txt": "b2fa4938edc527c3067110a566fb48d8d0e3cda72594f4557dafd869b8bb7244",
-    "stdout.txt": "d091ec2a860b93f50d0b5a0f3302b6e4867f95a731145467fcbc661ea97568f0"
+    "audit.json": "20fa3a9b76c33444e57b0d62048c1a766a613498b92c8c4ce09c8f37f53bc5d0",
+    "audit.txt": "b33a0119eb1d899514d164340ad17ae738f378001eb3545d1b0355670788e004",
+    "report.json": "233d146f046f7bcec03ace636c1e43dca177b21aa0c06bff6dd2badc4e2195a2",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "5c5158c4285a564ca23c889537b00c3ac967f749bafb232f2c428b7836c932fc"
    },
    "produced_by": {
     "producer": {
@@ -3909,7 +3897,7 @@
     "simulate": "sizing",
     "hdd": 3890,
     "model": "<SEED>",
-    "hvac_system": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+    "hvac_system": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
     "weather": {
      "epw": "<EPW>",
      "ddy": "<DDY>"
@@ -3989,9 +3977,159 @@
     }
    ],
    "baseline_sha256": {
-    "audit.json": "e36a999f30103b689a52cfc2c13c3ab4a9f2591397fd0d70c8ca84261b772a9c",
-    "audit.txt": "0f51b1d164d8b7207647a88cabb7a458d3ef0899b1df1aa5cf2cacbdeb86b699",
-    "report.json": "fa81422daff90ce4ee5ce684275c66643bb8d27e5c4eeba3c31bfd2bc7306894"
+    "audit.json": "5f43249ae480150fc2576dac28d0c0ec3c1bb2a20420e65cf11181b811638493",
+    "audit.txt": "af83c6591907c983db873ab316653fd104b92d12890499ee7591a066ccf9c01c",
+    "report.json": "0a8f2c2aac0532bbc724e20049d0c0f86a391b2958a32192b0c381e3dc57b05d"
+   },
+   "produced_by": {
+    "producer": {
+     "openstudio": "3.11.0+241b8abb4d",
+     "energyplus": "25.2.0-cf7368216c",
+     "python_driver": "3.12.3",
+     "python_worker": "3.12.3",
+     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+     "container_digest": null,
+     "python_worker_executable": "/workspaces/openstudio-necb-gems/.venv/bin/python",
+     "openstudio_driver": "3.11.0+241b8abb4d",
+     "energyplus_driver": "25.2.0-cf7368216c"
+    },
+    "openstudio_cli": "3.11.0+241b8abb4d"
+   }
+  },
+  {
+   "id": "determination-07-system2-terminal-first-annual",
+   "lane": "parity",
+   "kind": "api",
+   "replaces": [],
+   "api_call": {
+    "code": "necb2020",
+    "simulate": "annual",
+    "hdd": 3890,
+    "model": "<SEED>",
+    "hvac_system": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
+    "weather": {
+     "epw": "<EPW>",
+     "ddy": "<DDY>"
+    },
+    "necb_loads": {
+     "space_type_map": {
+      "Story 1 Core Space": [
+       "Space Function",
+       "Office enclosed > 25 m2"
+      ],
+      "Story 1 East Perimeter Space": [
+       "Space Function",
+       "Office enclosed > 25 m2"
+      ],
+      "Story 1 North Perimeter Space": [
+       "Space Function",
+       "Office enclosed > 25 m2"
+      ],
+      "Story 1 South Perimeter Space": [
+       "Space Function",
+       "Office enclosed > 25 m2"
+      ],
+      "Story 1 West Perimeter Space": [
+       "Space Function",
+       "Office enclosed > 25 m2"
+      ]
+     }
+    },
+    "building": {
+     "storeys": 1,
+     "zone_types": {
+      "Thermal Zone 1": "data centre",
+      "Thermal Zone 2": "data centre",
+      "Thermal Zone 3": "data centre",
+      "Thermal Zone 4": "data centre",
+      "Thermal Zone 5": "data centre"
+     }
+    }
+   },
+   "env": {},
+   "expect_exit": 0,
+   "timeout_s": 5400,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {},
+   "seal": "python-only:first frozen to cover reference System 2/5 after issue #113 \u2014 authored after the Ruby product retired; no cross-language attestation exists for this scenario",
+   "fragments": {
+    "reference_annual/run/eplusout.err": {
+     "required": [
+      "; 0 Severe Errors; Elapsed Time"
+     ]
+    }
+   },
+   "asserts": [
+    {
+     "op": "audit_entry",
+     "step": "selection",
+     "action": "reference system selected",
+     "inputs": {
+      "category": "Data Processing Area"
+     },
+     "count": 5
+    },
+    {
+     "op": "audit_entry",
+     "ruling": "D-111",
+     "ahj": "AHJ-26",
+     "action": "zone dispatch: the make-up-air terminal runs before the fan coil",
+     "count": 1
+    },
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "annual",
+     "value": true
+    },
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "reference.unmet_occupied_hours",
+     "value": {
+      "heating": 79.0,
+      "cooling": 15.75
+     }
+    },
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "compliance_determination",
+     "value": "conditional"
+    },
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "compliance_determination_reason.ahj_ids",
+     "value": [
+      "AHJ-7",
+      "AHJ-14",
+      "AHJ-22",
+      "AHJ-26"
+     ]
+    },
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "tier",
+     "value": 2
+    },
+    {
+     "op": "observation_equals",
+     "key": "compliant",
+     "value": true
+    }
+   ],
+   "baseline_sha256": {
+    "audit.json": "73ca9cadf1098ecb398001ca280ccc4983f0ffd3fcf1fdb8a7bed416cdcfa2c5",
+    "audit.txt": "c00f36cbaf6d4bed0199b3bbe931e6742915ab509457490f8ab73f6691b7846b",
+    "report.json": "5b2ed283af72ec2194075df68d19bbda583e42ad15dcbf9a05f3e820c29533ad"
    },
    "produced_by": {
     "producer": {
@@ -4011,9 +4149,9 @@
  ],
  "uncovered": [
   {
-   "branch": "8.4.1.2.(5) capacity-iteration FAILURE paths other than stall detection",
-   "why": "the failed-bump, post-bump nonconvergence, cap-exhaustion and zero-iteration-warning branches require a real annual run engineered to reach each state; no CLI flag exposes max_capacity_iterations",
-   "witness": "determination-04 now freezes the D-43 stall branch at capacity_iterations[1].stalled = true; the other failure branches remain covered only by existing unit tests",
+   "branch": "8.4.1.2.(5) capacity-iteration FAILURE paths, stall detection included",
+   "why": "the stall, failed-bump, post-bump nonconvergence, cap-exhaustion and zero-iteration-warning branches require a real annual run engineered to reach each state; no CLI flag exposes max_capacity_iterations",
+   "witness": "the D-43 STALL branch is witnessed on purpose by tests/necb/test_compliance.py::TestComplianceWithEngine::test_capacity_iteration_STALLS_on_hard_sized_equipment (hard-sized electric baseboards, a 4-week run; it fails when stall detection is disabled). determination-04 froze it only by accident \u2014 sample 16's shared heat pump stalled its search \u2014 and lost it when that sample became one unit per zone (2026-11-24). The other failure branches remain covered only by existing unit tests",
    "option": "a future API-level scenario (parity lane) is a named OPTION, not a witness; nothing is frozen unless it appears in this manifest"
   }
  ]

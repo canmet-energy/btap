@@ -1,2 +1,0 @@
-<ROOT>/src/btap/codes/necb/path.py:1396: UserWarning: ONE shared 'PSZ RTU Gas and DX Coils and Hot Water Baseboard' unit now serves 5 zones, controlled from a single zone. A packaged single-zone system is normally one unit per zone: pass config={'per_zone': True} or call build_system once per zone. (#236)
-  result = modeling.build_system(
