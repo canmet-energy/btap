@@ -47,12 +47,13 @@ Unmet hours  heating 0.0 / 0.0 h    cooling 1.3 / 10.3 h
   text does not settle.
     - AHJ-12 (referral): "where present" humidification — an
       INTERPRETATION the acceptable-solution text does not settle.
-      Applies to: psz-gas-hwbb-gasboiler | Thermal Zone 1, psz-gas-
-      hwbb-gasboiler | Thermal Zone 2, psz-gas-hwbb-gasboiler |
-      Thermal Zone 3, psz-gas-hwbb-gasboiler | Thermal Zone 4, psz-
-      gas-hwbb-gasboiler | Thermal Zone 5 — each of the 5 choices
-      above makes this same unresolved election; the conditions list
-      carries what was established at each one
+      Applies to: psz-gas-hwbb-gasboiler | Thermal Zone 1,
+      psz-gas-hwbb-gasboiler | Thermal Zone 2,
+      psz-gas-hwbb-gasboiler | Thermal Zone 3,
+      psz-gas-hwbb-gasboiler | Thermal Zone 4,
+      psz-gas-hwbb-gasboiler | Thermal Zone 5 — each of the 5
+      choices above makes this same unresolved election; the
+      conditions list carries what was established at each one
     - AHJ-14 (referral): which part-load class a reference boiler or
       furnace takes — an INTERPRETATION the acceptable-solution text
       does not settle. Applies to: Primary Boiler,

@@ -2,7 +2,7 @@
  "version": 2,
  "spec_sha256": "f7d5cb76db9e77c526024a6545047ba19f6517332372b39242c64682168be76c",
  "provenance": {
-  "commit": "e3c333e504819dd14081ae0aabef1b68d39249e7",
+  "commit": "44044a79588fab0495230db41fded54cf6ae226b",
   "dirty": false,
   "openstudio_cli": "3.11.0+241b8abb4d",
   "producer": {
@@ -3170,7 +3170,7 @@
     "audit.txt": "96f7475421bda6c10c01d169672e0d957597b20a42ceb4f849146ee8a1d25268",
     "report.json": "f063e21504ab1a514dcacab3058d0da875f17a21313ebb0afb009b370bfc8086",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "stdout.txt": "4b00eb599cd63c57552ce9f88c62fc8bc78ab2c7c24a20f80c0140a675ff9ba3"
+    "stdout.txt": "284d20dc7a4b0b148f2933f978ad1d3b69323c7e6eb4f24667bb778fb079fec7"
    },
    "produced_by": {
     "producer": {
@@ -3267,7 +3267,7 @@
     "audit.txt": "8306654e99cb3db1d8342bec23e0f99baf628d94923dfcc0a026cc190c5cbf66",
     "report.json": "0d72d9d7dbd7b3470dd258d8fefab452dfbc65466ca0156ff1e783972312f509",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "stdout.txt": "cedf975dae407e4d8fdecd5ec3d3ed9e1d2e8ebad237277964a64172ad9934a9"
+    "stdout.txt": "78dc6916468e0006b9df1b8658df6deda56deb3300210b03b0491ad5f96d4edb"
    },
    "produced_by": {
     "producer": {
