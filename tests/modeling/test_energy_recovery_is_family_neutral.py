@@ -55,7 +55,7 @@ def _build(name, **config):
 
 
 def _a_row_of(family):
-    return next(r['name'] for r in catalog.rows() if r['family'] == family)
+    return next(r['id'] for r in catalog.rows() if r['family'] == family)
 
 
 @needs_sdk
@@ -155,7 +155,7 @@ class TestTheTwoCatalogueRowsAreUnchanged(unittest.TestCase):
     """
 
     def test_each_shipped_ERV_row_still_builds_one_exchanger(self):
-        rows = [r['name'] for r in catalog.rows() if r.get('needs_erv')]
+        rows = [r['id'] for r in catalog.rows() if r.get('needs_erv')]
         self.assertEqual(2, len(rows), 'the shipped ERV row count moved')
         for name in rows:
             with self.subTest(row=name):
@@ -169,7 +169,7 @@ class TestTheTwoCatalogueRowsAreUnchanged(unittest.TestCase):
     def test_the_exchanger_is_tagged_as_catalogue_sourced(self):
         """`teardown` uses this tag to tell a catalogue-built exchanger from a
         proposed one, so losing it in the move would break the NECB path."""
-        name = next(r['name'] for r in catalog.rows() if r.get('needs_erv'))
+        name = next(r['id'] for r in catalog.rows() if r.get('needs_erv'))
         model = _build(name)
         exchanger = model.getHeatExchangerAirToAirSensibleAndLatents()[0]
         source = exchanger.additionalProperties().getFeatureAsString(
@@ -229,8 +229,8 @@ class TestZoneLevelRecoveryIsTheOtherMechanism(unittest.TestCase):
 
     def test_the_standalone_row_and_the_option_build_the_SAME_device(self):
         """`systems/zone_ervs.py` now delegates to the shared function, so the
-        shipped 'Zone ERVs' row cannot drift from the option."""
-        standalone = _build('Zone ERVs')
+        shipped 'zone-erv' row cannot drift from the option."""
+        standalone = _build('zone-erv')
         option = _build(_a_row_of('baseboards'), needs_zone_erv=True)
         self.assertEqual(
             len(standalone.getZoneHVACEnergyRecoveryVentilators()),

@@ -105,27 +105,27 @@ class TestTheScorerUsesIt(unittest.TestCase):
         return hit
 
     def test_a_recovery_row_is_marked_DOWN_for_a_loop_with_no_exchanger(self):
-        with_hrv = self._score('PVAV with gas boiler reheat and plate HRV',
+        with_hrv = self._score('pvav-hw-hwbb-hrv-gasboiler',
                                loop_heat_recovery=False)
-        without = self._score('PVAV with gas boiler reheat and hot water '
-                              'baseboard', loop_heat_recovery=False)
+        without = self._score('pvav-hw-hwbb-gasboiler',
+                              loop_heat_recovery=False)
         self.assertGreater(
             without['score'], with_hrv['score'],
             'a row that invents heat recovery must not outscore the row that '
             'does not')
 
     def test_the_objection_NAMES_the_invented_device(self):
-        hit = self._score('PVAV with gas boiler reheat and plate HRV',
+        hit = self._score('pvav-hw-hwbb-hrv-gasboiler',
                           loop_heat_recovery=False)
         self.assertTrue(
             any('HEAT RECOVERY' in line for line in hit['against']),
             f"nothing names the addition: {hit['against']}")
 
     def test_a_recovery_row_is_PREFERRED_when_the_loop_does_recover(self):
-        with_hrv = self._score('PVAV with gas boiler reheat and plate HRV',
+        with_hrv = self._score('pvav-hw-hwbb-hrv-gasboiler',
                                loop_heat_recovery=True)
-        without = self._score('PVAV with gas boiler reheat and hot water '
-                              'baseboard', loop_heat_recovery=True)
+        without = self._score('pvav-hw-hwbb-gasboiler',
+                              loop_heat_recovery=True)
         self.assertGreater(
             with_hrv['score'], without['score'],
             'a loop that recovers heat should prefer a row that recovers heat')
@@ -168,8 +168,13 @@ class TestTheCatalogueCanExpressIt(unittest.TestCase):
         from btap.modeling.hvac import canonical
         seen = {}
         for row in catalog.rows():
-            seen.setdefault(canonical.name(row), []).append(row['name'])
-        collisions = {c: names for c, names in seen.items() if len(names) > 1}
+            # The generated name people see, and the retired canonical name
+            # frozen in `aliases` -- the one the collision was caught on.
+            seen.setdefault(canonical.name(row), []).append(row['id'])
+            for alias in row['aliases']:
+                seen.setdefault(alias, []).append(row['id'])
+        collisions = {c: names for c, names in seen.items()
+                      if len(set(names)) > 1}
         self.assertEqual({}, collisions)
 
 

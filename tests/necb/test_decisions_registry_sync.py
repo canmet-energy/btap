@@ -1695,8 +1695,9 @@ class TestTheCommittedProvisionView(unittest.TestCase):
     #: have two; one of those records is D-60's related 2020 comparison.
     #: REQUIREMENTS counts instances, including a shared key once per decision
     #: that uses it. D-109 (a process decision, `not_applicable`) is OMITTED from
-    #: the provision view, taking that count from 35 to 36.
-    STRUCTURED, ESTABLISHED, HELD, INCLUDED, OMITTED = 72, 0, 3, 75, 36
+    #: the provision view, taking that count from 35 to 36, and D-112 (the HVAC
+    #: catalogue taxonomy, also `not_applicable`) from 36 to 37.
+    STRUCTURED, ESTABLISHED, HELD, INCLUDED, OMITTED = 72, 0, 3, 75, 37
     SOURCE_ROWS = 246
     GOVERNING_ROWS = 245
     REQUIREMENTS = 131

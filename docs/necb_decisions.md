@@ -160,6 +160,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-109** — The thermal-bridging engine is a default dependency, not the [tbd] extra _(process)_
 - **D-110** — Fan coils the authoring API builds carry the mode-specific sizing contract _(process)_
 - **D-111** — Make-up-air terminal before zone equipment: System 2/5 fan coils, and authored PSZ baseboards _(runtime)_
+- **D-112** — HVAC catalogue taxonomy: stable model ids, display names, legacy names as input _(process)_
 
 <!-- TOC END -->
 
@@ -8859,3 +8860,65 @@ the heating load; System 6's VAV reheat terminal is CONTROLLED and throttles
 to what the baseboard leaves. D-111's defect needs an uncontrolled terminal
 SHARING the load with equipment ordered ahead of it. So the builders keep
 their order, and no System 1 or 6 reference result moves.
+
+<a id="d-112"></a>
+
+## D-112 — The HVAC catalogue is browsed by taxonomy and keyed by stable ids
+
+phylroy (2026-11-25): "I want something that a mechanical engineer would be
+able to quickly find the systems and variants." The catalogue had grown from
+six sources (NECB, CBECS, campus, NECB ECMs, the NECB reference heat pumps,
+generic), each with its own naming style, and its 21 `family` values followed
+those origins rather than system types. The plan is
+`docs/plans/HVAC_TAXONOMY_PLAN.md`; Astra reviewed it twice and Fable
+verified the facets against every builder.
+
+**What was decided.**
+
+- **A taxonomy an engineer browses**: six categories (central ducted systems;
+  outdoor-air unit + zone terminals; zone equipment only; heating only;
+  ventilation only; process), 29 system types, and FACETS by equipment ROLE —
+  air handler, zone terminal, plant, whole system, lineage — DERIVED in
+  `btap/modeling/hvac/taxonomy.py` from each row's fields and its builder's
+  defaults. A configuration the taxonomy cannot describe faithfully raises
+  rather than being misnamed.
+- **Three names per row.** An `id` (`[a-z0-9-]`, at most 40 characters) is
+  what builders write into the model — `.osm`/`.idf` names cannot carry
+  `, ; !`, `|` is reserved by the loop naming, and EnergyPlus upper-cases
+  names. IDs are minted once from the facets, stored, and never regenerated;
+  a changed configuration gets a new id and a retired id is never reused. A
+  `display` name is generated for people and never reaches a model. The old
+  name is kept as `legacy_name`: accepted wherever a system is named, never
+  emitted. The retired generated canonical names stay resolvable as
+  `aliases`.
+- **The id names the base row; the facets describe the configured build.**
+  NECB System 2 electric is the four-pipe fan-coil row with
+  `boiler_fuel: Electricity`, so its facets and audit say electric boiler
+  while its id stays the row's.
+- **No invented equipment.** NECB Systems 3 and 4 build identical equipment
+  (`systems/psz.py`), so the System 4 rows are told apart by a provenance
+  discriminator, `-necbs4`, not an "exhaust" token.
+- **Applicability stays in the codes layer.** A row carries its NECB
+  *lineage*; which reference System actually builds it is
+  `btap.codes.necb.hvac.catalog_annotations.catalog_reference_use`, read from
+  each edition's `system_definitions`.
+
+**The D-58 golden was edited by hand.** D-79 forbids regenerating it from
+Python, so its identity paths — each row's name and every assignment's
+`catalog` value, 3990 values — were relabelled through the committed
+`tests/fixtures/system_id_migration.json` bijection. The proof is permanent
+(`tests/necb/test_reference_matrix_migration.py`): inverse-mapping the
+committed golden reproduces the pre-rename bytes, and every row's
+configuration without its identity fields hashes as before.
+
+**Identify's scores are unchanged.** Two of its predicates read the row NAME;
+both now read the immutable `legacy_name`, and ties still break on it, so the
+rename cannot reorder a candidate. Two pre-existing errors those predicates
+make (the campus water-heated-PTAC make-up air unit's DX coil is missed; the
+reference heat-pump CV-reheat rows are read as electric heat) are recorded
+findings, to be fixed as their own measured change.
+
+**What did not change.** No catalogue row builds anything different; no
+reference selection changes. Model object names change (ids replace legacy
+names), so the frozen scenarios were re-frozen with every moved baseline
+attributed to the rename.

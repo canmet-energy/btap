@@ -389,11 +389,9 @@ class TestTheWarningIsDeduplicated(_Fixture):
 _ASHP_MIXED_FACTS = {
     "zone_groups": [{
         "zones": [f"Thermal Zone {i}" for i in range(1, 6)],
-        "air_loop": "PSZ RTU ASHP with Electric and ASHP with Electric "
-                    "Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 1",
+        "air_loop": "psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 1",
         "family": "psz",
-        "catalog_name": "PSZ RTU ASHP with Electric and ASHP with Electric "
-                        "Supp. Heat Coils and Hot Water Baseboard",
+        "catalog_name": "psz-ashp-elecsupp-hwbb-gasboiler",
         "family_guess": "central_doas_or_cv",
         "heated": True,
         "cooled": True,
@@ -733,7 +731,7 @@ class TestTheOutcomesAreReachableInABuiltModel(unittest.TestCase):
 
     MARKER = "PROPOSED MARKER"
 
-    def _mixed_proposed(self, system="Baseboard gas boiler"):
+    def _mixed_proposed(self, system="bb-hwbb-gasboiler"):
         """A proposed model whose hot-water plant is dual-fuel, with every
         boiler marked so adoption is visible in the reference."""
         from .support import proposed_with_hvac
@@ -766,7 +764,7 @@ class TestTheOutcomesAreReachableInABuiltModel(unittest.TestCase):
         """
         from .support import proposed_with_hvac
 
-        proposed = proposed_with_hvac("FPFC MAU DX Coils with Scroll Chiller")
+        proposed = proposed_with_hvac("mau-fc4-gas-gasboiler-scrollchiller")
         for space_type in proposed.getSpaceTypes():
             if space_type.spaces():
                 space_type.setStandardsSpaceType("Dwelling unit")
@@ -852,7 +850,7 @@ class TestTheOutcomesAreReachableInABuiltModel(unittest.TestCase):
         boilers for both (Fable, `158` F3).
         """
         proposed = self._mixed_proposed(
-            "PSZ RTU Electric and DX Coils and Hot Water Baseboard")
+            "psz-elec-hwbb-gasboiler")
         reference, _audit = self._reference_of(proposed)
         boilers = list(reference.getBoilerHotWaters())
         self.assertTrue(
@@ -867,7 +865,7 @@ class TestTheOutcomesAreReachableInABuiltModel(unittest.TestCase):
         """A variant declaring `needs_boiler: false` leaves the reference with
         no boiler at all. 50 shipped variants declare it; this uses one."""
         proposed = self._mixed_proposed(
-            "PSZ RTU Electric and DX Coils and Electric Baseboard")
+            "psz-elec-elecbb")
         reference, _audit = self._reference_of(proposed)
         self.assertEqual(
             [], [b.nameString() for b in reference.getBoilerHotWaters()],
@@ -885,10 +883,10 @@ class TestTheOutcomesAreReachableInABuiltModel(unittest.TestCase):
         data = json.loads(
             (pathlib.Path(modeling.__file__).parent / "hvac" / "data"
              / "systems.json").read_text(encoding="utf-8"))
-        free = {s.get("name") for s in data["systems"]
+        free = {s.get("id") for s in data["systems"]
                 if s.get("needs_boiler") is False}
         self.assertIn(
-            "PSZ RTU Electric and DX Coils and Electric Baseboard", free)
+            "psz-elec-elecbb", free)
 
 
 class TestPurchasedEnergyDoesNotSuppressUNRELATEDGroups(_Fixture):
@@ -1055,7 +1053,7 @@ class TestAnOILProposedBuildingsFinalREFERENCEFuel(unittest.TestCase):
         the loop never emptied. It is replaced now, like every other
         `action == "build"` plant, and the result no longer depends on which
         block is processed first."""
-        fuels, kept = self._oil_reference("Baseboard gas boiler")
+        fuels, kept = self._oil_reference("bb-hwbb-gasboiler")
         self.assertEqual(0, kept,
                          "a build-action plant is replaced; adoption via "
                          "sequential teardown is the artifact `141` removed")
@@ -1073,7 +1071,7 @@ class TestAnOILProposedBuildingsFinalREFERENCEFuel(unittest.TestCase):
 
         seen = []
         for reverse in (False, True):
-            proposed = proposed_with_hvac("Baseboard gas boiler")
+            proposed = proposed_with_hvac("bb-hwbb-gasboiler")
             for index, boiler in enumerate(proposed.getBoilerHotWaters()):
                 boiler.setFuelType("FuelOilNo2")
                 boiler.setName("{} {}".format(self.MARKER, index))
@@ -1098,7 +1096,7 @@ class TestAnOILProposedBuildingsFinalREFERENCEFuel(unittest.TestCase):
         """The opposite outcome from the same `gas` election, which is why the
         election cannot stand in for the final fuel."""
         fuels, kept = self._oil_reference(
-            "PSZ RTU Electric and DX Coils and Hot Water Baseboard")
+            "psz-elec-hwbb-gasboiler")
         self.assertEqual(0, kept, "the plant is replaced, so no marker remains")
         self.assertEqual({"NaturalGas"}, fuels)
 

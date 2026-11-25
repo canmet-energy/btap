@@ -28,7 +28,7 @@ from tests.support import needs_sdk
 
 
 def _a_row_of(family):
-    return next(r['name'] for r in catalog.rows() if r['family'] == family)
+    return next(r['id'] for r in catalog.rows() if r['family'] == family)
 
 
 class TestTheProfilesThemselves(unittest.TestCase):
@@ -209,7 +209,7 @@ class TestProfilesReachTheModel(unittest.TestCase):
         for row in catalog.rows():
             if not row.get('needs_erv'):
                 continue
-            with self.subTest(row=row['name']):
+            with self.subTest(row=row['id']):
                 energy_recovery.resolve_energy_recovery(dict(row))
 
     def test_the_build_RESULT_still_reports_the_catalogue_family(self):

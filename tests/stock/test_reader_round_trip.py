@@ -20,7 +20,7 @@ import unittest
 
 from tests.support import needs_sdk
 
-SYSTEM = "PSZ-AC with gas coil"
+SYSTEM = "psz-gas-perzone"
 
 
 def _geometry(*, loads=True):

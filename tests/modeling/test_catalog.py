@@ -8,15 +8,15 @@ class TestCatalog(unittest.TestCase):
     def test_list_all(self):
         rows = modeling.systems()
         self.assertGreaterEqual(len(rows), 8)
-        self.assertTrue(all(r.get('name') and r.get('family') for r in rows))
+        self.assertTrue(all(r.get('id') and r.get('display') and r.get('family') for r in rows))
 
     def test_list_filtered(self):
         gas = modeling.systems(filter='Gas')
         self.assertTrue(gas)
         self.assertTrue(
-            all('gas' in r['name'].lower() or 'gas' in r['canonical_name'].lower()
+            all('gas' in ' '.join([r['id'], r['display'], r['legacy_name'], *r['aliases']]).lower()
                 for r in gas),
-            'filter matches legacy or canonical names, case-insensitively')
+            'filter matches id, display, legacy or retired canonical names, case-insensitively')
 
         psz = modeling.systems(family='psz')
         self.assertTrue(psz)

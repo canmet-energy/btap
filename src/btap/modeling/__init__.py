@@ -33,6 +33,7 @@ __all__ = [
     "floor_plans",
     # the HVAC catalogue
     "systems",
+    "system_taxonomy",
     "build_system",
     "elect_control_zones",
     "replace_system",
@@ -443,10 +444,44 @@ def floor_plans(model_or_path, path=None, png_dir=None, audit=None):
 
 # --- The HVAC authoring API ------------------------------------------------
 
-def systems(filter=None, family=None):
-    """List the system catalog (names are a closed, validated vocabulary)."""
+def systems(filter=None, family=None, **facets):
+    """List the HVAC system catalogue, each row with its `id`, plain-English
+    `display` name and `facets` (docs/plans/HVAC_TAXONOMY_PLAN.md).
+
+    :param filter: text (every word must match, case-insensitive) or a
+        compiled regex, over the id, display name, legacy name and aliases
+    :param family: builder family (e.g. ``'psz'``)
+    :param facets: any taxonomy facet — ``system_type='psz'``,
+        ``ahu_heating='gas'``, ``terminal='fc4'``, ``hw_plant='awhp'``, ... A
+        list means any of them. ``system_taxonomy()['facets']`` lists every
+        facet and its values; an unknown one raises with the valid choices.
+
+    >>> [r["id"] for r in systems(system_type="psz", ahu_heating="gas")][:2]
+    ['psz-gas-hwbb-gasboiler', 'psz-gas-elecbb']
+    """
     from btap.modeling.hvac import catalog
-    return catalog.list_systems(filter=filter, family=family)
+    return catalog.list_systems(filter=filter, family=family, **facets)
+
+
+def system_taxonomy():
+    """The catalogue's browsing tree and facet vocabularies.
+
+    :return: ``{"categories": {key: title}, "types": {key: {"category",
+        "title", "abbreviation", "systems": [id, ...]}}, "facets": {facet:
+        [value, ...]}}`` — the same tree and filters the catalogue page shows.
+    """
+    from btap.modeling.hvac import taxonomy
+    tree = taxonomy.tree()
+    types = {}
+    for category, members in tree.items():
+        for system_type, rows in members.items():
+            _, title, abbr = taxonomy.TYPES[system_type]
+            types[system_type] = {"category": category, "title": title,
+                                  "abbreviation": abbr,
+                                  "systems": [r["id"] for r in rows]}
+    return {"categories": {k: taxonomy.CATEGORIES[k] for k in tree},
+            "types": types,
+            "facets": {k: list(v) for k, v in taxonomy.FACETS.items()}}
 
 
 def build_system(model, system_name, zones, *, performance_profile=None,

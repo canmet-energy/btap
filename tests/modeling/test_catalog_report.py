@@ -50,11 +50,14 @@ class TestCatalogReport(unittest.TestCase):
         self.assertRegex(html, r'(?i)<html')
         self.assertRegex(html, r'(?i)</html>')
 
-    def test_contains_every_argument_name(self):
+    def test_contains_every_id_display_and_legacy_name(self):
+        from btap.modeling.hvac import taxonomy
         html = self.html()
-        missing = [r['name'] for r in self.rows() if self.esc(r['name']) not in html]
-        self.assertEqual([], missing,
-                         f'argument names missing from catalog HTML: {missing!r}')
+        for key in ('id', 'legacy_name'):
+            missing = [r[key] for r in self.rows() if self.esc(r[key]) not in html]
+            self.assertEqual([], missing, f'{key}s missing from catalog HTML: {missing!r}')
+        missing = [r['id'] for r in self.rows() if self.esc(taxonomy.display(r)) not in html]
+        self.assertEqual([], missing, f'display names missing for: {missing!r}')
 
     def test_contains_every_canonical_name(self):
         from btap.modeling.hvac import canonical
@@ -84,17 +87,18 @@ class TestCatalogReport(unittest.TestCase):
         self.assertNotRegex(html, r'svg\s*\{[^}]*width:\s*100%',
                             'svg must not be stretched to 100% width')
 
-    def test_family_groups_start_collapsed(self):
+    def test_the_tree_is_category_then_type(self):
+        from btap.modeling.hvac import taxonomy
         html = self.html()
-        # Each family group is a collapsible toggle and starts COLLAPSED on load.
-        collapsed = html.count('class="nav-family collapsed"')
-        titles = html.count('class="nav-family-title"')
-        self.assertGreaterEqual(collapsed, 11,
-                                f'family groups should render collapsed on load, got {collapsed}')
-        self.assertEqual(titles, collapsed,
-                         'every family group carries the collapsed class on load')
-        self.assertRegex(html, r'class="nav-family-title"',
-                         'family header is a clickable toggle')
+        tree = taxonomy.tree()
+        self.assertEqual(len(tree), html.count('<section class="nav-cat">'))
+        self.assertEqual(sum(len(types) for types in tree.values()),
+                         html.count('<details class="nav-type"'))
+        self.assertEqual(len(self.rows()), html.count('class="nav-item"'))
+        # every filter chip is a labelled checkbox with a unique id
+        ids = re.findall(r'<input type="checkbox" id="(f-[^"]+)"', html)
+        self.assertTrue(ids)
+        self.assertEqual(len(ids), len(set(ids)))
 
     def test_no_external_references(self):
         html = self.html()
@@ -160,7 +164,8 @@ class TestCatalogReport(unittest.TestCase):
         self.assertRegex(html, r'class="[^"]*\bsystem-detail\b',
                          'system-detail containers present')
         self.assertRegex(html, r'class="[^"]*\bsidebar\b', 'left sidebar present')
-        self.assertRegex(html, r'class="[^"]*\bnav-family\b', 'family-grouped nav present')
+        self.assertRegex(html, r'class="[^"]*\bnav-type\b', 'type-grouped nav present')
+        self.assertRegex(html, r'class="filters"', 'facet filters present')
 
         # Per-system tab controls exist (systems with multiple loops render >1 tab).
         self.assertRegex(html, r'class="[^"]*\btab-bar\b', 'tab bar present')
@@ -295,8 +300,8 @@ class TestCatalogReport(unittest.TestCase):
             written = f.read()
         self.assertEqual(rendered, written, 'written file equals the returned string')
         for r in self.rows():
-            self.assertIn(self.esc(r['name']), written,
-                          "written file contains argument name {}".format(r['name']))
+            self.assertIn(self.esc(r['id']), written,
+                          "written file contains id {}".format(r['id']))
 
 
 @needs_sdk

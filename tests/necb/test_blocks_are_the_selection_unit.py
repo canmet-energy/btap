@@ -31,7 +31,7 @@ from .support import proposed_with_hvac
 
 #: One proposed VAV loop over all five retained zones — the shape that made a
 #: reference "single-zone" unit serve five blocks.
-MULTIZONE_PROPOSED = 'MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard'
+MULTIZONE_PROPOSED = 'vav-hw-hwbb-gasboiler-scrollchiller'
 
 EDITIONS = ('necb2020', 'necb2025')
 
@@ -270,9 +270,8 @@ class TestTheArticle13ElectionTRACKSTHEHEATPUMP(unittest.TestCase):
     totals — not the entry count.
     """
 
-    SYS3_ASHP = ('PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils '
-                 'and Electric Baseboard')
-    GSHP = 'DOAS with water source heat pumps with ground source heat pump'
+    SYS3_ASHP = 'psz-ashp-gassupp-elecbb'
+    GSHP = 'doas-wshp-elec-groundloop'
 
     def built(self, system, splits, *, rename_first_loop=None):
         from btap import modeling
@@ -439,7 +438,7 @@ class TestPurchasedEnergyStillGetsBlocks(unittest.TestCase):
     how many thermal blocks.
     """
 
-    SYS = 'DOAS with fan coil district chilled water with district hot water'
+    SYS = 'doas-fc4-elec-district-districtchw'
 
     def test_both_purchased_services_keep_one_unit_per_block(self):
         proposed = proposed_with_hvac(self.SYS)
@@ -483,7 +482,7 @@ class TestAMixedCopyAndBuildClosure(unittest.TestCase):
     """
 
     MARKER = 'PROPOSED MARKER'
-    SYS = 'FPFC MAU DX Coils with Scroll Chiller'
+    SYS = 'mau-fc4-gas-gasboiler-scrollchiller'
 
     def mixed_proposed(self):
         """One four-pipe fan-coil serving group over five blocks: block 1
@@ -597,7 +596,7 @@ class TestDistinctSourceLoopServiceSetsStayDISTINCT(unittest.TestCase):
     service and allocation choice.
     """
 
-    SYS = 'DOAS with water source heat pumps fluid cooler with boiler'
+    SYS = 'doas-wshp-elec-gasboiler-fluidcooler'
 
     def test_two_WSHP_service_sets_on_one_source_loop_disclose_SEPARATELY(self):
         from btap import modeling
@@ -763,7 +762,7 @@ class TestTheCOOLINGPlantOwnershipToo(unittest.TestCase):
     """
 
     MARKER = 'PROPOSED MARKER'
-    SYS = 'FPFC MAU DX Coils with Scroll Chiller'
+    SYS = 'mau-fc4-gas-gasboiler-scrollchiller'
 
     def mixed_proposed(self):
         """Block 1 residential (`copy_proposed`); blocks 2-5 a Museum archive,
@@ -952,7 +951,7 @@ class TestAPlantKeptAliveByNONZONEDemand(unittest.TestCase):
     def proposed_with_process_water(self):
         import openstudio
 
-        proposed = proposed_with_hvac('Baseboard gas boiler')
+        proposed = proposed_with_hvac('bb-hwbb-gasboiler')
         boilers = sorted(proposed.getBoilerHotWaters(),
                          key=lambda b: b.nameString())
         self.assertGreater(len(boilers), 1, 'fixture: a multi-boiler plant')
@@ -1080,9 +1079,8 @@ class TestTWOMergedSystem6ConstructionsStaySEPARATE(unittest.TestCase):
     to preserve.
     """
 
-    GAS = 'MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard'
-    ELECTRIC = ('MZ BU RTU Electric Heating Coil Scroll Chiller and '
-                'Electric Baseboard')
+    GAS = 'vav-hw-hwbb-gasboiler-scrollchiller'
+    ELECTRIC = 'vav-elec-elecbb-scrollchiller'
 
     def two_service_sets(self):
         from btap import modeling
@@ -1121,8 +1119,15 @@ class TestTWOMergedSystem6ConstructionsStaySEPARATE(unittest.TestCase):
         electric = by_blocks[tuple(blocks[3:])]
         self.assertEqual(3, gas['inputs']['selection_assignments_absorbed'])
         self.assertEqual(2, electric['inputs']['selection_assignments_absorbed'])
-        self.assertIn('Hot Water', gas['inputs']['catalogue'])
-        self.assertIn('Electric', electric['inputs']['catalogue'])
+        from btap.modeling.hvac import catalog
+        self.assertEqual(self.GAS, gas['inputs']['catalogue'])
+        self.assertEqual(self.ELECTRIC, electric['inputs']['catalogue'])
+        self.assertIn(
+            'Hot Water',
+            catalog.resolve(gas['inputs']['catalogue'])['legacy_name'])
+        self.assertIn(
+            'Electric',
+            catalog.resolve(electric['inputs']['catalogue'])['legacy_name'])
 
         # And no record may claim a system spanning the union.
         for entry in merges:
@@ -1173,9 +1178,8 @@ class TestSAMECatalOGUEDifferentCONFIGKeepsItsFuel(unittest.TestCase):
     D-101 removed on the teardown side, surviving on the construction side.
     """
 
-    GAS = 'MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard'
-    ELECTRIC = ('MZ BU RTU Electric Heating Coil Scroll Chiller and '
-                'Electric Baseboard')
+    GAS = 'vav-hw-hwbb-gasboiler-scrollchiller'
+    ELECTRIC = 'vav-elec-elecbb-scrollchiller'
 
     def build(self, *, gas_loop_name, electric_loop_name, code):
         from btap import modeling
@@ -1340,7 +1344,7 @@ class TestAnOMITTEDBackupOnlyNeedsItsFuelPresent(unittest.TestCase):
         loop = plant_loops.hot_water(model, fuel='NaturalGas',
                                      backup_fuel='Electricity', reuse=False)
         loop.setLoadDistributionScheme('SequentialLoad')
-        modeling.build_system(model, 'Baseboard gas boiler',
+        modeling.build_system(model, 'bb-hwbb-gasboiler',
                               sorted_zones(model))
         facts = modeling.characterize(model, audit=None)
         hot = [p for p in facts['plants'] if p['type'] == 'hot_water']

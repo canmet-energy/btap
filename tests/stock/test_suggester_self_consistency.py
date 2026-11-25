@@ -76,14 +76,14 @@ class TestSuggesterSelfConsistency(unittest.TestCase):
         cls.errors = []
         for row in catalog.rows():
             try:
-                one, five = _recover(row['name'])
+                one, five = _recover(row['id'])
             except Exception as exc:                       # noqa: BLE001
-                cls.errors.append(f"{row['name']}: {type(exc).__name__}")
+                cls.errors.append(f"{row['id']}: {type(exc).__name__}")
                 continue
             if one:
-                cls.top1.append(row['name'])
+                cls.top1.append(row['id'])
             if five:
-                cls.top5.append(row['name'])
+                cls.top5.append(row['id'])
 
     def test_every_row_can_be_built_and_read_back(self):
         """Separate from accuracy: a row that RAISES is a different defect,

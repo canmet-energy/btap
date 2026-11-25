@@ -85,7 +85,7 @@ class TestTheClassifierReadsIt(unittest.TestCase):
     def test_a_declaring_builder_puts_the_fact_in_the_facts(self):
         """`psz` means packaged single zone, so the row names real equipment."""
         model = load_fixture()
-        build_system(model, 'PSZ RTU Gas and DX Coils and Hot Water Baseboard',
+        build_system(model, 'psz-gas-hwbb-gasboiler',
                      sorted_zones(model))
         group = self._group(model)
         self.assertEqual('air_cooled_unitary',
@@ -99,7 +99,7 @@ class TestTheClassifierReadsIt(unittest.TestCase):
         builds a generic air handler, and whether a given Campus unit is
         packaged is a fact about those buildings that nobody established."""
         model = load_fixture()
-        build_system(model, 'Shared furnace with DX cooling and no outdoor air',
+        build_system(model, 'furnace-gas-dx-nooa-shared',
                      sorted_zones(model))
         self.assertIsNone(self._group(model)['declared_equipment_class'])
 
@@ -108,7 +108,7 @@ class TestTheClassifierReadsIt(unittest.TestCase):
         `Residential AC with baseboard electric` is a residential central split
         AC — Table 5.2.12.1.-A's split-system air-cooled unitary."""
         model = load_fixture()
-        build_system(model, 'Residential AC with baseboard electric',
+        build_system(model, 'splitac-dx-elecbb-nooa',
                      sorted_zones(model))
         groups = classify.characterize(model, audit=None)['zone_groups']
         declared = {g.get('declared_equipment_class') for g in groups
@@ -135,7 +135,7 @@ class TestThePszDeclarationFollowsItsHeatSource(unittest.TestCase):
     def test_every_reference_ASHP_row_declares_heat_pump(self):
         from btap.modeling.hvac import catalog
 
-        rows = [r['name'] for r in catalog.rows()
+        rows = [r['id'] for r in catalog.rows()
                 if r.get('family') == 'psz' and r.get('heat_source') == 'ashp']
         self.assertEqual(8, len(rows), 'precondition: the eight ASHP rows')
         for name in rows:
@@ -146,7 +146,7 @@ class TestThePszDeclarationFollowsItsHeatSource(unittest.TestCase):
         """The control: the conditional must not have flipped every row."""
         from btap.modeling.hvac import catalog
 
-        rows = [r['name'] for r in catalog.rows()
+        rows = [r['id'] for r in catalog.rows()
                 if r.get('family') == 'psz' and not r.get('heat_source')]
         self.assertTrue(rows)
         for name in rows[:3]:
@@ -178,7 +178,7 @@ class TestAnUnrecognizedDeclarationIsNotSilent(unittest.TestCase):
         from btap.audit import AuditLog
 
         model = load_fixture()
-        build_system(model, 'Shared furnace with DX cooling and no outdoor air',
+        build_system(model, 'furnace-gas-dx-nooa-shared',
                      sorted_zones(model))
         if value is not None:
             for loop in model.getAirLoopHVACs():

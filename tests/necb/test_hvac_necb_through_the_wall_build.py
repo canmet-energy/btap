@@ -42,7 +42,7 @@ class TestNecbThroughTheWallBuild(unittest.TestCase):
     def build_incompatible_cooling_residential_model(self):
         model = load_fixture()
         modeling.build_system(
-            model, 'MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard',
+            model, 'vav-hw-hwbb-gasboiler-scrollchiller',
             sorted_zones(model))
         types = {z.nameString(): 'Multi-unit residential' for z in model.getThermalZones()}
         return model, types
@@ -58,7 +58,7 @@ class TestNecbThroughTheWallBuild(unittest.TestCase):
                          'fixture precondition: heated+cooled residential with an incompatible '
                          'cooling family must select the "otherwise" sentence')
         self.assertEqual([1], sorted({a.reference_system for a in result.assignments}))
-        self.assertEqual(['PSZ MAU Hot Water and DX Coils and Hot Water Baseboard with PTAC'],
+        self.assertEqual(['mau-ptac-hw-hwbb-gasboiler'],
                          sorted({a.catalog_name for a in result.assignments}),
                          "'through_the_wall' and heated-only 'build' share the identical System 1 "
                          'catalog definition (_residential_assignment sets reference_system=1 '
@@ -71,7 +71,7 @@ class TestNecbThroughTheWallBuild(unittest.TestCase):
         zone_count = len(result.model.getThermalZones())
         self.assertEqual(1, len(result.model.getAirLoopHVACs()),
                          'System 1 = one central MAU for ventilation air')
-        self.assertEqual('PSZ MAU Hot Water and DX Coils and Hot Water Baseboard with PTAC',
+        self.assertEqual('mau-ptac-hw-hwbb-gasboiler',
                          result.model.getAirLoopHVACs()[0].nameString())
         self.assertEqual(zone_count,
                          len(result.model.getZoneHVACPackagedTerminalAirConditioners()),

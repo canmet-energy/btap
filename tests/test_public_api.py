@@ -35,7 +35,7 @@ PUBLIC: dict[str, list[str]] = {
                         "runner"],
     "btap.modeling": [
         "SHAPES", "create", "create_from_footprint", "bar", "apply_wwr",
-        "seed_constructions", "render", "floor_plans", "systems", "build_system",
+        "seed_constructions", "render", "floor_plans", "systems", "system_taxonomy", "build_system",
         "elect_control_zones", "replace_system", "remove_hvac_from_zones", "plant_is_hvac_candidate",
         "characterize", "catalog_html", "model_hvac_diagrams", "hvac_icon_defs",
     ],

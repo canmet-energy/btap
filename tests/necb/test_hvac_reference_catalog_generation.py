@@ -36,8 +36,8 @@ from tests.support import needs_sdk
 
 PRIMARY_SCENARIO = 'general_2storey'
 MODERN_ERV_ROWS = {
-    'VAV chiller with gas boiler reheat and rotary ERV',
-    'PVAV with gas boiler reheat and plate HRV',
+    'vav-hw-hwbb-erv-gasboiler-scrollchiller',
+    'pvav-hw-hwbb-hrv-gasboiler',
 }
 MERGED_REFERENCE_SYSTEMS = {1, 2, 5, 6}
 
@@ -113,7 +113,7 @@ class TestCatalogReferenceGeneration(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.golden = json.loads(GOLDEN.read_text(encoding='utf-8'))
-        cls.expected = {row['name']: row for row in cls.golden}
+        cls.expected = {row['id']: row for row in cls.golden}
         cls.temp = tempfile.TemporaryDirectory(
             prefix='catalog-reference-generation-')
         cls.temp_path = Path(cls.temp.name)
@@ -248,13 +248,13 @@ class TestCatalogReferenceGeneration(unittest.TestCase):
 
     def test_golden_and_catalog_names_are_identical(self):
         self.assertEqual(
-            {row['name'] for row in catalog.rows()},
+            {row['id'] for row in catalog.rows()},
             set(self.expected))
 
 
 def _add_per_system_tests():
     for index, row in enumerate(catalog.rows()):
-        name = row['name']
+        name = row['id']
 
         def test(self, index=index, name=name):
             self.check_system(index, name)
