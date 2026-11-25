@@ -1,6 +1,6 @@
 # HVAC system taxonomy and rename: stable model IDs and plain-English names
 
-Revision 2, after Astra's review (2026-11-25: 4 BLOCKER and 7 SHOULD findings, all adopted).
+Revision 3. Revision 2 adopted Astra's first review (4 BLOCKER and 7 SHOULD findings). Revision 3 adopts her follow-up (2026-11-25): one new BLOCKER and four smaller items, listed under **Revision 3** at the end.
 
 ## Context
 
@@ -293,3 +293,18 @@ Commits C2-C4 fail the catalogue-hash test until C5, so the PR is merged by squa
 - Legacy names are accepted as input, with an `audit.info` line recording "legacy name X resolved to Y". They are never emitted.
 - Families stay as they are. The taxonomy fixes browsing, not the builds.
 - The `catalog_name` and `catalogue` field names stay; their values become IDs.
+
+## Revision 3: Astra's follow-up (2026-11-25)
+
+Astra rated nine findings ADDRESSED and #7 and #9 PARTLY. She raised these new items:
+
+- **BLOCKER: NECB applicability stays out of `btap.modeling`.** `necb_reference` is derived **in `btap.codes.necb`**, which owns `reference_rules.json`. The new function `btap.codes.necb.catalog_reference_use(code=)` returns `{id: [System N variants]}` for that edition.
+  - `btap.modeling` keeps only `necb_lineage` (row data, `sys_abbr`) and code-agnostic facets.
+  - `catalog_html()` and `systems()` take an optional **annotations provider**, so the NECB chip and filter arrive from the codes layer, following the costing `daylighting_areas` provider precedent.
+  - `btap.codes.necb.catalog_html(code=)` is the NECB-annotated page.
+- **#7 completed:** `terminal_outdoor_air` (none or ventilating terminal) describes PTAC and VRF units that supply outdoor air at the zone.
+- **#9 policy:** an emitted model name over 100 characters is **audited as a warning, never shortened**. EnergyPlus 25.2 measured clean at 132 characters, and silent shortening could collide names.
+- **Scope vocabulary:** `one per zone`, `shared from one control zone`, and `central multi-zone with independently controlled terminals` (VAV and similar).
+- **UI verification exercises the shipped JavaScript.** The filter and URL-state code becomes a pure function in the page's script, and a test runs that exact function under `node` over the page's data. The test is skipped with a stated reason when `node` is absent, and is required in the CI image.
+- **Chip counts are disjunctive:** a count shows what ticking that chip would give, with the other groups applied. Multivalued facets do not sum to 110, and no test claims they do.
+- **Display grammar:** display text never reaches a model, so it needs only to be ASCII. `;` is allowed there. The ban on `, ; ! |` applies to IDs and emitted model names only.
