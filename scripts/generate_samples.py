@@ -514,7 +514,7 @@ def fixture() -> str:
     return str(resources.files("btap.modeling.hvac") / "data" / "5ZoneNoHVAC.osm")
 
 
-SUPPORTED_SYSTEM_STATUS_SCHEMA = 1
+SUPPORTED_SYSTEM_STATUS_SCHEMA = 2
 
 
 def simulatable() -> set[str]:

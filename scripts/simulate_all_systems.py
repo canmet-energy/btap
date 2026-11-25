@@ -142,9 +142,12 @@ def validate_status_payload(payload):
     for index, row in enumerate(systems):
         if not isinstance(row, dict):
             raise ValueError(f"systems[{index}] must be an object")
-        name = row.get("name")
+        name = row.get("id")
         if not isinstance(name, str) or not name:
-            raise ValueError(f"systems[{index}].name must be non-empty")
+            raise ValueError(f"systems[{index}].id must be non-empty")
+        legacy = row.get("legacy_name")
+        if not isinstance(legacy, str) or not legacy:
+            raise ValueError(f"{name!r}: legacy_name must be non-empty")
         if name in names:
             raise ValueError(f"duplicate system verdict for {name!r}")
         names.add(name)

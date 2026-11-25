@@ -53,7 +53,7 @@ class TestSystemSimulationStatus(unittest.TestCase):
         self.sweep = _load_sweep()
         self.verdict = json.loads(STATUS.read_text(encoding="utf-8"))
         self.rows = self.verdict["systems"]
-        self.failing = sorted(r["name"] for r in self.rows if r["status"] != "ok")
+        self.failing = sorted(r["id"] for r in self.rows if r["status"] != "ok")
 
     def test_the_verdict_declares_a_SCHEMA_VERSION(self):
         """So both readers can refuse an unknown shape rather than fail on it.
@@ -79,9 +79,9 @@ class TestSystemSimulationStatus(unittest.TestCase):
         """
         from btap.modeling.hvac import catalog
 
-        catalogue = sorted((row["name"], row.get("family"))
+        catalogue = sorted((row["id"], row.get("family"))
                            for row in catalog.rows())
-        recorded = sorted((row["name"], row.get("family"))
+        recorded = sorted((row["id"], row.get("family"))
                           for row in self.rows)
         self.assertEqual(
             len(recorded), len(set(recorded)),
@@ -200,8 +200,8 @@ class TestSystemSimulationStatus(unittest.TestCase):
 
     def test_the_status_file_covers_every_catalog_system(self):
         from btap.modeling.hvac import catalog
-        catalog_names = sorted(r["name"] for r in catalog.rows())
-        recorded = sorted(r["name"] for r in self.rows)
+        catalog_names = sorted(r["id"] for r in catalog.rows())
+        recorded = sorted(r["id"] for r in self.rows)
         missing = [n for n in catalog_names if n not in recorded]
         self.assertEqual([], missing,
                          "system(s) never simulated — re-run the sweep: " + ", ".join(missing))

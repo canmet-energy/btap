@@ -68,18 +68,18 @@ class TestSimulationVerdictReader(unittest.TestCase):
     def test_an_UNKNOWN_schema_is_refused_by_this_reader(self):
         verdict = {
             "produced_by": {"schema_version": 999},
-            "systems": [{"name": "fabricated", "status": "ok"}],
+            "systems": [{"id": "fabricated", "status": "ok"}],
         }
         with self.assertRaisesRegex(
-                ValueError, r"schema_version 999; expected 1"):
+                ValueError, r"schema_version 999; expected 2"):
             self._read(verdict)
 
-    def test_schema_ONE_returns_only_sizing_clean_systems(self):
+    def test_schema_TWO_returns_only_sizing_clean_systems(self):
         verdict = {
-            "produced_by": {"schema_version": 1},
+            "produced_by": {"schema_version": 2},
             "systems": [
-                {"name": "clean", "status": "ok"},
-                {"name": "broken", "status": "simulation_error"},
+                {"id": "clean", "legacy_name": "Clean", "status": "ok"},
+                {"id": "broken", "legacy_name": "Broken", "status": "simulation_error"},
             ],
         }
         self.assertEqual({"clean"}, self._read(verdict))
