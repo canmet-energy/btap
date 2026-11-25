@@ -574,12 +574,27 @@ def _record_hvac_build(system_name, zones, result, kwargs, audit, *, replaced):
         warnings.warn(message, UserWarning, stacklevel=3)
     if audit is None:
         return
+    from btap.modeling.hvac import catalog
+    system_id = catalog.resolve(system_name)["id"]
+    if catalog.is_legacy_key(system_name):
+        # An old name is accepted as input and never emitted (D-112): the
+        # trail says which id it meant, and names the id from here on.
+        audit.info("hvac", f"legacy name '{system_name}' resolved to {system_id}",
+                   target=system_id, inputs={"name": system_name})
     if message:
-        audit.warn("hvac", message, target=system_name,
+        audit.warn("hvac", message, target=system_id,
                    inputs={"zones": len(zones)})
     air_loops = getattr(result, "air_loops", None)
-    audit.decision("hvac", f"{'replaced with' if replaced else 'built'} {system_name}",
-                   target=system_name,
+    # The IDD states 100 characters; EnergyPlus 25.2 measured clean at 132.
+    # A long ZONE name is the user's, so the name is reported, never shortened
+    # (shortening could collide two names).
+    for loop in air_loops or []:
+        if len(loop.nameString()) > 100:
+            audit.warn("hvac", f"model name longer than 100 characters "
+                       f"({len(loop.nameString())}): {loop.nameString()}",
+                       target=system_id, inputs={"limit": 100})
+    audit.decision("hvac", f"{'replaced with' if replaced else 'built'} {system_id}",
+                   target=system_id,
                    inputs={"zones": len(zones),
                            "control_zone": _control_zone_label(kwargs.get("control_zone"))},
                    value={"air_loops": len(list(air_loops)) if air_loops is not None

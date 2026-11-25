@@ -12,7 +12,7 @@ set "HERE=%~dp0"
   --storeys 1 ^
   --space-type "Space Function/Office enclosed > 25 m2" ^
   --shw-fuel NaturalGas ^
-  --hvac-system "Baseboard gas boiler" ^
+  --hvac-system "bb-hwbb-gasboiler" ^
   --quick ^
   --project "Sample Office" ^
   --prepared-by "NECB Compliance demo" ^
