@@ -18,44 +18,44 @@ ROWS = catalog.rows()
 
 # family => every key any row of that family may carry (frozen from the data)
 FAMILY_KEYS = {
-    'baseboards': ['baseboard_type', 'boiler_fuel', 'family', 'hw_source', 'name',
+    'baseboards': ['baseboard_type', 'boiler_fuel', 'family', 'hw_source', 'id', 'legacy_name', 'aliases',
                    'needs_boiler', 'origin'],
     'chilled_beams': ['baseboard_type', 'beam_design_inlet_water_temperature',
                       'beam_design_outlet_water_temperature', 'beam_type',
                       'chilled_water_profile', 'chiller_type', 'chw_source',
                       'comment', 'dewpoint_margin', 'doas_maximum_humidity_ratio',
-                      'doas_supply_air_temperature', 'family', 'name',
+                      'doas_supply_air_temperature', 'family', 'id', 'legacy_name', 'aliases',
                       'needs_boiler', 'needs_chiller', 'origin', 'sizing', 'sys_abbr'],
-    'composite': ['comment', 'family', 'name', 'needs_boiler', 'origin', 'parts'],
-    'doas': ['comment', 'family', 'heating_type', 'name', 'needs_boiler', 'origin',
+    'composite': ['comment', 'family', 'id', 'legacy_name', 'aliases', 'needs_boiler', 'origin', 'parts'],
+    'doas': ['comment', 'family', 'heating_type', 'id', 'legacy_name', 'aliases', 'needs_boiler', 'origin',
              'sizing'],
-    'doas_pthp': ['comment', 'family', 'name', 'needs_boiler', 'origin', 'sizing',
+    'doas_pthp': ['comment', 'family', 'id', 'legacy_name', 'aliases', 'needs_boiler', 'origin', 'sizing',
                   'supp_htg_fuel', 'sys_abbr'],
-    'dual_duct': ['boiler_fuel', 'chiller_type', 'comment', 'family', 'name',
+    'dual_duct': ['boiler_fuel', 'chiller_type', 'comment', 'family', 'id', 'legacy_name', 'aliases',
                   'needs_boiler', 'needs_chiller', 'origin', 'sizing', 'sys_abbr'],
-    'ecm_ashp_baseboard': ['air_eqpt', 'baseboard_type', 'comment', 'family', 'name',
+    'ecm_ashp_baseboard': ['air_eqpt', 'baseboard_type', 'comment', 'family', 'id', 'legacy_name', 'aliases',
                            'needs_boiler', 'origin', 'sizing', 'supp_htg_fuel',
                            'sys_abbr', 'vent_type'],
-    'ecm_doas_vrf': ['air_eqpt', 'comment', 'family', 'name', 'needs_boiler', 'origin',
+    'ecm_doas_vrf': ['air_eqpt', 'comment', 'family', 'id', 'legacy_name', 'aliases', 'needs_boiler', 'origin',
                      'sizing', 'supp_htg_fuel', 'sys_abbr'],
-    'ecm_hp_fancoils': ['air_eqpt', 'boiler_fuel', 'comment', 'family', 'name',
+    'ecm_hp_fancoils': ['air_eqpt', 'boiler_fuel', 'comment', 'family', 'id', 'legacy_name', 'aliases',
                         'needs_boiler', 'origin', 'plant_type', 'sizing',
                         'supp_htg_fuel', 'sys_abbr'],
-    'evap_cooler': ['family', 'name', 'needs_boiler', 'origin'],
+    'evap_cooler': ['family', 'id', 'legacy_name', 'aliases', 'needs_boiler', 'origin'],
     'fan_coils': ['chiller_type', 'comment', 'family', 'fan_coil_type',
-                  'mau_cooling_type', 'mau_heating_coil_type', 'name', 'needs_boiler',
+                  'mau_cooling_type', 'mau_heating_coil_type', 'id', 'legacy_name', 'aliases', 'needs_boiler',
                   'needs_chiller', 'sizing', 'sys_abbr'],
     'furnace': ['comment', 'cooling', 'equipment_class', 'family', 'heating',
-                'heating_type', 'name', 'needs_boiler', 'origin', 'per_zone',
+                'heating_type', 'id', 'legacy_name', 'aliases', 'needs_boiler', 'origin', 'per_zone',
                 'reheat', 'ventilation'],
-    'mau_ptac': ['baseboard_type', 'comment', 'family', 'mau_heating_coil_type', 'name',
+    'mau_ptac': ['baseboard_type', 'comment', 'family', 'mau_heating_coil_type', 'id', 'legacy_name', 'aliases',
                  'needs_boiler', 'origin', 'ptac_heating_type', 'reference_hp',
                  'sizing', 'supp_htg_fuel', 'sys_abbr'],
     # 'heat_source' is the reference-ASHP marker (was: heating_coil_type 'DX').
     'psz': ['baseboard_type', 'boiler_fuel', 'comment', 'family', 'heat_source',
-            'heating_coil_type', 'name', 'needs_boiler', 'origin', 'per_zone', 'sizing',
+            'heating_coil_type', 'id', 'legacy_name', 'aliases', 'needs_boiler', 'origin', 'per_zone', 'sizing',
             'supp_htg_fuel', 'sys_abbr'],
-    'unit_heaters': ['family', 'heating_type', 'name', 'needs_boiler', 'origin'],
+    'unit_heaters': ['family', 'heating_type', 'id', 'legacy_name', 'aliases', 'needs_boiler', 'origin'],
     'vav_reheat': ['baseboard_type', 'boiler_fuel', 'chiller_type', 'comment',
                    'cooling_type', 'erv_bypass_control_type',
                    'erv_defrost_time_fraction_increase_rate',
@@ -71,21 +71,21 @@ FAMILY_KEYS = {
                    'erv_profile',
                    'erv_sensible_effectiveness',
                    'erv_supply_air_outlet_temperature_control', 'family',
-                   'heating_coil_type', 'name', 'needs_boiler', 'needs_chiller',
+                   'heating_coil_type', 'id', 'legacy_name', 'aliases', 'needs_boiler', 'needs_chiller',
                    'needs_erv', 'origin', 'sizing', 'sys_abbr'],
-    'vrf': ['comment', 'family', 'name', 'needs_boiler', 'origin', 'zone_ventilation'],
-    'wshp': ['boiler_fuel', 'comment', 'family', 'name', 'needs_boiler', 'origin',
+    'vrf': ['comment', 'family', 'id', 'legacy_name', 'aliases', 'needs_boiler', 'origin', 'zone_ventilation'],
+    'wshp': ['boiler_fuel', 'comment', 'family', 'id', 'legacy_name', 'aliases', 'needs_boiler', 'origin',
              'sizing', 'ventilation'],
     'crah': ['chiller_type', 'chw_source', 'comment', 'cooling', 'cooling_type',
              'crah_maximum_humidity_ratio', 'crah_supply_air_temperature',
-             'family', 'heating', 'name', 'needs_boiler', 'needs_chiller',
+             'family', 'heating', 'id', 'legacy_name', 'aliases', 'needs_boiler', 'needs_chiller',
              'origin', 'sizing', 'sys_abbr', 'ventilation'],
     # 'erv_profile' since #217: the row names a profile in
     # data/energy_recovery.json rather than carrying eleven erv_* keys.
-    'zone_ervs': ['comment', 'erv_profile', 'family', 'name',
+    'zone_ervs': ['comment', 'erv_profile', 'family', 'id', 'legacy_name', 'aliases',
                   'needs_boiler', 'origin'],
     'zone_terminal': ['baseboard_type', 'boiler_fuel', 'comment', 'family',
-                      'heating_type', 'name', 'needs_boiler', 'origin', 'unit_type'],
+                      'heating_type', 'id', 'legacy_name', 'aliases', 'needs_boiler', 'origin', 'unit_type'],
 }
 
 # Closed value vocabularies. Exact-match strings — case included (the dialects
@@ -169,22 +169,26 @@ class TestCatalogSchema(unittest.TestCase):
             unknown = [k for k in row if k not in allowed]
             self.assertEqual(
                 unknown, [],
-                f"'{row['name']}' ({row['family']}) carries unknown key(s) {unknown!r}. "
+                f"'{row['id']}' ({row['family']}) carries unknown key(s) {unknown!r}. "
                 'If deliberate: add them to FAMILY_KEYS here and to data/README.md.')
 
     def test_every_row_has_the_universal_keys(self):
         for row in ROWS:
-            for key in ['name', 'family', 'needs_boiler']:
+            for key in ['id', 'legacy_name', 'family', 'needs_boiler']:
                 self.assertIn(key, row,
-                              f"'{row.get('name', row)!r}' is missing required key '{key}'")
-            self.assertIsInstance(row['name'], str)
+                              f"'{row.get('id', row)!r}' is missing required key '{key}'")
+            self.assertIsInstance(row['id'], str)
+            self.assertIsInstance(row['legacy_name'], str)
+            self.assertNotIn('name', row, "rows carry `id` and `legacy_name` since the "
+                             "HVAC taxonomy; a `name` key would be read by nothing")
             self.assertIn(row['needs_boiler'], [True, False],
-                          f"'{row['name']}': needs_boiler must be a boolean")
+                          f"'{row['id']}': needs_boiler must be a boolean")
 
     def test_names_are_unique(self):
-        names = [r['name'] for r in ROWS]
-        duplicates = [n for n, c in Counter(names).items() if c > 1]
-        self.assertEqual(duplicates, [], f"duplicate catalog names: {duplicates!r}")
+        for key in ('id', 'legacy_name'):
+            names = [r[key] for r in ROWS]
+            duplicates = [n for n, c in Counter(names).items() if c > 1]
+            self.assertEqual(duplicates, [], f"duplicate catalog {key}s: {duplicates!r}")
 
     def test_closed_vocabularies(self):
         for row in ROWS:
@@ -194,7 +198,7 @@ class TestCatalogSchema(unittest.TestCase):
 
                 self.assertIn(
                     row[key], allowed,
-                    f"'{row['name']}': {key} = {row[key]!r} is outside the closed "
+                    f"'{row['id']}': {key} = {row[key]!r} is outside the closed "
                     f"vocabulary {allowed!r}")
 
     def test_sizing_blocks_resolve(self):
@@ -204,7 +208,7 @@ class TestCatalogSchema(unittest.TestCase):
                 continue
 
             self.assertIn(row['sizing'], blocks,
-                          f"'{row['name']}': sizing block '{row['sizing']}' is not in "
+                          f"'{row['id']}': sizing block '{row['sizing']}' is not in "
                           'sizing.json')
 
     # ---- the heat_source rename (the reference-ASHP marker) ----
@@ -214,19 +218,19 @@ class TestCatalogSchema(unittest.TestCase):
         self.assertEqual(8, len(ashp), 'expected the 8 psz sys3/sys4 reference-ASHP rows')
         for row in ashp:
             self.assertEqual('psz', row['family'],
-                             f"'{row['name']}': heat_source is a psz-family key")
+                             f"'{row['id']}': heat_source is a psz-family key")
             self.assertEqual('necb_reference_hp', row['origin'],
-                             f"'{row['name']}': heat_source rows are reference-HP rows")
+                             f"'{row['id']}': heat_source rows are reference-HP rows")
             self.assertNotIn(
                 'heating_coil_type', row,
-                f"'{row['name']}': heat_source rows must NOT also carry heating_coil_type")
+                f"'{row['id']}': heat_source rows must NOT also carry heating_coil_type")
             self.assertIn(row['supp_htg_fuel'], ['Gas', 'Electric'],
-                          f"'{row['name']}': an ASHP build needs a supplemental coil fuel")
+                          f"'{row['id']}': an ASHP build needs a supplemental coil fuel")
         self.assertEqual(['sys_3', 'sys_4'],
                          sorted({r['sys_abbr'] for r in ashp}))
 
     def test_no_row_uses_dx_as_a_heating_coil_type(self):
-        offenders = [r['name'] for r in ROWS if r.get('heating_coil_type') == 'DX']
+        offenders = [r['id'] for r in ROWS if r.get('heating_coil_type') == 'DX']
         self.assertEqual(
             offenders, [],
             "'DX' is not a heating coil type — it was the old spelling of the "

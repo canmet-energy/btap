@@ -1,8 +1,12 @@
 {
-  "comment": "The system catalog: descriptive, fuel-encoding names -> family + full build config. Seeded from the NECB systems.json hvac_types descriptions; NECB reference-HP variants included (reference_hp rows). The name IS the fuel specification.",
+  "comment": "The system catalog: descriptive, fuel-encoding names -> family + full build config. Seeded from the NECB systems.json hvac_types descriptions; NECB reference-HP variants included (reference_hp rows). The name IS the fuel specification. | Since the HVAC taxonomy (docs/plans/HVAC_TAXONOMY_PLAN.md): `id` is the stable, model-safe key builders write into models; `legacy_name` is the name this row had before, kept as provenance and accepted as input; `aliases` holds the retired generated canonical name. Composite `parts` reference rows by `id`.",
   "systems": [
     {
-      "name": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+      "id": "psz-gas-hwbb-gasboiler",
+      "legacy_name": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+      "aliases": [
+        "packaged single-zone DX with gas heat + hot water baseboards (gas boiler)"
+      ],
       "family": "psz",
       "sys_abbr": "sys_3",
       "sizing": "necb_psz",
@@ -11,7 +15,11 @@
       "needs_boiler": true
     },
     {
-      "name": "PSZ RTU Gas and DX Coils and Electric Baseboard",
+      "id": "psz-gas-elecbb",
+      "legacy_name": "PSZ RTU Gas and DX Coils and Electric Baseboard",
+      "aliases": [
+        "packaged single-zone DX with gas heat + electric baseboards"
+      ],
       "family": "psz",
       "sys_abbr": "sys_3",
       "sizing": "necb_psz",
@@ -20,7 +28,11 @@
       "needs_boiler": false
     },
     {
-      "name": "PSZ RTU Electric and DX Coils and Hot Water Baseboard",
+      "id": "psz-elec-hwbb-gasboiler",
+      "legacy_name": "PSZ RTU Electric and DX Coils and Hot Water Baseboard",
+      "aliases": [
+        "packaged single-zone DX with electric heat + hot water baseboards (gas boiler)"
+      ],
       "family": "psz",
       "sys_abbr": "sys_3",
       "sizing": "necb_psz",
@@ -29,7 +41,11 @@
       "needs_boiler": true
     },
     {
-      "name": "PSZ RTU Electric and DX Coils and Electric Baseboard",
+      "id": "psz-elec-elecbb",
+      "legacy_name": "PSZ RTU Electric and DX Coils and Electric Baseboard",
+      "aliases": [
+        "packaged single-zone DX with electric heat + electric baseboards"
+      ],
       "family": "psz",
       "sys_abbr": "sys_3",
       "sizing": "necb_psz",
@@ -38,7 +54,11 @@
       "needs_boiler": false
     },
     {
-      "name": "PSZ RTU with exhaust Gas and DX Coils and Hot Water Baseboard",
+      "id": "psz-gas-hwbb-gasboiler-necbs4",
+      "legacy_name": "PSZ RTU with exhaust Gas and DX Coils and Hot Water Baseboard",
+      "aliases": [
+        "packaged single-zone DX with gas heat, with exhaust + hot water baseboards (gas boiler)"
+      ],
       "family": "psz",
       "sys_abbr": "sys_4",
       "sizing": "necb_psz",
@@ -47,7 +67,11 @@
       "needs_boiler": true
     },
     {
-      "name": "PSZ RTU with exhaust Gas and DX Coils and Electric Baseboard",
+      "id": "psz-gas-elecbb-necbs4",
+      "legacy_name": "PSZ RTU with exhaust Gas and DX Coils and Electric Baseboard",
+      "aliases": [
+        "packaged single-zone DX with gas heat, with exhaust + electric baseboards"
+      ],
       "family": "psz",
       "sys_abbr": "sys_4",
       "sizing": "necb_psz",
@@ -56,7 +80,11 @@
       "needs_boiler": false
     },
     {
-      "name": "PSZ RTU with exhaust Electric and DX Coils and Hot Water Baseboard",
+      "id": "psz-elec-hwbb-gasboiler-necbs4",
+      "legacy_name": "PSZ RTU with exhaust Electric and DX Coils and Hot Water Baseboard",
+      "aliases": [
+        "packaged single-zone DX with electric heat, with exhaust + hot water baseboards (gas boiler)"
+      ],
       "family": "psz",
       "sys_abbr": "sys_4",
       "sizing": "necb_psz",
@@ -65,7 +93,11 @@
       "needs_boiler": true
     },
     {
-      "name": "PSZ RTU with exhaust Electric and DX Coils and Electric Baseboard",
+      "id": "psz-elec-elecbb-necbs4",
+      "legacy_name": "PSZ RTU with exhaust Electric and DX Coils and Electric Baseboard",
+      "aliases": [
+        "packaged single-zone DX with electric heat, with exhaust + electric baseboards"
+      ],
       "family": "psz",
       "sys_abbr": "sys_4",
       "sizing": "necb_psz",
@@ -74,7 +106,11 @@
       "needs_boiler": false
     },
     {
-      "name": "MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard",
+      "id": "vav-elec-elecbb-scrollchiller",
+      "legacy_name": "MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard",
+      "aliases": [
+        "built-up VAV with electric reheat and chilled water cooling + electric baseboards (scroll chiller)"
+      ],
       "family": "vav_reheat",
       "sys_abbr": "sys_6",
       "sizing": "necb_vav",
@@ -85,7 +121,11 @@
       "needs_chiller": true
     },
     {
-      "name": "MZ BU RTU Electric Heating Coil Scroll Chiller and Hot Water Baseboard",
+      "id": "vav-elec-hwbb-gasboiler-scrollchiller",
+      "legacy_name": "MZ BU RTU Electric Heating Coil Scroll Chiller and Hot Water Baseboard",
+      "aliases": [
+        "built-up VAV with electric reheat and chilled water cooling + hot water baseboards (gas boiler, scroll chiller)"
+      ],
       "family": "vav_reheat",
       "sys_abbr": "sys_6",
       "sizing": "necb_vav",
@@ -96,7 +136,11 @@
       "needs_chiller": true
     },
     {
-      "name": "MZ BU RTU Electric Heating Coil Centrifugal Chiller and Electric Baseboard",
+      "id": "vav-elec-elecbb-centrifchiller",
+      "legacy_name": "MZ BU RTU Electric Heating Coil Centrifugal Chiller and Electric Baseboard",
+      "aliases": [
+        "built-up VAV with electric reheat and chilled water cooling + electric baseboards (centrifugal chiller)"
+      ],
       "family": "vav_reheat",
       "sys_abbr": "sys_6",
       "sizing": "necb_vav",
@@ -107,7 +151,11 @@
       "needs_chiller": true
     },
     {
-      "name": "MZ BU RTU Electric Heating Coil Centrifugal Chiller and Hot Water Baseboard",
+      "id": "vav-elec-hwbb-gasboiler-centrifchiller",
+      "legacy_name": "MZ BU RTU Electric Heating Coil Centrifugal Chiller and Hot Water Baseboard",
+      "aliases": [
+        "built-up VAV with electric reheat and chilled water cooling + hot water baseboards (gas boiler, centrifugal chiller)"
+      ],
       "family": "vav_reheat",
       "sys_abbr": "sys_6",
       "sizing": "necb_vav",
@@ -118,7 +166,11 @@
       "needs_chiller": true
     },
     {
-      "name": "MZ BU RTU Electric Heating Coil Rotary Screw Chiller and Electric Baseboard",
+      "id": "vav-elec-elecbb-screwchiller",
+      "legacy_name": "MZ BU RTU Electric Heating Coil Rotary Screw Chiller and Electric Baseboard",
+      "aliases": [
+        "built-up VAV with electric reheat and chilled water cooling + electric baseboards (rotary screw chiller)"
+      ],
       "family": "vav_reheat",
       "sys_abbr": "sys_6",
       "sizing": "necb_vav",
@@ -129,7 +181,11 @@
       "needs_chiller": true
     },
     {
-      "name": "MZ BU RTU Electric Heating Coil Rotary Screw Chiller and Hot Water Baseboard",
+      "id": "vav-elec-hwbb-gasboiler-screwchiller",
+      "legacy_name": "MZ BU RTU Electric Heating Coil Rotary Screw Chiller and Hot Water Baseboard",
+      "aliases": [
+        "built-up VAV with electric reheat and chilled water cooling + hot water baseboards (gas boiler, rotary screw chiller)"
+      ],
       "family": "vav_reheat",
       "sys_abbr": "sys_6",
       "sizing": "necb_vav",
@@ -140,7 +196,11 @@
       "needs_chiller": true
     },
     {
-      "name": "MZ BU RTU Electric Heating Coil Reciprocating Chiller and Electric Baseboard",
+      "id": "vav-elec-elecbb-recipchiller",
+      "legacy_name": "MZ BU RTU Electric Heating Coil Reciprocating Chiller and Electric Baseboard",
+      "aliases": [
+        "built-up VAV with electric reheat and chilled water cooling + electric baseboards (reciprocating chiller)"
+      ],
       "family": "vav_reheat",
       "sys_abbr": "sys_6",
       "sizing": "necb_vav",
@@ -151,7 +211,11 @@
       "needs_chiller": true
     },
     {
-      "name": "MZ BU RTU Electric Heating Coil Reciprocating Chiller and Hot Water Baseboard",
+      "id": "vav-elec-hwbb-gasboiler-recipchiller",
+      "legacy_name": "MZ BU RTU Electric Heating Coil Reciprocating Chiller and Hot Water Baseboard",
+      "aliases": [
+        "built-up VAV with electric reheat and chilled water cooling + hot water baseboards (gas boiler, reciprocating chiller)"
+      ],
       "family": "vav_reheat",
       "sys_abbr": "sys_6",
       "sizing": "necb_vav",
@@ -162,7 +226,11 @@
       "needs_chiller": true
     },
     {
-      "name": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Electric Baseboard",
+      "id": "vav-hw-elecbb-gasboiler-scrollchiller",
+      "legacy_name": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Electric Baseboard",
+      "aliases": [
+        "built-up VAV with hot water reheat and chilled water cooling + electric baseboards (gas boiler, scroll chiller)"
+      ],
       "family": "vav_reheat",
       "sys_abbr": "sys_6",
       "sizing": "necb_vav",
@@ -173,7 +241,11 @@
       "needs_chiller": true
     },
     {
-      "name": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
+      "id": "vav-hw-hwbb-gasboiler-scrollchiller",
+      "legacy_name": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
+      "aliases": [
+        "built-up VAV with hot water reheat and chilled water cooling + hot water baseboards (gas boiler, scroll chiller)"
+      ],
       "family": "vav_reheat",
       "sys_abbr": "sys_6",
       "sizing": "necb_vav",
@@ -184,7 +256,11 @@
       "needs_chiller": true
     },
     {
-      "name": "MZ BU RTU Hot Water Heating Coil Centrifugal Chiller and Electric Baseboard",
+      "id": "vav-hw-elecbb-gasboiler-centrifchiller",
+      "legacy_name": "MZ BU RTU Hot Water Heating Coil Centrifugal Chiller and Electric Baseboard",
+      "aliases": [
+        "built-up VAV with hot water reheat and chilled water cooling + electric baseboards (gas boiler, centrifugal chiller)"
+      ],
       "family": "vav_reheat",
       "sys_abbr": "sys_6",
       "sizing": "necb_vav",
@@ -195,7 +271,11 @@
       "needs_chiller": true
     },
     {
-      "name": "MZ BU RTU Hot Water Heating Coil Centrifugal Chiller and Hot Water Baseboard",
+      "id": "vav-hw-hwbb-gasboiler-centrifchiller",
+      "legacy_name": "MZ BU RTU Hot Water Heating Coil Centrifugal Chiller and Hot Water Baseboard",
+      "aliases": [
+        "built-up VAV with hot water reheat and chilled water cooling + hot water baseboards (gas boiler, centrifugal chiller)"
+      ],
       "family": "vav_reheat",
       "sys_abbr": "sys_6",
       "sizing": "necb_vav",
@@ -206,7 +286,11 @@
       "needs_chiller": true
     },
     {
-      "name": "MZ BU RTU Hot Water Heating Coil Rotary Screw Chiller and Electric Baseboard",
+      "id": "vav-hw-elecbb-gasboiler-screwchiller",
+      "legacy_name": "MZ BU RTU Hot Water Heating Coil Rotary Screw Chiller and Electric Baseboard",
+      "aliases": [
+        "built-up VAV with hot water reheat and chilled water cooling + electric baseboards (gas boiler, rotary screw chiller)"
+      ],
       "family": "vav_reheat",
       "sys_abbr": "sys_6",
       "sizing": "necb_vav",
@@ -217,7 +301,11 @@
       "needs_chiller": true
     },
     {
-      "name": "MZ BU RTU Hot Water Heating Coil Rotary Screw Chiller and Hot Water Baseboard",
+      "id": "vav-hw-hwbb-gasboiler-screwchiller",
+      "legacy_name": "MZ BU RTU Hot Water Heating Coil Rotary Screw Chiller and Hot Water Baseboard",
+      "aliases": [
+        "built-up VAV with hot water reheat and chilled water cooling + hot water baseboards (gas boiler, rotary screw chiller)"
+      ],
       "family": "vav_reheat",
       "sys_abbr": "sys_6",
       "sizing": "necb_vav",
@@ -228,7 +316,11 @@
       "needs_chiller": true
     },
     {
-      "name": "MZ BU RTU Hot Water Heating Coil Reciprocating Chiller and Electric Baseboard",
+      "id": "vav-hw-elecbb-gasboiler-recipchiller",
+      "legacy_name": "MZ BU RTU Hot Water Heating Coil Reciprocating Chiller and Electric Baseboard",
+      "aliases": [
+        "built-up VAV with hot water reheat and chilled water cooling + electric baseboards (gas boiler, reciprocating chiller)"
+      ],
       "family": "vav_reheat",
       "sys_abbr": "sys_6",
       "sizing": "necb_vav",
@@ -239,7 +331,11 @@
       "needs_chiller": true
     },
     {
-      "name": "MZ BU RTU Hot Water Heating Coil Reciprocating Chiller and Hot Water Baseboard",
+      "id": "vav-hw-hwbb-gasboiler-recipchiller",
+      "legacy_name": "MZ BU RTU Hot Water Heating Coil Reciprocating Chiller and Hot Water Baseboard",
+      "aliases": [
+        "built-up VAV with hot water reheat and chilled water cooling + hot water baseboards (gas boiler, reciprocating chiller)"
+      ],
       "family": "vav_reheat",
       "sys_abbr": "sys_6",
       "sizing": "necb_vav",
@@ -250,7 +346,11 @@
       "needs_chiller": true
     },
     {
-      "name": "FPFC MAU DX Coils with Scroll Chiller",
+      "id": "mau-fc4-gas-gasboiler-scrollchiller",
+      "legacy_name": "FPFC MAU DX Coils with Scroll Chiller",
+      "aliases": [
+        "four-pipe fan coils + DX make-up air (gas boiler, scroll chiller)"
+      ],
       "family": "fan_coils",
       "sys_abbr": "sys_2",
       "sizing": "necb_mau",
@@ -263,7 +363,11 @@
       "comment": "legacy NECB systems.json name"
     },
     {
-      "name": "FPFC MAU DX Coils with Centrifugal Chiller",
+      "id": "mau-fc4-gas-gasboiler-centrifchiller",
+      "legacy_name": "FPFC MAU DX Coils with Centrifugal Chiller",
+      "aliases": [
+        "four-pipe fan coils + DX make-up air (gas boiler, centrifugal chiller)"
+      ],
       "family": "fan_coils",
       "sys_abbr": "sys_2",
       "sizing": "necb_mau",
@@ -276,7 +380,11 @@
       "comment": "legacy NECB systems.json name"
     },
     {
-      "name": "FPFC MAU DX Coils with Rotary Screw Chiller",
+      "id": "mau-fc4-gas-gasboiler-screwchiller",
+      "legacy_name": "FPFC MAU DX Coils with Rotary Screw Chiller",
+      "aliases": [
+        "four-pipe fan coils + DX make-up air (gas boiler, rotary screw chiller)"
+      ],
       "family": "fan_coils",
       "sys_abbr": "sys_2",
       "sizing": "necb_mau",
@@ -289,7 +397,11 @@
       "comment": "legacy NECB systems.json name"
     },
     {
-      "name": "FPFC MAU DX Coils with Reciprocating Chiller",
+      "id": "mau-fc4-gas-gasboiler-recipchiller",
+      "legacy_name": "FPFC MAU DX Coils with Reciprocating Chiller",
+      "aliases": [
+        "four-pipe fan coils + DX make-up air (gas boiler, reciprocating chiller)"
+      ],
       "family": "fan_coils",
       "sys_abbr": "sys_2",
       "sizing": "necb_mau",
@@ -302,7 +414,11 @@
       "comment": "legacy NECB systems.json name"
     },
     {
-      "name": "FPFC MAU Chilled Water Coils with Scroll Chiller",
+      "id": "mau-fc4-gas-chw-gasboiler-scrollchiller",
+      "legacy_name": "FPFC MAU Chilled Water Coils with Scroll Chiller",
+      "aliases": [
+        "four-pipe fan coils + hydronic make-up air (gas boiler, scroll chiller)"
+      ],
       "family": "fan_coils",
       "sys_abbr": "sys_2",
       "sizing": "necb_mau",
@@ -315,7 +431,11 @@
       "comment": "legacy NECB systems.json name"
     },
     {
-      "name": "FPFC MAU Chilled Water Coils with Centrifugal Chiller",
+      "id": "mau-fc4-gas-chw-gasboiler-centrifchiller",
+      "legacy_name": "FPFC MAU Chilled Water Coils with Centrifugal Chiller",
+      "aliases": [
+        "four-pipe fan coils + hydronic make-up air (gas boiler, centrifugal chiller)"
+      ],
       "family": "fan_coils",
       "sys_abbr": "sys_2",
       "sizing": "necb_mau",
@@ -328,7 +448,11 @@
       "comment": "legacy NECB systems.json name"
     },
     {
-      "name": "FPFC MAU Chilled Water Coils with Rotary Screw Chiller",
+      "id": "mau-fc4-gas-chw-gasboiler-screwchiller",
+      "legacy_name": "FPFC MAU Chilled Water Coils with Rotary Screw Chiller",
+      "aliases": [
+        "four-pipe fan coils + hydronic make-up air (gas boiler, rotary screw chiller)"
+      ],
       "family": "fan_coils",
       "sys_abbr": "sys_2",
       "sizing": "necb_mau",
@@ -341,7 +465,11 @@
       "comment": "legacy NECB systems.json name"
     },
     {
-      "name": "FPFC MAU Chilled Water Coils with Reciprocating Chiller",
+      "id": "mau-fc4-gas-chw-gasboiler-recipchiller",
+      "legacy_name": "FPFC MAU Chilled Water Coils with Reciprocating Chiller",
+      "aliases": [
+        "four-pipe fan coils + hydronic make-up air (gas boiler, reciprocating chiller)"
+      ],
       "family": "fan_coils",
       "sys_abbr": "sys_2",
       "sizing": "necb_mau",
@@ -354,7 +482,11 @@
       "comment": "legacy NECB systems.json name"
     },
     {
-      "name": "TPFC MAU DX Coils with Scroll Chiller",
+      "id": "mau-fc2-gas-gasboiler-scrollchiller",
+      "legacy_name": "TPFC MAU DX Coils with Scroll Chiller",
+      "aliases": [
+        "two-pipe fan coils + DX make-up air (gas boiler, scroll chiller)"
+      ],
       "family": "fan_coils",
       "sys_abbr": "sys_5",
       "sizing": "necb_mau",
@@ -367,7 +499,11 @@
       "comment": "NEW: legacy catalog had no sys5/TPFC descriptions; gem fills the gap"
     },
     {
-      "name": "TPFC MAU DX Coils with Centrifugal Chiller",
+      "id": "mau-fc2-gas-gasboiler-centrifchiller",
+      "legacy_name": "TPFC MAU DX Coils with Centrifugal Chiller",
+      "aliases": [
+        "two-pipe fan coils + DX make-up air (gas boiler, centrifugal chiller)"
+      ],
       "family": "fan_coils",
       "sys_abbr": "sys_5",
       "sizing": "necb_mau",
@@ -380,7 +516,11 @@
       "comment": "NEW: legacy catalog had no sys5/TPFC descriptions; gem fills the gap"
     },
     {
-      "name": "TPFC MAU DX Coils with Rotary Screw Chiller",
+      "id": "mau-fc2-gas-gasboiler-screwchiller",
+      "legacy_name": "TPFC MAU DX Coils with Rotary Screw Chiller",
+      "aliases": [
+        "two-pipe fan coils + DX make-up air (gas boiler, rotary screw chiller)"
+      ],
       "family": "fan_coils",
       "sys_abbr": "sys_5",
       "sizing": "necb_mau",
@@ -393,7 +533,11 @@
       "comment": "NEW: legacy catalog had no sys5/TPFC descriptions; gem fills the gap"
     },
     {
-      "name": "TPFC MAU DX Coils with Reciprocating Chiller",
+      "id": "mau-fc2-gas-gasboiler-recipchiller",
+      "legacy_name": "TPFC MAU DX Coils with Reciprocating Chiller",
+      "aliases": [
+        "two-pipe fan coils + DX make-up air (gas boiler, reciprocating chiller)"
+      ],
       "family": "fan_coils",
       "sys_abbr": "sys_5",
       "sizing": "necb_mau",
@@ -406,7 +550,11 @@
       "comment": "NEW: legacy catalog had no sys5/TPFC descriptions; gem fills the gap"
     },
     {
-      "name": "TPFC MAU Chilled Water Coils with Scroll Chiller",
+      "id": "mau-fc2-gas-chw-gasboiler-scrollchiller",
+      "legacy_name": "TPFC MAU Chilled Water Coils with Scroll Chiller",
+      "aliases": [
+        "two-pipe fan coils + hydronic make-up air (gas boiler, scroll chiller)"
+      ],
       "family": "fan_coils",
       "sys_abbr": "sys_5",
       "sizing": "necb_mau",
@@ -419,7 +567,11 @@
       "comment": "NEW: legacy catalog had no sys5/TPFC descriptions; gem fills the gap"
     },
     {
-      "name": "TPFC MAU Chilled Water Coils with Centrifugal Chiller",
+      "id": "mau-fc2-gas-chw-gasboiler-centrifchiller",
+      "legacy_name": "TPFC MAU Chilled Water Coils with Centrifugal Chiller",
+      "aliases": [
+        "two-pipe fan coils + hydronic make-up air (gas boiler, centrifugal chiller)"
+      ],
       "family": "fan_coils",
       "sys_abbr": "sys_5",
       "sizing": "necb_mau",
@@ -432,7 +584,11 @@
       "comment": "NEW: legacy catalog had no sys5/TPFC descriptions; gem fills the gap"
     },
     {
-      "name": "TPFC MAU Chilled Water Coils with Rotary Screw Chiller",
+      "id": "mau-fc2-gas-chw-gasboiler-screwchiller",
+      "legacy_name": "TPFC MAU Chilled Water Coils with Rotary Screw Chiller",
+      "aliases": [
+        "two-pipe fan coils + hydronic make-up air (gas boiler, rotary screw chiller)"
+      ],
       "family": "fan_coils",
       "sys_abbr": "sys_5",
       "sizing": "necb_mau",
@@ -445,7 +601,11 @@
       "comment": "NEW: legacy catalog had no sys5/TPFC descriptions; gem fills the gap"
     },
     {
-      "name": "TPFC MAU Chilled Water Coils with Reciprocating Chiller",
+      "id": "mau-fc2-gas-chw-gasboiler-recipchiller",
+      "legacy_name": "TPFC MAU Chilled Water Coils with Reciprocating Chiller",
+      "aliases": [
+        "two-pipe fan coils + hydronic make-up air (gas boiler, reciprocating chiller)"
+      ],
       "family": "fan_coils",
       "sys_abbr": "sys_5",
       "sizing": "necb_mau",
@@ -458,7 +618,11 @@
       "comment": "NEW: legacy catalog had no sys5/TPFC descriptions; gem fills the gap"
     },
     {
-      "name": "PSZ MAU Hot Water and DX Coils and Hot Water Baseboard with PTAC",
+      "id": "mau-ptac-hw-hwbb-gasboiler",
+      "legacy_name": "PSZ MAU Hot Water and DX Coils and Hot Water Baseboard with PTAC",
+      "aliases": [
+        "100% OA make-up air (hot water heat) + zone PTAC cooling + hot water baseboards (gas boiler)"
+      ],
       "family": "mau_ptac",
       "sys_abbr": "sys_1",
       "sizing": "necb_mau_ptac",
@@ -468,7 +632,11 @@
       "comment": "legacy NECB systems.json sys1 name (non-heat-pump)"
     },
     {
-      "name": "PSZ MAU Hot Water and DX Coils and Electric Baseboard with PTAC",
+      "id": "mau-ptac-hw-elecbb-gasboiler",
+      "legacy_name": "PSZ MAU Hot Water and DX Coils and Electric Baseboard with PTAC",
+      "aliases": [
+        "100% OA make-up air (hot water heat) + zone PTAC cooling + electric baseboards (gas boiler)"
+      ],
       "family": "mau_ptac",
       "sys_abbr": "sys_1",
       "sizing": "necb_mau_ptac",
@@ -478,7 +646,11 @@
       "comment": "legacy NECB systems.json sys1 name (non-heat-pump)"
     },
     {
-      "name": "PSZ MAU Electric and DX Coils and Hot Water Baseboard with PTAC",
+      "id": "mau-ptac-elec-hwbb-gasboiler",
+      "legacy_name": "PSZ MAU Electric and DX Coils and Hot Water Baseboard with PTAC",
+      "aliases": [
+        "100% OA make-up air (electric heat) + zone PTAC cooling + hot water baseboards (gas boiler)"
+      ],
       "family": "mau_ptac",
       "sys_abbr": "sys_1",
       "sizing": "necb_mau_ptac",
@@ -488,7 +660,11 @@
       "comment": "legacy NECB systems.json sys1 name (non-heat-pump)"
     },
     {
-      "name": "PSZ MAU Electric and DX Coils and Electric Baseboard with PTAC",
+      "id": "mau-ptac-elec-elecbb",
+      "legacy_name": "PSZ MAU Electric and DX Coils and Electric Baseboard with PTAC",
+      "aliases": [
+        "100% OA make-up air (electric heat) + zone PTAC cooling + electric baseboards"
+      ],
       "family": "mau_ptac",
       "sys_abbr": "sys_1",
       "sizing": "necb_mau_ptac",
@@ -498,14 +674,22 @@
       "comment": "legacy NECB systems.json sys1 name (non-heat-pump)"
     },
     {
-      "name": "Baseboard electric",
+      "id": "bb-elecbb",
+      "legacy_name": "Baseboard electric",
+      "aliases": [
+        "electric baseboards"
+      ],
       "family": "baseboards",
       "baseboard_type": "Electric",
       "needs_boiler": false,
       "origin": "cbecs"
     },
     {
-      "name": "Baseboard gas boiler",
+      "id": "bb-hwbb-gasboiler",
+      "legacy_name": "Baseboard gas boiler",
+      "aliases": [
+        "hot water baseboards (gas boiler)"
+      ],
       "family": "baseboards",
       "baseboard_type": "Hot Water",
       "boiler_fuel": "NaturalGas",
@@ -513,7 +697,11 @@
       "origin": "cbecs"
     },
     {
-      "name": "PSZ-AC with electric coil",
+      "id": "psz-elec-perzone",
+      "legacy_name": "PSZ-AC with electric coil",
+      "aliases": [
+        "packaged single-zone DX with electric heat, one unit per zone"
+      ],
       "family": "psz",
       "sys_abbr": "psz_ac",
       "per_zone": true,
@@ -524,7 +712,11 @@
       "comment": "one packaged unit per zone (CBECS/90.1 convention); no NECB sizing block - host sizing applies"
     },
     {
-      "name": "PSZ-AC with gas coil",
+      "id": "psz-gas-perzone",
+      "legacy_name": "PSZ-AC with gas coil",
+      "aliases": [
+        "packaged single-zone DX with gas heat, one unit per zone"
+      ],
       "family": "psz",
       "sys_abbr": "psz_ac",
       "per_zone": true,
@@ -535,7 +727,11 @@
       "comment": "one packaged unit per zone (CBECS/90.1 convention); no NECB sizing block - host sizing applies"
     },
     {
-      "name": "hs11_ashp_pthp",
+      "id": "doas-pthp-ashp-elecsupp",
+      "legacy_name": "hs11_ashp_pthp",
+      "aliases": [
+        "DOAS ASHP + zone PTHPs"
+      ],
       "family": "doas_pthp",
       "sys_abbr": "sys_1",
       "sizing": "ecm_doas",
@@ -545,7 +741,11 @@
       "comment": "NECB ECM hs11: DOAS + ASHP + zone PTHPs. Topology only - ECM curves/COPs applied by the host's apply_efficiency_ecm_hs11_ashp_pthp after sizing."
     },
     {
-      "name": "hs09_ccashp_baseboard",
+      "id": "doas-ptac-ccashp-elecsupp-elecbb",
+      "legacy_name": "hs09_ccashp_baseboard",
+      "aliases": [
+        "DOAS cold-climate ASHP + zone PTAC cooling + electric baseboards"
+      ],
       "family": "ecm_ashp_baseboard",
       "sys_abbr": "sys_1",
       "sizing": "ecm_doas",
@@ -558,7 +758,11 @@
       "comment": "NECB ECM hs09: DOAS + cold-climate ASHP (variable-speed DX) + PTAC cooling + baseboards. Topology only."
     },
     {
-      "name": "hs12_ashp_baseboard",
+      "id": "doas-ptac-ashp-elecsupp-elecbb",
+      "legacy_name": "hs12_ashp_baseboard",
+      "aliases": [
+        "DOAS ASHP + zone PTAC cooling + electric baseboards"
+      ],
       "family": "ecm_ashp_baseboard",
       "sys_abbr": "sys_1",
       "sizing": "ecm_doas",
@@ -571,7 +775,11 @@
       "comment": "NECB ECM hs12: DOAS + ASHP (single-speed DX) + PTAC cooling + baseboards. Topology only."
     },
     {
-      "name": "hs08_ccashp_vrf",
+      "id": "doas-vrf-ccashp-elecsupp",
+      "legacy_name": "hs08_ccashp_vrf",
+      "aliases": [
+        "DOAS cold-climate ASHP + VRF"
+      ],
       "family": "ecm_doas_vrf",
       "sys_abbr": "sys_1",
       "sizing": "ecm_doas",
@@ -582,7 +790,11 @@
       "comment": "NECB ECM hs08: DOAS (CCASHP) + outdoor VRF unit with heat recovery + zone VRF terminals. Topology only."
     },
     {
-      "name": "hs13_ashp_vrf",
+      "id": "doas-vrf-ashp-elecsupp",
+      "legacy_name": "hs13_ashp_vrf",
+      "aliases": [
+        "DOAS ASHP + VRF"
+      ],
       "family": "ecm_doas_vrf",
       "sys_abbr": "sys_1",
       "sizing": "ecm_doas",
@@ -593,7 +805,11 @@
       "comment": "NECB ECM hs13: DOAS (ASHP) + outdoor VRF unit + zone VRF terminals (hs08 with single-speed DX). Topology only."
     },
     {
-      "name": "hs14_cgshp_fancoils",
+      "id": "doas-fc4-hw-chw-gshp-elecboiler",
+      "legacy_name": "hs14_cgshp_fancoils",
+      "aliases": [
+        "four-pipe fan coils on a ground-source heat pump plant"
+      ],
       "family": "ecm_hp_fancoils",
       "sys_abbr": "sys_1",
       "sizing": "ecm_doas",
@@ -606,7 +822,11 @@
       "comment": "NECB ECM hs14: ground-source W2W HP heating plant + water/air-cooled chillers + district-modeled GLHX loop + DOAS + 4-pipe fan coils. Topology + structural W2W curves; sizing-dependent values host-side."
     },
     {
-      "name": "hs15_cawhp_fancoils",
+      "id": "doas-fc4-hw-chw-awhp-elecboiler",
+      "legacy_name": "hs15_cawhp_fancoils",
+      "aliases": [
+        "four-pipe fan coils on a air-to-water heat pump plant"
+      ],
       "family": "ecm_hp_fancoils",
       "sys_abbr": "sys_1",
       "sizing": "ecm_doas",
@@ -619,7 +839,11 @@
       "comment": "NECB ECM hs15: central air-to-water plant-loop-EIR heat pumps (companion pair) + boiler backup + DOAS + 4-pipe fan coils."
     },
     {
-      "name": "hs16_ashp_cawhp_fancoils",
+      "id": "doas-fc4-ashp-elecsupp-awhp-elecboiler",
+      "legacy_name": "hs16_ashp_cawhp_fancoils",
+      "aliases": [
+        "four-pipe fan coils on a air-to-water heat pump plant with ASHP DOAS"
+      ],
       "family": "ecm_hp_fancoils",
       "sys_abbr": "sys_1",
       "sizing": "ecm_doas",
@@ -632,7 +856,11 @@
       "comment": "NECB ECM hs16: hs15 with an ASHP (DX) DOAS + supplemental coil."
     },
     {
-      "name": "PTAC with baseboard electric",
+      "id": "ptac-elecbb",
+      "legacy_name": "PTAC with baseboard electric",
+      "aliases": [
+        "zone PTAC cooling + electric baseboards"
+      ],
       "family": "zone_terminal",
       "unit_type": "ptac",
       "heating_type": "None",
@@ -642,7 +870,11 @@
       "comment": "no-heat PTAC (cooling + ventilation) with electric baseboards doing the heating"
     },
     {
-      "name": "PTAC with baseboard gas boiler",
+      "id": "ptac-hwbb-gasboiler",
+      "legacy_name": "PTAC with baseboard gas boiler",
+      "aliases": [
+        "zone PTAC cooling + hot water baseboards (gas boiler)"
+      ],
       "family": "zone_terminal",
       "unit_type": "ptac",
       "heating_type": "None",
@@ -652,7 +884,11 @@
       "origin": "cbecs"
     },
     {
-      "name": "PTHP",
+      "id": "pthp",
+      "legacy_name": "PTHP",
+      "aliases": [
+        "zone PTHPs"
+      ],
       "family": "zone_terminal",
       "unit_type": "pthp",
       "baseboard_type": "None",
@@ -660,7 +896,11 @@
       "origin": "cbecs"
     },
     {
-      "name": "Window AC with baseboard electric",
+      "id": "windowac-elecbb",
+      "legacy_name": "Window AC with baseboard electric",
+      "aliases": [
+        "window AC units + electric baseboards"
+      ],
       "family": "zone_terminal",
       "unit_type": "window_ac",
       "baseboard_type": "Electric",
@@ -669,28 +909,44 @@
       "comment": "cooling-only window units (EER 8.5) + electric baseboards"
     },
     {
-      "name": "Gas unit heaters",
+      "id": "uh-gas",
+      "legacy_name": "Gas unit heaters",
+      "aliases": [
+        "gas unit heaters"
+      ],
       "family": "unit_heaters",
       "heating_type": "Gas",
       "needs_boiler": false,
       "origin": "cbecs"
     },
     {
-      "name": "Electric unit heaters",
+      "id": "uh-elec",
+      "legacy_name": "Electric unit heaters",
+      "aliases": [
+        "electric unit heaters"
+      ],
       "family": "unit_heaters",
       "heating_type": "Electric",
       "needs_boiler": false,
       "origin": "cbecs"
     },
     {
-      "name": "Hot water unit heaters",
+      "id": "uh-hw-gasboiler",
+      "legacy_name": "Hot water unit heaters",
+      "aliases": [
+        "hot water unit heaters (gas boiler)"
+      ],
       "family": "unit_heaters",
       "heating_type": "Hot Water",
       "needs_boiler": true,
       "origin": "campus"
     },
     {
-      "name": "PSZ-AC with electric baseboard heat",
+      "id": "psz-elec-elecbb-perzone",
+      "legacy_name": "PSZ-AC with electric baseboard heat",
+      "aliases": [
+        "packaged single-zone DX with electric heat, one unit per zone + electric baseboards"
+      ],
       "family": "psz",
       "sys_abbr": "psz_ac",
       "per_zone": true,
@@ -700,7 +956,11 @@
       "origin": "cbecs"
     },
     {
-      "name": "PSZ-AC with gas boiler",
+      "id": "psz-hw-gasboiler-perzone",
+      "legacy_name": "PSZ-AC with gas boiler",
+      "aliases": [
+        "packaged single-zone DX with hot water heat, one unit per zone (gas boiler)"
+      ],
       "family": "psz",
       "sys_abbr": "psz_ac",
       "per_zone": true,
@@ -712,7 +972,11 @@
       "comment": "per-zone packaged units with hot-water coils served by a gas boiler loop"
     },
     {
-      "name": "Shared PSZ with gas boiler coils and hot water baseboard",
+      "id": "psz-hw-hwbb-gasboiler",
+      "legacy_name": "Shared PSZ with gas boiler coils and hot water baseboard",
+      "aliases": [
+        "packaged single-zone DX with hot water heat + hot water baseboards (gas boiler)"
+      ],
       "family": "psz",
       "sys_abbr": "psz_ac",
       "per_zone": false,
@@ -724,7 +988,11 @@
       "comment": "one shared constant-volume loop serving several zones, hot-water heating coil on a gas boiler loop, DX cooling, hot-water baseboard in the zones. The Gagetown Office archetype's central loops are exactly this and NO catalogue row matched: 'PSZ-AC with gas boiler' is per_zone with no baseboards, and every other PSZ row heats with a direct-gas coil. Established 2026-11-04 by two independent agent reads of gagetown_coldlake_Office_pre-1960.osm, whose loops carry Coil:Heating:Water on a gas boiler loop plus ZoneHVAC:Baseboard:Convective:Water in the zones."
     },
     {
-      "name": "VAV chiller with gas boiler reheat",
+      "id": "vav-hw-gasboiler-scrollchiller",
+      "legacy_name": "VAV chiller with gas boiler reheat",
+      "aliases": [
+        "built-up VAV with hot water reheat and chilled water cooling (gas boiler, scroll chiller)"
+      ],
       "family": "vav_reheat",
       "sys_abbr": "sys_6",
       "sizing": "necb_vav",
@@ -738,7 +1006,11 @@
       "comment": "central VAV, chilled-water cooling, gas-boiler hot-water heat + reheat (NECB sizing block reused)"
     },
     {
-      "name": "VAV chiller with gas boiler reheat and rotary ERV",
+      "id": "vav-hw-hwbb-erv-gasboiler-scrollchiller",
+      "legacy_name": "VAV chiller with gas boiler reheat and rotary ERV",
+      "aliases": [
+        "built-up VAV with hot water reheat and chilled water cooling and rotary ERV + hot water baseboards (gas boiler, scroll chiller)"
+      ],
       "family": "vav_reheat",
       "sys_abbr": "sys_6",
       "sizing": "necb_vav",
@@ -764,7 +1036,11 @@
       "comment": "opt-in central VAV energy recovery with gas-boiler hydronic perimeter trim and explicit rotary-wheel effectiveness, frost, bypass, pretreat and parasitic-power inputs"
     },
     {
-      "name": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard",
+      "id": "psz-ashp-gassupp-hwbb-gasboiler",
+      "legacy_name": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard",
+      "aliases": [
+        "packaged single-zone DX with ASHP heat with gas backup + hot water baseboards (gas boiler)"
+      ],
       "family": "psz",
       "sys_abbr": "sys_3",
       "sizing": "necb_psz_hp",
@@ -777,7 +1053,11 @@
       "comment": "NECB reference heat pump PSZ: ASHP DX heat/cool + supplemental coil (fuel encoded in the name - no regional lookup needed)"
     },
     {
-      "name": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Electric Baseboard",
+      "id": "psz-ashp-gassupp-elecbb",
+      "legacy_name": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Electric Baseboard",
+      "aliases": [
+        "packaged single-zone DX with ASHP heat with gas backup + electric baseboards"
+      ],
       "family": "psz",
       "sys_abbr": "sys_3",
       "sizing": "necb_psz_hp",
@@ -790,7 +1070,11 @@
       "comment": "NECB reference heat pump PSZ: ASHP DX heat/cool + supplemental coil (fuel encoded in the name - no regional lookup needed)"
     },
     {
-      "name": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard",
+      "id": "psz-ashp-elecsupp-hwbb-gasboiler",
+      "legacy_name": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard",
+      "aliases": [
+        "packaged single-zone DX with ASHP heat with electric backup + hot water baseboards (gas boiler)"
+      ],
       "family": "psz",
       "sys_abbr": "sys_3",
       "sizing": "necb_psz_hp",
@@ -803,7 +1087,11 @@
       "comment": "NECB reference heat pump PSZ: ASHP DX heat/cool + supplemental coil (fuel encoded in the name - no regional lookup needed)"
     },
     {
-      "name": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard",
+      "id": "psz-ashp-elecsupp-elecbb",
+      "legacy_name": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard",
+      "aliases": [
+        "packaged single-zone DX with ASHP heat with electric backup + electric baseboards"
+      ],
       "family": "psz",
       "sys_abbr": "sys_3",
       "sizing": "necb_psz_hp",
@@ -816,7 +1104,11 @@
       "comment": "NECB reference heat pump PSZ: ASHP DX heat/cool + supplemental coil (fuel encoded in the name - no regional lookup needed)"
     },
     {
-      "name": "PSZ RTU with exhaust ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard",
+      "id": "psz-ashp-gassupp-hwbb-gasboiler-necbs4",
+      "legacy_name": "PSZ RTU with exhaust ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard",
+      "aliases": [
+        "packaged single-zone DX with ASHP heat with gas backup, with exhaust + hot water baseboards (gas boiler)"
+      ],
       "family": "psz",
       "sys_abbr": "sys_4",
       "sizing": "necb_psz_hp",
@@ -829,7 +1121,11 @@
       "comment": "NECB reference heat pump PSZ: ASHP DX heat/cool + supplemental coil (fuel encoded in the name - no regional lookup needed)"
     },
     {
-      "name": "PSZ RTU with exhaust ASHP with Gas and ASHP with Gas Supp. Heat Coils and Electric Baseboard",
+      "id": "psz-ashp-gassupp-elecbb-necbs4",
+      "legacy_name": "PSZ RTU with exhaust ASHP with Gas and ASHP with Gas Supp. Heat Coils and Electric Baseboard",
+      "aliases": [
+        "packaged single-zone DX with ASHP heat with gas backup, with exhaust + electric baseboards"
+      ],
       "family": "psz",
       "sys_abbr": "sys_4",
       "sizing": "necb_psz_hp",
@@ -842,7 +1138,11 @@
       "comment": "NECB reference heat pump PSZ: ASHP DX heat/cool + supplemental coil (fuel encoded in the name - no regional lookup needed)"
     },
     {
-      "name": "PSZ RTU with exhaust ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard",
+      "id": "psz-ashp-elecsupp-hwbb-gasboiler-necbs4",
+      "legacy_name": "PSZ RTU with exhaust ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard",
+      "aliases": [
+        "packaged single-zone DX with ASHP heat with electric backup, with exhaust + hot water baseboards (gas boiler)"
+      ],
       "family": "psz",
       "sys_abbr": "sys_4",
       "sizing": "necb_psz_hp",
@@ -855,7 +1155,11 @@
       "comment": "NECB reference heat pump PSZ: ASHP DX heat/cool + supplemental coil (fuel encoded in the name - no regional lookup needed)"
     },
     {
-      "name": "PSZ RTU with exhaust ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard",
+      "id": "psz-ashp-elecsupp-elecbb-necbs4",
+      "legacy_name": "PSZ RTU with exhaust ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard",
+      "aliases": [
+        "packaged single-zone DX with ASHP heat with electric backup, with exhaust + electric baseboards"
+      ],
       "family": "psz",
       "sys_abbr": "sys_4",
       "sizing": "necb_psz_hp",
@@ -868,7 +1172,11 @@
       "comment": "NECB reference heat pump PSZ: ASHP DX heat/cool + supplemental coil (fuel encoded in the name - no regional lookup needed)"
     },
     {
-      "name": "PSZ RTU ASHP with Gas and ASHP Coils and Hot Water Baseboard with Gas Reheat",
+      "id": "cvrh-ashp-gasrh-hwbb-gasboiler",
+      "legacy_name": "PSZ RTU ASHP with Gas and ASHP Coils and Hot Water Baseboard with Gas Reheat",
+      "aliases": [
+        "100% OA make-up air ASHP + CAV gas reheat + hot water baseboards (gas boiler)"
+      ],
       "family": "mau_ptac",
       "sys_abbr": "sys_1",
       "sizing": "necb_mau_hp",
@@ -880,7 +1188,11 @@
       "comment": "NECB reference heat pump sys1: 100% OA MAU with ASHP DX coils, CAV reheat terminals (fuel from name), baseboards"
     },
     {
-      "name": "PSZ RTU ASHP with Gas and ASHP Coils and Electric Baseboard with Gas Reheat",
+      "id": "cvrh-ashp-gasrh-elecbb",
+      "legacy_name": "PSZ RTU ASHP with Gas and ASHP Coils and Electric Baseboard with Gas Reheat",
+      "aliases": [
+        "100% OA make-up air ASHP + CAV gas reheat + electric baseboards"
+      ],
       "family": "mau_ptac",
       "sys_abbr": "sys_1",
       "sizing": "necb_mau_hp",
@@ -892,7 +1204,11 @@
       "comment": "NECB reference heat pump sys1: 100% OA MAU with ASHP DX coils, CAV reheat terminals (fuel from name), baseboards"
     },
     {
-      "name": "PSZ RTU ASHP with Electric and ASHP Coils and Hot Water Baseboard with Electric Reheat",
+      "id": "cvrh-ashp-elecrh-hwbb-gasboiler",
+      "legacy_name": "PSZ RTU ASHP with Electric and ASHP Coils and Hot Water Baseboard with Electric Reheat",
+      "aliases": [
+        "100% OA make-up air ASHP + CAV electric reheat + hot water baseboards (gas boiler)"
+      ],
       "family": "mau_ptac",
       "sys_abbr": "sys_1",
       "sizing": "necb_mau_hp",
@@ -904,7 +1220,11 @@
       "comment": "NECB reference heat pump sys1: 100% OA MAU with ASHP DX coils, CAV reheat terminals (fuel from name), baseboards"
     },
     {
-      "name": "PSZ RTU ASHP with Electric and ASHP Coils and Electric Baseboard with Electric Reheat",
+      "id": "cvrh-ashp-elecrh-elecbb",
+      "legacy_name": "PSZ RTU ASHP with Electric and ASHP Coils and Electric Baseboard with Electric Reheat",
+      "aliases": [
+        "100% OA make-up air ASHP + CAV electric reheat + electric baseboards"
+      ],
       "family": "mau_ptac",
       "sys_abbr": "sys_1",
       "sizing": "necb_mau_hp",
@@ -916,7 +1236,11 @@
       "comment": "NECB reference heat pump sys1: 100% OA MAU with ASHP DX coils, CAV reheat terminals (fuel from name), baseboards"
     },
     {
-      "name": "PSZ MAU Hot Water with water-heated PTAC",
+      "id": "mau-ptac-hw-hwptac-gasboiler",
+      "legacy_name": "PSZ MAU Hot Water with water-heated PTAC",
+      "aliases": [
+        "100% OA make-up air (hot water heat) + zone PTAC cooling (gas boiler)"
+      ],
       "family": "mau_ptac",
       "mau_heating_coil_type": "Hot Water",
       "ptac_heating_type": "Hot Water",
@@ -925,7 +1249,11 @@
       "origin": "campus"
     },
     {
-      "name": "Forced air furnace",
+      "id": "furnace-gas",
+      "legacy_name": "Forced air furnace",
+      "aliases": [
+        "per-zone gas furnace"
+      ],
       "family": "furnace",
       "heating": true,
       "cooling": false,
@@ -934,7 +1262,11 @@
       "origin": "cbecs"
     },
     {
-      "name": "Shared hot water heating-only air handler",
+      "id": "hv-hw-gasboiler-shared",
+      "legacy_name": "Shared hot water heating-only air handler",
+      "aliases": [
+        "shared hot water heating-only air handler (gas boiler)"
+      ],
       "family": "furnace",
       "heating": true,
       "cooling": false,
@@ -945,7 +1277,11 @@
       "origin": "campus"
     },
     {
-      "name": "Shared furnace with DX cooling and no outdoor air",
+      "id": "furnace-gas-dx-nooa-shared",
+      "legacy_name": "Shared furnace with DX cooling and no outdoor air",
+      "aliases": [
+        "shared furnace with DX cooling"
+      ],
       "family": "furnace",
       "heating": true,
       "cooling": true,
@@ -955,7 +1291,11 @@
       "origin": "campus"
     },
     {
-      "name": "Shared hot water air handler with water reheat",
+      "id": "cvrh-hw-gasboiler",
+      "legacy_name": "Shared hot water air handler with water reheat",
+      "aliases": [
+        "shared hot water heating-only air handler with hot water reheat (gas boiler)"
+      ],
       "family": "furnace",
       "heating": true,
       "cooling": false,
@@ -967,13 +1307,17 @@
       "origin": "campus"
     },
     {
-      "name": "Residential AC with baseboard electric",
+      "id": "splitac-dx-elecbb-nooa",
+      "legacy_name": "Residential AC with baseboard electric",
+      "aliases": [
+        "per-zone central AC + electric baseboards"
+      ],
       "family": "composite",
       "origin": "cbecs",
       "needs_boiler": false,
       "parts": [
         {
-          "name": "Forced air furnace",
+          "id": "furnace-gas",
           "config": {
             "heating": false,
             "cooling": true,
@@ -982,13 +1326,17 @@
           }
         },
         {
-          "name": "Baseboard electric"
+          "id": "bb-elecbb"
         }
       ],
       "comment": "central AC (cooling-only per-zone loops, no OA) + electric baseboards"
     },
     {
-      "name": "Baseboard district hot water",
+      "id": "bb-hwbb-district",
+      "legacy_name": "Baseboard district hot water",
+      "aliases": [
+        "hot water baseboards (district heating)"
+      ],
       "family": "baseboards",
       "baseboard_type": "Hot Water",
       "needs_boiler": true,
@@ -996,7 +1344,11 @@
       "origin": "cbecs"
     },
     {
-      "name": "PVAV with gas boiler reheat",
+      "id": "pvav-hw-gasboiler",
+      "legacy_name": "PVAV with gas boiler reheat",
+      "aliases": [
+        "built-up VAV with hot water reheat and DX cooling (gas boiler)"
+      ],
       "family": "vav_reheat",
       "sys_abbr": "pvav",
       "sizing": "necb_vav",
@@ -1010,7 +1362,11 @@
       "comment": "packaged VAV: two-speed DX cooling, gas-boiler hot-water heat + reheat"
     },
     {
-      "name": "PVAV with gas boiler reheat and plate HRV",
+      "id": "pvav-hw-hwbb-hrv-gasboiler",
+      "legacy_name": "PVAV with gas boiler reheat and plate HRV",
+      "aliases": [
+        "built-up VAV with hot water reheat and DX cooling and plate HRV + hot water baseboards (gas boiler)"
+      ],
       "family": "vav_reheat",
       "sys_abbr": "pvav",
       "sizing": "necb_vav",
@@ -1036,7 +1392,11 @@
       "comment": "opt-in packaged VAV sensible-only plate recovery with gas-boiler hydronic perimeter trim and explicit effectiveness, frost, bypass, pretreat and parasitic-power inputs"
     },
     {
-      "name": "PVAV with gas boiler reheat and hot water baseboard",
+      "id": "pvav-hw-hwbb-gasboiler",
+      "legacy_name": "PVAV with gas boiler reheat and hot water baseboard",
+      "aliases": [
+        "built-up VAV with hot water reheat and DX cooling + hot water baseboards (gas boiler)"
+      ],
       "family": "vav_reheat",
       "sys_abbr": "pvav",
       "sizing": "necb_vav",
@@ -1050,27 +1410,39 @@
       "comment": "the PVAV sys-6 shape with hot-water baseboards and NO heat recovery. Its only sibling carrying baseboards also carries a plate HRV, so before this row a building with baseboards and no heat exchanger had no faithful choice: the HRV row added a recovery device worth 48.64 GJ/yr that the building does not have, and the baseboard-less row dropped equipment it does. Established 2026-11-06 from gagetown_coldlake_Office_pre-1960.osm, whose Packaged Rooftop VAV with Reheat has hot-water baseboards in its zones and zero HeatExchangerAirToAirSensibleAndLatent anywhere in the model."
     },
     {
-      "name": "Direct evap coolers with baseboard electric",
+      "id": "evap-elecbb",
+      "legacy_name": "Direct evap coolers with baseboard electric",
+      "aliases": [
+        "per-zone direct evaporative coolers + electric baseboards"
+      ],
       "family": "composite",
       "origin": "cbecs",
       "needs_boiler": false,
       "parts": [
         {
-          "name": "Direct evap coolers with no heat"
+          "id": "evap"
         },
         {
-          "name": "Baseboard electric"
+          "id": "bb-elecbb"
         }
       ]
     },
     {
-      "name": "Direct evap coolers with no heat",
+      "id": "evap",
+      "legacy_name": "Direct evap coolers with no heat",
+      "aliases": [
+        "per-zone direct evaporative coolers"
+      ],
       "family": "evap_cooler",
       "needs_boiler": false,
       "origin": "cbecs"
     },
     {
-      "name": "DOAS ventilation only",
+      "id": "doas-elec",
+      "legacy_name": "DOAS ventilation only",
+      "aliases": [
+        "DOAS ventilation"
+      ],
       "family": "doas",
       "heating_type": "Electric",
       "sizing": "necb_mau_ptac",
@@ -1079,7 +1451,11 @@
       "comment": "the ventilation half of 'DOAS with <zone system>' composites"
     },
     {
-      "name": "Water source heat pumps",
+      "id": "wshp-gasboiler",
+      "legacy_name": "Water source heat pumps",
+      "aliases": [
+        "water-source heat pumps on a fluid cooler loop"
+      ],
       "family": "wshp",
       "boiler_fuel": "NaturalGas",
       "ventilation": false,
@@ -1089,30 +1465,38 @@
       "comment": "condenser loop (boiler + evaporative fluid cooler) + per-zone water-to-air HPs; ventilate via a DOAS part"
     },
     {
-      "name": "DOAS with water source heat pumps fluid cooler with boiler",
+      "id": "doas-wshp-elec-gasboiler-fluidcooler",
+      "legacy_name": "DOAS with water source heat pumps fluid cooler with boiler",
+      "aliases": [
+        "DOAS ventilation + water-source heat pumps on a fluid cooler loop"
+      ],
       "family": "composite",
       "origin": "cbecs",
       "needs_boiler": false,
       "parts": [
         {
-          "name": "DOAS ventilation only"
+          "id": "doas-elec"
         },
         {
-          "name": "Water source heat pumps"
+          "id": "wshp-gasboiler"
         }
       ]
     },
     {
-      "name": "DOAS with fan coil chiller with boiler",
+      "id": "doas-fc4-elec-gasboiler-scrollchiller",
+      "legacy_name": "DOAS with fan coil chiller with boiler",
+      "aliases": [
+        "DOAS ventilation + four-pipe fan coils (gas boiler, scroll chiller)"
+      ],
       "family": "composite",
       "origin": "cbecs",
       "needs_boiler": false,
       "parts": [
         {
-          "name": "DOAS ventilation only"
+          "id": "doas-elec"
         },
         {
-          "name": "FPFC MAU DX Coils with Scroll Chiller",
+          "id": "mau-fc4-gas-gasboiler-scrollchiller",
           "config": {
             "mau": false
           }
@@ -1121,7 +1505,11 @@
       "comment": "DOAS ventilates; no-MAU four-pipe fan coils condition (chiller + boiler plant)"
     },
     {
-      "name": "DOAS with active chilled beams and electric baseboards",
+      "id": "doas-acb-elec-elecbb-acscrollchiller",
+      "legacy_name": "DOAS with active chilled beams and electric baseboards",
+      "aliases": [
+        "DOAS with active chilled beams + electric baseboards (air-cooled scroll chiller)"
+      ],
       "family": "chilled_beams",
       "beam_type": "Active",
       "baseboard_type": "Electric",
@@ -1146,7 +1534,11 @@
       "comment": "100% OA dehumidifying DOAS with active chilled-beam terminals, electric perimeter heat, and dew-point-safe tempered chilled water"
     },
     {
-      "name": "DOAS with passive chilled beams and electric baseboards",
+      "id": "doas-pcb-elec-elecbb-acscrollchiller",
+      "legacy_name": "DOAS with passive chilled beams and electric baseboards",
+      "aliases": [
+        "DOAS with passive chilled beams + electric baseboards (air-cooled scroll chiller)"
+      ],
       "family": "chilled_beams",
       "beam_type": "Passive",
       "baseboard_type": "Electric",
@@ -1171,7 +1563,11 @@
       "comment": "100% OA dehumidifying DOAS with passive chilled-beam terminals, electric perimeter heat, and dew-point-safe tempered chilled water"
     },
     {
-      "name": "Dual-duct VAV with gas boiler and water-cooled chiller",
+      "id": "ddvav-hw-gasboiler-scrollchiller",
+      "legacy_name": "Dual-duct VAV with gas boiler and water-cooled chiller",
+      "aliases": [
+        "dual-duct VAV with hydronic hot and cold decks (gas boiler, scroll chiller)"
+      ],
       "family": "dual_duct",
       "sys_abbr": "dual_duct",
       "sizing": "dual_duct_vav",
@@ -1183,7 +1579,11 @@
       "comment": "true two-deck VAV with a hydronic hot deck, hydronic cold deck, upstream mixed outdoor air and one dual-duct terminal per zone"
     },
     {
-      "name": "VRF",
+      "id": "vrf",
+      "legacy_name": "VRF",
+      "aliases": [
+        "VRF heat recovery system"
+      ],
       "family": "vrf",
       "zone_ventilation": true,
       "needs_boiler": false,
@@ -1191,7 +1591,11 @@
       "comment": "outdoor VRF unit + self-ventilating zone terminals"
     },
     {
-      "name": "Zone ERVs",
+      "id": "zone-erv",
+      "legacy_name": "Zone ERVs",
+      "aliases": [
+        "zone energy recovery ventilators"
+      ],
       "family": "zone_ervs",
       "needs_boiler": false,
       "origin": "generic",
@@ -1199,16 +1603,20 @@
       "erv_profile": "plate_erv"
     },
     {
-      "name": "DOAS with VRF",
+      "id": "doas-vrf-elec",
+      "legacy_name": "DOAS with VRF",
+      "aliases": [
+        "DOAS ventilation + VRF heat recovery system"
+      ],
       "family": "composite",
       "needs_boiler": false,
       "origin": "cbecs",
       "parts": [
         {
-          "name": "DOAS ventilation only"
+          "id": "doas-elec"
         },
         {
-          "name": "VRF",
+          "id": "vrf",
           "config": {
             "zone_ventilation": false
           }
@@ -1216,16 +1624,20 @@
       ]
     },
     {
-      "name": "DOAS with water source heat pumps cooling tower with boiler",
+      "id": "doas-wshp-elec-gasboiler-tower",
+      "legacy_name": "DOAS with water source heat pumps cooling tower with boiler",
+      "aliases": [
+        "DOAS ventilation + water-source heat pumps on a cooling tower loop"
+      ],
       "family": "composite",
       "needs_boiler": false,
       "origin": "cbecs",
       "parts": [
         {
-          "name": "DOAS ventilation only"
+          "id": "doas-elec"
         },
         {
-          "name": "Water source heat pumps",
+          "id": "wshp-gasboiler",
           "config": {
             "heat_rejection": "cooling_tower"
           }
@@ -1233,16 +1645,20 @@
       ]
     },
     {
-      "name": "DOAS with water source heat pumps with ground source heat pump",
+      "id": "doas-wshp-elec-groundloop",
+      "legacy_name": "DOAS with water source heat pumps with ground source heat pump",
+      "aliases": [
+        "DOAS ventilation + water-source heat pumps on a ground loop"
+      ],
       "family": "composite",
       "needs_boiler": false,
       "origin": "cbecs",
       "parts": [
         {
-          "name": "DOAS ventilation only"
+          "id": "doas-elec"
         },
         {
-          "name": "Water source heat pumps",
+          "id": "wshp-gasboiler",
           "config": {
             "heat_rejection": "ground"
           }
@@ -1251,16 +1667,20 @@
       "comment": "GSHP: vertical ground heat exchanger on the HP loop, no boiler"
     },
     {
-      "name": "DOAS with fan coil chiller with district hot water",
+      "id": "doas-fc4-elec-district-scrollchiller",
+      "legacy_name": "DOAS with fan coil chiller with district hot water",
+      "aliases": [
+        "DOAS ventilation + four-pipe fan coils (district heating, scroll chiller)"
+      ],
       "family": "composite",
       "needs_boiler": false,
       "origin": "cbecs",
       "parts": [
         {
-          "name": "DOAS ventilation only"
+          "id": "doas-elec"
         },
         {
-          "name": "FPFC MAU DX Coils with Scroll Chiller",
+          "id": "mau-fc4-gas-gasboiler-scrollchiller",
           "config": {
             "mau": false,
             "hw_source": "district"
@@ -1269,16 +1689,20 @@
       ]
     },
     {
-      "name": "DOAS with fan coil air-cooled chiller with boiler",
+      "id": "doas-fc4-elec-gasboiler-acscrollchiller",
+      "legacy_name": "DOAS with fan coil air-cooled chiller with boiler",
+      "aliases": [
+        "DOAS ventilation + four-pipe fan coils (gas boiler, air-cooled scroll chiller)"
+      ],
       "family": "composite",
       "needs_boiler": false,
       "origin": "cbecs",
       "parts": [
         {
-          "name": "DOAS ventilation only"
+          "id": "doas-elec"
         },
         {
-          "name": "FPFC MAU DX Coils with Scroll Chiller",
+          "id": "mau-fc4-gas-gasboiler-scrollchiller",
           "config": {
             "mau": false,
             "chw_source": "air_cooled"
@@ -1287,16 +1711,20 @@
       ]
     },
     {
-      "name": "DOAS with fan coil air-cooled chiller with district hot water",
+      "id": "doas-fc4-elec-district-acscrollchiller",
+      "legacy_name": "DOAS with fan coil air-cooled chiller with district hot water",
+      "aliases": [
+        "DOAS ventilation + four-pipe fan coils (district heating, air-cooled scroll chiller)"
+      ],
       "family": "composite",
       "needs_boiler": false,
       "origin": "cbecs",
       "parts": [
         {
-          "name": "DOAS ventilation only"
+          "id": "doas-elec"
         },
         {
-          "name": "FPFC MAU DX Coils with Scroll Chiller",
+          "id": "mau-fc4-gas-gasboiler-scrollchiller",
           "config": {
             "mau": false,
             "chw_source": "air_cooled",
@@ -1306,16 +1734,20 @@
       ]
     },
     {
-      "name": "DOAS with fan coil district chilled water with boiler",
+      "id": "doas-fc4-elec-gasboiler-districtchw",
+      "legacy_name": "DOAS with fan coil district chilled water with boiler",
+      "aliases": [
+        "DOAS ventilation + four-pipe fan coils (gas boiler, district cooling)"
+      ],
       "family": "composite",
       "needs_boiler": false,
       "origin": "cbecs",
       "parts": [
         {
-          "name": "DOAS ventilation only"
+          "id": "doas-elec"
         },
         {
-          "name": "FPFC MAU DX Coils with Scroll Chiller",
+          "id": "mau-fc4-gas-gasboiler-scrollchiller",
           "config": {
             "mau": false,
             "chw_source": "district"
@@ -1324,16 +1756,20 @@
       ]
     },
     {
-      "name": "DOAS with fan coil district chilled water with district hot water",
+      "id": "doas-fc4-elec-district-districtchw",
+      "legacy_name": "DOAS with fan coil district chilled water with district hot water",
+      "aliases": [
+        "DOAS ventilation + four-pipe fan coils (district heating, district cooling)"
+      ],
       "family": "composite",
       "needs_boiler": false,
       "origin": "cbecs",
       "parts": [
         {
-          "name": "DOAS ventilation only"
+          "id": "doas-elec"
         },
         {
-          "name": "FPFC MAU DX Coils with Scroll Chiller",
+          "id": "mau-fc4-gas-gasboiler-scrollchiller",
           "config": {
             "mau": false,
             "chw_source": "district",
@@ -1343,7 +1779,11 @@
       ]
     },
     {
-      "name": "Recirculating CRAH chilled water with humidity control",
+      "id": "crah-acscrollchiller",
+      "legacy_name": "Recirculating CRAH chilled water with humidity control",
+      "aliases": [
+        "recirculating cooling-only chilled water computer-room air handler with humidity control (air-cooled scroll chiller)"
+      ],
       "family": "crah",
       "cooling_type": "Hydronic",
       "cooling": true,

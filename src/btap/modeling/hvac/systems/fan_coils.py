@@ -120,7 +120,7 @@ class FanCoils(BaseSystem):
                                                 'Chilled Water')
                         else 'DX')
         naming.apply(namer, air_loop,
-                     system_name=self.config['name'],
+                     system_name=self.config['id'],
                      sys_abbr=self.config['sys_abbr'],
                      sys_oa='doas',
                      parts={

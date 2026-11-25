@@ -136,7 +136,7 @@ class TestCoolingAttributionOverTheCatalogue(unittest.TestCase):
         import btap.modeling as modeling
 
         for entry in _catalogue():
-            name = entry["name"]
+            name = entry["id"]
             with self.subTest(system=name):
                 loaded = openstudio.osversion.VersionTranslator().loadModel(
                     openstudio.toPath(str(FIXTURE)))
@@ -186,7 +186,7 @@ class TestCoolingAttributionOverTheCatalogue(unittest.TestCase):
 
         families = {}
         for entry in _catalogue():
-            families.setdefault(entry.get("family"), entry["name"])
+            families.setdefault(entry.get("family"), entry["id"])
 
         for label, config in TOPOLOGY_CONFIGS:
             for family, name in sorted(families.items()):
@@ -258,7 +258,7 @@ class TestCoolingAttributionOverTheCatalogue(unittest.TestCase):
 
         by_family = {}
         for entry in _catalogue():
-            by_family.setdefault(entry.get("family"), entry["name"])
+            by_family.setdefault(entry.get("family"), entry["id"])
 
         exercised = 0
         for family, label, config in FAMILY_CONFIGS:
@@ -304,7 +304,7 @@ class TestCoolingAttributionOverTheCatalogue(unittest.TestCase):
 
         import btap.modeling as modeling
 
-        psz = next(e["name"] for e in _catalogue()
+        psz = next(e["id"] for e in _catalogue()
                    if e.get("family") == "psz")
         loaded = openstudio.osversion.VersionTranslator().loadModel(
             openstudio.toPath(str(FIXTURE)))

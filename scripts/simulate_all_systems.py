@@ -90,14 +90,17 @@ COMPLETED = "EnergyPlus Completed Successfully"
 
 def catalogue_rows():
     rows = json.loads(CATALOGUE.read_text(encoding="utf-8"))["systems"]
-    return [{"name": r["name"], "family": r.get("family")} for r in rows]
+    # Keyed by the stable `id` since the HVAC taxonomy; `legacy_name` rides
+    # along so a reader of the verdict can still find the old name.
+    return [{"id": r["id"], "legacy_name": r["legacy_name"], "family": r.get("family")}
+            for r in rows]
 
 
 #: Bumped when the verdict's SHAPE changes, so both readers can refuse an
 #: unknown format instead of failing accidentally on it. The rows moved
 #: under a `systems` key once already and broke a reader that iterated the
 #: top level as a list.
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 #: The statuses `simulate_one` can return. A closed vocabulary, so a row
 #: carrying something else is a malformed verdict rather than a new state
@@ -139,9 +142,12 @@ def validate_status_payload(payload):
     for index, row in enumerate(systems):
         if not isinstance(row, dict):
             raise ValueError(f"systems[{index}] must be an object")
-        name = row.get("name")
+        name = row.get("id")
         if not isinstance(name, str) or not name:
-            raise ValueError(f"systems[{index}].name must be non-empty")
+            raise ValueError(f"systems[{index}].id must be non-empty")
+        legacy = row.get("legacy_name")
+        if not isinstance(legacy, str) or not legacy:
+            raise ValueError(f"{name!r}: legacy_name must be non-empty")
         if name in names:
             raise ValueError(f"duplicate system verdict for {name!r}")
         names.add(name)
@@ -287,7 +293,7 @@ def simulate_one(row, keep_dir=None, annual=False):
     import btap.simulation as simulation
 
     started = time.time()
-    verdict = {"name": row["name"], "family": row["family"]}
+    verdict = {"id": row["id"], "legacy_name": row["legacy_name"], "family": row["family"]}
     work = pathlib.Path(keep_dir) if keep_dir else pathlib.Path(
         tempfile.mkdtemp(prefix="sweep-"))
     try:
@@ -301,7 +307,7 @@ def simulate_one(row, keep_dir=None, annual=False):
         zones = sorted(model.getThermalZones(),
                        key=lambda z: z.nameString())
         try:
-            modeling.build_system(model, row["name"], zones)
+            modeling.build_system(model, row["id"], zones)
         except Exception as error:                            # noqa: BLE001
             verdict.update(status="build_error",
                            detail=f"{type(error).__name__}: {error}"[:400],
@@ -406,7 +412,8 @@ def main():
     rows = catalogue_rows()
     if args.name:
         rows = [r for r in rows
-                if any(n.lower() in r["name"].lower() for n in args.name)]
+                if any(n.lower() in (r["id"] + " " + r["legacy_name"]).lower()
+                       for n in args.name)]
     if args.limit:
         rows = rows[:args.limit]
     if not rows:
@@ -425,7 +432,7 @@ def main():
         verdicts.append(verdict)
         mark = "ok  " if verdict["status"] == "ok" else "FAIL"
         print(f"  [{index:3d}/{len(rows)}] {mark} {verdict['seconds']:6.1f}s "
-              f"{row['name'][:58]}", flush=True)
+              f"{row['id'][:58]}", flush=True)
         if verdict["status"] != "ok":
             print(f"            {verdict['status']}: "
                   f"{verdict.get('detail', '')[:100]}", flush=True)
@@ -434,11 +441,11 @@ def main():
     print(f"\n{len(verdicts) - len(failed)}/{len(verdicts)} ok, "
           f"{len(failed)} failed")
     for verdict in failed:
-        print(f"  {verdict['status']:18} {verdict['name']}")
+        print(f"  {verdict['status']:18} {verdict['id']}")
 
     if args.check:
-        previous = {v["name"]: v["status"] for v in committed_rows}
-        current = {v["name"]: v["status"] for v in verdicts}
+        previous = {v.get("id", v.get("name")): v["status"] for v in committed_rows}
+        current = {v["id"]: v["status"] for v in verdicts}
         moved = {n: (previous.get(n), s) for n, s in current.items()
                  if previous.get(n) != s}
         # EXACT SET, both directions — but only when the whole catalogue ran.
@@ -451,7 +458,7 @@ def main():
         # first version gated it on a full sweep, so `--check --limit 1`
         # with a planted phantom row still said "no verdict moved" and
         # exited 0 (Fable, `234`).
-        catalogue = {row["name"] for row in catalogue_rows()}
+        catalogue = {row["id"] for row in catalogue_rows()}
         stale = sorted(set(previous) - catalogue)
         missing = sorted(catalogue - set(previous))
         if stale or missing:
@@ -490,7 +497,7 @@ def main():
 
     payload = {
         "produced_by": producer_identity(annual=args.annual),
-        "systems": sorted(verdicts, key=lambda v: v["name"]),
+        "systems": sorted(verdicts, key=lambda v: v["id"]),
     }
     STATUS.write_text(json.dumps(payload, indent=2, ensure_ascii=False)
                       + "\n", encoding="utf-8")

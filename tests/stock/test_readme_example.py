@@ -38,7 +38,7 @@ class TestTheExampleRuns(unittest.TestCase):
         exec(compile(example_source(), str(README), "exec"), scope)  # noqa: S102
         account, target = scope["account"], scope["target"]
         self.assertEqual([], account["refused"])
-        self.assertIn("HVAC 'PSZ-AC with gas coil' (IDENTIFIED) on 16 zone(s)", account["applied"])
+        self.assertIn("HVAC 'psz-gas-perzone' (IDENTIFIED) on 16 zone(s)", account["applied"])
         self.assertEqual([], [s for s in account["skipped"] if "NO schedule" in s])
         self.assertEqual(16, len(target.getAirLoopHVACs()))
 

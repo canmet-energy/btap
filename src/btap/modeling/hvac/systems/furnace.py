@@ -48,7 +48,7 @@ class Furnace(BaseSystem):
         """
         if self.config.get('reheat') and self.config.get('per_zone', True):
             raise ValueError(
-                f"{self.config['name']!r} sets both 'reheat' and 'per_zone': a "
+                f"{self.config['id']!r} sets both 'reheat' and 'per_zone': a "
                 f"per-zone loop already tracks its own zone, so a reheat "
                 f"terminal has nothing to correct")
         return None
@@ -77,7 +77,7 @@ class Furnace(BaseSystem):
         heating_type = self.config.get('heating_type', 'Gas')
 
         air_loop = openstudio.model.AirLoopHVAC(model)
-        name = self.config['name']
+        name = self.config['id']
         air_loop.setName(f"{name} | {suffix}" if suffix else name)
 
         fan = openstudio.model.FanConstantVolume(model, always_on)

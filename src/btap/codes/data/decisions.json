@@ -4515,6 +4515,18 @@
           ]
         }
       ]
+    },
+    {
+      "id": "D-112",
+      "title": "HVAC catalogue taxonomy: stable model ids, display names, legacy names as input",
+      "kind": "process",
+      "articles": {
+        "not_applicable": []
+      },
+      "editions": [
+        "not_applicable"
+      ],
+      "summary": "Decided: phylroy, 2026-11-25. The 110-system HVAC catalogue is organised as category, system type and variant, with facets by equipment role derived from what each builder builds. Every row carries a stable, file-safe id that builders write into models, a plain-English display name generated from its facets, and its old name as legacy_name, accepted as input and never emitted. NECB reference use is supplied by the codes layer. The adjudicated D-58 golden was relabelled by hand under a byte-level inverse-mapping proof, and no row's configuration changed."
     }
   ]
 }

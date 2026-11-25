@@ -139,7 +139,7 @@ class Doas(BaseSystem):
             air_loop.addBranchForZone(zone, diffuser.to_StraightComponent())
 
         naming.apply(namer, air_loop,
-                     system_name=self.config['name'], sys_abbr='doas', sys_oa='doas',
+                     system_name=self.config['id'], sys_abbr='doas', sys_oa='doas',
                      parts={'sys_hr': 'none', 'sys_clg': 'dx',
                             'sys_htg': self.config.get('heating_type', 'Electric'),
                             'sys_sf': 'cv', 'zone_htg': 'none', 'zone_clg': 'none',

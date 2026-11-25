@@ -342,7 +342,7 @@
    "cooled": true,
    "cooling_kw": null
   },
-  "value": "System hp -> 'PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard'",
+  "value": "System hp -> 'psz-ashp-elecsupp-elecbb'",
   "article": "8.4.5.7.(1); 8.4.5.13.(2)(a)",
   "building": "reference building",
   "level": "decision"
@@ -385,7 +385,7 @@
    "cooled": true,
    "cooling_kw": null
   },
-  "value": "System hp -> 'PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard'",
+  "value": "System hp -> 'psz-ashp-elecsupp-elecbb'",
   "article": "8.4.5.7.(1); 8.4.5.13.(2)(a)",
   "building": "reference building",
   "level": "decision"
@@ -428,7 +428,7 @@
    "cooled": true,
    "cooling_kw": null
   },
-  "value": "System hp -> 'PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard'",
+  "value": "System hp -> 'psz-ashp-elecsupp-elecbb'",
   "article": "8.4.5.7.(1); 8.4.5.13.(2)(a)",
   "building": "reference building",
   "level": "decision"
@@ -471,7 +471,7 @@
    "cooled": true,
    "cooling_kw": null
   },
-  "value": "System hp -> 'PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard'",
+  "value": "System hp -> 'psz-ashp-elecsupp-elecbb'",
   "article": "8.4.5.7.(1); 8.4.5.13.(2)(a)",
   "building": "reference building",
   "level": "decision"
@@ -514,7 +514,7 @@
    "cooled": true,
    "cooling_kw": null
   },
-  "value": "System hp -> 'PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard'",
+  "value": "System hp -> 'psz-ashp-elecsupp-elecbb'",
   "article": "8.4.5.7.(1); 8.4.5.13.(2)(a)",
   "building": "reference building",
   "level": "decision"
@@ -544,7 +544,7 @@
     "build"
    ]
   },
-  "value": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard",
+  "value": "psz-ashp-elecsupp-elecbb",
   "article": "8.4.5.7.(1); 8.4.5.13.(2)(a)",
   "building": "reference building",
   "level": "decision"
@@ -569,7 +569,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard | Thermal Zone 1",
+  "target": "psz-ashp-elecsupp-elecbb | Thermal Zone 1",
   "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
   "article": "5.2.2.8.(1)",
   "ruling": "D-20",
@@ -578,7 +578,7 @@
  },
  {
   "step": "rules",
-  "target": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard | Thermal Zone 1",
+  "target": "psz-ashp-elecsupp-elecbb | Thermal Zone 1",
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": []
@@ -590,7 +590,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard | Thermal Zone 1",
+  "target": "psz-ashp-elecsupp-elecbb | Thermal Zone 1",
   "action": "no proposed air-system operating schedule to inherit \u2014 builder default retained",
   "article": "8.4.3.2.(1)",
   "ruling": "D-14",
@@ -623,7 +623,7 @@
     "build"
    ]
   },
-  "value": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard",
+  "value": "psz-ashp-elecsupp-elecbb",
   "article": "8.4.5.7.(1); 8.4.5.13.(2)(a)",
   "building": "reference building",
   "level": "decision"
@@ -648,7 +648,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard | Thermal Zone 2",
+  "target": "psz-ashp-elecsupp-elecbb | Thermal Zone 2",
   "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
   "article": "5.2.2.8.(1)",
   "ruling": "D-20",
@@ -657,7 +657,7 @@
  },
  {
   "step": "rules",
-  "target": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard | Thermal Zone 2",
+  "target": "psz-ashp-elecsupp-elecbb | Thermal Zone 2",
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": []
@@ -669,7 +669,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard | Thermal Zone 2",
+  "target": "psz-ashp-elecsupp-elecbb | Thermal Zone 2",
   "action": "no proposed air-system operating schedule to inherit \u2014 builder default retained",
   "article": "8.4.3.2.(1)",
   "ruling": "D-14",
@@ -702,7 +702,7 @@
     "build"
    ]
   },
-  "value": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard",
+  "value": "psz-ashp-elecsupp-elecbb",
   "article": "8.4.5.7.(1); 8.4.5.13.(2)(a)",
   "building": "reference building",
   "level": "decision"
@@ -727,7 +727,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard | Thermal Zone 3",
+  "target": "psz-ashp-elecsupp-elecbb | Thermal Zone 3",
   "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
   "article": "5.2.2.8.(1)",
   "ruling": "D-20",
@@ -736,7 +736,7 @@
  },
  {
   "step": "rules",
-  "target": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard | Thermal Zone 3",
+  "target": "psz-ashp-elecsupp-elecbb | Thermal Zone 3",
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": []
@@ -748,7 +748,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard | Thermal Zone 3",
+  "target": "psz-ashp-elecsupp-elecbb | Thermal Zone 3",
   "action": "no proposed air-system operating schedule to inherit \u2014 builder default retained",
   "article": "8.4.3.2.(1)",
   "ruling": "D-14",
@@ -781,7 +781,7 @@
     "build"
    ]
   },
-  "value": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard",
+  "value": "psz-ashp-elecsupp-elecbb",
   "article": "8.4.5.7.(1); 8.4.5.13.(2)(a)",
   "building": "reference building",
   "level": "decision"
@@ -806,7 +806,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard | Thermal Zone 4",
+  "target": "psz-ashp-elecsupp-elecbb | Thermal Zone 4",
   "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
   "article": "5.2.2.8.(1)",
   "ruling": "D-20",
@@ -815,7 +815,7 @@
  },
  {
   "step": "rules",
-  "target": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard | Thermal Zone 4",
+  "target": "psz-ashp-elecsupp-elecbb | Thermal Zone 4",
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": []
@@ -827,7 +827,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard | Thermal Zone 4",
+  "target": "psz-ashp-elecsupp-elecbb | Thermal Zone 4",
   "action": "no proposed air-system operating schedule to inherit \u2014 builder default retained",
   "article": "8.4.3.2.(1)",
   "ruling": "D-14",
@@ -860,7 +860,7 @@
     "build"
    ]
   },
-  "value": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard",
+  "value": "psz-ashp-elecsupp-elecbb",
   "article": "8.4.5.7.(1); 8.4.5.13.(2)(a)",
   "building": "reference building",
   "level": "decision"
@@ -885,7 +885,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard | Thermal Zone 5",
+  "target": "psz-ashp-elecsupp-elecbb | Thermal Zone 5",
   "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
   "article": "5.2.2.8.(1)",
   "ruling": "D-20",
@@ -894,7 +894,7 @@
  },
  {
   "step": "rules",
-  "target": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard | Thermal Zone 5",
+  "target": "psz-ashp-elecsupp-elecbb | Thermal Zone 5",
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": []
@@ -906,7 +906,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard | Thermal Zone 5",
+  "target": "psz-ashp-elecsupp-elecbb | Thermal Zone 5",
   "action": "no proposed air-system operating schedule to inherit \u2014 builder default retained",
   "article": "8.4.3.2.(1)",
   "ruling": "D-14",

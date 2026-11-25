@@ -29,11 +29,11 @@ Unmet hours  heating 0.0 / 0.0 h    cooling 1.3 / 10.3 h
     - Thermal Zone 3
     - Thermal Zone 4
     - Thermal Zone 5
-    - PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1
-    - PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 2
-    - PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 3
-    - PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 4
-    - PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 5
+    - psz-gas-hwbb-gasboiler | Thermal Zone 1
+    - psz-gas-hwbb-gasboiler | Thermal Zone 2
+    - psz-gas-hwbb-gasboiler | Thermal Zone 3
+    - psz-gas-hwbb-gasboiler | Thermal Zone 4
+    - psz-gas-hwbb-gasboiler | Thermal Zone 5
     - Primary Boiler
     - CoilHeatingGasMultiStage_gas
     - CoilHeatingGasMultiStage_gas 1
@@ -47,12 +47,11 @@ Unmet hours  heating 0.0 / 0.0 h    cooling 1.3 / 10.3 h
   text does not settle.
     - AHJ-12 (referral): "where present" humidification — an
       INTERPRETATION the acceptable-solution text does not settle.
-      Applies to: PSZ RTU Gas and DX Coils and Hot Water Baseboard |
-      Thermal Zone 1, PSZ RTU Gas and DX Coils and Hot Water
-      Baseboard | Thermal Zone 2, PSZ RTU Gas and DX Coils and Hot
-      Water Baseboard | Thermal Zone 3, PSZ RTU Gas and DX Coils and
-      Hot Water Baseboard | Thermal Zone 4, PSZ RTU Gas and DX Coils
-      and Hot Water Baseboard | Thermal Zone 5 — each of the 5
+      Applies to: psz-gas-hwbb-gasboiler | Thermal Zone 1,
+      psz-gas-hwbb-gasboiler | Thermal Zone 2,
+      psz-gas-hwbb-gasboiler | Thermal Zone 3,
+      psz-gas-hwbb-gasboiler | Thermal Zone 4,
+      psz-gas-hwbb-gasboiler | Thermal Zone 5 — each of the 5
       choices above makes this same unresolved election; the
       conditions list carries what was established at each one
     - AHJ-14 (referral): which part-load class a reference boiler or

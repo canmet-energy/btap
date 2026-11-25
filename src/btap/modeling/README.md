@@ -53,6 +53,48 @@ also outside the profile: it is a generic prototype convention rather than a
 code/reference target, and stock recipes can retarget fan pressure through
 the code-neutral efficiency primitive after construction.
 
+## Finding a system
+
+The HVAC catalogue's 110 systems are organised the way a mechanical engineer
+browses them: **category, then system type, then variants**. Variants within a
+type differ by *facets*: what the air handler heats and cools with, the zone
+terminals, the hot- and chilled-water plant, outdoor air, heat recovery, and
+whether one unit serves one zone or several
+([plan](../../../docs/plans/HVAC_TAXONOMY_PLAN.md)).
+
+| Category | System types |
+|---|---|
+| Central ducted systems | packaged rooftop unit (PSZ), packaged and built-up VAV, dual-duct VAV, CV reheat, furnace, H&V unit, split AC, evaporative cooler |
+| Outdoor-air unit + zone terminals | MAU or DOAS with PTACs, fan coils (2- or 4-pipe), PTHPs, water-source heat pumps, VRF, chilled beams |
+| Zone equipment only | PTAC, PTHP, window AC, VRF, water-source heat pumps |
+| Heating only / Ventilation only / Process | baseboards, unit heaters / DOAS, zone ERVs / computer-room air handler |
+
+Every system has three names:
+
+- an **id**, such as `psz-gas-hwbb-gasboiler`: short, file-safe, stable. It is
+  what `build_system` writes into the model (`psz-gas-hwbb-gasboiler | Thermal
+  Zone 1`) and what code should use;
+- a **display name** people read: "Packaged rooftop unit (PSZ): gas heat, DX
+  cooling, hot water baseboards, one unit serving several zones - gas boiler";
+- its **legacy name** from before the taxonomy, such as "PSZ RTU Gas and DX
+  Coils and Hot Water Baseboard". It is still accepted wherever a system is
+  named, so older scripts and models keep working.
+
+```python
+from btap import modeling
+
+modeling.systems(system_type="psz", ahu_heating="gas")    # facet filters
+modeling.systems(terminal="fc4", hw_plant="awhp")         # fan coils on a heat-pump plant
+modeling.systems("rooftop shared")                        # words, any order
+modeling.system_taxonomy()["facets"]                      # every facet and value
+```
+
+`modeling.catalog_html("catalog.html")` writes the browsable page: search,
+facet filters with live counts, the tree, and each system's loop diagrams and
+`build_system` line. `btap.codes.necb.hvac.catalog_annotations.catalog_html(
+"catalog.html", code="necb2020")` adds which NECB reference System uses each
+row; the modeling layer itself shows only a row's NECB *lineage*.
+
 ## Modern HVAC systems
 
 Five opt-in catalog rows add modern hydronic and air-system topology without

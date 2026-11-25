@@ -24,10 +24,10 @@ import warnings
 import btap.modeling as modeling
 from tests.support import DDY, EPW, load_fixture, needs_engine, needs_sdk
 
-NO_REHEAT_ROWS = ("PSZ-AC with gas coil", "PSZ-AC with electric coil",
-                  "Forced air furnace", "Shared PSZ with gas boiler coils and hot water baseboard")
-REHEAT_ROW = "Shared hot water air handler with water reheat"
-NECB_ROW = "PSZ RTU Gas and DX Coils and Hot Water Baseboard"   # its sizing block sets 43 C
+NO_REHEAT_ROWS = ("psz-gas-perzone", "psz-elec-perzone",
+                  "furnace-gas", "psz-hw-hwbb-gasboiler")
+REHEAT_ROW = "cvrh-hw-gasboiler"
+NECB_ROW = "psz-gas-hwbb-gasboiler"   # its sizing block sets 43 C
 
 
 def _built(name):
@@ -72,7 +72,7 @@ class TestAuthoredFanCoilsAreMarked(unittest.TestCase):
 
     def test_every_fan_coil_the_builder_authors_is_marked(self):
         from btap.simulation.translation import marked_fan_coil_names
-        for name in ("FPFC MAU DX Coils with Scroll Chiller",):
+        for name in ("mau-fc4-gas-gasboiler-scrollchiller",):
             with self.subTest(system=name):
                 model = _built(name)
                 fan_coils = sorted(fc.nameString() for fc in model.getZoneHVACFourPipeFanCoils())
@@ -81,7 +81,7 @@ class TestAuthoredFanCoilsAreMarked(unittest.TestCase):
 
     def test_the_heat_pump_plant_fan_coils_are_marked_too(self):
         from btap.simulation.translation import marked_fan_coil_names
-        rows = [s["name"] for s in modeling.systems() if s["family"] == "ecm_hp_fancoils"]
+        rows = [s["id"] for s in modeling.systems() if s["family"] == "ecm_hp_fancoils"]
         self.assertTrue(rows, "the ECM heat-pump fan-coil rows went missing")
         model = _built(rows[0])
         fan_coils = sorted(fc.nameString() for fc in model.getZoneHVACFourPipeFanCoils())
@@ -117,7 +117,7 @@ class TestASingleZoneUnitRecoversFromSetback(unittest.TestCase):
         loads.apply_loads(model, code="necb2020")
         lighting.apply_lights(model, code="necb2020")
         shw.apply_shw(model, code="necb2020", fuel="NaturalGas")
-        modeling.build_system(model, "PSZ-AC with gas coil", list(model.getThermalZones()))
+        modeling.build_system(model, "psz-gas-perzone", list(model.getThermalZones()))
         with tempfile.TemporaryDirectory(prefix="setback-recovery-") as tmp:
             result = simulation.run(
                 model, run_dir=os.path.join(tmp, "run"),

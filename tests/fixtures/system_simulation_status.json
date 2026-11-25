@@ -1,33 +1,25 @@
 {
   "produced_by": {
-    "schema_version": 1,
+    "schema_version": 2,
     "openstudio_sdk": "3.11.0+241b8abb4d",
     "energyplus": "EnergyPlus, Version 25.2.0-cf7368216c",
     "mode": "sizing-only (design days from the DDY; no run period)",
     "catalogue": "systems.json",
-    "catalogue_sha256": "66cca791c98f81a984c5c021fb431c41ffe047885f484bab54eb36244ae0ef3b",
+    "catalogue_sha256": "9a80e0e01660f45c8a3bc62f11b37a0ec74c25dd4d4c12c06c4e8bfb15897741",
     "fixture": "5ZoneNoHVAC.osm",
     "fixture_sha256": "532d43e6fedb08425f4bb0450c7f2bb1219d53f1db74d4ba09f8db6d39c38aed",
     "epw": "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw",
     "epw_sha256": "b062d77fec9ae2cba62909507bab80c83572a2cb2aa9d92e0000d0cb6b2ac4bc",
     "ddy": "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.ddy",
     "ddy_sha256": "39a3a0bbcf759b36d2545d1348afa47f9bbbd74dce02f478cc68052634c75238",
-    "source_revision": "fdf5f968fea6b7c29b89a8bfc3a0dcee33e85f48",
+    "source_revision": "cb1a70c851c5068ff245f1b61d286333895652e4",
     "source_dirty": false,
-    "generated_utc": "2026-11-14T11:49:11+00:00"
+    "generated_utc": "2026-11-25T20:38:22+00:00"
   },
   "systems": [
     {
-      "name": "Baseboard district hot water",
-      "family": "baseboards",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.2
-    },
-    {
-      "name": "Baseboard electric",
+      "id": "bb-elecbb",
+      "legacy_name": "Baseboard electric",
       "family": "baseboards",
       "status": "ok",
       "severe": 0,
@@ -36,17 +28,19 @@
       "seconds": 4.1
     },
     {
-      "name": "Baseboard gas boiler",
+      "id": "bb-hwbb-district",
+      "legacy_name": "Baseboard district hot water",
       "family": "baseboards",
       "status": "ok",
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.2
+      "seconds": 4.6
     },
     {
-      "name": "DOAS ventilation only",
-      "family": "doas",
+      "id": "bb-hwbb-gasboiler",
+      "legacy_name": "Baseboard gas boiler",
+      "family": "baseboards",
       "status": "ok",
       "severe": 0,
       "fatal": 0,
@@ -54,143 +48,9 @@
       "seconds": 4.5
     },
     {
-      "name": "DOAS with VRF",
-      "family": "composite",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.9
-    },
-    {
-      "name": "DOAS with active chilled beams and electric baseboards",
-      "family": "chilled_beams",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.5
-    },
-    {
-      "name": "DOAS with fan coil air-cooled chiller with boiler",
-      "family": "composite",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.8
-    },
-    {
-      "name": "DOAS with fan coil air-cooled chiller with district hot water",
-      "family": "composite",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.7
-    },
-    {
-      "name": "DOAS with fan coil chiller with boiler",
-      "family": "composite",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.9
-    },
-    {
-      "name": "DOAS with fan coil chiller with district hot water",
-      "family": "composite",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.8
-    },
-    {
-      "name": "DOAS with fan coil district chilled water with boiler",
-      "family": "composite",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.9
-    },
-    {
-      "name": "DOAS with fan coil district chilled water with district hot water",
-      "family": "composite",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.8
-    },
-    {
-      "name": "DOAS with passive chilled beams and electric baseboards",
-      "family": "chilled_beams",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.5
-    },
-    {
-      "name": "DOAS with water source heat pumps cooling tower with boiler",
-      "family": "composite",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.8
-    },
-    {
-      "name": "DOAS with water source heat pumps fluid cooler with boiler",
-      "family": "composite",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.7
-    },
-    {
-      "name": "DOAS with water source heat pumps with ground source heat pump",
-      "family": "composite",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.8
-    },
-    {
-      "name": "Direct evap coolers with baseboard electric",
-      "family": "composite",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.5
-    },
-    {
-      "name": "Direct evap coolers with no heat",
-      "family": "evap_cooler",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.5
-    },
-    {
-      "name": "Dual-duct VAV with gas boiler and water-cooled chiller",
-      "family": "dual_duct",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.5
-    },
-    {
-      "name": "Electric unit heaters",
-      "family": "unit_heaters",
+      "id": "crah-acscrollchiller",
+      "legacy_name": "Recirculating CRAH chilled water with humidity control",
+      "family": "crah",
       "status": "ok",
       "severe": 0,
       "fatal": 0,
@@ -198,35 +58,89 @@
       "seconds": 4.4
     },
     {
-      "name": "FPFC MAU Chilled Water Coils with Centrifugal Chiller",
-      "family": "fan_coils",
+      "id": "cvrh-ashp-elecrh-elecbb",
+      "legacy_name": "PSZ RTU ASHP with Electric and ASHP Coils and Electric Baseboard with Electric Reheat",
+      "family": "mau_ptac",
       "status": "ok",
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.2
+      "seconds": 4.8
     },
     {
-      "name": "FPFC MAU Chilled Water Coils with Reciprocating Chiller",
-      "family": "fan_coils",
+      "id": "cvrh-ashp-elecrh-hwbb-gasboiler",
+      "legacy_name": "PSZ RTU ASHP with Electric and ASHP Coils and Hot Water Baseboard with Electric Reheat",
+      "family": "mau_ptac",
       "status": "ok",
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.1
+      "seconds": 4.9
     },
     {
-      "name": "FPFC MAU Chilled Water Coils with Rotary Screw Chiller",
-      "family": "fan_coils",
+      "id": "cvrh-ashp-gasrh-elecbb",
+      "legacy_name": "PSZ RTU ASHP with Gas and ASHP Coils and Electric Baseboard with Gas Reheat",
+      "family": "mau_ptac",
       "status": "ok",
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.2
+      "seconds": 4.6
     },
     {
-      "name": "FPFC MAU Chilled Water Coils with Scroll Chiller",
-      "family": "fan_coils",
+      "id": "cvrh-ashp-gasrh-hwbb-gasboiler",
+      "legacy_name": "PSZ RTU ASHP with Gas and ASHP Coils and Hot Water Baseboard with Gas Reheat",
+      "family": "mau_ptac",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.6
+    },
+    {
+      "id": "cvrh-hw-gasboiler",
+      "legacy_name": "Shared hot water air handler with water reheat",
+      "family": "furnace",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.9
+    },
+    {
+      "id": "ddvav-hw-gasboiler-scrollchiller",
+      "legacy_name": "Dual-duct VAV with gas boiler and water-cooled chiller",
+      "family": "dual_duct",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.7
+    },
+    {
+      "id": "doas-acb-elec-elecbb-acscrollchiller",
+      "legacy_name": "DOAS with active chilled beams and electric baseboards",
+      "family": "chilled_beams",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.5
+    },
+    {
+      "id": "doas-elec",
+      "legacy_name": "DOAS ventilation only",
+      "family": "doas",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.3
+    },
+    {
+      "id": "doas-fc4-ashp-elecsupp-awhp-elecboiler",
+      "legacy_name": "hs16_ashp_cawhp_fancoils",
+      "family": "ecm_hp_fancoils",
       "status": "ok",
       "severe": 0,
       "fatal": 0,
@@ -234,8 +148,129 @@
       "seconds": 5.4
     },
     {
-      "name": "FPFC MAU DX Coils with Centrifugal Chiller",
-      "family": "fan_coils",
+      "id": "doas-fc4-elec-district-acscrollchiller",
+      "legacy_name": "DOAS with fan coil air-cooled chiller with district hot water",
+      "family": "composite",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.9
+    },
+    {
+      "id": "doas-fc4-elec-district-districtchw",
+      "legacy_name": "DOAS with fan coil district chilled water with district hot water",
+      "family": "composite",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.6
+    },
+    {
+      "id": "doas-fc4-elec-district-scrollchiller",
+      "legacy_name": "DOAS with fan coil chiller with district hot water",
+      "family": "composite",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.9
+    },
+    {
+      "id": "doas-fc4-elec-gasboiler-acscrollchiller",
+      "legacy_name": "DOAS with fan coil air-cooled chiller with boiler",
+      "family": "composite",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.9
+    },
+    {
+      "id": "doas-fc4-elec-gasboiler-districtchw",
+      "legacy_name": "DOAS with fan coil district chilled water with boiler",
+      "family": "composite",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.8
+    },
+    {
+      "id": "doas-fc4-elec-gasboiler-scrollchiller",
+      "legacy_name": "DOAS with fan coil chiller with boiler",
+      "family": "composite",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.1
+    },
+    {
+      "id": "doas-fc4-hw-chw-awhp-elecboiler",
+      "legacy_name": "hs15_cawhp_fancoils",
+      "family": "ecm_hp_fancoils",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.1
+    },
+    {
+      "id": "doas-fc4-hw-chw-gshp-elecboiler",
+      "legacy_name": "hs14_cgshp_fancoils",
+      "family": "ecm_hp_fancoils",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.9
+    },
+    {
+      "id": "doas-pcb-elec-elecbb-acscrollchiller",
+      "legacy_name": "DOAS with passive chilled beams and electric baseboards",
+      "family": "chilled_beams",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.8
+    },
+    {
+      "id": "doas-ptac-ashp-elecsupp-elecbb",
+      "legacy_name": "hs12_ashp_baseboard",
+      "family": "ecm_ashp_baseboard",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.5
+    },
+    {
+      "id": "doas-ptac-ccashp-elecsupp-elecbb",
+      "legacy_name": "hs09_ccashp_baseboard",
+      "family": "ecm_ashp_baseboard",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.9
+    },
+    {
+      "id": "doas-pthp-ashp-elecsupp",
+      "legacy_name": "hs11_ashp_pthp",
+      "family": "doas_pthp",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.8
+    },
+    {
+      "id": "doas-vrf-ashp-elecsupp",
+      "legacy_name": "hs13_ashp_vrf",
+      "family": "ecm_doas_vrf",
       "status": "ok",
       "severe": 0,
       "fatal": 0,
@@ -243,539 +278,69 @@
       "seconds": 5.2
     },
     {
-      "name": "FPFC MAU DX Coils with Reciprocating Chiller",
-      "family": "fan_coils",
+      "id": "doas-vrf-ccashp-elecsupp",
+      "legacy_name": "hs08_ccashp_vrf",
+      "family": "ecm_doas_vrf",
       "status": "ok",
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.3
+      "seconds": 5.2
     },
     {
-      "name": "FPFC MAU DX Coils with Rotary Screw Chiller",
-      "family": "fan_coils",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 5.1
-    },
-    {
-      "name": "FPFC MAU DX Coils with Scroll Chiller",
-      "family": "fan_coils",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 5.1
-    },
-    {
-      "name": "Forced air furnace",
-      "family": "furnace",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.4
-    },
-    {
-      "name": "Gas unit heaters",
-      "family": "unit_heaters",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.2
-    },
-    {
-      "name": "Hot water unit heaters",
-      "family": "unit_heaters",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.2
-    },
-    {
-      "name": "MZ BU RTU Electric Heating Coil Centrifugal Chiller and Electric Baseboard",
-      "family": "vav_reheat",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.9
-    },
-    {
-      "name": "MZ BU RTU Electric Heating Coil Centrifugal Chiller and Hot Water Baseboard",
-      "family": "vav_reheat",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.7
-    },
-    {
-      "name": "MZ BU RTU Electric Heating Coil Reciprocating Chiller and Electric Baseboard",
-      "family": "vav_reheat",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.4
-    },
-    {
-      "name": "MZ BU RTU Electric Heating Coil Reciprocating Chiller and Hot Water Baseboard",
-      "family": "vav_reheat",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.6
-    },
-    {
-      "name": "MZ BU RTU Electric Heating Coil Rotary Screw Chiller and Electric Baseboard",
-      "family": "vav_reheat",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.6
-    },
-    {
-      "name": "MZ BU RTU Electric Heating Coil Rotary Screw Chiller and Hot Water Baseboard",
-      "family": "vav_reheat",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.8
-    },
-    {
-      "name": "MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard",
-      "family": "vav_reheat",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.4
-    },
-    {
-      "name": "MZ BU RTU Electric Heating Coil Scroll Chiller and Hot Water Baseboard",
-      "family": "vav_reheat",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.9
-    },
-    {
-      "name": "MZ BU RTU Hot Water Heating Coil Centrifugal Chiller and Electric Baseboard",
-      "family": "vav_reheat",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.7
-    },
-    {
-      "name": "MZ BU RTU Hot Water Heating Coil Centrifugal Chiller and Hot Water Baseboard",
-      "family": "vav_reheat",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.7
-    },
-    {
-      "name": "MZ BU RTU Hot Water Heating Coil Reciprocating Chiller and Electric Baseboard",
-      "family": "vav_reheat",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.6
-    },
-    {
-      "name": "MZ BU RTU Hot Water Heating Coil Reciprocating Chiller and Hot Water Baseboard",
-      "family": "vav_reheat",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.7
-    },
-    {
-      "name": "MZ BU RTU Hot Water Heating Coil Rotary Screw Chiller and Electric Baseboard",
-      "family": "vav_reheat",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.7
-    },
-    {
-      "name": "MZ BU RTU Hot Water Heating Coil Rotary Screw Chiller and Hot Water Baseboard",
-      "family": "vav_reheat",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.7
-    },
-    {
-      "name": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Electric Baseboard",
-      "family": "vav_reheat",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.7
-    },
-    {
-      "name": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
-      "family": "vav_reheat",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.7
-    },
-    {
-      "name": "PSZ MAU Electric and DX Coils and Electric Baseboard with PTAC",
-      "family": "mau_ptac",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.5
-    },
-    {
-      "name": "PSZ MAU Electric and DX Coils and Hot Water Baseboard with PTAC",
-      "family": "mau_ptac",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.6
-    },
-    {
-      "name": "PSZ MAU Hot Water and DX Coils and Electric Baseboard with PTAC",
-      "family": "mau_ptac",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.4
-    },
-    {
-      "name": "PSZ MAU Hot Water and DX Coils and Hot Water Baseboard with PTAC",
-      "family": "mau_ptac",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.4
-    },
-    {
-      "name": "PSZ MAU Hot Water with water-heated PTAC",
-      "family": "mau_ptac",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.7
-    },
-    {
-      "name": "PSZ RTU ASHP with Electric and ASHP Coils and Electric Baseboard with Electric Reheat",
-      "family": "mau_ptac",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.3
-    },
-    {
-      "name": "PSZ RTU ASHP with Electric and ASHP Coils and Hot Water Baseboard with Electric Reheat",
-      "family": "mau_ptac",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.4
-    },
-    {
-      "name": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard",
-      "family": "psz",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.3
-    },
-    {
-      "name": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard",
-      "family": "psz",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.7
-    },
-    {
-      "name": "PSZ RTU ASHP with Gas and ASHP Coils and Electric Baseboard with Gas Reheat",
-      "family": "mau_ptac",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.2
-    },
-    {
-      "name": "PSZ RTU ASHP with Gas and ASHP Coils and Hot Water Baseboard with Gas Reheat",
-      "family": "mau_ptac",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.3
-    },
-    {
-      "name": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Electric Baseboard",
-      "family": "psz",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.6
-    },
-    {
-      "name": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard",
-      "family": "psz",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.8
-    },
-    {
-      "name": "PSZ RTU Electric and DX Coils and Electric Baseboard",
-      "family": "psz",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.3
-    },
-    {
-      "name": "PSZ RTU Electric and DX Coils and Hot Water Baseboard",
-      "family": "psz",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.7
-    },
-    {
-      "name": "PSZ RTU Gas and DX Coils and Electric Baseboard",
-      "family": "psz",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.5
-    },
-    {
-      "name": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
-      "family": "psz",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 7.6
-    },
-    {
-      "name": "PSZ RTU with exhaust ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard",
-      "family": "psz",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.4
-    },
-    {
-      "name": "PSZ RTU with exhaust ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard",
-      "family": "psz",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.6
-    },
-    {
-      "name": "PSZ RTU with exhaust ASHP with Gas and ASHP with Gas Supp. Heat Coils and Electric Baseboard",
-      "family": "psz",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.4
-    },
-    {
-      "name": "PSZ RTU with exhaust ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard",
-      "family": "psz",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.6
-    },
-    {
-      "name": "PSZ RTU with exhaust Electric and DX Coils and Electric Baseboard",
-      "family": "psz",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.3
-    },
-    {
-      "name": "PSZ RTU with exhaust Electric and DX Coils and Hot Water Baseboard",
-      "family": "psz",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.6
-    },
-    {
-      "name": "PSZ RTU with exhaust Gas and DX Coils and Electric Baseboard",
-      "family": "psz",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.4
-    },
-    {
-      "name": "PSZ RTU with exhaust Gas and DX Coils and Hot Water Baseboard",
-      "family": "psz",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.7
-    },
-    {
-      "name": "PSZ-AC with electric baseboard heat",
-      "family": "psz",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.7
-    },
-    {
-      "name": "PSZ-AC with electric coil",
-      "family": "psz",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.5
-    },
-    {
-      "name": "PSZ-AC with gas boiler",
-      "family": "psz",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.8
-    },
-    {
-      "name": "PSZ-AC with gas coil",
-      "family": "psz",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.5
-    },
-    {
-      "name": "PTAC with baseboard electric",
-      "family": "zone_terminal",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.4
-    },
-    {
-      "name": "PTAC with baseboard gas boiler",
-      "family": "zone_terminal",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.4
-    },
-    {
-      "name": "PTHP",
-      "family": "zone_terminal",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.3
-    },
-    {
-      "name": "PVAV with gas boiler reheat",
-      "family": "vav_reheat",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.4
-    },
-    {
-      "name": "PVAV with gas boiler reheat and hot water baseboard",
-      "family": "vav_reheat",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.6
-    },
-    {
-      "name": "PVAV with gas boiler reheat and plate HRV",
-      "family": "vav_reheat",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.5
-    },
-    {
-      "name": "Recirculating CRAH chilled water with humidity control",
-      "family": "crah",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.6
-    },
-    {
-      "name": "Residential AC with baseboard electric",
+      "id": "doas-vrf-elec",
+      "legacy_name": "DOAS with VRF",
       "family": "composite",
       "status": "ok",
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.4
+      "seconds": 5.1
     },
     {
-      "name": "Shared PSZ with gas boiler coils and hot water baseboard",
-      "family": "psz",
+      "id": "doas-wshp-elec-gasboiler-fluidcooler",
+      "legacy_name": "DOAS with water source heat pumps fluid cooler with boiler",
+      "family": "composite",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.8
+    },
+    {
+      "id": "doas-wshp-elec-gasboiler-tower",
+      "legacy_name": "DOAS with water source heat pumps cooling tower with boiler",
+      "family": "composite",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.9
+    },
+    {
+      "id": "doas-wshp-elec-groundloop",
+      "legacy_name": "DOAS with water source heat pumps with ground source heat pump",
+      "family": "composite",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.9
+    },
+    {
+      "id": "evap",
+      "legacy_name": "Direct evap coolers with no heat",
+      "family": "evap_cooler",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.6
+    },
+    {
+      "id": "evap-elecbb",
+      "legacy_name": "Direct evap coolers with baseboard electric",
+      "family": "composite",
       "status": "ok",
       "severe": 0,
       "fatal": 0,
@@ -783,7 +348,18 @@
       "seconds": 4.7
     },
     {
-      "name": "Shared furnace with DX cooling and no outdoor air",
+      "id": "furnace-gas",
+      "legacy_name": "Forced air furnace",
+      "family": "furnace",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.0
+    },
+    {
+      "id": "furnace-gas-dx-nooa-shared",
+      "legacy_name": "Shared furnace with DX cooling and no outdoor air",
       "family": "furnace",
       "status": "ok",
       "severe": 0,
@@ -792,53 +368,9 @@
       "seconds": 4.3
     },
     {
-      "name": "Shared hot water air handler with water reheat",
+      "id": "hv-hw-gasboiler-shared",
+      "legacy_name": "Shared hot water heating-only air handler",
       "family": "furnace",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.3
-    },
-    {
-      "name": "Shared hot water heating-only air handler",
-      "family": "furnace",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.4
-    },
-    {
-      "name": "TPFC MAU Chilled Water Coils with Centrifugal Chiller",
-      "family": "fan_coils",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.8
-    },
-    {
-      "name": "TPFC MAU Chilled Water Coils with Reciprocating Chiller",
-      "family": "fan_coils",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.8
-    },
-    {
-      "name": "TPFC MAU Chilled Water Coils with Rotary Screw Chiller",
-      "family": "fan_coils",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.8
-    },
-    {
-      "name": "TPFC MAU Chilled Water Coils with Scroll Chiller",
-      "family": "fan_coils",
       "status": "ok",
       "severe": 0,
       "fatal": 0,
@@ -846,16 +378,8 @@
       "seconds": 4.9
     },
     {
-      "name": "TPFC MAU DX Coils with Centrifugal Chiller",
-      "family": "fan_coils",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.9
-    },
-    {
-      "name": "TPFC MAU DX Coils with Reciprocating Chiller",
+      "id": "mau-fc2-gas-chw-gasboiler-centrifchiller",
+      "legacy_name": "TPFC MAU Chilled Water Coils with Centrifugal Chiller",
       "family": "fan_coils",
       "status": "ok",
       "severe": 0,
@@ -864,16 +388,8 @@
       "seconds": 5.0
     },
     {
-      "name": "TPFC MAU DX Coils with Rotary Screw Chiller",
-      "family": "fan_coils",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.8
-    },
-    {
-      "name": "TPFC MAU DX Coils with Scroll Chiller",
+      "id": "mau-fc2-gas-chw-gasboiler-recipchiller",
+      "legacy_name": "TPFC MAU Chilled Water Coils with Reciprocating Chiller",
       "family": "fan_coils",
       "status": "ok",
       "severe": 0,
@@ -882,26 +398,149 @@
       "seconds": 4.9
     },
     {
-      "name": "VAV chiller with gas boiler reheat",
-      "family": "vav_reheat",
+      "id": "mau-fc2-gas-chw-gasboiler-screwchiller",
+      "legacy_name": "TPFC MAU Chilled Water Coils with Rotary Screw Chiller",
+      "family": "fan_coils",
       "status": "ok",
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.8
+      "seconds": 4.9
     },
     {
-      "name": "VAV chiller with gas boiler reheat and rotary ERV",
-      "family": "vav_reheat",
+      "id": "mau-fc2-gas-chw-gasboiler-scrollchiller",
+      "legacy_name": "TPFC MAU Chilled Water Coils with Scroll Chiller",
+      "family": "fan_coils",
       "status": "ok",
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.8
+      "seconds": 5.0
     },
     {
-      "name": "VRF",
-      "family": "vrf",
+      "id": "mau-fc2-gas-gasboiler-centrifchiller",
+      "legacy_name": "TPFC MAU DX Coils with Centrifugal Chiller",
+      "family": "fan_coils",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.2
+    },
+    {
+      "id": "mau-fc2-gas-gasboiler-recipchiller",
+      "legacy_name": "TPFC MAU DX Coils with Reciprocating Chiller",
+      "family": "fan_coils",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.9
+    },
+    {
+      "id": "mau-fc2-gas-gasboiler-screwchiller",
+      "legacy_name": "TPFC MAU DX Coils with Rotary Screw Chiller",
+      "family": "fan_coils",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.4
+    },
+    {
+      "id": "mau-fc2-gas-gasboiler-scrollchiller",
+      "legacy_name": "TPFC MAU DX Coils with Scroll Chiller",
+      "family": "fan_coils",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.9
+    },
+    {
+      "id": "mau-fc4-gas-chw-gasboiler-centrifchiller",
+      "legacy_name": "FPFC MAU Chilled Water Coils with Centrifugal Chiller",
+      "family": "fan_coils",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.1
+    },
+    {
+      "id": "mau-fc4-gas-chw-gasboiler-recipchiller",
+      "legacy_name": "FPFC MAU Chilled Water Coils with Reciprocating Chiller",
+      "family": "fan_coils",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.9
+    },
+    {
+      "id": "mau-fc4-gas-chw-gasboiler-screwchiller",
+      "legacy_name": "FPFC MAU Chilled Water Coils with Rotary Screw Chiller",
+      "family": "fan_coils",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.0
+    },
+    {
+      "id": "mau-fc4-gas-chw-gasboiler-scrollchiller",
+      "legacy_name": "FPFC MAU Chilled Water Coils with Scroll Chiller",
+      "family": "fan_coils",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.0
+    },
+    {
+      "id": "mau-fc4-gas-gasboiler-centrifchiller",
+      "legacy_name": "FPFC MAU DX Coils with Centrifugal Chiller",
+      "family": "fan_coils",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.6
+    },
+    {
+      "id": "mau-fc4-gas-gasboiler-recipchiller",
+      "legacy_name": "FPFC MAU DX Coils with Reciprocating Chiller",
+      "family": "fan_coils",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.1
+    },
+    {
+      "id": "mau-fc4-gas-gasboiler-screwchiller",
+      "legacy_name": "FPFC MAU DX Coils with Rotary Screw Chiller",
+      "family": "fan_coils",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.7
+    },
+    {
+      "id": "mau-fc4-gas-gasboiler-scrollchiller",
+      "legacy_name": "FPFC MAU DX Coils with Scroll Chiller",
+      "family": "fan_coils",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.6
+    },
+    {
+      "id": "mau-ptac-elec-elecbb",
+      "legacy_name": "PSZ MAU Electric and DX Coils and Electric Baseboard with PTAC",
+      "family": "mau_ptac",
       "status": "ok",
       "severe": 0,
       "fatal": 0,
@@ -909,44 +548,9 @@
       "seconds": 4.4
     },
     {
-      "name": "Water source heat pumps",
-      "family": "wshp",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.5
-    },
-    {
-      "name": "Window AC with baseboard electric",
-      "family": "zone_terminal",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.3
-    },
-    {
-      "name": "Zone ERVs",
-      "family": "zone_ervs",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.3
-    },
-    {
-      "name": "hs08_ccashp_vrf",
-      "family": "ecm_doas_vrf",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 5.1
-    },
-    {
-      "name": "hs09_ccashp_baseboard",
-      "family": "ecm_ashp_baseboard",
+      "id": "mau-ptac-elec-hwbb-gasboiler",
+      "legacy_name": "PSZ MAU Electric and DX Coils and Hot Water Baseboard with PTAC",
+      "family": "mau_ptac",
       "status": "ok",
       "severe": 0,
       "fatal": 0,
@@ -954,44 +558,9 @@
       "seconds": 4.6
     },
     {
-      "name": "hs11_ashp_pthp",
-      "family": "doas_pthp",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.6
-    },
-    {
-      "name": "hs12_ashp_baseboard",
-      "family": "ecm_ashp_baseboard",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.6
-    },
-    {
-      "name": "hs13_ashp_vrf",
-      "family": "ecm_doas_vrf",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 5.1
-    },
-    {
-      "name": "hs14_cgshp_fancoils",
-      "family": "ecm_hp_fancoils",
-      "status": "ok",
-      "severe": 0,
-      "fatal": 0,
-      "completed": true,
-      "seconds": 4.9
-    },
-    {
-      "name": "hs15_cawhp_fancoils",
-      "family": "ecm_hp_fancoils",
+      "id": "mau-ptac-hw-elecbb-gasboiler",
+      "legacy_name": "PSZ MAU Hot Water and DX Coils and Electric Baseboard with PTAC",
+      "family": "mau_ptac",
       "status": "ok",
       "severe": 0,
       "fatal": 0,
@@ -999,13 +568,554 @@
       "seconds": 4.7
     },
     {
-      "name": "hs16_ashp_cawhp_fancoils",
-      "family": "ecm_hp_fancoils",
+      "id": "mau-ptac-hw-hwbb-gasboiler",
+      "legacy_name": "PSZ MAU Hot Water and DX Coils and Hot Water Baseboard with PTAC",
+      "family": "mau_ptac",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.7
+    },
+    {
+      "id": "mau-ptac-hw-hwptac-gasboiler",
+      "legacy_name": "PSZ MAU Hot Water with water-heated PTAC",
+      "family": "mau_ptac",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.2
+    },
+    {
+      "id": "psz-ashp-elecsupp-elecbb",
+      "legacy_name": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard",
+      "family": "psz",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.4
+    },
+    {
+      "id": "psz-ashp-elecsupp-elecbb-necbs4",
+      "legacy_name": "PSZ RTU with exhaust ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard",
+      "family": "psz",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.5
+    },
+    {
+      "id": "psz-ashp-elecsupp-hwbb-gasboiler",
+      "legacy_name": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard",
+      "family": "psz",
       "status": "ok",
       "severe": 0,
       "fatal": 0,
       "completed": true,
       "seconds": 4.8
+    },
+    {
+      "id": "psz-ashp-elecsupp-hwbb-gasboiler-necbs4",
+      "legacy_name": "PSZ RTU with exhaust ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard",
+      "family": "psz",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.8
+    },
+    {
+      "id": "psz-ashp-gassupp-elecbb",
+      "legacy_name": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Electric Baseboard",
+      "family": "psz",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.6
+    },
+    {
+      "id": "psz-ashp-gassupp-elecbb-necbs4",
+      "legacy_name": "PSZ RTU with exhaust ASHP with Gas and ASHP with Gas Supp. Heat Coils and Electric Baseboard",
+      "family": "psz",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.5
+    },
+    {
+      "id": "psz-ashp-gassupp-hwbb-gasboiler",
+      "legacy_name": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard",
+      "family": "psz",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.6
+    },
+    {
+      "id": "psz-ashp-gassupp-hwbb-gasboiler-necbs4",
+      "legacy_name": "PSZ RTU with exhaust ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard",
+      "family": "psz",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.9
+    },
+    {
+      "id": "psz-elec-elecbb",
+      "legacy_name": "PSZ RTU Electric and DX Coils and Electric Baseboard",
+      "family": "psz",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.4
+    },
+    {
+      "id": "psz-elec-elecbb-necbs4",
+      "legacy_name": "PSZ RTU with exhaust Electric and DX Coils and Electric Baseboard",
+      "family": "psz",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.4
+    },
+    {
+      "id": "psz-elec-elecbb-perzone",
+      "legacy_name": "PSZ-AC with electric baseboard heat",
+      "family": "psz",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.7
+    },
+    {
+      "id": "psz-elec-hwbb-gasboiler",
+      "legacy_name": "PSZ RTU Electric and DX Coils and Hot Water Baseboard",
+      "family": "psz",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.0
+    },
+    {
+      "id": "psz-elec-hwbb-gasboiler-necbs4",
+      "legacy_name": "PSZ RTU with exhaust Electric and DX Coils and Hot Water Baseboard",
+      "family": "psz",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.7
+    },
+    {
+      "id": "psz-elec-perzone",
+      "legacy_name": "PSZ-AC with electric coil",
+      "family": "psz",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.7
+    },
+    {
+      "id": "psz-gas-elecbb",
+      "legacy_name": "PSZ RTU Gas and DX Coils and Electric Baseboard",
+      "family": "psz",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.5
+    },
+    {
+      "id": "psz-gas-elecbb-necbs4",
+      "legacy_name": "PSZ RTU with exhaust Gas and DX Coils and Electric Baseboard",
+      "family": "psz",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.4
+    },
+    {
+      "id": "psz-gas-hwbb-gasboiler",
+      "legacy_name": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+      "family": "psz",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 8.1
+    },
+    {
+      "id": "psz-gas-hwbb-gasboiler-necbs4",
+      "legacy_name": "PSZ RTU with exhaust Gas and DX Coils and Hot Water Baseboard",
+      "family": "psz",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.7
+    },
+    {
+      "id": "psz-gas-perzone",
+      "legacy_name": "PSZ-AC with gas coil",
+      "family": "psz",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.5
+    },
+    {
+      "id": "psz-hw-gasboiler-perzone",
+      "legacy_name": "PSZ-AC with gas boiler",
+      "family": "psz",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.8
+    },
+    {
+      "id": "psz-hw-hwbb-gasboiler",
+      "legacy_name": "Shared PSZ with gas boiler coils and hot water baseboard",
+      "family": "psz",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.3
+    },
+    {
+      "id": "ptac-elecbb",
+      "legacy_name": "PTAC with baseboard electric",
+      "family": "zone_terminal",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.9
+    },
+    {
+      "id": "ptac-hwbb-gasboiler",
+      "legacy_name": "PTAC with baseboard gas boiler",
+      "family": "zone_terminal",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.0
+    },
+    {
+      "id": "pthp",
+      "legacy_name": "PTHP",
+      "family": "zone_terminal",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.2
+    },
+    {
+      "id": "pvav-hw-gasboiler",
+      "legacy_name": "PVAV with gas boiler reheat",
+      "family": "vav_reheat",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.0
+    },
+    {
+      "id": "pvav-hw-hwbb-gasboiler",
+      "legacy_name": "PVAV with gas boiler reheat and hot water baseboard",
+      "family": "vav_reheat",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.7
+    },
+    {
+      "id": "pvav-hw-hwbb-hrv-gasboiler",
+      "legacy_name": "PVAV with gas boiler reheat and plate HRV",
+      "family": "vav_reheat",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.2
+    },
+    {
+      "id": "splitac-dx-elecbb-nooa",
+      "legacy_name": "Residential AC with baseboard electric",
+      "family": "composite",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.0
+    },
+    {
+      "id": "uh-elec",
+      "legacy_name": "Electric unit heaters",
+      "family": "unit_heaters",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.3
+    },
+    {
+      "id": "uh-gas",
+      "legacy_name": "Gas unit heaters",
+      "family": "unit_heaters",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.3
+    },
+    {
+      "id": "uh-hw-gasboiler",
+      "legacy_name": "Hot water unit heaters",
+      "family": "unit_heaters",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.4
+    },
+    {
+      "id": "vav-elec-elecbb-centrifchiller",
+      "legacy_name": "MZ BU RTU Electric Heating Coil Centrifugal Chiller and Electric Baseboard",
+      "family": "vav_reheat",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.6
+    },
+    {
+      "id": "vav-elec-elecbb-recipchiller",
+      "legacy_name": "MZ BU RTU Electric Heating Coil Reciprocating Chiller and Electric Baseboard",
+      "family": "vav_reheat",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.7
+    },
+    {
+      "id": "vav-elec-elecbb-screwchiller",
+      "legacy_name": "MZ BU RTU Electric Heating Coil Rotary Screw Chiller and Electric Baseboard",
+      "family": "vav_reheat",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.5
+    },
+    {
+      "id": "vav-elec-elecbb-scrollchiller",
+      "legacy_name": "MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard",
+      "family": "vav_reheat",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.7
+    },
+    {
+      "id": "vav-elec-hwbb-gasboiler-centrifchiller",
+      "legacy_name": "MZ BU RTU Electric Heating Coil Centrifugal Chiller and Hot Water Baseboard",
+      "family": "vav_reheat",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.7
+    },
+    {
+      "id": "vav-elec-hwbb-gasboiler-recipchiller",
+      "legacy_name": "MZ BU RTU Electric Heating Coil Reciprocating Chiller and Hot Water Baseboard",
+      "family": "vav_reheat",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.8
+    },
+    {
+      "id": "vav-elec-hwbb-gasboiler-screwchiller",
+      "legacy_name": "MZ BU RTU Electric Heating Coil Rotary Screw Chiller and Hot Water Baseboard",
+      "family": "vav_reheat",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.7
+    },
+    {
+      "id": "vav-elec-hwbb-gasboiler-scrollchiller",
+      "legacy_name": "MZ BU RTU Electric Heating Coil Scroll Chiller and Hot Water Baseboard",
+      "family": "vav_reheat",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.0
+    },
+    {
+      "id": "vav-hw-elecbb-gasboiler-centrifchiller",
+      "legacy_name": "MZ BU RTU Hot Water Heating Coil Centrifugal Chiller and Electric Baseboard",
+      "family": "vav_reheat",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.7
+    },
+    {
+      "id": "vav-hw-elecbb-gasboiler-recipchiller",
+      "legacy_name": "MZ BU RTU Hot Water Heating Coil Reciprocating Chiller and Electric Baseboard",
+      "family": "vav_reheat",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.7
+    },
+    {
+      "id": "vav-hw-elecbb-gasboiler-screwchiller",
+      "legacy_name": "MZ BU RTU Hot Water Heating Coil Rotary Screw Chiller and Electric Baseboard",
+      "family": "vav_reheat",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.7
+    },
+    {
+      "id": "vav-hw-elecbb-gasboiler-scrollchiller",
+      "legacy_name": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Electric Baseboard",
+      "family": "vav_reheat",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.7
+    },
+    {
+      "id": "vav-hw-gasboiler-scrollchiller",
+      "legacy_name": "VAV chiller with gas boiler reheat",
+      "family": "vav_reheat",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.4
+    },
+    {
+      "id": "vav-hw-hwbb-erv-gasboiler-scrollchiller",
+      "legacy_name": "VAV chiller with gas boiler reheat and rotary ERV",
+      "family": "vav_reheat",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.3
+    },
+    {
+      "id": "vav-hw-hwbb-gasboiler-centrifchiller",
+      "legacy_name": "MZ BU RTU Hot Water Heating Coil Centrifugal Chiller and Hot Water Baseboard",
+      "family": "vav_reheat",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.8
+    },
+    {
+      "id": "vav-hw-hwbb-gasboiler-recipchiller",
+      "legacy_name": "MZ BU RTU Hot Water Heating Coil Reciprocating Chiller and Hot Water Baseboard",
+      "family": "vav_reheat",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.0
+    },
+    {
+      "id": "vav-hw-hwbb-gasboiler-screwchiller",
+      "legacy_name": "MZ BU RTU Hot Water Heating Coil Rotary Screw Chiller and Hot Water Baseboard",
+      "family": "vav_reheat",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.9
+    },
+    {
+      "id": "vav-hw-hwbb-gasboiler-scrollchiller",
+      "legacy_name": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
+      "family": "vav_reheat",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.2
+    },
+    {
+      "id": "vrf",
+      "legacy_name": "VRF",
+      "family": "vrf",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.7
+    },
+    {
+      "id": "windowac-elecbb",
+      "legacy_name": "Window AC with baseboard electric",
+      "family": "zone_terminal",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 5.0
+    },
+    {
+      "id": "wshp-gasboiler",
+      "legacy_name": "Water source heat pumps",
+      "family": "wshp",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.6
+    },
+    {
+      "id": "zone-erv",
+      "legacy_name": "Zone ERVs",
+      "family": "zone_ervs",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.6
     }
   ]
 }

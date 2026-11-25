@@ -60,8 +60,8 @@ Unmet hours  heating 0.0 / 31.5 h    cooling 0.0 / 0.0 h
     - AHJ-22 (alternative-solution): cooling-tower capacity
       equations replaced by the engine Merkel model — an ALTERNATIVE
       SOLUTION, which the text DECIDES and this tool does not meet —
-      accepting it means accepting an explicitly identified non-
-      conforming substitution. Applies to: Cooling Tower Single
+      accepting it means accepting an explicitly identified
+      non-conforming substitution. Applies to: Cooling Tower Single
       Speed 1 — prescribed cooling-tower capacity equations are NOT
       installed — the engine Merkel effectiveness-NTU model is
       retained as an alternative solution

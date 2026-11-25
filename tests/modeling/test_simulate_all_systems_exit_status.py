@@ -44,12 +44,12 @@ class TestTheSweepsExitStatus(unittest.TestCase):
     def _run(self, argv, verdicts):
         """Run `main()` with `simulate_one` stubbed. Returns the exit code."""
         def fake(row, keep_dir=None, annual=False):
-            selected = verdicts.get(row["name"], "ok")
+            selected = verdicts.get(row["id"], "ok")
             if isinstance(selected, dict):
                 return dict(selected)
             verdict = {
-                "name": row["name"], "family": row["family"],
-                "status": selected, "seconds": 0.1,
+                "id": row["id"], "legacy_name": row["legacy_name"],
+                "family": row["family"], "status": selected, "seconds": 0.1,
             }
             if selected in self.sweep.ENERGYPLUS_STATUSES:
                 verdict.update(
@@ -71,7 +71,7 @@ class TestTheSweepsExitStatus(unittest.TestCase):
             return 0, out.getvalue()
 
     def _a_real_name(self):
-        return self.sweep.catalogue_rows()[0]["name"]
+        return self.sweep.catalogue_rows()[0]["id"]
 
     def _committed(self):
         return json.loads(
@@ -145,7 +145,7 @@ class TestTheSweepsExitStatus(unittest.TestCase):
     def test_a_LIMITED_sweep_follows_the_same_rule(self):
         rows = self.sweep.catalogue_rows()
         code, _text = self._run(["--limit", "2"],
-                                {rows[1]["name"]: "simulation_error"})
+                                {rows[1]["id"]: "simulation_error"})
         self.assertNotEqual(0, code)
         code, _text = self._run(["--limit", "2"], {})
         self.assertEqual(0, code)
@@ -167,7 +167,7 @@ class TestTheSweepsExitStatus(unittest.TestCase):
     def test_CHECK_reports_a_verdict_that_MOVED(self):
         """The ordinary `--check` case: a recorded `ok` that now fails."""
         committed = self._committed()
-        already_ok = next(row["name"] for row in committed["systems"]
+        already_ok = next(row["id"] for row in committed["systems"]
                           if row["status"] == "ok")
         code, text = self._run(["--check", "--name", already_ok],
                                {already_ok: "simulation_error"})
@@ -191,11 +191,11 @@ class TestTheSweepsExitStatus(unittest.TestCase):
         green.
         """
         failure = self._producer_failure("build_error")
-        name = failure["name"]
+        name = failure["id"]
         committed = self._committed()
         verdict = deepcopy(committed)
         verdict["systems"] = [
-            failure if row["name"] == name else row
+            failure if row["id"] == name else row
             for row in verdict["systems"]
         ]
         scratch = pathlib.Path(self.enterContext(
@@ -281,7 +281,8 @@ class TestTheSweepsExitStatus(unittest.TestCase):
 
         def fake(row, keep_dir=None, annual=False):
             annual_arguments.append(annual)
-            return {"name": row["name"], "family": row["family"],
+            return {"id": row["id"], "legacy_name": row["legacy_name"],
+                    "family": row["family"],
                     "status": "ok", "severe": 0, "fatal": 0,
                     "completed": True, "seconds": 0.1}
 

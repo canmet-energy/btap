@@ -42,7 +42,7 @@ class TestCampusVariants(unittest.TestCase):
     # ------------------------------------------------------------------ #4
     def test_hydronic_unit_heaters_need_NO_builder_change(self):
         """A water coil per zone off a boiler plant, and no air loop at all."""
-        model, zones, _ = self._build('Hot water unit heaters')
+        model, zones, _ = self._build('uh-hw-gasboiler')
         self.assertEqual(len(zones), len(model.getCoilHeatingWaters()),
                          'one hydronic coil per zone')
         self.assertEqual(0, len(model.getCoilHeatingGass()),
@@ -59,7 +59,7 @@ class TestCampusVariants(unittest.TestCase):
     def test_heating_only_hydronic_air_handler_is_SHARED_and_has_no_cooling(self):
         """Requirement 1. Introducing cooling is the error #152 warns against."""
         model, zones, result = self._build(
-            'Shared hot water heating-only air handler')
+            'hv-hw-gasboiler-shared')
         self.assertEqual(1, len(result.air_loops),
                          'ONE loop, not one per zone — 87 of 134 Campus loops '
                          'serve multiple zones')
@@ -80,7 +80,7 @@ class TestCampusVariants(unittest.TestCase):
     def test_shared_furnace_with_DX_has_NO_central_outdoor_air(self):
         """Requirement 3, and the OA absence is the whole point of the row."""
         model, zones, result = self._build(
-            'Shared furnace with DX cooling and no outdoor air')
+            'furnace-gas-dx-nooa-shared')
         self.assertEqual(1, len(result.air_loops), 'shared, not per zone')
         self.assertEqual(len(zones),
                          len(result.air_loops[0].thermalZones()))
@@ -98,7 +98,7 @@ class TestCampusVariants(unittest.TestCase):
         already builds this pair — so this row is requirement 1 plus `reheat`
         rather than a separate family."""
         model, zones, result = self._build(
-            'Shared hot water air handler with water reheat')
+            'cvrh-hw-gasboiler')
         self.assertEqual(1, len(result.air_loops), 'shared')
         self.assertEqual(
             len(zones),
@@ -120,7 +120,7 @@ class TestCampusVariants(unittest.TestCase):
 
         model = load_fixture()
         zones = sorted_by_name(model.getThermalZones())
-        config = {'name': 'probe', 'heating': True, 'reheat': 'Hot Water',
+        config = {'id': 'probe', 'heating': True, 'reheat': 'Hot Water',
                   'per_zone': True}
         with self.assertRaises(ValueError) as caught:
             Furnace(config).preflight(model, zones, control_zone=zones[0])
@@ -142,7 +142,7 @@ class TestCampusVariants(unittest.TestCase):
         zones = sorted_by_name(model.getThermalZones())
         before = (len(model.getAirLoopHVACs()), len(model.getFanConstantVolumes()),
                   len(model.getCoilHeatingGass()))
-        config = {'name': 'probe', 'heating': True, 'reheat': 'Hot Water',
+        config = {'id': 'probe', 'heating': True, 'reheat': 'Hot Water',
                   'per_zone': True}
         with self.assertRaises(ValueError):
             Furnace(config).preflight(model, zones, control_zone=zones[0])
@@ -156,7 +156,7 @@ class TestCampusVariants(unittest.TestCase):
         """Requirement 5. The NECB port deliberately disables that section;
         a Campus Office PTAC really heats, so it must be switchable."""
         model, zones, _ = self._build(
-            'PSZ MAU Hot Water with water-heated PTAC')
+            'mau-ptac-hw-hwptac-gasboiler')
         ptacs = model.getZoneHVACPackagedTerminalAirConditioners()
         self.assertEqual(len(zones), len(ptacs))
         for ptac in ptacs:
@@ -175,8 +175,7 @@ class TestCampusVariants(unittest.TestCase):
     def test_the_SHIPPED_mau_ptac_rows_keep_a_DISABLED_section(self):
         """Behaviour preservation: `ptac_heating_type` defaults to None."""
         model, zones, _ = self._build(
-            'PSZ MAU Hot Water and DX Coils and Hot Water Baseboard '
-            'with PTAC')
+            'mau-ptac-hw-hwbb-gasboiler')
         ptacs = model.getZoneHVACPackagedTerminalAirConditioners()
         self.assertEqual(len(zones), len(ptacs))
         for ptac in ptacs:
@@ -196,7 +195,7 @@ class TestCampusVariants(unittest.TestCase):
         default, precisely because this row has always built per zone.
         Preserving a shipped row outranks consistency between families.
         """
-        model, zones, result = self._build('Forced air furnace')
+        model, zones, result = self._build('furnace-gas')
         self.assertEqual(len(zones), len(result.air_loops), 'still per zone')
         self.assertEqual(len(zones), len(model.getCoilHeatingGass()),
                          'still a GAS coil — heating_type defaults to Gas')
@@ -204,21 +203,32 @@ class TestCampusVariants(unittest.TestCase):
         self.assertEqual(0, len(model.getCoilCoolingDXSingleSpeeds()))
 
     def test_every_furnace_and_unit_heater_name_is_DISTINCT(self):
-        """`catalog.py` raises on a canonical collision, so a shared row that
+        """`catalog.py` raises on a key collision, so a shared row that
         still read "per-zone" could not be added at all. That guard is what
-        forces the scope word into the name; this asserts it stayed honest."""
+        forces the scope word into the name; this asserts it stayed honest.
+
+        Since the HVAC taxonomy the generated name people see is `display`,
+        and the retired canonical name is frozen as the row's alias; both
+        must stay distinct and keep the scope word."""
         rows = [r for r in modeling.systems()
                 if r['family'] in ('furnace', 'unit_heaters')]
-        canon = [r['canonical_name'] for r in rows]
-        self.assertEqual(len(canon), len(set(canon)), f'collision in {canon}')
-        by_name = {r['name']: r['canonical_name'] for r in rows}
-        self.assertEqual('per-zone gas furnace',
-                         by_name['Forced air furnace'],
+        for label, names in (
+                ('display', [r['display'] for r in rows]),
+                ('alias', [a for r in rows for a in r['aliases']]),
+                ('id', [r['id'] for r in rows])):
+            self.assertEqual(len(names), len(set(names)),
+                             f'collision in {label} names {names}')
+        by_id = {r['id']: r for r in rows}
+        self.assertEqual(['per-zone gas furnace'],
+                         by_id['furnace-gas']['aliases'],
                          'the shipped name must not drift')
-        self.assertIn('shared',
-                      by_name['Shared hot water heating-only air handler'])
-        self.assertIn('hot water',
-                      by_name['Hot water unit heaters'])
+        shared = by_id['hv-hw-gasboiler-shared']
+        self.assertIn('shared', shared['aliases'][0])
+        self.assertIn('one unit serving several zones', shared['display'])
+        self.assertNotIn('one unit serving several zones',
+                         by_id['furnace-gas']['display'])
+        self.assertIn('hot water', by_id['uh-hw-gasboiler']['aliases'][0])
+        self.assertIn('hot water', by_id['uh-hw-gasboiler']['display'])
 
 
 if __name__ == '__main__':

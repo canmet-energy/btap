@@ -61,25 +61,25 @@ from tests.support import needs_sdk
 # found interesting: plant HPs (hs09/14), district variants, DOAS+fan-coil
 # composite, MAU+PTAC, shared PSZ (electric AND ashp), wshp, vrf, MZ built-up.
 SUBSET = [
-    'Baseboard electric', 'Baseboard district hot water', 'Forced air furnace',
-    'PSZ RTU Electric and DX Coils and Electric Baseboard',
-    'PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Electric Baseboard',
-    'PSZ MAU Electric and DX Coils and Electric Baseboard with PTAC',
-    'FPFC MAU Chilled Water Coils with Scroll Chiller',
-    'TPFC MAU Chilled Water Coils with Scroll Chiller',
-    'MZ BU RTU Electric Heating Coil Centrifugal Chiller and Electric Baseboard',
-    'DOAS with fan coil air-cooled chiller with boiler',
-    'DOAS with fan coil air-cooled chiller with district hot water',
-    'DOAS with active chilled beams and electric baseboards',
-    'DOAS with passive chilled beams and electric baseboards',
-    'DOAS with VRF', 'DOAS with water source heat pumps',
-    'Dual-duct VAV with gas boiler and water-cooled chiller',
-    'PVAV with gas boiler reheat and plate HRV',
-    'VAV chiller with gas boiler reheat and rotary ERV',
-    'hs09_ccashp_baseboard', 'hs11_ashp_pthp', 'hs14_cgshp_fancoils',
-    'hs16_ashp_cawhp_fancoils', 'Direct evap coolers with no heat',
-    'Gas unit heaters', 'Window AC with baseboard electric', 'PTHP',
-    'Water source heat pumps',
+    'bb-elecbb', 'bb-hwbb-district', 'furnace-gas',
+    'psz-elec-elecbb',
+    'psz-ashp-gassupp-elecbb',
+    'mau-ptac-elec-elecbb',
+    'mau-fc4-gas-chw-gasboiler-scrollchiller',
+    'mau-fc2-gas-chw-gasboiler-scrollchiller',
+    'vav-elec-elecbb-centrifchiller',
+    'doas-fc4-elec-gasboiler-acscrollchiller',
+    'doas-fc4-elec-district-acscrollchiller',
+    'doas-acb-elec-elecbb-acscrollchiller',
+    'doas-pcb-elec-elecbb-acscrollchiller',
+    'doas-vrf-elec', 'doas-wshp-elec-gasboiler-fluidcooler',
+    'ddvav-hw-gasboiler-scrollchiller',
+    'pvav-hw-hwbb-hrv-gasboiler',
+    'vav-hw-hwbb-erv-gasboiler-scrollchiller',
+    'doas-ptac-ccashp-elecsupp-elecbb', 'doas-pthp-ashp-elecsupp', 'doas-fc4-hw-chw-gshp-elecboiler',
+    'doas-fc4-ashp-elecsupp-awhp-elecboiler', 'evap',
+    'uh-gas', 'windowac-elecbb', 'pthp',
+    'wshp-gasboiler',
 ]
 
 #: `blocks` replaced `zones` with D-101. The old key counted the zones of
@@ -94,16 +94,16 @@ PER_SYSTEM_PREFIX = 'test_reference_assignments_match_the_adjudicated_golden__'
 
 
 def names_under_test():
-    """``(names, unmatched subset entries)``. Subset entries are prefixes-or-exact
-    against the catalog (some names carry long suffixes)."""
-    all_names = [r['name'] for r in catalog.rows()]
+    """``(ids, unmatched subset entries)``. Subset entries are catalogue ids,
+    matched exactly. (Before the HVAC taxonomy they were legacy names matched
+    prefix-or-exact; an id is short and stable, so a prefix match would only
+    let one entry silently stand for a different row.)"""
+    all_names = [r['id'] for r in catalog.rows()]
     if os.environ.get('FULL_MATRIX'):
         return all_names, []
     names, unmatched = [], []
     for want in SUBSET:
         found = next((n for n in all_names if n == want), None)
-        if found is None:
-            found = next((n for n in all_names if n.startswith(want)), None)
         if found is None:
             unmatched.append(want)
         elif found not in names:
@@ -125,8 +125,8 @@ class TestReferenceSelectionMatrix(unittest.TestCase):
             cls.golden = json.load(f)
 
     def compute_row(self, name, code='necb2020'):
-        row = next(r for r in catalog.rows() if r['name'] == name)
-        record = {'name': name, 'family': row['family']}
+        row = next(r for r in catalog.rows() if r['id'] == name)
+        record = {'id': name, 'family': row['family']}
         for pass_ in ('catalog', 'scrubbed'):
             model = load_fixture()
             zones = sorted_zones(model)
@@ -184,7 +184,7 @@ class TestReferenceSelectionMatrix(unittest.TestCase):
         return out
 
     def check_system(self, name):
-        expected = next((r for r in self.golden if r['name'] == name), None)
+        expected = next((r for r in self.golden if r['id'] == name), None)
         self.assertIsNotNone(
             expected,
             f"'{name}' missing from the golden. The golden is NEVER regenerated "
@@ -220,7 +220,7 @@ class TestReferenceSelectionMatrix(unittest.TestCase):
     def test_every_subset_entry_matches_a_catalog_system(self):
         _names, unmatched = names_under_test()
         self.assertEqual([], unmatched,
-                         'SUBSET entries that match no catalog name — the matrix would '
+                         'SUBSET entries that match no catalog id — the matrix would '
                          'silently test fewer systems')
 
     def test_one_generated_test_per_system_under_test(self):
@@ -234,12 +234,12 @@ class TestReferenceSelectionMatrix(unittest.TestCase):
                 self.assertEqual(
                     self.normalize(row[f'catalog_{label}']),
                     self.normalize(row[f'scrubbed_{label}']),
-                    f"{row['name']} / {label}: the golden itself carries a naming-pass divergence — "
+                    f"{row['id']} / {label}: the golden itself carries a naming-pass divergence — "
                     'foreign proposeds would get a different reference than gem-built ones')
 
     def test_golden_covers_the_whole_catalog(self):
-        golden_names = {r['name'] for r in self.golden}
-        missing = [r['name'] for r in catalog.rows() if r['name'] not in golden_names]
+        golden_names = {r['id'] for r in self.golden}
+        missing = [r['id'] for r in catalog.rows() if r['id'] not in golden_names]
         self.assertEqual(
             [], missing,
             'catalog systems missing from the adjudicated golden (new system added? re-run D-58)')

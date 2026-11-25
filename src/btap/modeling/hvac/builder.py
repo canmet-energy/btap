@@ -72,7 +72,7 @@ def _preflight_resolved(model, resolved, zones, control_zone, namer,
     """Validate a resolved row, including every composite part, without mutation."""
     if resolved['family'] == 'composite':
         for part in resolved['parts']:
-            part_resolved = catalog.resolve(part['name'])
+            part_resolved = catalog.resolve(part['id'])
             if part.get('config'):
                 part_resolved = {
                     **part_resolved,
@@ -165,7 +165,7 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
             # dropping it here left the documented contract unmet for exactly
             # the systems that need it most (Sol, `145`).
             air_loops.extend(
-                build_system(model, part['name'], zones,
+                build_system(model, part['id'], zones,
                              control_zone=control_zone, namer=namer,
                              config=part.get('config'),
                              exclude_plants=exclude_plants,

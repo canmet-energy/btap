@@ -33,6 +33,7 @@ __all__ = [
     "floor_plans",
     # the HVAC catalogue
     "systems",
+    "system_taxonomy",
     "build_system",
     "elect_control_zones",
     "replace_system",
@@ -443,10 +444,44 @@ def floor_plans(model_or_path, path=None, png_dir=None, audit=None):
 
 # --- The HVAC authoring API ------------------------------------------------
 
-def systems(filter=None, family=None):
-    """List the system catalog (names are a closed, validated vocabulary)."""
+def systems(filter=None, family=None, **facets):
+    """List the HVAC system catalogue, each row with its `id`, plain-English
+    `display` name and `facets` (docs/plans/HVAC_TAXONOMY_PLAN.md).
+
+    :param filter: text (every word must match, case-insensitive) or a
+        compiled regex, over the id, display name, legacy name and aliases
+    :param family: builder family (e.g. ``'psz'``)
+    :param facets: any taxonomy facet — ``system_type='psz'``,
+        ``ahu_heating='gas'``, ``terminal='fc4'``, ``hw_plant='awhp'``, ... A
+        list means any of them. ``system_taxonomy()['facets']`` lists every
+        facet and its values; an unknown one raises with the valid choices.
+
+    >>> [r["id"] for r in systems(system_type="psz", ahu_heating="gas")][:2]
+    ['psz-gas-hwbb-gasboiler', 'psz-gas-elecbb']
+    """
     from btap.modeling.hvac import catalog
-    return catalog.list_systems(filter=filter, family=family)
+    return catalog.list_systems(filter=filter, family=family, **facets)
+
+
+def system_taxonomy():
+    """The catalogue's browsing tree and facet vocabularies.
+
+    :return: ``{"categories": {key: title}, "types": {key: {"category",
+        "title", "abbreviation", "systems": [id, ...]}}, "facets": {facet:
+        [value, ...]}}`` — the same tree and filters the catalogue page shows.
+    """
+    from btap.modeling.hvac import taxonomy
+    tree = taxonomy.tree()
+    types = {}
+    for category, members in tree.items():
+        for system_type, rows in members.items():
+            _, title, abbr = taxonomy.TYPES[system_type]
+            types[system_type] = {"category": category, "title": title,
+                                  "abbreviation": abbr,
+                                  "systems": [r["id"] for r in rows]}
+    return {"categories": {k: taxonomy.CATEGORIES[k] for k in tree},
+            "types": types,
+            "facets": {k: list(v) for k, v in taxonomy.FACETS.items()}}
 
 
 def build_system(model, system_name, zones, *, performance_profile=None,
@@ -539,12 +574,27 @@ def _record_hvac_build(system_name, zones, result, kwargs, audit, *, replaced):
         warnings.warn(message, UserWarning, stacklevel=3)
     if audit is None:
         return
+    from btap.modeling.hvac import catalog
+    system_id = catalog.resolve(system_name)["id"]
+    if catalog.is_legacy_key(system_name):
+        # An old name is accepted as input and never emitted (D-112): the
+        # trail says which id it meant, and names the id from here on.
+        audit.info("hvac", f"legacy name '{system_name}' resolved to {system_id}",
+                   target=system_id, inputs={"name": system_name})
     if message:
-        audit.warn("hvac", message, target=system_name,
+        audit.warn("hvac", message, target=system_id,
                    inputs={"zones": len(zones)})
     air_loops = getattr(result, "air_loops", None)
-    audit.decision("hvac", f"{'replaced with' if replaced else 'built'} {system_name}",
-                   target=system_name,
+    # The IDD states 100 characters; EnergyPlus 25.2 measured clean at 132.
+    # A long ZONE name is the user's, so the name is reported, never shortened
+    # (shortening could collide two names).
+    for loop in air_loops or []:
+        if len(loop.nameString()) > 100:
+            audit.warn("hvac", f"model name longer than 100 characters "
+                       f"({len(loop.nameString())}): {loop.nameString()}",
+                       target=system_id, inputs={"limit": 100})
+    audit.decision("hvac", f"{'replaced with' if replaced else 'built'} {system_id}",
+                   target=system_id,
                    inputs={"zones": len(zones),
                            "control_zone": _control_zone_label(kwargs.get("control_zone"))},
                    value={"air_loops": len(list(air_loops)) if air_loops is not None

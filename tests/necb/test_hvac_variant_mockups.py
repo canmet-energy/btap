@@ -1,6 +1,7 @@
 """D-33 full-pipeline gates for reference-system routes missed by the fleet."""
 
 import json
+import re
 import shutil
 import tempfile
 import unittest
@@ -9,6 +10,12 @@ from tests import support
 
 FIXTURES = support.FIXTURES / "variant_mockups"
 MANIFEST = json.loads((FIXTURES / "manifest.json").read_text(encoding="utf-8"))
+
+def _names(expected, value):
+    """`expected` occurs in `value` and is not part of a LONGER id. An id is
+    routinely a prefix of a sibling's (`psz-elec-elecbb`, `...-necbs4`), which
+    no legacy name was, so a bare substring test would have become weaker."""
+    return re.search(rf"(?<![\w-]){re.escape(expected)}(?![\w-])", value) is not None
 
 
 @support.needs_sdk
@@ -32,12 +39,12 @@ class TestVariantMockups(unittest.TestCase):
         if selected := expected.get("selected"):
             values = [str(entry.get("value", "")) for entry in entries
                       if entry["action"] == "reference system selected"]
-            self.assertTrue(any(selected in value for value in values),
+            self.assertTrue(any(_names(selected, value) for value in values),
                             f"{name}: expected selection {selected!r}, got {values!r}")
         if built := expected.get("built"):
             values = [str(entry.get("value", "")) for entry in entries
                       if entry["action"] == "reference system built"]
-            self.assertTrue(any(built in value for value in values),
+            self.assertTrue(any(_names(built, value) for value in values),
                             f"{name}: expected build {built!r}, got {values!r}")
         for key in ("decision", "decision2"):
             if decision := expected.get(key):

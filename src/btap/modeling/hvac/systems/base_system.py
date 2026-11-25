@@ -260,5 +260,5 @@ class BaseSystem:
             resolved = energy_recovery.resolve_energy_recovery(self.config)
             energy_recovery.add_energy_recovery(
                 model, oa_system, resolved,
-                name=name or self.config.get('name') or 'Air Loop')
+                name=name or self.config.get('id') or 'Air Loop')
         return oa_system

@@ -21,9 +21,9 @@ from btap.audit import AuditLog
 from tests.support import load_fixture, needs_sdk
 
 #: A PSZ row that does NOT state `per_zone`: shared by the builder's default.
-DEFAULT_SHARED = "PSZ RTU Gas and DX Coils and Hot Water Baseboard"
-#: A PSZ row that states `per_zone: false` and says "Shared" in its name.
-EXPLICIT_SHARED = "Shared PSZ with gas boiler coils and hot water baseboard"
+DEFAULT_SHARED = "psz-gas-hwbb-gasboiler"
+#: A PSZ row that states `per_zone: false` (legacy name "Shared PSZ with gas boiler coils ...").
+EXPLICIT_SHARED = "psz-hw-hwbb-gasboiler"
 
 
 def _zones(model):

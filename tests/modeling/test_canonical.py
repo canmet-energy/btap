@@ -1,64 +1,58 @@
-"""The consolidated canonical naming grammar: <primary>[ + <zone equipment>][ (<plant>)],
-GENERATED from each row's structured config, resolvable alongside the legacy names."""
+"""The RETIRED canonical naming grammar still resolves (HVAC taxonomy).
+
+The generated canonical names (`<primary>[ + <zone>][ (<plant>)]`) were
+replaced by stable ids and facet-generated display names
+(docs/plans/HVAC_TAXONOMY_PLAN.md). Each row keeps its old canonical name in
+`aliases`, so code or notes that used one still build the same system; nothing
+generates new canonical names.
+"""
 
 import unittest
-from collections import Counter
 
 import btap.modeling as modeling
-from btap.modeling.hvac import canonical, catalog
+from btap.modeling.hvac import canonical, catalog, taxonomy
 
 
-class TestCanonical(unittest.TestCase):
-    def test_all_canonical_names_unique_and_disjoint_from_legacy(self):
-        rows = catalog.rows()
-        canon = [canonical.name(r) for r in rows]
-        collisions = [n for n, c in Counter(canon).items() if c > 1]
-        self.assertEqual(len(rows), len(set(canon)),
-                         f"canonical collisions: {collisions}")
-        legacy = [r['name'] for r in rows]
-        self.assertEqual(sorted(set(canon) & set(legacy)), [],
-                         'canonical names must not shadow legacy names')
+class TestTheRetiredGrammarStillResolves(unittest.TestCase):
 
-    def test_consolidation_examples(self):
-        # the user's example pair: CBECS fuel-first vs NECB medium-first now share one grammar
-        self.assertEqual('hot water baseboards (gas boiler)',
-                         self.canonical_for('Baseboard gas boiler'))
-        self.assertEqual(
-            'packaged single-zone DX with gas heat + hot water baseboards (gas boiler)',
-            self.canonical_for('PSZ RTU Gas and DX Coils and Hot Water Baseboard'))
-        self.assertEqual('DOAS ASHP + zone PTHPs', self.canonical_for('hs11_ashp_pthp'))
-        self.assertEqual('electric baseboards', self.canonical_for('Baseboard electric'))
+    def test_every_rows_old_canonical_name_resolves_to_that_row(self):
+        for row in catalog.rows():
+            with self.subTest(id=row["id"]):
+                self.assertTrue(row["aliases"], "the retired canonical name was not kept")
+                self.assertEqual(row["id"], catalog.resolve(row["aliases"][0])["id"])
 
-    def test_composites_derive_from_parts(self):
-        canon = self.canonical_for('DOAS with fan coil chiller with boiler')
-        self.assertIn('DOAS ventilation', canon)
-        self.assertIn('four-pipe fan coils', canon)
+    def test_the_documented_examples(self):
+        # The pair the grammar was introduced for: CBECS fuel-first and NECB
+        # medium-first legacy names, and an ECM id.
+        for old, expected in [
+                ("hot water baseboards (gas boiler)", "bb-hwbb-gasboiler"),
+                ("packaged single-zone DX with gas heat + hot water baseboards (gas boiler)",
+                 "psz-gas-hwbb-gasboiler"),
+                ("DOAS ASHP + zone PTHPs", "doas-pthp-ashp-elecsupp"),
+                ("electric baseboards", "bb-elecbb")]:
+            with self.subTest(old=old):
+                self.assertEqual(expected, catalog.resolve(old)["id"])
 
-    def test_listing_includes_canonical_and_filter_matches_it(self):
-        rows = modeling.systems()
-        self.assertTrue(all(isinstance(r['canonical_name'], str) and r['canonical_name']
-                            for r in rows))
-        hits = modeling.systems(filter='packaged single-zone')
-        self.assertTrue(hits, 'filter should match canonical names too')
-
-    def test_resolve_and_build_by_canonical_name(self):
+    def test_an_old_canonical_name_still_builds(self):
         from btap._compat import sorted_by_name
         from tests.support import load_fixture
 
-        config = catalog.resolve('hot water baseboards (gas boiler)')
-        self.assertEqual('Baseboard gas boiler', config['name'])
-
         model = load_fixture()
         zones = sorted_by_name(model.getThermalZones())
-        modeling.build_system(model, 'hot water baseboards (gas boiler)', zones)
+        modeling.build_system(model, "hot water baseboards (gas boiler)", zones)
         self.assertEqual(len(zones), len(model.getZoneHVACBaseboardConvectiveWaters()))
         self.assertEqual(2, len(model.getBoilerHotWaters()))
 
-    def canonical_for(self, legacy_name):
-        row = next((r for r in catalog.rows() if r['name'] == legacy_name), None)
-        self.assertIsNotNone(row, f"no catalog row named '{legacy_name}'")
-        return canonical.name(row)
+    def test_the_shim_returns_the_display_name(self):
+        row = catalog.resolve("psz-gas-hwbb-gasboiler")
+        self.assertEqual(taxonomy.display(row), canonical.name(row))
+
+    def test_aliases_never_shadow_an_id(self):
+        ids = {r["id"].casefold() for r in catalog.rows()}
+        for row in catalog.rows():
+            for alias in row["aliases"]:
+                self.assertNotIn(alias.casefold(), ids - {row["id"].casefold()})
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

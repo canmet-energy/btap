@@ -109,7 +109,7 @@ class DoasPthp(BaseSystem):
         # Legacy final name (assign_base_sys_name + update_sys_name):
         # sys_1|doas|shr>none|sc>ashp|sh>ashp|ssf>cv|zh>pthp|zc>pthp|srf>none|
         naming.apply(namer, air_loop,
-                     system_name=self.config['name'],
+                     system_name=self.config['id'],
                      sys_abbr=self.config.get('sys_abbr', 'sys_1'),
                      sys_oa='doas',
                      parts={

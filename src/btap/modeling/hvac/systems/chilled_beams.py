@@ -83,7 +83,7 @@ class ChilledBeams(BaseSystem):
             raise ValueError(
                 'ChilledBeams requires a hot water loop for Hot Water baseboards')
 
-        system_name = self.config['name']
+        system_name = self.config['id']
         beam_type = self.config['beam_type']
         air_loop = build_dehumidifying_doas(
             self, model,

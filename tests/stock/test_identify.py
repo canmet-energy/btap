@@ -82,7 +82,7 @@ class TestTheCoilMediumIsNotAFuel(unittest.TestCase):
         # Assert the PROPERTY, not a name substring. The first version of this
         # test required 'Hot Water' in the name, which was a proxy for
         # "hydronic" — and once `boiler_fuel` was scored the winner became
-        # 'PVAV with gas boiler reheat and plate HRV', which is hydronic AND
+        # 'pvav-hw-hwbb-hrv-gasboiler', which is hydronic AND
         # names its gas boiler but does not contain that string. The proxy
         # would have failed a better answer.
         self.assertNotIn(
@@ -101,9 +101,9 @@ class TestTheCoilMediumIsNotAFuel(unittest.TestCase):
             cooling_energy_types=['Electricity'],
             terminal_type='vav_reheat', zonal_units=['baseboard']), limit=20)
         electric = [c for c in candidates
-                    if 'Electric Heating Coil' in (c['system'] or '')]
+                    if 'Electric Heating Coil' in c['legacy_name']]
         hot_water = [c for c in candidates
-                     if 'Hot Water Heating Coil' in (c['system'] or '')]
+                     if 'Hot Water Heating Coil' in c['legacy_name']]
         self.assertTrue(electric and hot_water, 'both kinds must be ranked')
         self.assertGreater(
             hot_water[0]['score'], electric[0]['score'],
@@ -119,9 +119,9 @@ class TestTheCoilMediumIsNotAFuel(unittest.TestCase):
             cooling_energy_types=['Electricity'],
             terminal_type='vav_reheat', zonal_units=['baseboard']), limit=20)
         electric = [c for c in candidates
-                    if 'Electric Heating Coil' in (c['system'] or '')]
+                    if 'Electric Heating Coil' in c['legacy_name']]
         hot_water = [c for c in candidates
-                     if 'Hot Water Heating Coil' in (c['system'] or '')]
+                     if 'Hot Water Heating Coil' in c['legacy_name']]
         self.assertGreater(electric[0]['score'], hot_water[0]['score'])
 
 
@@ -136,7 +136,7 @@ class TestWhatItFindsOnTheRealSIGNATURES(unittest.TestCase):
             family_guess='zonal_heating_only',
             heating_energy_types=['NaturalGas'],
             zonal_units=['unit_heater']))
-        self.assertEqual('Hot water unit heaters', candidates[0]['system'])
+        self.assertEqual('uh-hw-gasboiler', candidates[0]['system'])
         self.assertEqual('campus', candidates[0]['origin'])
 
     def test_a_ptac_group_finds_the_campus_MAU_row(self):
@@ -144,7 +144,7 @@ class TestWhatItFindsOnTheRealSIGNATURES(unittest.TestCase):
             family_guess='zonal_heat_cool', cooled=True,
             heating_energy_types=['NaturalGas'],
             cooling_energy_types=['Electricity'], zonal_units=['ptac']))
-        self.assertEqual('PSZ MAU Hot Water with water-heated PTAC',
+        self.assertEqual('mau-ptac-hw-hwptac-gasboiler',
                          candidates[0]['system'])
 
     def test_a_central_cv_group_finds_a_SHARED_hydronic_psz(self):
@@ -181,7 +181,7 @@ class TestWhatItFindsOnTheRealSIGNATURES(unittest.TestCase):
             zonal_units=['unit_heater']), limit=5)
         top = candidates[0]
         self.assertEqual(
-            'Electric unit heaters', top['system'],
+            'uh-elec', top['system'],
             'the electric row must win on the FACT, not lose to the '
             'campus-origin hot-water row on provenance')
         campus = [c for c in candidates if c['origin'] == 'campus'][0]
@@ -264,9 +264,9 @@ class TestTheDistrictTieBreak(unittest.TestCase):
     def test_a_gas_building_picks_the_GAS_BOILER_not_district(self):
         candidates = identify_candidates(self._gas_baseboard_group(),
                                          limit=10)
-        self.assertEqual('Baseboard gas boiler', candidates[0]['system'])
+        self.assertEqual('bb-hwbb-gasboiler', candidates[0]['system'])
         district = next(c for c in candidates
-                        if c['system'] == 'Baseboard district hot water')
+                        if c['system'] == 'bb-hwbb-district')
         self.assertLess(
             district['score'], candidates[0]['score'],
             'district must LOSE, and not by a tie-break — by the facts')
@@ -275,7 +275,7 @@ class TestTheDistrictTieBreak(unittest.TestCase):
         candidates = identify_candidates(self._gas_baseboard_group(),
                                          limit=10)
         district = next(c for c in candidates
-                        if c['system'] == 'Baseboard district hot water')
+                        if c['system'] == 'bb-hwbb-district')
         self.assertTrue(
             any('purchased-heat stream' in a for a in district['against']),
             'the contradiction has to be legible, not just scored')
@@ -285,7 +285,7 @@ class TestTheDistrictTieBreak(unittest.TestCase):
         group = self._gas_baseboard_group()
         group['descriptive']['heating_energy_types'] = ['DistrictHeating']
         candidates = identify_candidates(group, limit=10)
-        self.assertEqual('Baseboard district hot water',
+        self.assertEqual('bb-hwbb-district',
                          candidates[0]['system'])
 
     def test_the_boiler_fuel_field_is_what_decides_it(self):
@@ -293,9 +293,9 @@ class TestTheDistrictTieBreak(unittest.TestCase):
         group = self._gas_baseboard_group()
         group['descriptive']['heating_energy_types'] = ['Electricity']
         candidates = identify_candidates(group, limit=10)
-        self.assertEqual('Baseboard electric', candidates[0]['system'])
+        self.assertEqual('bb-elecbb', candidates[0]['system'])
         gas = next(c for c in candidates
-                   if c['system'] == 'Baseboard gas boiler')
+                   if c['system'] == 'bb-hwbb-gasboiler')
         self.assertTrue(any("boiler fuel 'NaturalGas' against" in a
                             for a in gas['against']))
 
@@ -334,7 +334,7 @@ class TestTheTwoFieldVocabularies(unittest.TestCase):
     def test_the_campus_PTAC_row_wins_its_own_case(self):
         candidates = identify_candidates(self._ptac_group(), limit=5)
         top = candidates[0]
-        self.assertEqual('PSZ MAU Hot Water with water-heated PTAC',
+        self.assertEqual('mau-ptac-hw-hwptac-gasboiler',
                          top['system'])
         self.assertEqual('campus', top['origin'])
 
@@ -371,10 +371,10 @@ class TestTheTwoFieldVocabularies(unittest.TestCase):
         My first version of this test asserted it always counts against, on a
         fact set that was incoherent: cooled=True with neither loop nor zonal
         cooling. `cooled` is a UNION, and the distinction is the whole point —
-        'Shared hot water heating-only air handler' is WRONG for a loop with a
+        'hv-hw-gasboiler-shared' is WRONG for a loop with a
         DX coil and RIGHT for the four-zone loop whose cooling is two PTACs.
         """
-        name = 'Shared hot water heating-only air handler'
+        name = 'hv-hw-gasboiler-shared'
 
         loop_cooled = {'resolved': False, 'descriptive': {
             'family_guess': 'central_doas_or_cv', 'heated': True,
@@ -407,8 +407,7 @@ class TestTheTwoFieldVocabularies(unittest.TestCase):
             'zonal_units': [], 'ventilation_sized': True}}
         candidates = identify_candidates(group, limit=30)
         reheat = [c for c in candidates
-                  if c['system'] == 'Shared hot water air handler with water '
-                                    'reheat']
+                  if c['system'] == 'cvrh-hw-gasboiler']
         self.assertTrue(reheat, 'the campus reheat row must be ranked')
         self.assertTrue(any('reheat terminals' in m
                             for m in reheat[0]['matched']))
@@ -478,8 +477,8 @@ class TestTheFuelCannotStandInForTheMedium(unittest.TestCase):
         'system_outdoor_air_method': 'ZoneSum', 'ventilation_sized': False,
         'supply_heating_media': ['hydronic'],
     }
-    COMBUSTION = 'PSZ RTU Gas and DX Coils and Hot Water Baseboard'
-    HYDRONIC = 'Shared PSZ with gas boiler coils and hot water baseboard'
+    COMBUSTION = 'psz-gas-hwbb-gasboiler'
+    HYDRONIC = 'psz-hw-hwbb-gasboiler'
 
     def _find(self, group, name):
         return next(c for c in identify_candidates(
@@ -601,7 +600,7 @@ class TestCompositesAreReachable(unittest.TestCase):
     def test_the_layering_credit_names_the_unit_it_would_build(self):
         hit = next(c for c in self._candidates()
                    if c['family'] == 'composite'
-                   and 'baseboard' in c['system'].lower())
+                   and 'baseboard' in c['legacy_name'].lower())
         self.assertTrue(
             any('AND this row builds it as a part' in m
                 for m in hit['matched']), hit['matched'])

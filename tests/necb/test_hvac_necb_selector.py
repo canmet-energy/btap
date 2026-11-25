@@ -204,7 +204,7 @@ class TestNecbSelector(unittest.TestCase):
         a = select([group(heat_pump=True)], {'Z1': 'Office - enclosed'})[0]
         self.assertEqual('hp', a.reference_system)
         self.assertRegex(''.join(a.articles), r'8\.4\.4\.13')
-        self.assertRegex(a.catalog_name, r'ASHP')
+        self.assertRegex(catalog.resolve(a.catalog_name)['legacy_name'], r'ASHP')
 
     # Table 8.4.4.13: "System 2 -> See Table 8.4.4.7.-B" (HP override does not apply)
     def test_heat_pump_does_not_override_system_2(self):
@@ -216,10 +216,11 @@ class TestNecbSelector(unittest.TestCase):
     def test_energy_type_follows_proposed(self):
         gas = select([group(heat_fuels=['NaturalGas'])], {'Z1': 'Office'})[0]
         self.assertEqual('gas', gas.energy_type)
-        self.assertRegex(gas.catalog_name, r'Gas|Hot Water')
+        self.assertRegex(catalog.resolve(gas.catalog_name)['legacy_name'],
+                         r'Gas|Hot Water')
         elec = select([group(heat_fuels=['Electricity'])], {'Z1': 'Office'})[0]
         self.assertEqual('electric', elec.energy_type)
-        self.assertRegex(elec.catalog_name, r'Electric')
+        self.assertRegex(catalog.resolve(elec.catalog_name)['legacy_name'], r'Electric')
 
     # 8.4.4.6.(1): "one gas-fired modulating boiler ... shall be used to represent the
     #  purchased energy equipment"

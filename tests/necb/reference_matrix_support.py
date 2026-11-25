@@ -18,26 +18,26 @@ SCENARIOS = {
 ASSIGNMENT_KEYS = ('system', 'action', 'energy_type', 'catalog', 'blocks')
 
 MODERN_ROWS = (
-    'DOAS with active chilled beams and electric baseboards',
-    'DOAS with passive chilled beams and electric baseboards',
-    'VAV chiller with gas boiler reheat and rotary ERV',
-    'PVAV with gas boiler reheat and plate HRV',
-    'Dual-duct VAV with gas boiler and water-cooled chiller',
+    'doas-acb-elec-elecbb-acscrollchiller',
+    'doas-pcb-elec-elecbb-acscrollchiller',
+    'vav-hw-hwbb-erv-gasboiler-scrollchiller',
+    'pvav-hw-hwbb-hrv-gasboiler',
+    'ddvav-hw-gasboiler-scrollchiller',
 )
 
 # One manually selected row from each distinct four-scenario D-58 assignment
 # signature. The five modern rows lead the two signatures they inhabit; seven
 # legacy representatives complete the nine-signature set.
 SIGNATURE_REPRESENTATIVES = (
-    'VAV chiller with gas boiler reheat and rotary ERV',
-    'PSZ RTU Gas and DX Coils and Hot Water Baseboard',
-    'DOAS with VRF',
-    'DOAS with water source heat pumps cooling tower with boiler',
-    'PSZ RTU ASHP with Electric and ASHP Coils and Hot Water Baseboard with Electric Reheat',
-    'DOAS with active chilled beams and electric baseboards',
-    'Baseboard district hot water',
-    'Baseboard electric',
-    'Zone ERVs',
+    'vav-hw-hwbb-erv-gasboiler-scrollchiller',
+    'psz-gas-hwbb-gasboiler',
+    'doas-vrf-elec',
+    'doas-wshp-elec-gasboiler-tower',
+    'cvrh-ashp-elecrh-hwbb-gasboiler',
+    'doas-acb-elec-elecbb-acscrollchiller',
+    'bb-hwbb-district',
+    'bb-elecbb',
+    'zone-erv',
 )
 
 # The EnergyPlus layer covers all five modern inputs plus one row from every
@@ -45,26 +45,26 @@ SIGNATURE_REPRESENTATIVES = (
 # copy_proposed through the residential PSZ case. The focused System 2/5
 # water-coil sizing gate lives in test_system25_fan_coil_sizing.py.
 ENGINE_CASES = (
-    ('DOAS with active chilled beams and electric baseboards',
+    ('doas-acb-elec-elecbb-acscrollchiller',
      'general_2storey'),
-    ('DOAS with passive chilled beams and electric baseboards',
+    ('doas-pcb-elec-elecbb-acscrollchiller',
      'general_3storey'),
-    ('VAV chiller with gas boiler reheat and rotary ERV',
+    ('vav-hw-hwbb-erv-gasboiler-scrollchiller',
      'general_3storey'),
-    ('PVAV with gas boiler reheat and plate HRV',
+    ('pvav-hw-hwbb-hrv-gasboiler',
      'general_3storey'),
-    ('Dual-duct VAV with gas boiler and water-cooled chiller',
+    ('ddvav-hw-gasboiler-scrollchiller',
      'residential'),
-    ('PSZ RTU Gas and DX Coils and Hot Water Baseboard',
+    ('psz-gas-hwbb-gasboiler',
      'residential'),
-    ('DOAS with VRF', 'general_2storey'),
-    ('DOAS with water source heat pumps cooling tower with boiler',
+    ('doas-vrf-elec', 'general_2storey'),
+    ('doas-wshp-elec-gasboiler-tower',
      'general_2storey'),
-    ('PSZ RTU ASHP with Electric and ASHP Coils and Hot Water Baseboard with Electric Reheat',
+    ('cvrh-ashp-elecrh-hwbb-gasboiler',
      'general_2storey'),
-    ('Baseboard district hot water', 'general_2storey'),
-    ('Baseboard electric', 'residential'),
-    ('Zone ERVs', 'general_2storey'),
+    ('bb-hwbb-district', 'general_2storey'),
+    ('bb-elecbb', 'residential'),
+    ('zone-erv', 'general_2storey'),
 )
 
 

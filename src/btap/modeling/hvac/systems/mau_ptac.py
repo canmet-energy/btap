@@ -103,7 +103,7 @@ class MauPtac(BaseSystem):
             else:
                 htg_part = 'ashp>c-e'
         naming.apply(namer, air_loop,
-                     system_name=self.config['name'],
+                     system_name=self.config['id'],
                      sys_abbr=self.config.get('sys_abbr', 'mau_ptac'),
                      # legacy sys1 ref-HP reads 'mixed'
                      sys_oa='mixed' if reference_hp else 'doas',

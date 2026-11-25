@@ -335,3 +335,16 @@ class TestCLIEndToEnd(CLICase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestConditionWrapKeepsIdsWhole(unittest.TestCase):
+    """An AHJ condition names the air loops it applies to by catalogue id
+    (D-112); wrapping at a hyphen split them across lines."""
+
+    def test_no_id_is_split_across_lines(self):
+        from btap.codes import cli
+        ids = [f"psz-gas-hwbb-gasboiler | Thermal Zone {i}" for i in range(1, 8)]
+        wrapped = cli._wrap_condition("Applies to: " + ", ".join(ids))
+        self.assertGreater(wrapped.count("\n"), 1)
+        for line in wrapped.splitlines():
+            self.assertFalse(line.rstrip().endswith("-"), line)

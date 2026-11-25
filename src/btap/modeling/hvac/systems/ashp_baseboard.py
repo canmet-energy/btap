@@ -53,7 +53,7 @@ class AshpBaseboard(BaseSystem):
         # (zh>b-e, zc>ptac) regardless of the actual baseboard type.
         zone_htg_part = 'Electric' if doas else baseboard_type
         naming.apply(namer, air_loop,
-                     system_name=self.config['name'],
+                     system_name=self.config['id'],
                      sys_abbr=self.config.get('sys_abbr', 'sys_1'),
                      sys_oa='doas' if doas else 'mixed',
                      parts={

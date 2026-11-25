@@ -28,7 +28,7 @@ def office(model):
 
 
 source = office(modeling.create(shape="l", length=40.0, width=30.0, storeys=2))
-modeling.build_system(source, "PSZ-AC with gas coil", list(source.getThermalZones()))
+modeling.build_system(source, "psz-gas-perzone", list(source.getThermalZones()))
 
 recipe = stock.write_recipe(source, building_type="Office")
 
