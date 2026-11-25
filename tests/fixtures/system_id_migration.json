@@ -1,5 +1,5 @@
 {
-  "_comment": "The one-time HVAC catalogue rename (docs/plans/HVAC_TAXONOMY_PLAN.md): legacy name -> stable id. A bijection over all 110 rows; the D-58 golden migration is proved against it.",
+  "_comment": "The one-time HVAC catalogue rename (docs/plans/HVAC_TAXONOMY_PLAN.md): legacy name -> stable id. A bijection over all 110 rows; the D-58 golden migration is proved against it. d58_golden_before_sha256 pins the D-58 golden BEFORE the rename: inverse-mapping the committed golden must reproduce those exact bytes. catalogue_configuration_before_sha256 pins every row's configuration WITHOUT its identity fields: the rename changed names, never what a row builds.",
   "mapping": {
     "PSZ RTU Gas and DX Coils and Hot Water Baseboard": "psz-gas-hwbb-gasboiler",
     "PSZ RTU Gas and DX Coils and Electric Baseboard": "psz-gas-elecbb",
@@ -111,5 +111,7 @@
     "DOAS with fan coil district chilled water with boiler": "doas-fc4-elec-gasboiler-districtchw",
     "DOAS with fan coil district chilled water with district hot water": "doas-fc4-elec-district-districtchw",
     "Recirculating CRAH chilled water with humidity control": "crah-acscrollchiller"
-  }
+  },
+  "d58_golden_before_sha256": "93f544c1bcf94557f200e037b7fe36904882556a1e43bc8049f5921e4109c9ab",
+  "catalogue_configuration_before_sha256": "597f4496dc711ec14b32cc0bd60452cd3c8d06dddcc3d132fca987aedef7c592"
 }
