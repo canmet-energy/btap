@@ -225,20 +225,20 @@
  },
  {
   "step": "characterize",
-  "target": "FPFC MAU DX Coils with Scroll Chiller",
+  "target": "mau-fc4-gas-gasboiler-scrollchiller",
   "action": "zone group characterized",
   "inputs": {
    "zones": 5,
    "terminal": "cv"
   },
   "value": "fan_coils",
-  "evidence": "air loop name resolves to catalog entry 'FPFC MAU DX Coils with Scroll Chiller'; cooled: OS_Coil_Cooling_DX_SingleSpeed on FPFC MAU DX Coils with Scroll Chiller; heated: OS_Coil_Heating_Gas on FPFC MAU DX Coils with Scroll Chiller",
+  "evidence": "air loop name resolves to catalog entry 'mau-fc4-gas-gasboiler-scrollchiller'; cooled: OS_Coil_Cooling_DX_SingleSpeed on mau-fc4-gas-gasboiler-scrollchiller; heated: OS_Coil_Heating_Gas on mau-fc4-gas-gasboiler-scrollchiller",
   "building": "reference building",
   "level": "decision"
  },
  {
   "step": "characterize",
-  "target": "FPFC MAU DX Coils with Scroll Chiller",
+  "target": "mau-fc4-gas-gasboiler-scrollchiller",
   "action": "cooling capacity unsized \u2014 design_cooling_kw unavailable (run a sizing run for kW-threshold rules)",
   "building": "reference building",
   "level": "warning"
@@ -271,12 +271,12 @@
   "inputs": {
    "category": "General Area",
    "energy_type": "gas",
-   "serving_system": "FPFC MAU DX Coils with Scroll Chiller",
+   "serving_system": "mau-fc4-gas-gasboiler-scrollchiller",
    "heated": true,
    "cooled": true,
    "cooling_kw": null
   },
-  "value": "System 3 -> 'PSZ RTU Gas and DX Coils and Hot Water Baseboard'",
+  "value": "System 3 -> 'psz-gas-hwbb-gasboiler'",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -288,12 +288,12 @@
   "inputs": {
    "category": "General Area",
    "energy_type": "gas",
-   "serving_system": "FPFC MAU DX Coils with Scroll Chiller",
+   "serving_system": "mau-fc4-gas-gasboiler-scrollchiller",
    "heated": true,
    "cooled": true,
    "cooling_kw": null
   },
-  "value": "System 3 -> 'PSZ RTU Gas and DX Coils and Hot Water Baseboard'",
+  "value": "System 3 -> 'psz-gas-hwbb-gasboiler'",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -305,12 +305,12 @@
   "inputs": {
    "category": "General Area",
    "energy_type": "gas",
-   "serving_system": "FPFC MAU DX Coils with Scroll Chiller",
+   "serving_system": "mau-fc4-gas-gasboiler-scrollchiller",
    "heated": true,
    "cooled": true,
    "cooling_kw": null
   },
-  "value": "System 3 -> 'PSZ RTU Gas and DX Coils and Hot Water Baseboard'",
+  "value": "System 3 -> 'psz-gas-hwbb-gasboiler'",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -322,12 +322,12 @@
   "inputs": {
    "category": "General Area",
    "energy_type": "gas",
-   "serving_system": "FPFC MAU DX Coils with Scroll Chiller",
+   "serving_system": "mau-fc4-gas-gasboiler-scrollchiller",
    "heated": true,
    "cooled": true,
    "cooling_kw": null
   },
-  "value": "System 3 -> 'PSZ RTU Gas and DX Coils and Hot Water Baseboard'",
+  "value": "System 3 -> 'psz-gas-hwbb-gasboiler'",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -339,12 +339,12 @@
   "inputs": {
    "category": "General Area",
    "energy_type": "gas",
-   "serving_system": "FPFC MAU DX Coils with Scroll Chiller",
+   "serving_system": "mau-fc4-gas-gasboiler-scrollchiller",
    "heated": true,
    "cooled": true,
    "cooling_kw": null
   },
-  "value": "System 3 -> 'PSZ RTU Gas and DX Coils and Hot Water Baseboard'",
+  "value": "System 3 -> 'psz-gas-hwbb-gasboiler'",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -374,7 +374,7 @@
     "build"
    ]
   },
-  "value": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+  "value": "psz-gas-hwbb-gasboiler",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -390,7 +390,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 1",
   "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
   "article": "5.2.2.8.(1)",
   "ruling": "D-20",
@@ -399,11 +399,11 @@
  },
  {
   "step": "rules",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 1",
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": [
-    "FPFC MAU DX Coils with Scroll Chiller"
+    "mau-fc4-gas-gasboiler-scrollchiller"
    ]
   },
   "article": "8.4.4.15.(2)",
@@ -413,7 +413,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 1",
   "action": "reference system operates on the proposed operating schedule",
   "inputs": {
    "schedule": "Always On Discrete"
@@ -471,7 +471,7 @@
     "build"
    ]
   },
-  "value": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+  "value": "psz-gas-hwbb-gasboiler",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -487,7 +487,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 2",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 2",
   "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
   "article": "5.2.2.8.(1)",
   "ruling": "D-20",
@@ -496,11 +496,11 @@
  },
  {
   "step": "rules",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 2",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 2",
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": [
-    "FPFC MAU DX Coils with Scroll Chiller"
+    "mau-fc4-gas-gasboiler-scrollchiller"
    ]
   },
   "article": "8.4.4.15.(2)",
@@ -510,7 +510,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 2",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 2",
   "action": "reference system operates on the proposed operating schedule",
   "inputs": {
    "schedule": "Always On Discrete"
@@ -568,7 +568,7 @@
     "build"
    ]
   },
-  "value": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+  "value": "psz-gas-hwbb-gasboiler",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -584,7 +584,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 3",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 3",
   "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
   "article": "5.2.2.8.(1)",
   "ruling": "D-20",
@@ -593,11 +593,11 @@
  },
  {
   "step": "rules",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 3",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 3",
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": [
-    "FPFC MAU DX Coils with Scroll Chiller"
+    "mau-fc4-gas-gasboiler-scrollchiller"
    ]
   },
   "article": "8.4.4.15.(2)",
@@ -607,7 +607,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 3",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 3",
   "action": "reference system operates on the proposed operating schedule",
   "inputs": {
    "schedule": "Always On Discrete"
@@ -665,7 +665,7 @@
     "build"
    ]
   },
-  "value": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+  "value": "psz-gas-hwbb-gasboiler",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -681,7 +681,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 4",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 4",
   "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
   "article": "5.2.2.8.(1)",
   "ruling": "D-20",
@@ -690,11 +690,11 @@
  },
  {
   "step": "rules",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 4",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 4",
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": [
-    "FPFC MAU DX Coils with Scroll Chiller"
+    "mau-fc4-gas-gasboiler-scrollchiller"
    ]
   },
   "article": "8.4.4.15.(2)",
@@ -704,7 +704,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 4",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 4",
   "action": "reference system operates on the proposed operating schedule",
   "inputs": {
    "schedule": "Always On Discrete"
@@ -762,7 +762,7 @@
     "build"
    ]
   },
-  "value": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+  "value": "psz-gas-hwbb-gasboiler",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -778,7 +778,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 5",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 5",
   "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
   "article": "5.2.2.8.(1)",
   "ruling": "D-20",
@@ -787,11 +787,11 @@
  },
  {
   "step": "rules",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 5",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 5",
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": [
-    "FPFC MAU DX Coils with Scroll Chiller"
+    "mau-fc4-gas-gasboiler-scrollchiller"
    ]
   },
   "article": "8.4.4.15.(2)",
@@ -801,7 +801,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 5",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 5",
   "action": "reference system operates on the proposed operating schedule",
   "inputs": {
    "schedule": "Always On Discrete"

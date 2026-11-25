@@ -281,7 +281,7 @@
    "cooled": false,
    "cooling_kw": 0.0
   },
-  "value": "System 3 -> 'PSZ RTU Gas and DX Coils and Hot Water Baseboard'",
+  "value": "System 3 -> 'psz-gas-hwbb-gasboiler'",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -298,7 +298,7 @@
    "cooled": false,
    "cooling_kw": 0.0
   },
-  "value": "System 3 -> 'PSZ RTU Gas and DX Coils and Hot Water Baseboard'",
+  "value": "System 3 -> 'psz-gas-hwbb-gasboiler'",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -315,7 +315,7 @@
    "cooled": false,
    "cooling_kw": 0.0
   },
-  "value": "System 3 -> 'PSZ RTU Gas and DX Coils and Hot Water Baseboard'",
+  "value": "System 3 -> 'psz-gas-hwbb-gasboiler'",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -332,7 +332,7 @@
    "cooled": false,
    "cooling_kw": 0.0
   },
-  "value": "System 3 -> 'PSZ RTU Gas and DX Coils and Hot Water Baseboard'",
+  "value": "System 3 -> 'psz-gas-hwbb-gasboiler'",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -349,7 +349,7 @@
    "cooled": false,
    "cooling_kw": 0.0
   },
-  "value": "System 3 -> 'PSZ RTU Gas and DX Coils and Hot Water Baseboard'",
+  "value": "System 3 -> 'psz-gas-hwbb-gasboiler'",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -379,7 +379,7 @@
     "build"
    ]
   },
-  "value": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+  "value": "psz-gas-hwbb-gasboiler",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -395,7 +395,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 1",
   "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
   "article": "5.2.2.8.(1)",
   "ruling": "D-20",
@@ -404,7 +404,7 @@
  },
  {
   "step": "rules",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 1",
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": []
@@ -416,7 +416,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 1",
   "action": "no proposed air-system operating schedule to inherit \u2014 builder default retained",
   "article": "8.4.3.2.(1)",
   "ruling": "D-14",
@@ -468,7 +468,7 @@
     "build"
    ]
   },
-  "value": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+  "value": "psz-gas-hwbb-gasboiler",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -484,7 +484,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 2",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 2",
   "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
   "article": "5.2.2.8.(1)",
   "ruling": "D-20",
@@ -493,7 +493,7 @@
  },
  {
   "step": "rules",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 2",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 2",
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": []
@@ -505,7 +505,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 2",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 2",
   "action": "no proposed air-system operating schedule to inherit \u2014 builder default retained",
   "article": "8.4.3.2.(1)",
   "ruling": "D-14",
@@ -557,7 +557,7 @@
     "build"
    ]
   },
-  "value": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+  "value": "psz-gas-hwbb-gasboiler",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -573,7 +573,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 3",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 3",
   "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
   "article": "5.2.2.8.(1)",
   "ruling": "D-20",
@@ -582,7 +582,7 @@
  },
  {
   "step": "rules",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 3",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 3",
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": []
@@ -594,7 +594,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 3",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 3",
   "action": "no proposed air-system operating schedule to inherit \u2014 builder default retained",
   "article": "8.4.3.2.(1)",
   "ruling": "D-14",
@@ -646,7 +646,7 @@
     "build"
    ]
   },
-  "value": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+  "value": "psz-gas-hwbb-gasboiler",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -662,7 +662,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 4",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 4",
   "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
   "article": "5.2.2.8.(1)",
   "ruling": "D-20",
@@ -671,7 +671,7 @@
  },
  {
   "step": "rules",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 4",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 4",
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": []
@@ -683,7 +683,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 4",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 4",
   "action": "no proposed air-system operating schedule to inherit \u2014 builder default retained",
   "article": "8.4.3.2.(1)",
   "ruling": "D-14",
@@ -735,7 +735,7 @@
     "build"
    ]
   },
-  "value": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+  "value": "psz-gas-hwbb-gasboiler",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -751,7 +751,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 5",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 5",
   "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
   "article": "5.2.2.8.(1)",
   "ruling": "D-20",
@@ -760,7 +760,7 @@
  },
  {
   "step": "rules",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 5",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 5",
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": []
@@ -772,7 +772,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 5",
+  "target": "psz-gas-hwbb-gasboiler | Thermal Zone 5",
   "action": "no proposed air-system operating schedule to inherit \u2014 builder default retained",
   "article": "8.4.3.2.(1)",
   "ruling": "D-14",

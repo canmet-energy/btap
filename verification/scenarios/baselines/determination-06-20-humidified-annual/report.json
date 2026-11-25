@@ -157,7 +157,7 @@
   ],
   "ahj_register": "docs/NECB_AHJ_QUESTIONS.md",
   "ahj_must_approve": [
-   "AHJ-12 (referral): \"where present\" humidification \u2014 an INTERPRETATION the acceptable-solution text does not settle. Applies to: PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1, PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 2, PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 3, PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 4, PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 5 \u2014 each of the 5 choices above makes this same unresolved election; the conditions list carries what was established at each one",
+   "AHJ-12 (referral): \"where present\" humidification \u2014 an INTERPRETATION the acceptable-solution text does not settle. Applies to: psz-gas-hwbb-gasboiler | Thermal Zone 1, psz-gas-hwbb-gasboiler | Thermal Zone 2, psz-gas-hwbb-gasboiler | Thermal Zone 3, psz-gas-hwbb-gasboiler | Thermal Zone 4, psz-gas-hwbb-gasboiler | Thermal Zone 5 \u2014 each of the 5 choices above makes this same unresolved election; the conditions list carries what was established at each one",
    "AHJ-14 (referral): which part-load class a reference boiler or furnace takes \u2014 an INTERPRETATION the acceptable-solution text does not settle. Applies to: Primary Boiler, CoilHeatingGasMultiStage_gas, CoilHeatingGasMultiStage_gas 1, CoilHeatingGasMultiStage_gas 2, CoilHeatingGasMultiStage_gas 3, CoilHeatingGasMultiStage_gas 4 \u2014 each of the 6 choices above makes this same unresolved election; the conditions list carries what was established at each one",
    "AHJ-15 (referral): whether (3) governs dispatch priority at all \u2014 an INTERPRETATION the acceptable-solution text does not settle. Applies to: Thermal Zone 1, Thermal Zone 2, Thermal Zone 3, Thermal Zone 4, Thermal Zone 5 \u2014 each of the 5 choices above makes this same unresolved election; the conditions list carries what was established at each one"
   ],
@@ -212,7 +212,7 @@
     "status": "referral",
     "title": "\"where present\" humidification",
     "article": "Table 8.4.4.7.-B Note (1)",
-    "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 1",
+    "target": "psz-gas-hwbb-gasboiler | Thermal Zone 1",
     "detail": "reference humidification rebuilt on the proposed energy source",
     "entry_index": 58
    },
@@ -221,7 +221,7 @@
     "status": "referral",
     "title": "\"where present\" humidification",
     "article": "Table 8.4.4.7.-B Note (1)",
-    "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 2",
+    "target": "psz-gas-hwbb-gasboiler | Thermal Zone 2",
     "detail": "the proposed humidification on this thermal block has NO determinable humidity control (no zone humidistat survives and the proposed used no scheduled minimum-humidity setpoint) \u2014 an uncontrolled humidifier is INERT, so none is rebuilt",
     "entry_index": 59
    },
@@ -230,7 +230,7 @@
     "status": "referral",
     "title": "\"where present\" humidification",
     "article": "Table 8.4.4.7.-B Note (1)",
-    "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 3",
+    "target": "psz-gas-hwbb-gasboiler | Thermal Zone 3",
     "detail": "the proposed humidification on this thermal block has NO determinable humidity control (no zone humidistat survives and the proposed used no scheduled minimum-humidity setpoint) \u2014 an uncontrolled humidifier is INERT, so none is rebuilt",
     "entry_index": 60
    },
@@ -239,7 +239,7 @@
     "status": "referral",
     "title": "\"where present\" humidification",
     "article": "Table 8.4.4.7.-B Note (1)",
-    "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 4",
+    "target": "psz-gas-hwbb-gasboiler | Thermal Zone 4",
     "detail": "the proposed humidification on this thermal block has NO determinable humidity control (no zone humidistat survives and the proposed used no scheduled minimum-humidity setpoint) \u2014 an uncontrolled humidifier is INERT, so none is rebuilt",
     "entry_index": 61
    },
@@ -248,7 +248,7 @@
     "status": "referral",
     "title": "\"where present\" humidification",
     "article": "Table 8.4.4.7.-B Note (1)",
-    "target": "PSZ RTU Gas and DX Coils and Hot Water Baseboard | Thermal Zone 5",
+    "target": "psz-gas-hwbb-gasboiler | Thermal Zone 5",
     "detail": "the proposed humidification on this thermal block has NO determinable humidity control (no zone humidistat survives and the proposed used no scheduled minimum-humidity setpoint) \u2014 an uncontrolled humidifier is INERT, so none is rebuilt",
     "entry_index": 62
    },

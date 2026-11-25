@@ -211,20 +211,20 @@
  },
  {
   "step": "characterize",
-  "target": "MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard | Thermal Zone 1",
+  "target": "vav-elec-elecbb-scrollchiller | Thermal Zone 1",
   "action": "zone group characterized",
   "inputs": {
    "zones": 5,
    "terminal": "vav_reheat"
   },
   "value": "vav_reheat",
-  "evidence": "air loop name resolves to catalog entry 'MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard'; cooled: OS_Coil_Cooling_Water on MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard | Thermal Zone 1; heated: OS_Coil_Heating_Electric on MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard | Thermal Zone 1; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 1; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 2; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 3; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 4; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 5",
+  "evidence": "air loop name resolves to catalog entry 'vav-elec-elecbb-scrollchiller'; cooled: OS_Coil_Cooling_Water on vav-elec-elecbb-scrollchiller | Thermal Zone 1; heated: OS_Coil_Heating_Electric on vav-elec-elecbb-scrollchiller | Thermal Zone 1; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 1; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 2; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 3; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 4; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 5",
   "building": "reference building",
   "level": "decision"
  },
  {
   "step": "characterize",
-  "target": "MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard | Thermal Zone 1",
+  "target": "vav-elec-elecbb-scrollchiller | Thermal Zone 1",
   "action": "cooling capacity unsized \u2014 design_cooling_kw unavailable (run a sizing run for kW-threshold rules)",
   "building": "reference building",
   "level": "warning"
@@ -257,12 +257,12 @@
   "inputs": {
    "category": "General Area",
    "energy_type": "electric",
-   "serving_system": "MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard | Thermal Zone 1",
+   "serving_system": "vav-elec-elecbb-scrollchiller | Thermal Zone 1",
    "heated": true,
    "cooled": true,
    "cooling_kw": null
   },
-  "value": "System 3 -> 'PSZ RTU Electric and DX Coils and Electric Baseboard'",
+  "value": "System 3 -> 'psz-elec-elecbb'",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -274,12 +274,12 @@
   "inputs": {
    "category": "General Area",
    "energy_type": "electric",
-   "serving_system": "MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard | Thermal Zone 1",
+   "serving_system": "vav-elec-elecbb-scrollchiller | Thermal Zone 1",
    "heated": true,
    "cooled": true,
    "cooling_kw": null
   },
-  "value": "System 3 -> 'PSZ RTU Electric and DX Coils and Electric Baseboard'",
+  "value": "System 3 -> 'psz-elec-elecbb'",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -291,12 +291,12 @@
   "inputs": {
    "category": "General Area",
    "energy_type": "electric",
-   "serving_system": "MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard | Thermal Zone 1",
+   "serving_system": "vav-elec-elecbb-scrollchiller | Thermal Zone 1",
    "heated": true,
    "cooled": true,
    "cooling_kw": null
   },
-  "value": "System 3 -> 'PSZ RTU Electric and DX Coils and Electric Baseboard'",
+  "value": "System 3 -> 'psz-elec-elecbb'",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -308,12 +308,12 @@
   "inputs": {
    "category": "General Area",
    "energy_type": "electric",
-   "serving_system": "MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard | Thermal Zone 1",
+   "serving_system": "vav-elec-elecbb-scrollchiller | Thermal Zone 1",
    "heated": true,
    "cooled": true,
    "cooling_kw": null
   },
-  "value": "System 3 -> 'PSZ RTU Electric and DX Coils and Electric Baseboard'",
+  "value": "System 3 -> 'psz-elec-elecbb'",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -325,12 +325,12 @@
   "inputs": {
    "category": "General Area",
    "energy_type": "electric",
-   "serving_system": "MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard | Thermal Zone 1",
+   "serving_system": "vav-elec-elecbb-scrollchiller | Thermal Zone 1",
    "heated": true,
    "cooled": true,
    "cooling_kw": null
   },
-  "value": "System 3 -> 'PSZ RTU Electric and DX Coils and Electric Baseboard'",
+  "value": "System 3 -> 'psz-elec-elecbb'",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -360,7 +360,7 @@
     "build"
    ]
   },
-  "value": "PSZ RTU Electric and DX Coils and Electric Baseboard",
+  "value": "psz-elec-elecbb",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -376,7 +376,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Electric and DX Coils and Electric Baseboard | Thermal Zone 1",
+  "target": "psz-elec-elecbb | Thermal Zone 1",
   "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
   "article": "5.2.2.8.(1)",
   "ruling": "D-20",
@@ -385,11 +385,11 @@
  },
  {
   "step": "rules",
-  "target": "PSZ RTU Electric and DX Coils and Electric Baseboard | Thermal Zone 1",
+  "target": "psz-elec-elecbb | Thermal Zone 1",
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": [
-    "MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard | Thermal Zone 1"
+    "vav-elec-elecbb-scrollchiller | Thermal Zone 1"
    ]
   },
   "article": "8.4.4.15.(2)",
@@ -399,7 +399,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Electric and DX Coils and Electric Baseboard | Thermal Zone 1",
+  "target": "psz-elec-elecbb | Thermal Zone 1",
   "action": "reference system operates on the proposed operating schedule",
   "inputs": {
    "schedule": "Always On Discrete"
@@ -455,7 +455,7 @@
     "build"
    ]
   },
-  "value": "PSZ RTU Electric and DX Coils and Electric Baseboard",
+  "value": "psz-elec-elecbb",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -471,7 +471,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Electric and DX Coils and Electric Baseboard | Thermal Zone 2",
+  "target": "psz-elec-elecbb | Thermal Zone 2",
   "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
   "article": "5.2.2.8.(1)",
   "ruling": "D-20",
@@ -480,11 +480,11 @@
  },
  {
   "step": "rules",
-  "target": "PSZ RTU Electric and DX Coils and Electric Baseboard | Thermal Zone 2",
+  "target": "psz-elec-elecbb | Thermal Zone 2",
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": [
-    "MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard | Thermal Zone 1"
+    "vav-elec-elecbb-scrollchiller | Thermal Zone 1"
    ]
   },
   "article": "8.4.4.15.(2)",
@@ -494,7 +494,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Electric and DX Coils and Electric Baseboard | Thermal Zone 2",
+  "target": "psz-elec-elecbb | Thermal Zone 2",
   "action": "reference system operates on the proposed operating schedule",
   "inputs": {
    "schedule": "Always On Discrete"
@@ -550,7 +550,7 @@
     "build"
    ]
   },
-  "value": "PSZ RTU Electric and DX Coils and Electric Baseboard",
+  "value": "psz-elec-elecbb",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -566,7 +566,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Electric and DX Coils and Electric Baseboard | Thermal Zone 3",
+  "target": "psz-elec-elecbb | Thermal Zone 3",
   "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
   "article": "5.2.2.8.(1)",
   "ruling": "D-20",
@@ -575,11 +575,11 @@
  },
  {
   "step": "rules",
-  "target": "PSZ RTU Electric and DX Coils and Electric Baseboard | Thermal Zone 3",
+  "target": "psz-elec-elecbb | Thermal Zone 3",
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": [
-    "MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard | Thermal Zone 1"
+    "vav-elec-elecbb-scrollchiller | Thermal Zone 1"
    ]
   },
   "article": "8.4.4.15.(2)",
@@ -589,7 +589,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Electric and DX Coils and Electric Baseboard | Thermal Zone 3",
+  "target": "psz-elec-elecbb | Thermal Zone 3",
   "action": "reference system operates on the proposed operating schedule",
   "inputs": {
    "schedule": "Always On Discrete"
@@ -645,7 +645,7 @@
     "build"
    ]
   },
-  "value": "PSZ RTU Electric and DX Coils and Electric Baseboard",
+  "value": "psz-elec-elecbb",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -661,7 +661,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Electric and DX Coils and Electric Baseboard | Thermal Zone 4",
+  "target": "psz-elec-elecbb | Thermal Zone 4",
   "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
   "article": "5.2.2.8.(1)",
   "ruling": "D-20",
@@ -670,11 +670,11 @@
  },
  {
   "step": "rules",
-  "target": "PSZ RTU Electric and DX Coils and Electric Baseboard | Thermal Zone 4",
+  "target": "psz-elec-elecbb | Thermal Zone 4",
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": [
-    "MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard | Thermal Zone 1"
+    "vav-elec-elecbb-scrollchiller | Thermal Zone 1"
    ]
   },
   "article": "8.4.4.15.(2)",
@@ -684,7 +684,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Electric and DX Coils and Electric Baseboard | Thermal Zone 4",
+  "target": "psz-elec-elecbb | Thermal Zone 4",
   "action": "reference system operates on the proposed operating schedule",
   "inputs": {
    "schedule": "Always On Discrete"
@@ -740,7 +740,7 @@
     "build"
    ]
   },
-  "value": "PSZ RTU Electric and DX Coils and Electric Baseboard",
+  "value": "psz-elec-elecbb",
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
@@ -756,7 +756,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Electric and DX Coils and Electric Baseboard | Thermal Zone 5",
+  "target": "psz-elec-elecbb | Thermal Zone 5",
   "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
   "article": "5.2.2.8.(1)",
   "ruling": "D-20",
@@ -765,11 +765,11 @@
  },
  {
   "step": "rules",
-  "target": "PSZ RTU Electric and DX Coils and Electric Baseboard | Thermal Zone 5",
+  "target": "psz-elec-elecbb | Thermal Zone 5",
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": [
-    "MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard | Thermal Zone 1"
+    "vav-elec-elecbb-scrollchiller | Thermal Zone 1"
    ]
   },
   "article": "8.4.4.15.(2)",
@@ -779,7 +779,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU Electric and DX Coils and Electric Baseboard | Thermal Zone 5",
+  "target": "psz-elec-elecbb | Thermal Zone 5",
   "action": "reference system operates on the proposed operating schedule",
   "inputs": {
    "schedule": "Always On Discrete"

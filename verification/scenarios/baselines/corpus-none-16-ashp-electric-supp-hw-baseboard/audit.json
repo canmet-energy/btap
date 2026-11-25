@@ -199,100 +199,100 @@
  },
  {
   "step": "characterize",
-  "target": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 1",
+  "target": "psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 1",
   "action": "zone group characterized",
   "inputs": {
    "zones": 1,
    "terminal": "cv"
   },
   "value": "psz",
-  "evidence": "air loop name resolves to catalog entry 'PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard'; PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 1 declares equipment_class 'heat_pump'; cooled: OS_Coil_Cooling_DX_SingleSpeed on PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 1; heated: OS_Coil_Heating_DX_SingleSpeed on PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 1; heated: OS_Coil_Heating_Electric on PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 1",
+  "evidence": "air loop name resolves to catalog entry 'psz-ashp-elecsupp-hwbb-gasboiler'; psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 1 declares equipment_class 'heat_pump'; cooled: OS_Coil_Cooling_DX_SingleSpeed on psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 1; heated: OS_Coil_Heating_DX_SingleSpeed on psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 1; heated: OS_Coil_Heating_Electric on psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 1",
   "building": "reference building",
   "level": "decision"
  },
  {
   "step": "characterize",
-  "target": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 2",
+  "target": "psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 2",
   "action": "zone group characterized",
   "inputs": {
    "zones": 1,
    "terminal": "cv"
   },
   "value": "psz",
-  "evidence": "air loop name resolves to catalog entry 'PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard'; PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 2 declares equipment_class 'heat_pump'; cooled: OS_Coil_Cooling_DX_SingleSpeed on PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 2; heated: OS_Coil_Heating_DX_SingleSpeed on PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 2; heated: OS_Coil_Heating_Electric on PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 2",
+  "evidence": "air loop name resolves to catalog entry 'psz-ashp-elecsupp-hwbb-gasboiler'; psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 2 declares equipment_class 'heat_pump'; cooled: OS_Coil_Cooling_DX_SingleSpeed on psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 2; heated: OS_Coil_Heating_DX_SingleSpeed on psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 2; heated: OS_Coil_Heating_Electric on psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 2",
   "building": "reference building",
   "level": "decision"
  },
  {
   "step": "characterize",
-  "target": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 3",
+  "target": "psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 3",
   "action": "zone group characterized",
   "inputs": {
    "zones": 1,
    "terminal": "cv"
   },
   "value": "psz",
-  "evidence": "air loop name resolves to catalog entry 'PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard'; PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 3 declares equipment_class 'heat_pump'; cooled: OS_Coil_Cooling_DX_SingleSpeed on PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 3; heated: OS_Coil_Heating_DX_SingleSpeed on PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 3; heated: OS_Coil_Heating_Electric on PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 3",
+  "evidence": "air loop name resolves to catalog entry 'psz-ashp-elecsupp-hwbb-gasboiler'; psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 3 declares equipment_class 'heat_pump'; cooled: OS_Coil_Cooling_DX_SingleSpeed on psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 3; heated: OS_Coil_Heating_DX_SingleSpeed on psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 3; heated: OS_Coil_Heating_Electric on psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 3",
   "building": "reference building",
   "level": "decision"
  },
  {
   "step": "characterize",
-  "target": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 4",
+  "target": "psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 4",
   "action": "zone group characterized",
   "inputs": {
    "zones": 1,
    "terminal": "cv"
   },
   "value": "psz",
-  "evidence": "air loop name resolves to catalog entry 'PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard'; PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 4 declares equipment_class 'heat_pump'; cooled: OS_Coil_Cooling_DX_SingleSpeed on PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 4; heated: OS_Coil_Heating_DX_SingleSpeed on PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 4; heated: OS_Coil_Heating_Electric on PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 4",
+  "evidence": "air loop name resolves to catalog entry 'psz-ashp-elecsupp-hwbb-gasboiler'; psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 4 declares equipment_class 'heat_pump'; cooled: OS_Coil_Cooling_DX_SingleSpeed on psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 4; heated: OS_Coil_Heating_DX_SingleSpeed on psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 4; heated: OS_Coil_Heating_Electric on psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 4",
   "building": "reference building",
   "level": "decision"
  },
  {
   "step": "characterize",
-  "target": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 5",
+  "target": "psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 5",
   "action": "zone group characterized",
   "inputs": {
    "zones": 1,
    "terminal": "cv"
   },
   "value": "psz",
-  "evidence": "air loop name resolves to catalog entry 'PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard'; PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 5 declares equipment_class 'heat_pump'; cooled: OS_Coil_Cooling_DX_SingleSpeed on PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 5; heated: OS_Coil_Heating_DX_SingleSpeed on PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 5; heated: OS_Coil_Heating_Electric on PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 5",
+  "evidence": "air loop name resolves to catalog entry 'psz-ashp-elecsupp-hwbb-gasboiler'; psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 5 declares equipment_class 'heat_pump'; cooled: OS_Coil_Cooling_DX_SingleSpeed on psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 5; heated: OS_Coil_Heating_DX_SingleSpeed on psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 5; heated: OS_Coil_Heating_Electric on psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 5",
   "building": "reference building",
   "level": "decision"
  },
  {
   "step": "characterize",
-  "target": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 1",
+  "target": "psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 1",
   "action": "cooling capacity unsized \u2014 design_cooling_kw unavailable (run a sizing run for kW-threshold rules)",
   "building": "reference building",
   "level": "warning"
  },
  {
   "step": "characterize",
-  "target": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 2",
+  "target": "psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 2",
   "action": "cooling capacity unsized \u2014 design_cooling_kw unavailable (run a sizing run for kW-threshold rules)",
   "building": "reference building",
   "level": "warning"
  },
  {
   "step": "characterize",
-  "target": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 3",
+  "target": "psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 3",
   "action": "cooling capacity unsized \u2014 design_cooling_kw unavailable (run a sizing run for kW-threshold rules)",
   "building": "reference building",
   "level": "warning"
  },
  {
   "step": "characterize",
-  "target": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 4",
+  "target": "psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 4",
   "action": "cooling capacity unsized \u2014 design_cooling_kw unavailable (run a sizing run for kW-threshold rules)",
   "building": "reference building",
   "level": "warning"
  },
  {
   "step": "characterize",
-  "target": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 5",
+  "target": "psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 5",
   "action": "cooling capacity unsized \u2014 design_cooling_kw unavailable (run a sizing run for kW-threshold rules)",
   "building": "reference building",
   "level": "warning"
@@ -380,12 +380,12 @@
   "inputs": {
    "category": "General Area",
    "energy_type": "gas",
-   "serving_system": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 1",
+   "serving_system": "psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 1",
    "heated": true,
    "cooled": true,
    "cooling_kw": null
   },
-  "value": "System hp -> 'PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard'",
+  "value": "System hp -> 'psz-ashp-gassupp-hwbb-gasboiler'",
   "article": "8.4.4.7.(1); 8.4.4.13.(2)(a)",
   "building": "reference building",
   "level": "decision"
@@ -452,12 +452,12 @@
   "inputs": {
    "category": "General Area",
    "energy_type": "gas",
-   "serving_system": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 2",
+   "serving_system": "psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 2",
    "heated": true,
    "cooled": true,
    "cooling_kw": null
   },
-  "value": "System hp -> 'PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard'",
+  "value": "System hp -> 'psz-ashp-gassupp-hwbb-gasboiler'",
   "article": "8.4.4.7.(1); 8.4.4.13.(2)(a)",
   "building": "reference building",
   "level": "decision"
@@ -524,12 +524,12 @@
   "inputs": {
    "category": "General Area",
    "energy_type": "gas",
-   "serving_system": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 3",
+   "serving_system": "psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 3",
    "heated": true,
    "cooled": true,
    "cooling_kw": null
   },
-  "value": "System hp -> 'PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard'",
+  "value": "System hp -> 'psz-ashp-gassupp-hwbb-gasboiler'",
   "article": "8.4.4.7.(1); 8.4.4.13.(2)(a)",
   "building": "reference building",
   "level": "decision"
@@ -596,12 +596,12 @@
   "inputs": {
    "category": "General Area",
    "energy_type": "gas",
-   "serving_system": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 4",
+   "serving_system": "psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 4",
    "heated": true,
    "cooled": true,
    "cooling_kw": null
   },
-  "value": "System hp -> 'PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard'",
+  "value": "System hp -> 'psz-ashp-gassupp-hwbb-gasboiler'",
   "article": "8.4.4.7.(1); 8.4.4.13.(2)(a)",
   "building": "reference building",
   "level": "decision"
@@ -668,12 +668,12 @@
   "inputs": {
    "category": "General Area",
    "energy_type": "gas",
-   "serving_system": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 5",
+   "serving_system": "psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 5",
    "heated": true,
    "cooled": true,
    "cooling_kw": null
   },
-  "value": "System hp -> 'PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard'",
+  "value": "System hp -> 'psz-ashp-gassupp-hwbb-gasboiler'",
   "article": "8.4.4.7.(1); 8.4.4.13.(2)(a)",
   "building": "reference building",
   "level": "decision"
@@ -703,7 +703,7 @@
     "build"
    ]
   },
-  "value": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard",
+  "value": "psz-ashp-gassupp-hwbb-gasboiler",
   "article": "8.4.4.7.(1); 8.4.4.13.(2)(a)",
   "building": "reference building",
   "level": "decision"
@@ -728,7 +728,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 1",
+  "target": "psz-ashp-gassupp-hwbb-gasboiler | Thermal Zone 1",
   "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
   "article": "5.2.2.8.(1)",
   "ruling": "D-20",
@@ -737,11 +737,11 @@
  },
  {
   "step": "rules",
-  "target": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 1",
+  "target": "psz-ashp-gassupp-hwbb-gasboiler | Thermal Zone 1",
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": [
-    "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 1"
+    "psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 1"
    ]
   },
   "article": "8.4.4.15.(2)",
@@ -751,7 +751,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 1",
+  "target": "psz-ashp-gassupp-hwbb-gasboiler | Thermal Zone 1",
   "action": "reference system operates on the proposed operating schedule",
   "inputs": {
    "schedule": "Always On Discrete"
@@ -788,7 +788,7 @@
     "build"
    ]
   },
-  "value": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard",
+  "value": "psz-ashp-gassupp-hwbb-gasboiler",
   "article": "8.4.4.7.(1); 8.4.4.13.(2)(a)",
   "building": "reference building",
   "level": "decision"
@@ -813,7 +813,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 2",
+  "target": "psz-ashp-gassupp-hwbb-gasboiler | Thermal Zone 2",
   "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
   "article": "5.2.2.8.(1)",
   "ruling": "D-20",
@@ -822,11 +822,11 @@
  },
  {
   "step": "rules",
-  "target": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 2",
+  "target": "psz-ashp-gassupp-hwbb-gasboiler | Thermal Zone 2",
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": [
-    "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 2"
+    "psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 2"
    ]
   },
   "article": "8.4.4.15.(2)",
@@ -836,7 +836,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 2",
+  "target": "psz-ashp-gassupp-hwbb-gasboiler | Thermal Zone 2",
   "action": "reference system operates on the proposed operating schedule",
   "inputs": {
    "schedule": "Always On Discrete"
@@ -873,7 +873,7 @@
     "build"
    ]
   },
-  "value": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard",
+  "value": "psz-ashp-gassupp-hwbb-gasboiler",
   "article": "8.4.4.7.(1); 8.4.4.13.(2)(a)",
   "building": "reference building",
   "level": "decision"
@@ -898,7 +898,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 3",
+  "target": "psz-ashp-gassupp-hwbb-gasboiler | Thermal Zone 3",
   "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
   "article": "5.2.2.8.(1)",
   "ruling": "D-20",
@@ -907,11 +907,11 @@
  },
  {
   "step": "rules",
-  "target": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 3",
+  "target": "psz-ashp-gassupp-hwbb-gasboiler | Thermal Zone 3",
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": [
-    "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 3"
+    "psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 3"
    ]
   },
   "article": "8.4.4.15.(2)",
@@ -921,7 +921,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 3",
+  "target": "psz-ashp-gassupp-hwbb-gasboiler | Thermal Zone 3",
   "action": "reference system operates on the proposed operating schedule",
   "inputs": {
    "schedule": "Always On Discrete"
@@ -958,7 +958,7 @@
     "build"
    ]
   },
-  "value": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard",
+  "value": "psz-ashp-gassupp-hwbb-gasboiler",
   "article": "8.4.4.7.(1); 8.4.4.13.(2)(a)",
   "building": "reference building",
   "level": "decision"
@@ -983,7 +983,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 4",
+  "target": "psz-ashp-gassupp-hwbb-gasboiler | Thermal Zone 4",
   "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
   "article": "5.2.2.8.(1)",
   "ruling": "D-20",
@@ -992,11 +992,11 @@
  },
  {
   "step": "rules",
-  "target": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 4",
+  "target": "psz-ashp-gassupp-hwbb-gasboiler | Thermal Zone 4",
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": [
-    "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 4"
+    "psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 4"
    ]
   },
   "article": "8.4.4.15.(2)",
@@ -1006,7 +1006,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 4",
+  "target": "psz-ashp-gassupp-hwbb-gasboiler | Thermal Zone 4",
   "action": "reference system operates on the proposed operating schedule",
   "inputs": {
    "schedule": "Always On Discrete"
@@ -1043,7 +1043,7 @@
     "build"
    ]
   },
-  "value": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard",
+  "value": "psz-ashp-gassupp-hwbb-gasboiler",
   "article": "8.4.4.7.(1); 8.4.4.13.(2)(a)",
   "building": "reference building",
   "level": "decision"
@@ -1068,7 +1068,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 5",
+  "target": "psz-ashp-gassupp-hwbb-gasboiler | Thermal Zone 5",
   "action": "air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)",
   "article": "5.2.2.8.(1)",
   "ruling": "D-20",
@@ -1077,11 +1077,11 @@
  },
  {
   "step": "rules",
-  "target": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 5",
+  "target": "psz-ashp-gassupp-hwbb-gasboiler | Thermal Zone 5",
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": [
-    "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 5"
+    "psz-ashp-elecsupp-hwbb-gasboiler | Thermal Zone 5"
    ]
   },
   "article": "8.4.4.15.(2)",
@@ -1091,7 +1091,7 @@
  },
  {
   "step": "build",
-  "target": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 5",
+  "target": "psz-ashp-gassupp-hwbb-gasboiler | Thermal Zone 5",
   "action": "reference system operates on the proposed operating schedule",
   "inputs": {
    "schedule": "Always On Discrete"

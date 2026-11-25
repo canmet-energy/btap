@@ -831,14 +831,14 @@
  },
  {
   "step": "characterize",
-  "target": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1",
+  "target": "vav-hw-hwbb-gasboiler-scrollchiller | Thermal Zone 1",
   "action": "zone group characterized",
   "inputs": {
    "zones": 5,
    "terminal": "vav_reheat"
   },
   "value": "vav_reheat",
-  "evidence": "air loop name resolves to catalog entry 'MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard'; cooled: OS_Coil_Cooling_Water on MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1; heated: OS_Coil_Heating_Water on MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 1; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 2; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 3; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 4; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 5",
+  "evidence": "air loop name resolves to catalog entry 'vav-hw-hwbb-gasboiler-scrollchiller'; cooled: OS_Coil_Cooling_Water on vav-hw-hwbb-gasboiler-scrollchiller | Thermal Zone 1; heated: OS_Coil_Heating_Water on vav-hw-hwbb-gasboiler-scrollchiller | Thermal Zone 1; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 1; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 2; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 3; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 4; heated: reheat coil on terminal Air Terminal Single Duct VAV Reheat 5",
   "building": "reference building",
   "level": "decision"
  },
@@ -990,12 +990,12 @@
   "inputs": {
    "category": "Data Processing Area",
    "energy_type": "gas",
-   "serving_system": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1",
+   "serving_system": "vav-hw-hwbb-gasboiler-scrollchiller | Thermal Zone 1",
    "heated": true,
    "cooled": true,
    "cooling_kw": 53.866993730000004
   },
-  "value": "System 2 -> 'FPFC MAU Chilled Water Coils with Scroll Chiller'",
+  "value": "System 2 -> 'mau-fc4-gas-chw-gasboiler-scrollchiller'",
   "article": "8.4.4.7.(1); 8.4.4.7.-A: 'Where the proposed building or space has a cooling capacity exceeding 20 kW, the reference building or space shall use System 2'",
   "building": "reference building",
   "level": "decision"
@@ -1007,12 +1007,12 @@
   "inputs": {
    "category": "Data Processing Area",
    "energy_type": "gas",
-   "serving_system": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1",
+   "serving_system": "vav-hw-hwbb-gasboiler-scrollchiller | Thermal Zone 1",
    "heated": true,
    "cooled": true,
    "cooling_kw": 53.866993730000004
   },
-  "value": "System 2 -> 'FPFC MAU Chilled Water Coils with Scroll Chiller'",
+  "value": "System 2 -> 'mau-fc4-gas-chw-gasboiler-scrollchiller'",
   "article": "8.4.4.7.(1); 8.4.4.7.-A: 'Where the proposed building or space has a cooling capacity exceeding 20 kW, the reference building or space shall use System 2'",
   "building": "reference building",
   "level": "decision"
@@ -1024,12 +1024,12 @@
   "inputs": {
    "category": "Data Processing Area",
    "energy_type": "gas",
-   "serving_system": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1",
+   "serving_system": "vav-hw-hwbb-gasboiler-scrollchiller | Thermal Zone 1",
    "heated": true,
    "cooled": true,
    "cooling_kw": 53.866993730000004
   },
-  "value": "System 2 -> 'FPFC MAU Chilled Water Coils with Scroll Chiller'",
+  "value": "System 2 -> 'mau-fc4-gas-chw-gasboiler-scrollchiller'",
   "article": "8.4.4.7.(1); 8.4.4.7.-A: 'Where the proposed building or space has a cooling capacity exceeding 20 kW, the reference building or space shall use System 2'",
   "building": "reference building",
   "level": "decision"
@@ -1041,12 +1041,12 @@
   "inputs": {
    "category": "Data Processing Area",
    "energy_type": "gas",
-   "serving_system": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1",
+   "serving_system": "vav-hw-hwbb-gasboiler-scrollchiller | Thermal Zone 1",
    "heated": true,
    "cooled": true,
    "cooling_kw": 53.866993730000004
   },
-  "value": "System 2 -> 'FPFC MAU Chilled Water Coils with Scroll Chiller'",
+  "value": "System 2 -> 'mau-fc4-gas-chw-gasboiler-scrollchiller'",
   "article": "8.4.4.7.(1); 8.4.4.7.-A: 'Where the proposed building or space has a cooling capacity exceeding 20 kW, the reference building or space shall use System 2'",
   "building": "reference building",
   "level": "decision"
@@ -1058,12 +1058,12 @@
   "inputs": {
    "category": "Data Processing Area",
    "energy_type": "gas",
-   "serving_system": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1",
+   "serving_system": "vav-hw-hwbb-gasboiler-scrollchiller | Thermal Zone 1",
    "heated": true,
    "cooled": true,
    "cooling_kw": 53.866993730000004
   },
-  "value": "System 2 -> 'FPFC MAU Chilled Water Coils with Scroll Chiller'",
+  "value": "System 2 -> 'mau-fc4-gas-chw-gasboiler-scrollchiller'",
   "article": "8.4.4.7.(1); 8.4.4.7.-A: 'Where the proposed building or space has a cooling capacity exceeding 20 kW, the reference building or space shall use System 2'",
   "building": "reference building",
   "level": "decision"
@@ -1073,7 +1073,7 @@
   "action": "one COMMON VENTILATION SYSTEM serves these thermal blocks; the heating and cooling equipment stays block-level",
   "inputs": {
    "reference_system": 2,
-   "catalogue": "FPFC MAU Chilled Water Coils with Scroll Chiller",
+   "catalogue": "mau-fc4-gas-chw-gasboiler-scrollchiller",
    "config": null,
    "energy_type": "gas",
    "selection_assignments_absorbed": 5,
@@ -1155,7 +1155,7 @@
     "build"
    ]
   },
-  "value": "FPFC MAU Chilled Water Coils with Scroll Chiller",
+  "value": "mau-fc4-gas-chw-gasboiler-scrollchiller",
   "article": "8.4.4.7.(1); 8.4.4.7.-A: 'Where the proposed building or space has a cooling capacity exceeding 20 kW, the reference building or space shall use System 2'",
   "building": "reference building",
   "level": "decision"
@@ -1237,11 +1237,11 @@
  },
  {
   "step": "rules",
-  "target": "FPFC MAU Chilled Water Coils with Scroll Chiller",
+  "target": "mau-fc4-gas-chw-gasboiler-scrollchiller",
   "action": "no demand-controlled ventilation on the proposed systems serving these thermal blocks \u2014 none modeled in the reference",
   "inputs": {
    "proposed_loops": [
-    "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard | Thermal Zone 1"
+    "vav-hw-hwbb-gasboiler-scrollchiller | Thermal Zone 1"
    ]
   },
   "article": "8.4.4.15.(2)",
@@ -1251,7 +1251,7 @@
  },
  {
   "step": "build",
-  "target": "FPFC MAU Chilled Water Coils with Scroll Chiller",
+  "target": "mau-fc4-gas-chw-gasboiler-scrollchiller",
   "action": "reference system operates on the proposed operating schedule",
   "inputs": {
    "schedule": "Always On Discrete"
@@ -3950,7 +3950,7 @@
  },
  {
   "step": "rules",
-  "target": "FPFC MAU Chilled Water Coils with Scroll Chiller",
+  "target": "mau-fc4-gas-chw-gasboiler-scrollchiller",
   "action": "energy recovery added to reference system (Table 5.2.10.1 threshold met)",
   "inputs": {
    "supply_l_s": 2607,
@@ -3961,7 +3961,7 @@
    "hdd": 3890,
    "threshold": "R (required at all flow rates)"
   },
-  "value": "rotary HX @ 50% sensible+latent effectiveness (= 50% ENTHALPY effectiveness by identity, the 5.2.10.1.(4) minimum) with 5.2.10.1.(6) overshoot control (FPFC MAU Chilled Water Coils with Scroll Chiller ERV)",
+  "value": "rotary HX @ 50% sensible+latent effectiveness (= 50% ENTHALPY effectiveness by identity, the 5.2.10.1.(4) minimum) with 5.2.10.1.(6) overshoot control (mau-fc4-gas-chw-gasboiler-scrollchiller ERV)",
   "article": "5.2.10.1.(1)",
   "ruling": "D-06",
   "building": "reference building",
@@ -3969,7 +3969,7 @@
  },
  {
   "step": "rules",
-  "target": "FPFC MAU Chilled Water Coils with Scroll Chiller ERV",
+  "target": "mau-fc4-gas-chw-gasboiler-scrollchiller ERV",
   "action": "energy-recovery sensible and latent effectiveness set to the minimum enthalpy effectiveness",
   "value": "50% sensible and 50% latent at every rating point",
   "article": "5.2.10.1.(4)",
@@ -3979,7 +3979,7 @@
  },
  {
   "step": "rules",
-  "target": "FPFC MAU Chilled Water Coils with Scroll Chiller ERV",
+  "target": "mau-fc4-gas-chw-gasboiler-scrollchiller ERV",
   "action": "energy-recovery supply-air temperature overshoot control enabled",
   "value": "supply outlet temperature control with pretreat setpoint manager",
   "article": "5.2.10.1.(6)",
