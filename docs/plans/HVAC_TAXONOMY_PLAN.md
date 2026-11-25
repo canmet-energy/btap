@@ -308,3 +308,16 @@ Astra rated nine findings ADDRESSED and #7 and #9 PARTLY. She raised these new i
 - **UI verification exercises the shipped JavaScript.** The filter and URL-state code becomes a pure function in the page's script, and a test runs that exact function under `node` over the page's data. The test is skipped with a stated reason when `node` is absent, and is required in the CI image.
 - **Chip counts are disjunctive:** a count shows what ticking that chip would give, with the other groups applied. Multivalued facets do not sum to 110, and no test claims they do.
 - **Display grammar:** display text never reaches a model, so it needs only to be ASCII. `;` is allowed there. The ban on `, ; ! |` applies to IDs and emitted model names only.
+
+## Findings outside this PR's scope (record; fix separately)
+
+These surfaced while building the taxonomy (2026-11-25). The rename does not change any of them. The taxonomy only reports what the builders do.
+
+1. **`stock/identify.py` reads equipment from names and defaults.**
+   - `'DX' in row['name']` credits MAU cooling to the four NECB MAU + PTAC rows. It misses the campus water-heated-PTAC MAU, which has the same DX coil.
+   - `row_heating_media` calls the four reference heat-pump CV-reheat rows *electric*, but the builder fits a DX heat-pump coil.
+   - In this PR, scores stay identical by reading the immutable `legacy_name`. The fix is a separate, measured change.
+2. **Possible double ventilation in the DOAS + four-pipe fan-coil composites.** `fan_coils.py` never zeroes the fan coils' outdoor air, so the DOAS *and* the fan coils ventilate. This is the class #217 found with zone ERVs, and it needs a sizing run to confirm.
+3. **`canonical.py` describes the reference heat-pump System 1 rows as "100% OA make-up air".** The builder makes a mixed-air air handler (`sys_oa='mixed'`). The canonical names are retired by this PR.
+4. **The NECB System 2 "make-up air unit" is built as a mixed-air unit.** It uses `build_oa_system` with `necb_mau` sizing (`all_outdoor_air: False`), so it is not 100% outdoor air.
+5. **Chiller kind is a label only.** `chiller_type` names the chiller, and every chiller is a default `ChillerElectricEIR` until the efficiency pass applies kind-specific curves.

@@ -83,7 +83,7 @@ class TestFacetsFollowTheirFields(unittest.TestCase):
         ("PSZ RTU Gas and DX Coils and Hot Water Baseboard", "heating_coil_type", "Electric", "ahu_heating"),
         ("PSZ RTU Gas and DX Coils and Hot Water Baseboard", "baseboard_type", "Electric", "zone_heating"),
         ("PSZ-AC with gas coil", "per_zone", False, "scope"),
-        ("MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard", "chiller_type", "Centrifugal", "chw_plant"),
+        ("MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard", "chiller_type", "Centrifugal", "chiller_kind"),
         ("MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard", "chw_source", "air_cooled", "chw_plant"),
         ("Baseboard gas boiler", "hw_source", "district", "hw_plant"),
         ("Baseboard gas boiler", "boiler_fuel", "Electricity", "hw_plant"),
@@ -97,6 +97,9 @@ class TestFacetsFollowTheirFields(unittest.TestCase):
         ("Shared hot water air handler with water reheat", "reheat", None, "system_type"),
         ("Water source heat pumps", "heat_rejection", "ground", "hw_plant"),
         ("PTAC with baseboard electric", "unit_type", "window_ac", "system_type"),
+        ("MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard", "chw_source", "air_cooled", "heat_rejection"),
+        ("Recirculating CRAH chilled water with humidity control", "ventilation", True, "outdoor_air"),
+        ("FPFC MAU DX Coils with Scroll Chiller", "heating", "none", "changeover"),
     ]
 
     def test_each_field_moves_its_facet(self):
@@ -126,6 +129,49 @@ class TestTheConfiguredBuildIsDescribed(unittest.TestCase):
         self.assertEqual(["gas_boiler"], taxonomy.facets(base)["hw_plant"])
         self.assertEqual(["electric_boiler"], taxonomy.facets(electric)["hw_plant"])
         self.assertIn("electric boiler", taxonomy.display(electric))
+
+
+class TestFableFindings(unittest.TestCase):
+    """Builder facts an independent read (Fable, 2026-11-25) found the first
+    version got wrong."""
+
+    def test_a_water_cooled_chiller_brings_its_cooling_tower(self):
+        f = taxonomy.facets(row("MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard"))
+        self.assertEqual(("water_cooled_chiller", "cooling_tower"), (f["chw_plant"][0], f["heat_rejection"]))
+
+    def test_a_shared_rooftop_unit_says_so(self):
+        name = taxonomy.display(row("PSZ RTU Gas and DX Coils and Hot Water Baseboard"))
+        self.assertIn("one unit serving several zones", name)
+        self.assertIn("one unit per zone", taxonomy.display(row("PSZ-AC with gas coil")))
+
+    def test_the_fan_coil_mau_defaults_to_dx(self):
+        bare = {k: v for k, v in row("FPFC MAU DX Coils with Scroll Chiller").items()
+                if k != "mau_cooling_type"}
+        self.assertEqual("dx", taxonomy.facets(bare)["ahu_cooling"])
+
+    def test_a_cooled_reheat_handler_is_not_named_like_the_heating_only_one(self):
+        heating_only = row("Shared hot water air handler with water reheat")
+        cooled = {**heating_only, "cooling": True}
+        self.assertNotEqual(taxonomy.mint_id(heating_only), taxonomy.mint_id(cooled))
+        self.assertEqual("dx", taxonomy.facets(cooled)["ahu_cooling"])
+
+    def test_a_composite_keeps_every_parts_plant(self):
+        f = taxonomy.facets(row("DOAS with fan coil air-cooled chiller with district hot water"))
+        self.assertEqual((["district"], ["air_cooled_chiller"]), (f["hw_plant"], f["chw_plant"]))
+
+    def test_configs_it_cannot_describe_are_refused_not_misnamed(self):
+        cases = [
+            {**row("hs12_ashp_baseboard"), "vent_type": "mixed"},
+            {**row("PSZ-AC with gas coil"), "needs_zone_erv": True},
+            {**row("FPFC MAU DX Coils with Scroll Chiller"), "mau": False},
+        ]
+        for config in cases:
+            with self.subTest(config=config["name"]), self.assertRaises(taxonomy.TaxonomyUnsupported):
+                taxonomy.facets(config)
+
+    def test_needs_erv_is_read_on_any_family(self):
+        config = {**row("PSZ-AC with gas coil"), "needs_erv": True, "erv_profile": "plate_erv"}
+        self.assertEqual("erv", taxonomy.facets(config)["vent_heat_recovery"])
 
 
 if __name__ == "__main__":
