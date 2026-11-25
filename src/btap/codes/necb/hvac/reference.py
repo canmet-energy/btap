@@ -1010,7 +1010,34 @@ def _finalize(assignment, group, definitions, selection, facts, audit,
                            'cooling_kw': group['design_cooling_kw']},
                    value=f"System {assignment.reference_system} -> '{assignment.catalog_name}'",
                    article='; '.join(_uniq([a for a in assignment.articles if a is not None])))
+    _disclose_configured_build(assignment, audit)
     return assignment
+
+
+def _disclose_configured_build(assignment, audit):
+    """Say what an override actually builds when it changes the system.
+
+    A catalogue id names its BASE row and is what the reference's loops are
+    called (D-112). NECB System 2 and 5 electric are the gas-boiler fan-coil
+    rows with ``boiler_fuel: Electricity``, so the id says "gasboiler" on an
+    electric-boiler build (Fable, PR #239 review). The id stays — it is what
+    classifies the reference's own loops — and this entry states the build,
+    only when the override changes what the taxonomy would call it.
+    """
+    if not assignment.config:
+        return
+    from btap.modeling.hvac import catalog, taxonomy
+    base = catalog.resolve(assignment.catalog_name)
+    merged = {**base, **assignment.config}
+    configured = taxonomy.mint_id(merged)
+    if configured == base['id']:
+        return
+    overrides = ', '.join(f'{k}={v}' for k, v in sorted(assignment.config.items()))
+    audit.info('selection',
+               f"'{base['id']}' built with {overrides}: {taxonomy.display(merged)}",
+               target=base['id'],
+               inputs={'config': dict(sorted(assignment.config.items())),
+                       'configured_as': configured})
 
 
 def _uniq(items):

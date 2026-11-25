@@ -8903,6 +8903,19 @@ verified the facets against every builder.
   `btap.codes.necb.hvac.catalog_annotations.catalog_reference_use`, read from
   each edition's `system_definitions`.
 
+**An override that changes the system is stated, not renamed.** NECB
+Systems 2 and 5 electric build the gas-boiler fan-coil rows with
+`boiler_fuel: Electricity`, so the reference's loops carry an id that says
+`gasboiler` on an electric-boiler build (Fable, PR #239 review). The id
+stays: it is what classifies the reference's own loops, and re-pointing
+those assignments at new catalogue rows would end the D-58 golden's
+pure-relabel proof. Instead the selection audits one more `info` entry
+whenever the override changes the id the taxonomy would mint, naming the
+override and the configured system in plain English
+(`btap/codes/necb/hvac/reference.py#_disclose_configured_build`). Only the
+four `boiler_fuel` overrides qualify; `staged_coils` does not. Separate
+electric-boiler rows are a follow-up, with their own gates.
+
 **The D-58 golden was edited by hand.** D-79 forbids regenerating it from
 Python, so its identity paths — each row's name and every assignment's
 `catalog` value, 3990 values — were relabelled through the committed

@@ -93,6 +93,14 @@ class TestTheShippedScript(unittest.TestCase):
             "JSON.stringify(BtapCatalog.parseHash(BtapCatalog.buildHash(%s)))" % json.dumps(state)))
         self.assertEqual(state, back)
 
+    def test_a_malformed_fragment_is_ignored_not_fatal(self):
+        # `#q=100%` is an invalid percent-escape; it must not kill the script
+        # (Fable, PR #239 review). The valid pair beside it still applies.
+        back = json.loads(self.ctx.eval(
+            "JSON.stringify(BtapCatalog.parseHash('#q=100%&sys=psz-gas-hwbb-gasboiler'))"))
+        self.assertEqual("psz-gas-hwbb-gasboiler", back["sys"])
+        self.assertEqual("", back["q"])
+
 
 if __name__ == "__main__":
     unittest.main()

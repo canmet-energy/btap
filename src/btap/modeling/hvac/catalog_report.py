@@ -1950,7 +1950,10 @@ SCRIPT_JS = r"""var BtapCatalog = (function(){
     var state = {q: '', selected: {}, sys: null};
     (hash || '').replace(/^#/, '').split('&').forEach(function(part){
       if (!part) return;
-      var kv = part.split('='), key = decodeURIComponent(kv[0]), value = decodeURIComponent(kv[1] || '');
+      var kv = part.split('='), key, value;
+      // A hand-typed fragment (`#q=100%`) must not kill the page.
+      try { key = decodeURIComponent(kv[0]); value = decodeURIComponent(kv[1] || ''); }
+      catch (e) { return; }
       if (key === 'q') state.q = value;
       else if (key === 'sys') state.sys = value;
       else state.selected[key] = value ? value.split(',') : [];
@@ -1986,6 +1989,10 @@ if (typeof document !== 'undefined'){ (function(C){
     document.getElementById(it.el.getAttribute('data-target')).classList.add('active');
     items.forEach(function(x){ x.el.classList.toggle('active', x === it); });
   }
+  function clearSelection(){
+    [].forEach.call(document.querySelectorAll('.system-detail'), function(d){ d.classList.remove('active'); });
+    items.forEach(function(x){ x.el.classList.remove('active'); });
+  }
   function render(){
     var r = C.filterItems(items, state.q, state.selected), shown = {};
     r.visible.forEach(function(id){ shown[id] = true; });
@@ -2001,7 +2008,8 @@ if (typeof document !== 'undefined'){ (function(C){
       b.disabled = !n && !b.checked;
     });
     document.getElementById('search-count').textContent = r.visible.length + ' of ' + items.length;
-    if (!state.sys || !shown[state.sys]) select(r.visible[0]); else select(state.sys);
+    if (!r.visible.length) { state.sys = null; clearSelection(); }
+    else if (!state.sys || !shown[state.sys]) select(r.visible[0]); else select(state.sys);
     history.replaceState(null, '', C.buildHash(state) || location.pathname);
   }
   function readControls(){
@@ -2070,7 +2078,7 @@ p.meta { color: #444; font-size: .85rem; max-width: 60rem; margin-bottom: .5rem;
 #system-search { width: 100%; padding: .45rem .6rem; font-size: .9rem; border: 1px solid #b8c0c8;
                  border-radius: .4rem; }
 #search-count { font-size: .72rem; color: #667; padding-left: .1rem; }
-.nav-family:not(.collapsed) .nav-item { display: block; width: 100%; text-align: left; border: none; background: none;
+.nav-type .nav-item { display: block; width: 100%; text-align: left; border: none; background: none;
             font: inherit; font-size: .8rem; color: #24313c; padding: .3rem .5rem; border-radius: .35rem;
             cursor: pointer; word-break: break-word; }
 .nav-item:hover { background: #eef2f5; }

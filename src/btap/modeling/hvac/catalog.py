@@ -96,7 +96,7 @@ def is_legacy_key(name):
     """True when `name` resolves, but not by its id — the caller used an old
     name or alias, which a build may record."""
     row = row_for(name)
-    return row is not None and row['id'] != name
+    return row is not None and row['id'].casefold() != str(name).casefold()
 
 
 def list_systems(filter=None, family=None, **facet_filters):

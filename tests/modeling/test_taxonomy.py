@@ -174,5 +174,21 @@ class TestFableFindings(unittest.TestCase):
         self.assertEqual("erv", taxonomy.facets(config)["vent_heat_recovery"])
 
 
+class TestFixesFromThePR239Review(unittest.TestCase):
+
+    def test_an_ashp_override_without_a_backup_fuel_gets_the_builders_default(self):
+        # psz.py: config.get('supp_htg_fuel', 'Electric')
+        from btap.modeling.hvac import catalog, taxonomy
+        row = dict(catalog.resolve("psz-gas-hwbb-gasboiler"))
+        row.pop("supp_htg_fuel", None)
+        row["heat_source"] = "ashp"
+        self.assertEqual("electric", taxonomy.facets(row)["ahu_backup"])
+
+    def test_a_case_variant_of_an_id_is_not_a_legacy_name(self):
+        from btap.modeling.hvac import catalog
+        self.assertFalse(catalog.is_legacy_key("PSZ-GAS-HWBB-GASBOILER"))
+        self.assertTrue(catalog.is_legacy_key("PSZ RTU Gas and DX Coils and Hot Water Baseboard"))
+
+
 if __name__ == "__main__":
     unittest.main()

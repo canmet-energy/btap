@@ -228,7 +228,7 @@ def _refuse(config, *keys):
     for key in keys:
         if config.get(key):
             raise TaxonomyUnsupported(
-                f"{config.get('name')!r}: `{key}` is not described by the taxonomy yet")
+                f"{config.get('id')!r}: `{key}` is not described by the taxonomy yet")
 
 
 # --- per family: what the builder builds -------------------------------------
@@ -239,7 +239,7 @@ def _psz(c):
     return _base(
         c, "psz",
         ahu_heating="ashp" if ashp else _fuel(heat_type),
-        ahu_backup=_fuel(c.get("supp_htg_fuel")) if ashp else "none",
+        ahu_backup=_fuel(c.get("supp_htg_fuel", "Electric")) if ashp else "none",  # psz.py default
         ahu_cooling="dx", outdoor_air="mixed", terminal="diffuser",
         # psz.py: `per_zone` builds one unit per zone; otherwise ONE unit serves
         # every zone it is given, tracking one control zone.
@@ -262,7 +262,7 @@ def _fan_coils(c, *, in_composite=False):
     mau = c.get("mau", True)
     if not mau and not in_composite:
         raise TaxonomyUnsupported(
-            f"{c.get('name')!r}: fan coils with no make-up air unit and no DOAS")
+            f"{c.get('id')!r}: fan coils with no make-up air unit and no DOAS")
     cooling_only = str(c.get("heating")) == "none"      # D-39 System 5 variant
     facets = _base(
         c, ("mau-fc2" if two_pipe else "mau-fc4") if mau else "doas-fc4",
@@ -419,7 +419,7 @@ def _family_facets(c, *, in_composite=False):
     if family == "ecm_ashp_baseboard":
         if c.get("vent_type", "doas") != "doas":
             raise TaxonomyUnsupported(
-                f"{c.get('name')!r}: ashp_baseboard with vent_type "
+                f"{c.get('id')!r}: ashp_baseboard with vent_type "
                 f"{c.get('vent_type')!r} builds a VAV, not DOAS + PTAC")
         # ashp_baseboard.py ('doas'): the PTAC's heat section is always off
         return _base(c, "doas-ptac", ahu_heating=_ecm_air(c, "ashp"),

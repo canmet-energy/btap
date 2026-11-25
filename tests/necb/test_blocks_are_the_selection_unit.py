@@ -1263,6 +1263,29 @@ class TestSAMECatalOGUEDifferentCONFIGKeepsItsFuel(unittest.TestCase):
                          'must carry it')
         self.assertIsNone(gas['config'])
 
+    def test_an_override_that_changes_the_system_is_STATED(self):
+        """D-112 (Fable, PR #239): the catalogue id names the BASE row, which
+        says `gasboiler`, while System 2 electric builds an electric boiler.
+        The selection must say so: once per electric selection, never for
+        the gas one.
+        """
+        _, audit, _ = self.build(gas_loop_name='A Gas',
+                                 electric_loop_name='Z Electric',
+                                 code='necb2020')
+        stated = [e for e in audit.entries
+                  if e['step'] == 'selection' and e['level'] == 'info'
+                  and 'built with' in e['action']]
+        self.assertTrue(stated)
+        for entry in stated:
+            self.assertEqual({'boiler_fuel': 'Electricity'}, entry['inputs']['config'])
+            self.assertIn('elecboiler', entry['inputs']['configured_as'])
+            self.assertIn('electric boiler', entry['action'])
+            self.assertNotIn('gasboiler', entry['inputs']['configured_as'])
+        selected = [e for e in audit.entries if e['action'] == 'reference system selected']
+        electric = [e for e in selected if e['inputs']['energy_type'] == 'electric']
+        self.assertEqual(len(electric), len(stated),
+                         'one statement per electric System 2 selection, none for gas')
+
 
 class TestAnOMITTEDBackupOnlyNeedsItsFuelPresent(unittest.TestCase):
     """The fuel check that fixed Sol's `151` was EQUALITY first, and the frozen
