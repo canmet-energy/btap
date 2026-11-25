@@ -17,7 +17,7 @@ class TestEveryRowHasFacts(unittest.TestCase):
 
     def test_every_catalogue_row_computes(self):
         for row in catalog.rows():
-            with self.subTest(row=row["name"]):
+            with self.subTest(row=row["id"]):
                 row_facts.row_heating_media(row)
                 if row.get("family") == "composite":
                     families, _ = row_facts.composite_shape(row)

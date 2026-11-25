@@ -38,7 +38,7 @@ class DoasVrf(BaseSystem):
             ecm_air.add_zone_vrf_terminal(model, zone, outdoor_unit)
 
         naming.apply(namer, air_loop,
-                     system_name=self.config['name'],
+                     system_name=self.config['id'],
                      sys_abbr=self.config.get('sys_abbr', 'sys_1'),
                      sys_oa='doas',
                      parts={

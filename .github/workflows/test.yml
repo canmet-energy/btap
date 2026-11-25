@@ -105,7 +105,7 @@ jobs:
           cache: pip
           cache-dependency-path: pyproject.toml
       - name: Install the openstudio wheel + test runner
-        run: pip install -q 'openstudio~=3.11.0' pytest pytest-xdist import-linter ruff build
+        run: pip install -q 'openstudio~=3.11.0' pytest pytest-xdist import-linter ruff build quickjs
       # The Python thermal-bridging engine is required on the bare runner too.
       - name: Install the pinned py-tbd engine (a default dependency, D-109; this job runs from source)
         # py-tbd from its released v3.5.2 tag (exactly the version the

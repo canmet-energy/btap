@@ -216,7 +216,7 @@ class PSZ(BaseSystem):
             else:
                 htg_part = 'ashp>c-e'
         naming.apply(namer, air_loop,
-                     system_name=config['name'],
+                     system_name=config['id'],
                      sys_abbr=config['sys_abbr'],
                      sys_oa='mixed',
                      parts={

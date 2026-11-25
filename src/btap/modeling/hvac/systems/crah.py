@@ -85,7 +85,7 @@ class Crah(BaseSystem):
         if not ordered:
             return []
 
-        system_name = self.config['name']
+        system_name = self.config['id']
         always_on = model.alwaysOnDiscreteSchedule()
 
         air_loop = openstudio.model.AirLoopHVAC(model)

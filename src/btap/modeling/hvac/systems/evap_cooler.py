@@ -27,7 +27,7 @@ class EvapCooler(BaseSystem):
             # undeclared loop would fall through to an inference instead, and
             # this is a fact the catalogue row knows for certain.
             equipment_class.declare(air_loop, 'evaporative')
-            air_loop.setName(f"{self.config['name']} | {zone.nameString()}")
+            air_loop.setName(f"{self.config['id']} | {zone.nameString()}")
 
             fan = openstudio.model.FanConstantVolume(model, always_on)
             fan.setName(f"{air_loop.nameString()} Fan")

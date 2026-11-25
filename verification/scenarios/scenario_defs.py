@@ -826,7 +826,7 @@ _SYSTEM_25_FAILURE_BUILDING = {
     "zone_types": {zone: "data centre" for zone in _SEED_ZONES},
 }
 
-PROPOSED_FAN_COIL_SYSTEM = "PSZ RTU Gas and DX Coils and Hot Water Baseboard"
+PROPOSED_FAN_COIL_SYSTEM = "psz-gas-hwbb-gasboiler"
 
 #: The heating-dominated pair's proposed: ONE multi-zone air handler over the
 #: five office-loaded zones. Table 8.4.4.7.-A gives a Data Processing Area
@@ -837,7 +837,7 @@ PROPOSED_FAN_COIL_SYSTEM = "PSZ RTU Gas and DX Coils and Hot Water Baseboard"
 #: witness. These scenarios used to get their one large unit by stretching a
 #: single-zone PSZ over five zones; a central VAV air handler is the good
 #: design that is genuinely one system above 20 kW (2026-11-24).
-HEATING_DOMINATED_PROPOSED = "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard"
+HEATING_DOMINATED_PROPOSED = "vav-hw-hwbb-gasboiler-scrollchiller"
 
 SYSTEM_25_SEAL = ("python-only:first frozen to cover reference System 2/5 "
                   "after issue #113 — authored after the Ruby product "

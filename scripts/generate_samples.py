@@ -54,16 +54,16 @@ MANIFEST = HERE / "sample_manifest.json"
 # to span fuel types and delivery types rather than to be exhaustive: 110 systems
 # would be a test suite, not a sample set.
 SAMPLES = (
-    ("01-baseboard-gas",        "Baseboard gas boiler"),
-    ("02-psz-gas-dx",           "PSZ RTU Gas and DX Coils and Hot Water Baseboard"),
-    ("03-vav-reheat-chiller",   "MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard"),
-    ("04-fancoil-chiller",      "FPFC MAU DX Coils with Scroll Chiller"),
-    ("05-ptac-electric",        "PTAC with baseboard electric"),
-    ("06-unit-heaters-gas",     "Gas unit heaters"),
-    ("07-furnace-forced-air",   "Forced air furnace"),
-    ("08-vrf",                  "VRF"),
-    ("09-water-source-hp",      "Water source heat pumps"),
-    ("10-ashp-pthp",            "hs11_ashp_pthp"),
+    ("01-baseboard-gas",        "bb-hwbb-gasboiler"),
+    ("02-psz-gas-dx",           "psz-gas-hwbb-gasboiler"),
+    ("03-vav-reheat-chiller",   "vav-elec-elecbb-scrollchiller"),
+    ("04-fancoil-chiller",      "mau-fc4-gas-gasboiler-scrollchiller"),
+    ("05-ptac-electric",        "ptac-elecbb"),
+    ("06-unit-heaters-gas",     "uh-gas"),
+    ("07-furnace-forced-air",   "furnace-gas"),
+    ("08-vrf",                  "vrf"),
+    ("09-water-source-hp",      "wshp-gasboiler"),
+    ("10-ashp-pthp",            "doas-pthp-ashp-elecsupp"),
 )
 
 # The staged mixed-fuel plants, built by hand because no single catalog name
@@ -373,24 +373,24 @@ _ground_f_factor_all_non_ordinary.after_build = True
 
 STRESS_CASES = (
     ("13-district-heating",
-     "DOAS with fan coil air-cooled chiller with district hot water",
+     "doas-fc4-elec-district-acscrollchiller",
      "8.4.4.6.(1)(a) — purchased heating: the reference grows a gas-fired boiler "
      "where the proposed has none. MUST be a single-group system: with several "
      "single-zone groups the district loop survives the per-group teardown and is "
      "adopted by name, so the article is only half-applied.",
      None),
     ("14-general-2storey",
-     "Baseboard gas boiler",
+     "bb-hwbb-gasboiler",
      "Table 8.4.4.7.-A — General Area at 2 storeys selects reference System 3. "
      "Pairs with 15; one sample cannot show a flip.",
      _two_storeys),
     ("15-general-3storey",
-     "Baseboard gas boiler",
+     "bb-hwbb-gasboiler",
      "Table 8.4.4.7.-A — the same building at 3 storeys crosses the threshold and "
      "selects System 6 instead.",
      _three_storeys),
     ("16-ashp-electric-supp-hw-baseboard",
-     "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard",
+     "psz-ashp-elecsupp-hwbb-gasboiler",
      "8.4.4.13.(2)(g) / D-52 — the auxiliary-fuel election. Needs --simulate annual: "
      "under :none it cannot run and the structural 8.4.4.9.(4) proxy answers instead. "
      "Proof that it RAN is the (g)(i) suffix on the article and the ELECTED wording, "
@@ -400,7 +400,7 @@ STRESS_CASES = (
      "on an all-electric one there is nothing to elect between.",
      None),
     ("17-vav-hw-reheat",
-     "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Electric Baseboard",
+     "vav-hw-elecbb-gasboiler-scrollchiller",
      "8.4.4.14/8.4.5.14 + DF-17 — the CATALOG-authored hydronic VAV, a common "
      "NECB System 6: five CoilHeatingWater in VAV reheat terminals, held inside "
      "the terminals and so reached through containingHVACComponent (the "
@@ -420,7 +420,7 @@ STRESS_CASES = (
      "absence. 18-vav-hw-subset-reheat is the sample that does.",
      None),
     ("19-corner-block-5storey",
-     "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
+     "vav-hw-hwbb-gasboiler-scrollchiller",
      "Table 8.4.4.7.-B Note (3) / D-18 / AHJ-10 — the ONLY sample with a block "
      "exposed on two facades, and the only one above four storeys. Both are "
      "required: grouping evidence is recorded only above four storeys, and the "
@@ -436,7 +436,7 @@ STRESS_CASES = (
     # the humidistat, a refusal for the rest). On a single-zone PSZ stretched
     # over five zones it did so through a design the sample should not teach.
     ("20-humidified-psz",
-     "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
+     "vav-hw-hwbb-gasboiler-scrollchiller",
      "Table 8.4.4.7.-B Note (1) / D-55 / AHJ-12 — the ONLY sample carrying "
      "humidification; `btap.modeling` builds none, so no other shape reaches "
      "the question of whether reference humidification is added at all. The "
@@ -446,7 +446,7 @@ STRESS_CASES = (
      "for that loop and the refusal for the zonally-served remainder.",
      _humidified),
     ("21-ground-f-factor",
-     "Baseboard gas boiler",
+     "bb-hwbb-gasboiler",
      "8.4.1.1.(1)/D-32 — a ground floor on `GroundFCfactorMethod`, the one "
      "whole-foundation method with no validated NECB reference applier. The "
      "run emits NO determination rather than a verdict, and this is the only "
@@ -455,7 +455,7 @@ STRESS_CASES = (
      "carries.",
      _ground_f_factor),
     ("22-ground-f-factor-all-non-ordinary",
-     "Baseboard gas boiler",
+     "bb-hwbb-gasboiler",
      "8.4.1.1.(1)/D-32 — every ground floor non-ordinary with the F-factor "
      "floor among them, so the ORDINARY list is EMPTY. The two routes "
      "9454b902's silent-verdict defects lived on; sample 21 stays green under "
@@ -479,7 +479,7 @@ STRESS_CASES = (
 #: only for the zones it actually serves.
 SUBSET_REHEAT = (
     "18-vav-hw-subset-reheat",
-    "MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard",
+    "vav-elec-elecbb-scrollchiller",
     3,
 )
 
@@ -551,7 +551,7 @@ def simulatable() -> set[str]:
         raise ValueError(
             "unsupported system simulation status schema_version "
             f"{schema!r}; expected {SUPPORTED_SYSTEM_STATUS_SCHEMA}")
-    return {row["name"] for row in verdict["systems"]
+    return {row["id"] for row in verdict["systems"]
             if row["status"] == "ok"}
 
 
@@ -692,7 +692,7 @@ def generate(out: Path) -> list[tuple[str, str, int]]:
             model = seed("necb2020")
             loop = plant_loops.hot_water(model, fuel=lead, backup_fuel=backup, reuse=False)
             loop.setLoadDistributionScheme("SequentialLoad")
-            modeling.build_system(model, "Baseboard gas boiler",
+            modeling.build_system(model, "bb-hwbb-gasboiler",
                                   sorted_by_name(model.getThermalZones()))
             size = save(model, out, slug)
         except Exception as e:  # noqa: BLE001 - re-raised as a fatal, named

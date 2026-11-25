@@ -249,7 +249,12 @@ def _score(row, group):
                      or row.get('needs_chiller')
                      or row.get('chiller_type')
                      or 'psz' in str(row.get('family') or '')
-                     or 'DX' in str(row.get('name') or ''))
+                     # The LEGACY name, deliberately: this predicate keyed on
+                     # 'DX' in the name, and the HVAC rename keeps every score
+                     # identical. It misses the campus water-heated-PTAC MAU,
+                     # which has the same DX coil — a recorded finding
+                     # (docs/plans/HVAC_TAXONOMY_PLAN.md), fixed separately.
+                     or 'DX' in str(row.get('legacy_name') or ''))
     if zonal_cools and row_cools and not row.get('ptac_heating_type'):
         score -= 2.5
         against.append(
@@ -565,10 +570,13 @@ def identify_candidates(group, *, limit=3):
         if row.get('family') not in families:
             continue
         score, matched, against = _score(row, facts)
-        scored.append({'system': row.get('name'), 'family': row.get('family'),
+        scored.append({'system': row['id'], 'legacy_name': row['legacy_name'],
+                       'family': row.get('family'),
                        'origin': row.get('origin'), 'score': round(score, 2),
                        'matched': matched, 'against': against})
-    scored.sort(key=lambda c: (-c['score'], c['system'] or ''))
+    # Ties keep breaking on the immutable LEGACY name, so the rename cannot
+    # reorder a tie (Astra, taxonomy review finding 3).
+    scored.sort(key=lambda c: (-c['score'], c['legacy_name']))
     return scored[:limit]
 
 

@@ -19,11 +19,14 @@ class CatalogFactError(ValueError):
 
 
 def _resolve_part(part):
+    # Composite parts reference rows by `id` since the HVAC taxonomy; `name` is
+    # accepted for a config written before it.
+    key = part.get('id') or part.get('name')
     try:
-        return catalog.resolve(part['name'])
-    except (KeyError, ValueError) as exc:
+        return catalog.resolve(key)
+    except (KeyError, ValueError, TypeError) as exc:
         raise CatalogFactError(
-            f"composite part {part.get('name')!r} does not resolve: {exc}") from exc
+            f"composite part {key!r} does not resolve: {exc}") from exc
 
 
 #: The COMPLETE `zonal_units` vocabulary `classify.py` can emit, mapped to the
@@ -84,7 +87,7 @@ def composite_shape(row, _depth=0):
     """
     if _depth > 3:
         raise CatalogFactError(
-            f"composite {row.get('name')!r} nests more than 3 levels deep")
+            f"composite {row.get('id') or row.get('name')!r} nests more than 3 levels deep")
     families, zonal = set(), set()
     for part in row.get('parts') or ():
         base = dict(_resolve_part(part))
@@ -128,7 +131,7 @@ def row_heating_media(row, _depth=0):
     """
     if _depth > 3:        # a malformed self-referential composite
         raise CatalogFactError(
-            f"composite {row.get('name')!r} nests more than 3 levels deep")
+            f"composite {row.get('id') or row.get('name')!r} nests more than 3 levels deep")
 
     if row.get('family') == 'composite' and row.get('parts'):
         media = set()

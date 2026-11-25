@@ -12,7 +12,7 @@ cooling capacity) and by costing of foreign models.
       'built_by_gem': True|False,
       'zone_groups': [
         { 'zones': ['Zone 1', ...], 'air_loop': 'name'|None,
-          'family': 'psz'|None, 'catalog_name': 'PSZ RTU ...'|None,
+          'family': 'psz'|None, 'catalog_name': 'psz-gas-hwbb-gasboiler'|None,
           'family_guess': 'multizone_vav'|...,
           'heated': True, 'cooled': False,
           'heating_energy_types': ['NaturalGas'], 'cooling_energy_types': ['Electricity'],
@@ -627,9 +627,9 @@ def _recognize_gem_name(group, air_loop, audit):
     candidate = name.split(' | ')[0]
     try:
         row = catalog.resolve(candidate)
-        group['catalog_name'] = row['name']
+        group['catalog_name'] = row['id']
         group['family'] = row['family']
-        group['evidence'].append(f"air loop name resolves to catalog entry '{row['name']}'")
+        group['evidence'].append(f"air loop name resolves to catalog entry '{row['id']}'")
         return
     except ValueError:
         pass  # not a gem catalog name

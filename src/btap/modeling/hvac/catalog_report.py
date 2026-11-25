@@ -30,6 +30,7 @@ must not depend on it.
 
 from __future__ import annotations
 
+import json
 import math
 import re
 from importlib import resources
@@ -38,7 +39,7 @@ from pathlib import Path
 import openstudio
 
 from btap._compat import esc, ruby_round, sorted_by_name
-from btap.modeling.hvac import builder, canonical, catalog
+from btap.modeling.hvac import builder, catalog, taxonomy
 from btap.modeling.hvac.catalog_icons import ICON_DATA, ICON_FOR_IDD
 from btap.modeling.hvac.components import coils
 
@@ -140,46 +141,7 @@ TERMINAL_KINDS = [
     (r'AirTerminal',                      'Air terminal'),
 ]
 
-# Per-FAMILY description blurb (verbatim from spec). Shown as the card
-# description; the canonical name is displayed separately (no duplication).
-FAMILY_BLURB = {
-    'baseboards': 'Perimeter baseboard heating only, no central air system.',
-    'chilled_beams': 'A dehumidifying 100% outdoor-air system supplies active or passive chilled-beam terminals on dew-point-reset tempered water, with perimeter heating.',
-    'composite': 'A dedicated ventilation unit paired with separate zone conditioning (fan coils, water/ground-source heat pumps, or residential AC).',
-    'doas': 'Dedicated outdoor air system providing ventilation only; zone conditioning is separate.',
-    'dual_duct': 'A true two-deck variable-air-volume system with independently controlled hydronic hot and cold decks feeding dual-duct zone terminals.',
-    'doas_pthp': 'Dedicated outdoor air with packaged terminal heat pumps at each zone (NECB ECM hs11).',
-    'ecm_ashp_baseboard': 'Air-source (or cold-climate) heat pump for primary heating and cooling with baseboard backup (NECB ECMs hs09/hs12).',
-    'ecm_doas_vrf': 'Dedicated outdoor air with variable refrigerant flow zone terminals on an air-source heat pump (NECB ECMs hs08/hs13).',
-    'ecm_hp_fancoils': 'Central heat-pump plant (ground-, water-, or air-source) serving hydronic fan coils (NECB ECMs hs14-16).',
-    'evap_cooler': 'Direct evaporative cooling, with or without supplementary heat.',
-    'fan_coils': 'Two-pipe (TPFC) or four-pipe (FPFC) fan coils per zone on a central chiller and boiler, with a make-up air unit for ventilation (NECB systems 2 and 5).',
-    'furnace': 'Forced-air furnace providing central heating.',
-    'mau_ptac': 'Make-up air unit for ventilation plus packaged terminal air conditioners at each zone (NECB system 1 variants).',
-    'psz': 'Packaged single-zone rooftop unit — one air handler per zone with DX or heat-pump cooling and a gas/electric heating coil, optionally with perimeter baseboards (NECB systems 3 and 4, and PSZ-AC).',
-    'unit_heaters': 'Standalone gas or electric unit heaters.',
-    'vav_reheat': 'Multi-zone variable-air-volume — a central built-up air handler with chilled-water or DX cooling and zone reheat terminals, plus baseboards (NECB system 6 and packaged VAV).',
-    'vrf': 'Variable refrigerant flow heat-recovery system serving zone terminals.',
-    'wshp': 'Water-source heat pumps at each zone on a common condenser-water loop.',
-    'zone_ervs': 'Zone-level energy recovery ventilators providing ventilation with heat recovery.',
-    'zone_terminal': 'Zone terminal units — packaged terminal AC/heat pump or window AC — with baseboard heating.',
-}
 
-FAMILY_TITLES = {
-    'baseboards': 'Baseboard heating', 'composite': 'Composite (DOAS + zone conditioning)',
-    'chilled_beams': 'Chilled beams',
-    'doas': 'Dedicated outdoor air', 'doas_pthp': 'DOAS + PTHP (ECM hs11)',
-    'dual_duct': 'Dual-duct VAV',
-    'ecm_ashp_baseboard': 'ASHP + baseboard (ECM hs09/hs12)',
-    'ecm_doas_vrf': 'DOAS + VRF (ECM hs08/hs13)',
-    'ecm_hp_fancoils': 'Heat-pump plant fan coils (ECM hs14-16)',
-    'evap_cooler': 'Evaporative cooling', 'fan_coils': 'Fan coils (NECB sys 2 / 5)',
-    'furnace': 'Furnace', 'mau_ptac': 'MAU + PTAC (NECB sys 1)',
-    'psz': 'Packaged single-zone (NECB sys 3 / 4, PSZ-AC)',
-    'unit_heaters': 'Unit heaters', 'vav_reheat': 'VAV with reheat (NECB sys 6, PVAV)',
-    'vrf': 'Variable refrigerant flow', 'wshp': 'Water-source heat pumps',
-    'zone_ervs': 'Zone ERVs', 'zone_terminal': 'Zone terminal units',
-}
 
 # ------------------------------------------------------------------ public
 
@@ -192,12 +154,14 @@ SINGLE_ZONE_FAMILIES = ['psz', 'zone_terminal', 'baseboards', 'unit_heaters',
                         'furnace', 'evap_cooler', 'vrf']
 
 
-def to_html(path=None, fixture=FIXTURE):
+def to_html(path=None, fixture=FIXTURE, annotate=None):
     """Build every catalog system on the fixture, extract its topology, and
     render the whole catalog as one self-contained HTML string.
 
     :param path: if given, the HTML is also written here
     :param fixture: the seed .osm (default: bundled 5ZoneNoHVAC)
+    :param annotate: optional row -> [label, ...] the code layer supplies,
+        e.g. which NECB reference System uses a row (btap.codes.necb)
     :return: the self-contained HTML document (str)
     """
     rows = catalog.rows()
@@ -205,7 +169,7 @@ def to_html(path=None, fixture=FIXTURE):
     # the .osm from disk costs ~2.4 s each (OSM deserialization); an in-memory
     # clone costs ~6 ms — the difference between a ~4 min and a ~6 s run.
     base = prepared_base(fixture)
-    cards = [build_card(row, base) for row in rows]
+    cards = [build_card(row, base, annotate) for row in rows]
     html = assemble(cards)
     if path:
         Path(path).write_text(html, encoding='utf-8')
@@ -292,14 +256,15 @@ def prepared_base(fixture):
     return model
 
 
-def build_card(row, base):
+def build_card(row, base, annotate=None):
     """:param base: the prepared fixture (openstudio.model.Model) to clone
-    :return: card dict: row, canonical, description, topology or diagram_error"""
-    canonical_name = canonical.name(row)
-    # Description = the per-family blurb only; the canonical name is shown on
-    # its own element, so appending it here would just duplicate it.
-    description = FAMILY_BLURB.get(row['family'], '')
-    card = {'row': row, 'canonical': canonical_name, 'description': description}
+    :param annotate: optional row -> [label, ...] from a code layer (NECB
+        reference use); `btap.modeling` itself knows no code
+    :return: card dict: row, display, facets, annotations, topology or
+        diagram_error"""
+    card = {'row': row, 'display': taxonomy.display(row),
+            'facets': taxonomy.facets(row),
+            'annotations': list(annotate(row)) if annotate else []}
     try:
         model = base.clone(True).to_Model()
         zones = sorted_by_name(model.getThermalZones())
@@ -308,7 +273,7 @@ def build_card(row, base):
         # handler/plant genuinely serving many zones — TWO zones is enough to show
         # that (and to render two demand branches) without a busy 5-zone diagram.
         zones = zones[:1] if row['family'] in SINGLE_ZONE_FAMILIES else zones[:2]
-        builder.build_system(model, row['name'], zones)
+        builder.build_system(model, row['id'], zones)
         card['topology'] = extract(model, zones)
     except Exception as e:
         # Never crash the whole report over one odd build — render the card
@@ -1636,54 +1601,170 @@ def wrap_label(string, max_chars, max_lines=2):
 
 
 # ---------------------------------------------------------------- HTML
+#
+# The catalogue page is how most engineers meet the HVAC taxonomy
+# (docs/plans/HVAC_TAXONOMY_PLAN.md): search plus facet filters over a
+# Category > System type > variant tree. One self-contained, offline file:
+# no external references, one small inline script. With scripting off every
+# system is still listed and readable.
+
+#: Short, accurate descriptions per system type, shown on each card.
+TYPE_BLURB = {
+    'psz': 'A packaged rooftop unit: one constant-volume air handler with DX cooling and a '
+           'heating coil (or air-source heat pump). Built one unit per zone, or one unit '
+           'serving several zones from a single control zone.',
+    'pvav': 'A packaged variable-air-volume unit with DX cooling serving several zones '
+            'through VAV terminals with reheat.',
+    'vav': 'A built-up variable-air-volume air handler on a chilled-water plant, serving '
+           'several zones through VAV terminals with reheat.',
+    'ddvav': 'A two-deck variable-air-volume system with hydronic hot and cold decks feeding '
+             'dual-duct zone terminals.',
+    'cvrh': 'A constant-volume air handler serving several zones, each with its own reheat '
+            'terminal.',
+    'furnace': 'A forced-air gas furnace, optionally with DX cooling.',
+    'hv': 'A heating and ventilating unit: a ducted air handler that heats and ventilates '
+          'but does not cool.',
+    'splitac': 'A ducted split-system air conditioner; heating, if any, comes from elsewhere.',
+    'evap': 'One direct evaporative cooler per zone, with outdoor air.',
+    'mau-ptac': 'A make-up air unit ventilates; a packaged terminal air conditioner cools '
+                'each zone.',
+    'doas-ptac': 'A dedicated outdoor air system ventilates; a packaged terminal air '
+                 'conditioner cools each zone.',
+    'mau-fc4': 'A make-up air unit ventilates; four-pipe fan coils heat and cool each zone '
+               'from a boiler and chiller plant.',
+    'mau-fc2': 'A make-up air unit ventilates; two-pipe fan coils heat or cool each zone by '
+               'season.',
+    'doas-fc4': 'A dedicated outdoor air system ventilates; four-pipe fan coils heat and cool '
+                'each zone.',
+    'doas-pthp': 'A dedicated outdoor air system ventilates; packaged terminal heat pumps heat '
+                 'and cool each zone.',
+    'doas-wshp': 'A dedicated outdoor air system ventilates; water-to-air heat pumps on a '
+                 'common water loop heat and cool each zone.',
+    'doas-vrf': 'A dedicated outdoor air system ventilates; variable-refrigerant-flow '
+                'terminals heat and cool each zone.',
+    'doas-acb': 'A dehumidifying outdoor air system supplies active chilled beams.',
+    'doas-pcb': 'A dehumidifying outdoor air system ventilates; passive chilled beams cool '
+                'each zone.',
+    'ptac': 'A packaged terminal air conditioner in each zone, ventilating itself.',
+    'pthp': 'A packaged terminal heat pump in each zone, ventilating itself.',
+    'windowac': 'A window air conditioner in each zone.',
+    'vrf': 'A variable-refrigerant-flow outdoor unit with heat recovery serving a terminal '
+           'in each zone.',
+    'wshp': 'Water-to-air heat pumps in each zone on a common water loop.',
+    'bb': 'Perimeter baseboard heating only; no air system.',
+    'uh': 'A unit heater in each zone; no cooling or ventilation system.',
+    'doas': 'A dedicated outdoor air system that ventilates only; zone conditioning is '
+            'separate.',
+    'zone-erv': 'An energy recovery ventilator in each zone; nothing else.',
+    'crah': 'A computer-room air handler: one chilled-water unit with humidity control '
+            'serving several zones at a fixed supply temperature.',
+}
+
+#: Facet filter groups shown on the page, in order, with their labels.
+FILTER_GROUPS = [
+    ('category', 'Category'),
+    ('ahu_heating', 'Air handler heating'),
+    ('ahu_cooling', 'Air handler cooling'),
+    ('terminal', 'Zone terminal'),
+    ('zone_heating', 'Zone heating'),
+    ('hw_plant', 'Hot water plant'),
+    ('chw_plant', 'Chilled water plant'),
+    ('outdoor_air', 'Outdoor air'),
+    ('vent_heat_recovery', 'Ventilation heat recovery'),
+    ('scope', 'Scope'),
+    ('distribution', 'Distribution'),
+    ('necb_lineage', 'NECB system (lineage)'),
+    ('origin', 'Origin'),
+]
+
+#: Human labels for facet values (a value absent here is shown humanised).
+VALUE_LABELS = {
+    'central': 'Central ducted', 'oa_plus_zone': 'Outdoor-air unit + zone',
+    'zone_only': 'Zone equipment only', 'heating_only': 'Heating only',
+    'ventilation_only': 'Ventilation only', 'process': 'Process and special',
+    'gas': 'Gas', 'electric': 'Electric', 'hot_water': 'Hot water', 'ashp': 'Air-source HP',
+    'ccashp': 'Cold-climate ASHP', 'none': 'None', 'dx': 'DX', 'chilled_water': 'Chilled water',
+    'evaporative': 'Evaporative', 'mixed': 'Mixed air', 'dedicated': '100% outdoor air',
+    'erv': 'ERV', 'hrv': 'HRV', 'diffuser': 'Diffusers only', 'vav_reheat': 'VAV reheat',
+    'cv_reheat': 'CV reheat', 'dual_duct': 'Dual-duct', 'ptac': 'PTAC', 'pthp': 'PTHP',
+    'window_ac': 'Window AC', 'fc4': 'Four-pipe fan coil', 'fc2': 'Two-pipe fan coil',
+    'vrf': 'VRF', 'wshp': 'Water-source HP', 'active_beam': 'Active chilled beam',
+    'passive_beam': 'Passive chilled beam', 'unit_heater': 'Unit heater',
+    'hw_baseboard': 'Hot water baseboard', 'elec_baseboard': 'Electric baseboard',
+    'gas_boiler': 'Gas boiler', 'electric_boiler': 'Electric boiler', 'district': 'District',
+    'gshp': 'Ground-source HP', 'awhp': 'Air-to-water HP',
+    'water_cooled_chiller': 'Water-cooled chiller', 'air_cooled_chiller': 'Air-cooled chiller',
+    'all_air': 'All-air', 'air_and_water': 'Air and water', 'all_water': 'All-water',
+    'unitary': 'Unitary (zone units)', 'per_zone': 'One per zone',
+    'shared': 'One unit, several zones', 'multizone': 'Central, zone terminals',
+    '1': 'System 1', '2': 'System 2', '3': 'System 3', '4': 'System 4', '5': 'System 5',
+    '6': 'System 6', 'necb': 'NECB', 'necb_reference_hp': 'NECB reference HP',
+    'necb_ecm': 'NECB ECM', 'cbecs': 'CBECS', 'campus': 'Campus', 'generic': 'Generic',
+}
+
+#: Words engineers search with, mapped to the words the names actually use.
+SYNONYMS = {
+    'rtu': 'rooftop', 'rooftop': 'rtu', 'fpfc': 'four-pipe fan coil',
+    'tpfc': 'two-pipe fan coil', 'fcu': 'fan coil', 'ahu': 'air handler',
+    'mau': 'make-up air unit', 'ccashp': 'cold-climate', 'hp': 'heat pump',
+    'gshp': 'ground-source', 'awhp': 'air-to-water', 'shared': 'several zones',
+    'erv': 'energy recovery', 'hrv': 'heat recovery', 'cav': 'constant-volume',
+    'chw': 'chilled water', 'hw': 'hot water', 'bb': 'baseboard',
+}
+
+
+def _label(value):
+    return VALUE_LABELS.get(value, str(value).replace('_', ' ').capitalize())
+
+
+def _search_text(card):
+    row, facets = card['row'], card['facets']
+    _, title, abbr = taxonomy.TYPES[facets['system_type']]
+    words = [row['id'], card['display'], row['legacy_name'], *(row.get('aliases') or []),
+             title, abbr, *card.get('annotations', [])]
+    for key, _ in FILTER_GROUPS:
+        values = facets[key] if key in taxonomy.MULTI else [facets[key]]
+        words += [_label(v) for v in values if v != 'none']
+    text = ' '.join(words).lower()
+    return text + ' ' + ' '.join(v for k, v in SYNONYMS.items() if k in text.split())
+
 
 def assemble(cards):
-    by_family = {}
-    for c in cards:
-        by_family.setdefault(c['row']['family'], []).append(c)
-    families = sorted(by_family.keys(), key=lambda f: FAMILY_TITLES.get(f, f).lower())
-
-    idx = 0
-    ordered = {}
-    for family in families:
-        ordered[family] = sorted(by_family[family], key=lambda c: c['row']['name'])
-        for c in ordered[family]:
-            c['id'] = f'sys-{idx}'
-            idx += 1
+    order = {t: i for i, t in enumerate(taxonomy.TYPES)}
+    cats = {c: i for i, c in enumerate(taxonomy.CATEGORIES)}
+    display_cards = sorted(
+        cards, key=lambda c: (cats[c['facets']['category']],
+                              order[c['facets']['system_type']], c['display'].lower()))
+    for i, card in enumerate(display_cards):
+        card['dom_id'] = f'sys-{i}'
     total = len(cards)
-    display_cards = [c for f in families for c in ordered[f]]
-
+    types = len({c['facets']['system_type'] for c in cards})
     out = ['<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">']
     out.append('<meta name="viewport" content="width=device-width, initial-scale=1">')
-    out.append('<title>OpenStudio-HVAC System Catalog</title>')
+    out.append('<title>HVAC System Catalog</title>')
     out.append(f'<style>{CSS}</style></head><body>')
-    # The embedded OS App icons: every data-URI lives ONCE in this hidden master
-    # defs; component cells reference them by id via <use>.
     out.append(icon_defs())
-    out.append(topbar(total, len(families)))
+    out.append(topbar(total, types))
     out.append('<div class="app">')
-    out.append(sidebar(families, ordered, total))
-    out.append('<main class="detail-pane">')
+    out.append(sidebar(display_cards, total))
+    out.append('<main class="detail-pane" id="detail-pane">')
     out.append(''.join(detail_html(c, i == 0) for i, c in enumerate(display_cards)))
     out.append('</main></div>')
     out.append(footer())
-    out.append(f'<script>{script(total)}</script>')
+    out.append(f'<script>{SCRIPT_JS}</script>')
     out.append('</body></html>')
     return ''.join(out)
 
 
-def topbar(total, family_count):
-    return (f'<header class="topbar"><h1>OpenStudio-HVAC System Catalog</h1>'
-            f'<p class="meta">{total} buildable HVAC systems across {family_count} families. '
-            'Every diagram is extracted from a system actually built on the bundled 5-zone fixture — '
-            'the topology cannot drift from what the gem assembles. Select a system on the left; hover '
-            f'any component for details.</p>{legend()}</header>')
+def topbar(total, types):
+    return (f'<header class="topbar"><h1>HVAC System Catalog</h1>'
+            f'<p class="meta">{total} buildable systems in {types} system types. Search, or narrow '
+            'with the filters; select a system to see what it builds. Every diagram is extracted '
+            'from a system actually built on the bundled 5-zone fixture.</p>'
+            f'{legend()}</header>')
 
 
 def legend():
-    """Only the loop-colour key is shown: component symbols are the real
-    OpenStudio App icons (self-labelled, with tooltips), so a glyph legend
-    would just list marks the diagram no longer draws."""
     loop_keys = ''.join(
         f'<span class="lk"><span class="sw" style="background:{color}"></span>{esc(LOOP_LABELS[kind])}</span>'
         for kind, color in LOOP_COLORS.items())
@@ -1692,44 +1773,90 @@ def legend():
             'hover any for details.</span></div>')
 
 
-def sidebar(families, ordered, total):
+def _filters(cards):
     groups = []
-    for family in families:
-        items = []
-        for card in ordered[family]:
-            row = card['row']
-            search = ' '.join(
-                p for p in [row['name'], card['canonical'], family, row.get('sys_abbr')]
-                if p is not None).lower()
-            active = ' active' if card['id'] == 'sys-0' else ''
-            # Always show the canonical (human-readable) name in the nav for
-            # consistency; the exact argument name stays searchable + as a tooltip.
-            items.append(
-                '<button type="button" class="nav-item{}" data-target="{}" '.format(active, card['id'])
-                + 'data-search="{}" title="{}">{}</button>'.format(
-                    esc(search), esc(row['name']), esc(card['canonical'])))
-        groups.append(
-            '<div class="nav-family collapsed"><button type="button" class="nav-family-title">'
-            '<span class="caret">&#9656;</span>{}</button>{}</div>'.format(
-                esc(FAMILY_TITLES.get(family, family)), ''.join(items)))
+    for key, title in FILTER_GROUPS:
+        counts = {}
+        for card in cards:
+            values = card['facets'][key] if key in taxonomy.MULTI else [card['facets'][key]]
+            for value in values:
+                counts[value] = counts.get(value, 0) + 1
+        vocab = [v for v in taxonomy.FACETS[key] if v in counts and v != 'none']
+        if len(vocab) < 2:
+            continue
+        boxes = ''.join(
+            '<label class="chip"><input type="checkbox" id="f-{k}-{v}" data-facet="{k}" '
+            'data-value="{v}"><span>{label}</span> <span class="n" data-count="{k}:{v}">{n}'
+            '</span></label>'.format(k=key, v=esc(v), label=esc(_label(v)), n=counts[v])
+            for v in vocab)
+        groups.append(f'<details class="fgroup"><summary>{esc(title)}</summary>'
+                      f'<div class="chips">{boxes}</div></details>')
+    return '<div class="filters">{}</div>'.format(''.join(groups))
+
+
+def sidebar(cards, total):
+    tree = []
+    by_cat = {}
+    for card in cards:
+        by_cat.setdefault(card['facets']['category'], {}).setdefault(
+            card['facets']['system_type'], []).append(card)
+    for cat, types in by_cat.items():
+        type_html = []
+        for system_type, members in types.items():
+            _, title, abbr = taxonomy.TYPES[system_type]
+            items = ''.join(
+                '<button type="button" class="nav-item" data-target="{}" data-id="{}" '
+                'data-facets="{}" data-search="{}" title="{}">{}</button>'.format(
+                    c['dom_id'], esc(c['row']['id']), esc(json.dumps(c['facets'])),
+                    esc(_search_text(c)), esc(c['row']['id']), esc(c['display']))
+                for c in members)
+            head = title if abbr == title else f'{title} ({abbr})'
+            type_html.append(
+                f'<details class="nav-type" open><summary>{esc(head)} '
+                f'<span class="n">{len(members)}</span></summary>{items}</details>')
+        tree.append(f'<section class="nav-cat"><h2>{esc(taxonomy.CATEGORIES[cat])}</h2>'
+                    f'{"".join(type_html)}</section>')
     return ('<aside class="sidebar">'
-            '<div class="search-wrap"><input type="search" id="system-search" placeholder="Search systems…" '
-            f'autocomplete="off" aria-label="Search systems"><span id="search-count">{total} of {total}</span></div>'
-            '<nav class="nav-list">{}</nav></aside>'.format(''.join(groups)))
+            '<div class="search-wrap"><label for="system-search" class="sr">Search systems</label>'
+            '<input type="search" id="system-search" placeholder="Search: gas rooftop, System 6, PSZ RTU"'
+            ' autocomplete="off">'
+            f'<div class="search-meta"><span id="search-count">{total} of {total}</span>'
+            '<button type="button" id="clear-all">Clear all</button></div></div>'
+            f'{_filters(cards)}<nav class="nav-list">{"".join(tree)}</nav></aside>')
+
+
+def _facet_table(facets):
+    rows = []
+    for key, title in FILTER_GROUPS[1:]:
+        values = facets[key] if key in taxonomy.MULTI else [facets[key]]
+        shown = ', '.join(_label(v) for v in values if v != 'none') or 'None'
+        rows.append(f'<tr><th>{esc(title)}</th><td>{esc(shown)}</td></tr>')
+    return '<table class="facts">{}</table>'.format(''.join(rows))
 
 
 def detail_html(card, first):
-    row = card['row']
-    badges = ['<span class="badge badge-family">{}</span>'.format(esc(row['family']))]
-    if row.get('sys_abbr') is not None:
-        badges.append('<span class="badge badge-sys">{}</span>'.format(esc(row['sys_abbr'])))
+    row, facets = card['row'], card['facets']
+    chips = []
+    if facets['necb_lineage'] != 'none':
+        chips.append(f'NECB System {facets["necb_lineage"]} (lineage)')
+    if facets['ecm'] != 'none':
+        chips.append(f'NECB ECM {facets["ecm"]}')
+    chips.append(_label(facets['origin']))
+    chips += card.get('annotations', [])
+    chip_html = ''.join(f'<span class="badge">{esc(c)}</span>' for c in chips)
+    aliases = row.get('aliases') or []
+    also = (f'<p class="aka">Also accepted: {esc(", ".join(aliases))}</p>' if aliases else '')
+    build = f'modeling.build_system(model, "{row["id"]}", zones)'
     active = ' active' if first else ''
-    return ('<article class="system-detail{}" id="{}">'.format(active, card['id'])
-            + '<div class="detail-head"><code>{}</code>{}</div>'.format(
-                esc(row['name']), ''.join(badges))
-            + '<div class="canonical">{}</div>'.format(esc(card['canonical']))
-            + '<p class="desc">{}</p>'.format(esc(card['description']))
-            + f'{tabs_html(card)}</article>')
+    return (f'<article class="system-detail{active}" id="{card["dom_id"]}">'
+            f'<h2 class="display">{esc(card["display"])}</h2>'
+            f'<div class="detail-head"><code class="sysid">{esc(row["id"])}</code>{chip_html}</div>'
+            f'<p class="aka">Formerly: {esc(row["legacy_name"])}</p>{also}'
+            f'<p class="desc">{esc(TYPE_BLURB[facets["system_type"]])}</p>'
+            f'<pre class="build"><code>{esc(build)}</code></pre>'
+            f'<details class="facts-wrap"><summary>What it builds</summary>'
+            f'{_facet_table(facets)}</details>'
+            f'{tabs_html(card)}</article>')
 
 
 def tabs_html(card):
@@ -1757,7 +1884,7 @@ def tabs_html(card):
     if not tabs:
         return '<p class="note">No central loops or zone equipment were assembled for this system.</p>'
 
-    sys_id = card['id']
+    sys_id = card['dom_id']
     bar = ''.join(
         '<button type="button" class="tab{}" data-tab="{}-t{}">{}</button>'.format(
             ' active' if i == 0 else '', sys_id, i, esc(t['label']))
@@ -1780,71 +1907,146 @@ def footer():
             '(BSD-3-Clause). See THIRD_PARTY_NOTICES.md.</p></footer>')
 
 
-def script(total):
-    """Plain inline JS — no libraries. Handles search filtering, master-detail
-    selection, and per-system tab switching via one delegated click handler."""
-    return SCRIPT_JS.replace('#{total}', str(total))
-
-
-# The inline JS, verbatim from the Ruby heredoc; `#{total}` is substituted by
-# `script(total)` exactly where Ruby interpolated it.
-SCRIPT_JS = """(function(){
-  var TOTAL = #{total};
-  function selectSystem(id){
-    var d = document.querySelectorAll('.system-detail');
-    for (var i = 0; i < d.length; i++){ d[i].classList.remove('active'); }
-    var el = document.getElementById(id);
-    if (el){ el.classList.add('active'); }
-    var n = document.querySelectorAll('.nav-item');
-    for (var j = 0; j < n.length; j++){
-      n[j].classList.toggle('active', n[j].getAttribute('data-target') === id);
-    }
-    window.scrollTo(0, 0);
+# The page script. `BtapCatalog` holds PURE functions (no DOM), exported when
+# run outside a browser so a test can exercise this exact code under node; the
+# DOM wiring below only calls them. Search words AND together; ticks inside a
+# filter group OR; groups AND. Counts are disjunctive: a group's counts are
+# computed with every OTHER group (and the search) applied, so each number is
+# what ticking that chip would show.
+SCRIPT_JS = r"""var BtapCatalog = (function(){
+  function asList(v){ return Object.prototype.toString.call(v) === '[object Array]' ? v : [v]; }
+  function matchesQuery(item, words){
+    for (var i = 0; i < words.length; i++){ if (item.search.indexOf(words[i]) < 0) return false; }
+    return true;
   }
+  function matchesFilters(item, selected, skip){
+    for (var facet in selected){
+      if (facet === skip || !selected[facet].length) continue;
+      var values = asList(item.facets[facet]), hit = false;
+      for (var i = 0; i < values.length; i++){ if (selected[facet].indexOf(values[i]) >= 0) hit = true; }
+      if (!hit) return false;
+    }
+    return true;
+  }
+  function filterItems(items, query, selected){
+    var words = (query || '').toLowerCase().split(/\s+/).filter(function(w){ return w; });
+    var visible = [], counts = {};
+    for (var i = 0; i < items.length; i++){
+      var item = items[i];
+      if (!matchesQuery(item, words)) continue;
+      if (matchesFilters(item, selected, null)) visible.push(item.id);
+      for (var facet in item.facets){
+        if (!matchesFilters(item, selected, facet)) continue;
+        var values = asList(item.facets[facet]);
+        counts[facet] = counts[facet] || {};
+        for (var j = 0; j < values.length; j++){
+          counts[facet][values[j]] = (counts[facet][values[j]] || 0) + 1;
+        }
+      }
+    }
+    return {visible: visible, counts: counts};
+  }
+  function parseHash(hash){
+    var state = {q: '', selected: {}, sys: null};
+    (hash || '').replace(/^#/, '').split('&').forEach(function(part){
+      if (!part) return;
+      var kv = part.split('='), key = decodeURIComponent(kv[0]), value = decodeURIComponent(kv[1] || '');
+      if (key === 'q') state.q = value;
+      else if (key === 'sys') state.sys = value;
+      else state.selected[key] = value ? value.split(',') : [];
+    });
+    return state;
+  }
+  function buildHash(state){
+    var parts = [];
+    if (state.q) parts.push('q=' + encodeURIComponent(state.q));
+    Object.keys(state.selected).sort().forEach(function(k){
+      if (state.selected[k].length) parts.push(encodeURIComponent(k) + '=' + state.selected[k].map(encodeURIComponent).join(','));
+    });
+    if (state.sys) parts.push('sys=' + encodeURIComponent(state.sys));
+    return parts.length ? '#' + parts.join('&') : '';
+  }
+  return {filterItems: filterItems, parseHash: parseHash, buildHash: buildHash};
+})();
+if (typeof module !== 'undefined' && module.exports){ module.exports = BtapCatalog; }
+if (typeof document !== 'undefined'){ (function(C){
+  var nav = [].slice.call(document.querySelectorAll('.nav-item'));
+  var items = nav.map(function(b){
+    return {id: b.getAttribute('data-id'), facets: JSON.parse(b.getAttribute('data-facets')),
+            search: b.getAttribute('data-search'), el: b};
+  });
+  var byId = {}; items.forEach(function(it){ byId[it.id] = it; });
+  var search = document.getElementById('system-search');
+  var boxes = [].slice.call(document.querySelectorAll('.chip input'));
+  var state = C.parseHash(location.hash);
+  function select(id){
+    var it = byId[id] || items[0]; if (!it) return;
+    state.sys = it.id;
+    [].forEach.call(document.querySelectorAll('.system-detail'), function(d){ d.classList.remove('active'); });
+    document.getElementById(it.el.getAttribute('data-target')).classList.add('active');
+    items.forEach(function(x){ x.el.classList.toggle('active', x === it); });
+  }
+  function render(){
+    var r = C.filterItems(items, state.q, state.selected), shown = {};
+    r.visible.forEach(function(id){ shown[id] = true; });
+    items.forEach(function(it){ it.el.style.display = shown[it.id] ? '' : 'none'; });
+    [].forEach.call(document.querySelectorAll('.nav-type, .nav-cat'), function(g){
+      g.style.display = g.querySelector('.nav-item:not([style*="none"])') ? '' : 'none';
+    });
+    boxes.forEach(function(b){
+      var f = b.getAttribute('data-facet'), v = b.getAttribute('data-value');
+      var n = (r.counts[f] && r.counts[f][v]) || 0;
+      b.parentNode.querySelector('.n').textContent = n;
+      b.parentNode.classList.toggle('zero', !n && !b.checked);
+      b.disabled = !n && !b.checked;
+    });
+    document.getElementById('search-count').textContent = r.visible.length + ' of ' + items.length;
+    if (!state.sys || !shown[state.sys]) select(r.visible[0]); else select(state.sys);
+    history.replaceState(null, '', C.buildHash(state) || location.pathname);
+  }
+  function readControls(){
+    state.q = search.value;
+    state.selected = {};
+    boxes.forEach(function(b){
+      if (!b.checked) return;
+      var f = b.getAttribute('data-facet');
+      (state.selected[f] = state.selected[f] || []).push(b.getAttribute('data-value'));
+    });
+  }
+  search.value = state.q;
+  boxes.forEach(function(b){
+    var sel = state.selected[b.getAttribute('data-facet')] || [];
+    b.checked = sel.indexOf(b.getAttribute('data-value')) >= 0;
+    b.addEventListener('change', function(){ readControls(); render(); });
+  });
+  search.addEventListener('input', function(){ readControls(); render(); });
+  document.getElementById('clear-all').addEventListener('click', function(){
+    search.value = ''; boxes.forEach(function(b){ b.checked = false; });
+    readControls(); render(); search.focus();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === '/' && document.activeElement !== search){ e.preventDefault(); search.focus(); }
+    else if (e.key === 'Escape' && document.activeElement === search){ search.value = ''; readControls(); render(); }
+  });
   document.addEventListener('click', function(e){
     var tab = e.target.closest ? e.target.closest('.tab') : null;
     if (tab){
       var bar = tab.parentNode, box = bar.parentNode;
-      var tabs = bar.querySelectorAll('.tab');
-      for (var i = 0; i < tabs.length; i++){ tabs[i].classList.remove('active'); }
+      [].forEach.call(bar.querySelectorAll('.tab'), function(t){ t.classList.remove('active'); });
       tab.classList.add('active');
-      var panels = box.querySelectorAll('.tab-panel');
-      for (var k = 0; k < panels.length; k++){ panels[k].classList.remove('active'); }
+      [].forEach.call(box.querySelectorAll('.tab-panel'), function(p){ p.classList.remove('active'); });
       var target = document.getElementById(tab.getAttribute('data-tab'));
-      if (target){ target.classList.add('active'); }
+      if (target) target.classList.add('active');
       return;
     }
-    var famTitle = e.target.closest ? e.target.closest('.nav-family-title') : null;
-    if (famTitle){ famTitle.parentNode.classList.toggle('collapsed'); return; }
-    var nav = e.target.closest ? e.target.closest('.nav-item') : null;
-    if (nav){ selectSystem(nav.getAttribute('data-target')); }
+    var it = e.target.closest ? e.target.closest('.nav-item') : null;
+    if (it){ select(it.getAttribute('data-id')); history.replaceState(null, '', C.buildHash(state)); window.scrollTo(0, 0); }
   });
-  var search = document.getElementById('system-search');
-  if (search){
-    search.addEventListener('input', function(){
-      var q = this.value.trim().toLowerCase(), visible = 0;
-      var fams = document.querySelectorAll('.nav-family');
-      for (var f = 0; f < fams.length; f++){
-        var any = false, items = fams[f].querySelectorAll('.nav-item');
-        for (var i = 0; i < items.length; i++){
-          var match = items[i].getAttribute('data-search').indexOf(q) >= 0;
-          // Clearing the inline style (match/empty-query) lets the
-          // .collapsed CSS rule hide items again when search is empty.
-          items[i].style.display = match ? '' : 'none';
-          if (match){ any = true; visible++; }
-        }
-        fams[f].style.display = any ? '' : 'none';
-        // While searching, auto-expand families with a match and collapse
-        // those without; when the box is cleared, re-collapse everything.
-        if (q){ fams[f].classList.toggle('collapsed', !any); }
-        else { fams[f].classList.add('collapsed'); }
-      }
-      var c = document.getElementById('search-count');
-      if (c){ c.textContent = visible + ' of ' + TOTAL; }
-    });
-  }
-})();
+  document.documentElement.classList.add('js');
+  render();
+})(BtapCatalog); }
 """
+
 
 CSS = """* { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -1868,16 +2070,7 @@ p.meta { color: #444; font-size: .85rem; max-width: 60rem; margin-bottom: .5rem;
 #system-search { width: 100%; padding: .45rem .6rem; font-size: .9rem; border: 1px solid #b8c0c8;
                  border-radius: .4rem; }
 #search-count { font-size: .72rem; color: #667; padding-left: .1rem; }
-.nav-family { margin-top: .5rem; }
-.nav-family-title { display: flex; align-items: center; gap: .3rem; width: 100%; border: none;
-                    background: none; font: inherit; font-size: .68rem; text-transform: uppercase;
-                    letter-spacing: .04em; color: #667; font-weight: 700; cursor: pointer;
-                    text-align: left; padding: .3rem .3rem .15rem; }
-.nav-family-title:hover { color: #1a5276; }
-.caret { display: inline-block; font-size: .8em; transition: transform .12s ease; }
-.nav-family:not(.collapsed) .caret { transform: rotate(90deg); }
-.nav-family.collapsed .nav-item { display: none; }
-.nav-item { display: block; width: 100%; text-align: left; border: none; background: none;
+.nav-family:not(.collapsed) .nav-item { display: block; width: 100%; text-align: left; border: none; background: none;
             font: inherit; font-size: .8rem; color: #24313c; padding: .3rem .5rem; border-radius: .35rem;
             cursor: pointer; word-break: break-word; }
 .nav-item:hover { background: #eef2f5; }
@@ -1893,7 +2086,6 @@ p.meta { color: #444; font-size: .85rem; max-width: 60rem; margin-bottom: .5rem;
 .badge { display: inline-block; padding: .1rem .5rem; border-radius: .3rem; font-weight: 700;
          font-size: .72rem; color: #fff; }
 .badge-family { background: #34495e; } .badge-sys { background: #1a5276; }
-.canonical { font-size: 1rem; font-weight: 600; color: #1a5276; margin: .5rem 0 .15rem; }
 .desc { font-size: .85rem; color: #444; margin-bottom: .8rem; }
 
 .tabs { margin-top: .4rem; }
@@ -1916,6 +2108,47 @@ p.meta { color: #444; font-size: .85rem; max-width: 60rem; margin-bottom: .5rem;
 .note { font-size: .82rem; color: #555; font-style: italic; margin: .3rem 0; }
 .note-err { color: #9a6700; font-style: normal; font-weight: 600; }
 footer { margin: 1.5rem; font-size: .75rem; color: #555; }
+
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.search-meta { display: flex; justify-content: space-between; align-items: center; }
+#clear-all { border: 1px solid #b8c0c8; background: #fff; border-radius: .35rem; font: inherit;
+             font-size: .72rem; padding: .1rem .5rem; cursor: pointer; }
+#clear-all:hover, #clear-all:focus-visible { border-color: #1a5276; color: #1a5276; }
+.filters { margin: .3rem 0 .6rem; border-top: 1px solid #e3e8ec; }
+.fgroup { border-bottom: 1px solid #e3e8ec; padding: .25rem 0; }
+.fgroup summary { cursor: pointer; font-size: .72rem; font-weight: 700; text-transform: uppercase;
+                  letter-spacing: .04em; color: #4a5866; padding: .2rem .1rem; }
+.fgroup .chips { padding: .3rem 0 .2rem; gap: .3rem; }
+.chip { display: inline-flex; align-items: center; gap: .25rem; border: 1px solid #c5cfd6;
+        border-radius: 1rem; padding: .1rem .55rem; font-size: .75rem; cursor: pointer; background: #fff; }
+.chip input { margin: 0; }
+.chip:has(input:checked) { background: #1a5276; border-color: #1a5276; color: #fff; }
+.chip .n { color: #6b7884; font-variant-numeric: tabular-nums; }
+.chip:has(input:checked) .n { color: #d6e4ef; }
+.chip.zero { opacity: .45; cursor: default; }
+.chip:focus-within { outline: 2px solid #1a5276; outline-offset: 1px; }
+.nav-cat h2 { font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; color: #4a5866;
+              margin: .7rem .2rem .2rem; }
+.nav-type summary { cursor: pointer; font-size: .8rem; font-weight: 600; color: #24313c;
+                    padding: .2rem .3rem; }
+.nav-type summary .n { color: #6b7884; font-weight: 400; font-variant-numeric: tabular-nums; }
+.nav-item { padding-left: 1.1rem; }
+.nav-item:focus-visible { outline: 2px solid #1a5276; }
+h2.display { font-size: 1.1rem; color: #12344d; margin-bottom: .35rem; text-wrap: balance; }
+.detail-head { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; margin-bottom: .3rem; }
+code.sysid { font-size: .95rem; font-weight: 700; background: #eef2f5; padding: .15rem .45rem;
+             border-radius: .3rem; }
+.badge { background: #e3ebf1; color: #1f3a4d; font-weight: 600; }
+.aka { font-size: .8rem; color: #55626e; }
+pre.build { background: #f6f8fa; border: 1px solid #e1e6ea; border-radius: .35rem;
+            padding: .35rem .6rem; font-size: .8rem; overflow-x: auto; margin: .5rem 0; }
+.facts-wrap { margin: .3rem 0 .8rem; font-size: .82rem; }
+.facts-wrap summary { cursor: pointer; font-weight: 600; color: #1a5276; }
+table.facts { border-collapse: collapse; margin-top: .3rem; }
+table.facts th { text-align: left; font-weight: 600; color: #4a5866; padding: .1rem .8rem .1rem 0; }
+table.facts td { padding: .1rem 0; }
+html:not(.js) .system-detail { display: block; border-top: 1px solid #d0d7de; padding-top: 1rem;
+                               margin-top: 1rem; }
 
 @media (max-width: 760px) {
   .app { flex-direction: column; }

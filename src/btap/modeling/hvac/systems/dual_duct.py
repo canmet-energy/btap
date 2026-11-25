@@ -95,7 +95,7 @@ class DualDuctVAV(BaseSystem):
             air_loop.addBranchForZone(zone, terminal)
 
         naming.apply(
-            namer, air_loop, system_name=self.config['name'],
+            namer, air_loop, system_name=self.config['id'],
             sys_abbr=self.config.get('sys_abbr', 'dual_duct'),
             sys_oa='mixed',
             parts={

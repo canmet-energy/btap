@@ -20,19 +20,19 @@ ID_RE = re.compile(r"^[a-z][a-z0-9]*(-[a-z0-9]+)*$")
 
 
 def row(name):
-    return next(r for r in ROWS if r["name"] == name)
+    return next(r for r in ROWS if r["legacy_name"] == name)
 
 
 class TestEveryRowIsPlaced(unittest.TestCase):
 
     def test_every_row_lands_in_exactly_one_type(self):
-        placed = [r["name"] for types in taxonomy.tree().values()
+        placed = [r["legacy_name"] for types in taxonomy.tree().values()
                   for rows in types.values() for r in rows]
-        self.assertEqual(sorted(r["name"] for r in ROWS), sorted(placed))
+        self.assertEqual(sorted(r["legacy_name"] for r in ROWS), sorted(placed))
 
     def test_facets_stay_in_their_vocabularies(self):
         for r in ROWS:
-            with self.subTest(row=r["name"]):
+            with self.subTest(row=r["legacy_name"]):
                 facets = taxonomy.facets(r)      # raises on a value outside the vocabulary
                 self.assertEqual(set(taxonomy.FACETS), set(facets))
 
@@ -166,7 +166,7 @@ class TestFableFindings(unittest.TestCase):
             {**row("FPFC MAU DX Coils with Scroll Chiller"), "mau": False},
         ]
         for config in cases:
-            with self.subTest(config=config["name"]), self.assertRaises(taxonomy.TaxonomyUnsupported):
+            with self.subTest(config=config["id"]), self.assertRaises(taxonomy.TaxonomyUnsupported):
                 taxonomy.facets(config)
 
     def test_needs_erv_is_read_on_any_family(self):

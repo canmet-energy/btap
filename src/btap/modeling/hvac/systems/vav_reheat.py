@@ -190,7 +190,7 @@ class VAVReheat(BaseSystem):
         # default does not know about.
         self.attach_oa_system(
             model, oa_system, supply_inlet_node,
-            name=f"{self.config['name']} | {group[0].nameString()}")
+            name=f"{self.config['id']} | {group[0].nameString()}")
         return_air_node = oa_system.returnAirModelObject().get().to_Node().get()
         return_fan.addToNode(return_air_node)
 
@@ -231,7 +231,7 @@ class VAVReheat(BaseSystem):
                 'erv' if self.config['erv_latent_effectiveness'] > 0.0
                 else 'hrv')
         naming.apply(namer, air_loop,
-                     system_name=self.config['name'],
+                     system_name=self.config['id'],
                      sys_abbr=self.config['sys_abbr'],
                      sys_oa='mixed',
                      parts={
