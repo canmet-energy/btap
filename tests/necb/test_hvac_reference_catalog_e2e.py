@@ -57,7 +57,7 @@ class TestReferenceEngineCaseManifest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.golden = json.loads(GOLDEN.read_text(encoding='utf-8'))
-        cls.expected = {row['name']: row for row in cls.golden}
+        cls.expected = {row['id']: row for row in cls.golden}
 
     def test_cases_cover_every_signature_and_every_modern_row(self):
         case_names = {name for name, _scenario in ENGINE_CASES}
