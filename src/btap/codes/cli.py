@@ -581,10 +581,13 @@ def unmet_line(p_sec, r_sec):
 
 def _wrap_condition(text, width=62, indent=6):
     """Wrap one AHJ condition for the terminal block. The conditions are
-    sentences, not labels, and a reader has to be able to act on them."""
+    sentences, not labels, and a reader has to be able to act on them.
+
+    Never break at a hyphen: catalogue ids are hyphenated (D-112), and an id
+    split across two lines cannot be searched for or copied whole."""
     import textwrap
 
-    lines = textwrap.wrap(str(text), width=width)
+    lines = textwrap.wrap(str(text), width=width, break_on_hyphens=False)
     pad = " " * indent
     return ("\n" + pad).join(lines) if lines else ""
 
