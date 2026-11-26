@@ -165,7 +165,7 @@ class TestFableFindings(unittest.TestCase):
 
     def test_a_shared_rooftop_unit_says_so(self):
         name = taxonomy.display(row("PSZ RTU Gas and DX Coils and Hot Water Baseboard"))
-        self.assertIn("one unit serving several zones", name)
+        self.assertIn("serves several zones from one control zone", name)
         self.assertIn("one unit per zone", taxonomy.display(row("PSZ-AC with gas coil")))
 
     def test_the_fan_coil_mau_defaults_to_dx(self):
@@ -212,6 +212,56 @@ class TestFixesFromThePR239Review(unittest.TestCase):
         from btap.modeling.hvac import catalog
         self.assertFalse(catalog.is_legacy_key("PSZ-GAS-HWBB-GASBOILER"))
         self.assertTrue(catalog.is_legacy_key("PSZ RTU Gas and DX Coils and Hot Water Baseboard"))
+
+
+class TestNamesMatchTheBuild(unittest.TestCase):
+    """Fable's naming review (2026-11-26): each name below once claimed what
+    the builder does not do, or hid what it does. The build fact is cited."""
+
+    def by_id(self, row_id):
+        from btap.modeling.hvac import catalog
+        return taxonomy.display(catalog.resolve(row_id))
+
+    def test_the_fan_coil_air_handler_is_not_a_make_up_air_unit(self):
+        # sizing.json `necb_mau`: all_outdoor_air false -> a mixed-air handler
+        name = self.by_id("mau-fc4-gas-gasboiler-scrollchiller")
+        self.assertNotIn("make-up air", name.lower())
+        self.assertIn("central air handler", name)
+        # only MAU + PTAC is 100% outdoor air (sized on VentilationRequirement)
+        self.assertIn("make-up air unit", self.by_id("mau-ptac-elec-elecbb"))
+
+    def test_a_modelled_ground_loop_says_so(self):
+        # hp_plant_fancoils.py `_build_glhx_loop`: district heating + cooling
+        self.assertIn("ground loop (modelled as district heating and cooling)",
+                      self.by_id("doas-fc4-hw-chw-gshp-elecboiler"))
+        # wshp.py builds a real GroundHeatExchangerVertical: plain "ground loop"
+        real = self.by_id("doas-wshp-elec-groundloop")
+        self.assertIn("ground loop", real)
+        self.assertNotIn("modelled", real)
+
+    def test_no_humidifier_is_implied(self):
+        for row_id in ("crah-acscrollchiller",):
+            name = self.by_id(row_id)
+            self.assertNotIn("humidity control", name)
+            self.assertIn("dehumidification (humidity high limit)", name)
+
+    def test_the_standalone_water_loop_heat_pump_says_it_has_no_outdoor_air(self):
+        self.assertIn("no outdoor air", self.by_id("wshp-gasboiler"))
+
+    def test_a_vrf_row_without_heat_recovery_cannot_take_the_title(self):
+        """Every VRF builder enables heat recovery today (ecm_air.py), so the
+        titles say it. A future row without it must be refused, not renamed
+        silently — driven here through the facets the display reads."""
+        from unittest import mock
+
+        from btap.modeling.hvac import catalog
+        row = catalog.resolve("vrf")
+        real = taxonomy.facets(row)
+        self.assertEqual("yes", real["refrigerant_heat_recovery"])
+        with mock.patch.object(taxonomy, "facets",
+                               return_value={**real, "refrigerant_heat_recovery": "no"}):
+            with self.assertRaises(taxonomy.TaxonomyUnsupported):
+                taxonomy.display(row)
 
 
 if __name__ == "__main__":

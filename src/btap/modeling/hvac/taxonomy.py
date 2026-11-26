@@ -46,7 +46,7 @@ class TaxonomyUnsupported(ValueError):
 #: claims: the medium is its own facet (`distribution`).
 CATEGORIES = {
     "central": "Central ducted systems",
-    "oa_plus_zone": "Outdoor-air unit + zone terminals",
+    "oa_plus_zone": "Zone terminals + outdoor-air unit",
     "zone_only": "Zone equipment only",
     "heating_only": "Heating only",
     "ventilation_only": "Ventilation only",
@@ -56,30 +56,34 @@ CATEGORIES = {
 #: System type key -> (category, title, abbreviation). The key is also the
 #: leading token of an ID. Order is display order.
 TYPES = {
-    "psz": ("central", "Packaged rooftop unit", "PSZ"),
+    "psz": ("central", "Packaged single-zone rooftop unit", "PSZ"),
     "pvav": ("central", "Packaged VAV with reheat", "PVAV"),
-    "vav": ("central", "Built-up VAV with reheat", "VAV"),
+    "vav": ("central", "VAV with reheat", "VAV"),
     "ddvav": ("central", "Dual-duct VAV", "DDVAV"),
-    "cvrh": ("central", "Constant-volume reheat air handler", "CV reheat"),
-    "furnace": ("central", "Gas furnace", "Furnace"),
+    "cvrh": ("central", "Constant-volume reheat air handler", "CAV reheat"),
+    "furnace": ("central", "Forced-air gas furnace", "Forced-air gas furnace"),
     "hv": ("central", "Heating and ventilating unit", "H&V"),
     "splitac": ("central", "Split-system air conditioner", "Split AC"),
-    "evap": ("central", "Direct evaporative cooler", "Evap"),
-    "mau-ptac": ("oa_plus_zone", "Make-up air unit + PTAC", "MAU + PTAC"),
-    "doas-ptac": ("oa_plus_zone", "DOAS + PTAC", "DOAS + PTAC"),
-    "mau-fc4": ("oa_plus_zone", "Make-up air unit + four-pipe fan coils", "MAU + FPFC"),
-    "mau-fc2": ("oa_plus_zone", "Make-up air unit + two-pipe fan coils", "MAU + TPFC"),
-    "doas-fc4": ("oa_plus_zone", "DOAS + four-pipe fan coils", "DOAS + FPFC"),
-    "doas-pthp": ("oa_plus_zone", "DOAS + packaged terminal heat pumps", "DOAS + PTHP"),
-    "doas-wshp": ("oa_plus_zone", "DOAS + water-source heat pumps", "DOAS + WSHP"),
-    "doas-vrf": ("oa_plus_zone", "DOAS + variable refrigerant flow", "DOAS + VRF"),
-    "doas-acb": ("oa_plus_zone", "DOAS + active chilled beams", "DOAS + ACB"),
-    "doas-pcb": ("oa_plus_zone", "DOAS + passive chilled beams", "DOAS + PCB"),
+    "evap": ("central", "Direct evaporative cooler", "DEC"),
+    # Terminal FIRST: an engineer finds these by the zone terminal (phylroy,
+    # 2026-11-26). The NECB System 2/5 fan-coil unit is a MIXED-air handler
+    # (sizing.json `necb_mau`, all_outdoor_air false), so it is a "central air
+    # handler", not a make-up air unit; only MAU + PTAC is 100% outdoor air.
+    "mau-ptac": ("oa_plus_zone", "PTAC + make-up air unit", "PTAC + MAU"),
+    "doas-ptac": ("oa_plus_zone", "PTAC + DOAS", "PTAC + DOAS"),
+    "mau-fc4": ("oa_plus_zone", "Fan coils, four-pipe + central air handler", "FPFC + AHU"),
+    "mau-fc2": ("oa_plus_zone", "Fan coils, two-pipe + central air handler", "TPFC + AHU"),
+    "doas-fc4": ("oa_plus_zone", "Fan coils, four-pipe + DOAS", "FPFC + DOAS"),
+    "doas-pthp": ("oa_plus_zone", "Heat pumps, packaged terminal + DOAS", "PTHP + DOAS"),
+    "doas-wshp": ("oa_plus_zone", "Heat pumps, water-loop + DOAS", "WSHP + DOAS"),
+    "doas-vrf": ("oa_plus_zone", "VRF heat recovery + DOAS", "VRF-HR + DOAS"),
+    "doas-acb": ("oa_plus_zone", "Chilled beams, active + DOAS", "ACB + DOAS"),
+    "doas-pcb": ("oa_plus_zone", "Chilled beams, passive + DOAS", "PCB + DOAS"),
     "ptac": ("zone_only", "Packaged terminal air conditioner", "PTAC"),
     "pthp": ("zone_only", "Packaged terminal heat pump", "PTHP"),
     "windowac": ("zone_only", "Window air conditioner", "Window AC"),
-    "vrf": ("zone_only", "Variable refrigerant flow", "VRF"),
-    "wshp": ("zone_only", "Water-source heat pumps", "WSHP"),
+    "vrf": ("zone_only", "VRF heat recovery", "VRF-HR"),
+    "wshp": ("zone_only", "Water-loop heat pumps", "WSHP"),
     "bb": ("heating_only", "Baseboard heating", "Baseboards"),
     "uh": ("heating_only", "Unit heaters", "Unit heaters"),
     "doas": ("ventilation_only", "Dedicated outdoor air system", "DOAS"),
@@ -641,13 +645,13 @@ _COOL_WORDS = {"dx": "DX cooling", "chilled_water": "chilled water cooling",
                "evaporative": "direct evaporative cooling"}
 _TERMINAL_WORDS = {"ptac": "PTACs", "pthp": "packaged terminal heat pumps",
                    "window_ac": "window AC units", "fc4": "four-pipe fan coils",
-                   "fc2": "two-pipe fan coils (seasonal changeover)",
-                   "vrf": "VRF terminals", "wshp": "water-to-air heat pumps",
+                   "fc2": "two-pipe changeover fan coils",
+                   "vrf": "VRF terminals", "wshp": "water-source heat pump units",
                    "active_beam": "active chilled beams",
                    "passive_beam": "passive chilled beams",
-                   "unit_heater": "unit heaters", "erv": "zone energy recovery ventilators"}
+                   "unit_heater": "unit heaters", "erv": "one ERV per zone"}
 _PLANT_WORDS = {"gas_boiler": "gas boiler", "electric_boiler": "electric boiler",
-                "district": "district hot water", "gshp": "ground-source heat pump",
+                "district": "district heating", "gshp": "ground-source heat pump",
                 "awhp": "air-to-water heat pump"}
 
 
@@ -660,20 +664,48 @@ def _chw_words(f):
             if kind != "none" else "water-cooled chiller",
             "air_cooled_chiller": f"air-cooled {kind} chiller" if kind != "none"
             else "air-cooled chiller",
-            "district": "district chilled water",
+            "district": "district cooling",
             "awhp": "air-to-water heat pump chilled water"}[plant])
     return words
 
 
 def display(config):
     """The plain-English name people see. ASCII; never written into a model."""
+    head, body, plant = display_parts(config)
+    text = head
+    if body:
+        text += f": {', '.join(body)}"
+    if plant:
+        text += f" - {', '.join(plant)}"
+    return text
+
+
+#: The unit that carries the air-handler phrases in the zone-terminal
+#: category, so "DOAS (electric heat; DX cooling)" cannot be read as the
+#: terminals' own heating and cooling (Fable, naming review).
+_OA_UNIT = {"mau-ptac": "MAU", "mau-fc4": "AHU", "mau-fc2": "AHU"}
+
+_HEAT_PUMP_HEAT = ("ashp", "ccashp")
+
+
+def display_parts(config):
+    """``(head, body phrases, plant phrases)`` — the pieces `display` joins.
+    The catalogue tree labels a variant by the phrases its siblings do not
+    share, so it needs them unjoined. No phrase contains ", "."""
     f = facets(config)
     t = f["system_type"]
     _, title, abbr = TYPES[t]
+    if t == "psz":
+        # ASHRAE 90.1 Appendix G names: PSZ-AC, or PSZ-HP for a heat pump.
+        abbr = "PSZ-HP" if f["ahu_heating"] in _HEAT_PUMP_HEAT else "PSZ-AC"
     head = title if abbr == title else f"{title} ({abbr})"
     ahu = []
+    heat_pump = f["ahu_heating"] in _HEAT_PUMP_HEAT and f["ahu_cooling"] == "dx"
     if f["ahu_heating"] != "none":
         word = _HEAT_WORDS[f["ahu_heating"]]
+        if heat_pump:
+            # the heat pump IS the DX cooling; saying both read as two units
+            word += " (heats and cools)"
         if f["ahu_backup"] != "none":
             word += f" with {f['ahu_backup']} backup"
         ahu.append(word)
@@ -682,7 +714,7 @@ def display(config):
         ahu[0] = f"{f['reheat'].replace('_', ' ')} heat and reheat"
     elif f["reheat"] != "none":
         ahu.append(f"{f['reheat'].replace('_', ' ')} reheat")
-    if f["ahu_cooling"] != "none":
+    if f["ahu_cooling"] != "none" and not heat_pump:
         ahu.append(_COOL_WORDS[f["ahu_cooling"]])
     elif f["changeover"] == "heating_only" and f["category"] == "central":
         ahu.append("no cooling")
@@ -690,46 +722,65 @@ def display(config):
         ahu.append("no outdoor air")
     if f["vent_heat_recovery"] != "none" and t != "zone-erv":
         ahu.append(f["vent_heat_recovery"].upper())
+    if f["category"] == "oa_plus_zone" and ahu:
+        unit = _OA_UNIT.get(t, "DOAS")
+        ahu = [f"{unit} ({'; '.join(ahu)})"]
     zone = []
     if f["terminal"] in _TERMINAL_WORDS:
         words = _TERMINAL_WORDS[f["terminal"]]
         if f["terminal"] == "ptac" and f["terminal_heating"] != "none":
-            words = f"{f['terminal_heating'].replace('_', ' ')}-heated {words}"
+            words = f"{words} with {f['terminal_heating'].replace('_', ' ')} coils"
         elif f["terminal"] == "ptac":
-            words += " (cooling only)"
+            words = f"cooling-only {words}"
         elif f["terminal"] in ("fc4", "fc2") and f["changeover"] == "cooling_only":
-            words += " (cooling only)"
+            words = f"cooling-only {words}"
         elif f["terminal"] == "unit_heater":
             words = f"{f['terminal_heating'].replace('_', ' ')} {words}"
         if f["terminal_outdoor_air"] == "yes" and f["terminal"] != "erv":
             words += " that ventilate"
         zone.append(words)
-    if f["refrigerant_heat_recovery"] == "yes":
-        zone.append("refrigerant heat recovery")
+        if f["category"] == "zone_only" and f["terminal_outdoor_air"] == "no":
+            # wshp.py zeroes the units' outdoor air; siblings say "that ventilate"
+            zone.append("no outdoor air")
+    if t in ("vrf", "doas-vrf") and f["refrigerant_heat_recovery"] != "yes":
+        raise TaxonomyUnsupported(
+            f"{config.get('id')!r}: the VRF type titles say 'heat recovery'; a VRF "
+            "row without it needs its own type title first")
+    if f["refrigerant_heat_recovery"] == "yes" and t not in ("vrf", "doas-vrf"):
+        zone.append("refrigerant heat recovery")      # the VRF titles already say it
     if f["zone_heating"] != "none":
         zone.append({"hw_baseboard": "hot water baseboards",
                      "elec_baseboard": "electric baseboards"}[f["zone_heating"]])
     if f["humidity_control"] == "yes":
-        zone.append("humidity control")
+        # crah.py / doas.py: a maximum-humidity-ratio setpoint; no humidifier
+        zone.append("dehumidification (humidity high limit)")
     if f["scope"] == "per_zone" and t == "psz":
         zone.append("one unit per zone")
     if f["scope"] == "shared":
-        zone.append("one unit serving several zones")
-    plant = [_PLANT_WORDS[p] for p in f["hw_plant"]] + _chw_words(f)
+        zone.append("serves several zones from one control zone")
+    hw = [_PLANT_WORDS[p] for p in f["hw_plant"]]
+    chw = _chw_words(f)
+    if "awhp" in f["hw_plant"] and "awhp" in f["chw_plant"]:
+        hw = [w if w != _PLANT_WORDS["awhp"] else "air-to-water heat pump (heating and cooling)"
+              for w in hw]
+        chw = [w for w in chw if w != "air-to-water heat pump chilled water"]
+    if "electric_boiler" in f["hw_plant"] and any(p in f["hw_plant"] for p in ("awhp", "gshp")):
+        # hp_plant_fancoils.py: heat-pump-led plants with boiler backup
+        hw = [w if w != "electric boiler" else "electric boiler backup" for w in hw]
+    plant = hw + chw
     if t in ("wshp", "doas-wshp"):
-        plant = [p.replace("boiler", "boiler on the heat-pump loop") for p in plant]
+        plant = [p.replace("gas boiler", "condenser-loop gas boiler") for p in plant]
     if f["heat_rejection"] not in ("none", "cooling_tower"):
-        plant.append({"fluid_cooler": "closed-circuit fluid cooler",
-                      "ground": "ground loop"}[f["heat_rejection"]])
+        if f["heat_rejection"] == "ground" and t == "doas-fc4":
+            # hp_plant_fancoils.py `_build_glhx_loop`: district heating and
+            # cooling in series stand in for the ground loop
+            plant.append("ground loop (modelled as district heating and cooling)")
+        else:
+            plant.append({"fluid_cooler": "evaporative fluid cooler",
+                          "ground": "ground loop"}[f["heat_rejection"]])
     elif f["heat_rejection"] == "cooling_tower" and not f["chw_plant"]:
         plant.append("cooling tower")
-    text = head
-    body = ", ".join(ahu + zone)
-    if body:
-        text += f": {body}"
-    if plant:
-        text += f" - {', '.join(plant)}"
-    return text
+    return head, ahu + zone, plant
 
 
 def tree(rows=None):

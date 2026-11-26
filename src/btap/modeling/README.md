@@ -64,9 +64,9 @@ whether one unit serves one zone or several
 
 | Category | System types |
 |---|---|
-| Central ducted systems | packaged rooftop unit (PSZ), packaged and built-up VAV, dual-duct VAV, CV reheat, furnace, H&V unit, split AC, evaporative cooler |
-| Outdoor-air unit + zone terminals | MAU or DOAS with PTACs, fan coils (2- or 4-pipe), PTHPs, water-source heat pumps, VRF, chilled beams |
-| Zone equipment only | PTAC, PTHP, window AC, VRF, water-source heat pumps |
+| Central ducted systems | packaged single-zone rooftop unit (PSZ-AC / PSZ-HP), packaged VAV and VAV with reheat, dual-duct VAV, CAV reheat, forced-air gas furnace, H&V unit, split AC, direct evaporative cooler |
+| Zone terminals + outdoor-air unit | named terminal first: chilled beams, fan coils (two- or four-pipe) with a DOAS or a central air handler, packaged terminal and water-loop heat pumps, PTACs with a DOAS or a make-up air unit, VRF heat recovery |
+| Zone equipment only | PTAC, PTHP, window AC, VRF heat recovery, water-loop heat pumps |
 | Heating only / Ventilation only / Process | baseboards, unit heaters / DOAS, zone ERVs / computer-room air handler |
 
 Every system has three names:
@@ -74,8 +74,11 @@ Every system has three names:
 - an **id**, such as `psz-gas-hwbb-gasboiler`: short, file-safe, stable. It is
   what `build_system` writes into the model (`psz-gas-hwbb-gasboiler | Thermal
   Zone 1`) and what code should use;
-- a **display name** people read: "Packaged rooftop unit (PSZ): gas heat, DX
-  cooling, hot water baseboards, one unit serving several zones - gas boiler";
+- a **display name** people read: "Packaged single-zone rooftop unit (PSZ-AC):
+  gas heat, DX cooling, hot water baseboards, serves several zones from one
+  control zone - gas boiler". In the zone-terminal category the air-handler
+  phrases carry their unit, as in "DOAS (electric heat; DX cooling)", so they
+  cannot be read as the terminals' own;
 - its **legacy name** from before the taxonomy, such as "PSZ RTU Gas and DX
   Coils and Hot Water Baseboard". It is still accepted wherever a system is
   named, so older scripts and models keep working.

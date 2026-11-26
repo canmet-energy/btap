@@ -92,9 +92,95 @@ class TestCatalogReport(unittest.TestCase):
         html = self.html()
         tree = taxonomy.tree()
         self.assertEqual(len(tree), html.count('<section class="nav-cat">'))
-        self.assertEqual(sum(len(types) for types in tree.values()),
-                         html.count('<details class="nav-type"'))
+        # A type with several variants is a collapsible group; a type with ONE
+        # variant is that single entry, so the tree does not repeat itself.
+        sizes = [len(rows) for types in tree.values() for rows in types.values()]
+        self.assertEqual(sum(1 for n in sizes if n > 1), html.count('<details class="nav-type"'))
+        self.assertEqual(sum(1 for n in sizes if n == 1), html.count('class="nav-type nav-single"'))
         self.assertEqual(len(self.rows()), html.count('class="nav-item"'))
+
+    def test_variant_labels_are_terse_and_unique_within_their_type(self):
+        """phylroy (2026-11-26): the tree repeated itself going down. A variant
+        is labelled by what its siblings do NOT share; the full name stays in
+        its tooltip and the detail pane."""
+        from btap.modeling.hvac import catalog_report, taxonomy
+        tree = taxonomy.tree()
+        for types in tree.values():
+            for system_type, rows in types.items():
+                if len(rows) < 2:
+                    continue
+                cards = [{'row': r} for r in rows]
+                shared, entries = catalog_report._tree_labels(cards)
+                paths = [(sub, label) for sub, _, label in entries]
+                with self.subTest(system_type=system_type):
+                    self.assertEqual(len(paths), len(set(paths)), paths)
+                    for (sub, sub_shared, label), row in zip(entries, rows):
+                        self.assertLess(len(label), len(taxonomy.display(row)))
+                        for phrase in shared + sub_shared + ([sub] if sub else []):
+                            self.assertNotIn(phrase, label.split(', '))
+                    if len(rows) > catalog_report.SUBGROUP_ABOVE:
+                        self.assertTrue(any(sub for sub, _, _ in entries),
+                                        f'{system_type}: a large type gets a second level')
+
+    def test_the_tree_path_loses_no_equipment(self):
+        """phylroy (2026-11-26): 'Window air conditioner' alone hid the unit's
+        electric baseboards. Every phrase of a system's full name must be
+        shown somewhere on its tree path: the type's 'all:' line, its
+        subgroup and that line, or its own label."""
+        from btap.modeling.hvac import catalog_report, taxonomy
+        for types in taxonomy.tree().values():
+            for rows in types.values():
+                shared, entries = catalog_report._tree_labels([{'row': r} for r in rows])
+                for row, (sub, sub_shared, label) in zip(rows, entries):
+                    _, body, plant = taxonomy.display_parts(row)
+                    wanted = {catalog_report._tree_phrase(p) for p in body + plant}
+                    shown = (set(shared) | set(sub_shared) | ({sub} if sub else set())
+                             | set(label.split(', ')))
+                    with self.subTest(id=row['id']):
+                        self.assertEqual(set(), wanted - shown)
+                        self.assertNotEqual('base configuration', label)
+
+    def test_a_single_variant_entry_shows_its_equipment(self):
+        html = self.html()
+        self.assertIn('Window air conditioner (Window AC)<span class="nav-detail">'
+                      'window AC units that ventilate, electric baseboards</span>', html)
+
+    def test_the_tree_is_sorted_below_the_categories(self):
+        """phylroy (2026-11-26): the outdoor-air section was not sorted.
+        Categories keep their deliberate order; each level below is
+        alphabetical (case-insensitive)."""
+        import html as html_mod
+        import re
+        page = self.html()
+        nav = page[page.index('<nav class="nav-list">'):page.index('</nav>')]
+        for section in re.findall(r'<section class="nav-cat">(.*?)</section>', nav, re.S):
+            singles = [html_mod.unescape(h) for h in re.findall(
+                r'<div class="nav-type nav-single"><button[^>]*>([^<]*)<span', section)]
+            types = [html_mod.unescape(h) for h in re.findall(
+                r'<details class="nav-type" open><summary>([^<]*?) <span', section)]
+            ordered = re.findall(r'<details class="nav-type" open><summary>([^<]*?) <span'
+                                 r'|<div class="nav-type nav-single"><button[^>]*>([^<]*)<span', section)
+            names = [html_mod.unescape(a or b) for a, b in ordered]
+            self.assertEqual(sorted(names, key=str.casefold), names)
+            self.assertEqual(len(names), len(types) + len(singles))
+        for group in re.findall(r'<details class="nav-sub">(.*?)</details>', nav, re.S):
+            labels = [html_mod.unescape(x) for x in re.findall(r'class="nav-item"[^>]*>([^<]*)</button>', group)]
+            self.assertEqual(sorted(labels, key=str.casefold), labels)
+
+    def test_a_variant_says_what_it_lacks(self):
+        """Fable (naming review): 'without hot water baseboards, HRV' read as
+        'with HRV'. A variant lacking what a sibling has says "no ..."."""
+        from btap.modeling.hvac import catalog, catalog_report, taxonomy
+        pvav = [r for r in catalog.rows() if taxonomy.facets(r)['system_type'] == 'pvav']
+        _, entries = catalog_report._tree_labels([{'row': r} for r in pvav])
+        plain = dict(zip([r['id'] for r in pvav], [e[2] for e in entries]))['pvav-hw-gasboiler']
+        self.assertEqual('no baseboards, no heat recovery', plain)
+        self.assertNotIn('without', ' '.join(e[2] for e in entries))
+
+    def test_the_system_list_is_resizable(self):
+        html = self.html()
+        self.assertIn('id="splitter" role="separator"', html)
+        self.assertIn('--sidebar-w', html)
         # every filter chip is a labelled checkbox with a unique id
         ids = re.findall(r'<input type="checkbox" id="(f-[^"]+)"', html)
         self.assertTrue(ids)
