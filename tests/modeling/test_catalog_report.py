@@ -146,6 +146,28 @@ class TestCatalogReport(unittest.TestCase):
         self.assertIn('Window air conditioner (Window AC)<span class="nav-detail">'
                       'window AC units that ventilate, electric baseboards</span>', html)
 
+    def test_the_tree_is_sorted_below_the_categories(self):
+        """phylroy (2026-11-26): the outdoor-air section was not sorted.
+        Categories keep their deliberate order; each level below is
+        alphabetical (case-insensitive)."""
+        import html as html_mod
+        import re
+        page = self.html()
+        nav = page[page.index('<nav class="nav-list">'):page.index('</nav>')]
+        for section in re.findall(r'<section class="nav-cat">(.*?)</section>', nav, re.S):
+            singles = [html_mod.unescape(h) for h in re.findall(
+                r'<div class="nav-type nav-single"><button[^>]*>([^<]*)<span', section)]
+            types = [html_mod.unescape(h) for h in re.findall(
+                r'<details class="nav-type" open><summary>([^<]*?) <span', section)]
+            ordered = re.findall(r'<details class="nav-type" open><summary>([^<]*?) <span'
+                                 r'|<div class="nav-type nav-single"><button[^>]*>([^<]*)<span', section)
+            names = [html_mod.unescape(a or b) for a, b in ordered]
+            self.assertEqual(sorted(names, key=str.casefold), names)
+            self.assertEqual(len(names), len(types) + len(singles))
+        for group in re.findall(r'<details class="nav-sub">(.*?)</details>', nav, re.S):
+            labels = [html_mod.unescape(x) for x in re.findall(r'class="nav-item"[^>]*>([^<]*)</button>', group)]
+            self.assertEqual(sorted(labels, key=str.casefold), labels)
+
     def test_the_system_list_is_resizable(self):
         html = self.html()
         self.assertIn('id="splitter" role="separator"', html)

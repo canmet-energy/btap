@@ -1873,11 +1873,18 @@ def sidebar(cards, total):
     for card in cards:
         by_cat.setdefault(card['facets']['category'], {}).setdefault(
             card['facets']['system_type'], []).append(card)
-    for cat, types in by_cat.items():
+    def head_of(system_type):
+        _, title, abbr = taxonomy.TYPES[system_type]
+        return title if abbr == title else f'{title} ({abbr})'
+
+    # Categories keep their deliberate order; everything below them is
+    # alphabetical — types, subgroups and variants (phylroy, 2026-11-26).
+    for cat in [c for c in taxonomy.CATEGORIES if c in by_cat]:
+        types = by_cat[cat]
         type_html = []
-        for system_type, members in types.items():
-            _, title, abbr = taxonomy.TYPES[system_type]
-            head = title if abbr == title else f'{title} ({abbr})'
+        for system_type in sorted(types, key=lambda s: head_of(s).casefold()):
+            members = types[system_type]
+            head = head_of(system_type)
             if len(members) == 1:
                 # One variant: the type IS the entry, with its equipment on a
                 # second line — the type name alone hid e.g. a window AC's
@@ -1887,20 +1894,21 @@ def sidebar(cards, total):
                                  f'{_nav_item(members[0], head, entries[0][2])}</div>')
                 continue
             shared, entries = _tree_labels(members)
-            items, done = [], set()
+            nodes, done = [], set()      # (sort key, html), loose leaves and subgroups together
             for card, (sub, sub_shared, label) in zip(members, entries):
                 if sub is None:
-                    items.append(_nav_item(card, label))
+                    nodes.append((label, _nav_item(card, label)))
                 elif sub not in done:
                     done.add(sub)
-                    group = [(c, e[2]) for c, e in zip(members, entries) if e[0] == sub]
+                    group = sorted(((c, e[2]) for c, e in zip(members, entries) if e[0] == sub),
+                                   key=lambda pair: pair[1].casefold())
                     note = (f'<div class="nav-shared">all: {esc(", ".join(sub_shared))}</div>'
                             if sub_shared else '')
-                    items.append(
+                    nodes.append((sub,
                         f'<details class="nav-sub"><summary>{esc(sub)} '
                         f'<span class="n">{len(group)}</span></summary>{note}'
-                        + ''.join(_nav_item(c, lab) for c, lab in group) + '</details>')
-            items = ''.join(items)
+                        + ''.join(_nav_item(c, lab) for c, lab in group) + '</details>'))
+            items = ''.join(html for _, html in sorted(nodes, key=lambda n: n[0].casefold()))
             common = (f'<div class="nav-shared">all: {esc(", ".join(shared))}</div>'
                       if shared else '')
             type_html.append(
