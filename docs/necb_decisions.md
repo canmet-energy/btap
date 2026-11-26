@@ -8972,6 +8972,16 @@ nothing.
   appends `necbs4`, and the display names no longer carry a "System 4
   form" suffix. The codes layer's `catalog_reference_use` shows the System 3
   row as used by both System 3 and System 4.
+- A retired name builds what it built before. `systems.json`'s
+  `alias_config` maps each of the 24 retired names (ids, legacy names and
+  aliases) to the config that made its row distinct, `sys_abbr: sys_4`, and
+  `catalog.resolve` merges it, so `build_system(model, "PSZ RTU with exhaust
+  ...", zones)` still names its objects `sys_4`. The legacy-name audit line
+  says what was carried. Without this, an old System 4 name silently built
+  System 3 naming (Fable, PR #241 review).
+- `systems(necb_lineage="4")` is now empty, which is true: no row comes from
+  System 4. Which rows NECB System 4 USES is the codes layer's
+  `catalog_reference_use`, which lists the System 3 row under both.
 
 **Proof that nothing physical moved.**
 
@@ -8987,6 +8997,10 @@ nothing.
   each retired row verbatim with its positions. The migration proof rebuilds
   the pre-retirement `systems.json` and golden byte-for-byte from it, and
   then re-runs D-112's proofs against them.
+- **The rules reach the build.** `tests/necb/test_system4_reference_is_tagged.py`
+  builds a System 4 reference through the real selection in both editions and
+  requires `sys_4` on its objects, with a System 3 reference as the control.
+  Deleting the override from the rules data fails it.
 
 **What is still open.** NECB 2020 Table 8.4.4.7.-B describes System 4 as a
 "Single-zone make-up air unit with baseboard heating", heated by an electric

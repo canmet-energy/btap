@@ -25,6 +25,7 @@ SIZING_PATH = Path(__file__).parent / 'data' / 'sizing.json'
 _rows = None
 _sizing_blocks = None
 _index = None
+_alias_config = None
 
 
 def rows():
@@ -32,6 +33,16 @@ def rows():
     if _rows is None:
         _rows = json.loads(SYSTEMS_PATH.read_text(encoding='utf-8'))['systems']
     return _rows
+
+
+def alias_config():
+    """``{casefolded retired name: config}`` — overrides a RETIRED name carries,
+    so it builds what it built before (D-113)."""
+    global _alias_config
+    if _alias_config is None:
+        data = json.loads(SYSTEMS_PATH.read_text(encoding='utf-8'))
+        _alias_config = {_key(k): v for k, v in (data.get('alias_config') or {}).items()}
+    return _alias_config
 
 
 def sizing_blocks():
@@ -164,7 +175,8 @@ def resolve(name):
             f"unknown system name '{name}'. Closest catalogue entries:\n  - "
             + '\n  - '.join(f"{r['id']}  ({r['legacy_name']})" for r in suggestions))
 
-    config = dict(row)
+    carried = alias_config().get(_key(name), {})
+    config = {**row, **carried}
     if isinstance(row.get('sizing'), str):
         block = sizing_blocks().get(row['sizing'])
         if block is None:
@@ -173,5 +185,5 @@ def resolve(name):
                 f"'{row['sizing']}'")
         config['sizing'] = block
     from btap.modeling.hvac import taxonomy
-    config['display'] = taxonomy.display(row)
+    config['display'] = taxonomy.display({**row, **carried})
     return config

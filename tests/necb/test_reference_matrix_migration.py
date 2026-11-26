@@ -45,13 +45,16 @@ def _sha(value):
 def catalogue_before_retirement():
     """systems.json as it was before D-113, rebuilt from the retirement record."""
     data = json.loads(SYSTEMS.read_text(encoding="utf-8"))
+    # D-113 also added the overrides a retired name carries; they are new.
+    data = {k: v for k, v in data.items() if k not in ("alias_config", "alias_config_comment")}
     rows = [dict(r) for r in data["systems"]]
     by_id = {r["id"]: r for r in rows}
     for item in RETIREMENTS["retired"]:
         old = item["row"]
         added = [old["id"], old["legacy_name"], *old["aliases"]]
         into = by_id[item["into"]]
-        assert into["aliases"][-len(added):] == added, item["id"]
+        if into["aliases"][-len(added):] != added:
+            raise AssertionError(f"{item['id']}: its names are not the tail of {item['into']}'s aliases")
         into["aliases"] = into["aliases"][:-len(added)]
     for item in sorted(RETIREMENTS["retired"], key=lambda i: i["catalogue_index"]):
         rows.insert(item["catalogue_index"], item["row"])
@@ -91,6 +94,20 @@ class TestTheRetirementIsLossless(unittest.TestCase):
             for name in (item["id"], item["row"]["legacy_name"], *item["row"]["aliases"]):
                 with self.subTest(name=name):
                     self.assertEqual(item["into"], catalog.resolve(name)["id"])
+
+    def test_a_retired_name_carries_what_made_it_distinct(self):
+        """Fable (PR #241): resolving an old System 4 name to the System 3
+        row silently built System 3 naming. A retired name resolves to its
+        row WITH the retired row's distinguishing config, so every field the
+        retired row had, the resolved config has."""
+        from btap.modeling.hvac import catalog
+        for item in RETIREMENTS["retired"]:
+            old = {k: v for k, v in item["row"].items()
+                   if k not in ("id", "legacy_name", "aliases", "sizing")}
+            for name in (item["id"], item["row"]["legacy_name"], *item["row"]["aliases"]):
+                with self.subTest(name=name):
+                    got = catalog.resolve(name)
+                    self.assertEqual(old, {k: got.get(k) for k in old})
 
 
 class TestTheGoldenRenameIsARelabelling(unittest.TestCase):
