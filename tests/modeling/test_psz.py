@@ -5,7 +5,10 @@ from tests.support import load_fixture, needs_sdk
 
 ELECTRIC = 'PSZ RTU Electric and DX Coils and Electric Baseboard'
 GAS_HW = 'PSZ RTU Gas and DX Coils and Hot Water Baseboard'
+#: NECB System 4 is the System 3 row tagged `sys_abbr: sys_4` (D-113); its
+#: old name resolves to that row, so the tag is what makes the build System 4.
 SYS4 = 'PSZ RTU with exhaust Gas and DX Coils and Electric Baseboard'
+SYS4_CONFIG = {'sys_abbr': 'sys_4'}
 
 
 @needs_sdk
@@ -98,7 +101,7 @@ class TestPSZ(unittest.TestCase):
 
         model = load_fixture()
         zones = sorted_by_name(model.getThermalZones())
-        result = modeling.build_system(model, SYS4, zones,
+        result = modeling.build_system(model, SYS4, zones, config=SYS4_CONFIG,
                                        control_zone=zones[2], namer='necb_pipe_name')
         self.assertEqual(zones[2], result.control_zone)
         self.assertEqual('sys_4|mixed|shr>none|sc>dx|sh>c-g|ssf>cv|zh>b-e|zc>none|srf>none|',

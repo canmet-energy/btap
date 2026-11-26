@@ -36,12 +36,17 @@ from tests.support import needs_sdk
 #
 #   before #221's three fact fixes   top-1 18   top-5 40
 #   after                            top-1 21   top-5 55
+#   D-113 retired the 8 System 4 twins top-1 21   top-5 52
+#
+# The D-113 drop is not a regression. Measured row by row against main: four
+# of the 55 were twins (now retired), no shared row lost its place, and one
+# GAINED it (doas-elec, no longer crowded out of the top five): 55 - 4 + 1.
 #
 # That delta is what the harness is for. The three fixes were each justified
 # on their own evidence, and this said whether they helped in aggregate
 # instead of leaving it to be assumed.
 TOP_1_FLOOR = 21
-TOP_5_FLOOR = 55
+TOP_5_FLOOR = 52
 
 
 def _recover(name):
