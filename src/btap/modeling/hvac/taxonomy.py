@@ -667,6 +667,19 @@ def _chw_words(f):
 
 def display(config):
     """The plain-English name people see. ASCII; never written into a model."""
+    head, body, plant = display_parts(config)
+    text = head
+    if body:
+        text += f": {', '.join(body)}"
+    if plant:
+        text += f" - {', '.join(plant)}"
+    return text
+
+
+def display_parts(config):
+    """``(head, body phrases, plant phrases)`` — the pieces `display` joins.
+    The catalogue tree labels a variant by the phrases its siblings do not
+    share, so it needs them unjoined."""
     f = facets(config)
     t = f["system_type"]
     _, title, abbr = TYPES[t]
@@ -723,13 +736,7 @@ def display(config):
                       "ground": "ground loop"}[f["heat_rejection"]])
     elif f["heat_rejection"] == "cooling_tower" and not f["chw_plant"]:
         plant.append("cooling tower")
-    text = head
-    body = ", ".join(ahu + zone)
-    if body:
-        text += f": {body}"
-    if plant:
-        text += f" - {', '.join(plant)}"
-    return text
+    return head, ahu + zone, plant
 
 
 def tree(rows=None):

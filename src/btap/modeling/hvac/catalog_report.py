@@ -1747,6 +1747,10 @@ def assemble(cards):
     out.append(topbar(total, types))
     out.append('<div class="app">')
     out.append(sidebar(display_cards, total))
+    out.append('<div class="splitter" id="splitter" role="separator" tabindex="0" '
+               'aria-orientation="vertical" aria-controls="sidebar" '
+               'aria-label="Resize the system list (arrow keys; double-click resets)" '
+               'title="Drag to resize; double-click to reset"></div>')
     out.append('<main class="detail-pane" id="detail-pane">')
     out.append(''.join(detail_html(c, i == 0) for i, c in enumerate(display_cards)))
     out.append('</main></div>')
@@ -1794,6 +1798,63 @@ def _filters(cards):
     return '<div class="filters">{}</div>'.format(''.join(groups))
 
 
+#: A type with more variants than this gets a second tree level, grouped by
+#: the variants' first distinguishing phrase.
+SUBGROUP_ABOVE = 6
+
+
+def _tree_phrase(phrase):
+    """A tree label may abbreviate what the full name spells out: a
+    water-cooled chiller always comes with its cooling tower."""
+    return phrase.replace(" chiller with cooling tower", " chiller")
+
+
+def _without_shared(phrase_lists):
+    if len(phrase_lists) < 2:
+        return [], phrase_lists
+    shared = [p for p in phrase_lists[0] if all(p in other for other in phrase_lists[1:])]
+    return shared, [[p for p in own if p not in shared] for own in phrase_lists]
+
+
+def _tree_labels(members):
+    """Terse labels for one system type's variants (phylroy, 2026-11-26: the
+    tree repeated itself on the way down). Each variant says only what its
+    siblings do NOT share; the heading already names the type, and the full
+    name stays in the tooltip and the detail pane. A type with more than
+    SUBGROUP_ABOVE variants is split once more by the first distinguishing
+    phrase.
+
+    Returns ``(shared, entries)``: ``entries`` is one ``(subgroup or None,
+    subgroup_shared, label)`` per member, in member order."""
+    phrases = []
+    for card in members:
+        _, body, plant = taxonomy.display_parts(card['row'])
+        phrases.append([_tree_phrase(p) for p in body + plant])
+    if len(members) == 1:
+        return [], [(None, [], ', '.join(phrases[0]))]
+    shared, rest = _without_shared(phrases)
+    keys = [own[0] if own else 'base configuration' for own in rest]
+    if len(members) <= SUBGROUP_ABOVE or len(set(keys)) in (1, len(members)):
+        return shared, [(None, [], ', '.join(own) or 'base configuration') for own in rest]
+    entries = [None] * len(members)
+    for key in dict.fromkeys(keys):
+        idx = [i for i, k in enumerate(keys) if k == key]
+        if len(idx) == 1:
+            entries[idx[0]] = (None, [], ', '.join(rest[idx[0]]) or 'base configuration')
+            continue
+        sub_shared, sub_rest = _without_shared([rest[i][1:] for i in idx])
+        for i, own in zip(idx, sub_rest):
+            entries[i] = (key, sub_shared, ', '.join(own) or 'base configuration')
+    return shared, entries
+
+
+def _nav_item(card, label):
+    return ('<button type="button" class="nav-item" data-target="{}" data-id="{}" '
+            'data-facets="{}" data-search="{}" title="{}">{}</button>'.format(
+                card['dom_id'], esc(card['row']['id']), esc(json.dumps(card['facets'])),
+                esc(_search_text(card)), esc(card['display']), esc(label)))
+
+
 def sidebar(cards, total):
     tree = []
     by_cat = {}
@@ -1804,19 +1865,34 @@ def sidebar(cards, total):
         type_html = []
         for system_type, members in types.items():
             _, title, abbr = taxonomy.TYPES[system_type]
-            items = ''.join(
-                '<button type="button" class="nav-item" data-target="{}" data-id="{}" '
-                'data-facets="{}" data-search="{}" title="{}">{}</button>'.format(
-                    c['dom_id'], esc(c['row']['id']), esc(json.dumps(c['facets'])),
-                    esc(_search_text(c)), esc(c['row']['id']), esc(c['display']))
-                for c in members)
             head = title if abbr == title else f'{title} ({abbr})'
+            if len(members) == 1:
+                # One variant: the type IS the entry; no heading to repeat.
+                type_html.append(f'<div class="nav-type nav-single">{_nav_item(members[0], head)}</div>')
+                continue
+            shared, entries = _tree_labels(members)
+            items, done = [], set()
+            for card, (sub, sub_shared, label) in zip(members, entries):
+                if sub is None:
+                    items.append(_nav_item(card, label))
+                elif sub not in done:
+                    done.add(sub)
+                    group = [(c, e[2]) for c, e in zip(members, entries) if e[0] == sub]
+                    note = (f'<div class="nav-shared">all: {esc(", ".join(sub_shared))}</div>'
+                            if sub_shared else '')
+                    items.append(
+                        f'<details class="nav-sub"><summary>{esc(sub)} '
+                        f'<span class="n">{len(group)}</span></summary>{note}'
+                        + ''.join(_nav_item(c, lab) for c, lab in group) + '</details>')
+            items = ''.join(items)
+            common = (f'<div class="nav-shared">all: {esc(", ".join(shared))}</div>'
+                      if shared else '')
             type_html.append(
                 f'<details class="nav-type" open><summary>{esc(head)} '
-                f'<span class="n">{len(members)}</span></summary>{items}</details>')
+                f'<span class="n">{len(members)}</span></summary>{common}{items}</details>')
         tree.append(f'<section class="nav-cat"><h2>{esc(taxonomy.CATEGORIES[cat])}</h2>'
                     f'{"".join(type_html)}</section>')
-    return ('<aside class="sidebar">'
+    return ('<aside class="sidebar" id="sidebar">'
             '<div class="search-wrap"><label for="system-search" class="sr">Search systems</label>'
             '<input type="search" id="system-search" placeholder="Search: gas rooftop, System 6, PSZ RTU"'
             ' autocomplete="off">'
@@ -1988,6 +2064,8 @@ if (typeof document !== 'undefined'){ (function(C){
     [].forEach.call(document.querySelectorAll('.system-detail'), function(d){ d.classList.remove('active'); });
     document.getElementById(it.el.getAttribute('data-target')).classList.add('active');
     items.forEach(function(x){ x.el.classList.toggle('active', x === it); });
+    var sub = it.el.closest ? it.el.closest('.nav-sub') : null;
+    if (sub) sub.open = true;
   }
   function clearSelection(){
     [].forEach.call(document.querySelectorAll('.system-detail'), function(d){ d.classList.remove('active'); });
@@ -1997,8 +2075,13 @@ if (typeof document !== 'undefined'){ (function(C){
     var r = C.filterItems(items, state.q, state.selected), shown = {};
     r.visible.forEach(function(id){ shown[id] = true; });
     items.forEach(function(it){ it.el.style.display = shown[it.id] ? '' : 'none'; });
-    [].forEach.call(document.querySelectorAll('.nav-type, .nav-cat'), function(g){
+    [].forEach.call(document.querySelectorAll('.nav-sub, .nav-type, .nav-cat'), function(g){
       g.style.display = g.querySelector('.nav-item:not([style*="none"])') ? '' : 'none';
+    });
+    // While searching or filtering, a closed subgroup must not hide a match.
+    var narrowed = !!state.q || Object.keys(state.selected).some(function(k){ return state.selected[k].length; });
+    if (narrowed) [].forEach.call(document.querySelectorAll('.nav-sub'), function(g){
+      if (g.style.display !== 'none') g.open = true;
     });
     boxes.forEach(function(b){
       var f = b.getAttribute('data-facet'), v = b.getAttribute('data-value');
@@ -2032,6 +2115,42 @@ if (typeof document !== 'undefined'){ (function(C){
     search.value = ''; boxes.forEach(function(b){ b.checked = false; });
     readControls(); render(); search.focus();
   });
+  (function(){
+    // A draggable splitter between the system list and the detail pane.
+    var app = document.querySelector('.app'), bar = document.getElementById('splitter');
+    if (!app || !bar) return;
+    var KEY = 'btap-catalog-sidebar-width', DEFAULT = 320;
+    function clamp(w){ return Math.max(200, Math.min(w, Math.round(window.innerWidth * 0.7))); }
+    function setWidth(w, save){
+      w = clamp(w); app.style.setProperty('--sidebar-w', w + 'px');
+      bar.setAttribute('aria-valuenow', w);
+      if (save) { try { localStorage.setItem(KEY, String(w)); } catch (e) {} }
+    }
+    var saved = null;
+    try { saved = parseInt(localStorage.getItem(KEY), 10); } catch (e) {}
+    setWidth(saved > 0 ? saved : DEFAULT, false);
+    var startX = 0, startW = 0;
+    function move(e){ setWidth(startW + (e.clientX - startX), false); }
+    function stop(e){
+      document.removeEventListener('pointermove', move);
+      document.removeEventListener('pointerup', stop);
+      bar.classList.remove('dragging'); document.body.classList.remove('resizing');
+      setWidth(document.getElementById('sidebar').getBoundingClientRect().width, true);
+    }
+    bar.addEventListener('pointerdown', function(e){
+      e.preventDefault(); startX = e.clientX;
+      startW = document.getElementById('sidebar').getBoundingClientRect().width;
+      bar.classList.add('dragging'); document.body.classList.add('resizing');
+      document.addEventListener('pointermove', move);
+      document.addEventListener('pointerup', stop);
+    });
+    bar.addEventListener('dblclick', function(){ setWidth(DEFAULT, true); });
+    bar.addEventListener('keydown', function(e){
+      var w = document.getElementById('sidebar').getBoundingClientRect().width;
+      if (e.key === 'ArrowLeft') { e.preventDefault(); setWidth(w - 24, true); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); setWidth(w + 24, true); }
+    });
+  })();
   document.addEventListener('keydown', function(e){
     if (e.key === '/' && document.activeElement !== search){ e.preventDefault(); search.focus(); }
     else if (e.key === 'Escape' && document.activeElement === search){ search.value = ''; readControls(); render(); }
@@ -2069,8 +2188,8 @@ p.meta { color: #444; font-size: .85rem; max-width: 60rem; margin-bottom: .5rem;
 .sw { display: inline-block; width: .9rem; height: .9rem; border-radius: .2rem; }
 .gk-svg { width: 20px; height: 20px; }
 
-.app { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem 1.5rem; }
-.sidebar { flex: 0 0 300px; width: 300px; position: sticky; top: 1rem;
+.app { display: flex; align-items: flex-start; gap: 0; padding: 1rem 1.5rem; --sidebar-w: 320px; }
+.sidebar { flex: 0 0 var(--sidebar-w); width: var(--sidebar-w); position: sticky; top: 1rem;
            max-height: calc(100vh - 2rem); overflow-y: auto; background: #fff;
            border: 1px solid #d0d7de; border-radius: .5rem; padding: .6rem; }
 .search-wrap { position: sticky; top: 0; background: #fff; padding-bottom: .5rem;
@@ -2141,6 +2260,20 @@ footer { margin: 1.5rem; font-size: .75rem; color: #555; }
                     padding: .2rem .3rem; }
 .nav-type summary .n { color: #6b7884; font-weight: 400; font-variant-numeric: tabular-nums; }
 .nav-item { padding-left: 1.1rem; }
+.nav-single .nav-item { padding-left: .3rem; font-weight: 600; }
+.nav-sub > summary { cursor: pointer; font-size: .78rem; color: #34495e; padding: .15rem .3rem .15rem 1.1rem; }
+.nav-sub > summary .n { color: #6b7884; font-variant-numeric: tabular-nums; }
+.nav-sub .nav-item { padding-left: 2rem; }
+.nav-sub .nav-shared { padding-left: 2rem; }
+.nav-shared { font-size: .7rem; color: #6b7884; padding: 0 .3rem .15rem 1.1rem; }
+.splitter { flex: 0 0 .9rem; align-self: stretch; cursor: col-resize; position: relative;
+            touch-action: none; }
+.splitter::after { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 3px;
+                   margin-left: -1.5px; border-radius: 2px; background: #d0d7de; }
+.splitter:hover::after, .splitter.dragging::after, .splitter:focus-visible::after {
+  background: #1a5276; }
+.splitter:focus-visible { outline: none; }
+body.resizing { cursor: col-resize; user-select: none; }
 .nav-item:focus-visible { outline: 2px solid #1a5276; }
 h2.display { font-size: 1.1rem; color: #12344d; margin-bottom: .35rem; text-wrap: balance; }
 .detail-head { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; margin-bottom: .3rem; }
@@ -2159,11 +2292,12 @@ html:not(.js) .system-detail { display: block; border-top: 1px solid #d0d7de; pa
                                margin-top: 1rem; }
 
 @media (max-width: 760px) {
-  .app { flex-direction: column; }
+  .app { flex-direction: column; gap: 1rem; }
+  .splitter { display: none; }
   .sidebar { position: static; width: 100%; flex-basis: auto; max-height: 40vh; }
 }
 @media print {
-  .sidebar, .topbar .legend { display: none; }
+  .sidebar, .splitter, .topbar .legend { display: none; }
   .system-detail { display: block; break-inside: avoid; }
   .tab-panel { display: block; }
   * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }

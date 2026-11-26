@@ -92,9 +92,40 @@ class TestCatalogReport(unittest.TestCase):
         html = self.html()
         tree = taxonomy.tree()
         self.assertEqual(len(tree), html.count('<section class="nav-cat">'))
-        self.assertEqual(sum(len(types) for types in tree.values()),
-                         html.count('<details class="nav-type"'))
+        # A type with several variants is a collapsible group; a type with ONE
+        # variant is that single entry, so the tree does not repeat itself.
+        sizes = [len(rows) for types in tree.values() for rows in types.values()]
+        self.assertEqual(sum(1 for n in sizes if n > 1), html.count('<details class="nav-type"'))
+        self.assertEqual(sum(1 for n in sizes if n == 1), html.count('class="nav-type nav-single"'))
         self.assertEqual(len(self.rows()), html.count('class="nav-item"'))
+
+    def test_variant_labels_are_terse_and_unique_within_their_type(self):
+        """phylroy (2026-11-26): the tree repeated itself going down. A variant
+        is labelled by what its siblings do NOT share; the full name stays in
+        its tooltip and the detail pane."""
+        from btap.modeling.hvac import catalog_report, taxonomy
+        tree = taxonomy.tree()
+        for types in tree.values():
+            for system_type, rows in types.items():
+                if len(rows) < 2:
+                    continue
+                cards = [{'row': r} for r in rows]
+                shared, entries = catalog_report._tree_labels(cards)
+                paths = [(sub, label) for sub, _, label in entries]
+                with self.subTest(system_type=system_type):
+                    self.assertEqual(len(paths), len(set(paths)), paths)
+                    for (sub, sub_shared, label), row in zip(entries, rows):
+                        self.assertLess(len(label), len(taxonomy.display(row)))
+                        for phrase in shared + sub_shared + ([sub] if sub else []):
+                            self.assertNotIn(phrase, label.split(', '))
+                    if len(rows) > catalog_report.SUBGROUP_ABOVE:
+                        self.assertTrue(any(sub for sub, _, _ in entries),
+                                        f'{system_type}: a large type gets a second level')
+
+    def test_the_system_list_is_resizable(self):
+        html = self.html()
+        self.assertIn('id="splitter" role="separator"', html)
+        self.assertIn('--sidebar-w', html)
         # every filter chip is a labelled checkbox with a unique id
         ids = re.findall(r'<input type="checkbox" id="(f-[^"]+)"', html)
         self.assertTrue(ids)
