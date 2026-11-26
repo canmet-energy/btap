@@ -98,7 +98,7 @@ These rules come from Astra's findings 1, 2, 8 and 9.
   - audit text that reads `System 2 -> 'mau-fc4-...' + {boiler_fuel: Electricity} (... electric boiler)`.
 
   The ID never claims a plant it doesn't build. Override cases are part of the verification matrix.
-- **No invented equipment.** NECB Systems 3 and 4 have identical topology (`systems/psz.py`). The System 4 rows get a **provenance discriminator** (`-necbs4`) and a display label that says "same equipment as System 3". There is no "exhaust" token.
+- *(Superseded by D-113, 2026-11-26: the eight `-necbs4` twins were retired as duplicates; System 4 is the System 3 row with `sys_abbr: sys_4`.)* **No invented equipment.** NECB Systems 3 and 4 have identical topology (`systems/psz.py`). The System 4 rows get a **provenance discriminator** (`-necbs4`) and a display label that says "same equipment as System 3". There is no "exhaust" token.
 - **Grammar** (mints new IDs only):
   - characters `^[a-z][a-z0-9]*(-[a-z0-9]+)*$`, at most 40 characters, ASCII only, no `, ; ! |`, unique case-insensitively;
   - segment order: type, heating, backup, cooling, reheat, zone add-ons, ventilation heat recovery, HW plant, CHW plant, heat rejection, scope, discriminator;

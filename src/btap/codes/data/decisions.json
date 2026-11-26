@@ -4527,6 +4527,18 @@
         "not_applicable"
       ],
       "summary": "Decided: phylroy, 2026-11-25. The 110-system HVAC catalogue is organised as category, system type and variant, with facets by equipment role derived from what each builder builds. Every row carries a stable, file-safe id that builders write into models, a plain-English display name generated from its facets, and its old name as legacy_name, accepted as input and never emitted. NECB reference use is supplied by the codes layer. The adjudicated D-58 golden was relabelled by hand under a byte-level inverse-mapping proof, and no row's configuration changed."
+    },
+    {
+      "id": "D-113",
+      "title": "Retire the eight NECB System 4 catalogue twins; System 4 is the System 3 row tagged sys_4",
+      "kind": "process",
+      "articles": {
+        "not_applicable": []
+      },
+      "editions": [
+        "not_applicable"
+      ],
+      "summary": "Decided: phylroy, 2026-11-26 ('the duplication is confusing'). The eight '-necbs4' catalogue rows built exactly the equipment of their System 3 rows and differed only in names and sys_abbr, so they were retired: their ids and old names resolve to the System 3 row as aliases and are never reused. NECB System 4's reference definitions in both editions name the System 3 row with sys_abbr: sys_4 added to their config, which keeps the System 4 tag in the reference's object names. Sixteen builds proved the override identical to the twin it replaces, and the D-58 golden lost only duplicate records under a byte-level rebuild proof. Whether NECB's System 4 'make-up air unit' should differ physically from System 3 is a separate, open question."
     }
   ]
 }

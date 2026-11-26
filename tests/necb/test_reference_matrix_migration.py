@@ -9,6 +9,11 @@ the committed legacy -> id bijection. This holds the edit to what it claims
   byte-for-byte, so no assignment, count, energy type, block or ruling moved;
 - every identity value in it is a catalogue id;
 - and no catalogue row's CONFIGURATION changed in the rename — only names.
+
+D-113 later RETIRED eight duplicate rows (the NECB System 4 '-necbs4' twins).
+`system_retirements.json` keeps each verbatim with its positions, so these
+proofs first rebuild the pre-retirement catalogue and golden — byte-checked
+against the hashes recorded when they were retired — and then run unchanged.
 """
 
 from __future__ import annotations
@@ -21,6 +26,8 @@ from pathlib import Path
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures"
 MIGRATION = json.loads((FIXTURES / "system_id_migration.json").read_text(encoding="utf-8"))
 MAPPING = MIGRATION["mapping"]
+RETIREMENTS = json.loads((FIXTURES / "system_retirements.json").read_text(encoding="utf-8"))
+SYSTEMS = Path(__file__).resolve().parents[2] / "src/btap/modeling/hvac/data/systems.json"
 INVERSE = {v: k for k, v in MAPPING.items()}
 SCENARIOS = ("catalog_data_processing", "catalog_general_2storey", "catalog_general_3storey",
              "catalog_residential", "scrubbed_data_processing", "scrubbed_general_2storey",
@@ -31,16 +38,72 @@ def _dump(value):
     return json.dumps(value, indent=2, ensure_ascii=False) + "\n"
 
 
+def _sha(value):
+    return hashlib.sha256(_dump(value).encode("utf-8")).hexdigest()
+
+
+def catalogue_before_retirement():
+    """systems.json as it was before D-113, rebuilt from the retirement record."""
+    data = json.loads(SYSTEMS.read_text(encoding="utf-8"))
+    rows = [dict(r) for r in data["systems"]]
+    by_id = {r["id"]: r for r in rows}
+    for item in RETIREMENTS["retired"]:
+        old = item["row"]
+        added = [old["id"], old["legacy_name"], *old["aliases"]]
+        into = by_id[item["into"]]
+        assert into["aliases"][-len(added):] == added, item["id"]
+        into["aliases"] = into["aliases"][:-len(added)]
+    for item in sorted(RETIREMENTS["retired"], key=lambda i: i["catalogue_index"]):
+        rows.insert(item["catalogue_index"], item["row"])
+    return {**data, "systems": rows}
+
+
+def golden_before_retirement(golden):
+    """The D-58 golden as it was before D-113: each retired row's record was
+    its System 3 row's record under its own id."""
+    by_id = {g["id"]: g for g in golden}
+    out = list(golden)
+    for item in sorted(RETIREMENTS["retired"], key=lambda i: i["golden_index"]):
+        out.insert(item["golden_index"], {**by_id[item["into"]], "id": item["id"]})
+    return out
+
+
+class TestTheRetirementIsLossless(unittest.TestCase):
+    """D-113 removed only exact duplicates, and nothing else moved."""
+
+    def test_the_rebuilt_files_are_the_pre_retirement_bytes(self):
+        golden = json.loads((FIXTURES / "reference_selection_matrix.json").read_text(encoding="utf-8"))
+        self.assertEqual(RETIREMENTS["systems_json_before_sha256"], _sha(catalogue_before_retirement()))
+        self.assertEqual(RETIREMENTS["d58_golden_before_sha256"], _sha(golden_before_retirement(golden)))
+
+    def test_each_retired_row_was_its_kept_row_under_other_names(self):
+        rows = {r["id"]: r for r in catalogue_before_retirement()["systems"]}
+        for item in RETIREMENTS["retired"]:
+            old, kept = item["row"], rows[item["into"]]
+            with self.subTest(retired=item["id"]):
+                self.assertEqual(["aliases", "id", "legacy_name", "sys_abbr"],
+                                 sorted(k for k in set(old) | set(kept) if old.get(k) != kept.get(k)))
+                self.assertEqual(("sys_4", "sys_3"), (old["sys_abbr"], kept["sys_abbr"]))
+
+    def test_a_retired_name_still_resolves_to_the_row_it_became(self):
+        from btap.modeling.hvac import catalog
+        for item in RETIREMENTS["retired"]:
+            for name in (item["id"], item["row"]["legacy_name"], *item["row"]["aliases"]):
+                with self.subTest(name=name):
+                    self.assertEqual(item["into"], catalog.resolve(name)["id"])
+
+
 class TestTheGoldenRenameIsARelabelling(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.golden = json.loads((FIXTURES / "reference_selection_matrix.json").read_text(encoding="utf-8"))
+        cls.golden = golden_before_retirement(
+            json.loads((FIXTURES / "reference_selection_matrix.json").read_text(encoding="utf-8")))
 
     def test_the_mapping_is_a_bijection_over_the_catalogue(self):
-        from btap.modeling.hvac import catalog
         self.assertEqual(len(MAPPING), len(set(MAPPING.values())))
-        self.assertEqual({r["legacy_name"]: r["id"] for r in catalog.rows()}, MAPPING)
+        self.assertEqual({r["legacy_name"]: r["id"] for r in catalogue_before_retirement()["systems"]},
+                         MAPPING)
 
     def test_inverse_mapping_reproduces_the_pre_rename_bytes(self):
         back = []
@@ -71,9 +134,8 @@ class TestTheGoldenRenameIsARelabelling(unittest.TestCase):
 class TestNoRowsConfigurationMoved(unittest.TestCase):
 
     def test_every_row_builds_what_it_built_before(self):
-        from btap.modeling.hvac import catalog
         projection = {}
-        for row in catalog.rows():
+        for row in catalogue_before_retirement()["systems"]:
             projection[row["id"]] = {
                 key: ([{**{k: v for k, v in p.items() if k != "id"}, "ref": p["id"]} for p in value]
                       if key == "parts" else value)

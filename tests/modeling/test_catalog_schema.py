@@ -215,7 +215,8 @@ class TestCatalogSchema(unittest.TestCase):
 
     def test_reference_ashp_rows_carry_heat_source(self):
         ashp = [r for r in ROWS if r.get('heat_source') == 'ashp']
-        self.assertEqual(8, len(ashp), 'expected the 8 psz sys3/sys4 reference-ASHP rows')
+        self.assertEqual(4, len(ashp), 'expected the 4 psz reference-ASHP rows (their System 4 '
+                         'twins were retired as duplicates, D-113)')
         for row in ashp:
             self.assertEqual('psz', row['family'],
                              f"'{row['id']}': heat_source is a psz-family key")
@@ -226,8 +227,7 @@ class TestCatalogSchema(unittest.TestCase):
                 f"'{row['id']}': heat_source rows must NOT also carry heating_coil_type")
             self.assertIn(row['supp_htg_fuel'], ['Gas', 'Electric'],
                           f"'{row['id']}': an ASHP build needs a supplemental coil fuel")
-        self.assertEqual(['sys_3', 'sys_4'],
-                         sorted({r['sys_abbr'] for r in ashp}))
+        self.assertEqual(['sys_3'], sorted({r['sys_abbr'] for r in ashp}))
 
     def test_no_row_uses_dx_as_a_heating_coil_type(self):
         offenders = [r['id'] for r in ROWS if r.get('heating_coil_type') == 'DX']

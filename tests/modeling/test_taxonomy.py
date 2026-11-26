@@ -36,16 +36,31 @@ class TestEveryRowIsPlaced(unittest.TestCase):
                 facets = taxonomy.facets(r)      # raises on a value outside the vocabulary
                 self.assertEqual(set(taxonomy.FACETS), set(facets))
 
+    #: Values only a CONFIGURED build produces, with the override that does.
+    #: NECB System 4 is the System 3 row built with `sys_abbr: sys_4` (D-113),
+    #: so no row carries lineage 4 and the reference's merged config does.
+    OVERRIDE_ONLY = {("necb_lineage", "4"): ("psz-gas-hwbb-gasboiler", {"sys_abbr": "sys_4"})}
+
     def test_every_vocabulary_value_is_used(self):
         """A value no row can produce is a dead filter an engineer would tick
-        and get nothing from."""
+        and get nothing from — unless a configured build produces it, which
+        is stated (and proved) above rather than skipped."""
         used = defaultdict(set)
         for r in ROWS:
             for key, value in taxonomy.facets(r).items():
                 used[key].update(value if key in taxonomy.MULTI else [value])
         for key, vocab in taxonomy.FACETS.items():
             with self.subTest(facet=key):
-                self.assertEqual([], [v for v in vocab if v not in used[key]])
+                self.assertEqual([], [v for v in vocab if v not in used[key]
+                                      and (key, v) not in self.OVERRIDE_ONLY])
+
+    def test_an_override_only_value_is_really_override_only(self):
+        from btap.modeling.hvac import catalog
+        for (key, value), (row_id, override) in self.OVERRIDE_ONLY.items():
+            with self.subTest(facet=key, value=value):
+                self.assertFalse([r["id"] for r in ROWS if taxonomy.facets(r)[key] == value])
+                merged = {**catalog.resolve(row_id), **override}
+                self.assertEqual(value, taxonomy.facets(merged)[key])
 
 
 class TestNames(unittest.TestCase):
@@ -66,14 +81,23 @@ class TestNames(unittest.TestCase):
                 self.assertNotIn("|", name)
         self.assertEqual(len(names), len({n.lower() for n in names}))
 
-    def test_necb_system_4_is_told_apart_by_provenance_not_equipment(self):
+    def test_necb_system_4_is_the_system_3_row_not_a_twin(self):
+        """D-113: the eight '-necbs4' rows built exactly their System 3 row's
+        equipment, so they were retired. Their old names resolve to it, and
+        the System 4 tag is a config override that changes lineage only."""
+        from btap.modeling.hvac import catalog
         three = row("PSZ RTU Gas and DX Coils and Hot Water Baseboard")
-        four = row("PSZ RTU with exhaust Gas and DX Coils and Hot Water Baseboard")
+        for old in ("PSZ RTU with exhaust Gas and DX Coils and Hot Water Baseboard",
+                    "psz-gas-hwbb-gasboiler-necbs4"):
+            self.assertEqual(three["id"], catalog.resolve(old)["id"])
+        four = {**three, "sys_abbr": "sys_4"}
         f3, f4 = taxonomy.facets(three), taxonomy.facets(four)
+        self.assertEqual(("3", "4"), (f3["necb_lineage"], f4["necb_lineage"]))
         self.assertEqual({k: v for k, v in f3.items() if k != "necb_lineage"},
                          {k: v for k, v in f4.items() if k != "necb_lineage"})
-        self.assertEqual(taxonomy.mint_id(three) + "-necbs4", taxonomy.mint_id(four))
-        self.assertNotIn("exhaust", taxonomy.display(four).lower())
+        self.assertEqual(three["id"], taxonomy.mint_id(four),
+                         "lineage is a facet, never part of an id")
+        self.assertFalse([r["id"] for r in ROWS if "necbs4" in r["id"]])
 
 
 class TestFacetsFollowTheirFields(unittest.TestCase):

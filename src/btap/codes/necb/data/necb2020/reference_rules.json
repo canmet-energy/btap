@@ -356,15 +356,17 @@
     "4": {
       "description": "Single-zone make-up air unit with baseboard heating; CV; air-cooled DX",
       "gas": {
-        "name": "psz-gas-hwbb-gasboiler-necbs4",
+        "name": "psz-gas-hwbb-gasboiler",
         "config": {
-          "staged_coils": true
+          "staged_coils": true,
+          "sys_abbr": "sys_4"
         }
       },
       "electric": {
-        "name": "psz-elec-elecbb-necbs4",
+        "name": "psz-elec-elecbb",
         "config": {
-          "staged_coils": true
+          "staged_coils": true,
+          "sys_abbr": "sys_4"
         }
       }
     },

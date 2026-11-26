@@ -13,7 +13,7 @@ MANIFEST = json.loads((FIXTURES / "manifest.json").read_text(encoding="utf-8"))
 
 def _names(expected, value):
     """`expected` occurs in `value` and is not part of a LONGER id. An id is
-    routinely a prefix of a sibling's (`psz-elec-elecbb`, `...-necbs4`), which
+    routinely a prefix of a sibling's (`psz-elec-elecbb`, `psz-elec-elecbb-perzone`), which
     no legacy name was, so a bare substring test would have become weaker."""
     return re.search(rf"(?<![\w-]){re.escape(expected)}(?![\w-])", value) is not None
 

@@ -161,6 +161,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-110** — Fan coils the authoring API builds carry the mode-specific sizing contract _(process)_
 - **D-111** — Make-up-air terminal before zone equipment: System 2/5 fan coils, and authored PSZ baseboards _(runtime)_
 - **D-112** — HVAC catalogue taxonomy: stable model ids, display names, legacy names as input _(process)_
+- **D-113** — Retire the eight NECB System 4 catalogue twins; System 4 is the System 3 row tagged sys_4 _(process)_
 
 <!-- TOC END -->
 
@@ -8897,7 +8898,8 @@ verified the facets against every builder.
   while its id stays the row's.
 - **No invented equipment.** NECB Systems 3 and 4 build identical equipment
   (`systems/psz.py`), so the System 4 rows are told apart by a provenance
-  discriminator, `-necbs4`, not an "exhaust" token.
+  discriminator, `-necbs4`, not an "exhaust" token. *Superseded by D-113,
+  which retired those rows as duplicates.*
 - **Applicability stays in the codes layer.** A row carries its NECB
   *lineage*; which reference System actually builds it is
   `btap.codes.necb.hvac.catalog_annotations.catalog_reference_use`, read from
@@ -8935,3 +8937,60 @@ findings, to be fixed as their own measured change.
 reference selection changes. Model object names change (ids replace legacy
 names), so the frozen scenarios were re-frozen with every moved baseline
 attributed to the rename.
+
+<a id="d-113"></a>
+
+## D-113 — NECB System 4 has no catalogue rows of its own
+
+phylroy (2026-11-26), asked why the catalogue held NECB variants of the same
+systems: "the duplication is confusing." The HVAC taxonomy (D-112) had
+told the System 4 rows apart with a `-necbs4` provenance discriminator,
+which kept the duplication and gave it a name.
+
+**What the twins were.** openstudio-standards built NECB Systems 3 and 4
+in separate methods; its own comment reads "This is the same as system
+type 3... SHOULD WE COMBINE sys3 and sys4". The port merged the builder
+(`btap/modeling/hvac/systems/psz.py`) but kept one catalogue row per legacy
+method. That left eight pairs: four rows and four reference heat-pump rows.
+Each twin differed from its System 3 row only in `id`, `legacy_name`,
+`aliases` and `sys_abbr`. Only two of the eight were used: System 4's gas
+and electric reference definitions. The other six were selected by
+nothing.
+
+**What was decided.**
+
+- The eight twins are RETIRED. Each one's id, legacy name and aliases
+  become aliases of the System 3 row, so every old name still resolves. A
+  retired id is never reused. The catalogue drops from 110 rows to 102.
+- NECB System 4's reference definitions, in both editions, name the
+  System 3 row with `sys_abbr: "sys_4"` added to their config. `sys_abbr`
+  is not only a label: it names the supply fan (`sys_4 Supply Fan`) and
+  the NECB pipe-name loop convention that `classify.py` reads back. The
+  override keeps that System 4 tag where it is true. The reference's loop
+  name changes from the twin's id to the System 3 row's id.
+- Lineage is a facet and never part of an id. `taxonomy.mint_id` no longer
+  appends `necbs4`, and the display names no longer carry a "System 4
+  form" suffix. The codes layer's `catalog_reference_use` shows the System 3
+  row as used by both System 3 and System 4.
+
+**Proof that nothing physical moved.**
+
+- **Builds.** Sixteen builds were compared: the eight twins, each bare and
+  with the reference's `staged_coils` override, built at `main`, against
+  the System 3 row with `sys_abbr: sys_4` added. Once the twin's id was
+  mapped to its System 3 row's, all sixteen gave identical
+  forward-translated objects, 12,972 in all.
+- **The golden.** The D-58 golden lost exactly the eight twin records, each
+  identical to its System 3 row's record apart from its id. No assignment
+  named a twin.
+- **A permanent record.** `tests/fixtures/system_retirements.json` keeps
+  each retired row verbatim with its positions. The migration proof rebuilds
+  the pre-retirement `systems.json` and golden byte-for-byte from it, and
+  then re-runs D-112's proofs against them.
+
+**What is still open.** NECB 2020 Table 8.4.4.7.-B describes System 4 as a
+"Single-zone make-up air unit with baseboard heating", heated by an electric
+or indirect fuel-fired furnace. System 3 is a "packaged rooftop unit". The
+catalogue builds both as the same mixed-air unit, as the legacy did. Whether
+NECB intends System 4 to be outdoor-air-only is a Code question for its own
+decision. If it is, System 4 gets one real, distinct row.

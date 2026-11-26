@@ -209,8 +209,8 @@
       "retrieved": "2026-07-12",
       "method": "transcribed",
       "source_verification": "archived",
-      "note": "The archived set is the three tables this file's provenance names plus the eight articles in its own `articles` list. The category keywords extending the Table 8.4.4.7.-A space lists with synonyms are a maintainer addition, not code text, and are marked as such in the file. On 2026-11-25 the HVAC taxonomy (docs/plans/HVAC_TAXONOMY_PLAN.md) replaced the 14 system_definitions catalogue NAMES with the catalogue's stable ids; the rows they name and every config override are unchanged (tests/fixtures/system_id_migration.json is the mapping).",
-      "result_sha256": "174668e3720d8f07f8e8dd60ef9e6115a141e4385f52f0a15a04557629d12940"
+      "note": "The archived set is the three tables this file's provenance names plus the eight articles in its own `articles` list. The category keywords extending the Table 8.4.4.7.-A space lists with synonyms are a maintainer addition, not code text, and are marked as such in the file. On 2026-11-25 the HVAC taxonomy (docs/plans/HVAC_TAXONOMY_PLAN.md) replaced the 14 system_definitions catalogue NAMES with the catalogue's stable ids; the rows they name and every config override are unchanged (tests/fixtures/system_id_migration.json is the mapping). On 2026-11-26 D-113 retired the eight duplicate '-necbs4' catalogue rows: System 4's gas and electric variants now name the System 3 row they always built identically, with sys_abbr: sys_4 added to their config so the reference keeps its System 4 tag in object names.",
+      "result_sha256": "04b6ac8d684226168f517ee7d8677471cd06d239657e82ce5cf8dad59d84b9c6"
     },
     "efficiencies.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
