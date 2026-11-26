@@ -1,7 +1,7 @@
 """btap.modeling — generic model authoring (port of the btap-modeling gem).
 
 Parametric building geometry (footprint wizards, the bar engine, measured
-footprints), the 110-system HVAC catalog + builders, classify/teardown, the
+footprints), the 102-system HVAC catalog + builders, classify/teardown, the
 envelope constructions machinery, and the plan/render tooling. SDK-only,
 code-agnostic: no NECB anywhere (rule application lives in btap.codes).
 
@@ -578,9 +578,13 @@ def _record_hvac_build(system_name, zones, result, kwargs, audit, *, replaced):
     system_id = catalog.resolve(system_name)["id"]
     if catalog.is_legacy_key(system_name):
         # An old name is accepted as input and never emitted (D-112): the
-        # trail says which id it meant, and names the id from here on.
-        audit.info("hvac", f"legacy name '{system_name}' resolved to {system_id}",
-                   target=system_id, inputs={"name": system_name})
+        # trail says which id it meant, and names the id from here on. A
+        # RETIRED name also carries the config that made it distinct (D-113).
+        carried = catalog.alias_config().get(catalog._key(system_name)) or {}
+        extra = ("" if not carried else " with "
+                 + ", ".join(f"{k}={v}" for k, v in sorted(carried.items())))
+        audit.info("hvac", f"legacy name '{system_name}' resolved to {system_id}{extra}",
+                   target=system_id, inputs={"name": system_name, **({"config": carried} if carried else {})})
     if message:
         audit.warn("hvac", message, target=system_id,
                    inputs={"zones": len(zones)})

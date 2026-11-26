@@ -628,10 +628,9 @@ def mint_id(config):
     if f["scope"] != _IMPLIED_SCOPE.get(t, f["scope"]):
         tokens.append({"per_zone": "perzone", "shared": "shared",
                        "multizone": "multizone"}[f["scope"]])
-    if f["necb_lineage"] == "4":
-        # NECB Systems 3 and 4 build identical equipment (psz.py); the System 4
-        # rows are told apart by PROVENANCE, not by an invented component.
-        tokens.append("necbs4")
+    # No lineage token: NECB Systems 3 and 4 build identical equipment
+    # (psz.py), so their eight twin rows were RETIRED as duplicates (D-113)
+    # rather than told apart. Lineage is a facet, never part of an id.
     return "-".join(tokens)
 
 
@@ -730,8 +729,6 @@ def display(config):
         text += f": {body}"
     if plant:
         text += f" - {', '.join(plant)}"
-    if f["necb_lineage"] == "4":
-        text += " (NECB System 4 form, same equipment as System 3)"
     return text
 
 

@@ -55,7 +55,7 @@ the code-neutral efficiency primitive after construction.
 
 ## Finding a system
 
-The HVAC catalogue's 110 systems are organised the way a mechanical engineer
+The HVAC catalogue's 102 systems are organised the way a mechanical engineer
 browses them: **category, then system type, then variants**. Variants within a
 type differ by *facets*: what the air handler heats and cools with, the zone
 terminals, the hot- and chilled-water plant, outdoor air, heat recovery, and

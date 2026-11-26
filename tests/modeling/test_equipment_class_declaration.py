@@ -137,7 +137,8 @@ class TestThePszDeclarationFollowsItsHeatSource(unittest.TestCase):
 
         rows = [r['id'] for r in catalog.rows()
                 if r.get('family') == 'psz' and r.get('heat_source') == 'ashp']
-        self.assertEqual(8, len(rows), 'precondition: the eight ASHP rows')
+        self.assertEqual(4, len(rows), 'precondition: the four ASHP rows (their System 4 '
+                         'twins were retired, D-113)')
         for name in rows:
             with self.subTest(row=name):
                 self.assertEqual({'heat_pump'}, self._declared(name))

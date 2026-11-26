@@ -30,7 +30,7 @@ there rather than silently dropped from the comparison.
 | File | Identical | Renumbered | Changed | Added | Removed |
 |---|---|---|---|---|---|
 | envelope (`envelope_rules.json`) | 75 | 2 | 0 | 0 | 0 |
-| hvac (`reference_rules.json`) | 322 | 30 | 1 | 1 | 0 |
+| hvac (`reference_rules.json`) | 324 | 30 | 1 | 1 | 0 |
 | hvac_efficiencies (`efficiencies.json`) | 2709 | 24 | 114 | 438 | 48 |
 | lighting (`lighting_rules.json`) | 6 | 0 | 0 | 0 | 0 |
 | loads (`loads_rules.json`) | 0 | 1 | 0 | 0 | 0 |
@@ -42,7 +42,7 @@ there rather than silently dropped from the comparison.
 | tables/schedules (`tables/schedules.json`) | 7473 | 0 | 0 | 0 | 0 |
 | tables/space_types (`tables/space_types.json`) | 24024 | 0 | 0 | 0 | 0 |
 | tables/table_c1 (`tables/table_c1.json`) | 8827 | 0 | 0 | 0 | 0 |
-| **Total** | **46060** | **58** | **120** | **439** | **48** |
+| **Total** | **46062** | **58** | **120** | **439** | **48** |
 
 ## necb2020 → necb2025
 
@@ -59,7 +59,7 @@ there rather than silently dropped from the comparison.
 </details>
 
 <details>
-<summary><b>hvac</b> (`reference_rules.json`) — 354 leaves: 322 identical, 30 renumbered, 1 changed, 1 added, 0 removed (click to expand)</summary>
+<summary><b>hvac</b> (`reference_rules.json`) — 356 leaves: 324 identical, 30 renumbered, 1 changed, 1 added, 0 removed (click to expand)</summary>
 
 #### Renumbered
 
