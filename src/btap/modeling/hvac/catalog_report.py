@@ -1816,6 +1816,16 @@ def _without_shared(phrase_lists):
     return shared, [[p for p in own if p not in shared] for own in phrase_lists]
 
 
+def _own_label(own, siblings):
+    """A variant's label: its own distinguishing phrases, or — when it has
+    none, being its type's plainest form — what its siblings add that it
+    lacks. 'base configuration' said neither."""
+    if own:
+        return ', '.join(own)
+    extra = [p for p in dict.fromkeys(p for s in siblings for p in s)]
+    return 'without ' + ', '.join(extra) if extra else 'base configuration'
+
+
 def _tree_labels(members):
     """Terse labels for one system type's variants (phylroy, 2026-11-26: the
     tree repeated itself on the way down). Each variant says only what its
@@ -1835,24 +1845,26 @@ def _tree_labels(members):
     shared, rest = _without_shared(phrases)
     keys = [own[0] if own else 'base configuration' for own in rest]
     if len(members) <= SUBGROUP_ABOVE or len(set(keys)) in (1, len(members)):
-        return shared, [(None, [], ', '.join(own) or 'base configuration') for own in rest]
+        return shared, [(None, [], _own_label(own, [o for o in rest if o is not own]))
+                        for own in rest]
     entries = [None] * len(members)
     for key in dict.fromkeys(keys):
         idx = [i for i, k in enumerate(keys) if k == key]
         if len(idx) == 1:
-            entries[idx[0]] = (None, [], ', '.join(rest[idx[0]]) or 'base configuration')
+            entries[idx[0]] = (None, [], _own_label(rest[idx[0]], [rest[j] for j in range(len(rest)) if j != idx[0]]))
             continue
         sub_shared, sub_rest = _without_shared([rest[i][1:] for i in idx])
         for i, own in zip(idx, sub_rest):
-            entries[i] = (key, sub_shared, ', '.join(own) or 'base configuration')
+            entries[i] = (key, sub_shared, _own_label(own, [o for o in sub_rest if o is not own]))
     return shared, entries
 
 
-def _nav_item(card, label):
+def _nav_item(card, label, detail=None):
+    more = f'<span class="nav-detail">{esc(detail)}</span>' if detail else ''
     return ('<button type="button" class="nav-item" data-target="{}" data-id="{}" '
-            'data-facets="{}" data-search="{}" title="{}">{}</button>'.format(
+            'data-facets="{}" data-search="{}" title="{}">{}{}</button>'.format(
                 card['dom_id'], esc(card['row']['id']), esc(json.dumps(card['facets'])),
-                esc(_search_text(card)), esc(card['display']), esc(label)))
+                esc(_search_text(card)), esc(card['display']), esc(label), more))
 
 
 def sidebar(cards, total):
@@ -1867,8 +1879,12 @@ def sidebar(cards, total):
             _, title, abbr = taxonomy.TYPES[system_type]
             head = title if abbr == title else f'{title} ({abbr})'
             if len(members) == 1:
-                # One variant: the type IS the entry; no heading to repeat.
-                type_html.append(f'<div class="nav-type nav-single">{_nav_item(members[0], head)}</div>')
+                # One variant: the type IS the entry, with its equipment on a
+                # second line — the type name alone hid e.g. a window AC's
+                # electric baseboards (phylroy, 2026-11-26).
+                _, entries = _tree_labels(members)
+                type_html.append('<div class="nav-type nav-single">'
+                                 f'{_nav_item(members[0], head, entries[0][2])}</div>')
                 continue
             shared, entries = _tree_labels(members)
             items, done = [], set()
@@ -2261,6 +2277,8 @@ footer { margin: 1.5rem; font-size: .75rem; color: #555; }
 .nav-type summary .n { color: #6b7884; font-weight: 400; font-variant-numeric: tabular-nums; }
 .nav-item { padding-left: 1.1rem; }
 .nav-single .nav-item { padding-left: .3rem; font-weight: 600; }
+.nav-detail { display: block; font-weight: 400; font-size: .74rem; color: #55626e; }
+.nav-item.active .nav-detail { color: #dbe7f0; }
 .nav-sub > summary { cursor: pointer; font-size: .78rem; color: #34495e; padding: .15rem .3rem .15rem 1.1rem; }
 .nav-sub > summary .n { color: #6b7884; font-variant-numeric: tabular-nums; }
 .nav-sub .nav-item { padding-left: 2rem; }

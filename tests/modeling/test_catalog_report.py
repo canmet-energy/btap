@@ -122,6 +122,30 @@ class TestCatalogReport(unittest.TestCase):
                         self.assertTrue(any(sub for sub, _, _ in entries),
                                         f'{system_type}: a large type gets a second level')
 
+    def test_the_tree_path_loses_no_equipment(self):
+        """phylroy (2026-11-26): 'Window air conditioner' alone hid the unit's
+        electric baseboards. Every phrase of a system's full name must be
+        shown somewhere on its tree path: the type's 'all:' line, its
+        subgroup and that line, or its own label."""
+        from btap.modeling.hvac import catalog_report, taxonomy
+        for types in taxonomy.tree().values():
+            for rows in types.values():
+                shared, entries = catalog_report._tree_labels([{'row': r} for r in rows])
+                for row, (sub, sub_shared, label) in zip(rows, entries):
+                    _, body, plant = taxonomy.display_parts(row)
+                    wanted = {catalog_report._tree_phrase(p) for p in body + plant}
+                    shown = set(shared) | set(sub_shared) | ({sub} if sub else set())
+                    if not label.startswith('without '):
+                        shown |= set(label.split(', '))
+                    with self.subTest(id=row['id']):
+                        self.assertEqual(set(), wanted - shown)
+                        self.assertNotEqual('base configuration', label)
+
+    def test_a_single_variant_entry_shows_its_equipment(self):
+        html = self.html()
+        self.assertIn('Window air conditioner (Window AC)<span class="nav-detail">'
+                      'window AC units that ventilate, electric baseboards</span>', html)
+
     def test_the_system_list_is_resizable(self):
         html = self.html()
         self.assertIn('id="splitter" role="separator"', html)
