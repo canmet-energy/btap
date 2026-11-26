@@ -224,8 +224,8 @@ class TestCampusVariants(unittest.TestCase):
                          'the shipped name must not drift')
         shared = by_id['hv-hw-gasboiler-shared']
         self.assertIn('shared', shared['aliases'][0])
-        self.assertIn('one unit serving several zones', shared['display'])
-        self.assertNotIn('one unit serving several zones',
+        self.assertIn('serves several zones from one control zone', shared['display'])
+        self.assertNotIn('serves several zones from one control zone',
                          by_id['furnace-gas']['display'])
         self.assertIn('hot water', by_id['uh-hw-gasboiler']['aliases'][0])
         self.assertIn('hot water', by_id['uh-hw-gasboiler']['display'])

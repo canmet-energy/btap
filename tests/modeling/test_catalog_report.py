@@ -134,9 +134,8 @@ class TestCatalogReport(unittest.TestCase):
                 for row, (sub, sub_shared, label) in zip(rows, entries):
                     _, body, plant = taxonomy.display_parts(row)
                     wanted = {catalog_report._tree_phrase(p) for p in body + plant}
-                    shown = set(shared) | set(sub_shared) | ({sub} if sub else set())
-                    if not label.startswith('without '):
-                        shown |= set(label.split(', '))
+                    shown = (set(shared) | set(sub_shared) | ({sub} if sub else set())
+                             | set(label.split(', ')))
                     with self.subTest(id=row['id']):
                         self.assertEqual(set(), wanted - shown)
                         self.assertNotEqual('base configuration', label)
@@ -167,6 +166,16 @@ class TestCatalogReport(unittest.TestCase):
         for group in re.findall(r'<details class="nav-sub">(.*?)</details>', nav, re.S):
             labels = [html_mod.unescape(x) for x in re.findall(r'class="nav-item"[^>]*>([^<]*)</button>', group)]
             self.assertEqual(sorted(labels, key=str.casefold), labels)
+
+    def test_a_variant_says_what_it_lacks(self):
+        """Fable (naming review): 'without hot water baseboards, HRV' read as
+        'with HRV'. A variant lacking what a sibling has says "no ..."."""
+        from btap.modeling.hvac import catalog, catalog_report, taxonomy
+        pvav = [r for r in catalog.rows() if taxonomy.facets(r)['system_type'] == 'pvav']
+        _, entries = catalog_report._tree_labels([{'row': r} for r in pvav])
+        plain = dict(zip([r['id'] for r in pvav], [e[2] for e in entries]))['pvav-hw-gasboiler']
+        self.assertEqual('no baseboards, no heat recovery', plain)
+        self.assertNotIn('without', ' '.join(e[2] for e in entries))
 
     def test_the_system_list_is_resizable(self):
         html = self.html()

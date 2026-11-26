@@ -1630,15 +1630,15 @@ TYPE_BLURB = {
                 'each zone.',
     'doas-ptac': 'A dedicated outdoor air system ventilates; a packaged terminal air '
                  'conditioner cools each zone.',
-    'mau-fc4': 'A make-up air unit ventilates; four-pipe fan coils heat and cool each zone '
+    'mau-fc4': 'A central air handler (mixed air, not 100% outdoor air) ventilates; four-pipe fan coils heat and cool each zone '
                'from a boiler and chiller plant.',
-    'mau-fc2': 'A make-up air unit ventilates; two-pipe fan coils heat or cool each zone by '
+    'mau-fc2': 'A central air handler (mixed air, not 100% outdoor air) ventilates; two-pipe fan coils heat or cool each zone by '
                'season.',
     'doas-fc4': 'A dedicated outdoor air system ventilates; four-pipe fan coils heat and cool '
                 'each zone.',
     'doas-pthp': 'A dedicated outdoor air system ventilates; packaged terminal heat pumps heat '
                  'and cool each zone.',
-    'doas-wshp': 'A dedicated outdoor air system ventilates; water-to-air heat pumps on a '
+    'doas-wshp': 'A dedicated outdoor air system ventilates; water-source heat pump units on a '
                  'common water loop heat and cool each zone.',
     'doas-vrf': 'A dedicated outdoor air system ventilates; variable-refrigerant-flow '
                 'terminals heat and cool each zone.',
@@ -1679,7 +1679,7 @@ FILTER_GROUPS = [
 
 #: Human labels for facet values (a value absent here is shown humanised).
 VALUE_LABELS = {
-    'central': 'Central ducted', 'oa_plus_zone': 'Outdoor-air unit + zone',
+    'central': 'Central ducted', 'oa_plus_zone': 'Zone terminals + outdoor-air unit',
     'zone_only': 'Zone equipment only', 'heating_only': 'Heating only',
     'ventilation_only': 'Ventilation only', 'process': 'Process and special',
     'gas': 'Gas', 'electric': 'Electric', 'hot_water': 'Hot water', 'ashp': 'Air-source HP',
@@ -1710,6 +1710,8 @@ SYNONYMS = {
     'gshp': 'ground-source', 'awhp': 'air-to-water', 'shared': 'several zones',
     'erv': 'energy recovery', 'hrv': 'heat recovery', 'cav': 'constant-volume',
     'chw': 'chilled water', 'hw': 'hot water', 'bb': 'baseboard',
+    'psz-ac': 'rooftop', 'psz-hp': 'heat pump', 'wlhp': 'water-loop',
+    'vrf-hr': 'heat recovery', 'dec': 'evaporative',
 }
 
 
@@ -1816,14 +1818,17 @@ def _without_shared(phrase_lists):
     return shared, [[p for p in own if p not in shared] for own in phrase_lists]
 
 
-def _own_label(own, siblings):
-    """A variant's label: its own distinguishing phrases, or — when it has
-    none, being its type's plainest form — what its siblings add that it
-    lacks. 'base configuration' said neither."""
-    if own:
-        return ', '.join(own)
-    extra = [p for p in dict.fromkeys(p for s in siblings for p in s)]
-    return 'without ' + ', '.join(extra) if extra else 'base configuration'
+#: What a variant LACKS that a sibling has, said plainly ("without X, Y"
+#: misread as "without X, with Y" — Fable, naming review).
+_ABSENCE = (("zone_heating", "no baseboards"), ("vent_heat_recovery", "no heat recovery"))
+
+
+def _own_label(own, mine, siblings):
+    """A variant's label: its own distinguishing phrases, plus a "no ..."
+    note for anything its siblings have and it does not."""
+    notes = [text for key, text in _ABSENCE
+             if mine[key] == "none" and any(f[key] != "none" for f in siblings)]
+    return ', '.join(list(own) + notes) or 'base configuration'
 
 
 def _tree_labels(members):
@@ -1836,26 +1841,31 @@ def _tree_labels(members):
 
     Returns ``(shared, entries)``: ``entries`` is one ``(subgroup or None,
     subgroup_shared, label)`` per member, in member order."""
-    phrases = []
+    phrases, facets = [], []
     for card in members:
         _, body, plant = taxonomy.display_parts(card['row'])
         phrases.append([_tree_phrase(p) for p in body + plant])
+        facets.append(taxonomy.facets(card['row']))
     if len(members) == 1:
         return [], [(None, [], ', '.join(phrases[0]))]
+
+    def label(i, own, group):
+        return _own_label(own, facets[i], [facets[j] for j in group if j != i])
+
     shared, rest = _without_shared(phrases)
+    everyone = range(len(members))
     keys = [own[0] if own else 'base configuration' for own in rest]
     if len(members) <= SUBGROUP_ABOVE or len(set(keys)) in (1, len(members)):
-        return shared, [(None, [], _own_label(own, [o for o in rest if o is not own]))
-                        for own in rest]
+        return shared, [(None, [], label(i, own, everyone)) for i, own in enumerate(rest)]
     entries = [None] * len(members)
     for key in dict.fromkeys(keys):
         idx = [i for i, k in enumerate(keys) if k == key]
         if len(idx) == 1:
-            entries[idx[0]] = (None, [], _own_label(rest[idx[0]], [rest[j] for j in range(len(rest)) if j != idx[0]]))
+            entries[idx[0]] = (None, [], label(idx[0], rest[idx[0]], everyone))
             continue
         sub_shared, sub_rest = _without_shared([rest[i][1:] for i in idx])
         for i, own in zip(idx, sub_rest):
-            entries[i] = (key, sub_shared, _own_label(own, [o for o in sub_rest if o is not own]))
+            entries[i] = (key, sub_shared, label(i, own, idx))
     return shared, entries
 
 
