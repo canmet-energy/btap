@@ -277,7 +277,7 @@ def _preflight_resolved(model, resolved, zones, control_zone, namer,
 
 def build_system(model, system_name, zones, control_zone=None, remove_existing=False,
                  namer='default', config=None, exclude_plants=None,
-                 performance_profile=None, _probe=False):
+                 performance_profile=None):
     """Build a complete HVAC system on a set of thermal zones by descriptive
     name.
 
@@ -312,6 +312,22 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
         merged over the current builder defaults
     :return: Result(system_name, family, air_loops, control_zone)
     """
+    return _build_system(model, system_name, zones, control_zone=control_zone,
+                         remove_existing=remove_existing, namer=namer, config=config,
+                         exclude_plants=exclude_plants,
+                         performance_profile=performance_profile)
+
+
+def _build_system(model, system_name, zones, control_zone=None, remove_existing=False,
+                  namer='default', config=None, exclude_plants=None,
+                  performance_profile=None, _probe=False):
+    """`build_system`, with the private `_probe` switch the zone-ERV dry run
+    uses. Kept off the public signature so no caller, through the facade's
+    `**kwargs` included, can turn the dry run off (Fable, review of #253)."""
+    # Materialised once: the dry run must not consume a one-shot iterable
+    # before the real build reads it.
+    if exclude_plants is not None:
+        exclude_plants = list(exclude_plants)
     performance_profile = performance.resolve(performance_profile)
     validation.require_zones(zones)
     validation.require_thermostats(zones)
@@ -437,7 +453,8 @@ def _probe_zone_ervs(model, system_name, zones, control_zone, remove_existing,
     refused rebuild left the zones with neither. Predicting it from the
     config would copy all ten conditions and drift; instead the same build
     runs, refusal included, on a throwaway clone. Only rows asking for zone
-    ERVs pay for it.
+    ERVs pay for it: measured, it doubles that build (2.2 s to 4.4 s on a
+    59-zone archetype; the clone itself is 0.02 s).
     """
     from btap._compat import opt
 
@@ -448,15 +465,10 @@ def _probe_zone_ervs(model, system_name, zones, control_zone, remove_existing,
     probe_control = None
     if control_zone is not None:
         probe_control = opt(probe.getThermalZone(control_zone.handle()))
-    import warnings
-    with warnings.catch_warnings():
-        # the real build says it again; the probe must not say it twice
-        warnings.simplefilter('ignore')
-        build_system(probe, system_name, probe_zones, control_zone=probe_control,
-                     remove_existing=remove_existing,
-                     namer=namer if isinstance(namer, str) else 'default',
-                     config=config, exclude_plants=exclude_plants,
-                     performance_profile=performance_profile, _probe=True)
+    _build_system(probe, system_name, probe_zones, control_zone=probe_control,
+                  remove_existing=remove_existing, namer=namer, config=config,
+                  exclude_plants=exclude_plants,
+                  performance_profile=performance_profile, _probe=True)
 
 
 def _mark_shared_loops(air_loops, rule):

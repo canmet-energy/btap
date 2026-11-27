@@ -253,6 +253,15 @@ class TestZoneLevelRecoveryIsTheOtherMechanism(unittest.TestCase):
                 self.assertEqual(before, inventory(model),
                                  'a refused rebuild must leave the model untouched')
 
+    def test_the_dry_run_cannot_be_switched_off_from_outside(self):
+        """Fable, review of #253: `_probe` was a keyword of the public
+        `build_system`, reachable through the facade's `**kwargs`, and
+        `_probe=True` skipped the dry run — the bug again, on request."""
+        import btap.modeling as modeling
+        model = load_fixture()
+        with self.assertRaises(TypeError):
+            modeling.build_system(model, 'bb-elecbb', sorted_zones(model), _probe=True)
+
     def test_an_accepted_request_still_builds_once_per_zone(self):
         """The probe runs on a clone: the real model gets one device per zone
         and nothing left over from the dry run."""
