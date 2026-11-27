@@ -1332,13 +1332,24 @@ def _heat_pump_hot_water_plants(model):
             if eir is not None:
                 hps.append(eir.nameString())
                 continue
-            hp = _plant_heat_pump(comp, loop)
-            if (hp is not None and hp[1] == 'heating') or _district_heating(comp) \
-                    or comp.to_WaterHeaterMixed().is_initialized():
+            # ADMIT, do not exclude: anything that is not a known passive
+            # part may add heat (a stratified tank, a fluid-to-fluid heat
+            # exchanger, a solar collector), and an exclusion list of three
+            # let those through to be attributed pro rata (Fable, re-review).
+            if comp.iddObjectType().valueName() not in _PASSIVE_PLANT_PARTS:
                 unmeasured = True
         if hps and not unmeasured:
             out[loop.nameString()] = {'hp': hps, 'aux': boilers}
     return out
+
+
+#: Supply-side parts that move or route water and add no heat of their own.
+_PASSIVE_PLANT_PARTS = frozenset({
+    'OS_Node', 'OS_Connector_Mixer', 'OS_Connector_Splitter',
+    'OS_Pipe_Adiabatic', 'OS_Pipe_Indoor', 'OS_Pipe_Outdoor',
+    'OS_Pump_VariableSpeed', 'OS_Pump_ConstantSpeed',
+    'OS_HeaderedPumps_VariableSpeed', 'OS_HeaderedPumps_ConstantSpeed',
+})
 
 
 def _hydronic_plant(coil, hp_plants):

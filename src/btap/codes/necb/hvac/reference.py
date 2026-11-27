@@ -3074,14 +3074,23 @@ def _election_scope(group, facts, annual=None):
     electing separately, which a mixed building turns into a wrong answer)."""
     loops = [group['air_loop']] if group.get('air_loop') is not None else []
     zones = list(group['zones'])
-    for members in ((annual or {}).get('plant_members') or {}).values():
-        if (set(members['zones']) & set(zones)) or (set(members['loops']) & set(loops)):
-            for name in members['loops']:
-                if name not in loops:
-                    loops.append(name)
-            for z in members['zones']:
-                if z not in zones:
-                    zones.append(z)
+    # To a FIXPOINT: two plants sharing a block pool together, and every block
+    # in the connected set gets the same scope whichever one asks and in
+    # whatever order the plants are listed (Fable, re-review).
+    plants = list(((annual or {}).get('plant_members') or {}).values())
+    grown = True
+    while grown:
+        grown = False
+        for members in plants:
+            if (set(members['zones']) & set(zones)) or (set(members['loops']) & set(loops)):
+                for name in members['loops']:
+                    if name not in loops:
+                        loops.append(name)
+                        grown = True
+                for z in members['zones']:
+                    if z not in zones:
+                        zones.append(z)
+                        grown = True
     if ('external' in (group.get('heat_pump_sources') or [])
             and group.get('heat_pump_source_loops')):
         for other in (facts.get('zone_groups') or []):

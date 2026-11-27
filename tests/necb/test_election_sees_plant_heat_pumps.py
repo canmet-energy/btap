@@ -144,25 +144,120 @@ class TestTheElectionPoolsThePlantsBlocks(unittest.TestCase):
         elected = [e for e in audit.entries if 'ELECTED' in e['action']]
         refused = [e for e in audit.entries if 'NOT above' in e['action']]
         self.assertEqual([], elected, 'no block may elect: the pooled share is 25%')
-        self.assertTrue(refused)
+        self.assertEqual(1, len(refused), 'ONE decision for the plant, not one per block')
         for e in refused:
             self.assertIn('25.0%', e['action'], e['action'])
 
 
+    def test_above_the_proviso_the_plant_elects_ONCE(self):
+        def strong(inv):
+            from btap.modeling.hvac import classify
+            water = [e['name'].upper() for es in inv['zones'].values() for e in es if e.get('plant')]
+            return {classify.BASEBOARD_VARIABLE: {**{n: 10e9 for n in water},
+                                                  'ZONE 1 ELECTRIC BASEBOARD': 1e9},
+                    classify.PLANT_HEAT_PUMP_VARIABLE: {'AIR-TO-WATER HEAT PUMP': 9e9},
+                    classify.BOILER_VARIABLE: {'BACKUP BOILER': 1e9}}      # 90% / 10%
+        _, audit = self.selection(strong)
+        elected = [e for e in audit.entries if 'ELECTED' in e['action']]
+        self.assertEqual(1, len(elected), [e['action'] for e in elected])
+        self.assertIn('NaturalGas', elected[0]['action'])
+
+
+@needs_sdk
+class TestAnAirLoopMemberPoolsWithTheRest(unittest.TestCase):
+    """Fable's re-review: a group whose only link to the plant is its air-loop
+    coil got a different scope from the plant's baseboard groups. Hot-water
+    rooftop units on zones 1-2 (an air-handler coil on the plant and NO zone
+    terminal on it) and baseboards on zones 3-5 share one heat-pump plant;
+    every group must get the same five-zone scope. (A VAV layout cannot
+    witness this: its reheat coils already make its zones members.)"""
+
+    def test_every_group_on_the_plant_gets_the_same_scope(self):
+        from btap import modeling
+        from btap._compat import sorted_by_name
+        from btap.audit import AuditLog
+        from btap.codes.necb import path
+        from btap.codes.necb.hvac import reference
+        from btap.modeling.hvac import classify
+        from tests.support import load_fixture
+        model = load_fixture()
+        zones = sorted_by_name(model.getThermalZones())
+        modeling.build_system(model, 'psz-hw-gasboiler-perzone', zones[:2],
+                              config={'hw_source': 'awhp', 'boiler_fuel': 'NaturalGas'})
+        modeling.build_system(model, 'bb-hwbb-awhp-gasbu', zones[2:])
+        inv = classify.heating_election_inventory(model)
+        self.assertEqual(1, len(inv['plants']), 'precondition: the two systems share one plant')
+        linked_only_by_loop = {z.nameString() for z in zones[:2]}
+        self.assertFalse(linked_only_by_loop & set(inv['zones']),
+                         'precondition: zones 1-2 have no zone terminal on the plant')
+        names = {classify.BASEBOARD_VARIABLE: {e['name'].upper(): 5e9 for es in inv['zones'].values()
+                                               for e in es if e['variable'] == classify.BASEBOARD_VARIABLE},
+                 classify.COIL_VARIABLE: {a['name'].upper(): 5e9 for e in inv['loops'].values() for a in e['aux']},
+                 classify.PLANT_HEAT_PUMP_VARIABLE: {'AIR-TO-WATER HEAT PUMP': 5e9},
+                 classify.BOILER_VARIABLE: {'BACKUP BOILER': 5e9}}
+        with mock.patch.object(path.runner, 'run_period_sums',
+                               side_effect=lambda _m, variable: names.get(variable, {})):
+            data = path._heating_election_data(model, inv, AuditLog())
+        facts = modeling.characterize(model, audit=None)
+        scopes = {tuple(sorted(reference._election_scope(g, facts, data)[1])) for g in facts['zone_groups']}
+        self.assertEqual({tuple(sorted(z.nameString() for z in zones))}, scopes)
+
+
+class TestTwoPlantsSharingABlockPoolTransitively(unittest.TestCase):
+    """Two plants that share a block form one pool, the same whichever block
+    asks and in whatever order the plants are listed."""
+
+    def test_the_scope_is_symmetric_and_order_independent(self):
+        from btap.codes.necb.hvac import reference
+        for order in ((('P1', ['X', 'Y']), ('P2', ['Y', 'Z'])),
+                      (('P2', ['Y', 'Z']), ('P1', ['X', 'Y']))):
+            annual = {'plant_members': {name: {'zones': zones, 'loops': []} for name, zones in order}}
+            for block in ('X', 'Y', 'Z'):
+                with self.subTest(order=[o[0] for o in order], block=block):
+                    _, scope, _ = reference._election_scope({'zones': [block]}, {}, annual)
+                    self.assertEqual(['X', 'Y', 'Z'], sorted(scope))
+
+
 @needs_sdk
 class TestAPlantWithAnUnmeasuredSourceIsNotSplit(unittest.TestCase):
-    """District heat (or another heat-pump type) on the loop would otherwise be
-    attributed pro rata to the heat pump and boiler, or read as 0 J."""
+    """Anything on the supply side that is not the measured heat pump, a boiler
+    or a passive part could add heat that would be attributed pro rata to the
+    heat pump and boiler, or read as 0 J. Such a plant is not split, and the
+    election behaves as it did before (prepare_annual requests nothing)."""
 
-    def test_district_heat_on_the_loop_leaves_it_unsplit(self):
-        import openstudio
+    def add_and_check(self, make):
+        import types
 
+        from btap.codes.necb import path
         from btap.modeling.hvac import classify
         model = _built('bb-hwbb-awhp-gasbu')
         loop = next(pl for pl in model.getPlantLoops() if pl.nameString() == 'Heat Pump Hot Water Loop')
-        district = openstudio.model.DistrictHeatingWater(model)
-        loop.addSupplyBranchForComponent(district)
-        self.assertEqual({}, classify.heating_election_inventory(model)['plants'])
+        loop.addSupplyBranchForComponent(make(model))
+        inv = classify.heating_election_inventory(model)
+        self.assertEqual({}, inv['plants'])
+        self.assertFalse(any('plant' in e for es in inv['zones'].values() for e in es))
+        run = types.SimpleNamespace(proposed=model, report={"proposed": {}}, state={})
+        asked = []
+        with mock.patch.object(path.runner, 'request_run_period_variables',
+                               side_effect=lambda _m, variables: asked.extend(variables)):
+            path.prepare_annual(run)
+        self.assertEqual([], asked)
+
+    def test_district_heat(self):
+        import openstudio
+        self.add_and_check(openstudio.model.DistrictHeatingWater)
+
+    def test_a_water_heater(self):
+        import openstudio
+        self.add_and_check(openstudio.model.WaterHeaterMixed)
+
+    def test_a_fuel_fired_heat_pump(self):
+        import openstudio
+        self.add_and_check(openstudio.model.HeatPumpAirToWaterFuelFiredHeating)
+
+    def test_a_fluid_to_fluid_heat_exchanger(self):
+        import openstudio
+        self.add_and_check(openstudio.model.HeatExchangerFluidToFluid)
 
 
 @needs_sdk

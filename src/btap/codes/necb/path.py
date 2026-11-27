@@ -1541,12 +1541,20 @@ def _heating_election_data(proposed, inventory, audit):
                 bucket = members.setdefault(e["plant"], {"zones": [], "loops": []})
                 if zone_name not in bucket["zones"]:
                     bucket["zones"].append(zone_name)
+    served = {loop.nameString(): sorted(z.nameString() for z in loop.thermalZones())
+              for loop in proposed.getAirLoopHVACs()}
     for loop_name, entry in inventory["loops"].items():
         for a in entry["aux"]:
             if a.get("plant") in split:
                 bucket = members.setdefault(a["plant"], {"zones": [], "loops": []})
                 if loop_name not in bucket["loops"]:
                     bucket["loops"].append(loop_name)
+                # ...and the zones that loop serves: a group whose only link
+                # to the plant is its air-loop coil must pool with the rest
+                # (Fable, re-review: two groups on one heat pump got two scopes).
+                for zone_name in served.get(loop_name, ()):
+                    if zone_name not in bucket["zones"]:
+                        bucket["zones"].append(zone_name)
     hp_gj = (sum(e["hp_j"] for e in loops.values())
              + sum(e["j"] for entries in zones.values() for e in entries
                    if e["role"] == "hp"))
