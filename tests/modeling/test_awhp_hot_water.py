@@ -172,6 +172,19 @@ def _reset(node):
     return ('constant', schedule.value())
 
 
+def _at(reset, outdoor):
+    """A node's setpoint at an outdoor temperature, as EnergyPlus evaluates
+    an outdoor-air reset: linear between the endpoints, clamped outside."""
+    if reset[0] == 'constant':
+        return reset[1]
+    at_cold, at_mild, cold, mild = reset
+    if outdoor <= cold:
+        return at_cold
+    if outdoor >= mild:
+        return at_mild
+    return at_cold + (at_mild - at_cold) * (outdoor - cold) / (mild - cold)
+
+
 def _plant_resets(model, loop):
     hp = model.getHeatPumpPlantLoopEIRHeatings()[0]
     boiler = model.getBoilerHotWaters()[0]
@@ -206,6 +219,10 @@ class TestTheControlsResolve(unittest.TestCase):
                 ('boiler_lift', {'loop_reset_c': [58.0, 45.0]}),        # within reach: that is low temperature
                 ('low_temperature', {'loop_reset_c': [60.0, 10.0]}),
                 ('low_temperature', {'heat_pump_max_c': 120.0}),
+                ('low_temperature', {'heat_pump_max_c': 10 ** 400}),       # overflows float()
+                ('low_temperature', {'loop_reset_c': [22, 20]}),           # design return below a room
+                ('boiler_lift', {'loop_reset_c': [82, 40]}),              # resets below the constant heat pump
+                ('boiler_lift', {'heat_pump_max_c': 57.5, 'backup_deadband_k': 5}),   # deadband can do nothing
                 ('low_temperature', [1, 2])):
             with self.subTest(supply=supply, controls=bad):
                 with self.assertRaises(ValueError):
@@ -234,9 +251,30 @@ class TestTheControlsAreBuilt(unittest.TestCase):
                           'loop': (60.0, 45.0, -16.0, 0.0), 'design exit': 60.0},
                          _plant_resets(model, _loops_with_heat_pump(model)[0]))
         model = self.build('bb-hwbb-gasboiler', {'hw_source': 'awhp', 'hw_supply': 'boiler_lift'})
-        self.assertEqual({'heat pump': ('constant', 60.0), 'boiler': (82.0, 59.0, -16.0, 0.0),
-                          'loop': (82.0, 60.0, -16.0, 0.0), 'design exit': 82.0},
-                         _plant_resets(model, _loops_with_heat_pump(model)[0]))
+        resets = _plant_resets(model, _loops_with_heat_pump(model)[0])
+        self.assertEqual(('constant', 60.0), resets['heat pump'])
+        self.assertEqual((82.0, 60.0, -16.0, 0.0), resets['loop'])
+        self.assertEqual(82.0, resets['design exit'])
+        self.assertBoilerLiftIsMet(resets, top=60.0, deadband=1.0)
+
+    def assertBoilerLiftIsMet(self, resets, top, deadband):
+        """The property, not the endpoints: at EVERY outdoor temperature one
+        machine meets the loop setpoint, and wherever the heat pump alone can
+        (the loop at or below `top`, past the boiler's own ramp) the boiler
+        sits `deadband` below it. The first version moved only the boiler's
+        mild endpoint, so between the endpoints neither met the loop (Fable,
+        review of #250: 0.96 K short at the default)."""
+        loop_cold, _loop_mild, cold, mild = resets['loop']
+        boiler_at_cold, boiler_at_mild, _b_cold, boiler_mild = resets['boiler']
+        self.assertEqual(loop_cold, boiler_at_cold)
+        self.assertAlmostEqual(top - deadband, boiler_at_mild)
+        for tenth in range(int(cold * 10) - 50, int(max(mild, boiler_mild) * 10) + 50):
+            outdoor = tenth / 10
+            loop_sp = _at(resets['loop'], outdoor)
+            met = max(_at(resets['heat pump'], outdoor), _at(resets['boiler'], outdoor))
+            self.assertGreaterEqual(met, loop_sp - 1e-9, f'nothing meets the loop at {outdoor} C outdoor')
+            if outdoor >= boiler_mild:
+                self.assertAlmostEqual(loop_sp - deadband, _at(resets['boiler'], outdoor))
 
     def test_low_temperature_controls(self):
         model = self.build('bb-hwbb-gasboiler', {'hw_source': 'awhp', 'hw_controls': {
@@ -249,12 +287,24 @@ class TestTheControlsAreBuilt(unittest.TestCase):
         # The boiler holds the deadband below the loop only where the heat
         # pump can reach the loop setpoint: at the cold end only the boiler
         # reaches 80 C, so it holds the loop setpoint there.
+        for controls in ({'heat_pump_max_c': 55, 'loop_reset_c': [80, 55], 'backup_deadband_k': 0.5},
+                         {'backup_deadband_k': 5},
+                         {'outdoor_reset_c': [-25, 10], 'backup_deadband_k': 2}):
+            with self.subTest(controls=controls):
+                model = self.build('bb-hwbb-gasboiler', {
+                    'hw_source': 'awhp', 'hw_supply': 'boiler_lift', 'hw_controls': controls})
+                resets = _plant_resets(model, _loops_with_heat_pump(model)[0])
+                top = float(controls.get('heat_pump_max_c', 60))
+                self.assertEqual(('constant', top), resets['heat pump'])
+                self.assertBoilerLiftIsMet(resets, top, float(controls['backup_deadband_k']))
+
+    def test_boiler_lift_the_heat_pump_never_meets(self):
+        # the loop never falls to the heat pump's 55 C: the boiler is the loop
         model = self.build('bb-hwbb-gasboiler', {
             'hw_source': 'awhp', 'hw_supply': 'boiler_lift',
-            'hw_controls': {'heat_pump_max_c': 55, 'loop_reset_c': [80, 55], 'backup_deadband_k': 0.5}})
-        self.assertEqual({'heat pump': ('constant', 55.0), 'boiler': (80.0, 54.5, -16.0, 0.0),
-                          'loop': (80.0, 55.0, -16.0, 0.0), 'design exit': 80.0},
-                         _plant_resets(model, _loops_with_heat_pump(model)[0]))
+            'hw_controls': {'heat_pump_max_c': 55, 'loop_reset_c': [82, 65]}})
+        resets = _plant_resets(model, _loops_with_heat_pump(model)[0])
+        self.assertEqual(resets['loop'], resets['boiler'])
 
     def test_plants_share_only_when_their_controls_match(self):
         from btap._compat import sorted_by_name
@@ -272,6 +322,12 @@ class TestTheControlsAreBuilt(unittest.TestCase):
         self.build('bb-hwbb-gasboiler', {'hw_source': 'awhp', 'hw_controls': {'backup_deadband_k': 2}},
                    zones[3:4], model)
         self.assertEqual(2, len(_loops_with_heat_pump(model)), 'the same controls again: shared')
+        # A key that builds nothing must not split a plant (Fable, review of
+        # #250): the ceiling does nothing on a low-temperature loop, and
+        # -0.0 is 0.0.
+        self.build('bb-hwbb-gasboiler', {'hw_source': 'awhp', 'hw_controls': {
+            'heat_pump_max_c': 70, 'outdoor_reset_c': [-16, -0.0]}}, zones[4:5], model)
+        self.assertEqual(2, len(_loops_with_heat_pump(model)), 'an unused key: still the default plant')
 
     def test_refused_BEFORE_the_old_system_is_torn_down(self):
         from btap import modeling
@@ -289,6 +345,18 @@ class TestTheControlsAreBuilt(unittest.TestCase):
     def test_a_row_with_no_hot_water_plant_refuses_them(self):
         with self.assertRaises(ValueError):
             self.build('psz-gas-elecbb', {'hw_controls': {'backup_deadband_k': 2}})
+
+    def test_the_display_names_the_loop_temperature_it_builds(self):
+        from btap.modeling.hvac import taxonomy
+        from btap.modeling.hvac.catalog import resolve
+        row = resolve('bb-hwbb-gasboiler')
+        for extra, phrase in (({}, '(60 C loop)'),
+                              ({'hw_controls': {'loop_reset_c': [55, 40]}}, '(55 C loop)'),
+                              ({'hw_supply': 'boiler_lift'}, '(82 C loop; boiler lifts)'),
+                              ({'hw_supply': 'boiler_lift', 'hw_controls': {'loop_reset_c': [75, 60]}},
+                               '(75 C loop; boiler lifts)')):
+            with self.subTest(extra=extra):
+                self.assertIn(phrase, taxonomy.display({**row, 'hw_source': 'awhp', **extra}))
 
     def test_a_composite_routes_them_to_its_hot_water_part(self):
         model = self.build('doas-fc4-elec-gasboiler-scrollchiller',

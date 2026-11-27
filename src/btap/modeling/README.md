@@ -147,7 +147,7 @@ Measured annually on the five-zone fixture (2026-11-27), hot water baseboards:
 | --- | ---: | ---: | ---: | ---: |
 | Gas boilers only | 0% | - | 147 GJ | 56.5 h |
 | Heat pump, low temperature, gas backup | 92% | 2.47 | 8.8 GJ | 59 h |
-| Heat pump, boiler lift, gas backup | 42% | 2.38 | 83 GJ | 57 h |
+| Heat pump, boiler lift, gas backup | 39% | 2.39 | 89 GJ | 56.75 h |
 
 VAV with reheat on a low-temperature heat-pump plant: 94% heat-pump share,
 70.25 h. None of these runs had a Severe error. A composite passes the options
@@ -173,13 +173,25 @@ Defaults: the loop resets over -16 to 0 C outdoor, from 60 to 45 C (low
 temperature) or 82 to 60 C (boiler lift). The heat pump's outlet ceiling is
 60 C, and the boiler deadband is 1 K.
 
-- The boiler holds the deadband below the loop wherever the heat pump can reach
-  the loop setpoint. Where it cannot, at the hot end of a boiler-lift reset, the
-  boiler holds the loop setpoint itself.
-- A low-temperature reset hotter than the heat pump's ceiling is refused,
-  because that loop is boiler lift. So is a boiler-lift reset the heat pump can
-  reach, because the boiler would lift nothing.
-- Plants with different controls are never shared.
+- The boiler holds the deadband below the loop wherever the heat pump alone can
+  meet the loop setpoint, and holds the loop setpoint itself wherever it cannot.
+  On boiler lift the boiler follows the loop's own reset and carries on past the
+  mild end until it is one deadband below the heat pump.
+- The first boiler-lift version moved only the boiler's mild endpoint. Between
+  the endpoints neither machine then met the loop: 0.96 K short at the default.
+  The boiler-lift row above was 42% heat pump, 83 GJ, before that was fixed;
+  some of that heat-pump share was really the loop running under setpoint.
+- These are refused:
+  - a low-temperature reset hotter than the heat pump's ceiling, because that
+    loop is boiler lift;
+  - a boiler-lift reset the heat pump can reach, because the boiler would lift
+    nothing;
+  - a boiler-lift reset that falls below the heat pump's constant setpoint;
+  - a deadband on a boiler-lift loop the heat pump never meets, because it
+    would do nothing;
+  - a loop whose design return would fall below 25 C.
+- Plants with different controls are never shared. A key that changes nothing
+  built, such as the ceiling on a low-temperature loop, does not split them.
 
 There is no sizing factor, deliberately. EnergyPlus scales the heat pump's
 water flow with it, and the heat pump sits in series on the loop's only supply

@@ -784,9 +784,14 @@ def display_parts(config):
         hw = [f"{w} backup" if w.endswith(" boiler") else w for w in hw]
     if config.get("hw_source") == "awhp":
         supply = config.get("hw_supply", "low_temperature")
+        # the loop's design temperature: plant_loops.HEAT_PUMP_LOOP_RESET_DEFAULTS
+        # unless `hw_controls` overrides it (Fable, review of #250)
+        reset = (config.get("hw_controls") or {}).get("loop_reset_c")
+        loop_c = (float(reset[0]) if reset
+                  else 60.0 if supply == "low_temperature" else 82.0)
         hw = [w if w != _PLANT_WORDS["awhp"] else
-              ("air-to-water heat pump (60 C loop)" if supply == "low_temperature"
-               else "air-to-water heat pump preheat (82 C loop; boiler lifts)")
+              (f"air-to-water heat pump ({loop_c:g} C loop)" if supply == "low_temperature"
+               else f"air-to-water heat pump preheat ({loop_c:g} C loop; boiler lifts)")
               for w in hw]
     plant = hw + chw
     if t in ("wshp", "doas-wshp"):

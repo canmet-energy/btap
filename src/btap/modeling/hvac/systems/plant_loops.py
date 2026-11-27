@@ -79,6 +79,8 @@ HEAT_PUMP_LOOP_RESET_DEFAULTS = {
     'boiler_lift': (82.0, 60.0),
 }
 HEAT_PUMP_CONTROL_KEYS = frozenset(HEAT_PUMP_CONTROL_DEFAULTS) | {'loop_reset_c'}
+#: The loop's fixed design temperature difference, K, per supply mode.
+HEAT_PUMP_LOOP_DELTA_T = {'low_temperature': 11.0, 'boiler_lift': 16.0}
 _HEAT_PUMP_LOOP_NAME = 'Heat Pump Hot Water Loop'
 CHILLED_WATER_SOURCES = frozenset({
     'water_cooled', 'air_cooled', 'district',
@@ -710,10 +712,15 @@ def heat_pump_controls(supply, controls=None):
                          f'it takes {sorted(HEAT_PUMP_CONTROL_KEYS)}')
 
     def number(key, value):
-        if isinstance(value, bool) or not isinstance(value, (int, float)) \
-                or not math.isfinite(value):
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
             raise ValueError(f'hw_controls {key} must be a finite number')
-        return float(value)
+        try:
+            value = float(value)
+        except OverflowError:
+            raise ValueError(f'hw_controls {key} must be a finite number') from None
+        if not math.isfinite(value):
+            raise ValueError(f'hw_controls {key} must be a finite number')
+        return value + 0.0          # -0.0 -> 0.0, so equal controls share a plant
 
     def pair(key, value):
         if not isinstance(value, (list, tuple)) or len(value) != 2:
@@ -733,8 +740,17 @@ def heat_pump_controls(supply, controls=None):
         raise ValueError('hw_controls outdoor_reset_c must be [colder, milder]')
     if not loop_cold >= loop_mild:
         raise ValueError('hw_controls loop_reset_c must not be hotter at the mild end')
-    if not (20.0 <= loop_mild and loop_cold <= 100.0):
-        raise ValueError('hw_controls loop_reset_c must lie between 20 and 100 C')
+    if not (30.0 <= loop_mild and loop_cold <= 100.0):
+        raise ValueError('hw_controls loop_reset_c must lie between 30 and 100 C')
+    # The loop sizes on a fixed design temperature difference (11 K low
+    # temperature, 16 K boiler lift); its design return must still be warm
+    # enough to heat a room (Fable, review of #250: [22, 20] was accepted).
+    design_return = loop_cold - HEAT_PUMP_LOOP_DELTA_T[supply]
+    if design_return < 25.0:
+        raise ValueError(
+            f'hw_controls loop_reset_c cold end {loop_cold:g} C leaves a design return of '
+            f'{design_return:g} C at the {HEAT_PUMP_LOOP_DELTA_T[supply]:g} K design '
+            'temperature difference; it must be at least 25 C')
     if not 30.0 <= top <= 90.0:
         raise ValueError('hw_controls heat_pump_max_c must lie between 30 and 90 C')
     if not 0.0 <= resolved['backup_deadband_k'] <= 5.0:
@@ -747,7 +763,36 @@ def heat_pump_controls(supply, controls=None):
         raise ValueError(
             f'a boiler_lift loop at {loop_cold:g} C is within the heat pump\'s reach '
             f'({top:g} C), so the boiler lifts nothing; that is hw_supply low_temperature')
+    # The boiler-lift heat pump runs at a CONSTANT setpoint, so a loop reset
+    # that falls below it leaves the heat pump overshooting the loop through
+    # the mild end (Fable, review of #250).
+    if supply == 'boiler_lift' and loop_mild < top:
+        raise ValueError(
+            f'a boiler_lift loop resets down to {loop_mild:g} C, below the heat pump\'s '
+            f'constant {top:g} C; lower heat_pump_max_c to the mild end or raise the reset')
+    # Where the heat pump never reaches the loop, the boiler holds the loop
+    # setpoint everywhere and a deadband does nothing: refused rather than
+    # silently ignored (Fable, review of #250).
+    if (supply == 'boiler_lift' and loop_mild > top
+            and 'backup_deadband_k' in map(str, controls)):
+        raise ValueError(
+            f'a boiler_lift loop that never falls to the heat pump\'s {top:g} C has no '
+            'hours where the heat pump alone meets it, so backup_deadband_k has no effect')
     return resolved
+
+
+def _effective_controls(supply, resolved):
+    """The resolved controls that change what is built — the reuse key's
+    content. An unused key must not split two identical plants (Fable,
+    review of #250): ``heat_pump_max_c`` builds nothing on a low-temperature
+    loop, and the deadband nothing on a boiler-lift loop the heat pump never
+    reaches."""
+    effective = dict(resolved)
+    if supply == 'low_temperature':
+        effective.pop('heat_pump_max_c')
+    elif resolved['loop_reset_c'][1] > resolved['heat_pump_max_c']:
+        effective.pop('backup_deadband_k')
+    return effective
 
 
 def _controls_signature(resolved):
@@ -791,8 +836,9 @@ def _air_to_water_heat_pump_hot_water(model, backup_fuel, supply, reuse, exclude
         raise ValueError(
             f"a heat-pump plant's backup fuel must be one of {list(HEAT_PUMP_BACKUP_FUELS)!r}")
     resolved = heat_pump_controls(supply, controls)
-    signature = _controls_signature(resolved)
-    default_signature = _controls_signature(heat_pump_controls(supply))
+    signature = _controls_signature(_effective_controls(supply, resolved))
+    default_signature = _controls_signature(
+        _effective_controls(supply, heat_pump_controls(supply)))
     if reuse:
         blocked = {str(handle) for handle in exclude}
         for pl in model.getPlantLoops():
@@ -815,7 +861,7 @@ def _air_to_water_heat_pump_hot_water(model, backup_fuel, supply, reuse, exclude
     sizing = loop.sizingPlant()
     sizing.setLoopType('Heating')
     sizing.setDesignLoopExitTemperature(loop_cold)
-    sizing.setLoopDesignTemperatureDifference(11.0 if low else 16.0)
+    sizing.setLoopDesignTemperatureDifference(HEAT_PUMP_LOOP_DELTA_T[supply])
     loop.setLoadDistributionScheme('SequentialLoad')
     loop.additionalProperties().setFeature(HOT_WATER_SOURCE_FEATURE, 'awhp')
     loop.additionalProperties().setFeature(HOT_WATER_SUPPLY_FEATURE, supply)
@@ -871,14 +917,24 @@ def _air_to_water_heat_pump_hot_water(model, backup_fuel, supply, reuse, exclude
     # below 10 C) and fired in nearly every heating hour (Fable, PR #243:
     # 67% of annual boiler heat came while the heat pump had capacity).
     #
-    # The boiler holds `deadband` below the loop wherever the heat pump can
-    # reach the loop setpoint, and AT the loop setpoint where it cannot (the
-    # cold end of a boiler-lift reset, which only the boiler reaches).
-    def boiler_setpoint(loop_setpoint):
-        return loop_setpoint - deadband if loop_setpoint <= top else loop_setpoint
-
+    # The boiler holds `deadband` below the loop wherever the heat pump alone
+    # can meet the loop setpoint, and AT the loop setpoint wherever it cannot.
+    #
+    # Low temperature: the heat pump follows the loop reset, so the boiler is
+    # the same line `deadband` lower.
+    #
+    # Boiler lift: the heat pump holds `top` and the loop resets down to it
+    # at the mild end. Moving only the boiler's mild endpoint down by
+    # `deadband` put it BELOW the loop everywhere between the endpoints, where
+    # neither machine then met the loop (Fable, review of #250: 0.96 K at the
+    # default, 4 K at a 5 K deadband). Instead the boiler follows the loop's
+    # own ramp and carries on past the mild end until it is `deadband` below
+    # the heat pump, so it equals the loop wherever the loop is above `top`.
+    # Where the loop never falls to `top`, the boiler is the loop's reset.
     if low:
         reset(hp_outlet, loop_cold, loop_mild, 'Heat Pump Outlet Reset')
+        reset(boiler_outlet, loop_cold - deadband, loop_mild - deadband,
+              'Backup Boiler Outlet Reset')
     else:
         schedule = openstudio.model.ScheduleConstant(model)
         schedule.setName(f'Heat Pump Outlet {top:g}C')
@@ -886,8 +942,20 @@ def _air_to_water_heat_pump_hot_water(model, backup_fuel, supply, reuse, exclude
         spm = openstudio.model.SetpointManagerScheduled(model, schedule)
         spm.setName('Heat Pump Outlet Setpoint')
         spm.addToNode(hp_outlet)
-    reset(boiler_outlet, boiler_setpoint(loop_cold), boiler_setpoint(loop_mild),
-          'Backup Boiler Outlet Reset')
+        boiler_reset = openstudio.model.SetpointManagerOutdoorAirReset(model)
+        boiler_reset.setName('Backup Boiler Outlet Reset')
+        boiler_reset.setControlVariable('Temperature')
+        boiler_reset.setSetpointatOutdoorLowTemperature(loop_cold)
+        boiler_reset.setOutdoorLowTemperature(outdoor_cold)
+        if loop_mild > top or deadband == 0.0:
+            boiler_reset.setSetpointatOutdoorHighTemperature(loop_mild)
+            boiler_reset.setOutdoorHighTemperature(outdoor_mild)
+        else:
+            slope = (loop_cold - loop_mild) / (outdoor_mild - outdoor_cold)   # K per K outdoor
+            boiler_reset.setSetpointatOutdoorHighTemperature(top - deadband)
+            boiler_reset.setOutdoorHighTemperature(
+                outdoor_cold + (loop_cold - top + deadband) / slope)
+        boiler_reset.addToNode(boiler_outlet)
     reset(loop.supplyOutletNode(), loop_cold, loop_mild, 'Hot Water Loop Reset')
     return loop
 
