@@ -174,7 +174,9 @@ class TestCatalogReport(unittest.TestCase):
         pvav = [r for r in catalog.rows() if taxonomy.facets(r)['system_type'] == 'pvav']
         _, entries = catalog_report._tree_labels([{'row': r} for r in pvav])
         plain = dict(zip([r['id'] for r in pvav], [e[2] for e in entries]))['pvav-hw-gasboiler']
-        self.assertEqual('no baseboards, no heat recovery', plain)
+        # 'gas boiler' too since the heat-pump PVAV joined: its sibling's
+        # boiler is a BACKUP, so the plain row's gas boiler now distinguishes it
+        self.assertEqual('gas boiler, no baseboards, no heat recovery', plain)
         self.assertNotIn('without', ' '.join(e[2] for e in entries))
 
     def test_the_system_list_is_resizable(self):

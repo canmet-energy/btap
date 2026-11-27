@@ -234,6 +234,49 @@ def _score(row, group):
         score -= 2.0
         against.append(f'row does NOT heat but the group heats with '
                        f'{sorted(heat)}')
+    # A heat-pump HOT-WATER plant (plant_loops `hw_source: awhp`, 2026-11-27).
+    # Only those rows are scored here, so no existing row's score moves.
+    # Without it every one TIED its boiler twin and won boiler-only buildings.
+    if row.get('hw_source') == 'awhp':
+        # The heat pump must heat WATER: hot-water baseboards, a hydronic
+        # supply coil or unit heaters are what that looks like in the facts.
+        # A DX heat-pump building is not one (Fable, #245: an electric-
+        # baseboard building with a heat pump was handed this row).
+        hydronic = ('Hot Water' in (group.get('baseboard_media') or [])
+                    or 'hydronic' in (group.get('supply_heating_media') or [])
+                    or 'unit_heater' in zonal)
+        if group.get('heat_pump') is True and hydronic:
+            score += 2.0
+            matched.append('the group has a heat pump and hot-water heating; '
+                           'this row heats its hot water with one')
+        elif group.get('heat_pump') is True:
+            score -= 2.0
+            against.append('the group has a heat pump but no hot-water '
+                           'heating; this row heats water with one')
+        else:
+            # Large on purpose: the explicit `boiler_fuel` these rows state
+            # earns up to +2.5 above that their boiler twins (which leave it
+            # implied) do not, and -3 let an electric-boiler building with no
+            # heat pump pick the heat-pump row (Fable, #245). Absent counts as
+            # not established: it is this row's defining equipment.
+            score -= 6.0
+            against.append('this row heats its hot water with a heat pump; no '
+                           'heat pump is established in the group')
+        # ...and on its BACKUP fuel, read from the RAW energy types: the
+        # normalised tokens drop fuel oil, and an oil-backed heat pump then
+        # looked all-electric (Fable, #245). The heat pump itself makes the
+        # group report electricity, so the question is any OTHER fuel.
+        burns_other = any('electric' not in str(fuel).lower()
+                          for fuel in group.get('heating_energy_types') or ())
+        electric_backup = 'electric' in str(row.get('boiler_fuel', 'NaturalGas')).lower()
+        if electric_backup and burns_other:
+            score -= 1.5
+            against.append("the group burns a non-electric fuel; this row's "
+                           'backup boiler is electric')
+        elif not electric_backup and not burns_other:
+            score -= 1.5
+            against.append("this row's backup boiler burns gas; the group "
+                           'burns no fuel but electricity')
     # #221: loop cooling is NOT DX-only. A chilled-water air handler cools on
     # the supply side just as much as a DX one, and reading `loop_dx_cooling`
     # alone made `zonal_cools` true for it — producing the explicit, FALSE

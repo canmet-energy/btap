@@ -616,7 +616,13 @@ def mint_id(config):
         tokens.append("nooa")
     if t == "crah" and f["outdoor_air"] != "none":
         tokens.append("oa")
-    tokens += [_PLANT_TOKEN[p] for p in f["hw_plant"]]
+    if config.get("hw_source") == "awhp":
+        # plant_loops' heat-pump plant: the boiler is a BACKUP, said in fewer
+        # characters than a primary boiler's token (ids stay <= 40)
+        tokens += ["gasbu" if p == "gas_boiler" else "elecbu" if p == "electric_boiler"
+                   else _PLANT_TOKEN[p] for p in f["hw_plant"]]
+    else:
+        tokens += [_PLANT_TOKEN[p] for p in f["hw_plant"]]
     # A heat-pump PLANT from hp_plant_fancoils.py brings its own chilled-water
     # side and ground loop; a water-cooled chiller brings its cooling tower.
     # The `hw_source: awhp` plant heats only, so its chiller still counts.
@@ -636,6 +642,10 @@ def mint_id(config):
     if f["scope"] != _IMPLIED_SCOPE.get(t, f["scope"]):
         tokens.append({"per_zone": "perzone", "shared": "shared",
                        "multizone": "multizone"}[f["scope"]])
+    if config.get("hw_source") == "awhp" and config.get("hw_supply") == "boiler_lift":
+        # the retrofit arrangement builds a different plant (82 C loop, the
+        # heat pump preheating) from the default low-temperature one
+        tokens.append("lift")
     # No lineage token: NECB Systems 3 and 4 build identical equipment
     # (psz.py), so their eight twin rows were RETIRED as duplicates (D-113)
     # rather than told apart. Lineage is a facet, never part of an id.
@@ -776,7 +786,7 @@ def display_parts(config):
         supply = config.get("hw_supply", "low_temperature")
         hw = [w if w != _PLANT_WORDS["awhp"] else
               ("air-to-water heat pump (60 C loop)" if supply == "low_temperature"
-               else "air-to-water heat pump preheat (82 C loop, boiler lifts)")
+               else "air-to-water heat pump preheat (82 C loop; boiler lifts)")
               for w in hw]
     plant = hw + chw
     if t in ("wshp", "doas-wshp"):

@@ -27,6 +27,10 @@ FIXTURES = Path(__file__).resolve().parents[1] / "fixtures"
 MIGRATION = json.loads((FIXTURES / "system_id_migration.json").read_text(encoding="utf-8"))
 MAPPING = MIGRATION["mapping"]
 RETIREMENTS = json.loads((FIXTURES / "system_retirements.json").read_text(encoding="utf-8"))
+#: Rows added AFTER the rename and the retirement; neither proof's "before"
+#: file contained them.
+ADDED = {a["id"] for a in json.loads(
+    (FIXTURES / "system_additions.json").read_text(encoding="utf-8"))["added"]}
 SYSTEMS = Path(__file__).resolve().parents[2] / "src/btap/modeling/hvac/data/systems.json"
 INVERSE = {v: k for k, v in MAPPING.items()}
 SCENARIOS = ("catalog_data_processing", "catalog_general_2storey", "catalog_general_3storey",
@@ -47,7 +51,7 @@ def catalogue_before_retirement():
     data = json.loads(SYSTEMS.read_text(encoding="utf-8"))
     # D-113 also added the overrides a retired name carries; they are new.
     data = {k: v for k, v in data.items() if k not in ("alias_config", "alias_config_comment")}
-    rows = [dict(r) for r in data["systems"]]
+    rows = [dict(r) for r in data["systems"] if r["id"] not in ADDED]
     by_id = {r["id"]: r for r in rows}
     for item in RETIREMENTS["retired"]:
         old = item["row"]
@@ -64,6 +68,7 @@ def catalogue_before_retirement():
 def golden_before_retirement(golden):
     """The D-58 golden as it was before D-113: each retired row's record was
     its System 3 row's record under its own id."""
+    golden = [g for g in golden if g["id"] not in ADDED]
     by_id = {g["id"]: g for g in golden}
     out = list(golden)
     for item in sorted(RETIREMENTS["retired"], key=lambda i: i["golden_index"]):
@@ -159,6 +164,28 @@ class TestNoRowsConfigurationMoved(unittest.TestCase):
                 for key, value in row.items() if key not in ("id", "legacy_name", "aliases")}
         self.assertEqual(MIGRATION["catalogue_configuration_before_sha256"],
                          hashlib.sha256(json.dumps(projection, sort_keys=True).encode()).hexdigest())
+
+
+class TestTheAdditionsAreRecorded(unittest.TestCase):
+    """Every row added after the rename is in system_additions.json, in both
+    files, appended at the END — so removing them restores the earlier bytes."""
+
+    def test_additions_are_appended_in_order_to_both_files(self):
+        order = [a["id"] for a in json.loads(
+            (FIXTURES / "system_additions.json").read_text(encoding="utf-8"))["added"]]
+        rows = [r["id"] for r in json.loads(SYSTEMS.read_text(encoding="utf-8"))["systems"]]
+        golden = [g["id"] for g in json.loads(
+            (FIXTURES / "reference_selection_matrix.json").read_text(encoding="utf-8"))]
+        self.assertEqual(order, rows[-len(order):])
+        self.assertEqual(order, golden[-len(order):])
+
+    def test_an_added_row_has_no_retired_names(self):
+        from btap.modeling.hvac import catalog
+        for row in catalog.rows():
+            if row["id"] in ADDED:
+                with self.subTest(id=row["id"]):
+                    self.assertEqual(row["id"], row["legacy_name"])
+                    self.assertEqual([], row["aliases"])
 
 
 if __name__ == "__main__":
