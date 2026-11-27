@@ -1231,6 +1231,10 @@ def _autosized_when_sized(component, accessor):
 
 BASEBOARD_VARIABLE = 'Baseboard Total Heating Energy'
 COIL_VARIABLE = 'Heating Coil Heating Energy'
+#: The two plant-side sums that apportion a hybrid plant's delivered heat
+#: between its heating heat pump(s) and its boiler(s).
+PLANT_HEAT_PUMP_VARIABLE = 'Heat Pump Load Side Heat Transfer Energy'
+BOILER_VARIABLE = 'Boiler Heating Energy'
 
 DX_HEATING_CASTS = ('to_CoilHeatingDXSingleSpeed', 'to_CoilHeatingDXMultiSpeed',
                     'to_CoilHeatingDXVariableSpeed', 'to_CoilHeatingWaterToAirHeatPumpEquationFit',
@@ -1258,12 +1262,25 @@ def heating_election_inventory(model):
     :return: dict
         'loops' — { air loop name: { 'hp': [coil names], 'aux': [{'name':, 'fuel':}] } }
         'zones' — { zone name: [{'name':, 'fuel':, 'variable':, 'role': 'aux' | 'hp'}] }
+        'plants' — { hot-water plant name: { 'hp': [heating heat pump names],
+                     'aux': [{'name': boiler, 'fuel':}] } } for every plant
+                     whose heat comes partly from a heating HEAT PUMP. A
+                     hydronic `aux` entry on such a plant carries `'plant'`,
+                     and the umbrella apportions that entry's delivered heat
+                     between the plant's heat pump and boilers by the
+                     plant's own delivered-heat split.
         All heating quantities the election compares are DELIVERED heat
         (Heating Coil Heating Energy / Baseboard Total Heating Energy), one
         consistent basis across fuels.
+
+    A plant heat pump was invisible here until #244: every terminal on a
+    heat-pump hot-water plant read as `aux` with the plant's fuels joined, so
+    the election never ran for such a building and its audit claimed there
+    was no annual data.
     """
     plants = [_plant_facts(loop, None) for loop in sorted_by_name(model.getPlantLoops())]
     plant_by_name = {p['name']: p for p in plants}
+    hp_plants = _heat_pump_hot_water_plants(model)
 
     loops = {}
     for air_loop in sorted_by_name(model.getAirLoopHVACs()):
@@ -1272,7 +1289,7 @@ def heating_election_inventory(model):
             if any(_try_cast(comp, cast) is not None for cast in DX_HEATING_CASTS):
                 entry['hp'].append(comp.nameString())
             else:
-                aux = _aux_coil_entry(comp, plant_by_name)
+                aux = _aux_coil_entry(comp, plant_by_name, hp_plants)
                 if aux is not None:
                     entry['aux'].append(aux)
         if entry['hp'] or entry['aux']:
@@ -1282,13 +1299,67 @@ def heating_election_inventory(model):
     for zone in sorted_by_name(model.getThermalZones()):
         entries = []
         for eq in zone.equipment():
-            entries.extend(_zonal_heating_entries(eq, plant_by_name))
+            entries.extend(_zonal_heating_entries(eq, plant_by_name, hp_plants))
         if entries:
             zones[zone.nameString()] = entries
-    return {'loops': loops, 'zones': zones}
+    return {'loops': loops, 'zones': zones, 'plants': hp_plants}
 
 
-def _aux_coil_entry(comp, plant_by_name):
+def _heat_pump_hot_water_plants(model):
+    """``{plant name: {'hp': [...], 'aux': [{'name', 'fuel'}]}}`` for each
+    plant loop whose heat comes ONLY from heat pumps and boilers this election
+    can measure.
+
+    Only `HeatPumpPlantLoopEIRHeating` is admitted: it is the one heating plant
+    heat pump whose delivered-heat output (`Heat Pump Load Side Heat Transfer
+    Energy`) is verified against the EnergyPlus 25.2 catalogue. A plant with
+    any OTHER heating source — another heat-pump type (the fuel-fired
+    air-to-water unit reports under a different name and reads as 0 J), district
+    heat, a water heater — is NOT split: attributing that heat pro rata to the
+    heat pump and boiler, or reading a heat pump as 0 J, would make a false
+    election (Fable, review of the election fix; #244). Those plants keep the
+    pre-existing behaviour.
+    """
+    out = {}
+    for loop in sorted_by_name(model.getPlantLoops()):
+        hps, boilers, unmeasured = [], [], False
+        for comp in loop.supplyComponents():
+            boiler = _try_cast(comp, 'to_BoilerHotWater')
+            if boiler is not None:
+                boilers.append({'name': boiler.nameString(), 'fuel': boiler.fuelType()})
+                continue
+            eir = _try_cast(comp, 'to_HeatPumpPlantLoopEIRHeating')
+            if eir is not None:
+                hps.append(eir.nameString())
+                continue
+            # ADMIT, do not exclude: anything that is not a known passive
+            # part may add heat (a stratified tank, a fluid-to-fluid heat
+            # exchanger, a solar collector), and an exclusion list of three
+            # let those through to be attributed pro rata (Fable, re-review).
+            if comp.iddObjectType().valueName() not in _PASSIVE_PLANT_PARTS:
+                unmeasured = True
+        if hps and not unmeasured:
+            out[loop.nameString()] = {'hp': hps, 'aux': boilers}
+    return out
+
+
+#: Supply-side parts that move or route water and add no heat of their own.
+_PASSIVE_PLANT_PARTS = frozenset({
+    'OS_Node', 'OS_Connector_Mixer', 'OS_Connector_Splitter',
+    'OS_Pipe_Adiabatic', 'OS_Pipe_Indoor', 'OS_Pipe_Outdoor',
+    'OS_Pump_VariableSpeed', 'OS_Pump_ConstantSpeed',
+    'OS_HeaderedPumps_VariableSpeed', 'OS_HeaderedPumps_ConstantSpeed',
+})
+
+
+def _hydronic_plant(coil, hp_plants):
+    """The heat-pump plant a hydronic coil is on, or None."""
+    loop = opt(coil.plantLoop()) if hasattr(coil, 'plantLoop') else None
+    name = loop.nameString() if loop is not None else None
+    return name if name in hp_plants else None
+
+
+def _aux_coil_entry(comp, plant_by_name, hp_plants=None):
     for cast, fuel in AUX_COIL_FUELS.items():
         coil = _try_cast(comp, cast)
         if coil is None:
@@ -1296,11 +1367,15 @@ def _aux_coil_entry(comp, plant_by_name):
 
         resolved = ('+'.join(_array(_hydronic_fuels(coil, plant_by_name)))
                     if fuel == 'hydronic' else fuel)
-        return {'name': coil.nameString(), 'fuel': resolved}
+        entry = {'name': coil.nameString(), 'fuel': resolved}
+        plant = _hydronic_plant(coil, hp_plants or {}) if fuel == 'hydronic' else None
+        if plant is not None:
+            entry['plant'] = plant
+        return entry
     return None
 
 
-def _zonal_heating_entries(eq, plant_by_name):
+def _zonal_heating_entries(eq, plant_by_name, hp_plants=None):
     if (eq.to_ZoneHVACBaseboardConvectiveElectric().is_initialized() or
             (hasattr(eq, 'to_ZoneHVACBaseboardRadiantConvectiveElectric') and
              eq.to_ZoneHVACBaseboardRadiantConvectiveElectric().is_initialized())):
@@ -1316,8 +1391,13 @@ def _zonal_heating_entries(eq, plant_by_name):
     if water_baseboard is not None:
         coil = water_baseboard.get().heatingCoil()
         fuel = '+'.join(_array(_hydronic_fuels(coil, plant_by_name)))
-        return [{'name': eq.nameString(), 'fuel': fuel,
-                 'variable': BASEBOARD_VARIABLE, 'role': 'aux'}]
+        entry = {'name': eq.nameString(), 'fuel': fuel,
+                 'variable': BASEBOARD_VARIABLE, 'role': 'aux'}
+        water_coil = _try_cast(coil, 'to_CoilHeatingWaterBaseboard')
+        plant = _hydronic_plant(water_coil, hp_plants or {}) if water_coil is not None else None
+        if plant is not None:
+            entry['plant'] = plant
+        return [entry]
 
     entries = []
     for coil, role in _zonal_heating_coils(eq):
@@ -1325,7 +1405,7 @@ def _zonal_heating_entries(eq, plant_by_name):
             entries.append({'name': coil.nameString(), 'fuel': 'Electricity',
                             'variable': COIL_VARIABLE, 'role': 'hp'})
         else:
-            aux = _aux_coil_entry(coil, plant_by_name)
+            aux = _aux_coil_entry(coil, plant_by_name, hp_plants)
             if aux is not None:
                 entries.append({**aux, 'variable': COIL_VARIABLE, 'role': 'aux'})
     return entries

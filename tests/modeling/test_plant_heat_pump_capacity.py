@@ -76,7 +76,7 @@ class TestAfterSizing(unittest.TestCase):
         self.assertAlmostEqual(1.0, sum(shares.values()), places=9)
 
 
-@needs_engine
+@needs_sdk
 class TestACoolingHeatPumpIsNotHeatingCapacity(unittest.TestCase):
 
     def test_the_chilled_water_side_records_no_heating_capacity(self):

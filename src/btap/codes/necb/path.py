@@ -559,13 +559,19 @@ def prepare_annual(run):
     proposed = run.proposed
     run.report["proposed"]["mechanical_cooling"] = _mechanical_cooling(proposed)
     inventory = classify.heating_election_inventory(proposed)
+    # A heat-pump HOT-WATER plant counts: its terminals are inventoried as
+    # `aux` on the plant, and the plant's own split says how much of their
+    # heat the heat pump delivered (#244). Before, such a building never ran
+    # the election and its audit said there was no annual data.
     hp_present = (any(e["hp"] for e in inventory["loops"].values())
                   or any(any(e["role"] == "hp" for e in entries)
-                         for entries in inventory["zones"].values()))
+                         for entries in inventory["zones"].values())
+                  or bool(inventory.get("plants")))
     if hp_present:
-        runner.request_run_period_variables(
-            proposed,
-            ["Heating Coil Heating Energy", "Baseboard Total Heating Energy"])
+        variables = ["Heating Coil Heating Energy", "Baseboard Total Heating Energy"]
+        if inventory.get("plants"):
+            variables += [classify.PLANT_HEAT_PUMP_VARIABLE, classify.BOILER_VARIABLE]
+        runner.request_run_period_variables(proposed, variables)
     run.state["heating_election_inventory"] = inventory if hp_present else None
 
 
@@ -1449,6 +1455,31 @@ def onramp_hvac_config(system_name):
     return None
 
 
+def _plant_heat_pump_splits(proposed, plants):
+    """``{plant: [('hp', share), (boiler fuel, share), ...]}`` from each
+    heat-pump hot-water plant's measured DELIVERED heat (heat pump load-side
+    transfer, boiler heating energy). A plant that delivered nothing has no
+    split, and its terminals stay unsplit rather than divided by zero."""
+    from btap.modeling.hvac import classify
+
+    if not plants:
+        return {}
+    hp_sums = runner.run_period_sums(proposed, classify.PLANT_HEAT_PUMP_VARIABLE)
+    boiler_sums = runner.run_period_sums(proposed, classify.BOILER_VARIABLE)
+    out = {}
+    for name, plant in plants.items():
+        parts = [("hp", sum(hp_sums.get(n.upper(), 0.0) for n in plant["hp"]))]
+        by_fuel = {}
+        for boiler in plant["aux"]:
+            by_fuel[boiler["fuel"]] = (by_fuel.get(boiler["fuel"], 0.0)
+                                       + boiler_sums.get(boiler["name"].upper(), 0.0))
+        parts += sorted(by_fuel.items())
+        total = sum(j for _, j in parts)
+        if total > 0:
+            out[name] = [(source, j / total) for source, j in parts]
+    return out
+
+
 def _heating_election_data(proposed, inventory, audit):
     """D-52: join the SDK heating-equipment inventory (names + fuels, from
     btap.modeling classify) with the proposed annual run's per-equipment
@@ -1465,20 +1496,65 @@ def _heating_election_data(proposed, inventory, audit):
                   else coil)
         return source.get(name.upper(), 0.0)
 
-    loops = {
-        loop_name: {
-            "hp_j": sum(lookup(n, classify.COIL_VARIABLE)
-                        for n in entry["hp"]),
-            "aux": [{"fuel": a["fuel"],
-                     "j": lookup(a["name"], classify.COIL_VARIABLE)}
-                    for a in entry["aux"]],
-        }
-        for loop_name, entry in inventory["loops"].items()}
+    split = _plant_heat_pump_splits(proposed, inventory.get("plants") or {})
+
+    def apportioned(fuel, joules, plant):
+        """A hydronic terminal's delivered heat as (role, fuel, J) parts:
+        whole and `aux` on its joined fuels, or — on a heat-pump plant whose
+        delivered heat was measured — split by that plant's own shares, so
+        a block's heat pump portion is its terminals' heat times the plant's
+        heat-pump share, never a whole-plant total counted once per zone."""
+        shares = split.get(plant) if plant else None
+        if not shares:
+            return [("aux", fuel, joules)]
+        return [(("hp" if source == "hp" else "aux"),
+                 ("Electricity" if source == "hp" else source), joules * share)
+                for source, share in shares]
+
+    loops = {}
+    for loop_name, entry in inventory["loops"].items():
+        hp_j = sum(lookup(n, classify.COIL_VARIABLE) for n in entry["hp"])
+        aux = []
+        for a in entry["aux"]:
+            for role, fuel, joules in apportioned(
+                    a["fuel"], lookup(a["name"], classify.COIL_VARIABLE), a.get("plant")):
+                if role == "hp":
+                    hp_j += joules
+                else:
+                    aux.append({"fuel": fuel, "j": joules})
+        loops[loop_name] = {"hp_j": hp_j, "aux": aux}
     zones = {
-        zone_name: [{"fuel": e["fuel"],
-                     "j": lookup(e["name"], e["variable"]),
-                     "role": e["role"]} for e in entries]
+        zone_name: [{"fuel": fuel, "j": joules, "role": role}
+                    for e in entries
+                    for role, fuel, joules in (
+                        apportioned(e["fuel"], lookup(e["name"], e["variable"]), e.get("plant"))
+                        if e["role"] == "aux"
+                        else [(e["role"], e["fuel"], lookup(e["name"], e["variable"]))])]
         for zone_name, entries in inventory["zones"].items()}
+    # Which blocks each heat-pump plant serves: (g)(i) elects over "the thermal
+    # blocks ... served by that heat pump", all of them, not each block alone
+    # (Fable: five blocks on one plant elected separately).
+    members = {}
+    for zone_name, entries in inventory["zones"].items():
+        for e in entries:
+            if e.get("plant") in split:
+                bucket = members.setdefault(e["plant"], {"zones": [], "loops": []})
+                if zone_name not in bucket["zones"]:
+                    bucket["zones"].append(zone_name)
+    served = {loop.nameString(): sorted(z.nameString() for z in loop.thermalZones())
+              for loop in proposed.getAirLoopHVACs()}
+    for loop_name, entry in inventory["loops"].items():
+        for a in entry["aux"]:
+            if a.get("plant") in split:
+                bucket = members.setdefault(a["plant"], {"zones": [], "loops": []})
+                if loop_name not in bucket["loops"]:
+                    bucket["loops"].append(loop_name)
+                # ...and the zones that loop serves: a group whose only link
+                # to the plant is its air-loop coil must pool with the rest
+                # (Fable, re-review: two groups on one heat pump got two scopes).
+                for zone_name in served.get(loop_name, ()):
+                    if zone_name not in bucket["zones"]:
+                        bucket["zones"].append(zone_name)
     hp_gj = (sum(e["hp_j"] for e in loops.values())
              + sum(e["j"] for entries in zones.values() for e in entries
                    if e["role"] == "hp"))
@@ -1491,7 +1567,7 @@ def _heating_election_data(proposed, inventory, audit):
         inputs={"air_loops": len(loops), "zones_with_heating": len(zones),
                 "heat_pump_gj": ruby_round(hp_gj / 1e9, 2)},
         ruling="D-52")
-    return {"loops": loops, "zones": zones}
+    return {"loops": loops, "zones": zones, "plant_members": members}
 
 
 def evaluate(report, ruleset, run_period, audit):
