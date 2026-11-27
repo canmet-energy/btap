@@ -186,6 +186,61 @@ class TestTheCoilMediumIsNotAFuel(unittest.TestCase):
                 top = identify_candidates(_group(**facts), limit=1)[0]['system']
                 self.assertEqual(expected, top)
 
+    def test_the_new_hydronic_facts_hold_for_the_cases_that_lacked_them(self):
+        """Fable, review of #252, on hand-written facts:
+        - a chilled-water VAV air loop is not handed a DX packaged row; and
+        - a DX heat-pump air handler beside hot-water baseboards on a boiler
+          is not a heat-pump hot-water plant (`hydronic_heat_pump` False)."""
+        chw = dict(family_guess='multizone_vav', terminal_type='vav_reheat', cooled=True,
+                   loop_dx_cooling=False, loop_hydronic_cooling_supply=True,
+                   zonal_units=['baseboard'], baseboard_media=['Hot Water'],
+                   supply_heating_media=['hydronic'], cooling_energy_types=['Electricity'],
+                   system_outdoor_air_method='ZoneSum')
+        for facts, expected in (
+                (dict(chw, heat_pump=True, hydronic_heat_pump=True,
+                      heating_energy_types=['Electricity']),
+                 'vav-hw-hwbb-awhp-elecbu-scrollchiller'),
+                (dict(chw, heat_pump=True, hydronic_heat_pump=True,
+                      heating_energy_types=['Electricity', 'NaturalGas']),
+                 'vav-hw-hwbb-awhp-gasbu-scrollchiller')):
+            with self.subTest(expected=expected):
+                self.assertEqual(expected, identify_candidates(_group(**facts), limit=1)[0]['system'])
+        dx_heat_pump = dict(family_guess='central_doas_or_cv', cooled=True, loop_dx_cooling=True,
+                            heat_pump=True, hydronic_heat_pump=False,
+                            supply_heating_media=['refrigerant'], zonal_units=['baseboard'],
+                            baseboard_media=['Hot Water'], heating_energy_types=['Electricity', 'NaturalGas'],
+                            cooling_energy_types=['Electricity'], system_outdoor_air_method='ZoneSum')
+        for candidate in identify_candidates(_group(**dx_heat_pump), limit=5):
+            with self.subTest(candidate=candidate['system']):
+                if 'awhp' in candidate['system']:
+                    self.assertIn('the group has a heat pump but no hot-water heating; '
+                                  'this row heats water with one', candidate['against'])
+        self.assertNotIn('awhp', identify_candidates(_group(**dx_heat_pump), limit=1)[0]['system'])
+
+    @needs_sdk
+    def test_built_buildings_rank_their_own_row_or_its_twin_first(self):
+        """The same, on facts `characterize` records from BUILT rows with every
+        name scrubbed (the suggester harness's method), so the facts are the
+        ones the identifier really receives."""
+        from btap.modeling import build_system
+        from btap.stock.hvac import hvac_section
+        from tests.necb.hvac_helpers import load_fixture, sorted_zones
+        for built, expected in (
+                ('vav-hw-gasboiler-scrollchiller', 'vav-hw-gasboiler-scrollchiller'),
+                ('vav-hw-hwbb-awhp-elecbu-scrollchiller', 'vav-hw-hwbb-awhp-elecbu-scrollchiller'),
+                ('vav-hw-hwbb-awhp-gasbu-scrollchiller', 'vav-hw-hwbb-awhp-gasbu-scrollchiller'),
+                ('cvrh-ashp-gasrh-hwbb-gasboiler', 'psz-hw-hwbb-gasboiler'),
+                ('psz-hw-hwbb-awhp-gasbu', 'psz-hw-hwbb-awhp-gasbu')):
+            with self.subTest(built=built):
+                model = load_fixture()
+                build_system(model, built, sorted_zones(model))
+                for i, loop in enumerate(model.getAirLoopHVACs()):
+                    loop.setName(f'Air System {i + 1}')
+                for i, loop in enumerate(model.getPlantLoops()):
+                    loop.setName(f'Plant {i + 1}')
+                group = hvac_section(model, audit=None)['zone_groups'][0]
+                self.assertEqual(expected, identify_candidates(group, limit=1)[0]['system'])
+
     def test_an_electric_heated_group_prefers_an_ELECTRIC_coil(self):
         """The inverse, so the fix is not just a thumb on one scale."""
         candidates = identify_candidates(_group(

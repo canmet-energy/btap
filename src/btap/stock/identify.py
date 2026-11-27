@@ -296,6 +296,14 @@ def _score(row, group):
         hydronic = ('Hot Water' in (group.get('baseboard_media') or [])
                     or 'hydronic' in (group.get('supply_heating_media') or [])
                     or 'unit_heater' in zonal)
+        # ...and the heat pump must be the one heating that water. Where
+        # classify states it (`hydronic_heat_pump`), that fact decides: a DX
+        # heat-pump air handler beside hot-water baseboards on a boiler set
+        # `heat_pump` and `hydronic` both, and was handed the heat-pump
+        # rooftop row (Fable, review of #252). Hand-written facts without the
+        # key keep the older reading.
+        if 'hydronic_heat_pump' in group:
+            hydronic = hydronic and group['hydronic_heat_pump'] is True
         if group.get('heat_pump') is True and hydronic:
             score += 2.0
             matched.append('the group has a heat pump and hot-water heating; '
@@ -632,7 +640,17 @@ def _score(row, group):
         against.append('the loop recovers heat; this row does not')
 
     cooling_medium = str(row.get('cooling_type') or '').lower()
-    if cool and cooling_medium:
+    # A DX air loop is not a chilled-water one. Credited on any cooled group,
+    # the DX packaged VAV rows out-scored the chilled-water VAV row on its own
+    # building (Fable, review of #252: 11.5 against 10.5). Only the five DX
+    # `vav_reheat` rows carry `cooling_type: dx`, so only their scores move.
+    loop_chilled_water_only = (group.get('loop_hydronic_cooling_supply') is True
+                               and group.get('loop_dx_cooling') is not True)
+    if cool and cooling_medium == 'dx' and loop_chilled_water_only:
+        score -= 1.0
+        against.append("row cools its air loop with DX; the group's air loop "
+                       'cools with chilled water')
+    elif cool and cooling_medium:
         score += 1.0
         matched.append(f'row cooling type {row["cooling_type"]!r}')
     if cool:

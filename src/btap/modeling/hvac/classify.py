@@ -23,6 +23,7 @@ cooling capacity) and by costing of foreign models.
           'resolved_heat_pump_source_unclassified': False,
           'unpaired_cooling_plant_heat_pumps': [
               {'name': 'Cooling HP', 'source': 'air'}],
+          'hydronic_heat_pump': False,
           'terminal_type': 'vav_reheat'|'dual_duct_vav'|'cv_reheat'|'cv'|'none',
           'cooling_plants': ['Chilled Water Loop'],
           'design_cooling_kw': 42.0|None,
@@ -693,6 +694,12 @@ def _base_group(zone_names, air_loop_name):
             'resolved_heat_pump': False, 'resolved_heat_pump_sources': [],
             'resolved_heat_pump_source_unclassified': False,
             'unpaired_cooling_plant_heat_pumps': [],
+            # A heat pump HEATS the water this group's hydronic coils,
+            # baseboards or terminals draw on (a heat-pump hot-water plant).
+            # `heat_pump` cannot say that: a DX heat-pump coil on the air
+            # loop sets it too, beside hot-water baseboards on a boiler
+            # (Fable, review of #252).
+            'hydronic_heat_pump': False,
             'terminal_type': 'none',
             # The MEDIUM of the loop's own heating coil, which
             # `heating_energy_types` cannot express: that is the fuel
@@ -881,6 +888,8 @@ def _record_plant_heat_pump(group, coil, plant_by_name):
         return
 
     group['heat_pump'] = True
+    if 'heating' in (plant.get('heat_pump_modes') or ()):
+        group['hydronic_heat_pump'] = True
     contributors = plant.get('heat_pump_contributors') or []
     for contributor in contributors:
         source = contributor['source']
