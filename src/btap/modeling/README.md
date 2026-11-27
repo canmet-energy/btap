@@ -156,6 +156,48 @@ ordinary boiler system, and plants of different `hw_supply` or backup fuel are
 never shared with each other. The setpoint schedules are authored defaults,
 not code values; the NECB reference building is unaffected and keeps boilers.
 
+`hw_controls` overrides those defaults. Every key is optional:
+
+```python
+modeling.build_system(model, "bb-hwbb-gasboiler", zones, config={
+    "hw_source": "awhp",
+    "hw_controls": {
+        "loop_reset_c": [55, 40],       # loop supply at [cold, mild] outdoor
+        "outdoor_reset_c": [-20, 5],    # the outdoor temperatures of that reset
+        "heat_pump_max_c": 60,          # the heat pump's outlet ceiling
+        "backup_deadband_k": 1.0,       # boiler setpoint below the loop's
+    }})
+```
+
+Defaults: the loop resets over -16 to 0 C outdoor, from 60 to 45 C (low
+temperature) or 82 to 60 C (boiler lift). The heat pump's outlet ceiling is
+60 C, and the boiler deadband is 1 K.
+
+- The boiler holds the deadband below the loop wherever the heat pump can reach
+  the loop setpoint. Where it cannot, at the hot end of a boiler-lift reset, the
+  boiler holds the loop setpoint itself.
+- A low-temperature reset hotter than the heat pump's ceiling is refused,
+  because that loop is boiler lift. So is a boiler-lift reset the heat pump can
+  reach, because the boiler would lift nothing.
+- Plants with different controls are never shared.
+
+There is no sizing factor, deliberately. EnergyPlus scales the heat pump's
+water flow with it, and the heat pump sits in series on the loop's only supply
+branch, so a smaller heat pump starves the loop. Measured on the boiler-lift
+baseboard plant:
+
+| Sizing factor | Load-side flow | Occupied unmet heating |
+| ---: | ---: | ---: |
+| 1.0 | 0.8 L/s | 57 h |
+| 0.4 | 0.3 L/s | 135 h |
+| 0.25 | - | 260 h |
+
+In both supply modes the heat pump peaks at only 51-58% of its autosized
+capacity (28.5 and 32.6 of 55.7 kW). The design-day load falls below its -15 C
+cutoff, where it does not run, so it is sized for a load it never meets.
+Right-sizing it means fixing the capacity at the load at the cutoff while the
+flow stays autosized; that is open work on #244.
+
 ## Modern HVAC systems
 
 Five opt-in catalog rows add modern hydronic and air-system topology without

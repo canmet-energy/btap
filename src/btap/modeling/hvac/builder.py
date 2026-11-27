@@ -68,7 +68,7 @@ def _system_class(family):
 
 
 #: Hot-water plant options a caller may pass to ANY row with a hot-water plant.
-_PLANT_SOURCE_KEYS = ('hw_source', 'hw_supply')
+_PLANT_SOURCE_KEYS = ('hw_source', 'hw_supply', 'hw_controls')
 
 # ---------------------------------------------------------------------------
 # Which caller `config` keys a COMPOSITE row accepts, and where they go.
@@ -110,7 +110,7 @@ _COMPOSITE_REFUSED_KEYS = frozenset({
 
 #: Read by `build_system` itself, for any part that builds a hot-water plant.
 _HW_PLANT_KEYS = frozenset({
-    'hw_source', 'hw_supply', 'boiler_fuel', 'boiler_part_load_curve_class',
+    'hw_source', 'hw_supply', 'hw_controls', 'boiler_fuel', 'boiler_part_load_curve_class',
     'hot_water_profile'})
 
 #: Read by `build_system` itself, for any part that builds a chilled-water plant.
@@ -244,7 +244,7 @@ def _route_plant_options(resolved, config):
     if (not resolved.get('needs_boiler')
             and any(k in config for k in _PLANT_SOURCE_KEYS)):
         raise ValueError(f"'{resolved['id']}' builds no hot-water plant of its own; "
-                         "hw_source and hw_supply do not apply")
+                         "hw_source, hw_supply and hw_controls do not apply")
     return resolved
 
 
@@ -377,6 +377,7 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
                                             'boiler_part_load_curve_class'),
                                         profile=resolved.get('hot_water_profile'),
                                         supply=resolved.get('hw_supply', 'low_temperature'),
+                                        controls=resolved.get('hw_controls'),
                                         minimum_part_load_ratio=performance_profile[
                                             'plant_heating_heat_pump_minimum_part_load_ratio'],
                                         exclude=exclude_plants or ())
