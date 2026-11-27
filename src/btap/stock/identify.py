@@ -99,7 +99,7 @@ FAMILY_CANDIDATES = {
 #: implies. `None` means the kind is carried as an ATTRIBUTE of a bigger row
 #: (`baseboard_type`) rather than by a family of its own.
 _ZONAL_FAMILY = {'unit_heater': 'unit_heaters', 'ptac': 'mau_ptac',
-                 'baseboard': None}
+                 'fan_coil': 'fan_coils', 'baseboard': None}
 
 
 
@@ -207,6 +207,13 @@ def _score(row, group):
         if family == implied:
             score += 3.0
             matched.append(f'zonal unit {unit!r} implies family {implied!r}')
+    # The converse, for fan coils: `central_doas_or_cv` admits the family for
+    # the fan-coil buildings guessed that way, and without this a fan-coil row
+    # outranked a furnace building's own candidates, crediting a boiler and a
+    # chiller the building did not have (Fable, review of #254).
+    if family == 'fan_coils' and 'fan_coil' not in zonal:
+        score -= 3.0
+        against.append('this row builds fan coils; the group has none')
 
     # TWO FIELD VOCABULARIES, and reading only one made the campus rows
     # unreachable. The NECB-shaped rows describe an air handler by
@@ -298,10 +305,11 @@ def _score(row, group):
         # supply coil or unit heaters are what that looks like in the facts.
         # A DX heat-pump building is not one (Fable, #245: an electric-
         # baseboard building with a heat pump was handed this row).
-        # Fan coils too: every fan coil this catalogue builds is on water, and
-        # leaving them out told the fan-coil heat-pump rows "no hot-water
-        # heating" on their own buildings (measured while admitting
-        # `fan_coils` to `central_doas_or_cv`).
+        # Fan coils too: a fan coil that heats is on water here, and leaving
+        # them out told the fan-coil heat-pump rows "no hot-water heating" on
+        # their own buildings. The cooling-only fan coil (D-39) carries a
+        # zero-capacity ELECTRIC coil instead (Fable, review of #254), which
+        # is why `hydronic_heat_pump`, where classify states it, decides below.
         hydronic = ('Hot Water' in (group.get('baseboard_media') or [])
                     or 'hydronic' in (group.get('supply_heating_media') or [])
                     or 'unit_heater' in zonal or 'fan_coil' in zonal)
