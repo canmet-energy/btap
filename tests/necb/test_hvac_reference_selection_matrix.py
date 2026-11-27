@@ -64,8 +64,10 @@ SUBSET = [
     'bb-elecbb', 'bb-hwbb-district', 'furnace-gas',
     'psz-elec-elecbb',
     'psz-ashp-gassupp-elecbb',
-    # a heat-pump HOT-WATER plant with a gas boiler: 8.4.x.13.(2)(a) plus the
-    # (2)(g)(i) auxiliary-fuel election (added 2026-11-27)
+    # a heat-pump HOT-WATER plant with a gas boiler: 8.4.x.13.(2)(a). Its gas
+    # auxiliary is the STRUCTURAL result (the boiler is the only non-heat-pump
+    # heat), not a (2)(g)(i) election: the election inventory does not yet see
+    # a plant-loop heat pump (Fable, #245; tracked on #244). Added 2026-11-27.
     'bb-hwbb-awhp-gasbu',
     'mau-ptac-elec-elecbb',
     'mau-fc4-gas-chw-gasboiler-scrollchiller',

@@ -127,6 +127,36 @@ class TestTheCoilMediumIsNotAFuel(unittest.TestCase):
         self.assertTrue(any('heats its hot water with one' in m
                             for m in candidates[0]['matched']))
 
+    def test_heat_pump_rows_win_only_heat_pump_hot_water_buildings(self):
+        """Fable's review of #245: the first scoring let a heat-pump row win an
+        electric-boiler building with no heat pump, and a DX heat-pump
+        building with electric baseboards. Each case here names the row that
+        must come first, or that no heat-pump row may."""
+        hw = dict(family_guess='zonal_heating_only', zonal_units=['baseboard'],
+                  baseboard_media=['Hot Water'])
+        cases = [
+            (dict(hw, heat_pump=False, heating_energy_types=['NaturalGas']), 'bb-hwbb-gasboiler'),
+            (dict(hw, heat_pump=True, heating_energy_types=['Electricity', 'NaturalGas']),
+             'bb-hwbb-awhp-gasbu'),
+            (dict(hw, heat_pump=True, heating_energy_types=['Electricity']), 'bb-hwbb-awhp-elecbu'),
+            (dict(hw, heat_pump=False, heating_energy_types=['Electricity']), None),
+            (dict(family_guess='zonal_heating_only', zonal_units=['baseboard'],
+                  baseboard_media=['Electric'], heat_pump=True,
+                  heating_energy_types=['Electricity']), None),
+            (dict(family_guess='zonal_heating_only', zonal_units=['unit_heater'], heat_pump=True,
+                  heating_energy_types=['Electricity', 'NaturalGas']), 'uh-hw-awhp-gasbu'),
+        ]
+        # Fuel OIL is not a catalogue fuel, and the identifier's fuel tokens
+        # drop it for EVERY row (pre-existing), so an oil-backed heat pump is
+        # not pinned here; recorded on #244.
+        for facts, expected in cases:
+            with self.subTest(facts=facts):
+                top = identify_candidates(_group(cooled=False, **facts), limit=1)[0]['system']
+                if expected is None:
+                    self.assertNotIn('awhp', top)
+                else:
+                    self.assertEqual(expected, top)
+
     def test_an_electric_heated_group_prefers_an_ELECTRIC_coil(self):
         """The inverse, so the fix is not just a thumb on one scale."""
         candidates = identify_candidates(_group(

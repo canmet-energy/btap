@@ -166,10 +166,6 @@ class TestNoRowsConfigurationMoved(unittest.TestCase):
                          hashlib.sha256(json.dumps(projection, sort_keys=True).encode()).hexdigest())
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class TestTheAdditionsAreRecorded(unittest.TestCase):
     """Every row added after the rename is in system_additions.json, in both
     files, appended at the END — so removing them restores the earlier bytes."""
@@ -191,3 +187,6 @@ class TestTheAdditionsAreRecorded(unittest.TestCase):
                     self.assertEqual(row["id"], row["legacy_name"])
                     self.assertEqual([], row["aliases"])
 
+
+if __name__ == "__main__":
+    unittest.main()
