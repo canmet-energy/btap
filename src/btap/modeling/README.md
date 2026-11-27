@@ -159,8 +159,23 @@ not a central row stacked on a zonal one.
    - `modeling.model_hvac_diagrams(model)` draws the loops.
    - An annual run reports unmet hours. NECB 2020 Article 8.4.1.2.(3) allows
      100 h of unmet heating per thermal block.
-   - `btap-compliance model.osm --code necb2020 --epw ...` makes the full
-     determination.
+   - The full NECB determination runs on the same model object, with no file
+     to save first:
+
+     ```python
+     from btap import codes
+
+     result = codes.performance_compliance(model, code="necb2020",
+                                           weather=weather, run_dir="runs/necb")
+     result.compliant                              # True / False; None if no determination
+     result.report["compliance_determination"]     # "code", "conditional" (needs an AHJ's
+                                                   # approval) or "no_determination"
+     ```
+
+     The command-line equivalent is `btap-compliance model.osm --code necb2020
+     --epw ...`. It runs the same pipeline from a saved file and reports the
+     outcome as an exit code: 0 compliant, 1 not compliant, 3 preflight refusal,
+     4 simulation failure, 6 no determination.
 
 **For an existing model**, `btap.stock` reads its HVAC into a recipe and
 ranks catalogue rows for each unidentified zone group. Each candidate lists the
