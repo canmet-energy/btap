@@ -46,6 +46,45 @@ HOT_WATER_SUPPLY_MODES = ('low_temperature', 'boiler_lift')
 HEAT_PUMP_BACKUP_FUELS = ('NaturalGas', 'Electricity')
 HOT_WATER_SOURCE_FEATURE = 'btap_hot_water_source'
 HOT_WATER_SUPPLY_FEATURE = 'btap_hot_water_supply'
+HEAT_PUMP_CONTROLS_FEATURE = 'btap_heat_pump_controls'
+
+#: The heat-pump plant's control settings (#244, Stream C). Every value is an
+#: authored engineering default, not a code value, and the defaults reproduce
+#: the plant as first built (PR #243) exactly:
+#:
+#: - ``outdoor_reset_c``: the outdoor temperatures [cold, mild] the loop
+#:   reset runs between;
+#: - ``loop_reset_c``: the loop supply setpoints [at cold, at mild]. The
+#:   default depends on ``hw_supply``: [60, 45] low temperature, [82, 60]
+#:   boiler lift;
+#: - ``heat_pump_max_c``: the heat pump's outlet setpoint ceiling. Low
+#:   temperature needs the loop reset at or below it; boiler lift needs the
+#:   cold end above it (that is what the boiler lifts);
+#: - ``backup_deadband_k``: how far below the loop setpoint the backup boiler
+#:   holds wherever the heat pump can reach the loop setpoint. At 0 the boiler
+#:   chased the heat pump's defrost dip (Fable, PR #243).
+#:
+#: There is deliberately NO sizing factor. EnergyPlus scales the heat pump's
+#: load-side FLOW with it, and the heat pump is in series on the loop's only
+#: supply branch, so a smaller one starves the loop. Measured on the
+#: boiler-lift baseboard plant (2026-11-27): factor 0.4 gave 0.3 instead of
+#: 0.8 L/s, and occupied unmet heating rose from 57 h to 135 h (260 h at 0.25).
+HEAT_PUMP_CONTROL_DEFAULTS = {
+    'outdoor_reset_c': (-16.0, 0.0),
+    'heat_pump_max_c': 60.0,
+    'backup_deadband_k': 1.0,
+}
+HEAT_PUMP_LOOP_RESET_DEFAULTS = {
+    'low_temperature': (60.0, 45.0),
+    'boiler_lift': (82.0, 60.0),
+}
+HEAT_PUMP_CONTROL_KEYS = frozenset(HEAT_PUMP_CONTROL_DEFAULTS) | {'loop_reset_c'}
+#: How far past the loop's mild end, in degrees of outdoor temperature, a
+#: boiler-lift boiler may take to fall its deadband below the heat pump.
+#: The default reset takes 0.73.
+BOILER_LIFT_MAX_DEADBAND_RAMP_K = 5.0
+#: The loop's fixed design temperature difference, K, per supply mode.
+HEAT_PUMP_LOOP_DELTA_T = {'low_temperature': 11.0, 'boiler_lift': 16.0}
 _HEAT_PUMP_LOOP_NAME = 'Heat Pump Hot Water Loop'
 CHILLED_WATER_SOURCES = frozenset({
     'water_cooled', 'air_cooled', 'district',
@@ -126,6 +165,10 @@ def validate_plant_config(config):
         if config['hw_supply'] not in HOT_WATER_SUPPLY_MODES:
             raise ValueError(
                 f"hw_supply must be one of {list(HOT_WATER_SUPPLY_MODES)!r}")
+    if config.get('hw_controls') is not None:
+        if hot_source != 'awhp':
+            raise ValueError("hw_controls applies only to hw_source 'awhp'")
+        heat_pump_controls(config.get('hw_supply', 'low_temperature'), config['hw_controls'])
     if hot_source == 'awhp':
         if config.get('boiler_fuel', 'NaturalGas') not in HEAT_PUMP_BACKUP_FUELS:
             raise ValueError(
@@ -653,6 +696,145 @@ def _feature(obj, key):
     return value.get() if value.is_initialized() else None
 
 
+def heat_pump_controls(supply, controls=None):
+    """Resolve and validate a heat-pump plant's ``hw_controls`` for ``supply``.
+
+    Returns a dict with every key of HEAT_PUMP_CONTROL_KEYS, the pairs as
+    tuples of floats. Raises ValueError, before any model is touched, on an
+    unknown key, a non-numeric value, or settings that contradict ``supply``.
+    """
+    import math
+
+    if supply not in HOT_WATER_SUPPLY_MODES:
+        raise ValueError(f"hw_supply must be one of {list(HOT_WATER_SUPPLY_MODES)!r}")
+    controls = {} if controls is None else controls
+    if not isinstance(controls, dict):
+        raise ValueError('hw_controls must be a mapping')
+    unknown = sorted(set(map(str, controls)) - HEAT_PUMP_CONTROL_KEYS)
+    if unknown:
+        raise ValueError(f'hw_controls does not take {unknown}; '
+                         f'it takes {sorted(HEAT_PUMP_CONTROL_KEYS)}')
+
+    def number(key, value):
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError(f'hw_controls {key} must be a finite number')
+        try:
+            value = float(value)
+        except OverflowError:
+            raise ValueError(f'hw_controls {key} must be a finite number') from None
+        if not math.isfinite(value):
+            raise ValueError(f'hw_controls {key} must be a finite number')
+        return value + 0.0          # -0.0 -> 0.0, so equal controls share a plant
+
+    def pair(key, value):
+        if not isinstance(value, (list, tuple)) or len(value) != 2:
+            raise ValueError(f'hw_controls {key} must be a pair [cold, mild]')
+        return (number(key, value[0]), number(key, value[1]))
+
+    resolved = {**HEAT_PUMP_CONTROL_DEFAULTS,
+                'loop_reset_c': HEAT_PUMP_LOOP_RESET_DEFAULTS[supply]}
+    for key, value in controls.items():
+        key = str(key)
+        resolved[key] = pair(key, value) if key.endswith('_reset_c') else number(key, value)
+
+    outdoor_cold, outdoor_mild = resolved['outdoor_reset_c']
+    loop_cold, loop_mild = resolved['loop_reset_c']
+    top = resolved['heat_pump_max_c']
+    if not outdoor_cold < outdoor_mild:
+        raise ValueError('hw_controls outdoor_reset_c must be [colder, milder]')
+    if not loop_cold >= loop_mild:
+        raise ValueError('hw_controls loop_reset_c must not be hotter at the mild end')
+    if not (30.0 <= loop_mild and loop_cold <= 100.0):
+        raise ValueError('hw_controls loop_reset_c must lie between 30 and 100 C')
+    # The loop sizes on a fixed design temperature difference (11 K low
+    # temperature, 16 K boiler lift); its design return must still be warm
+    # enough to heat a room (Fable, review of #250: [22, 20] was accepted).
+    # 20 C, not higher: a 35 C supply is a common heat-pump design point.
+    design_return = loop_cold - HEAT_PUMP_LOOP_DELTA_T[supply]
+    if design_return < 20.0:
+        raise ValueError(
+            f'hw_controls loop_reset_c cold end {loop_cold:g} C leaves a design return of '
+            f'{design_return:g} C at the {HEAT_PUMP_LOOP_DELTA_T[supply]:g} K design '
+            'temperature difference; it must be at least 20 C')
+    if not 30.0 <= top <= 90.0:
+        raise ValueError('hw_controls heat_pump_max_c must lie between 30 and 90 C')
+    if not 0.0 <= resolved['backup_deadband_k'] <= 5.0:
+        raise ValueError('hw_controls backup_deadband_k must lie between 0 and 5 K')
+    if supply == 'low_temperature' and loop_cold > top:
+        raise ValueError(
+            f'a low_temperature loop at {loop_cold:g} C is hotter than the heat pump '
+            f'makes ({top:g} C); that is hw_supply boiler_lift')
+    if supply == 'boiler_lift' and loop_cold <= top:
+        raise ValueError(
+            f'a boiler_lift loop at {loop_cold:g} C is within the heat pump\'s reach '
+            f'({top:g} C), so the boiler lifts nothing; that is hw_supply low_temperature')
+    # The boiler-lift heat pump runs at a CONSTANT setpoint, so a loop reset
+    # that falls below it leaves the heat pump overshooting the loop through
+    # the mild end (Fable, review of #250).
+    if supply == 'boiler_lift' and loop_mild < top:
+        raise ValueError(
+            f'a boiler_lift loop resets down to {loop_mild:g} C, below the heat pump\'s '
+            f'constant {top:g} C; lower heat_pump_max_c to the mild end or raise the reset')
+    # Where the heat pump never reaches the loop, the boiler holds the loop
+    # setpoint everywhere and a deadband does nothing: refused rather than
+    # silently ignored (Fable, review of #250).
+    if (supply == 'boiler_lift' and loop_mild > top
+            and resolved['backup_deadband_k'] != 0.0
+            and 'backup_deadband_k' in map(str, controls)):
+        raise ValueError(
+            f'a boiler_lift loop that never falls to the heat pump\'s {top:g} C has no '
+            'hours where the heat pump alone meets it, so backup_deadband_k has no effect')
+    # The boiler-lift boiler reaches its deadband only `deadband / slope`
+    # degrees of outdoor temperature past the loop's mild end. A shallow
+    # reset stretches that until the boiler sits at the heat pump's setpoint
+    # through the whole defrost band, which is what the deadband exists to
+    # prevent (Fable, re-review of #250: [62, 60] with 5 K took 40 C).
+    if supply == 'boiler_lift' and loop_mild == top and resolved['backup_deadband_k'] > 0.0:
+        slope = (loop_cold - loop_mild) / (outdoor_mild - outdoor_cold)
+        ramp = resolved['backup_deadband_k'] / slope
+        if ramp > BOILER_LIFT_MAX_DEADBAND_RAMP_K:
+            raise ValueError(
+                f'on this boiler_lift reset the boiler reaches its {resolved["backup_deadband_k"]:g} K '
+                f'deadband only {ramp:.1f} C of outdoor temperature past the mild end '
+                f'(at most {BOILER_LIFT_MAX_DEADBAND_RAMP_K:g}); steepen the reset or '
+                'lower the deadband')
+    return resolved
+
+
+def _effective_controls(supply, resolved):
+    """The resolved controls that change what is built — the reuse key's
+    content. An unused key must not split two identical plants (Fable,
+    review of #250): ``heat_pump_max_c`` builds nothing on a low-temperature
+    loop, and the deadband nothing on a boiler-lift loop the heat pump never
+    reaches."""
+    effective = dict(resolved)
+    if supply == 'low_temperature':
+        effective.pop('heat_pump_max_c')
+    elif resolved['loop_reset_c'][1] > resolved['heat_pump_max_c']:
+        effective.pop('backup_deadband_k')
+    return effective
+
+
+def _controls_signature(resolved):
+    """The plant-reuse key for resolved controls: a canonical string."""
+    import json
+    return json.dumps({k: resolved[k] for k in sorted(resolved)}, sort_keys=True)
+
+
+def _built_signature(loop, supply, default_signature):
+    """The controls signature a heat-pump loop was built with.
+
+    Every loop built since `hw_controls` carries it. One without it was built
+    by PR #243's code, whose low-temperature plant is today's default and
+    whose boiler-lift plant is NOT: its boiler reset ended at 0 C outdoor and
+    sat under the loop between the endpoints (Fable, re-review of #250), so
+    it matches nothing and a new plant is built beside it."""
+    built = _feature(loop, HEAT_PUMP_CONTROLS_FEATURE)
+    if built is not None:
+        return built
+    return default_signature if supply == 'low_temperature' else None
+
+
 def _node_after(optional_object, what):
     """The Node a just-connected component's outlet lands on, through `opt`:
     an empty crash-family optional SEGFAULTS on a bare `.get()` (D-79)."""
@@ -665,7 +847,7 @@ def _node_after(optional_object, what):
 
 
 def _air_to_water_heat_pump_hot_water(model, backup_fuel, supply, reuse, exclude,
-                                      minimum_part_load_ratio):
+                                      minimum_part_load_ratio, controls=None):
     """A hot-water loop led by an air-to-water heat pump, with ONE backup
     boiler in series downstream of it (the hp_plant_fancoils arrangement,
     generalised to every hydronic system).
@@ -677,7 +859,8 @@ def _air_to_water_heat_pump_hot_water(model, backup_fuel, supply, reuse, exclude
     ``boiler_lift`` the heat pump is held at its 60 C limit and the loop keeps
     the conventional 82 C-at--16 C reset, so the boiler lifts whatever the
     heat pump cannot reach. Both setpoint schedules are authored defaults,
-    not code values.
+    not code values, and ``controls`` (``hw_controls``) overrides them; see
+    HEAT_PUMP_CONTROL_DEFAULTS.
     """
     from btap.modeling.hvac.components import curves as curves_mod
 
@@ -686,25 +869,34 @@ def _air_to_water_heat_pump_hot_water(model, backup_fuel, supply, reuse, exclude
     if backup_fuel not in HEAT_PUMP_BACKUP_FUELS:
         raise ValueError(
             f"a heat-pump plant's backup fuel must be one of {list(HEAT_PUMP_BACKUP_FUELS)!r}")
+    resolved = heat_pump_controls(supply, controls)
+    signature = _controls_signature(_effective_controls(supply, resolved))
+    default_signature = _controls_signature(
+        _effective_controls(supply, heat_pump_controls(supply)))
     if reuse:
         blocked = {str(handle) for handle in exclude}
         for pl in model.getPlantLoops():
             if (str(pl.handle()) not in blocked and _heat_pump_heated(pl)
                     and _feature(pl, HOT_WATER_SOURCE_FEATURE) == 'awhp'
                     and _feature(pl, HOT_WATER_SUPPLY_FEATURE) == supply
-                    and boiler_fuels(pl) == [backup_fuel]):
+                    and boiler_fuels(pl) == [backup_fuel]
+                    and _built_signature(pl, supply, default_signature) == signature):
                 return pl
 
     low = supply == 'low_temperature'
+    outdoor_cold, outdoor_mild = resolved['outdoor_reset_c']
+    loop_cold, loop_mild = resolved['loop_reset_c']
+    top, deadband = resolved['heat_pump_max_c'], resolved['backup_deadband_k']
     loop = openstudio.model.PlantLoop(model)
     loop.setName(_HEAT_PUMP_LOOP_NAME)
     sizing = loop.sizingPlant()
     sizing.setLoopType('Heating')
-    sizing.setDesignLoopExitTemperature(60.0 if low else 82.0)
-    sizing.setLoopDesignTemperatureDifference(11.0 if low else 16.0)
+    sizing.setDesignLoopExitTemperature(loop_cold)
+    sizing.setLoopDesignTemperatureDifference(HEAT_PUMP_LOOP_DELTA_T[supply])
     loop.setLoadDistributionScheme('SequentialLoad')
     loop.additionalProperties().setFeature(HOT_WATER_SOURCE_FEATURE, 'awhp')
     loop.additionalProperties().setFeature(HOT_WATER_SUPPLY_FEATURE, supply)
+    loop.additionalProperties().setFeature(HEAT_PUMP_CONTROLS_FEATURE, signature)
     openstudio.model.PumpVariableSpeed(model).addToNode(loop.supplyInletNode())
 
     # Heat-pump settings: the hp_plant_fancoils / ECM hs15 CAWHP equipment
@@ -745,34 +937,62 @@ def _air_to_water_heat_pump_hot_water(model, backup_fuel, supply, reuse, exclude
         spm.setName(label)
         spm.setControlVariable('Temperature')
         spm.setSetpointatOutdoorLowTemperature(low_temperature)
-        spm.setOutdoorLowTemperature(-16.0)
+        spm.setOutdoorLowTemperature(outdoor_cold)
         spm.setSetpointatOutdoorHighTemperature(high_temperature)
-        spm.setOutdoorHighTemperature(0.0)
+        spm.setOutdoorHighTemperature(outdoor_mild)
         spm.addToNode(node)
 
     # A 1 K DEADBAND below the heat pump: with identical setpoints the boiler
     # chased the 0.1-0.5 K the heat pump runs short while defrosting (active
     # below 10 C) and fired in nearly every heating hour (Fable, PR #243:
     # 67% of annual boiler heat came while the heat pump had capacity).
+    #
+    # The boiler holds `deadband` below the loop wherever the heat pump alone
+    # can meet the loop setpoint, and AT the loop setpoint wherever it cannot.
+    #
+    # Low temperature: the heat pump follows the loop reset, so the boiler is
+    # the same line `deadband` lower.
+    #
+    # Boiler lift: the heat pump holds `top` and the loop resets down to it
+    # at the mild end. Moving only the boiler's mild endpoint down by
+    # `deadband` put it BELOW the loop everywhere between the endpoints, where
+    # neither machine then met the loop (Fable, review of #250: 0.96 K at the
+    # default, 4 K at a 5 K deadband). Instead the boiler follows the loop's
+    # own ramp and carries on past the mild end until it is `deadband` below
+    # the heat pump, so it equals the loop wherever the loop is above `top`.
+    # Where the loop never falls to `top`, the boiler is the loop's reset.
     if low:
-        reset(hp_outlet, 60.0, 45.0, 'Heat Pump Outlet Reset')
-        reset(boiler_outlet, 59.0, 44.0, 'Backup Boiler Outlet Reset')
-        reset(loop.supplyOutletNode(), 60.0, 45.0, 'Hot Water Loop Reset')
+        reset(hp_outlet, loop_cold, loop_mild, 'Heat Pump Outlet Reset')
+        reset(boiler_outlet, loop_cold - deadband, loop_mild - deadband,
+              'Backup Boiler Outlet Reset')
     else:
         schedule = openstudio.model.ScheduleConstant(model)
-        schedule.setName('Heat Pump Outlet 60C')
-        schedule.setValue(60.0)
+        schedule.setName(f'Heat Pump Outlet {top:g}C')
+        schedule.setValue(top)
         spm = openstudio.model.SetpointManagerScheduled(model, schedule)
         spm.setName('Heat Pump Outlet Setpoint')
         spm.addToNode(hp_outlet)
-        reset(boiler_outlet, 82.0, 59.0, 'Backup Boiler Outlet Reset')
-        reset(loop.supplyOutletNode(), 82.0, 60.0, 'Hot Water Loop Reset')
+        boiler_reset = openstudio.model.SetpointManagerOutdoorAirReset(model)
+        boiler_reset.setName('Backup Boiler Outlet Reset')
+        boiler_reset.setControlVariable('Temperature')
+        boiler_reset.setSetpointatOutdoorLowTemperature(loop_cold)
+        boiler_reset.setOutdoorLowTemperature(outdoor_cold)
+        if loop_mild > top or deadband == 0.0:
+            boiler_reset.setSetpointatOutdoorHighTemperature(loop_mild)
+            boiler_reset.setOutdoorHighTemperature(outdoor_mild)
+        else:
+            slope = (loop_cold - loop_mild) / (outdoor_mild - outdoor_cold)   # K per K outdoor
+            boiler_reset.setSetpointatOutdoorHighTemperature(top - deadband)
+            boiler_reset.setOutdoorHighTemperature(
+                outdoor_cold + (loop_cold - top + deadband) / slope)
+        boiler_reset.addToNode(boiler_outlet)
+    reset(loop.supplyOutletNode(), loop_cold, loop_mild, 'Hot Water Loop Reset')
     return loop
 
 
 def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='boiler',
               part_load_curve_class=None, exclude=(), profile=None,
-              supply='low_temperature', minimum_part_load_ratio=None):
+              supply='low_temperature', minimum_part_load_ratio=None, controls=None):
     """Build a hot-water loop: primary + secondary boiler, variable-speed pump,
     82C design exit / 16K dT, OA-reset 82C@-16C down to 60C@0C.
 
@@ -806,6 +1026,8 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
     :param supply: for ``source='awhp'`` only — ``'low_temperature'`` or
         ``'boiler_lift'`` (see HOT_WATER_SUPPLY_MODES); ``fuel`` is then the
         BACKUP boiler's fuel
+    :param controls: for ``source='awhp'`` only — the ``hw_controls``
+        overrides of HEAT_PUMP_CONTROL_DEFAULTS
     :return: openstudio.model.PlantLoop
     """
     if source not in HOT_WATER_SOURCES:
@@ -820,7 +1042,9 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
             minimum_part_load_ratio = performance.resolve()[
                 'plant_heating_heat_pump_minimum_part_load_ratio']
         return _air_to_water_heat_pump_hot_water(
-            model, fuel, supply, reuse, exclude, minimum_part_load_ratio)
+            model, fuel, supply, reuse, exclude, minimum_part_load_ratio, controls)
+    if controls is not None:
+        raise ValueError("hw_controls applies only to hw_source 'awhp'")
     profile = _normalize_temperature_profile(profile, 'hot_water')
     hw_loop = None
     if reuse:

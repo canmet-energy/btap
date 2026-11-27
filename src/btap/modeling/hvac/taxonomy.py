@@ -784,9 +784,23 @@ def display_parts(config):
         hw = [f"{w} backup" if w.endswith(" boiler") else w for w in hw]
     if config.get("hw_source") == "awhp":
         supply = config.get("hw_supply", "low_temperature")
+        # the loop's design temperature: plant_loops.HEAT_PUMP_LOOP_RESET_DEFAULTS
+        # unless `hw_controls` overrides it (Fable, review of #250)
+        controls = config.get("hw_controls") or {}
+        if not isinstance(controls, dict):
+            raise ValueError(f"{config.get('id')}: hw_controls must be a mapping")
+        reset = controls.get("loop_reset_c")
+        if reset is None:
+            loop_c = 60.0 if supply == "low_temperature" else 82.0
+        elif (isinstance(reset, (list, tuple)) and len(reset) == 2
+              and all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in reset)):
+            loop_c = float(reset[0])
+        else:
+            raise ValueError(f"{config.get('id')}: hw_controls loop_reset_c must be "
+                             f"a pair of numbers, not {reset!r}")
         hw = [w if w != _PLANT_WORDS["awhp"] else
-              ("air-to-water heat pump (60 C loop)" if supply == "low_temperature"
-               else "air-to-water heat pump preheat (82 C loop; boiler lifts)")
+              (f"air-to-water heat pump ({loop_c:g} C loop)" if supply == "low_temperature"
+               else f"air-to-water heat pump preheat ({loop_c:g} C loop; boiler lifts)")
               for w in hw]
     plant = hw + chw
     if t in ("wshp", "doas-wshp"):

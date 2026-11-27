@@ -147,7 +147,7 @@ Measured annually on the five-zone fixture (2026-11-27), hot water baseboards:
 | --- | ---: | ---: | ---: | ---: |
 | Gas boilers only | 0% | - | 147 GJ | 56.5 h |
 | Heat pump, low temperature, gas backup | 92% | 2.47 | 8.8 GJ | 59 h |
-| Heat pump, boiler lift, gas backup | 42% | 2.38 | 83 GJ | 57 h |
+| Heat pump, boiler lift, gas backup | 39% | 2.39 | 89 GJ | 56.75 h |
 
 VAV with reheat on a low-temperature heat-pump plant: 94% heat-pump share,
 70.25 h. None of these runs had a Severe error. A composite passes the options
@@ -155,6 +155,64 @@ to its hot-water parts; a row with no hot-water plant refuses them. A heat-pump 
 ordinary boiler system, and plants of different `hw_supply` or backup fuel are
 never shared with each other. The setpoint schedules are authored defaults,
 not code values; the NECB reference building is unaffected and keeps boilers.
+
+`hw_controls` overrides those defaults. Every key is optional:
+
+```python
+modeling.build_system(model, "bb-hwbb-gasboiler", zones, config={
+    "hw_source": "awhp",
+    "hw_controls": {
+        "loop_reset_c": [55, 40],       # loop supply at [cold, mild] outdoor
+        "outdoor_reset_c": [-20, 5],    # the outdoor temperatures of that reset
+        "heat_pump_max_c": 60,          # the heat pump's outlet ceiling
+        "backup_deadband_k": 1.0,       # boiler setpoint below the loop's
+    }})
+```
+
+Defaults: the loop resets over -16 to 0 C outdoor, from 60 to 45 C (low
+temperature) or 82 to 60 C (boiler lift). The heat pump's outlet ceiling is
+60 C, and the boiler deadband is 1 K.
+
+- The boiler holds the deadband below the loop wherever the heat pump alone can
+  meet the loop setpoint, and holds the loop setpoint itself wherever it cannot.
+  On boiler lift the boiler follows the loop's own reset and carries on past the
+  mild end until it is one deadband below the heat pump.
+- The first boiler-lift version moved only the boiler's mild endpoint. Between
+  the endpoints neither machine then met the loop: 0.96 K short at the default.
+  The boiler-lift row above was 42% heat pump, 83 GJ, before that was fixed;
+  some of that heat-pump share was really the loop running under setpoint.
+- These are refused:
+  - a low-temperature reset hotter than the heat pump's ceiling, because that
+    loop is boiler lift;
+  - a boiler-lift reset the heat pump can reach, because the boiler would lift
+    nothing;
+  - a boiler-lift reset that falls below the heat pump's constant setpoint;
+  - a deadband on a boiler-lift loop the heat pump never meets, because it
+    would do nothing;
+  - a loop whose design return would fall below 20 C (a 35 C low-temperature
+    supply is accepted);
+  - a boiler-lift reset so shallow that the boiler would need more than 5 C of
+    outdoor temperature past the mild end to fall its deadband below the heat
+    pump.
+- Plants with different controls are never shared. A key that changes nothing
+  built, such as the ceiling on a low-temperature loop, does not split them.
+
+There is no sizing factor, deliberately. EnergyPlus scales the heat pump's
+water flow with it, and the heat pump sits in series on the loop's only supply
+branch, so a smaller heat pump starves the loop. Measured on the boiler-lift
+baseboard plant:
+
+| Sizing factor | Load-side flow | Occupied unmet heating |
+| ---: | ---: | ---: |
+| 1.0 | 0.8 L/s | 57 h |
+| 0.4 | 0.3 L/s | 135 h |
+| 0.25 | - | 260 h |
+
+In both supply modes the heat pump peaks at only 51-58% of its autosized
+capacity (28.5 and 32.6 of 55.7 kW). The design-day load falls below its -15 C
+cutoff, where it does not run, so it is sized for a load it never meets.
+Right-sizing it means fixing the capacity at the load at the cutoff while the
+flow stays autosized; that is open work on #244.
 
 ## Modern HVAC systems
 
