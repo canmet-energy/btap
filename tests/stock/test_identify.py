@@ -95,11 +95,15 @@ class TestTheCoilMediumIsNotAFuel(unittest.TestCase):
             'boiler-fed heat source')
 
     def test_an_electric_coil_is_penalised_for_a_gas_building(self):
+        # limit 30, not 20: the window only has to CONTAIN both kinds. The
+        # heat-pump hot-water rows (2026-11-27) rank three below their boiler
+        # twins, which still puts two of them above the electric-coil rows and
+        # pushed those from 20th to 21st. The assertion below is unchanged.
         candidates = identify_candidates(_group(
             family_guess='multizone_vav', cooled=True,
             heating_energy_types=['NaturalGas'],
             cooling_energy_types=['Electricity'],
-            terminal_type='vav_reheat', zonal_units=['baseboard']), limit=20)
+            terminal_type='vav_reheat', zonal_units=['baseboard']), limit=30)
         electric = [c for c in candidates
                     if 'Electric Heating Coil' in c['legacy_name']]
         hot_water = [c for c in candidates
@@ -110,6 +114,18 @@ class TestTheCoilMediumIsNotAFuel(unittest.TestCase):
             'the hydronic coil must outrank the electric one')
         self.assertTrue(any('no boiler can feed it' in a
                             for a in electric[0]['against']))
+
+    def test_a_heat_pump_hot_water_building_finds_the_heat_pump_row(self):
+        """2026-11-27: the heat-pump hot-water rows score on the group's heat
+        pump, both ways — their boiler twins win a boiler building (the unit
+        heater and baseboard tests above), and they win a heat-pump one."""
+        candidates = identify_candidates(_group(
+            family_guess='zonal_heating_only', cooled=False, heat_pump=True,
+            heating_energy_types=['Electricity', 'NaturalGas'],
+            zonal_units=['baseboard'], baseboard_media=['Hot Water']), limit=5)
+        self.assertEqual('bb-hwbb-awhp-gasbu', candidates[0]['system'])
+        self.assertTrue(any('heats its hot water with one' in m
+                            for m in candidates[0]['matched']))
 
     def test_an_electric_heated_group_prefers_an_ELECTRIC_coil(self):
         """The inverse, so the fix is not just a thumb on one scale."""

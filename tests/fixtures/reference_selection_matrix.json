@@ -35918,5 +35918,2823 @@
         "blocks": 1
       }
     ]
+  },
+  {
+    "id": "bb-hwbb-awhp-gasbu",
+    "family": "baseboards",
+    "catalog_groups": [
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      }
+    ],
+    "catalog_general_2storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "catalog_general_3storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "catalog_residential": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "catalog_data_processing": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_groups": [
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      }
+    ],
+    "scrubbed_general_2storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_general_3storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_residential": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_data_processing": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ]
+  },
+  {
+    "id": "bb-hwbb-awhp-elecbu",
+    "family": "baseboards",
+    "catalog_groups": [
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      }
+    ],
+    "catalog_general_2storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      }
+    ],
+    "catalog_general_3storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      }
+    ],
+    "catalog_residential": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      }
+    ],
+    "catalog_data_processing": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_groups": [
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      }
+    ],
+    "scrubbed_general_2storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_general_3storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_residential": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_data_processing": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      }
+    ]
+  },
+  {
+    "id": "bb-hwbb-awhp-gasbu-lift",
+    "family": "baseboards",
+    "catalog_groups": [
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      }
+    ],
+    "catalog_general_2storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "catalog_general_3storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "catalog_residential": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "catalog_data_processing": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_groups": [
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      }
+    ],
+    "scrubbed_general_2storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_general_3storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_residential": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_data_processing": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ]
+  },
+  {
+    "id": "vav-hw-hwbb-awhp-gasbu-scrollchiller",
+    "family": "vav_reheat",
+    "catalog_groups": [
+      {
+        "zones": 5,
+        "family": "vav_reheat",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      }
+    ],
+    "catalog_general_2storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "catalog_general_3storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "catalog_residential": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "catalog_data_processing": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_groups": [
+      {
+        "zones": 5,
+        "family": "multizone_vav",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      }
+    ],
+    "scrubbed_general_2storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_general_3storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_residential": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_data_processing": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ]
+  },
+  {
+    "id": "vav-hw-hwbb-awhp-elecbu-scrollchiller",
+    "family": "vav_reheat",
+    "catalog_groups": [
+      {
+        "zones": 5,
+        "family": "vav_reheat",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      }
+    ],
+    "catalog_general_2storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      }
+    ],
+    "catalog_general_3storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      }
+    ],
+    "catalog_residential": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      }
+    ],
+    "catalog_data_processing": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_groups": [
+      {
+        "zones": 5,
+        "family": "multizone_vav",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      }
+    ],
+    "scrubbed_general_2storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_general_3storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_residential": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_data_processing": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      }
+    ]
+  },
+  {
+    "id": "pvav-hw-hwbb-awhp-gasbu",
+    "family": "vav_reheat",
+    "catalog_groups": [
+      {
+        "zones": 5,
+        "family": "vav_reheat",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      }
+    ],
+    "catalog_general_2storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "catalog_general_3storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "catalog_residential": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "catalog_data_processing": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_groups": [
+      {
+        "zones": 5,
+        "family": "multizone_vav",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      }
+    ],
+    "scrubbed_general_2storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_general_3storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_residential": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_data_processing": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ]
+  },
+  {
+    "id": "uh-hw-awhp-gasbu",
+    "family": "unit_heaters",
+    "catalog_groups": [
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      }
+    ],
+    "catalog_general_2storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "catalog_general_3storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "catalog_residential": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "catalog_data_processing": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_groups": [
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heating_only",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity",
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      }
+    ],
+    "scrubbed_general_2storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_general_3storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_residential": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_data_processing": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-ashp-gassupp-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ]
   }
 ]

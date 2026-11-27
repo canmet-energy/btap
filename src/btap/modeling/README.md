@@ -55,7 +55,7 @@ the code-neutral efficiency primitive after construction.
 
 ## Finding a system
 
-The HVAC catalogue's 102 systems are organised the way a mechanical engineer
+The HVAC catalogue's 109 systems are organised the way a mechanical engineer
 browses them: **category, then system type, then variants**. Variants within a
 type differ by *facets*: what the air handler heats and cools with, the zone
 terminals, the hot- and chilled-water plant, outdoor air, heat recovery, and
@@ -103,7 +103,19 @@ row; the modeling layer itself shows only a row's NECB *lineage*.
 Any system with a hot-water plant (baseboards, VAV reheat, fan coils with a
 central air handler, hot-water rooftop coils, unit heaters) can take an
 air-to-water heat-pump plant instead of boilers, with one backup boiler in
-series downstream of the heat pump:
+series downstream of the heat pump.
+
+Seven named catalogue entries use it (2026-11-27):
+
+- hot water baseboards: `bb-hwbb-awhp-gasbu`, `bb-hwbb-awhp-elecbu`, and the
+  retrofit `bb-hwbb-awhp-gasbu-lift`;
+- VAV with reheat: `vav-hw-hwbb-awhp-gasbu-scrollchiller` and
+  `vav-hw-hwbb-awhp-elecbu-scrollchiller`;
+- packaged VAV: `pvav-hw-hwbb-awhp-gasbu`;
+- hot water unit heaters: `uh-hw-awhp-gasbu`.
+
+`gasbu` and `elecbu` mark the boiler as a backup. Any other hydronic row takes
+the same plant as an option:
 
 ```python
 modeling.build_system(model, "bb-hwbb-gasboiler", zones,

@@ -16,7 +16,14 @@ from btap.modeling.hvac import canonical, catalog, taxonomy
 class TestTheRetiredGrammarStillResolves(unittest.TestCase):
 
     def test_every_rows_old_canonical_name_resolves_to_that_row(self):
-        for row in catalog.rows():
+        # Rows added after the taxonomy never had a canonical name to retire;
+        # they are recorded, so this cannot quietly skip a row that lost one.
+        import json
+        from pathlib import Path
+        added = {a["id"] for a in json.loads(
+            (Path(__file__).resolve().parents[1] / "fixtures" / "system_additions.json")
+            .read_text(encoding="utf-8"))["added"]}
+        for row in (r for r in catalog.rows() if r["id"] not in added):
             with self.subTest(id=row["id"]):
                 self.assertTrue(row["aliases"], "the retired canonical name was not kept")
                 self.assertEqual(row["id"], catalog.resolve(row["aliases"][0])["id"])

@@ -64,6 +64,9 @@ SUBSET = [
     'bb-elecbb', 'bb-hwbb-district', 'furnace-gas',
     'psz-elec-elecbb',
     'psz-ashp-gassupp-elecbb',
+    # a heat-pump HOT-WATER plant with a gas boiler: 8.4.x.13.(2)(a) plus the
+    # (2)(g)(i) auxiliary-fuel election (added 2026-11-27)
+    'bb-hwbb-awhp-gasbu',
     'mau-ptac-elec-elecbb',
     'mau-fc4-gas-chw-gasboiler-scrollchiller',
     'mau-fc2-gas-chw-gasboiler-scrollchiller',

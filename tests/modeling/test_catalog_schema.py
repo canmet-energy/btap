@@ -18,8 +18,8 @@ ROWS = catalog.rows()
 
 # family => every key any row of that family may carry (frozen from the data)
 FAMILY_KEYS = {
-    'baseboards': ['baseboard_type', 'boiler_fuel', 'family', 'hw_source', 'id', 'legacy_name', 'aliases',
-                   'needs_boiler', 'origin'],
+    'baseboards': ['baseboard_type', 'boiler_fuel', 'comment', 'family', 'hw_source', 'hw_supply', 'id', 'legacy_name',
+                   'aliases', 'needs_boiler', 'origin'],
     'chilled_beams': ['baseboard_type', 'beam_design_inlet_water_temperature',
                       'beam_design_outlet_water_temperature', 'beam_type',
                       'chilled_water_profile', 'chiller_type', 'chw_source',
@@ -55,8 +55,9 @@ FAMILY_KEYS = {
     'psz': ['baseboard_type', 'boiler_fuel', 'comment', 'family', 'heat_source',
             'heating_coil_type', 'id', 'legacy_name', 'aliases', 'needs_boiler', 'origin', 'per_zone', 'sizing',
             'supp_htg_fuel', 'sys_abbr'],
-    'unit_heaters': ['family', 'heating_type', 'id', 'legacy_name', 'aliases', 'needs_boiler', 'origin'],
-    'vav_reheat': ['baseboard_type', 'boiler_fuel', 'chiller_type', 'comment',
+    'unit_heaters': ['boiler_fuel', 'comment', 'family', 'heating_type', 'hw_source', 'hw_supply', 'id', 'legacy_name',
+                     'aliases', 'needs_boiler', 'origin'],
+    'vav_reheat': ['baseboard_type', 'boiler_fuel', 'chiller_type', 'comment', 'hw_source', 'hw_supply',
                    'cooling_type', 'erv_bypass_control_type',
                    'erv_defrost_time_fraction_increase_rate',
                    'erv_economizer_lockout', 'erv_frost_control_type',

@@ -1,0 +1,40 @@
+{
+  "_comment": "Catalogue rows ADDED after the HVAC taxonomy (D-112), in the order appended to systems.json and the D-58 golden. The migration and retirement proofs rebuild the files as they were BEFORE these rows, so they remove them first. A row added here has no pre-taxonomy name: its legacy_name is its id and it carries no aliases.",
+  "added": [
+    {
+      "id": "bb-hwbb-awhp-gasbu",
+      "date": "2026-11-27",
+      "pr": "air-to-water heat-pump named entries"
+    },
+    {
+      "id": "bb-hwbb-awhp-elecbu",
+      "date": "2026-11-27",
+      "pr": "air-to-water heat-pump named entries"
+    },
+    {
+      "id": "bb-hwbb-awhp-gasbu-lift",
+      "date": "2026-11-27",
+      "pr": "air-to-water heat-pump named entries"
+    },
+    {
+      "id": "vav-hw-hwbb-awhp-gasbu-scrollchiller",
+      "date": "2026-11-27",
+      "pr": "air-to-water heat-pump named entries"
+    },
+    {
+      "id": "vav-hw-hwbb-awhp-elecbu-scrollchiller",
+      "date": "2026-11-27",
+      "pr": "air-to-water heat-pump named entries"
+    },
+    {
+      "id": "pvav-hw-hwbb-awhp-gasbu",
+      "date": "2026-11-27",
+      "pr": "air-to-water heat-pump named entries"
+    },
+    {
+      "id": "uh-hw-awhp-gasbu",
+      "date": "2026-11-27",
+      "pr": "air-to-water heat-pump named entries"
+    }
+  ]
+}

@@ -234,6 +234,35 @@ def _score(row, group):
         score -= 2.0
         against.append(f'row does NOT heat but the group heats with '
                        f'{sorted(heat)}')
+    # A heat-pump HOT-WATER plant (plant_loops `hw_source: awhp`, 2026-11-27).
+    # Only those rows are scored on it, so no existing row's score moves; and
+    # without it every one TIED its boiler twin and could win a building that
+    # has no heat pump at all (measured: the boiler-only unit heaters and
+    # electric baseboards were handed their heat-pump copies).
+    if row.get('hw_source') == 'awhp':
+        if group.get('heat_pump') is True:
+            score += 2.0
+            matched.append('the group has a heat pump; this row heats its '
+                           'hot water with one')
+        else:
+            score -= 3.0
+            against.append('this row heats its hot water with a heat pump; '
+                           'the group has none')
+        # ...and on its BACKUP fuel: the three heat-pump baseboard rows tied
+        # on a gas-burning building and the tie-break chose ELECTRIC backup.
+        # (Low temperature versus boiler lift is a supply temperature the
+        # facts do not carry; that tie breaks to the default by id.)
+        # The heat pump itself makes the group report electricity, so the
+        # question is whether it burns GAS. PENALTY ONLY: the boiler-fuel
+        # criterion above already credits a matching `boiler_fuel`, and a
+        # second credit let the heat-pump row outscore its own boiler twin on
+        # a building with no heat pump (measured on the unit heaters).
+        gas_backup = 'gas' in _fuel_tokens([row.get('boiler_fuel', 'NaturalGas')])
+        if gas_backup != ('gas' in heat):
+            score -= 1.5
+            against.append('the group burns gas; this row\'s backup boiler is electric'
+                           if not gas_backup else
+                           'this row\'s backup boiler burns gas; the group burns none')
     # #221: loop cooling is NOT DX-only. A chilled-water air handler cools on
     # the supply side just as much as a DX one, and reading `loop_dx_cooling`
     # alone made `zonal_cools` true for it — producing the explicit, FALSE
