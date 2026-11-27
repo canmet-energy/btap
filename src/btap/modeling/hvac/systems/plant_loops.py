@@ -33,7 +33,20 @@ DEWPOINT_MARGIN_FEATURE = 'btap_dewpoint_margin_k'
 #: loop's dew-point reset. Handles keep EMS object names collision-free when
 #: distinct zone names sanitize to the same identifier.
 DEWPOINT_ZONE_MARGINS_FEATURE = 'btap_dewpoint_zone_margins'
-HOT_WATER_SOURCES = frozenset({'boiler', 'district'})
+HOT_WATER_SOURCES = frozenset({'boiler', 'district', 'awhp'})
+
+#: How an air-to-water heat-pump hot-water plant meets its load (phylroy,
+#: 2026-11-26): ``low_temperature`` — the new-design norm — runs the loop at
+#: 60 C with terminals autosized for it and the boiler as backup to the SAME
+#: setpoint; ``boiler_lift`` — the retrofit arrangement — keeps the
+#: conventional 82 C loop, the heat pump preheating to its 60 C limit and the
+#: boiler lifting the rest of the way.
+HOT_WATER_SUPPLY_MODES = ('low_temperature', 'boiler_lift')
+#: A heat-pump plant's backup boiler burns one of these.
+HEAT_PUMP_BACKUP_FUELS = ('NaturalGas', 'Electricity')
+HOT_WATER_SOURCE_FEATURE = 'btap_hot_water_source'
+HOT_WATER_SUPPLY_FEATURE = 'btap_hot_water_supply'
+_HEAT_PUMP_LOOP_NAME = 'Heat Pump Hot Water Loop'
 CHILLED_WATER_SOURCES = frozenset({
     'water_cooled', 'air_cooled', 'district',
 })
@@ -107,6 +120,15 @@ def validate_plant_config(config):
     if hot_source not in HOT_WATER_SOURCES:
         raise ValueError(
             f"hw_source must be one of {sorted(HOT_WATER_SOURCES)!r}")
+    if 'hw_supply' in config:
+        if hot_source != 'awhp':
+            raise ValueError("hw_supply applies only to hw_source 'awhp'")
+        if config['hw_supply'] not in HOT_WATER_SUPPLY_MODES:
+            raise ValueError(
+                f"hw_supply must be one of {list(HOT_WATER_SUPPLY_MODES)!r}")
+    if hot_source == 'awhp' and config.get('boiler_fuel', 'NaturalGas') not in HEAT_PUMP_BACKUP_FUELS:
+        raise ValueError(
+            f"a heat-pump plant's backup boiler_fuel must be one of {list(HEAT_PUMP_BACKUP_FUELS)!r}")
     chilled_source = config.get('chw_source', 'water_cooled')
     if chilled_source not in CHILLED_WATER_SOURCES:
         raise ValueError(
@@ -561,6 +583,7 @@ def find_hot_water(model, part_load_curve_class=None, exclude=(), fuel=None,
         (pl for pl in model.getPlantLoops()
          if str(pl.handle()) not in blocked
          and _boiler_heated(pl) and not _district_heated(pl)
+         and not _heat_pump_heated(pl)
          and boiler_part_load_class(pl) == part_load_curve_class
          and _temperature_profile_matches(
              pl, temperature_profile, 'hot_water')
@@ -594,6 +617,13 @@ def _boiler_heated(loop):
     return len(loop.supplyComponents(openstudio.model.BoilerHotWater.iddObjectType())) > 0
 
 
+def _heat_pump_heated(loop):
+    """A heating heat pump on the supply side — a heat-pump plant, whose
+    boiler is a backup and which an ordinary boiler caller must never adopt."""
+    return len(loop.supplyComponents(
+        openstudio.model.HeatPumpPlantLoopEIRHeating.iddObjectType())) > 0
+
+
 def _source_less_hot_water_shell(loop):
     """Whether a named loop has distribution topology but no heating source."""
     if _boiler_heated(loop) or _district_heated(loop):
@@ -610,8 +640,116 @@ def _source_less_hot_water_shell(loop):
     return len(pipes) in (0, 2) and len(pumps) <= 1
 
 
+def _feature(obj, key):
+    value = obj.additionalProperties().getFeatureAsString(key)
+    return value.get() if value.is_initialized() else None
+
+
+def _air_to_water_heat_pump_hot_water(model, backup_fuel, supply, reuse, exclude,
+                                      minimum_part_load_ratio):
+    """A hot-water loop led by an air-to-water heat pump, with ONE backup
+    boiler in series downstream of it (the hp_plant_fancoils arrangement,
+    generalised to every hydronic system).
+
+    The heat pump runs on its outlet setpoint and the boiler tops up to the
+    loop's. In ``low_temperature`` both setpoints follow the same outdoor
+    reset (60 C at -16 C down to 45 C at 0 C), so the boiler fires only when
+    the heat pump falls short — at capacity or below its -15 C cutoff. In
+    ``boiler_lift`` the heat pump is held at its 60 C limit and the loop keeps
+    the conventional 82 C-at--16 C reset, so the boiler lifts whatever the
+    heat pump cannot reach. Both setpoint schedules are authored defaults,
+    not code values.
+    """
+    from btap.modeling.hvac.components import curves as curves_mod
+
+    if supply not in HOT_WATER_SUPPLY_MODES:
+        raise ValueError(f"hw_supply must be one of {list(HOT_WATER_SUPPLY_MODES)!r}")
+    if backup_fuel not in HEAT_PUMP_BACKUP_FUELS:
+        raise ValueError(
+            f"a heat-pump plant's backup fuel must be one of {list(HEAT_PUMP_BACKUP_FUELS)!r}")
+    if reuse:
+        blocked = {str(handle) for handle in exclude}
+        for pl in model.getPlantLoops():
+            if (str(pl.handle()) not in blocked and _heat_pump_heated(pl)
+                    and _feature(pl, HOT_WATER_SOURCE_FEATURE) == 'awhp'
+                    and _feature(pl, HOT_WATER_SUPPLY_FEATURE) == supply
+                    and boiler_fuels(pl) == [backup_fuel]):
+                return pl
+
+    low = supply == 'low_temperature'
+    loop = openstudio.model.PlantLoop(model)
+    loop.setName(_HEAT_PUMP_LOOP_NAME)
+    sizing = loop.sizingPlant()
+    sizing.setLoopType('Heating')
+    sizing.setDesignLoopExitTemperature(60.0 if low else 82.0)
+    sizing.setLoopDesignTemperatureDifference(11.0 if low else 16.0)
+    loop.setLoadDistributionScheme('SequentialLoad')
+    loop.additionalProperties().setFeature(HOT_WATER_SOURCE_FEATURE, 'awhp')
+    loop.additionalProperties().setFeature(HOT_WATER_SUPPLY_FEATURE, supply)
+    openstudio.model.PumpVariableSpeed(model).addToNode(loop.supplyInletNode())
+
+    # Heat-pump settings: the hp_plant_fancoils / ECM hs15 CAWHP equipment
+    # (COP 3, -15 C low-ambient cutoff, the CAWHP-HS15 curves), except that a
+    # heating-only plant has no companion cooling heat pump to size from.
+    hp = openstudio.model.HeatPumpPlantLoopEIRHeating(model)
+    hp.setName('Air-to-Water Heat Pump')
+    hp.setCondenserType('AirSource')
+    hp.setMinimumSourceInletTemperature(-15.0)
+    hp.setReferenceCoefficientofPerformance(3.0)
+    hp.setHeatPumpSizingMethod('HeatingCapacity')
+    hp.setHeatPumpDefrostControl('OnDemand')
+    hp.setFlowMode('VariableSpeedPumping')
+    hp.setControlType('Setpoint')
+    hp.setMinimumPartLoadRatio(minimum_part_load_ratio)
+    hp.setCapacityModifierFunctionofTemperatureCurve(
+        curves_mod.build(model, 'CAWHP-HS15-HCAPFT'))
+    hp.setElectricInputtoOutputRatioModifierFunctionofTemperatureCurve(
+        curves_mod.build(model, 'CAWHP-HS15-HEIRFT'))
+    loop.addSupplyBranchForComponent(hp)
+    loop.addSupplyBranchForComponent(openstudio.model.PipeAdiabatic(model))
+    openstudio.model.PipeAdiabatic(model).addToNode(loop.supplyOutletNode())
+
+    hp_outlet = hp.supplyOutletModelObject().get().to_Node().get()
+    boiler = openstudio.model.BoilerHotWater(model)
+    boiler.setFuelType(backup_fuel)
+    boiler.setName('Backup Boiler')
+    # SETPOINT-controlled, on its own outlet: in series behind the heat pump
+    # a load-dispatched boiler was handed almost nothing, and the loop ran
+    # 4-12 K under setpoint whenever the heat pump fell short (measured; the
+    # boiler-only control holds setpoint every hour).
+    boiler.setBoilerFlowMode('LeavingSetpointModulated')
+    boiler.addToNode(hp_outlet)
+    boiler_outlet = boiler.outletModelObject().get().to_Node().get()
+
+    def reset(node, low_temperature, high_temperature, label):
+        spm = openstudio.model.SetpointManagerOutdoorAirReset(model)
+        spm.setName(label)
+        spm.setControlVariable('Temperature')
+        spm.setSetpointatOutdoorLowTemperature(low_temperature)
+        spm.setOutdoorLowTemperature(-16.0)
+        spm.setSetpointatOutdoorHighTemperature(high_temperature)
+        spm.setOutdoorHighTemperature(0.0)
+        spm.addToNode(node)
+
+    if low:
+        reset(hp_outlet, 60.0, 45.0, 'Heat Pump Outlet Reset')
+        reset(boiler_outlet, 60.0, 45.0, 'Backup Boiler Outlet Reset')
+        reset(loop.supplyOutletNode(), 60.0, 45.0, 'Hot Water Loop Reset')
+    else:
+        schedule = openstudio.model.ScheduleConstant(model)
+        schedule.setName('Heat Pump Outlet 60C')
+        schedule.setValue(60.0)
+        spm = openstudio.model.SetpointManagerScheduled(model, schedule)
+        spm.setName('Heat Pump Outlet Setpoint')
+        spm.addToNode(hp_outlet)
+        reset(boiler_outlet, 82.0, 60.0, 'Backup Boiler Outlet Reset')
+        reset(loop.supplyOutletNode(), 82.0, 60.0, 'Hot Water Loop Reset')
+    return loop
+
+
 def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='boiler',
-              part_load_curve_class=None, exclude=(), profile=None):
+              part_load_curve_class=None, exclude=(), profile=None,
+              supply='low_temperature', minimum_part_load_ratio=None):
     """Build a hot-water loop: primary + secondary boiler, variable-speed pump,
     82C design exit / 16K dT, OA-reset 82C@-16C down to 60C@0C.
 
@@ -642,11 +780,24 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
         is class-aware: a loop whose boilers carry a different class (or none)
         is not adopted, so a purchased-heating group never lands on an
         ordinary group's boilers and vice versa.
+    :param supply: for ``source='awhp'`` only — ``'low_temperature'`` or
+        ``'boiler_lift'`` (see HOT_WATER_SUPPLY_MODES); ``fuel`` is then the
+        BACKUP boiler's fuel
     :return: openstudio.model.PlantLoop
     """
     if source not in HOT_WATER_SOURCES:
         raise ValueError(
             f"hot-water source must be one of {sorted(HOT_WATER_SOURCES)!r}")
+    if source == 'awhp':
+        if profile is not None:
+            raise ValueError("a heat-pump plant sets its own temperatures; pass hw_supply, "
+                             "not a hot_water_profile")
+        if minimum_part_load_ratio is None:
+            from btap.modeling.hvac import performance
+            minimum_part_load_ratio = performance.resolve()[
+                'plant_heating_heat_pump_minimum_part_load_ratio']
+        return _air_to_water_heat_pump_hot_water(
+            model, fuel, supply, reuse, exclude, minimum_part_load_ratio)
     profile = _normalize_temperature_profile(profile, 'hot_water')
     hw_loop = None
     if reuse:

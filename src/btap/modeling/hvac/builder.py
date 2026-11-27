@@ -190,6 +190,9 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
                                         part_load_curve_class=resolved.get(
                                             'boiler_part_load_curve_class'),
                                         profile=resolved.get('hot_water_profile'),
+                                        supply=resolved.get('hw_supply', 'low_temperature'),
+                                        minimum_part_load_ratio=performance_profile[
+                                            'plant_heating_heat_pump_minimum_part_load_ratio'],
                                         exclude=exclude_plants or ())
     chw_loop = None
     if resolved.get('needs_chiller'):

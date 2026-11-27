@@ -98,6 +98,50 @@ facet filters with live counts, the tree, and each system's loop diagrams and
 "catalog.html", code="necb2020")` adds which NECB reference System uses each
 row; the modeling layer itself shows only a row's NECB *lineage*.
 
+## Heat-pump hot water for any hydronic system
+
+Any system with a hot-water plant (baseboards, VAV reheat, fan coils with a
+central air handler, hot-water rooftop coils, unit heaters) can take an
+air-to-water heat-pump plant instead of boilers, with one backup boiler in
+series downstream of the heat pump:
+
+```python
+modeling.build_system(model, "bb-hwbb-gasboiler", zones,
+                      config={"hw_source": "awhp"})                    # gas backup
+modeling.build_system(model, "bb-hwbb-gasboiler", zones,
+                      config={"hw_source": "awhp", "boiler_fuel": "Electricity"})
+modeling.build_system(model, "vav-hw-hwbb-gasboiler-scrollchiller", zones,
+                      config={"hw_source": "awhp", "hw_supply": "boiler_lift"})
+```
+
+`hw_supply` chooses how the load is met:
+
+- **`low_temperature`** (the default, the new-design norm): the loop runs at
+  60 C (outdoor reset down to 45 C at 0 C), terminals autosize for that water,
+  and the boiler backs up to the same setpoint, firing only when the heat pump
+  is at capacity or below its -15 C cutoff;
+- **`boiler_lift`** (the retrofit arrangement): the loop keeps the
+  conventional 82 C reset for terminals sized for it; the heat pump preheats to
+  its 60 C limit and the boiler lifts the rest.
+
+The heat pump is the ECM hs15 air-to-water equipment (COP 3, the CAWHP-HS15
+curves), sized on the heating load. The backup boiler is setpoint-controlled
+on its own outlet; load-dispatched in series it was handed almost nothing and
+the loop ran under setpoint. Measured annually on the five-zone fixture
+(2026-11-27), hot water baseboards:
+
+| Plant | Heat pump share | Heat-pump COP | Site gas | Occupied unmet heating |
+| --- | ---: | ---: | ---: | ---: |
+| Gas boilers only | 0% | - | 147 GJ | 56.5 h |
+| Heat pump, low temperature, gas backup | 77% | 2.46 | 30 GJ | 56.75 h |
+| Heat pump, boiler lift, gas backup | 33% | 2.39 | 96 GJ | 56.75 h |
+
+VAV with reheat on a low-temperature heat-pump plant: 80% heat-pump share,
+70 h. None of these runs had a Severe error. A heat-pump plant is never shared with an
+ordinary boiler system, and plants of different `hw_supply` or backup fuel are
+never shared with each other. The setpoint schedules are authored defaults,
+not code values; the NECB reference building is unaffected and keeps boilers.
+
 ## Modern HVAC systems
 
 Five opt-in catalog rows add modern hydronic and air-system topology without
