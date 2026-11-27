@@ -786,9 +786,18 @@ def display_parts(config):
         supply = config.get("hw_supply", "low_temperature")
         # the loop's design temperature: plant_loops.HEAT_PUMP_LOOP_RESET_DEFAULTS
         # unless `hw_controls` overrides it (Fable, review of #250)
-        reset = (config.get("hw_controls") or {}).get("loop_reset_c")
-        loop_c = (float(reset[0]) if reset
-                  else 60.0 if supply == "low_temperature" else 82.0)
+        controls = config.get("hw_controls") or {}
+        if not isinstance(controls, dict):
+            raise ValueError(f"{config.get('id')}: hw_controls must be a mapping")
+        reset = controls.get("loop_reset_c")
+        if reset is None:
+            loop_c = 60.0 if supply == "low_temperature" else 82.0
+        elif (isinstance(reset, (list, tuple)) and len(reset) == 2
+              and all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in reset)):
+            loop_c = float(reset[0])
+        else:
+            raise ValueError(f"{config.get('id')}: hw_controls loop_reset_c must be "
+                             f"a pair of numbers, not {reset!r}")
         hw = [w if w != _PLANT_WORDS["awhp"] else
               (f"air-to-water heat pump ({loop_c:g} C loop)" if supply == "low_temperature"
                else f"air-to-water heat pump preheat ({loop_c:g} C loop; boiler lifts)")

@@ -223,10 +223,20 @@ class TestTheControlsResolve(unittest.TestCase):
                 ('low_temperature', {'loop_reset_c': [22, 20]}),           # design return below a room
                 ('boiler_lift', {'loop_reset_c': [82, 40]}),              # resets below the constant heat pump
                 ('boiler_lift', {'heat_pump_max_c': 57.5, 'backup_deadband_k': 5}),   # deadband can do nothing
+                ('boiler_lift', {'loop_reset_c': [62, 60], 'backup_deadband_k': 5}),  # 40 C to reach it
                 ('low_temperature', [1, 2])):
             with self.subTest(supply=supply, controls=bad):
                 with self.assertRaises(ValueError):
                     heat_pump_controls(supply, bad)
+
+    def test_reasonable_controls_are_accepted(self):
+        # Fable, re-review of #250: these were refused for no physical reason
+        from btap.modeling.hvac.systems.plant_loops import heat_pump_controls
+        for supply, ok in (('low_temperature', {'loop_reset_c': [35, 30]}),    # a radiant design point
+                           ('boiler_lift', {'loop_reset_c': [82, 70], 'backup_deadband_k': 0}),
+                           ('boiler_lift', {'loop_reset_c': [70, 60], 'backup_deadband_k': 1})):
+            with self.subTest(supply=supply, controls=ok):
+                heat_pump_controls(supply, ok)
 
     def test_validate_plant_config_checks_them_and_their_source(self):
         from btap.modeling.hvac.systems import plant_loops
@@ -329,6 +339,25 @@ class TestTheControlsAreBuilt(unittest.TestCase):
             'heat_pump_max_c': 70, 'outdoor_reset_c': [-16, -0.0]}}, zones[4:5], model)
         self.assertEqual(2, len(_loops_with_heat_pump(model)), 'an unused key: still the default plant')
 
+    def test_a_plant_built_before_hw_controls_is_adopted_only_where_it_matches(self):
+        # A loop without the signature was built by PR #243's code: its
+        # low-temperature plant is today's default, its boiler-lift plant is
+        # not (the boiler reset changed), so a boiler-lift build must not
+        # adopt it (Fable, re-review of #250).
+        from btap._compat import sorted_by_name
+        from btap.modeling.hvac.systems.plant_loops import HEAT_PUMP_CONTROLS_FEATURE
+        from tests.support import load_fixture
+        for supply, expected in (('low_temperature', 1), ('boiler_lift', 2)):
+            with self.subTest(supply=supply):
+                model = load_fixture()
+                zones = sorted_by_name(model.getThermalZones())
+                config = {'hw_source': 'awhp', 'hw_supply': supply}
+                self.build('bb-hwbb-gasboiler', config, zones[:1], model)
+                old = _loops_with_heat_pump(model)[0]
+                self.assertTrue(old.additionalProperties().resetFeature(HEAT_PUMP_CONTROLS_FEATURE))
+                self.build('bb-hwbb-gasboiler', config, zones[1:2], model)
+                self.assertEqual(expected, len(_loops_with_heat_pump(model)))
+
     def test_refused_BEFORE_the_old_system_is_torn_down(self):
         from btap import modeling
         model = self.build('bb-hwbb-gasboiler', None)
@@ -357,6 +386,15 @@ class TestTheControlsAreBuilt(unittest.TestCase):
                                '(75 C loop; boiler lifts)')):
             with self.subTest(extra=extra):
                 self.assertIn(phrase, taxonomy.display({**row, 'hw_source': 'awhp', **extra}))
+
+    def test_a_malformed_row_fails_loudly_in_the_display(self):
+        from btap.modeling.hvac import taxonomy
+        from btap.modeling.hvac.catalog import resolve
+        row = {**resolve('bb-hwbb-gasboiler'), 'hw_source': 'awhp'}
+        for bad in ({'loop_reset_c': 55}, {'loop_reset_c': '55,40'}, {'loop_reset_c': ['a', 'b']}, [1, 2]):
+            with self.subTest(hw_controls=bad):
+                with self.assertRaises(ValueError):
+                    taxonomy.display({**row, 'hw_controls': bad})
 
     def test_a_composite_routes_them_to_its_hot_water_part(self):
         model = self.build('doas-fc4-elec-gasboiler-scrollchiller',

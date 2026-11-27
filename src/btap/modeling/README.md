@@ -189,7 +189,11 @@ temperature) or 82 to 60 C (boiler lift). The heat pump's outlet ceiling is
   - a boiler-lift reset that falls below the heat pump's constant setpoint;
   - a deadband on a boiler-lift loop the heat pump never meets, because it
     would do nothing;
-  - a loop whose design return would fall below 25 C.
+  - a loop whose design return would fall below 20 C (a 35 C low-temperature
+    supply is accepted);
+  - a boiler-lift reset so shallow that the boiler would need more than 5 C of
+    outdoor temperature past the mild end to fall its deadband below the heat
+    pump.
 - Plants with different controls are never shared. A key that changes nothing
   built, such as the ceiling on a low-temperature loop, does not split them.
 
