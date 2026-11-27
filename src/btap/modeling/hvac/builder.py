@@ -312,6 +312,22 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
         merged over the current builder defaults
     :return: Result(system_name, family, air_loops, control_zone)
     """
+    return _build_system(model, system_name, zones, control_zone=control_zone,
+                         remove_existing=remove_existing, namer=namer, config=config,
+                         exclude_plants=exclude_plants,
+                         performance_profile=performance_profile)
+
+
+def _build_system(model, system_name, zones, control_zone=None, remove_existing=False,
+                  namer='default', config=None, exclude_plants=None,
+                  performance_profile=None, _probe=False):
+    """`build_system`, with the private `_probe` switch the zone-ERV dry run
+    uses. Kept off the public signature so no caller, through the facade's
+    `**kwargs` included, can turn the dry run off (Fable, review of #253)."""
+    # Materialised once: the dry run must not consume a one-shot iterable
+    # before the real build reads it.
+    if exclude_plants is not None:
+        exclude_plants = list(exclude_plants)
     performance_profile = performance.resolve(performance_profile)
     validation.require_zones(zones)
     validation.require_thermostats(zones)
@@ -335,6 +351,10 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
     _preflight_resolved(
         model, resolved, zones, control_zone, namer, remove_existing,
         performance_profile)
+    if resolved.get('needs_zone_erv') and not _probe:
+        _probe_zone_ervs(model, system_name, zones, None if elect else control_zone,
+                         remove_existing, namer, config, exclude_plants,
+                         performance_profile)
 
     if remove_existing:
         teardown.remove_hvac_from_zones(model, zones)
@@ -420,6 +440,35 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
     return Result(system_name=system_name, family=resolved['family'],
                   air_loops=air_loops, control_zone=control_zone,
                   grouping_evidence=getattr(system, 'grouping_evidence', None))
+
+
+def _probe_zone_ervs(model, system_name, zones, control_zone, remove_existing,
+                     namer, config, exclude_plants, performance_profile):
+    """Refuse `needs_zone_erv` BEFORE the real model is touched (#244).
+
+    Whether a system ventilates centrally is known only once its families
+    have built: ten builders add an outdoor-air system, each under its own
+    conditions (a `ventilation` flag, the `mau` part, an else-branch). So the
+    refusal ran after `remove_existing` had torn the old system down, and a
+    refused rebuild left the zones with neither. Predicting it from the
+    config would copy all ten conditions and drift; instead the same build
+    runs, refusal included, on a throwaway clone. Only rows asking for zone
+    ERVs pay for it: measured, it doubles that build (2.2 s to 4.4 s on a
+    59-zone archetype; the clone itself is 0.02 s).
+    """
+    from btap._compat import opt
+
+    probe = model.clone(True).to_Model()
+    probe_zones = [opt(probe.getThermalZone(zone.handle())) for zone in zones]
+    if any(zone is None for zone in probe_zones):
+        raise RuntimeError('a zone did not survive cloning the model')
+    probe_control = None
+    if control_zone is not None:
+        probe_control = opt(probe.getThermalZone(control_zone.handle()))
+    _build_system(probe, system_name, probe_zones, control_zone=probe_control,
+                  remove_existing=remove_existing, namer=namer, config=config,
+                  exclude_plants=exclude_plants,
+                  performance_profile=performance_profile, _probe=True)
 
 
 def _mark_shared_loops(air_loops, rule):
