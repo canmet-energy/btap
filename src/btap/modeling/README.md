@@ -98,6 +98,86 @@ facet filters with live counts, the tree, and each system's loop diagrams and
 "catalog.html", code="necb2020")` adds which NECB reference System uses each
 row; the modeling layer itself shows only a row's NECB *lineage*.
 
+## Building a model's HVAC
+
+The catalogue is browsed as central systems, zone terminals with an
+outdoor-air unit, and zone equipment, but **each row is a whole system**:
+`psz-gas-hwbb-gasboiler` is the rooftop unit, its hot-water baseboards and
+the gas boiler, and `doas-fc4-elec-gasboiler-scrollchiller` is a DOAS, four-pipe
+fan coils and both plants. So the normal pattern is one row per group of zones,
+not a central row stacked on a zonal one.
+
+1. **Prepare the model.** Every zone the system will serve needs a
+   thermostat; `build_system` refuses a zone without one. If the model will go
+   through an NECB compliance run, its spaces also need standards space types.
+2. **Group the zones** that share a system: by use, schedule or floor, or
+   one per zone. A group is a list of `ThermalZone` objects.
+3. **Pick a row for each group**, on the catalogue page or from Python
+   (see Finding a system above).
+4. **Build each group:**
+
+   ```python
+   from btap import modeling
+
+   zones = sorted(model.getThermalZones(), key=lambda z: z.nameString())
+   offices, corridor = zones[:4], zones[4:]
+
+   modeling.build_system(model, "vav-hw-hwbb-gasboiler-scrollchiller", offices)
+   modeling.build_system(model, "bb-elecbb", corridor)
+   ```
+
+   - **Plants are shared.** A second group needing a gas hot-water plant
+     joins the first one's loop. Plants of a different kind never share:
+     heat pump or boiler, backup fuel, controls.
+   - **Options go in `config=`:**
+     - `{"hw_source": "awhp"}` for a heat-pump hot-water plant on any
+       hydronic row;
+     - `{"boiler_fuel": "Electricity"}`;
+     - `{"hw_controls": {...}}` for the loop reset and the backup deadband;
+     - `{"per_zone": True}` for one packaged unit per zone.
+
+     An unknown or contradictory option is refused before anything is
+     built.
+   - **A single-zone row given several zones builds one unit** that follows
+     one control zone. Pass `control_zone=` to choose it, or leave it to step
+     5. Without either, the build warns.
+   - **`modeling.replace_system(...)` swaps a group's system.** It is
+     `build_system(..., remove_existing=True)`: only those zones' HVAC is torn
+     down, and a refused rebuild leaves the old system in place.
+5. **Size, then settle the control zones:**
+
+   ```python
+   from btap import simulation
+
+   simulation.run(model, run_dir="runs/size", weather=weather, sizing_only=True)
+   modeling.elect_control_zones(model)   # each shared unit follows its largest heating load
+   ```
+
+6. **Check what you built.**
+   - `modeling.characterize(model)` gives the facts per zone group: fuels,
+     terminals, plants and heat pumps.
+   - `modeling.model_hvac_diagrams(model)` draws the loops.
+   - An annual run reports unmet hours. NECB 2020 Article 8.4.1.2.(3) allows
+     100 h of unmet heating per thermal block.
+   - `btap-compliance model.osm --code necb2020 --epw ...` makes the full
+     determination.
+
+**For an existing model**, `btap.stock` reads its HVAC into a recipe and
+ranks catalogue rows for each unidentified zone group. Each candidate lists the
+facts that matched and those that did not. A candidate is only a guess:
+building one is opt-in (`build_from_recipe(..., accept_candidates=True)`) and
+is audited as a guess.
+
+**Limits:**
+
+- **Stacking two rows on the same zones is not validated.** It means calling
+  `build_system` twice without `remove_existing`. The one case refused is a
+  zone ERV on a system that already ventilates centrally. Prefer a row that
+  already combines what you need; the composites (DOAS + fan coils, DOAS + VRF,
+  DOAS + water-loop heat pumps) exist for that.
+- **One build serves its zones uniformly**, so different equipment on
+  different zones of one central system needs separate builds.
+
 ## Heat-pump hot water for any hydronic system
 
 Any system with a hot-water plant (baseboards, VAV reheat, fan coils with a
