@@ -653,6 +653,17 @@ def _feature(obj, key):
     return value.get() if value.is_initialized() else None
 
 
+def _node_after(optional_object, what):
+    """The Node a just-connected component's outlet lands on, through `opt`:
+    an empty crash-family optional SEGFAULTS on a bare `.get()` (D-79)."""
+    from btap._compat import opt
+    obj = opt(optional_object)
+    node = opt(obj.to_Node()) if obj is not None else None
+    if node is None:
+        raise RuntimeError(f"the {what} is not connected to a node")
+    return node
+
+
 def _air_to_water_heat_pump_hot_water(model, backup_fuel, supply, reuse, exclude,
                                       minimum_part_load_ratio):
     """A hot-water loop led by an air-to-water heat pump, with ONE backup
@@ -717,7 +728,7 @@ def _air_to_water_heat_pump_hot_water(model, backup_fuel, supply, reuse, exclude
     loop.addSupplyBranchForComponent(openstudio.model.PipeAdiabatic(model))
     openstudio.model.PipeAdiabatic(model).addToNode(loop.supplyOutletNode())
 
-    hp_outlet = hp.supplyOutletModelObject().get().to_Node().get()
+    hp_outlet = _node_after(hp.supplyOutletModelObject(), 'heat pump supply outlet')
     boiler = openstudio.model.BoilerHotWater(model)
     boiler.setFuelType(backup_fuel)
     boiler.setName('Backup Boiler')
@@ -727,7 +738,7 @@ def _air_to_water_heat_pump_hot_water(model, backup_fuel, supply, reuse, exclude
     # boiler-only control holds setpoint every hour).
     boiler.setBoilerFlowMode('LeavingSetpointModulated')
     boiler.addToNode(hp_outlet)
-    boiler_outlet = boiler.outletModelObject().get().to_Node().get()
+    boiler_outlet = _node_after(boiler.outletModelObject(), 'backup boiler outlet')
 
     def reset(node, low_temperature, high_temperature, label):
         spm = openstudio.model.SetpointManagerOutdoorAirReset(model)
