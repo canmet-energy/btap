@@ -1892,9 +1892,15 @@
       "needs_boiler": true,
       "needs_chiller": true,
       "hw_source": "awhp",
+      "hw_controls": {
+        "loop_reset_c": [
+          60,
+          55
+        ]
+      },
       "boiler_fuel": "NaturalGas",
       "origin": "generic",
-      "comment": "Air-to-water heat-pump hot-water plant (plant_loops hw_source 'awhp', added 2026-11-27 after the HVAC taxonomy): one air-source heat pump with ONE backup boiler in series, setpoint-controlled 1 K below it. Low-temperature design: a 60 C loop the terminals autosize for."
+      "comment": "Air-to-water heat-pump hot-water plant (plant_loops hw_source 'awhp', added 2026-11-27 after the HVAC taxonomy): one air-source heat pump with ONE backup boiler in series, setpoint-controlled 1 K below it. Low-temperature design: a 60 C loop the terminals autosize for. Fan coils on the 60 C loop: the default 60->45 C reset left 239 occupied unmet heating hours (boiler twin 150 h); 60->55 C gives 80.5 h at heat-pump COP 2.54 against 2.77 (annual, five-zone fixture, Toronto CWEC 2020; phylroy 2026-11-27)."
     },
     {
       "id": "mau-fc4-elec-awhp-elecbu-scrollchiller",
@@ -1910,9 +1916,15 @@
       "needs_boiler": true,
       "needs_chiller": true,
       "hw_source": "awhp",
+      "hw_controls": {
+        "loop_reset_c": [
+          60,
+          55
+        ]
+      },
       "boiler_fuel": "Electricity",
       "origin": "generic",
-      "comment": "Air-to-water heat-pump hot-water plant (plant_loops hw_source 'awhp', added 2026-11-27 after the HVAC taxonomy): one air-source heat pump with ONE backup boiler in series, setpoint-controlled 1 K below it. Low-temperature design: a 60 C loop the terminals autosize for. The make-up air unit heats electrically too, so the row burns no fuel (its gas-backup sibling keeps the NECB System 2 gas MAU coil)."
+      "comment": "Air-to-water heat-pump hot-water plant (plant_loops hw_source 'awhp', added 2026-11-27 after the HVAC taxonomy): one air-source heat pump with ONE backup boiler in series, setpoint-controlled 1 K below it. Low-temperature design: a 60 C loop the terminals autosize for. The make-up air unit heats electrically too, so the row burns no fuel (its gas-backup sibling keeps the NECB System 2 gas MAU coil). Fan coils on the 60 C loop: the default 60->45 C reset left 239 occupied unmet heating hours (boiler twin 150 h); 60->55 C gives 80.5 h at heat-pump COP 2.54 against 2.77 (annual, five-zone fixture, Toronto CWEC 2020; phylroy 2026-11-27)."
     },
     {
       "id": "psz-hw-hwbb-awhp-gasbu",

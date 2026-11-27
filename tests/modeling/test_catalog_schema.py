@@ -42,7 +42,7 @@ FAMILY_KEYS = {
                         'needs_boiler', 'origin', 'plant_type', 'sizing',
                         'supp_htg_fuel', 'sys_abbr'],
     'evap_cooler': ['family', 'id', 'legacy_name', 'aliases', 'needs_boiler', 'origin'],
-    'fan_coils': ['boiler_fuel', 'chiller_type', 'comment', 'family', 'fan_coil_type', 'hw_source',
+    'fan_coils': ['boiler_fuel', 'chiller_type', 'comment', 'family', 'fan_coil_type', 'hw_controls', 'hw_source',
                   'mau_cooling_type', 'mau_heating_coil_type', 'id', 'legacy_name', 'aliases', 'needs_boiler',
                   'needs_chiller', 'origin', 'sizing', 'sys_abbr'],
     'furnace': ['comment', 'cooling', 'equipment_class', 'family', 'heating',

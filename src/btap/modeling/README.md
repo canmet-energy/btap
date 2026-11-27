@@ -159,14 +159,27 @@ VAV with reheat on a low-temperature heat-pump plant: 94% heat-pump share,
 
 | Entry | Heat pump share | Occupied unmet heating | Boiler twin |
 | --- | ---: | ---: | ---: |
-| Four-pipe fan coils + MAU, gas backup | 93.5% | 239.25 h | 150 h |
-| Four-pipe fan coils + MAU, electric | 93.5% | 239.25 h | - |
+| Four-pipe fan coils + MAU, gas backup | 93.5% | 80.5 h | 150 h |
+| Four-pipe fan coils + MAU, electric | 93.5% | 80.5 h | - |
 | Hot-water rooftop unit + baseboards, gas backup | 94% | 687.75 h | 687 h |
 | Baseboards, boiler lift, electric backup | 39% | 56.75 h | 56.5 h |
 
 The rooftop unit's unmet hours are its shared topology (one control zone for
-five), the same with boilers. The fan coils lose about 90 hours to the 60 C
-loop's outdoor reset; their make-up air unit's coil recorded no heating in
+five), the same with boilers. On the default 60 to 45 C reset the fan coils had 239.25 h unmet: at 45 C
+there was too little coil capacity to recover from night setback. Their two
+rows therefore set `hw_controls: {"loop_reset_c": [60, 55]}` (phylroy,
+2026-11-27). The measured trade-off, gas backup:
+
+| Fan-coil loop reset | Occupied unmet heating | Heat-pump COP | Site electricity |
+| --- | ---: | ---: | ---: |
+| 60 to 45 C (the plant default) | 239.25 h | 2.77 | 478 GJ |
+| 60 to 50 C | 111.25 h | 2.66 | 490 GJ |
+| 60 to 55 C (these rows) | 80.5 h | 2.54 | 500 GJ |
+| 60 C flat | 78.5 h | 2.45 | 507 GJ |
+
+NECB 2020 Article 8.4.1.2.(3) allows 100 h of unmet heating per thermal block
+in a compliance run; these are whole-building occupied hours on a test fixture
+whose boiler twin has 150 h. The make-up air unit's coil recorded no heating in
 either variant. None of these runs had a Severe error. A composite passes the options
 to its hot-water parts; a row with no hot-water plant refuses them. A heat-pump plant is never shared with an
 ordinary boiler system, and plants of different `hw_supply` or backup fuel are
