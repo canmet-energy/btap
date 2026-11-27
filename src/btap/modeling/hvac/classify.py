@@ -297,6 +297,38 @@ def _plant_heat_pump(comp, loop):
     return None
 
 
+#: The (fixed, autosized) capacity accessors of each HEATING plant heat pump,
+#: from the SDK headers. HeatPumpAirToWaterHeating keeps its fixed capacity in
+#: per-speed data, so only its autosized convenience value is read here.
+PLANT_HP_HEATING_CAPACITY = {
+    'to_HeatPumpPlantLoopEIRHeating': ('referenceCapacity', 'autosizedReferenceCapacity'),
+    'to_HeatPumpWaterToWaterEquationFitHeating':
+        ('ratedHeatingCapacity', 'autosizedRatedHeatingCapacity'),
+    'to_HeatPumpAirToWaterHeating': (None, 'autosizedRatedHeatingCapacity'),
+    'to_HeatPumpAirToWaterFuelFiredHeating':
+        ('nominalHeatingCapacity', 'autosizedNominalHeatingCapacity'),
+}
+
+
+def _plant_heat_pump_heating_watts(comp, loop):
+    """A heating plant heat pump's capacity in W, or None when it is unknown
+    (autosized with no sizing run yet, or a type whose capacity is not read).
+
+    Read like a boiler's, and only asked for the autosized value when a sizing
+    run exists, for the same reason: the SDK prints a "no sql file" line per
+    object otherwise, which the frozen stdout baselines would catch.
+    """
+    for cast, (fixed, autosized) in PLANT_HP_HEATING_CAPACITY.items():
+        unit = _try_cast(comp, cast)
+        if unit is None:
+            continue
+        watts = opt(getattr(unit, fixed)()) if fixed else None
+        if watts is None and loop.model().sqlFile().is_initialized():
+            watts = opt(getattr(unit, autosized)())
+        return float(watts) if watts is not None else None
+    return None
+
+
 def _plant_heat_pump_has_heating_side(unit, mode):
     """Whether this plant heat-pump equipment carries a heating side."""
     if mode == 'heating':
@@ -324,6 +356,12 @@ def _plant_facts(loop, audit):
 
     #: (fuel, watts|None) per heating device on this plant — see below.
     allocation = []
+    #: ...and per HEATING heat pump, kept apart because `allocation` is also
+    #: the boiler count. 8.4.4.9.(5) ratios the capacity allocation of EVERY
+    #: energy type on the plant, and a heat pump's was never recorded, so a
+    #: hybrid heat-pump + boiler plant could never establish the ratio even
+    #: once sized (Fable's review of #245; #244).
+    heat_pump_allocation = []
     for comp in loop.supplyComponents():
         if comp.to_BoilerHotWater().is_initialized():
             has_boiler = True
@@ -371,6 +409,9 @@ def _plant_facts(loop, audit):
                 unit, mode, fuel, _source_kind = hp
                 heat_pump = True
                 heat_pump_modes.append(mode)
+                if mode == 'heating':
+                    heat_pump_allocation.append(
+                        (fuel, _plant_heat_pump_heating_watts(comp, loop)))
                 if _plant_heat_pump_has_heating_side(unit, mode):
                     resolved_heat_pumps.append(unit.nameString())
                 elif mode == 'cooling':
@@ -407,7 +448,7 @@ def _plant_facts(loop, audit):
     # fuel whose devices are all autosized maps to None: the allocation is
     # UNKNOWN until a sizing run, not zero.
     by_fuel = {}
-    for fuel, watts in allocation:
+    for fuel, watts in allocation + heat_pump_allocation:
         if fuel not in by_fuel:
             by_fuel[fuel] = watts
         elif by_fuel[fuel] is not None and watts is not None:
