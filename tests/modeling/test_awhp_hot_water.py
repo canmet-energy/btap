@@ -57,6 +57,14 @@ class TestTheHeatPumpPlant(unittest.TestCase):
         self.assertEqual('LeavingSetpointModulated', boilers[0].boilerFlowMode())
         boiler_out = boilers[0].outletModelObject().get().to_Node().get()
         self.assertEqual(1, len(boiler_out.setpointManagers()))
+        # ...with a 1 K deadband below the heat pump, so it does not chase the
+        # fraction of a kelvin the heat pump runs short while defrosting
+        # (Fable, PR #243: with equal setpoints 67% of boiler heat came while
+        # the heat pump had capacity).
+        boiler_spm = boiler_out.setpointManagers()[0].to_SetpointManagerOutdoorAirReset().get()
+        hp_spm = hp_out.to_Node().get().setpointManagers()[0].to_SetpointManagerOutdoorAirReset().get()
+        for getter in ('setpointatOutdoorLowTemperature', 'setpointatOutdoorHighTemperature'):
+            self.assertAlmostEqual(getattr(hp_spm, getter)() - 1.0, getattr(boiler_spm, getter)())
         # every baseboard hangs on the heat-pump loop, none on a boiler loop
         for bb in model.getZoneHVACBaseboardConvectiveWaters():
             coil = bb.heatingCoil().to_CoilHeatingWaterBaseboard().get()
@@ -109,6 +117,35 @@ class TestTheHeatPumpPlant(unittest.TestCase):
             with self.subTest(config=bad):
                 with self.assertRaises(ValueError):
                     plant_loops.validate_plant_config(bad)
+
+    def test_a_bad_combination_is_refused_BEFORE_the_old_system_is_torn_down(self):
+        from btap import modeling
+        model = self.build('bb-hwbb-gasboiler', None)
+        before = len(model.getZoneHVACBaseboardConvectiveWaters())
+        zones = list(model.getThermalZones())
+        profile = {'name': 'low', 'design_exit_temperature': 60.0, 'design_temperature_difference': 10.0,
+                   'setpoint_temperature': 60.0}
+        with self.assertRaises(ValueError):
+            modeling.build_system(model, 'bb-hwbb-gasboiler', zones, remove_existing=True,
+                                  config={'hw_source': 'awhp', 'hot_water_profile': profile})
+        self.assertEqual(before, len(model.getZoneHVACBaseboardConvectiveWaters()),
+                         'the existing system must survive a refused rebuild')
+
+    def test_a_composite_passes_the_option_to_its_hot_water_part(self):
+        model = self.build('doas-fc4-elec-gasboiler-scrollchiller', {'hw_source': 'awhp'})
+        self.assertEqual(1, len(_loops_with_heat_pump(model)))
+        self.assertEqual(1, len(model.getBoilerHotWaters()), 'the one backup boiler')
+
+    def test_a_bad_value_on_a_composite_is_refused(self):
+        with self.assertRaises(ValueError):
+            self.build('doas-fc4-elec-gasboiler-scrollchiller',
+                       {'hw_source': 'awhp', 'hw_supply': 'tepid'})
+
+    def test_a_row_with_no_hot_water_plant_refuses_the_option(self):
+        for system in ('psz-gas-elecbb', 'wshp-gasboiler', 'doas-fc4-hw-chw-awhp-elecboiler'):
+            with self.subTest(system=system):
+                with self.assertRaises(ValueError):
+                    self.build(system, {'hw_source': 'awhp'})
 
     def test_any_hydronic_family_takes_it(self):
         for system in ('vav-hw-hwbb-gasboiler-scrollchiller', 'mau-fc4-gas-chw-gasboiler-scrollchiller',

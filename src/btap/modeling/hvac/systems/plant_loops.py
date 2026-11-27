@@ -126,9 +126,17 @@ def validate_plant_config(config):
         if config['hw_supply'] not in HOT_WATER_SUPPLY_MODES:
             raise ValueError(
                 f"hw_supply must be one of {list(HOT_WATER_SUPPLY_MODES)!r}")
-    if hot_source == 'awhp' and config.get('boiler_fuel', 'NaturalGas') not in HEAT_PUMP_BACKUP_FUELS:
-        raise ValueError(
-            f"a heat-pump plant's backup boiler_fuel must be one of {list(HEAT_PUMP_BACKUP_FUELS)!r}")
+    if hot_source == 'awhp':
+        if config.get('boiler_fuel', 'NaturalGas') not in HEAT_PUMP_BACKUP_FUELS:
+            raise ValueError(
+                f"a heat-pump plant's backup boiler_fuel must be one of {list(HEAT_PUMP_BACKUP_FUELS)!r}")
+        # Refused HERE, before any teardown, not inside the builder (Fable,
+        # PR #243: the builder raised after remove_existing had run).
+        for key in ('hot_water_profile', 'boiler_part_load_curve_class'):
+            if config.get(key) is not None:
+                raise ValueError(
+                    f"{key} does not apply to a heat-pump plant (hw_source 'awhp'), "
+                    "which sets its own temperatures and has one backup boiler")
     chilled_source = config.get('chw_source', 'water_cooled')
     if chilled_source not in CHILLED_WATER_SOURCES:
         raise ValueError(
@@ -731,9 +739,13 @@ def _air_to_water_heat_pump_hot_water(model, backup_fuel, supply, reuse, exclude
         spm.setOutdoorHighTemperature(0.0)
         spm.addToNode(node)
 
+    # A 1 K DEADBAND below the heat pump: with identical setpoints the boiler
+    # chased the 0.1-0.5 K the heat pump runs short while defrosting (active
+    # below 10 C) and fired in nearly every heating hour (Fable, PR #243:
+    # 67% of annual boiler heat came while the heat pump had capacity).
     if low:
         reset(hp_outlet, 60.0, 45.0, 'Heat Pump Outlet Reset')
-        reset(boiler_outlet, 60.0, 45.0, 'Backup Boiler Outlet Reset')
+        reset(boiler_outlet, 59.0, 44.0, 'Backup Boiler Outlet Reset')
         reset(loop.supplyOutletNode(), 60.0, 45.0, 'Hot Water Loop Reset')
     else:
         schedule = openstudio.model.ScheduleConstant(model)
@@ -742,7 +754,7 @@ def _air_to_water_heat_pump_hot_water(model, backup_fuel, supply, reuse, exclude
         spm = openstudio.model.SetpointManagerScheduled(model, schedule)
         spm.setName('Heat Pump Outlet Setpoint')
         spm.addToNode(hp_outlet)
-        reset(boiler_outlet, 82.0, 60.0, 'Backup Boiler Outlet Reset')
+        reset(boiler_outlet, 82.0, 59.0, 'Backup Boiler Outlet Reset')
         reset(loop.supplyOutletNode(), 82.0, 60.0, 'Hot Water Loop Reset')
     return loop
 

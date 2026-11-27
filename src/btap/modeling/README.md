@@ -126,18 +126,20 @@ modeling.build_system(model, "vav-hw-hwbb-gasboiler-scrollchiller", zones,
 
 The heat pump is the ECM hs15 air-to-water equipment (COP 3, the CAWHP-HS15
 curves), sized on the heating load. The backup boiler is setpoint-controlled
-on its own outlet; load-dispatched in series it was handed almost nothing and
-the loop ran under setpoint. Measured annually on the five-zone fixture
-(2026-11-27), hot water baseboards:
+on its own outlet, 1 K below the heat pump: load-dispatched in series it was
+handed almost nothing and the loop ran under setpoint, and at the SAME setpoint
+it chased the fraction of a kelvin the heat pump runs short while defrosting.
+Measured annually on the five-zone fixture (2026-11-27), hot water baseboards:
 
 | Plant | Heat pump share | Heat-pump COP | Site gas | Occupied unmet heating |
 | --- | ---: | ---: | ---: | ---: |
 | Gas boilers only | 0% | - | 147 GJ | 56.5 h |
-| Heat pump, low temperature, gas backup | 77% | 2.46 | 30 GJ | 56.75 h |
-| Heat pump, boiler lift, gas backup | 33% | 2.39 | 96 GJ | 56.75 h |
+| Heat pump, low temperature, gas backup | 92% | 2.47 | 8.8 GJ | 59 h |
+| Heat pump, boiler lift, gas backup | 42% | 2.38 | 83 GJ | 57 h |
 
-VAV with reheat on a low-temperature heat-pump plant: 80% heat-pump share,
-70 h. None of these runs had a Severe error. A heat-pump plant is never shared with an
+VAV with reheat on a low-temperature heat-pump plant: 94% heat-pump share,
+70.25 h. None of these runs had a Severe error. A composite passes the options
+to its hot-water parts; a row with no hot-water plant refuses them. A heat-pump plant is never shared with an
 ordinary boiler system, and plants of different `hw_supply` or backup fuel are
 never shared with each other. The setpoint schedules are authored defaults,
 not code values; the NECB reference building is unaffected and keeps boilers.
