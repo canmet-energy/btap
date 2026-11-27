@@ -146,9 +146,9 @@ class TestTheCoilMediumIsNotAFuel(unittest.TestCase):
             (dict(family_guess='zonal_heating_only', zonal_units=['unit_heater'], heat_pump=True,
                   heating_energy_types=['Electricity', 'NaturalGas']), 'uh-hw-awhp-gasbu'),
         ]
-        # Fuel OIL is not a catalogue fuel, and the identifier's fuel tokens
-        # drop it for EVERY row (pre-existing), so an oil-backed heat pump is
-        # not pinned here; recorded on #244.
+        # Fuel OIL is not a catalogue fuel, so no row is right for an
+        # oil-backed heat pump; how it is scored is pinned by
+        # TestFuelsNoCatalogueRowBurns below (#244).
         for facts, expected in cases:
             with self.subTest(facts=facts):
                 top = identify_candidates(_group(cooled=False, **facts), limit=1)[0]['system']

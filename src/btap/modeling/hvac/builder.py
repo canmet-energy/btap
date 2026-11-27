@@ -69,33 +69,180 @@ def _system_class(family):
 
 #: Hot-water plant options a caller may pass to ANY row with a hot-water plant.
 _PLANT_SOURCE_KEYS = ('hw_source', 'hw_supply')
-_PLANT_KEYS = _PLANT_SOURCE_KEYS + ('boiler_fuel',)
+
+# ---------------------------------------------------------------------------
+# Which caller `config` keys a COMPOSITE row accepts, and where they go.
+#
+# A composite builds each part with that part's own `config`, so before #244
+# every caller key except the hot-water plant options was silently dropped:
+# `config={'per_zone': True}` on a split-system composite built one shared
+# unit, and a typo built the default. The rule now:
+#
+#   1. a key a part ACCEPTS reaches that part, and only that part, with the
+#      caller's value winning over the part's own `config`;
+#   2. a key NO part accepts is REFUSED, before preflight and so before any
+#      teardown — never dropped;
+#   3. identity and plant-STRUCTURE keys are refused outright: a part's id,
+#      family or whether it builds a plant is what the composite IS, so
+#      overriding one is choosing a different catalogue row;
+#   4. `needs_zone_erv` is applied ONCE, by the composite, to its zones. Sent
+#      to every part it would build one zone ERV per part per zone.
+#
+# "Accepts" means what the part's BUILDER READS, not what the catalogue rows
+# of that family happen to carry. The per-family row allowlist in
+# tests/modeling/test_catalog_schema.py (`FAMILY_KEYS`) was checked as the
+# source and is the wrong one in both directions: builders read keys it does
+# not list (`staged_coils` for psz, `mau` and `heating` for fan_coils,
+# `heat_rejection` for wshp — the last two arrive through composite parts'
+# own `config`), and it lists keys the family's class never reads (`boiler_fuel` on
+# baseboards is read by the PLANT builder, only when the row needs a boiler).
+# So the table below is declared from the builders and the plant rules, and
+# tests/modeling/test_composite_config.py records every key each family's
+# class actually reads while building every catalogue row, plus a source scan
+# of each family module, and fails when a builder reads a key not declared
+# here — the case that would silently drop it again.
+# ---------------------------------------------------------------------------
+
+#: Identity and plant-structure keys: refused on a composite (rule 3).
+_COMPOSITE_REFUSED_KEYS = frozenset({
+    'id', 'legacy_name', 'aliases', 'family', 'parts', 'origin', 'comment',
+    'display', 'needs_boiler', 'needs_chiller'})
+
+#: Read by `build_system` itself, for any part that builds a hot-water plant.
+_HW_PLANT_KEYS = frozenset({
+    'hw_source', 'hw_supply', 'boiler_fuel', 'boiler_part_load_curve_class',
+    'hot_water_profile'})
+
+#: Read by `build_system` itself, for any part that builds a chilled-water plant.
+_CHW_PLANT_KEYS = frozenset({'chiller_type', 'chw_source', 'chilled_water_profile'})
+
+#: The exchanger parameters `energy_recovery.resolve_energy_recovery` reads.
+_ERV_FIELD_KEYS = frozenset({
+    'erv_profile', 'erv_bypass_control_type',
+    'erv_defrost_time_fraction_increase_rate', 'erv_economizer_lockout',
+    'erv_frost_control_type', 'erv_frost_threshold_temperature',
+    'erv_heat_exchanger_type', 'erv_initial_defrost_time_fraction',
+    'erv_latent_effectiveness', 'erv_nominal_electric_power',
+    'erv_sensible_effectiveness', 'erv_supply_air_outlet_temperature_control'})
+
+#: Central recovery: `BaseSystem.attach_oa_system` reads `needs_erv`, so the
+#: families that build an outdoor-air system through it take these.
+_CENTRAL_ERV_KEYS = _ERV_FIELD_KEYS | {'needs_erv'}
+
+#: Keys each family's builder class reads from its config (rule 1). `id` is
+#: read by most and is identity, so it is not listed.
+FAMILY_CONFIG_KEYS = {
+    'baseboards': frozenset({'baseboard_type'}),
+    'chilled_beams': frozenset({
+        'baseboard_type', 'beam_design_inlet_water_temperature',
+        'beam_design_outlet_water_temperature', 'beam_type',
+        'chilled_water_profile', 'chw_source', 'dewpoint_margin',
+        'doas_maximum_humidity_ratio', 'doas_supply_air_temperature',
+        'needs_boiler', 'needs_chiller', 'sizing', 'sys_abbr'}) | _CENTRAL_ERV_KEYS,
+    # crah.py calls BaseSystem.add_oa_system when `ventilation` is set, which
+    # reads the central-ERV keys (Fable, review of #248).
+    'crah': frozenset({
+        'cooling_type', 'crah_maximum_humidity_ratio',
+        'crah_supply_air_temperature', 'sizing', 'sys_abbr', 'ventilation'}) | _CENTRAL_ERV_KEYS,
+    'doas': frozenset({'heating_type', 'sizing'}) | _CENTRAL_ERV_KEYS,
+    'doas_pthp': frozenset({'sizing', 'supp_htg_fuel', 'sys_abbr'}) | _CENTRAL_ERV_KEYS,
+    'dual_duct': frozenset({
+        'needs_boiler', 'needs_chiller', 'sizing', 'sys_abbr'}) | _CENTRAL_ERV_KEYS,
+    'ecm_ashp_baseboard': frozenset({
+        'air_eqpt', 'baseboard_type', 'sizing', 'supp_htg_fuel', 'sys_abbr',
+        'vent_type'}),
+    'ecm_doas_vrf': frozenset({'air_eqpt', 'sizing', 'supp_htg_fuel', 'sys_abbr'}),
+    'ecm_hp_fancoils': frozenset({
+        'air_eqpt', 'boiler_fuel', 'plant_type', 'sizing', 'supp_htg_fuel',
+        'sys_abbr'}),
+    'evap_cooler': _CENTRAL_ERV_KEYS,
+    'fan_coils': frozenset({
+        'fan_coil_type', 'heating', 'mau', 'mau_cooling_type',
+        'mau_heating_coil_type', 'sizing', 'sys_abbr'}) | _CENTRAL_ERV_KEYS,
+    'furnace': frozenset({
+        'cooling', 'equipment_class', 'heating', 'heating_type', 'per_zone',
+        'reheat', 'sizing', 'ventilation'}) | _CENTRAL_ERV_KEYS,
+    'mau_ptac': frozenset({
+        'baseboard_type', 'mau_heating_coil_type', 'ptac_heating_type',
+        'reference_hp', 'sizing', 'supp_htg_fuel', 'sys_abbr'}) | _CENTRAL_ERV_KEYS,
+    'psz': frozenset({
+        'baseboard_type', 'heat_source', 'heating_coil_type', 'per_zone',
+        'sizing', 'staged_coils', 'supp_htg_fuel', 'sys_abbr'}) | _CENTRAL_ERV_KEYS,
+    'unit_heaters': frozenset({'heating_type'}),
+    'vav_reheat': frozenset({
+        'baseboard_type', 'cooling_type', 'heating_coil_type', 'sizing',
+        'sys_abbr'}) | _CENTRAL_ERV_KEYS,
+    'vrf': frozenset({'zone_ventilation'}),
+    'wshp': frozenset({'boiler_fuel', 'heat_rejection', 'sizing', 'ventilation'}),
+    'zone_ervs': _ERV_FIELD_KEYS,
+    'zone_terminal': frozenset({'baseboard_type', 'heating_type', 'sizing', 'unit_type'}),
+}
+
+
+def accepted_config_keys(part_resolved):
+    """The caller keys one resolved, non-composite row's build reads: its
+    family's own keys, plus the plant keys when it builds that plant."""
+    keys = set(FAMILY_CONFIG_KEYS.get(part_resolved['family'], ()))
+    if part_resolved.get('needs_boiler'):
+        keys |= _HW_PLANT_KEYS
+    if part_resolved.get('needs_chiller'):
+        keys |= _CHW_PLANT_KEYS
+    return keys
+
+
+def _route_composite_config(resolved, config):
+    """Apply a caller's `config` to a composite under the rule above, or refuse.
+
+    Runs before preflight, so a refusal never follows a teardown.
+    """
+    config = {str(k): v for k, v in config.items()}
+    refused = sorted(set(config) & _COMPOSITE_REFUSED_KEYS)
+    if refused:
+        raise ValueError(
+            f"'{resolved['id']}' is a composite; {refused} name what its parts "
+            'are and cannot be overridden per call. Choose the catalogue row '
+            'that builds what you want instead.')
+
+    # Rule 4: the composite itself takes the zone-ERV option, and with it the
+    # exchanger fields that configure that device.
+    composite_level = set()
+    if 'needs_zone_erv' in config:
+        composite_level.add('needs_zone_erv')
+        if config['needs_zone_erv']:
+            composite_level |= _ERV_FIELD_KEYS & set(config)
+
+    parts, taken = [], set()
+    for part in resolved['parts']:
+        own = part.get('config') or {}
+        part_resolved = {**catalog.resolve(part['id']),
+                         **{str(k): v for k, v in own.items()}}
+        accepts = accepted_config_keys(part_resolved) - {'needs_zone_erv'}
+        routed = {k: v for k, v in config.items() if k in accepts}
+        taken |= set(routed)
+        parts.append({**part, 'config': {**own, **routed}} if routed else part)
+
+    unaccepted = sorted(set(config) - taken - composite_level)
+    if unaccepted:
+        if set(unaccepted) & set(_PLANT_SOURCE_KEYS):
+            raise ValueError(f"'{resolved['id']}' builds no hot-water plant; "
+                             f'{unaccepted} do not apply')
+        raise ValueError(
+            f"'{resolved['id']}' is a composite of "
+            f"{[p['id'] for p in resolved['parts']]} and none of its parts "
+            f'reads {unaccepted}; refused rather than silently dropped')
+    return {**resolved, **{k: config[k] for k in composite_level},
+            'parts': parts}
 
 
 def _route_plant_options(resolved, config):
-    """Send a caller's hot-water plant options where a plant is built, or refuse.
+    """Refuse hot-water plant options on a non-composite row with no plant.
 
-    A composite builds its parts with their own config, so these options were
-    silently dropped — invalid values included — on all twelve composite rows;
-    and a row with no hot-water plant accepted `hw_source` and built nothing
-    (Fable, PR #243). Both now behave: the options reach every part that
-    builds a hot-water plant, and a row with none refuses them. Runs before
-    preflight, so a refusal never follows a teardown.
+    A row with no hot-water plant accepted `hw_source` and built nothing
+    (Fable, PR #243). Runs before preflight, so a refusal never follows a
+    teardown. Composites go through `_route_composite_config` instead.
     """
-    plant = {k: config[k] for k in _PLANT_KEYS if k in config}
-    if not plant:
-        return resolved
-    if resolved['family'] == 'composite':
-        hot_water_parts = {p['id'] for p in resolved['parts']
-                           if catalog.resolve(p['id']).get('needs_boiler')}
-        if not hot_water_parts and any(k in plant for k in _PLANT_SOURCE_KEYS):
-            raise ValueError(f"'{resolved['id']}' builds no hot-water plant; "
-                             f"{sorted(plant)} do not apply")
-        parts = [{**p, 'config': {**(p.get('config') or {}), **plant}}
-                 if p['id'] in hot_water_parts else p
-                 for p in resolved['parts']]
-        return {**resolved, 'parts': parts}
-    if not resolved.get('needs_boiler') and any(k in plant for k in _PLANT_SOURCE_KEYS):
+    if (not resolved.get('needs_boiler')
+            and any(k in config for k in _PLANT_SOURCE_KEYS)):
         raise ValueError(f"'{resolved['id']}' builds no hot-water plant of its own; "
                          "hw_source and hw_supply do not apply")
     return resolved
@@ -179,7 +326,9 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
     validation.require_control_zone(zones, control_zone)
 
     resolved = catalog.resolve(system_name)
-    if config:
+    if config and resolved['family'] == 'composite':
+        resolved = _route_composite_config(resolved, config)
+    elif config:
         resolved = {**resolved, **{str(k): v for k, v in config.items()}}
         resolved = _route_plant_options(resolved, config)
 
@@ -205,6 +354,8 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
                              config=part.get('config'),
                              exclude_plants=exclude_plants,
                              performance_profile=performance_profile).air_loops)
+        if resolved.get('needs_zone_erv'):
+            _add_zone_ervs(model, system_name, zones, air_loops, resolved)
         if elect:
             _mark_shared_loops(air_loops, rule)
         return Result(system_name=system_name, family='composite',
@@ -261,51 +412,7 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
     # different devices with different parameters, and reusing the flag would
     # silently change what the two shipped `needs_erv` rows build.
     if resolved.get('needs_zone_erv'):
-        from btap._compat import sorted_by_name
-        from btap.modeling.hvac import energy_recovery
-
-        # A zone ERV is that zone's VENTILATION SOURCE, with its own supply
-        # and exhaust fans — not an accessory. So a family that already
-        # ventilates centrally does not benefit from one, it DOUBLE-ventilates.
-        # Measured before this guard: `psz`, `doas` and `vav_reheat` each
-        # built a central outdoor-air system AND five zone ERVs, silently.
-        #
-        # Refused rather than warned, because the result is a model that
-        # simulates and reports plausible numbers while moving roughly twice
-        # the outdoor air the building asked for. Use `needs_erv` for a
-        # central exchanger on those families.
-        ventilating = [
-            loop.nameString() for loop in air_loops
-            if loop.airLoopHVACOutdoorAirSystem().is_initialized()
-        ]
-        if ventilating:
-            raise ValueError(
-                f"{system_name!r} cannot take `needs_zone_erv`: it already "
-                f'ventilates centrally through '
-                f"{', '.join(sorted(ventilating))}, and a zone ERV brings its "
-                'own outdoor air, so the result would ventilate twice. Use '
-                '`needs_erv` for an exchanger on the central outdoor-air '
-                'stream instead.')
-
-        # The OPTION resolves a profile, exactly as the central path does, so
-        # `needs_zone_erv` cannot quietly inherit the SDK's defaults —
-        # sensible 0.76, latent 0.68 and `frostControlType 'None'`, which
-        # leaves an exchanger with no frost protection in a climate reaching
-        # -40 C. The standalone "Zone ERVs" catalogue row still builds on
-        # those defaults; migrating it changes its output and needs the
-        # catalogue's gates.
-        #
-        # Named `recovery`, not `resolved`, to avoid shadowing the catalogue
-        # row that `return Result(... family=resolved['family'] ...)` reads
-        # below. I first wrote this as a rebinding of `resolved` and then
-        # claimed in a comment that it raised KeyError. It does NOT:
-        # `resolve_energy_recovery` returns `dict(config)` with the profile
-        # merged in, so the result is a SUPERSET of the row and `family`
-        # survives. A mutation test proved the rebinding harmless. The
-        # distinct name is clearer; it did not fix a defect.
-        recovery = energy_recovery.resolve_energy_recovery(resolved)
-        for zone in sorted_by_name(zones):
-            energy_recovery.add_zone_energy_recovery(model, zone, recovery)
+        _add_zone_ervs(model, system_name, zones, air_loops, resolved)
 
     if elect:
         _mark_shared_loops(air_loops, rule)
@@ -322,3 +429,48 @@ def _mark_shared_loops(air_loops, rule):
     for loop in air_loops:
         if len(loop.thermalZones()) > 1 and control_zones.controls(loop):
             control_zones.mark_for_election(loop, rule)
+
+
+def _add_zone_ervs(model, system_name, zones, air_loops, resolved):
+    """One zone ERV per zone, refused where the system already ventilates.
+
+    Called once per BUILD: by a plain row after its family builds, and by a
+    composite after ALL its parts build, with every part's air loops — so a
+    composite never gets one device per part per zone (#244).
+    """
+    from btap._compat import sorted_by_name
+    from btap.modeling.hvac import energy_recovery
+
+    # A zone ERV is that zone's VENTILATION SOURCE, with its own supply
+    # and exhaust fans — not an accessory. So a family that already
+    # ventilates centrally does not benefit from one, it DOUBLE-ventilates.
+    # Measured before this guard: `psz`, `doas` and `vav_reheat` each
+    # built a central outdoor-air system AND five zone ERVs, silently.
+    #
+    # Refused rather than warned, because the result is a model that
+    # simulates and reports plausible numbers while moving roughly twice
+    # the outdoor air the building asked for. Use `needs_erv` for a
+    # central exchanger on those families.
+    ventilating = [
+        loop.nameString() for loop in air_loops
+        if loop.airLoopHVACOutdoorAirSystem().is_initialized()
+    ]
+    if ventilating:
+        raise ValueError(
+            f"{system_name!r} cannot take `needs_zone_erv`: it already "
+            f'ventilates centrally through '
+            f"{', '.join(sorted(ventilating))}, and a zone ERV brings its "
+            'own outdoor air, so the result would ventilate twice. Use '
+            '`needs_erv` for an exchanger on the central outdoor-air '
+            'stream instead.')
+
+    # The OPTION resolves a profile, exactly as the central path does, so
+    # `needs_zone_erv` cannot quietly inherit the SDK's defaults —
+    # sensible 0.76, latent 0.68 and `frostControlType 'None'`, which
+    # leaves an exchanger with no frost protection in a climate reaching
+    # -40 C. The standalone "Zone ERVs" catalogue row still builds on
+    # those defaults; migrating it changes its output and needs the
+    # catalogue's gates.
+    recovery = energy_recovery.resolve_energy_recovery(resolved)
+    for zone in sorted_by_name(zones):
+        energy_recovery.add_zone_energy_recovery(model, zone, recovery)

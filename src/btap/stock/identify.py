@@ -98,19 +98,70 @@ _ZONAL_FAMILY = {'unit_heater': 'unit_heaters', 'ptac': 'mau_ptac',
 
 
 
+#: Fuel tokens no catalogue row burns. A group burning one cannot be built
+#: from the catalogue without substituting the fuel, and is told so.
+_NO_CATALOGUE_FUEL = frozenset({'oil', 'other'})
+
+#: Fuels that can fire a boiler, and therefore agree with a hydronic coil.
+#: `Boiler:HotWater`'s Fuel Type (E+ IDD) accepts every non-district fuel
+#: below; district heat reaches a coil through a district plant instead.
+_BOILER_FUELS = frozenset({'gas', 'oil', 'district', 'other'})
+
+
 def _fuel_tokens(energy_types):
-    """Normalise `['NaturalGas']` to the words catalogue fields use."""
+    """Normalise `['NaturalGas']` to the words catalogue fields use.
+
+    EVERY fuel yields a token; none is dropped (classify's `'Purchased'`
+    marker is not a fuel name, and is handled below). The vocabulary is the SDK's
+    `FuelType` enum (`utilities/data/DataEnums.hpp`, OpenStudio 3.11):
+
+    - `gas`: NaturalGas, Gas, Propane — one burner type, as before;
+    - `electric`: Electricity;
+    - `district`: DistrictHeating(Water), DistrictHeatingSteam, Steam,
+      DistrictCooling;
+    - `oil`: FuelOilNo1, FuelOilNo2 and Diesel (a distillate fuel oil);
+    - `other`: Gasoline, Coal, OtherFuel1, OtherFuel2 and anything not
+      recognised.
+
+    #244: `Coal` and `OtherFuel1/2` were DROPPED, so a building burning only
+    one of them scored as if it burned nothing, and `Gasoline` was read as
+    `gas` because the word contains it — a natural-gas "match" for a fuel
+    that is not natural gas. Oil and gasoline are tested FIRST for that
+    reason.
+    """
     out = set()
     for fuel in energy_types or ():
+        if not fuel:
+            continue
         lowered = str(fuel).lower()
-        if 'gas' in lowered or 'propane' in lowered:
+        if lowered == 'unknown':
+            # NOT a fuel either: `classify` writes 'Unknown' when it cannot
+            # resolve one (a hydronic coil with no plant, a plant with no
+            # source). Read as `other` it became "the group burns other", a
+            # fabricated fact that moved scores unevenly (Fable, review of
+            # #248) — absent, never defaulted.
+            continue
+        if lowered == 'purchased':
+            # NOT a fuel name: `classify` spells district heating and district
+            # cooling this way, and this function has never read it — so the
+            # identifier does not see a district plant it characterized (the
+            # district tests here hand-write 'DistrictHeating'). Kept dropped
+            # DELIBERATELY: reading it as `district` is the right fix and moves
+            # the district rows' scores, which is a measured change of its own
+            # (the suggester floors), not part of the oil fix (#244).
+            continue
+        if 'oil' in lowered or 'diesel' in lowered:
+            out.add('oil')
+        elif 'gasoline' in lowered:
+            out.add('other')
+        elif 'gas' in lowered or 'propane' in lowered:
             out.add('gas')
         elif 'electric' in lowered:
             out.add('electric')
         elif 'district' in lowered or 'steam' in lowered:
             out.add('district')
-        elif 'oil' in lowered or 'diesel' in lowered:
-            out.add('oil')
+        else:
+            out.add('other')
     return out
 
 
@@ -262,11 +313,17 @@ def _score(row, group):
             score -= 6.0
             against.append('this row heats its hot water with a heat pump; no '
                            'heat pump is established in the group')
-        # ...and on its BACKUP fuel, read from the RAW energy types: the
-        # normalised tokens drop fuel oil, and an oil-backed heat pump then
-        # looked all-electric (Fable, #245). The heat pump itself makes the
-        # group report electricity, so the question is any OTHER fuel.
+        # ...and on its BACKUP fuel, read from the RAW energy types. The heat
+        # pump itself makes the group report electricity, so the question is
+        # any OTHER fuel. #245 said the tokens drop fuel oil; they never did,
+        # but they dropped coal and the OtherFuels (now tokens, #244) and
+        # still drop classify's 'Purchased' district marker, which this raw
+        # reading counts. Moving this onto the tokens changed 28 scores on
+        # district groups, measured, so it stays raw.
+        # 'Unknown' is classify's marker for an unresolved fuel, not a fuel
+        # burned (Fable, review of #248); it must not count here either.
         burns_other = any('electric' not in str(fuel).lower()
+                          and str(fuel).lower() != 'unknown'
                           for fuel in group.get('heating_energy_types') or ())
         electric_backup = 'electric' in str(row.get('boiler_fuel', 'NaturalGas')).lower()
         if electric_backup and burns_other:
@@ -388,8 +445,7 @@ def _score(row, group):
     coil_name = (row.get('heating_coil_type') or row.get('heating_type')
                  or row.get('mau_heating_coil_type'))
     coil = str(coil_name or '').lower()
-    # Fuels that can fire a boiler, and therefore agree with a hydronic coil.
-    boiler_fuels = {'gas', 'oil', 'district'}
+    boiler_fuels = _BOILER_FUELS
     if coil and heat:
         if 'electric' in coil:
             if 'electric' in heat:
@@ -428,15 +484,27 @@ def _score(row, group):
     # `hw_source: district`; both were being ignored.
     boiler_fuel = _fuel_tokens([row.get('boiler_fuel')]
                                if row.get('boiler_fuel') else [])
-    if boiler_fuel and heat:
-        if boiler_fuel & heat:
+    # A heat-pump row's boiler is its BACKUP, and the heat pump explains the
+    # group's electricity by itself. Where the group also burns a fuel no
+    # catalogue row burns, that fuel is what the backup burns, so the backup
+    # is judged against the non-electric fuels alone: an oil-backed heat-pump
+    # building otherwise credited the ELECTRIC-backup row with "boiler fuel
+    # 'Electricity' matches ['electric', 'oil']" and ranked it first (#244).
+    # Scoped to the unbuildable fuels so no score on a fuel the catalogue
+    # builds moves; the same credit on a gas-backed building is recorded on
+    # #244, not changed here.
+    judged = heat
+    if row.get('hw_source') == 'awhp' and heat & _NO_CATALOGUE_FUEL:
+        judged = heat - {'electric'}
+    if boiler_fuel and judged:
+        if boiler_fuel & judged:
             score += 2.5
             matched.append(f"boiler fuel {row['boiler_fuel']!r} matches "
-                           f'{sorted(heat)}')
+                           f'{sorted(judged)}')
         else:
             score -= 2.0
             against.append(f"boiler fuel {row['boiler_fuel']!r} against "
-                           f'{sorted(heat)}')
+                           f'{sorted(judged)}')
 
     # A district source is a different PLANT, not a different efficiency, so
     # proposing one for a building that fires its own boiler introduces an
@@ -455,7 +523,7 @@ def _score(row, group):
         score -= 3.0
         against.append('row is district chilled water; the group is not')
 
-    if row.get('needs_boiler') and heat & {'gas', 'oil', 'district'}:
+    if row.get('needs_boiler') and heat & _BOILER_FUELS:
         score += 0.5
         matched.append(f'row needs a boiler; group heats with {sorted(heat)}')
     elif row.get('needs_boiler') and heat:
@@ -577,6 +645,17 @@ def _score(row, group):
     elif row.get('needs_chiller'):
         score -= 1.0
         against.append('row needs a chiller; group is not cooled')
+
+    # A fuel the catalogue cannot build. Every row substitutes it, so every
+    # row says so and pays the same amount: the penalty ranks nothing, it
+    # keeps an oil- or coal-fired group from being offered a candidate with
+    # nothing against it (#244).
+    unbuilt = heat & _NO_CATALOGUE_FUEL
+    if unbuilt:
+        score -= 2.0
+        against.append(f'the group burns {sorted(unbuilt)}; no catalogue '
+                       'system burns it, so building this row substitutes '
+                       'the fuel')
 
     # Provenance, as a TIEBREAK and nothing more. Six rows carry
     # `origin: campus` and were curated from the project these archetypes come
