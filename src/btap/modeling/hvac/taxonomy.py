@@ -161,6 +161,9 @@ def _hw_plant(config):
         return []
     if config.get("hw_source") == "district":
         return ["district"]
+    if config.get("hw_source") == "awhp":
+        # plant_loops: an air-to-water heat pump with ONE backup boiler
+        return ["awhp", f"{_fuel(config.get('boiler_fuel', 'NaturalGas'))}_boiler"]
     return [f"{_fuel(config.get('boiler_fuel', 'NaturalGas'))}_boiler"]
 
 
@@ -614,9 +617,10 @@ def mint_id(config):
     if t == "crah" and f["outdoor_air"] != "none":
         tokens.append("oa")
     tokens += [_PLANT_TOKEN[p] for p in f["hw_plant"]]
-    hp_plant = {"gshp", "awhp"} & set(f["hw_plant"])
-    # A heat-pump PLANT (hp_plant_fancoils.py) brings its own chilled-water
+    # A heat-pump PLANT from hp_plant_fancoils.py brings its own chilled-water
     # side and ground loop; a water-cooled chiller brings its cooling tower.
+    # The `hw_source: awhp` plant heats only, so its chiller still counts.
+    hp_plant = ({"gshp", "awhp"} & set(f["hw_plant"])) and config.get("hw_source") != "awhp"
     if not hp_plant:
         for plant in f["chw_plant"]:
             kind = _KIND_TOKEN.get(f["chiller_kind"], "")
@@ -764,9 +768,16 @@ def display_parts(config):
         hw = [w if w != _PLANT_WORDS["awhp"] else "air-to-water heat pump (heating and cooling)"
               for w in hw]
         chw = [w for w in chw if w != "air-to-water heat pump chilled water"]
-    if "electric_boiler" in f["hw_plant"] and any(p in f["hw_plant"] for p in ("awhp", "gshp")):
-        # hp_plant_fancoils.py: heat-pump-led plants with boiler backup
-        hw = [w if w != "electric boiler" else "electric boiler backup" for w in hw]
+    if any(p in f["hw_plant"] for p in ("awhp", "gshp")):
+        # heat-pump-led plants with boiler backup (hp_plant_fancoils.py and
+        # plant_loops' `awhp` source)
+        hw = [f"{w} backup" if w.endswith(" boiler") else w for w in hw]
+    if config.get("hw_source") == "awhp":
+        supply = config.get("hw_supply", "low_temperature")
+        hw = [w if w != _PLANT_WORDS["awhp"] else
+              ("air-to-water heat pump (60 C loop)" if supply == "low_temperature"
+               else "air-to-water heat pump preheat (82 C loop, boiler lifts)")
+              for w in hw]
     plant = hw + chw
     if t in ("wshp", "doas-wshp"):
         plant = [p.replace("gas boiler", "condenser-loop gas boiler") for p in plant]

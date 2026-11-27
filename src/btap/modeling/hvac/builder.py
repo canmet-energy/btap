@@ -67,6 +67,40 @@ def _system_class(family):
     return getattr(module, class_name)
 
 
+#: Hot-water plant options a caller may pass to ANY row with a hot-water plant.
+_PLANT_SOURCE_KEYS = ('hw_source', 'hw_supply')
+_PLANT_KEYS = _PLANT_SOURCE_KEYS + ('boiler_fuel',)
+
+
+def _route_plant_options(resolved, config):
+    """Send a caller's hot-water plant options where a plant is built, or refuse.
+
+    A composite builds its parts with their own config, so these options were
+    silently dropped — invalid values included — on all twelve composite rows;
+    and a row with no hot-water plant accepted `hw_source` and built nothing
+    (Fable, PR #243). Both now behave: the options reach every part that
+    builds a hot-water plant, and a row with none refuses them. Runs before
+    preflight, so a refusal never follows a teardown.
+    """
+    plant = {k: config[k] for k in _PLANT_KEYS if k in config}
+    if not plant:
+        return resolved
+    if resolved['family'] == 'composite':
+        hot_water_parts = {p['id'] for p in resolved['parts']
+                           if catalog.resolve(p['id']).get('needs_boiler')}
+        if not hot_water_parts and any(k in plant for k in _PLANT_SOURCE_KEYS):
+            raise ValueError(f"'{resolved['id']}' builds no hot-water plant; "
+                             f"{sorted(plant)} do not apply")
+        parts = [{**p, 'config': {**(p.get('config') or {}), **plant}}
+                 if p['id'] in hot_water_parts else p
+                 for p in resolved['parts']]
+        return {**resolved, 'parts': parts}
+    if not resolved.get('needs_boiler') and any(k in plant for k in _PLANT_SOURCE_KEYS):
+        raise ValueError(f"'{resolved['id']}' builds no hot-water plant of its own; "
+                         "hw_source and hw_supply do not apply")
+    return resolved
+
+
 def _preflight_resolved(model, resolved, zones, control_zone, namer,
                         remove_existing, performance_profile):
     """Validate a resolved row, including every composite part, without mutation."""
@@ -147,6 +181,7 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
     resolved = catalog.resolve(system_name)
     if config:
         resolved = {**resolved, **{str(k): v for k, v in config.items()}}
+        resolved = _route_plant_options(resolved, config)
 
     _preflight_resolved(
         model, resolved, zones, control_zone, namer, remove_existing,
@@ -190,6 +225,9 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
                                         part_load_curve_class=resolved.get(
                                             'boiler_part_load_curve_class'),
                                         profile=resolved.get('hot_water_profile'),
+                                        supply=resolved.get('hw_supply', 'low_temperature'),
+                                        minimum_part_load_ratio=performance_profile[
+                                            'plant_heating_heat_pump_minimum_part_load_ratio'],
                                         exclude=exclude_plants or ())
     chw_loop = None
     if resolved.get('needs_chiller'):
