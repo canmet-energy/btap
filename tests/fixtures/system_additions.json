@@ -35,6 +35,36 @@
       "id": "uh-hw-awhp-gasbu",
       "date": "2026-11-27",
       "pr": "air-to-water heat-pump named entries"
+    },
+    {
+      "id": "mau-fc4-gas-awhp-gasbu-scrollchiller",
+      "date": "2026-11-27",
+      "pr": "air-to-water heat-pump named entries, second set"
+    },
+    {
+      "id": "mau-fc4-elec-awhp-elecbu-scrollchiller",
+      "date": "2026-11-27",
+      "pr": "air-to-water heat-pump named entries, second set"
+    },
+    {
+      "id": "psz-hw-hwbb-awhp-gasbu",
+      "date": "2026-11-27",
+      "pr": "air-to-water heat-pump named entries, second set"
+    },
+    {
+      "id": "pvav-hw-hwbb-awhp-elecbu",
+      "date": "2026-11-27",
+      "pr": "air-to-water heat-pump named entries, second set"
+    },
+    {
+      "id": "uh-hw-awhp-elecbu",
+      "date": "2026-11-27",
+      "pr": "air-to-water heat-pump named entries, second set"
+    },
+    {
+      "id": "bb-hwbb-awhp-elecbu-lift",
+      "date": "2026-11-27",
+      "pr": "air-to-water heat-pump named entries, second set"
     }
   ]
 }

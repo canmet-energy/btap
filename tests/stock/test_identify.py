@@ -157,6 +157,35 @@ class TestTheCoilMediumIsNotAFuel(unittest.TestCase):
                 else:
                     self.assertEqual(expected, top)
 
+    def test_the_second_set_of_heat_pump_rows_wins_its_own_buildings(self):
+        """#244 (second set of named heat-pump hot-water rows, 2026-11-27).
+        The facts are the ones `characterize` records for each row built on
+        the five-zone fixture. Each new row comes first on its own building
+        (before it existed, an electric unit heater and a chilled-water VAV
+        row did), and its boiler twin still wins the boiler-only one."""
+        hw = dict(zonal_units=['baseboard'], baseboard_media=['Hot Water'],
+                  supply_heating_media=['hydronic'])
+        cases = [
+            (dict(hw, family_guess='central_doas_or_cv', cooled=True, loop_dx_cooling=True,
+                  heat_pump=True, heating_energy_types=['Electricity', 'NaturalGas'],
+                  cooling_energy_types=['Electricity'], system_outdoor_air_method='ZoneSum'),
+             'psz-hw-hwbb-awhp-gasbu'),
+            (dict(hw, family_guess='central_doas_or_cv', cooled=True, loop_dx_cooling=True,
+                  heat_pump=False, heating_energy_types=['NaturalGas'],
+                  cooling_energy_types=['Electricity'], system_outdoor_air_method='ZoneSum'),
+             'psz-hw-hwbb-gasboiler'),
+            (dict(hw, family_guess='multizone_vav', terminal_type='vav_reheat', cooled=True,
+                  loop_dx_cooling=True, heat_pump=True, heating_energy_types=['Electricity'],
+                  cooling_energy_types=['Electricity'], system_outdoor_air_method='ZoneSum'),
+             'pvav-hw-hwbb-awhp-elecbu'),
+            (dict(family_guess='zonal_heating_only', zonal_units=['unit_heater'], heat_pump=True,
+                  heating_energy_types=['Electricity']), 'uh-hw-awhp-elecbu'),
+        ]
+        for facts, expected in cases:
+            with self.subTest(expected=expected):
+                top = identify_candidates(_group(**facts), limit=1)[0]['system']
+                self.assertEqual(expected, top)
+
     def test_an_electric_heated_group_prefers_an_ELECTRIC_coil(self):
         """The inverse, so the fix is not just a thumb on one scale."""
         candidates = identify_candidates(_group(

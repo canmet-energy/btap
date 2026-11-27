@@ -6,7 +6,7 @@ simulates. Four engines: the footprint wizards and the bar engine (verbatim
 ports from openstudio-standards), a 3D viewer (ported from
 canmet-energy/campus) and a per-storey 2D floor-plan renderer — plus, since
 the by-nature refactor (D-77), the **HVAC authoring machinery**: the
-108-system topology catalog, `build_system` / `replace_system`, the system
+115-system topology catalog, `build_system` / `replace_system`, the system
 builders, coil/curve/schedule components, `classify.characterize`,
 teardown, and the envelope authoring pieces (constructions, the
 exposed-surface census).
@@ -16,7 +16,7 @@ exposed-surface census).
 ```
 btap/modeling/
   geometry/   wizards, bar engine, footprints, plans, 3D render
-  hvac/       108-system catalog + builders (systems/, components/, data/)
+  hvac/       115-system catalog + builders (systems/, components/, data/)
   envelope/   constructions + surface census
 ```
 
@@ -55,7 +55,7 @@ the code-neutral efficiency primitive after construction.
 
 ## Finding a system
 
-The HVAC catalogue's 109 systems are organised the way a mechanical engineer
+The HVAC catalogue's 115 systems are organised the way a mechanical engineer
 browses them: **category, then system type, then variants**. Variants within a
 type differ by *facets*: what the air handler heats and cools with, the zone
 terminals, the hot- and chilled-water plant, outdoor air, heat recovery, and
@@ -105,14 +105,19 @@ central air handler, hot-water rooftop coils, unit heaters) can take an
 air-to-water heat-pump plant instead of boilers, with one backup boiler in
 series downstream of the heat pump.
 
-Seven named catalogue entries use it (2026-11-27):
+Thirteen named catalogue entries use it (2026-11-27):
 
 - hot water baseboards: `bb-hwbb-awhp-gasbu`, `bb-hwbb-awhp-elecbu`, and the
-  retrofit `bb-hwbb-awhp-gasbu-lift`;
+  retrofit `bb-hwbb-awhp-gasbu-lift` and `bb-hwbb-awhp-elecbu-lift`;
 - VAV with reheat: `vav-hw-hwbb-awhp-gasbu-scrollchiller` and
   `vav-hw-hwbb-awhp-elecbu-scrollchiller`;
-- packaged VAV: `pvav-hw-hwbb-awhp-gasbu`;
-- hot water unit heaters: `uh-hw-awhp-gasbu`.
+- packaged VAV: `pvav-hw-hwbb-awhp-gasbu` and `pvav-hw-hwbb-awhp-elecbu`;
+- four-pipe fan coils with a make-up air unit (the NECB System 2 shape):
+  `mau-fc4-gas-awhp-gasbu-scrollchiller`, and the all-electric
+  `mau-fc4-elec-awhp-elecbu-scrollchiller`, whose make-up air unit heats
+  electrically too;
+- hot-water rooftop unit with hot water baseboards: `psz-hw-hwbb-awhp-gasbu`;
+- hot water unit heaters: `uh-hw-awhp-gasbu` and `uh-hw-awhp-elecbu`.
 
 `gasbu` and `elecbu` mark the boiler as a backup. Any other hydronic row takes
 the same plant as an option:
@@ -150,7 +155,19 @@ Measured annually on the five-zone fixture (2026-11-27), hot water baseboards:
 | Heat pump, boiler lift, gas backup | 39% | 2.39 | 89 GJ | 56.75 h |
 
 VAV with reheat on a low-temperature heat-pump plant: 94% heat-pump share,
-70.25 h. None of these runs had a Severe error. A composite passes the options
+70.25 h. The same fixture, measured for the second set of entries:
+
+| Entry | Heat pump share | Occupied unmet heating | Boiler twin |
+| --- | ---: | ---: | ---: |
+| Four-pipe fan coils + MAU, gas backup | 93.5% | 239.25 h | 150 h |
+| Four-pipe fan coils + MAU, electric | 93.5% | 239.25 h | - |
+| Hot-water rooftop unit + baseboards, gas backup | 94% | 687.75 h | 687 h |
+| Baseboards, boiler lift, electric backup | 39% | 56.75 h | 56.5 h |
+
+The rooftop unit's unmet hours are its shared topology (one control zone for
+five), the same with boilers. The fan coils lose about 90 hours to the 60 C
+loop's outdoor reset; their make-up air unit's coil recorded no heating in
+either variant. None of these runs had a Severe error. A composite passes the options
 to its hot-water parts; a row with no hot-water plant refuses them. A heat-pump plant is never shared with an
 ordinary boiler system, and plants of different `hw_supply` or backup fuel are
 never shared with each other. The setpoint schedules are authored defaults,
