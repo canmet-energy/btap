@@ -99,6 +99,73 @@ class TestTheSplit(unittest.TestCase):
 
 
 @needs_sdk
+class TestTheElectionPoolsThePlantsBlocks(unittest.TestCase):
+    """(g)(i): "the thermal blocks ... served by that heat pump" — ALL of them.
+    Fable's case: one air-to-water plant on five blocks plus an electric
+    baseboard in Zone 1. Per block, Zones 2-5 elected gas at a 40% share; pooled
+    over the plant's five blocks the share is 25%, under the 33% proviso, so
+    the clause elects nothing and the structural proxy decides."""
+
+    def selection(self, sums):
+        import openstudio
+
+        from btap._compat import sorted_by_name
+        from btap.audit import AuditLog
+        from btap.codes.necb import hvac, path
+        from btap.modeling.hvac import classify
+        model = _built('bb-hwbb-awhp-gasbu')
+        zone1 = sorted_by_name(model.getThermalZones())[0]
+        extra = openstudio.model.ZoneHVACBaseboardConvectiveElectric(model)
+        extra.setName('Zone 1 Electric Baseboard')
+        extra.addToThermalZone(zone1)
+        inv = classify.heating_election_inventory(model)
+        with mock.patch.object(path.runner, 'run_period_sums',
+                               side_effect=lambda _m, variable: sums(inv).get(variable, {})):
+            data = path._heating_election_data(model, inv, AuditLog())
+        audit = AuditLog()
+        hvac.reference_hvac(model, code='necb2020', audit=audit, proposed_annual=data)
+        return data, audit
+
+    @staticmethod
+    def mixed(inv):
+        from btap.modeling.hvac import classify
+        water = [e['name'].upper() for es in inv['zones'].values() for e in es if e.get('plant')]
+        return {classify.BASEBOARD_VARIABLE: {**{n: 10e9 for n in water},
+                                              'ZONE 1 ELECTRIC BASEBOARD': 30e9},
+                classify.PLANT_HEAT_PUMP_VARIABLE: {'AIR-TO-WATER HEAT PUMP': 4e9},
+                classify.BOILER_VARIABLE: {'BACKUP BOILER': 6e9}}          # 40% / 60%
+
+    def test_the_plant_names_all_five_blocks(self):
+        data, _ = self.selection(self.mixed)
+        self.assertEqual(5, len(data['plant_members']['Heat Pump Hot Water Loop']['zones']))
+
+    def test_pooled_below_the_proviso_no_block_elects(self):
+        _, audit = self.selection(self.mixed)
+        elected = [e for e in audit.entries if 'ELECTED' in e['action']]
+        refused = [e for e in audit.entries if 'NOT above' in e['action']]
+        self.assertEqual([], elected, 'no block may elect: the pooled share is 25%')
+        self.assertTrue(refused)
+        for e in refused:
+            self.assertIn('25.0%', e['action'], e['action'])
+
+
+@needs_sdk
+class TestAPlantWithAnUnmeasuredSourceIsNotSplit(unittest.TestCase):
+    """District heat (or another heat-pump type) on the loop would otherwise be
+    attributed pro rata to the heat pump and boiler, or read as 0 J."""
+
+    def test_district_heat_on_the_loop_leaves_it_unsplit(self):
+        import openstudio
+
+        from btap.modeling.hvac import classify
+        model = _built('bb-hwbb-awhp-gasbu')
+        loop = next(pl for pl in model.getPlantLoops() if pl.nameString() == 'Heat Pump Hot Water Loop')
+        district = openstudio.model.DistrictHeatingWater(model)
+        loop.addSupplyBranchForComponent(district)
+        self.assertEqual({}, classify.heating_election_inventory(model)['plants'])
+
+
+@needs_sdk
 class TestPrepareAnnualAsksForThem(unittest.TestCase):
     """The call site: without this, nothing is requested and the election
     never runs on an annual run, which is the defect."""

@@ -178,7 +178,7 @@ def _select_reference_systems(*, facts, building, ruleset, audit=None,
         # BEFORE it is split: `_election_scope` reads `group['zones']`, and a
         # block view has one. (g)(ii) also reaches sibling groups sharing a
         # source water loop, which only the unsplit group can see.
-        scope_loops, scope_zones, scope_sentence = _election_scope(group, facts)
+        scope_loops, scope_zones, scope_sentence = _election_scope(group, facts, proposed_annual)
         election_key = (tuple(sorted(scope_loops)), tuple(sorted(scope_zones)),
                         scope_sentence)
         # TWO PASSES over the blocks, because the 8.4.x.9.(5) disclosure must
@@ -2984,7 +2984,7 @@ def heat_pump_aux_energy_type(group, facts, hp_rules, annual, audit, article_bas
                    target=','.join(group['zones']), article=f'{article_base}.(2)(g)', ruling='D-52')
         return None
 
-    scope_loops, scope_zones, sentence = _election_scope(group, facts)
+    scope_loops, scope_zones, sentence = _election_scope(group, facts, annual)
     hp_j = 0.0
     aux_by_fuel: dict = {}
     for loop_name in scope_loops:
@@ -3062,12 +3062,26 @@ def heat_pump_aux_energy_type(group, facts, hp_rules, annual, audit, article_bas
     return variant
 
 
-def _election_scope(group, facts):
+def _election_scope(group, facts, annual=None):
     """(g)(i) vs (g)(ii): an 'external'-source (water/ground) heat pump elects over
     the thermal blocks of ALL heat pumps connected to the same source water loop, so
-    sibling zone groups sharing a source loop are pulled in."""
+    sibling zone groups sharing a source loop are pulled in.
+
+    A heat-pump HOT-WATER plant serves every block with a terminal on it, so
+    (g)(i) elects over all of them together: the annual data names each
+    plant's member zones and air loops, and a group on such a plant takes in
+    the plant's other members (#244; Fable found five blocks on one plant
+    electing separately, which a mixed building turns into a wrong answer)."""
     loops = [group['air_loop']] if group.get('air_loop') is not None else []
     zones = list(group['zones'])
+    for members in ((annual or {}).get('plant_members') or {}).values():
+        if (set(members['zones']) & set(zones)) or (set(members['loops']) & set(loops)):
+            for name in members['loops']:
+                if name not in loops:
+                    loops.append(name)
+            for z in members['zones']:
+                if z not in zones:
+                    zones.append(z)
     if ('external' in (group.get('heat_pump_sources') or [])
             and group.get('heat_pump_source_loops')):
         for other in (facts.get('zone_groups') or []):

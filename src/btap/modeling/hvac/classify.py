@@ -1307,19 +1307,36 @@ def heating_election_inventory(model):
 
 def _heat_pump_hot_water_plants(model):
     """``{plant name: {'hp': [...], 'aux': [{'name', 'fuel'}]}}`` for each
-    plant loop with a HEATING plant heat pump on its supply side."""
+    plant loop whose heat comes ONLY from heat pumps and boilers this election
+    can measure.
+
+    Only `HeatPumpPlantLoopEIRHeating` is admitted: it is the one heating plant
+    heat pump whose delivered-heat output (`Heat Pump Load Side Heat Transfer
+    Energy`) is verified against the EnergyPlus 25.2 catalogue. A plant with
+    any OTHER heating source — another heat-pump type (the fuel-fired
+    air-to-water unit reports under a different name and reads as 0 J), district
+    heat, a water heater — is NOT split: attributing that heat pro rata to the
+    heat pump and boiler, or reading a heat pump as 0 J, would make a false
+    election (Fable, review of the election fix; #244). Those plants keep the
+    pre-existing behaviour.
+    """
     out = {}
     for loop in sorted_by_name(model.getPlantLoops()):
-        hps, boilers = [], []
+        hps, boilers, unmeasured = [], [], False
         for comp in loop.supplyComponents():
             boiler = _try_cast(comp, 'to_BoilerHotWater')
             if boiler is not None:
                 boilers.append({'name': boiler.nameString(), 'fuel': boiler.fuelType()})
                 continue
+            eir = _try_cast(comp, 'to_HeatPumpPlantLoopEIRHeating')
+            if eir is not None:
+                hps.append(eir.nameString())
+                continue
             hp = _plant_heat_pump(comp, loop)
-            if hp is not None and hp[1] == 'heating':
-                hps.append(hp[0].nameString())
-        if hps:
+            if (hp is not None and hp[1] == 'heating') or _district_heating(comp) \
+                    or comp.to_WaterHeaterMixed().is_initialized():
+                unmeasured = True
+        if hps and not unmeasured:
             out[loop.nameString()] = {'hp': hps, 'aux': boilers}
     return out
 

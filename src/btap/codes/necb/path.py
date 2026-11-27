@@ -1531,6 +1531,22 @@ def _heating_election_data(proposed, inventory, audit):
                         if e["role"] == "aux"
                         else [(e["role"], e["fuel"], lookup(e["name"], e["variable"]))])]
         for zone_name, entries in inventory["zones"].items()}
+    # Which blocks each heat-pump plant serves: (g)(i) elects over "the thermal
+    # blocks ... served by that heat pump", all of them, not each block alone
+    # (Fable: five blocks on one plant elected separately).
+    members = {}
+    for zone_name, entries in inventory["zones"].items():
+        for e in entries:
+            if e.get("plant") in split:
+                bucket = members.setdefault(e["plant"], {"zones": [], "loops": []})
+                if zone_name not in bucket["zones"]:
+                    bucket["zones"].append(zone_name)
+    for loop_name, entry in inventory["loops"].items():
+        for a in entry["aux"]:
+            if a.get("plant") in split:
+                bucket = members.setdefault(a["plant"], {"zones": [], "loops": []})
+                if loop_name not in bucket["loops"]:
+                    bucket["loops"].append(loop_name)
     hp_gj = (sum(e["hp_j"] for e in loops.values())
              + sum(e["j"] for entries in zones.values() for e in entries
                    if e["role"] == "hp"))
@@ -1543,7 +1559,7 @@ def _heating_election_data(proposed, inventory, audit):
         inputs={"air_loops": len(loops), "zones_with_heating": len(zones),
                 "heat_pump_gj": ruby_round(hp_gj / 1e9, 2)},
         ruling="D-52")
-    return {"loops": loops, "zones": zones}
+    return {"loops": loops, "zones": zones, "plant_members": members}
 
 
 def evaluate(report, ruleset, run_period, audit):
