@@ -69,6 +69,10 @@ SUBSET = [
     # heat), not a (2)(g)(i) election: the election inventory does not yet see
     # a plant-loop heat pump (Fable, #245; tracked on #244). Added 2026-11-27.
     'bb-hwbb-awhp-gasbu',
+    # the same plant under four-pipe fan coils whose make-up air unit burns
+    # gas directly: a cooled, air-handler shape on 8.4.x.13.(2)(a). Added
+    # 2026-11-27 (#244, second set).
+    'mau-fc4-gas-awhp-gasbu-scrollchiller',
     'mau-ptac-elec-elecbb',
     'mau-fc4-gas-chw-gasboiler-scrollchiller',
     'mau-fc2-gas-chw-gasboiler-scrollchiller',

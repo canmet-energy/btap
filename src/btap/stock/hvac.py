@@ -54,6 +54,10 @@ _DESCRIPTIVE = (
     # boiler the building has not got (#221). The zone-equipment counterpart
     # of `supply_heating_media`.
     'baseboard_media',
+    # Whether a heat pump heats the group's hot water. `heat_pump` alone is
+    # also set by a DX heat-pump coil on the air loop, which handed a
+    # heat-pump hot-water row to a boiler building (Fable, review of #252).
+    'hydronic_heat_pump',
 )
 
 
