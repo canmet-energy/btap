@@ -227,6 +227,43 @@ class TestZoneLevelRecoveryIsTheOtherMechanism(unittest.TestCase):
                     _build(_a_row_of(family), needs_zone_erv=True)
                 self.assertIn('ventilate twice', str(caught.exception))
 
+    def test_the_refusal_comes_BEFORE_the_old_system_is_torn_down(self):
+        """#244: the guard above ran after `remove_existing` had torn the
+        zones' existing system down, so a refused rebuild left them with
+        neither. The model must come back exactly as it was: same object
+        count, same objects by type and name."""
+        def inventory(model):
+            return sorted((o.iddObjectType().valueName(), o.nameString())
+                          for o in model.modelObjects())
+        for existing, replacement in (
+                ('bb-elecbb', _a_row_of('psz')),
+                ('bb-elecbb', _a_row_of('vav_reheat')),
+                (_a_row_of('psz'), _a_row_of('doas')),
+                ('bb-elecbb', 'doas-vrf-elec'),          # a composite
+                ('bb-elecbb', 'evap-elecbb')):           # a composite
+            with self.subTest(existing=existing, replacement=replacement):
+                model = load_fixture()
+                build_system(model, existing, sorted_zones(model))
+                before = inventory(model)
+                with self.assertRaises(ValueError) as caught:
+                    build_system(model, replacement, sorted_zones(model),
+                                 remove_existing=True,
+                                 config={'needs_zone_erv': True})
+                self.assertIn('ventilate twice', str(caught.exception))
+                self.assertEqual(before, inventory(model),
+                                 'a refused rebuild must leave the model untouched')
+
+    def test_an_accepted_request_still_builds_once_per_zone(self):
+        """The probe runs on a clone: the real model gets one device per zone
+        and nothing left over from the dry run."""
+        model = load_fixture()
+        build_system(model, _a_row_of('psz'), sorted_zones(model))
+        build_system(model, _a_row_of('baseboards'), sorted_zones(model),
+                     remove_existing=True, config={'needs_zone_erv': True})
+        self.assertEqual(len(sorted_zones(model)),
+                         len(model.getZoneHVACEnergyRecoveryVentilators()))
+        self.assertEqual(0, len(model.getAirLoopHVACs()), 'the old loop is gone')
+
     def test_the_standalone_row_and_the_option_build_the_SAME_device(self):
         """`systems/zone_ervs.py` now delegates to the shared function, so the
         shipped 'zone-erv' row cannot drift from the option."""
