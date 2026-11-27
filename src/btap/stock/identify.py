@@ -63,8 +63,13 @@ FAMILY_CANDIDATES = {
     'zonal_cooling_only': ('zone_terminal', 'evap_cooler', 'vrf'),
     'zonal_heat_cool': ('mau_ptac', 'fan_coils', 'vrf', 'wshp', 'doas_pthp',
                         'zone_terminal', 'composite'),
+    # `fan_coils`: a make-up air unit with fan coils is guessed this way (one
+    # central constant-volume loop plus `zonal_units: ['fan_coil']`), and
+    # without the family no fan-coil row could ever be proposed for its own
+    # building (Fable, review of #252: all 18 fan-coil rows, and the two DOAS
+    # + fan-coil composites, came back as a per-zone rooftop unit).
     'central_doas_or_cv': ('furnace', 'psz', 'doas', 'evap_cooler',
-                           'composite'),
+                           'fan_coils', 'composite'),
     'packaged_single_zone': ('psz', 'furnace', 'composite'),
     # 'furnace' belongs here: in this catalogue that family covers SHARED AIR
     # HANDLERS, and the campus row 'Shared hot water air handler with water
@@ -293,9 +298,13 @@ def _score(row, group):
         # supply coil or unit heaters are what that looks like in the facts.
         # A DX heat-pump building is not one (Fable, #245: an electric-
         # baseboard building with a heat pump was handed this row).
+        # Fan coils too: every fan coil this catalogue builds is on water, and
+        # leaving them out told the fan-coil heat-pump rows "no hot-water
+        # heating" on their own buildings (measured while admitting
+        # `fan_coils` to `central_doas_or_cv`).
         hydronic = ('Hot Water' in (group.get('baseboard_media') or [])
                     or 'hydronic' in (group.get('supply_heating_media') or [])
-                    or 'unit_heater' in zonal)
+                    or 'unit_heater' in zonal or 'fan_coil' in zonal)
         # ...and the heat pump must be the one heating that water. Where
         # classify states it (`hydronic_heat_pump`), that fact decides: a DX
         # heat-pump air handler beside hot-water baseboards on a boiler set

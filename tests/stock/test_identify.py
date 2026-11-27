@@ -241,6 +241,36 @@ class TestTheCoilMediumIsNotAFuel(unittest.TestCase):
                 group = hvac_section(model, audit=None)['zone_groups'][0]
                 self.assertEqual(expected, identify_candidates(group, limit=1)[0]['system'])
 
+    @needs_sdk
+    def test_a_fan_coil_building_is_offered_a_fan_coil_row(self):
+        """Fan-coil groups are guessed `central_doas_or_cv`, which did not
+        admit the `fan_coils` family, so every fan-coil building — 18 rows
+        and two DOAS + fan-coil composites — came back as a per-zone rooftop
+        unit (Fable, review of #252). Facts are characterized from BUILT rows
+        with every name scrubbed. Two-pipe vs four-pipe and the chiller type
+        are not in the facts, so a fan-coil building gets A fan-coil row; the
+        heat-pump ones, whose plant is in the facts, get their own."""
+        from btap.modeling import build_system
+        from btap.stock.hvac import hvac_section
+        from tests.necb.hvac_helpers import load_fixture, sorted_zones
+        for built, expected in (
+                ('mau-fc4-gas-gasboiler-scrollchiller', None),
+                ('mau-fc2-gas-chw-gasboiler-scrollchiller', None),
+                ('mau-fc4-gas-awhp-gasbu-scrollchiller', 'mau-fc4-gas-awhp-gasbu-scrollchiller'),
+                ('mau-fc4-elec-awhp-elecbu-scrollchiller', 'mau-fc4-elec-awhp-elecbu-scrollchiller')):
+            with self.subTest(built=built):
+                model = load_fixture()
+                build_system(model, built, sorted_zones(model))
+                for i, loop in enumerate(model.getAirLoopHVACs()):
+                    loop.setName(f'Air System {i + 1}')
+                for i, loop in enumerate(model.getPlantLoops()):
+                    loop.setName(f'Plant {i + 1}')
+                top = identify_candidates(hvac_section(model, audit=None)['zone_groups'][0],
+                                          limit=1)[0]
+                self.assertEqual('fan_coils', top['family'], top['system'])
+                if expected:
+                    self.assertEqual(expected, top['system'])
+
     def test_an_electric_heated_group_prefers_an_ELECTRIC_coil(self):
         """The inverse, so the fix is not just a thumb on one scale."""
         candidates = identify_candidates(_group(
