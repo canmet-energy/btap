@@ -139,9 +139,11 @@ FAMILY_CONFIG_KEYS = {
         'chilled_water_profile', 'chw_source', 'dewpoint_margin',
         'doas_maximum_humidity_ratio', 'doas_supply_air_temperature',
         'needs_boiler', 'needs_chiller', 'sizing', 'sys_abbr'}) | _CENTRAL_ERV_KEYS,
+    # crah.py calls BaseSystem.add_oa_system when `ventilation` is set, which
+    # reads the central-ERV keys (Fable, review of #248).
     'crah': frozenset({
         'cooling_type', 'crah_maximum_humidity_ratio',
-        'crah_supply_air_temperature', 'sizing', 'sys_abbr', 'ventilation'}),
+        'crah_supply_air_temperature', 'sizing', 'sys_abbr', 'ventilation'}) | _CENTRAL_ERV_KEYS,
     'doas': frozenset({'heating_type', 'sizing'}) | _CENTRAL_ERV_KEYS,
     'doas_pthp': frozenset({'sizing', 'supp_htg_fuel', 'sys_abbr'}) | _CENTRAL_ERV_KEYS,
     'dual_duct': frozenset({

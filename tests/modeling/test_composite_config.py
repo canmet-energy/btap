@@ -236,5 +236,32 @@ for _family in _catalogue_families():
             _make_family_test(_family))
 
 
+
+class TestTheCentralErvKeysFollowTheOutdoorAirSystem(unittest.TestCase):
+    """Fable, review of #248: crah reads the central-ERV keys through
+    BaseSystem.add_oa_system when `ventilation` is set, which a scan of
+    crah.py alone cannot see, so a composite would have REFUSED a key its
+    crah part reads. Any family whose builder calls add_oa_system or
+    attach_oa_system reads them; the table must say so."""
+
+    def test_every_family_that_adds_an_oa_system_declares_them(self):
+        import pathlib
+        import re
+
+        from btap.modeling.hvac import builder
+        src = pathlib.Path(builder.__file__).read_text(encoding="utf-8")
+        families = dict(re.findall(r"'(\w+)': \('(\w+)', '\w+'\)", src))
+        systems = pathlib.Path(builder.__file__).parent / "systems"
+        checked = 0
+        for family, module in sorted(families.items()):
+            code = (systems / f"{module}.py").read_text(encoding="utf-8")
+            if re.search(r"(add|attach)_oa_system\(", code):
+                checked += 1
+                with self.subTest(family=family):
+                    self.assertLessEqual(builder._CENTRAL_ERV_KEYS,
+                                         builder.FAMILY_CONFIG_KEYS[family])
+        self.assertGreaterEqual(checked, 10, "the scan found the OA-system families")
+
+
 if __name__ == '__main__':
     unittest.main()

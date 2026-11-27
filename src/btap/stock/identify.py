@@ -134,6 +134,13 @@ def _fuel_tokens(energy_types):
         if not fuel:
             continue
         lowered = str(fuel).lower()
+        if lowered == 'unknown':
+            # NOT a fuel either: `classify` writes 'Unknown' when it cannot
+            # resolve one (a hydronic coil with no plant, a plant with no
+            # source). Read as `other` it became "the group burns other", a
+            # fabricated fact that moved scores unevenly (Fable, review of
+            # #248) — absent, never defaulted.
+            continue
         if lowered == 'purchased':
             # NOT a fuel name: `classify` spells district heating and district
             # cooling this way, and this function has never read it — so the
@@ -313,7 +320,10 @@ def _score(row, group):
         # still drop classify's 'Purchased' district marker, which this raw
         # reading counts. Moving this onto the tokens changed 28 scores on
         # district groups, measured, so it stays raw.
+        # 'Unknown' is classify's marker for an unresolved fuel, not a fuel
+        # burned (Fable, review of #248); it must not count here either.
         burns_other = any('electric' not in str(fuel).lower()
+                          and str(fuel).lower() != 'unknown'
                           for fuel in group.get('heating_energy_types') or ())
         electric_backup = 'electric' in str(row.get('boiler_fuel', 'NaturalGas')).lower()
         if electric_backup and burns_other:

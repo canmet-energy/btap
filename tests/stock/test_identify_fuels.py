@@ -131,5 +131,29 @@ class TestAnOilFiredModelEndToEnd(unittest.TestCase):
                                     for a in c['against']), c['system'])
 
 
+
+class TestUnknownIsNotAFuel(unittest.TestCase):
+    """Fable, review of #248: classify writes 'Unknown' for a fuel it cannot
+    resolve. The catch-all read it as `other` ("the group burns other"), a
+    fabricated fact that moved candidates unevenly. It must score exactly as
+    if no fuel were reported."""
+
+    def test_unknown_scores_exactly_like_no_fuel(self):
+        from btap.stock import identify_candidates
+        from tests.stock.test_identify import _group
+        base = dict(family_guess='zonal_heating_only', zonal_units=['baseboard'],
+                    baseboard_media=['Hot Water'])
+        unknown = identify_candidates(_group(heating_energy_types=['Unknown'], **base), limit=15)
+        empty = identify_candidates(_group(heating_energy_types=[], **base), limit=15)
+        self.assertEqual([(c['system'], c['score']) for c in empty],
+                         [(c['system'], c['score']) for c in unknown])
+        self.assertFalse(any('other' in a for c in unknown for a in c['against']))
+
+    def test_the_token_function_drops_it(self):
+        from btap.stock.identify import _fuel_tokens
+        self.assertEqual(set(), _fuel_tokens(['Unknown']))
+        self.assertEqual({'gas'}, _fuel_tokens(['Unknown', 'NaturalGas']))
+
+
 if __name__ == '__main__':
     unittest.main()
