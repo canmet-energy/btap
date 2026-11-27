@@ -2,72 +2,180 @@
 
 PROTOTYPE. `identify.py` scores catalogue rows against `classify`'s coarse
 facts with hand-written expectations of what each row should look like. This
-module instead reads a ROLE-BASED fingerprint straight from the equipment:
+module reads the equipment itself and matches it against fingerprints made
+by BUILDING every catalogue row, so nothing mirrors a builder by hand.
 
-- **zone**: what serves the zone: zone equipment by object type, the air
-  terminal, the coils inside both, and whether each coil is always available
-  (a scheduled coil is seasonal changeover: a two-pipe fan coil);
-- **ahu**: the air handler of every loop serving the zone: its supply
-  components in order, the coils inside a unitary wrapper, the outdoor-air
-  system, its economizer and exchangers, the sizing basis, and whether one
-  loop serves one zone or several;
-- **plant**: for every water coil above, the plant behind it: its source
-  objects, boiler fuel, chiller condenser and heat rejection, setpoint
-  manager kind and outdoor-reset endpoints.
+A zone is described as COMPONENTS (Fable's review of the first cut):
 
-The same extractor fingerprints the catalogue, by BUILDING each row (the way
-the sizing sweep does), so nothing mirrors a builder by hand. Capacities,
-efficiencies and sizes are deliberately not identity.
+- one ``unit`` per piece of zone equipment (baseboard, PTAC, fan coil, unit
+  heater, VRF terminal, ...);
+- one ``air_loop`` per air loop serving the zone, together with the zone's
+  terminal on it.
 
-Fingerprints are sets of namespaced tokens; matching is weighted Jaccard per
-stage. Two rows with the same fingerprint are reported as one equivalence
-class rather than separated by a tie-break.
+Each component carries two token sets:
+
+- **identity**: object types, the air handler's components IN ORDER, the
+  coils inside units, terminals and unitary wrappers (with whether each coil
+  is always available, read from the schedule's VALUES: a scheduled coil is
+  seasonal changeover), a small table of identity fields (a chilled beam's
+  type), and the plants behind the component's water coils, followed through
+  condenser and heat-exchanger loops;
+- **controls**: what legitimately differs between authors and is reported as
+  a difference, never used to decide a match: setpoint managers and resets,
+  the economizer, fan object types, the sizing basis, whether a loop serves
+  one zone or several (a fixture artefact: the catalogue is built on five
+  zones), and equipment counts.
+
+`explain` decides by components, not by a score: **match** (every component
+covered), **partial** (a row covers some; the rest is listed), or **none**
+(nearest row and what differs).
 """
 
 from __future__ import annotations
 
 from btap._compat import opt
 
-#: Stage weights: what serves the zone matters most. `controls` holds what
-#: third-party models legitimately do differently from our builders
-#: (setpoint-manager kind, reset, economizer, fan object type): it still
-#: separates rows that differ only in control, but cannot outweigh the
-#: equipment. Measured on the 28 `models/` archetypes, those tokens were most
-#: of every mismatch (618 zones on the plant reset alone).
-STAGE_WEIGHTS = {'zone': 3.0, 'ahu': 2.0, 'plant': 2.0, 'controls': 0.5}
+#: Pass-through plumbing that says nothing about the system.
+_PLUMBING = frozenset({
+    'Node', 'Connector_Mixer', 'Connector_Splitter',
+    'Pipe_Adiabatic', 'Pipe_Indoor', 'Pipe_Outdoor',
+    'AirLoopHVAC_ZoneMixer', 'AirLoopHVAC_ZoneSplitter',
+    'AirLoopHVAC_SupplyPlenum', 'AirLoopHVAC_ReturnPlenum',
+    'Pump_VariableSpeed', 'Pump_ConstantSpeed',
+    'HeaderedPumps_VariableSpeed', 'HeaderedPumps_ConstantSpeed',
+})
 
 #: Zone equipment that is not the zone's HVAC SYSTEM.
 _NOT_A_SYSTEM = frozenset({'Fan_ZoneExhaust'})
 
-#: Pass-through plumbing that says nothing about the system.
-_PLUMBING = frozenset({
-    'OS_Node', 'OS_Connector_Mixer', 'OS_Connector_Splitter',
-    'OS_Pipe_Adiabatic', 'OS_Pipe_Indoor', 'OS_Pipe_Outdoor',
-    'OS_AirLoopHVAC_ZoneMixer', 'OS_AirLoopHVAC_ZoneSplitter',
-    'OS_AirLoopHVAC_SupplyPlenum', 'OS_AirLoopHVAC_ReturnPlenum',
-    'OS_Pump_VariableSpeed', 'OS_Pump_ConstantSpeed',
-    'OS_HeaderedPumps_VariableSpeed', 'OS_HeaderedPumps_ConstantSpeed',
-})
+#: Fields that are IDENTITY on some object types: two rows differing only in
+#: one of these are different systems (the active and passive chilled-beam
+#: rows collided without the beam type).
+IDENTITY_FIELDS = {
+    'AirTerminal_SingleDuct_ConstantVolume_CooledBeam': ('cooledBeamType',),
+    'Boiler_HotWater': ('fuelType',),
+    'Boiler_Steam': ('fuelType',),
+    'Chiller_Electric_EIR': ('condenserType',),
+    'Chiller_Electric_ReformulatedEIR': ('condenserType',),
+    'HeatPump_PlantLoop_EIR_Heating': ('condenserType',),
+    'HeatPump_PlantLoop_EIR_Cooling': ('condenserType',),
+    'Coil_Heating_Gas': ('fuelType',),
+    'Coil_Heating_Gas_MultiStage': ('fuelType',),
+}
+
+#: Equipment FAMILIES: stage counts and variants of one kind of equipment
+#: are the same identity; the exact type is reported as a control
+#: difference (measured: openstudio-standards models use two-speed DX where
+#: the catalogue builds single-speed, and became no-match without this).
+_FAMILY_PREFIXES = (
+    ('Coil_Cooling_DX_', 'Coil_Cooling_DX'),
+    ('Coil_Heating_DX_', 'Coil_Heating_DX'),
+    ('Coil_Heating_Gas_MultiStage', 'Coil_Heating_Gas'),
+    ('Coil_Heating_Electric_MultiStage', 'Coil_Heating_Electric'),
+)
+
+#: Owners on which a coil's AVAILABILITY is identity: a scheduled fan-coil
+#: coil is seasonal changeover, the whole difference between a two-pipe and
+#: a four-pipe system. Elsewhere a seasonal schedule is a control choice.
+_AVAILABILITY_IS_IDENTITY = frozenset({'ZoneHVAC_FourPipeFanCoil'})
+
+
+def _family(kind):
+    for prefix, family in _FAMILY_PREFIXES:
+        if kind.startswith(prefix):
+            return family
+    return kind
+
+
+#: Object types with no SDK cast found: recorded, never silently skipped.
+UNCAST = set()
 
 
 def _kind(obj):
     return obj.iddObjectType().valueName().replace('OS_', '', 1)
 
 
+_CASTS = None
+
+
+def _cast_table():
+    """{IDD type name: the SDK `to<Class>` function}, built once from every
+    model class's own `iddObjectType()`. Name-mangling the IDD name missed
+    the classes the SDK abbreviates (`ZoneHVACLowTempRadiantVarFlow`)."""
+    global _CASTS
+    if _CASTS is None:
+        import openstudio
+        _CASTS = {}
+        for name in dir(openstudio.model):
+            cls = getattr(openstudio.model, name)
+            idd = getattr(cls, 'iddObjectType', None)
+            cast = getattr(openstudio.model, f'to{name}', None)
+            if not (isinstance(cls, type) and callable(idd) and callable(cast)):
+                continue
+            try:
+                _CASTS.setdefault(idd().valueName().replace('OS_', '', 1), cast)
+            except TypeError:
+                continue        # an instance method on a base class, not static
+    return _CASTS
+
+
+def _concrete(obj):
+    cast = _cast_table().get(_kind(obj))
+    if cast is None:
+        UNCAST.add(_kind(obj))
+        return obj
+    value = opt(cast(obj))
+    return value if value is not None else obj
+
+
+def _maybe(value):
+    """Unwrap only a real optional: some accessors return the object."""
+    return opt(value) if hasattr(value, 'is_initialized') else value
+
+
 def _hvac(obj):
     return opt(obj.to_HVACComponent())
 
 
-def _maybe(value):
-    """An accessor's result, unwrapped only when it IS an optional: some
-    accessors (`heatingCoil` on a baseboard or fan coil) return the object
-    itself, and `opt` on one of those raises."""
-    return opt(value) if hasattr(value, 'is_initialized') else value
+def _schedule_is_always_on(schedule):
+    """Whether a schedule is 1 at every hour, read from its VALUES (the
+    names vary: `Always On Discrete`, `Always_On`)."""
+    constant = opt(schedule.to_ScheduleConstant())
+    if constant is not None:
+        return constant.value() == 1.0
+    ruleset = opt(schedule.to_ScheduleRuleset())
+    if ruleset is not None:
+        days = [ruleset.defaultDaySchedule()] + [r.daySchedule() for r in ruleset.scheduleRules()]
+        return all(all(v == 1.0 for v in day.values()) for day in days)
+    return False
+
+
+def _availability(coil):
+    getter = getattr(coil, 'availabilitySchedule', None)
+    if not callable(getter):
+        return None
+    try:
+        schedule = _maybe(getter())
+    except TypeError:
+        return None
+    if schedule is None:
+        return None
+    return 'always' if _schedule_is_always_on(schedule) else 'scheduled'
+
+
+def _token(kind, concrete):
+    """The identity token of one object: its equipment family plus its
+    identity fields."""
+    family = _family(kind)
+    fields = []
+    for field in IDENTITY_FIELDS.get(kind, ()):
+        getter = getattr(concrete, field, None)
+        if callable(getter):
+            fields.append(f'{field}={getter()}')
+    return family + (f"[{','.join(fields)}]" if fields else '')
 
 
 def _children_by_container(model):
-    """{container handle: [component]}: the coils and fans inside a unitary
-    wrapper, a terminal or a piece of zone equipment."""
     out = {}
     for obj in model.getHVACComponents():
         for container in (opt(obj.containingHVACComponent()),
@@ -77,203 +185,290 @@ def _children_by_container(model):
     return out
 
 
-def _always_available(coil):
-    """Whether a coil's availability schedule is the always-on one."""
-    getter = getattr(coil, 'availabilitySchedule', None)
-    if getter is None:
-        return None
-    try:
-        schedule = getter()
-    except TypeError:
-        return None
-    schedule = _maybe(schedule)
-    if schedule is None:
-        return None
-    name = schedule.nameString().lower()
-    return 'always on' in name
+class Component:
+    """One thing serving a zone: identity tokens decide, controls inform."""
 
+    def __init__(self, role):
+        self.role = role
+        self.identity = set()
+        self.controls = set()
+        self._plants = set()
 
-def _plant_tokens(loop, role, seen):
-    """(equipment tokens, control tokens) for the plant behind a coil."""
-    key = (str(loop.handle()), role)
-    if key in seen:
-        return set(), set()
-    seen.add(key)
-    tokens, controls = set(), set()
-    for comp in loop.supplyComponents():
-        kind = _kind(comp)
-        if 'OS_' + kind in _PLUMBING:
-            continue
-        tokens.add(f'plant:{role}:{kind}')
-        concrete = _concrete(comp)
-        fuel = getattr(concrete, 'fuelType', None)
-        if callable(fuel) and kind.startswith('Boiler'):
-            tokens.add(f'plant:{role}:{kind}:fuel={fuel()}')
-        condenser = getattr(concrete, 'condenserType', None)
-        if callable(condenser) and kind.startswith('Chiller'):
-            tokens.add(f'plant:{role}:{kind}:condenser={condenser()}')
-            secondary = _maybe(concrete.secondaryPlantLoop()) if hasattr(concrete, 'secondaryPlantLoop') else None
-            if secondary is not None:
-                for sc in secondary.supplyComponents():
-                    if 'OS_' + _kind(sc) not in _PLUMBING:
-                        tokens.add(f'plant:{role}:rejection:{_kind(sc)}')
-        source = getattr(concrete, 'condenserType', None)
-        if kind.startswith('HeatPumpPlantLoopEIR') and callable(source):
-            tokens.add(f'plant:{role}:{kind}:source={source()}')
-    for spm in loop.supplyOutletNode().setpointManagers():
-        kind = _kind(spm)
-        controls.add(f'controls:{role}_plant:spm:{kind}')
-        reset = opt(spm.to_SetpointManagerOutdoorAirReset())
-        if reset is not None:
-            controls.add(f'controls:{role}_plant:reset:'
-                         f'{round(reset.setpointatOutdoorLowTemperature())}'
-                         f'/{round(reset.setpointatOutdoorHighTemperature())}')
-    return tokens, controls
+    def plant(self, coil):
+        """The plant behind a water coil, and the loops it rejects to."""
+        hvac = _hvac(coil)
+        loop = opt(hvac.plantLoop()) if hvac is not None else None
+        if loop is not None:
+            self._walk(loop, loop.sizingPlant().loopType().lower(), 0)
 
-
-def _concrete(obj):
-    """The concrete SDK type of a ModelObject, via its `to_<Type>` cast."""
-    import openstudio
-    name = _kind(obj).replace('_', '')
-    cast = getattr(openstudio.model, f'to{name}', None)
-    if cast is None:
-        return obj
-    value = opt(cast(obj))
-    return value if value is not None else obj
-
-
-def _coil_tokens(stage, owner_kind, coil, seen_plants):
-    """Tokens for one coil: its type, availability, and its plant."""
-    kind = _kind(coil)
-    tokens = {f'{stage}:{owner_kind}:coil:{kind}'}
-    concrete = _concrete(coil)
-    available = _always_available(concrete)
-    if available is not None:
-        tokens.add(f'{stage}:{owner_kind}:coil:{kind}:'
-                   f'{"always" if available else "scheduled"}')
-    plant_tokens = (set(), set())
-    hvac = _hvac(coil)
-    loop = opt(hvac.plantLoop()) if hvac is not None else None
-    if loop is not None:
-        role = 'cooling' if 'Cooling' in kind else 'heating'
-        plant_tokens = _plant_tokens(loop, role, seen_plants)
-    return tokens, plant_tokens
-
-
-def zone_fingerprint(model, zone, children=None):
-    """``{'zone': set, 'ahu': set, 'plant': set}`` for one thermal zone."""
-    children = children if children is not None else _children_by_container(model)
-    out = {'zone': set(), 'ahu': set(), 'plant': set(), 'controls': set()}
-    seen_plants = set()
-
-    def add_coils(stage, owner):
-        for child in children.get(str(owner.handle()), []):
-            kind = _kind(child)
-            if 'Coil' in kind:
-                tokens, plant = _coil_tokens(stage, _kind(owner), child, seen_plants)
-                out[stage] |= tokens
-                out['plant'] |= plant[0]
-                out['controls'] |= plant[1]
-            elif 'Fan' in kind:
-                out['controls'].add(f'controls:{stage}:{_kind(owner)}:fan:{kind}')
-            add_coils(stage, child)          # nested: a terminal unit's coils
-
-    terminal = opt(zone.airLoopHVACTerminal())
-    for equipment in zone.equipment():
-        if terminal is not None and str(equipment.handle()) == str(terminal.handle()):
-            continue
-        if _kind(equipment) in _NOT_A_SYSTEM:
-            continue
-        out['zone'].add(f'zone:equipment:{_kind(equipment)}')
-        # a baseboard's coil is not "contained": it is the baseboard's own
-        concrete = _concrete(equipment)
-        coil = _maybe(concrete.heatingCoil()) if hasattr(concrete, 'heatingCoil') else None
-        if coil is not None and not children.get(str(equipment.handle())):
-            tokens, plant = _coil_tokens('zone', _kind(equipment), coil, seen_plants)
-            out['zone'] |= tokens
-            out['plant'] |= plant[0]
-            out['controls'] |= plant[1]
-        add_coils('zone', equipment)
-    if terminal is not None:
-        out['zone'].add(f'zone:terminal:{_kind(terminal)}')
-        add_coils('zone', terminal)
-
-    for loop in zone.airLoopHVACs():
-        zones = len(loop.thermalZones())
-        out['ahu'].add(f'ahu:scope:{"one zone" if zones == 1 else "several zones"}')
-        out['ahu'].add(f'ahu:sizing:{loop.sizingSystem().typeofLoadtoSizeOn()}')
+    def _walk(self, loop, role, depth):
+        key = str(loop.handle())
+        if key in self._plants or depth > 2:
+            return
+        self._plants.add(key)
+        counts = {}
         for comp in loop.supplyComponents():
             kind = _kind(comp)
-            if 'OS_' + kind in _PLUMBING:
+            if kind in _PLUMBING:
+                continue
+            self.identity.add(f'plant:{role}:{_token(kind, _concrete(comp))}')
+            counts[kind] = counts.get(kind, 0) + 1
+            # whatever this rejects to or draws from: a chiller's condenser
+            # loop, a heat exchanger's other side, a heat pump's source
+            w2w = opt(comp.to_WaterToWaterComponent()) if hasattr(comp, 'to_WaterToWaterComponent') else None
+            if w2w is not None:
+                for other in (opt(w2w.secondaryPlantLoop()), opt(w2w.plantLoop())):
+                    if other is not None and str(other.handle()) != key:
+                        self._walk(other, f'{role}>{other.sizingPlant().loopType().lower()}',
+                                   depth + 1)
+        for kind, n in counts.items():
+            if n > 1:
+                self.controls.add(f'plant:{role}:{kind}:count={n}')
+        for spm in loop.supplyOutletNode().setpointManagers():
+            self.controls.add(f'plant:{role}:spm:{_kind(spm)}')
+            reset = opt(spm.to_SetpointManagerOutdoorAirReset())
+            if reset is not None:
+                self.controls.add(f'plant:{role}:reset:'
+                                  f'{round(reset.setpointatOutdoorLowTemperature())}/'
+                                  f'{round(reset.setpointatOutdoorHighTemperature())}')
+
+    def frozen(self):
+        return (self.role, tuple(sorted(self.identity)))
+
+    def as_dict(self):
+        return {'role': self.role, 'identity': sorted(self.identity),
+                'controls': sorted(self.controls)}
+
+    @classmethod
+    def from_dict(cls, data):
+        c = cls(data['role'])
+        c.identity, c.controls = set(data['identity']), set(data['controls'])
+        return c
+
+
+def _add_coil(component, prefix, owner_kind, coil):
+    kind = _kind(coil)
+    concrete = _concrete(coil)
+    availability = _availability(concrete)
+    token = f'{prefix}:coil:{_token(kind, concrete)}'
+    if availability and owner_kind in _AVAILABILITY_IS_IDENTITY:
+        token += f'({availability})'
+    elif availability:
+        component.controls.add(f'{prefix}:coil:{kind}:{availability}')
+    component.identity.add(token)
+    if _family(kind) != kind:
+        component.controls.add(f'{prefix}:coil:{kind}')
+    component.plant(coil)
+
+
+def _inner(component, owner, children, prefix):
+    """The coils (identity) and fans (controls) inside `owner`, recursively."""
+    for child in children.get(str(owner.handle()), []):
+        kind = _kind(child)
+        if 'Coil' in kind:
+            _add_coil(component, prefix, _kind(owner), child)
+        elif 'Fan' in kind:
+            component.controls.add(f'{prefix}:fan:{kind}')
+        _inner(component, child, children, prefix)
+
+
+def zone_components(model, zone, children=None):
+    """The components serving one thermal zone (see the module docstring)."""
+    children = children if children is not None else _children_by_container(model)
+    components = []
+    terminals = {str(t.handle()): t for t in zone.airLoopHVACTerminals()}
+
+    for equipment in zone.equipment():
+        kind = _kind(equipment)
+        if str(equipment.handle()) in terminals or kind in _NOT_A_SYSTEM:
+            continue
+        unit = Component('unit')
+        concrete = _concrete(equipment)
+        unit.identity.add(f'unit:{_token(kind, concrete)}')
+        if children.get(str(equipment.handle())):
+            _inner(unit, equipment, children, 'unit')
+        else:
+            # a baseboard's coil is its own, not "contained"
+            coil = _maybe(concrete.heatingCoil()) if hasattr(concrete, 'heatingCoil') else None
+            if coil is not None:
+                _add_coil(unit, 'unit', kind, coil)
+        components.append(unit)
+
+    terminal_of = {}
+    for terminal in terminals.values():
+        concrete = _concrete(terminal)
+        owner = opt(concrete.airLoopHVAC()) if hasattr(concrete, 'airLoopHVAC') else None
+        if owner is not None:
+            terminal_of[str(owner.handle())] = terminal
+    for loop in zone.airLoopHVACs():
+        part = Component('air_loop')
+        terminal = terminal_of.get(str(loop.handle()))
+        if terminal is not None:
+            part.identity.add(f'terminal:{_token(_kind(terminal), _concrete(terminal))}')
+            _inner(part, terminal, children, 'terminal')
+        else:
+            part.identity.add('terminal:none')
+        sequence = []
+        for comp in loop.supplyComponents():
+            kind = _kind(comp)
+            if kind in _PLUMBING:
+                continue
+            if kind.startswith('Fan'):
+                part.controls.add(f'ahu:fan:{kind}')
                 continue
             if kind == 'AirLoopHVAC_OutdoorAirSystem':
+                sequence.append('OutdoorAir')
                 oa = opt(loop.airLoopHVACOutdoorAirSystem())
-                out['ahu'].add('ahu:outdoor_air')
                 if oa is not None:
                     controller = oa.getControllerOutdoorAir()
-                    out['controls'].add(
-                        f'controls:economizer:{controller.getEconomizerControlType()}')
+                    part.controls.add(
+                        f'ahu:economizer:{controller.getEconomizerControlType()}')
+                    # 100% outdoor air is IDENTITY (a DOAS or make-up air
+                    # unit), not a control: without it `doas-elec` and
+                    # `psz-elec-perzone` were one class. Declared by the
+                    # sizing, or a minimum fraction that is 1 at every hour.
+                    minimum = opt(controller.minimumFractionofOutdoorAirSchedule())
+                    sizing = loop.sizingSystem()
+                    if ((sizing.allOutdoorAirinCooling() and sizing.allOutdoorAirinHeating())
+                            or (minimum is not None and _schedule_is_always_on(minimum))):
+                        part.identity.add('ahu:all_outdoor_air')
                     for oac in oa.components():
-                        if 'OS_' + _kind(oac) not in _PLUMBING:
-                            out['ahu'].add(f'ahu:oa:{_kind(oac)}')
+                        okind = _kind(oac)
+                        if okind not in _PLUMBING and not okind.startswith('Fan'):
+                            part.identity.add(f'ahu:oa:{okind}')
                 continue
+            sequence.append(_token(kind, _concrete(comp)))
+            if _family(kind) != kind:
+                part.controls.add(f'ahu:component:{kind}')
             if 'Coil' in kind:
-                tokens, plant = _coil_tokens('ahu', 'loop', comp, seen_plants)
-                out['ahu'] |= tokens
-                out['plant'] |= plant[0]
-                out['controls'] |= plant[1]
-            elif kind.startswith('Fan'):
-                out['controls'].add(f'controls:ahu:fan:{kind}')
+                part.plant(comp)
             else:
-                out['ahu'].add(f'ahu:component:{kind}')
                 owner = _hvac(comp)
                 if owner is not None:
-                    add_coils('ahu', owner)
-    return out
+                    _inner(part, owner, children, f'ahu:{kind}')
+        # WHAT the air handler holds is identity; the ORDER is an arrangement
+        # detail authors differ on (heating before or after the DX coil), so
+        # it is reported, not matched.
+        part.identity.add('ahu:components:' + '+'.join(sorted(sequence)))
+        part.controls.add('ahu:order:' + '>'.join(sequence))
+        zones = len(loop.thermalZones())
+        part.controls.add(f'ahu:scope:{"one zone" if zones == 1 else "several zones"}')
+        part.controls.add(f'ahu:sizing:{loop.sizingSystem().typeofLoadtoSizeOn()}')
+        for spm in loop.supplyOutletNode().setpointManagers():
+            part.controls.add(f'ahu:spm:{_kind(spm)}')
+            # Whether the unit FOLLOWS A ZONE is its role, and identity: a
+            # 100%-outdoor-air DOAS (scheduled supply temperature) and a
+            # 100%-outdoor-air rooftop unit (single-zone reheat) were one
+            # class without it. The exact manager stays a control: authors
+            # pick Warmest or Scheduled for the same VAV.
+            if _kind(spm).startswith('SetpointManager_SingleZone'):
+                part.identity.add('ahu:follows_a_zone')
+        components.append(part)
+    return components
 
 
-def model_fingerprints(model):
-    """``[(zone name, fingerprint)]`` for every zone, in name order."""
+def model_components(model):
+    """``[(zone name, [Component])]`` for every zone, in name order."""
     children = _children_by_container(model)
     zones = sorted(model.getThermalZones(), key=lambda z: z.nameString())
-    return [(z.nameString(), zone_fingerprint(model, z, children)) for z in zones]
+    return [(z.nameString(), zone_components(model, z, children)) for z in zones]
 
 
-def similarity(a, b):
-    """Weighted Jaccard over the stages: 1.0 identical, 0.0 disjoint."""
-    total = weight = 0.0
-    for stage, w in STAGE_WEIGHTS.items():
-        sa, sb = a.get(stage, set()), b.get(stage, set())
-        if not sa and not sb:
-            continue
-        total += w * len(sa & sb) / len(sa | sb)
-        weight += w
-    return total / weight if weight else 0.0
+def signature(components):
+    """A zone's HVAC identity: its components' identities as a sorted
+    multiset. Equal signatures are one equivalence class."""
+    return tuple(sorted(c.frozen() for c in components))
 
 
-def frozen(fp):
-    """A hashable, order-free form of a fingerprint (for equivalence)."""
-    return tuple(sorted((stage, tuple(sorted(tokens))) for stage, tokens in fp.items()))
+def _jaccard(a, b):
+    return len(a & b) / len(a | b) if (a or b) else 1.0
 
 
-def rank(fp, catalogue, limit=3):
-    """Rank catalogue rows against one zone fingerprint.
+def _covers(row, remaining):
+    """The zone components `row` covers exactly, or None if any of the row's
+    own components is absent from `remaining`."""
+    left = list(remaining)
+    for rc in (c.frozen() for c in row):
+        if rc not in left:
+            return None
+        left.remove(rc)
+    return left
 
-    :param catalogue: ``{row id: fingerprint}``
-    :returns: ``[{'systems': [ids with this fingerprint], 'similarity',
-        'matched', 'missing', 'extra'}]`` best first, rows with IDENTICAL
-        fingerprints grouped as one candidate.
+
+def explain(components, catalogue):
+    """Explain one zone against the catalogue, by components.
+
+    - ``match``: one row (or one equivalence class) builds exactly this;
+    - ``composed``: several rows build it between them, one per part (a
+      rooftop unit's row plus a unit-heater row), chosen greedily;
+    - ``partial``: rows build some parts; ``uncovered`` lists the rest;
+    - ``none``: no row builds any part; the nearest row and the differences;
+    - ``unserved``: nothing serves the zone.
+
+    :param catalogue: ``{row id: [Component]}``
     """
-    classes = {}
-    for row_id, row_fp in catalogue.items():
-        classes.setdefault(frozen(row_fp), (row_fp, []))[1].append(row_id)
-    ranked = []
-    for row_fp, ids in classes.values():
-        tokens_a = set().union(*fp.values())
-        tokens_b = set().union(*row_fp.values())
-        ranked.append({'systems': sorted(ids), 'similarity': round(similarity(fp, row_fp), 4),
-                       'matched': sorted(tokens_a & tokens_b),
-                       'missing': sorted(tokens_b - tokens_a),
-                       'extra': sorted(tokens_a - tokens_b)})
-    ranked.sort(key=lambda c: (-c['similarity'], c['systems']))
-    return ranked[:limit]
+    if not components:
+        return {'outcome': 'unserved', 'systems': []}
+    zone = [c.frozen() for c in components]
+    by_signature = {}
+    for row_id, row in catalogue.items():
+        by_signature.setdefault(signature(row), []).append(row_id)
+
+    exact = by_signature.get(tuple(sorted(zone)))
+    if exact:
+        row = catalogue[exact[0]]
+        return {'outcome': 'match', 'systems': sorted(exact),
+                'control_differences': _control_diff(components, row)}
+
+    parts, remaining = [], list(zone)
+    while remaining:
+        best = None
+        for ids in by_signature.values():
+            left = _covers(catalogue[ids[0]], remaining)
+            if left is None or len(left) == len(remaining):
+                continue
+            if best is None or len(left) < len(best[1]):
+                best = (sorted(ids), left)
+        if best is None:
+            break
+        parts.append({'systems': best[0],
+                      'covers': [r for r in remaining if r not in best[1]]})
+        remaining = best[1]
+    if parts:
+        return {'outcome': 'partial' if remaining else 'composed',
+                'systems': [p['systems'][0] for p in parts],
+                'parts': [{'systems': p['systems'], 'covers': [{'role': r, 'identity': list(i)}
+                                                               for r, i in p['covers']]}
+                          for p in parts],
+                'uncovered': [{'role': r, 'identity': list(i)} for r, i in remaining]}
+    return _nearest(components, catalogue)
+
+
+def _control_diff(components, row):
+    zone_controls = set().union(*(c.controls for c in components))
+    row_controls = set().union(*(c.controls for c in row))
+    return {'model_only': sorted(zone_controls - row_controls),
+            'row_only': sorted(row_controls - zone_controls)}
+
+
+def _nearest(components, catalogue):
+    scored = []
+    for row_id, row in catalogue.items():
+        score, diffs, unused = 0.0, [], list(components)
+        for rc in row:
+            candidates = [zc for zc in unused if zc.role == rc.role]
+            if not candidates:
+                diffs.append({'row_has': sorted(rc.identity)})
+                continue
+            zc = max(candidates, key=lambda c: _jaccard(c.identity, rc.identity))
+            unused.remove(zc)
+            score += _jaccard(zc.identity, rc.identity)
+            if zc.identity != rc.identity:
+                diffs.append({'row_has': sorted(rc.identity - zc.identity),
+                              'model_has': sorted(zc.identity - rc.identity)})
+        diffs.extend({'model_has': sorted(zc.identity)} for zc in unused)
+        scored.append((score / max(len(row), len(components)), row_id, diffs))
+    scored.sort(key=lambda s: (-s[0], s[1]))
+    similarity, row_id, diffs = scored[0]
+    return {'outcome': 'none', 'systems': [row_id], 'similarity': round(similarity, 3),
+            'nearest_differences': diffs}
