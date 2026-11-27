@@ -87,6 +87,24 @@ def _family(kind):
     return kind
 
 
+#: Wrappers that PACKAGE coils (to stage them, or as a unitary product).
+#: Their coils are the air handler's own; the wrapper is reported as a
+#: control. Measured: the NECB reference builds `psz-gas-hwbb-gasboiler` with
+#: `staged_coils`, which wraps the same coils in a unitary system, and 391
+#: reference zones whose equipment equalled that build were not named.
+_WRAPPERS = frozenset({
+    'AirLoopHVAC_UnitarySystem', 'AirLoopHVAC_UnitaryHeatPump_AirToAir',
+    'AirLoopHVAC_UnitaryHeatPump_AirToAir_MultiSpeed',
+})
+
+
+#: Identity fields a type FIXES rather than stores. EnergyPlus 25.2's
+#: `Coil:Heating:Gas:MultiStage` has no fuel field at all (its 20 fields carry
+#: none), so it is natural gas; without this the staged NECB reference build
+#: lost its fuel and stopped matching its own row.
+IMPLIED_FIELDS = {'Coil_Heating_Gas_MultiStage': ('fuelType=NaturalGas',)}
+
+
 #: Object types with no SDK cast found: recorded, never silently skipped.
 UNCAST = set()
 
@@ -172,6 +190,7 @@ def _token(kind, concrete):
         getter = getattr(concrete, field, None)
         if callable(getter):
             fields.append(f'{field}={getter()}')
+    fields.extend(IMPLIED_FIELDS.get(kind, ()))
     return family + (f"[{','.join(fields)}]" if fields else '')
 
 
@@ -336,6 +355,22 @@ def zone_components(model, zone, children=None):
                         okind = _kind(oac)
                         if okind not in _PLUMBING and not okind.startswith('Fan'):
                             part.identity.add(f'ahu:oa:{okind}')
+                continue
+            if kind in _WRAPPERS:
+                part.controls.add(f'ahu:wrapper:{kind}')
+                concrete = _concrete(comp)
+                getter = getattr(concrete, 'controllingZoneorThermostatLocation', None)
+                if callable(getter) and _maybe(getter()) is not None:
+                    part.identity.add('ahu:follows_a_zone')
+                for child in children.get(str(comp.handle()), []):
+                    ckind = _kind(child)
+                    if 'Coil' in ckind:
+                        sequence.append(_token(ckind, _concrete(child)))
+                        if _family(ckind) != ckind:
+                            part.controls.add(f'ahu:component:{ckind}')
+                        part.plant(child)
+                    elif 'Fan' in ckind:
+                        part.controls.add(f'ahu:fan:{ckind}')
                 continue
             sequence.append(_token(kind, _concrete(comp)))
             if _family(kind) != kind:
