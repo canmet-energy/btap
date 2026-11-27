@@ -241,6 +241,69 @@ class TestTheCoilMediumIsNotAFuel(unittest.TestCase):
                 group = hvac_section(model, audit=None)['zone_groups'][0]
                 self.assertEqual(expected, identify_candidates(group, limit=1)[0]['system'])
 
+    @needs_sdk
+    def test_a_fan_coil_building_is_offered_a_fan_coil_row(self):
+        """Fan-coil groups are guessed `central_doas_or_cv`, which did not
+        admit the `fan_coils` family, so every fan-coil building — 18 rows
+        and two DOAS + fan-coil composites — came back as a per-zone rooftop
+        unit (Fable, review of #252). Facts are characterized from BUILT rows
+        with every name scrubbed. Two-pipe vs four-pipe and the chiller type
+        are not in the facts, so a fan-coil building gets A fan-coil row; the
+        heat-pump ones, whose plant is in the facts, get their own."""
+        from btap.modeling import build_system
+        from btap.stock.hvac import hvac_section
+        from tests.necb.hvac_helpers import load_fixture, sorted_zones
+        for built, expected in (
+                ('mau-fc4-gas-gasboiler-scrollchiller', None),
+                ('mau-fc2-gas-chw-gasboiler-scrollchiller', None),
+                ('mau-fc4-gas-awhp-gasbu-scrollchiller', 'mau-fc4-gas-awhp-gasbu-scrollchiller'),
+                ('mau-fc4-elec-awhp-elecbu-scrollchiller', 'mau-fc4-elec-awhp-elecbu-scrollchiller')):
+            with self.subTest(built=built):
+                model = load_fixture()
+                build_system(model, built, sorted_zones(model))
+                for i, loop in enumerate(model.getAirLoopHVACs()):
+                    loop.setName(f'Air System {i + 1}')
+                for i, loop in enumerate(model.getPlantLoops()):
+                    loop.setName(f'Plant {i + 1}')
+                ranked = identify_candidates(hvac_section(model, audit=None)['zone_groups'][0],
+                                             limit=40)
+                top = ranked[0]
+                self.assertEqual('fan_coils', top['family'], top['system'])
+                if expected:
+                    self.assertEqual(expected, top['system'])
+                # ...and by a margin, not a half-point tie-break: the zonal
+                # fan coil implies the family (+3), as unit heaters and PTACs
+                # already do. Without it the fan-coil rows led 6.0 to 5.5.
+                best_other = max(c['score'] for c in ranked if c['family'] != 'fan_coils')
+                self.assertGreaterEqual(top['score'] - best_other, 1.5)
+
+    @needs_sdk
+    def test_a_building_WITHOUT_fan_coils_is_not_offered_one(self):
+        """The negative control (Fable, review of #254): admitting
+        `fan_coils` to `central_doas_or_cv` let a fan-coil row outrank a
+        furnace building's own candidates — four `mau-fc4-gas-chw-*` rows at
+        6.0, crediting a boiler and a chiller it did not have. A gas furnace
+        with outdoor air, characterized from a built model."""
+        import openstudio
+
+        from btap.modeling import build_system
+        from btap.stock.hvac import hvac_section
+        from tests.necb.hvac_helpers import load_fixture, sorted_zones
+        model = load_fixture()
+        build_system(model, 'furnace-gas-dx-nooa-shared', sorted_zones(model))
+        for loop in model.getAirLoopHVACs():
+            controller = openstudio.model.ControllerOutdoorAir(model)
+            openstudio.model.AirLoopHVACOutdoorAirSystem(model, controller).addToNode(
+                loop.supplyInletNode())
+        for i, loop in enumerate(model.getAirLoopHVACs()):
+            loop.setName(f'Air System {i + 1}')
+        group = hvac_section(model, audit=None)['zone_groups'][0]
+        facts = group.get('descriptive') or group
+        self.assertEqual('central_doas_or_cv', facts['family_guess'])
+        self.assertNotIn('fan_coil', facts.get('zonal_units') or [])
+        top = identify_candidates(group, limit=3)
+        self.assertEqual([], [c['system'] for c in top if c['family'] == 'fan_coils'])
+
     def test_an_electric_heated_group_prefers_an_ELECTRIC_coil(self):
         """The inverse, so the fix is not just a thumb on one scale."""
         candidates = identify_candidates(_group(
