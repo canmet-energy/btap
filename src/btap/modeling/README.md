@@ -208,11 +208,28 @@ baseboard plant:
 | 0.4 | 0.3 L/s | 135 h |
 | 0.25 | - | 260 h |
 
-In both supply modes the heat pump peaks at only 51-58% of its autosized
-capacity (28.5 and 32.6 of 55.7 kW). The design-day load falls below its -15 C
-cutoff, where it does not run, so it is sized for a load it never meets.
-Right-sizing it means fixing the capacity at the load at the cutoff while the
-flow stays autosized; that is open work on #244.
+Is the autosized heat pump too big? The hourly part-load ratio measures
+delivered heat against what the heat pump can deliver at that hour's outdoor
+temperature, so it answers that. Its peak output in kW does not: the
+capacity curve derates the rated capacity in cold weather. Measured
+annually (2026-11-27):
+
+| Outdoor | Low temperature: hours at >= 95% | Low temperature: max | Boiler lift: max |
+| --- | ---: | ---: | ---: |
+| -15 to -10 C | 9 | 1.00 | 0.03 |
+| -10 to -5 C | 13 | 0.99 | 0.29 |
+| -5 to 0 C | 0 | 0.91 | 0.67 |
+| 0 to 5 C | 0 | 0.74 | 0.74 |
+
+- **Low temperature: not oversized.** Just above its cutoff the heat pump runs
+  at its full derated capacity and the boiler tops up. A smaller heat pump
+  would hand that heat to the boiler.
+- **Boiler lift: larger than it needs to be.** In cold weather the return
+  water is already above the heat pump's 60 C, so it barely runs. It never
+  exceeds 74% of its available capacity. That affects installed size, and so
+  costing, but hardly any energy. Fixing it would need a two-pass sizing run,
+  because a sizing factor starves the loop. It is left as it is (#244, closed
+  by phylroy as costing-only).
 
 ## Modern HVAC systems
 
