@@ -366,6 +366,72 @@ class Component:
         return c
 
 
+#: ENERGY STAR "Cold Climate" (ASHP specification v6.x, EPA key product
+#: criteria, read 2026-11-28): COP at 5 F >= 1.75 AND heating capacity at
+#: 5 F >= 70% of the capacity at 47 F. Chosen as identity because both are
+#: performance values a model's coil holds (phylroy, #257). NEEP ccASHP v4.0
+#: (variable capacity: >= 3 speeds or continuous, AND COP at 5 F >= 1.75 at
+#: maximum capacity) is reported alongside, not used to decide.
+COLD_CLIMATE_COP_5F = 1.75
+COLD_CLIMATE_CAPACITY_RATIO_5F = 0.70
+NEEP_MIN_SPEEDS = 3
+_5F_C = -15.0
+_47F_C = 8.33
+_INDOOR_C = 21.1
+
+
+def _at(curve, outdoor_c):
+    """A performance curve at an outdoor temperature: f(outdoor) or
+    f(indoor 21.1 C, outdoor), as the heating-coil curves are defined."""
+    n = curve.numVariables()
+    if n == 1:
+        return curve.evaluate(outdoor_c)
+    if n == 2:
+        return curve.evaluate(_INDOOR_C, outdoor_c)
+    return None
+
+
+def heating_performance_at_5f(concrete, kind):
+    """``(speeds, COP at 5 F, capacity at 5 F / capacity at 47 F)`` at
+    maximum capacity, from the coil's own rated values and curves, or None
+    when the coil is not a DX heating coil or a curve is unreadable."""
+    try:
+        if kind == 'Coil_Heating_DX_SingleSpeed':
+            speeds, cop = 1, concrete.ratedCOP()
+            cap_curve = concrete.totalHeatingCapacityFunctionofTemperatureCurve()
+            eir_curve = concrete.energyInputRatioFunctionofTemperatureCurve()
+        elif kind == 'Coil_Heating_DX_VariableSpeed':
+            levels = list(concrete.speeds())
+            if not levels:
+                return None
+            top = levels[-1]
+            speeds, cop = len(levels), top.referenceUnitGrossRatedHeatingCOP()
+            cap_curve = top.heatingCapacityFunctionofTemperatureCurve()
+            eir_curve = top.energyInputRatioFunctionofTemperatureCurve()
+        else:
+            return None
+        cap_5, cap_47 = _at(cap_curve, _5F_C), _at(cap_curve, _47F_C)
+        eir_5, eir_47 = _at(eir_curve, _5F_C), _at(eir_curve, _47F_C)
+    except (TypeError, RuntimeError):
+        return None
+    if None in (cap_5, cap_47, eir_5, eir_47) or cap_47 <= 0 or eir_5 <= 0:
+        return None
+    return speeds, cop * eir_47 / eir_5, cap_5 / cap_47
+
+
+def _cold_climate(component, prefix, kind, concrete):
+    performance = heating_performance_at_5f(concrete, kind)
+    if performance is None:
+        return
+    speeds, cop_5f, ratio = performance
+    component.controls.add(f'{prefix}:{kind}:at 5F: COP {cop_5f:.2f}, capacity {ratio:.0%}, '
+                           f'{speeds} speed(s)')
+    if cop_5f >= COLD_CLIMATE_COP_5F and ratio >= COLD_CLIMATE_CAPACITY_RATIO_5F:
+        component.identity.add(f'{prefix}:{_family(kind)}:cold_climate[ENERGY STAR]')
+    neep = speeds >= NEEP_MIN_SPEEDS and cop_5f >= COLD_CLIMATE_COP_5F
+    component.controls.add(f'{prefix}:{kind}:NEEP ccASHP v4.0 {"met" if neep else "not met"}')
+
+
 def _add_coil(component, prefix, owner_kind, coil):
     kind = _kind(coil)
     concrete = _concrete(coil)
@@ -378,6 +444,7 @@ def _add_coil(component, prefix, owner_kind, coil):
     component.identity.add(token)
     if _family(kind) != kind:
         component.controls.add(f'{prefix}:coil:{kind}')
+    _cold_climate(component, prefix, kind, concrete)
     component.plant(coil)
 
 
@@ -475,6 +542,7 @@ def zone_components(model, zone, children=None):
                     ckind = _kind(child)
                     if 'Coil' in ckind and not ckind.startswith('CoilSystem'):
                         sequence.append(_token(ckind, _concrete(child)))
+                        _cold_climate(part, 'ahu', ckind, _concrete(child))
                         if _family(ckind) != ckind:
                             part.controls.add(f'ahu:component:{ckind}')
                         part.plant(child)
@@ -484,6 +552,7 @@ def zone_components(model, zone, children=None):
                     stack.extend(children.get(str(child.handle()), []))
                 continue
             sequence.append(_token(kind, _concrete(comp)))
+            _cold_climate(part, 'ahu', kind, _concrete(comp))
             if _family(kind) != kind:
                 part.controls.add(f'ahu:component:{kind}')
             if 'Coil' in kind:

@@ -161,6 +161,36 @@ class TestTheFingerprint(unittest.TestCase):
         self.assertTrue(any('plant:heating:boiler_lifts_above_heat_pump' in c.identity for c in lift))
         self.assertFalse(any('plant:heating:boiler_lifts_above_heat_pump' in c.identity for c in low))
 
+    def test_a_cold_climate_heat_pump_is_identified_by_its_performance(self):
+        """#257: ENERGY STAR Cold Climate (COP >= 1.75 and capacity >= 70% at
+        5 F) is identity, read from the coil's own curves. No catalogue row
+        meets it today (the `ccashp` rows keep 53%), so a flat capacity curve
+        stands in for a real cold-climate unit."""
+        import openstudio
+
+        from btap.stock import fingerprint
+
+        def cold_climate(model):
+            for coil in model.getCoilHeatingDXSingleSpeeds():
+                flat = openstudio.model.CurveCubic(model)
+                flat.setCoefficient1Constant(1.0)
+                flat.setCoefficient2x(0.0)
+                flat.setCoefficient3xPOW2(0.0)
+                flat.setCoefficient4xPOW3(0.0)
+                flat.setMinimumValueofx(-30.0)
+                flat.setMaximumValueofx(30.0)
+                coil.setTotalHeatingCapacityFunctionofTemperatureCurve(flat)
+
+        plain = _zone(_built('pthp'))
+        cold = _zone(_built('pthp', mutate=cold_climate))
+        token = 'unit:Coil_Heating_DX:cold_climate[ENERGY STAR]'
+        self.assertFalse(any(token in c.identity for c in plain))
+        self.assertTrue(any(token in c.identity for c in cold))
+        self.assertNotEqual(fingerprint.signature(plain), fingerprint.signature(cold))
+        # ...and the reported facts say why, with NEEP alongside
+        self.assertTrue(any('NEEP ccASHP v4.0 not met' in x for c in cold for x in c.controls),
+                        'one speed: not variable capacity, whatever the curve')
+
     def test_a_different_fuel_is_a_different_system(self):
         from btap.stock import fingerprint
         catalogue = _catalogue(*ROWS)
