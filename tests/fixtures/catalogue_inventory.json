@@ -1,5 +1,6 @@
 {
- "_comment": "The catalogue's independent inventory (#261 step 1). Every catalogue id with its legacy name, aliases and the sha256 of its D-58 golden record (canonical JSON, the record's own `id` excluded). The catalogue, the golden and the installed wheel are each checked AGAINST this file, so none of them is its own reference: adding, retiring or renaming a row, or changing an adjudicated record, means editing this file in the same change. `presets` lists rows that differ from their base row only in a declared neutral key (D-112 ids stay emitted; each keeps its own D-58 record, which must equal its base's).",
+ "_comment": "The catalogue's independent inventory (#261 step 1). Every catalogue id with its legacy name, aliases and the sha256 of its D-58 golden record (canonical JSON, the record's own `id` excluded). The catalogue, the golden and the installed wheel are each checked AGAINST this file, so none of them is its own reference: adding, retiring or renaming a row, or changing an adjudicated record, means editing this file in the same change. `alias_config_sha256` pins what a retired name BUILDS (D-113's carried configuration), not only that it resolves. `presets` lists rows that differ from their base row only in a declared neutral key (D-112 ids stay emitted; each keeps its own D-58 record, which must equal its base's).",
+ "alias_config_sha256": "433fec40195c6e3eab30547497b922b0628653a2b0aeb37d08292b294c8da17b",
  "systems": [
   {
    "id": "psz-gas-hwbb-gasboiler",

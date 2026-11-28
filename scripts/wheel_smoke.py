@@ -91,7 +91,8 @@ def run_checks() -> int:
         assert installed == expected, (
             f"the wheel's catalog has {len(installed)} systems, the inventory {len(expected)}; "
             f"missing {sorted(set(expected) - set(installed))[:5]}, "
-            f"unexpected {sorted(set(installed) - set(expected))[:5]}")
+            f"unexpected {sorted(set(installed) - set(expected))[:5]}"
+            + ("; same ids in a different ORDER" if sorted(installed) == sorted(expected) else ""))
     check("packaged data loads (necb rules + the inventoried catalog)", data_loads)
 
     def coverage_reference_loads():
