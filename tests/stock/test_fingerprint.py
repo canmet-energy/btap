@@ -133,6 +133,30 @@ class TestTheFingerprint(unittest.TestCase):
         doas = _zone(_built('doas-elec'))
         self.assertTrue(any('ahu:all_outdoor_air' in c.identity for c in doas))
 
+    def test_identical_units_are_one_system_and_the_count_is_reported(self):
+        """phylroy (2026-11-28): a unit count is a control. Two identical
+        baseboards in a zone match the one-baseboard row, with the count
+        listed; they were "composed" from the same row twice before."""
+        from btap.stock import fingerprint
+        model = _built('bb-hwbb-gasboiler', 'bb-hwbb-gasboiler')
+        comps = _zone(model)
+        self.assertEqual(2, sum(1 for c in comps if c.role == 'unit'))
+        result = fingerprint.explain(comps, _catalogue(*ROWS))
+        self.assertEqual('match', result['outcome'], result)
+        self.assertEqual(['bb-hwbb-gasboiler'], result['systems'])
+        self.assertIn('unit:count=2', result['control_differences']['model_only'])
+
+    def test_boiler_lift_is_a_different_system(self):
+        """phylroy (2026-11-28): boiler lift is identity. Same equipment as a
+        low-temperature heat-pump plant; the loop is held above the heat
+        pump's own setpoint, which the setpoint managers state."""
+        from btap.stock import fingerprint
+        low = _zone(_built('bb-hwbb-awhp-gasbu'))
+        lift = _zone(_built('bb-hwbb-awhp-gasbu-lift'))
+        self.assertNotEqual(fingerprint.signature(low), fingerprint.signature(lift))
+        self.assertTrue(any('plant:heating:boiler_lifts_above_heat_pump' in c.identity for c in lift))
+        self.assertFalse(any('plant:heating:boiler_lifts_above_heat_pump' in c.identity for c in low))
+
     def test_a_different_fuel_is_a_different_system(self):
         from btap.stock import fingerprint
         catalogue = _catalogue(*ROWS)

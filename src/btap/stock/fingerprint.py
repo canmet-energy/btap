@@ -215,6 +215,25 @@ def _all_outdoor_air(controller, sizing):
     return low is not None and high is not None and low > 0 and abs(low - high) <= 1e-9 * max(low, high)
 
 
+def _hottest_setpoint(node):
+    """The highest temperature a node's setpoint managers ask for, C: the
+    cold end of an outdoor-air reset, or a constant schedule's value. None
+    when no manager there states one."""
+    values = []
+    for spm in node.setpointManagers():
+        reset = opt(spm.to_SetpointManagerOutdoorAirReset())
+        if reset is not None:
+            values.append(max(reset.setpointatOutdoorLowTemperature(),
+                              reset.setpointatOutdoorHighTemperature()))
+            continue
+        scheduled = opt(spm.to_SetpointManagerScheduled())
+        if scheduled is not None:
+            constant = opt(scheduled.schedule().to_ScheduleConstant())
+            if constant is not None:
+                values.append(constant.value())
+    return max(values) if values else None
+
+
 def _availability(coil):
     getter = getattr(coil, 'availabilitySchedule', None)
     if not callable(getter):
@@ -291,6 +310,7 @@ class Component:
             return
         self._plants.add(key)
         role = loop.sizingPlant().loopType().lower()
+        heat_pump_tops = []
         counts = {}
         for comp in loop.supplyComponents():
             kind = _kind(comp)
@@ -302,6 +322,11 @@ class Component:
             # loop, a heat exchanger's other side, a heat pump's source
             # (and a heat-recovery chiller's TERTIARY loop)
             w2w = opt(comp.to_WaterToWaterComponent()) if hasattr(comp, 'to_WaterToWaterComponent') else None
+            if w2w is not None and kind == 'HeatPump_PlantLoop_EIR_Heating':
+                outlet = opt(w2w.supplyOutletModelObject())
+                node = opt(outlet.to_Node()) if outlet is not None else None
+                if node is not None:
+                    heat_pump_tops.append(_hottest_setpoint(node))
             if w2w is not None:
                 for other in (opt(w2w.plantLoop()), opt(w2w.secondaryPlantLoop()),
                               opt(w2w.tertiaryPlantLoop())):
@@ -310,6 +335,14 @@ class Component:
         for kind, n in counts.items():
             if n > 1:
                 self.controls.add(f'plant:{role}:{kind}:count={n}')
+        # BOILER LIFT is identity (phylroy, 2026-11-28): the loop is held
+        # hotter than its heat pump's own outlet setpoint, so a boiler lifts
+        # what the heat pump cannot reach. Same equipment as a low-temperature
+        # plant; measured 39% against 92% heat-pump share.
+        loop_top = _hottest_setpoint(loop.supplyOutletNode())
+        tops = [h for h in heat_pump_tops if h is not None]
+        if loop_top is not None and tops and loop_top > max(tops) + 0.5:
+            self.identity.add(f'plant:{role}:boiler_lifts_above_heat_pump')
         for spm in loop.supplyOutletNode().setpointManagers():
             self.controls.add(f'plant:{role}:spm:{_kind(spm)}')
             reset = opt(spm.to_SetpointManagerOutdoorAirReset())
@@ -487,10 +520,37 @@ def model_components(model):
     return [(z.nameString(), zone_components(model, z, children)) for z in zones]
 
 
+def collapse(components):
+    """Identical components as ONE, with the count as a control.
+
+    phylroy (2026-11-28): how many identical units serve a zone is a sizing
+    choice, not a different system. Two identical baseboards match the
+    one-baseboard row, and "2 units" is reported as a difference; before,
+    the zone was "composed" from the same row twice.
+    """
+    seen = {}
+    for c in components:
+        key = c.frozen()
+        if key in seen:
+            seen[key][1] += 1
+        else:
+            seen[key] = [c, 1]
+    out = []
+    for c, n in seen.values():
+        if n > 1:
+            merged = Component(c.role)
+            merged.identity, merged.notes = set(c.identity), set(c.notes)
+            merged.controls = set(c.controls) | {f'{c.role}:count={n}'}
+            c = merged
+        out.append(c)
+    return out
+
+
 def signature(components):
     """A zone's HVAC identity: its components' identities as a sorted
-    multiset. Equal signatures are one equivalence class."""
-    return tuple(sorted(c.frozen() for c in components))
+    multiset, identical components collapsed (see `collapse`). Equal
+    signatures are one equivalence class."""
+    return tuple(sorted(c.frozen() for c in collapse(components)))
 
 
 def _jaccard(a, b):
@@ -522,6 +582,7 @@ def explain(components, catalogue):
     """
     if not components:
         return {'outcome': 'unserved', 'systems': []}
+    components = collapse(components)
     zone = [c.frozen() for c in components]
     by_signature = {}
     for row_id, row in catalogue.items():
