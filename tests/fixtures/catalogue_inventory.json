@@ -1,0 +1,1067 @@
+{
+ "_comment": "The catalogue's independent inventory (#261 step 1). Every catalogue id with its legacy name, aliases and the sha256 of its D-58 golden record (canonical JSON, the record's own `id` excluded). The catalogue, the golden and the installed wheel are each checked AGAINST this file, so none of them is its own reference: adding, retiring or renaming a row, or changing an adjudicated record, means editing this file in the same change. `presets` lists rows that differ from their base row only in a declared neutral key (D-112 ids stay emitted; each keeps its own D-58 record, which must equal its base's).",
+ "systems": [
+  {
+   "id": "psz-gas-hwbb-gasboiler",
+   "legacy_name": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+   "aliases": [
+    "packaged single-zone DX with gas heat + hot water baseboards (gas boiler)",
+    "psz-gas-hwbb-gasboiler-necbs4",
+    "PSZ RTU with exhaust Gas and DX Coils and Hot Water Baseboard",
+    "packaged single-zone DX with gas heat, with exhaust + hot water baseboards (gas boiler)"
+   ],
+   "d58_record_sha256": "fd325e0588adf215411f594b32839859b115082d8bd3e6e0b57290dcc8ba186c"
+  },
+  {
+   "id": "psz-gas-elecbb",
+   "legacy_name": "PSZ RTU Gas and DX Coils and Electric Baseboard",
+   "aliases": [
+    "packaged single-zone DX with gas heat + electric baseboards",
+    "psz-gas-elecbb-necbs4",
+    "PSZ RTU with exhaust Gas and DX Coils and Electric Baseboard",
+    "packaged single-zone DX with gas heat, with exhaust + electric baseboards"
+   ],
+   "d58_record_sha256": "16c8da0391991f991ef972c11e18cb1b586368fa5441b1c421fb3dd785314912"
+  },
+  {
+   "id": "psz-elec-hwbb-gasboiler",
+   "legacy_name": "PSZ RTU Electric and DX Coils and Hot Water Baseboard",
+   "aliases": [
+    "packaged single-zone DX with electric heat + hot water baseboards (gas boiler)",
+    "psz-elec-hwbb-gasboiler-necbs4",
+    "PSZ RTU with exhaust Electric and DX Coils and Hot Water Baseboard",
+    "packaged single-zone DX with electric heat, with exhaust + hot water baseboards (gas boiler)"
+   ],
+   "d58_record_sha256": "16c8da0391991f991ef972c11e18cb1b586368fa5441b1c421fb3dd785314912"
+  },
+  {
+   "id": "psz-elec-elecbb",
+   "legacy_name": "PSZ RTU Electric and DX Coils and Electric Baseboard",
+   "aliases": [
+    "packaged single-zone DX with electric heat + electric baseboards",
+    "psz-elec-elecbb-necbs4",
+    "PSZ RTU with exhaust Electric and DX Coils and Electric Baseboard",
+    "packaged single-zone DX with electric heat, with exhaust + electric baseboards"
+   ],
+   "d58_record_sha256": "a5dabfd90ce7136ff2756d3e5c91b84e671b7f447f5ae4e84b427104ae2d18ad"
+  },
+  {
+   "id": "vav-elec-elecbb-scrollchiller",
+   "legacy_name": "MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard",
+   "aliases": [
+    "built-up VAV with electric reheat and chilled water cooling + electric baseboards (scroll chiller)"
+   ],
+   "d58_record_sha256": "419afc0c5ba76a0a54e48ee6bac4d968a35dbee147e1e0247ba1a6173b7ff479"
+  },
+  {
+   "id": "vav-elec-hwbb-gasboiler-scrollchiller",
+   "legacy_name": "MZ BU RTU Electric Heating Coil Scroll Chiller and Hot Water Baseboard",
+   "aliases": [
+    "built-up VAV with electric reheat and chilled water cooling + hot water baseboards (gas boiler, scroll chiller)"
+   ],
+   "d58_record_sha256": "27de0c9247aeedfab57f583e833c774c49e1543bb1a17892c8ac467a79e27400"
+  },
+  {
+   "id": "vav-elec-elecbb-centrifchiller",
+   "legacy_name": "MZ BU RTU Electric Heating Coil Centrifugal Chiller and Electric Baseboard",
+   "aliases": [
+    "built-up VAV with electric reheat and chilled water cooling + electric baseboards (centrifugal chiller)"
+   ],
+   "d58_record_sha256": "419afc0c5ba76a0a54e48ee6bac4d968a35dbee147e1e0247ba1a6173b7ff479"
+  },
+  {
+   "id": "vav-elec-hwbb-gasboiler-centrifchiller",
+   "legacy_name": "MZ BU RTU Electric Heating Coil Centrifugal Chiller and Hot Water Baseboard",
+   "aliases": [
+    "built-up VAV with electric reheat and chilled water cooling + hot water baseboards (gas boiler, centrifugal chiller)"
+   ],
+   "d58_record_sha256": "27de0c9247aeedfab57f583e833c774c49e1543bb1a17892c8ac467a79e27400"
+  },
+  {
+   "id": "vav-elec-elecbb-screwchiller",
+   "legacy_name": "MZ BU RTU Electric Heating Coil Rotary Screw Chiller and Electric Baseboard",
+   "aliases": [
+    "built-up VAV with electric reheat and chilled water cooling + electric baseboards (rotary screw chiller)"
+   ],
+   "d58_record_sha256": "419afc0c5ba76a0a54e48ee6bac4d968a35dbee147e1e0247ba1a6173b7ff479"
+  },
+  {
+   "id": "vav-elec-hwbb-gasboiler-screwchiller",
+   "legacy_name": "MZ BU RTU Electric Heating Coil Rotary Screw Chiller and Hot Water Baseboard",
+   "aliases": [
+    "built-up VAV with electric reheat and chilled water cooling + hot water baseboards (gas boiler, rotary screw chiller)"
+   ],
+   "d58_record_sha256": "27de0c9247aeedfab57f583e833c774c49e1543bb1a17892c8ac467a79e27400"
+  },
+  {
+   "id": "vav-elec-elecbb-recipchiller",
+   "legacy_name": "MZ BU RTU Electric Heating Coil Reciprocating Chiller and Electric Baseboard",
+   "aliases": [
+    "built-up VAV with electric reheat and chilled water cooling + electric baseboards (reciprocating chiller)"
+   ],
+   "d58_record_sha256": "419afc0c5ba76a0a54e48ee6bac4d968a35dbee147e1e0247ba1a6173b7ff479"
+  },
+  {
+   "id": "vav-elec-hwbb-gasboiler-recipchiller",
+   "legacy_name": "MZ BU RTU Electric Heating Coil Reciprocating Chiller and Hot Water Baseboard",
+   "aliases": [
+    "built-up VAV with electric reheat and chilled water cooling + hot water baseboards (gas boiler, reciprocating chiller)"
+   ],
+   "d58_record_sha256": "27de0c9247aeedfab57f583e833c774c49e1543bb1a17892c8ac467a79e27400"
+  },
+  {
+   "id": "vav-hw-elecbb-gasboiler-scrollchiller",
+   "legacy_name": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Electric Baseboard",
+   "aliases": [
+    "built-up VAV with hot water reheat and chilled water cooling + electric baseboards (gas boiler, scroll chiller)"
+   ],
+   "d58_record_sha256": "27de0c9247aeedfab57f583e833c774c49e1543bb1a17892c8ac467a79e27400"
+  },
+  {
+   "id": "vav-hw-hwbb-gasboiler-scrollchiller",
+   "legacy_name": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
+   "aliases": [
+    "built-up VAV with hot water reheat and chilled water cooling + hot water baseboards (gas boiler, scroll chiller)"
+   ],
+   "d58_record_sha256": "75b64481e558199bc9ca07df6461ba89fc5d23a2dbc224f5bc5f07145512a852"
+  },
+  {
+   "id": "vav-hw-elecbb-gasboiler-centrifchiller",
+   "legacy_name": "MZ BU RTU Hot Water Heating Coil Centrifugal Chiller and Electric Baseboard",
+   "aliases": [
+    "built-up VAV with hot water reheat and chilled water cooling + electric baseboards (gas boiler, centrifugal chiller)"
+   ],
+   "d58_record_sha256": "27de0c9247aeedfab57f583e833c774c49e1543bb1a17892c8ac467a79e27400"
+  },
+  {
+   "id": "vav-hw-hwbb-gasboiler-centrifchiller",
+   "legacy_name": "MZ BU RTU Hot Water Heating Coil Centrifugal Chiller and Hot Water Baseboard",
+   "aliases": [
+    "built-up VAV with hot water reheat and chilled water cooling + hot water baseboards (gas boiler, centrifugal chiller)"
+   ],
+   "d58_record_sha256": "75b64481e558199bc9ca07df6461ba89fc5d23a2dbc224f5bc5f07145512a852"
+  },
+  {
+   "id": "vav-hw-elecbb-gasboiler-screwchiller",
+   "legacy_name": "MZ BU RTU Hot Water Heating Coil Rotary Screw Chiller and Electric Baseboard",
+   "aliases": [
+    "built-up VAV with hot water reheat and chilled water cooling + electric baseboards (gas boiler, rotary screw chiller)"
+   ],
+   "d58_record_sha256": "27de0c9247aeedfab57f583e833c774c49e1543bb1a17892c8ac467a79e27400"
+  },
+  {
+   "id": "vav-hw-hwbb-gasboiler-screwchiller",
+   "legacy_name": "MZ BU RTU Hot Water Heating Coil Rotary Screw Chiller and Hot Water Baseboard",
+   "aliases": [
+    "built-up VAV with hot water reheat and chilled water cooling + hot water baseboards (gas boiler, rotary screw chiller)"
+   ],
+   "d58_record_sha256": "75b64481e558199bc9ca07df6461ba89fc5d23a2dbc224f5bc5f07145512a852"
+  },
+  {
+   "id": "vav-hw-elecbb-gasboiler-recipchiller",
+   "legacy_name": "MZ BU RTU Hot Water Heating Coil Reciprocating Chiller and Electric Baseboard",
+   "aliases": [
+    "built-up VAV with hot water reheat and chilled water cooling + electric baseboards (gas boiler, reciprocating chiller)"
+   ],
+   "d58_record_sha256": "27de0c9247aeedfab57f583e833c774c49e1543bb1a17892c8ac467a79e27400"
+  },
+  {
+   "id": "vav-hw-hwbb-gasboiler-recipchiller",
+   "legacy_name": "MZ BU RTU Hot Water Heating Coil Reciprocating Chiller and Hot Water Baseboard",
+   "aliases": [
+    "built-up VAV with hot water reheat and chilled water cooling + hot water baseboards (gas boiler, reciprocating chiller)"
+   ],
+   "d58_record_sha256": "75b64481e558199bc9ca07df6461ba89fc5d23a2dbc224f5bc5f07145512a852"
+  },
+  {
+   "id": "mau-fc4-gas-gasboiler-scrollchiller",
+   "legacy_name": "FPFC MAU DX Coils with Scroll Chiller",
+   "aliases": [
+    "four-pipe fan coils + DX make-up air (gas boiler, scroll chiller)"
+   ],
+   "d58_record_sha256": "20dc6b6572750e622c5a110f0bd909d965d9805c4b558525a2591f3f2e4cb77c"
+  },
+  {
+   "id": "mau-fc4-gas-gasboiler-centrifchiller",
+   "legacy_name": "FPFC MAU DX Coils with Centrifugal Chiller",
+   "aliases": [
+    "four-pipe fan coils + DX make-up air (gas boiler, centrifugal chiller)"
+   ],
+   "d58_record_sha256": "20dc6b6572750e622c5a110f0bd909d965d9805c4b558525a2591f3f2e4cb77c"
+  },
+  {
+   "id": "mau-fc4-gas-gasboiler-screwchiller",
+   "legacy_name": "FPFC MAU DX Coils with Rotary Screw Chiller",
+   "aliases": [
+    "four-pipe fan coils + DX make-up air (gas boiler, rotary screw chiller)"
+   ],
+   "d58_record_sha256": "20dc6b6572750e622c5a110f0bd909d965d9805c4b558525a2591f3f2e4cb77c"
+  },
+  {
+   "id": "mau-fc4-gas-gasboiler-recipchiller",
+   "legacy_name": "FPFC MAU DX Coils with Reciprocating Chiller",
+   "aliases": [
+    "four-pipe fan coils + DX make-up air (gas boiler, reciprocating chiller)"
+   ],
+   "d58_record_sha256": "20dc6b6572750e622c5a110f0bd909d965d9805c4b558525a2591f3f2e4cb77c"
+  },
+  {
+   "id": "mau-fc4-gas-chw-gasboiler-scrollchiller",
+   "legacy_name": "FPFC MAU Chilled Water Coils with Scroll Chiller",
+   "aliases": [
+    "four-pipe fan coils + hydronic make-up air (gas boiler, scroll chiller)"
+   ],
+   "d58_record_sha256": "20dc6b6572750e622c5a110f0bd909d965d9805c4b558525a2591f3f2e4cb77c"
+  },
+  {
+   "id": "mau-fc4-gas-chw-gasboiler-centrifchiller",
+   "legacy_name": "FPFC MAU Chilled Water Coils with Centrifugal Chiller",
+   "aliases": [
+    "four-pipe fan coils + hydronic make-up air (gas boiler, centrifugal chiller)"
+   ],
+   "d58_record_sha256": "20dc6b6572750e622c5a110f0bd909d965d9805c4b558525a2591f3f2e4cb77c"
+  },
+  {
+   "id": "mau-fc4-gas-chw-gasboiler-screwchiller",
+   "legacy_name": "FPFC MAU Chilled Water Coils with Rotary Screw Chiller",
+   "aliases": [
+    "four-pipe fan coils + hydronic make-up air (gas boiler, rotary screw chiller)"
+   ],
+   "d58_record_sha256": "20dc6b6572750e622c5a110f0bd909d965d9805c4b558525a2591f3f2e4cb77c"
+  },
+  {
+   "id": "mau-fc4-gas-chw-gasboiler-recipchiller",
+   "legacy_name": "FPFC MAU Chilled Water Coils with Reciprocating Chiller",
+   "aliases": [
+    "four-pipe fan coils + hydronic make-up air (gas boiler, reciprocating chiller)"
+   ],
+   "d58_record_sha256": "20dc6b6572750e622c5a110f0bd909d965d9805c4b558525a2591f3f2e4cb77c"
+  },
+  {
+   "id": "mau-fc2-gas-gasboiler-scrollchiller",
+   "legacy_name": "TPFC MAU DX Coils with Scroll Chiller",
+   "aliases": [
+    "two-pipe fan coils + DX make-up air (gas boiler, scroll chiller)"
+   ],
+   "d58_record_sha256": "20dc6b6572750e622c5a110f0bd909d965d9805c4b558525a2591f3f2e4cb77c"
+  },
+  {
+   "id": "mau-fc2-gas-gasboiler-centrifchiller",
+   "legacy_name": "TPFC MAU DX Coils with Centrifugal Chiller",
+   "aliases": [
+    "two-pipe fan coils + DX make-up air (gas boiler, centrifugal chiller)"
+   ],
+   "d58_record_sha256": "20dc6b6572750e622c5a110f0bd909d965d9805c4b558525a2591f3f2e4cb77c"
+  },
+  {
+   "id": "mau-fc2-gas-gasboiler-screwchiller",
+   "legacy_name": "TPFC MAU DX Coils with Rotary Screw Chiller",
+   "aliases": [
+    "two-pipe fan coils + DX make-up air (gas boiler, rotary screw chiller)"
+   ],
+   "d58_record_sha256": "20dc6b6572750e622c5a110f0bd909d965d9805c4b558525a2591f3f2e4cb77c"
+  },
+  {
+   "id": "mau-fc2-gas-gasboiler-recipchiller",
+   "legacy_name": "TPFC MAU DX Coils with Reciprocating Chiller",
+   "aliases": [
+    "two-pipe fan coils + DX make-up air (gas boiler, reciprocating chiller)"
+   ],
+   "d58_record_sha256": "20dc6b6572750e622c5a110f0bd909d965d9805c4b558525a2591f3f2e4cb77c"
+  },
+  {
+   "id": "mau-fc2-gas-chw-gasboiler-scrollchiller",
+   "legacy_name": "TPFC MAU Chilled Water Coils with Scroll Chiller",
+   "aliases": [
+    "two-pipe fan coils + hydronic make-up air (gas boiler, scroll chiller)"
+   ],
+   "d58_record_sha256": "20dc6b6572750e622c5a110f0bd909d965d9805c4b558525a2591f3f2e4cb77c"
+  },
+  {
+   "id": "mau-fc2-gas-chw-gasboiler-centrifchiller",
+   "legacy_name": "TPFC MAU Chilled Water Coils with Centrifugal Chiller",
+   "aliases": [
+    "two-pipe fan coils + hydronic make-up air (gas boiler, centrifugal chiller)"
+   ],
+   "d58_record_sha256": "20dc6b6572750e622c5a110f0bd909d965d9805c4b558525a2591f3f2e4cb77c"
+  },
+  {
+   "id": "mau-fc2-gas-chw-gasboiler-screwchiller",
+   "legacy_name": "TPFC MAU Chilled Water Coils with Rotary Screw Chiller",
+   "aliases": [
+    "two-pipe fan coils + hydronic make-up air (gas boiler, rotary screw chiller)"
+   ],
+   "d58_record_sha256": "20dc6b6572750e622c5a110f0bd909d965d9805c4b558525a2591f3f2e4cb77c"
+  },
+  {
+   "id": "mau-fc2-gas-chw-gasboiler-recipchiller",
+   "legacy_name": "TPFC MAU Chilled Water Coils with Reciprocating Chiller",
+   "aliases": [
+    "two-pipe fan coils + hydronic make-up air (gas boiler, reciprocating chiller)"
+   ],
+   "d58_record_sha256": "20dc6b6572750e622c5a110f0bd909d965d9805c4b558525a2591f3f2e4cb77c"
+  },
+  {
+   "id": "mau-ptac-hw-hwbb-gasboiler",
+   "legacy_name": "PSZ MAU Hot Water and DX Coils and Hot Water Baseboard with PTAC",
+   "aliases": [
+    "100% OA make-up air (hot water heat) + zone PTAC cooling + hot water baseboards (gas boiler)"
+   ],
+   "d58_record_sha256": "450196e32a2d957d83abe2aece03c4e2bd08ec5658acfbdbbeb7ae52ff4aad67"
+  },
+  {
+   "id": "mau-ptac-hw-elecbb-gasboiler",
+   "legacy_name": "PSZ MAU Hot Water and DX Coils and Electric Baseboard with PTAC",
+   "aliases": [
+    "100% OA make-up air (hot water heat) + zone PTAC cooling + electric baseboards (gas boiler)"
+   ],
+   "d58_record_sha256": "450196e32a2d957d83abe2aece03c4e2bd08ec5658acfbdbbeb7ae52ff4aad67"
+  },
+  {
+   "id": "mau-ptac-elec-hwbb-gasboiler",
+   "legacy_name": "PSZ MAU Electric and DX Coils and Hot Water Baseboard with PTAC",
+   "aliases": [
+    "100% OA make-up air (electric heat) + zone PTAC cooling + hot water baseboards (gas boiler)"
+   ],
+   "d58_record_sha256": "450196e32a2d957d83abe2aece03c4e2bd08ec5658acfbdbbeb7ae52ff4aad67"
+  },
+  {
+   "id": "mau-ptac-elec-elecbb",
+   "legacy_name": "PSZ MAU Electric and DX Coils and Electric Baseboard with PTAC",
+   "aliases": [
+    "100% OA make-up air (electric heat) + zone PTAC cooling + electric baseboards"
+   ],
+   "d58_record_sha256": "66d0bf8aa78e238f796143c6d173061e65d2ab73e4eeaf2414fb1057461ab84d"
+  },
+  {
+   "id": "bb-elecbb",
+   "legacy_name": "Baseboard electric",
+   "aliases": [
+    "electric baseboards"
+   ],
+   "d58_record_sha256": "f82b1dcd1c85d56223b566ab6e8ca7fe457fbf425e21434e0c37038aaa30da88"
+  },
+  {
+   "id": "bb-hwbb-gasboiler",
+   "legacy_name": "Baseboard gas boiler",
+   "aliases": [
+    "hot water baseboards (gas boiler)"
+   ],
+   "d58_record_sha256": "bd382e5b6ec7999ec2cd7d6234d5751957ad4bcf16e11710f1727902de55e750"
+  },
+  {
+   "id": "psz-elec-perzone",
+   "legacy_name": "PSZ-AC with electric coil",
+   "aliases": [
+    "packaged single-zone DX with electric heat, one unit per zone"
+   ],
+   "d58_record_sha256": "d7e3de73f1060a2ff74a815960c77210a6a4e1c0cf84da283ae8567ccf76c8da"
+  },
+  {
+   "id": "psz-gas-perzone",
+   "legacy_name": "PSZ-AC with gas coil",
+   "aliases": [
+    "packaged single-zone DX with gas heat, one unit per zone"
+   ],
+   "d58_record_sha256": "7fb2e03ddd817107a07b72f67c690fc1b75eb6e73cf7ea5a122291b3d7b644c2"
+  },
+  {
+   "id": "doas-pthp-ashp-elecsupp",
+   "legacy_name": "hs11_ashp_pthp",
+   "aliases": [
+    "DOAS ASHP + zone PTHPs"
+   ],
+   "d58_record_sha256": "122acd8248fde0b4b8c9a8c54f94450ef68bdb7a5120165894072bf3c345c3d6"
+  },
+  {
+   "id": "doas-ptac-ccashp-elecsupp-elecbb",
+   "legacy_name": "hs09_ccashp_baseboard",
+   "aliases": [
+    "DOAS cold-climate ASHP + zone PTAC cooling + electric baseboards"
+   ],
+   "d58_record_sha256": "1bdf298da8230557d6e59e453e5964a067ec62acb5a3f507ea8a975ae352864f"
+  },
+  {
+   "id": "doas-ptac-ashp-elecsupp-elecbb",
+   "legacy_name": "hs12_ashp_baseboard",
+   "aliases": [
+    "DOAS ASHP + zone PTAC cooling + electric baseboards"
+   ],
+   "d58_record_sha256": "1bdf298da8230557d6e59e453e5964a067ec62acb5a3f507ea8a975ae352864f"
+  },
+  {
+   "id": "doas-vrf-ccashp-elecsupp",
+   "legacy_name": "hs08_ccashp_vrf",
+   "aliases": [
+    "DOAS cold-climate ASHP + VRF"
+   ],
+   "d58_record_sha256": "022b117c397eec406467af16cb987745fc9304d3de64e74a6039d3ea5054096c"
+  },
+  {
+   "id": "doas-vrf-ashp-elecsupp",
+   "legacy_name": "hs13_ashp_vrf",
+   "aliases": [
+    "DOAS ASHP + VRF"
+   ],
+   "d58_record_sha256": "022b117c397eec406467af16cb987745fc9304d3de64e74a6039d3ea5054096c"
+  },
+  {
+   "id": "doas-fc4-hw-chw-gshp-elecboiler",
+   "legacy_name": "hs14_cgshp_fancoils",
+   "aliases": [
+    "four-pipe fan coils on a ground-source heat pump plant"
+   ],
+   "d58_record_sha256": "e4a1e217b5a56bd4305bee99e61c8db098fc65443547dc518e82d59b87add67d"
+  },
+  {
+   "id": "doas-fc4-hw-chw-awhp-elecboiler",
+   "legacy_name": "hs15_cawhp_fancoils",
+   "aliases": [
+    "four-pipe fan coils on a air-to-water heat pump plant"
+   ],
+   "d58_record_sha256": "3bd864ffed54ee68165a50516efe148c1774251b59f5c6b6bcf557d6d2a4e323"
+  },
+  {
+   "id": "doas-fc4-ashp-elecsupp-awhp-elecboiler",
+   "legacy_name": "hs16_ashp_cawhp_fancoils",
+   "aliases": [
+    "four-pipe fan coils on a air-to-water heat pump plant with ASHP DOAS"
+   ],
+   "d58_record_sha256": "3bd864ffed54ee68165a50516efe148c1774251b59f5c6b6bcf557d6d2a4e323"
+  },
+  {
+   "id": "ptac-elecbb",
+   "legacy_name": "PTAC with baseboard electric",
+   "aliases": [
+    "zone PTAC cooling + electric baseboards"
+   ],
+   "d58_record_sha256": "f6857c8a6ee9f134816bb82f08ae33af16da4611ed6666864ab8c84f442a4a17"
+  },
+  {
+   "id": "ptac-hwbb-gasboiler",
+   "legacy_name": "PTAC with baseboard gas boiler",
+   "aliases": [
+    "zone PTAC cooling + hot water baseboards (gas boiler)"
+   ],
+   "d58_record_sha256": "021fe46789ad38d03df667bf49773e2d5c22d472f8d7ca3cc4d6965f25e8c7f7"
+  },
+  {
+   "id": "pthp",
+   "legacy_name": "PTHP",
+   "aliases": [
+    "zone PTHPs"
+   ],
+   "d58_record_sha256": "d4496608b80edb8024bd48a94d04142c6d2572348d0155f49c5f2b13c88a4aa7"
+  },
+  {
+   "id": "windowac-elecbb",
+   "legacy_name": "Window AC with baseboard electric",
+   "aliases": [
+    "window AC units + electric baseboards"
+   ],
+   "d58_record_sha256": "f6857c8a6ee9f134816bb82f08ae33af16da4611ed6666864ab8c84f442a4a17"
+  },
+  {
+   "id": "uh-gas",
+   "legacy_name": "Gas unit heaters",
+   "aliases": [
+    "gas unit heaters"
+   ],
+   "d58_record_sha256": "2afbe61e73fb07d01ef06d28440ebb353bd9b2b810cf8bf3487da73956edc3aa"
+  },
+  {
+   "id": "uh-elec",
+   "legacy_name": "Electric unit heaters",
+   "aliases": [
+    "electric unit heaters"
+   ],
+   "d58_record_sha256": "533ff55e13cab0e17724d07a78ec65d72149654022943faf1a8cd6f8f385be88"
+  },
+  {
+   "id": "uh-hw-gasboiler",
+   "legacy_name": "Hot water unit heaters",
+   "aliases": [
+    "hot water unit heaters (gas boiler)"
+   ],
+   "d58_record_sha256": "2afbe61e73fb07d01ef06d28440ebb353bd9b2b810cf8bf3487da73956edc3aa"
+  },
+  {
+   "id": "psz-elec-elecbb-perzone",
+   "legacy_name": "PSZ-AC with electric baseboard heat",
+   "aliases": [
+    "packaged single-zone DX with electric heat, one unit per zone + electric baseboards"
+   ],
+   "d58_record_sha256": "d7e3de73f1060a2ff74a815960c77210a6a4e1c0cf84da283ae8567ccf76c8da"
+  },
+  {
+   "id": "psz-hw-gasboiler-perzone",
+   "legacy_name": "PSZ-AC with gas boiler",
+   "aliases": [
+    "packaged single-zone DX with hot water heat, one unit per zone (gas boiler)"
+   ],
+   "d58_record_sha256": "7fb2e03ddd817107a07b72f67c690fc1b75eb6e73cf7ea5a122291b3d7b644c2"
+  },
+  {
+   "id": "psz-hw-hwbb-gasboiler",
+   "legacy_name": "Shared PSZ with gas boiler coils and hot water baseboard",
+   "aliases": [
+    "packaged single-zone DX with hot water heat + hot water baseboards (gas boiler)"
+   ],
+   "d58_record_sha256": "fd325e0588adf215411f594b32839859b115082d8bd3e6e0b57290dcc8ba186c"
+  },
+  {
+   "id": "vav-hw-gasboiler-scrollchiller",
+   "legacy_name": "VAV chiller with gas boiler reheat",
+   "aliases": [
+    "built-up VAV with hot water reheat and chilled water cooling (gas boiler, scroll chiller)"
+   ],
+   "d58_record_sha256": "75b64481e558199bc9ca07df6461ba89fc5d23a2dbc224f5bc5f07145512a852"
+  },
+  {
+   "id": "vav-hw-hwbb-erv-gasboiler-scrollchiller",
+   "legacy_name": "VAV chiller with gas boiler reheat and rotary ERV",
+   "aliases": [
+    "built-up VAV with hot water reheat and chilled water cooling and rotary ERV + hot water baseboards (gas boiler, scroll chiller)"
+   ],
+   "d58_record_sha256": "75b64481e558199bc9ca07df6461ba89fc5d23a2dbc224f5bc5f07145512a852"
+  },
+  {
+   "id": "psz-ashp-gassupp-hwbb-gasboiler",
+   "legacy_name": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard",
+   "aliases": [
+    "packaged single-zone DX with ASHP heat with gas backup + hot water baseboards (gas boiler)",
+    "psz-ashp-gassupp-hwbb-gasboiler-necbs4",
+    "PSZ RTU with exhaust ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard",
+    "packaged single-zone DX with ASHP heat with gas backup, with exhaust + hot water baseboards (gas boiler)"
+   ],
+   "d58_record_sha256": "daddaf15ed21012636dbf17586cb96a69c6beaff0f73c043fa9168c1c13d5ab7"
+  },
+  {
+   "id": "psz-ashp-gassupp-elecbb",
+   "legacy_name": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Electric Baseboard",
+   "aliases": [
+    "packaged single-zone DX with ASHP heat with gas backup + electric baseboards",
+    "psz-ashp-gassupp-elecbb-necbs4",
+    "PSZ RTU with exhaust ASHP with Gas and ASHP with Gas Supp. Heat Coils and Electric Baseboard",
+    "packaged single-zone DX with ASHP heat with gas backup, with exhaust + electric baseboards"
+   ],
+   "d58_record_sha256": "daddaf15ed21012636dbf17586cb96a69c6beaff0f73c043fa9168c1c13d5ab7"
+  },
+  {
+   "id": "psz-ashp-elecsupp-hwbb-gasboiler",
+   "legacy_name": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard",
+   "aliases": [
+    "packaged single-zone DX with ASHP heat with electric backup + hot water baseboards (gas boiler)",
+    "psz-ashp-elecsupp-hwbb-gasboiler-necbs4",
+    "PSZ RTU with exhaust ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard",
+    "packaged single-zone DX with ASHP heat with electric backup, with exhaust + hot water baseboards (gas boiler)"
+   ],
+   "d58_record_sha256": "daddaf15ed21012636dbf17586cb96a69c6beaff0f73c043fa9168c1c13d5ab7"
+  },
+  {
+   "id": "psz-ashp-elecsupp-elecbb",
+   "legacy_name": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard",
+   "aliases": [
+    "packaged single-zone DX with ASHP heat with electric backup + electric baseboards",
+    "psz-ashp-elecsupp-elecbb-necbs4",
+    "PSZ RTU with exhaust ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard",
+    "packaged single-zone DX with ASHP heat with electric backup, with exhaust + electric baseboards"
+   ],
+   "d58_record_sha256": "b6e872742dade82aa24d1f2766cb8df6c0ccacd087e46ad9a5ef7e081b68cfc3"
+  },
+  {
+   "id": "cvrh-ashp-gasrh-hwbb-gasboiler",
+   "legacy_name": "PSZ RTU ASHP with Gas and ASHP Coils and Hot Water Baseboard with Gas Reheat",
+   "aliases": [
+    "100% OA make-up air ASHP + CAV gas reheat + hot water baseboards (gas boiler)"
+   ],
+   "d58_record_sha256": "73ca6785d26bb93193032bc39453f023f06ce646e50586a49cc8af6d7e973157"
+  },
+  {
+   "id": "cvrh-ashp-gasrh-elecbb",
+   "legacy_name": "PSZ RTU ASHP with Gas and ASHP Coils and Electric Baseboard with Gas Reheat",
+   "aliases": [
+    "100% OA make-up air ASHP + CAV gas reheat + electric baseboards"
+   ],
+   "d58_record_sha256": "73ca6785d26bb93193032bc39453f023f06ce646e50586a49cc8af6d7e973157"
+  },
+  {
+   "id": "cvrh-ashp-elecrh-hwbb-gasboiler",
+   "legacy_name": "PSZ RTU ASHP with Electric and ASHP Coils and Hot Water Baseboard with Electric Reheat",
+   "aliases": [
+    "100% OA make-up air ASHP + CAV electric reheat + hot water baseboards (gas boiler)"
+   ],
+   "d58_record_sha256": "73ca6785d26bb93193032bc39453f023f06ce646e50586a49cc8af6d7e973157"
+  },
+  {
+   "id": "cvrh-ashp-elecrh-elecbb",
+   "legacy_name": "PSZ RTU ASHP with Electric and ASHP Coils and Electric Baseboard with Electric Reheat",
+   "aliases": [
+    "100% OA make-up air ASHP + CAV electric reheat + electric baseboards"
+   ],
+   "d58_record_sha256": "ee5a95f808950448112068b0ce9e961a65a4b88f279db6114e1edfe84561bc5c"
+  },
+  {
+   "id": "mau-ptac-hw-hwptac-gasboiler",
+   "legacy_name": "PSZ MAU Hot Water with water-heated PTAC",
+   "aliases": [
+    "100% OA make-up air (hot water heat) + zone PTAC cooling (gas boiler)"
+   ],
+   "d58_record_sha256": "905fe8f91a34a6a2d989b9a0751ec197a2da0c362182c8d6fa1d9d9019d594ad"
+  },
+  {
+   "id": "furnace-gas",
+   "legacy_name": "Forced air furnace",
+   "aliases": [
+    "per-zone gas furnace"
+   ],
+   "d58_record_sha256": "02fe8ef15d7301134a457ecfb3c3fafdb77799d3c0c0f74ddc8802e2ee794062"
+  },
+  {
+   "id": "hv-hw-gasboiler-shared",
+   "legacy_name": "Shared hot water heating-only air handler",
+   "aliases": [
+    "shared hot water heating-only air handler (gas boiler)"
+   ],
+   "d58_record_sha256": "4e6aea17c7256a89d8ba7e3ed29043439073ae1ebdafb9d8a3d8badc4fb6db0b"
+  },
+  {
+   "id": "furnace-gas-dx-nooa-shared",
+   "legacy_name": "Shared furnace with DX cooling and no outdoor air",
+   "aliases": [
+    "shared furnace with DX cooling"
+   ],
+   "d58_record_sha256": "6741fbe7d7ad5af235b4d31922ae14f07a844b629c532c3ec5b27f6dbae42089"
+  },
+  {
+   "id": "cvrh-hw-gasboiler",
+   "legacy_name": "Shared hot water air handler with water reheat",
+   "aliases": [
+    "shared hot water heating-only air handler with hot water reheat (gas boiler)"
+   ],
+   "d58_record_sha256": "1c705a2234a388944f67299d476da6c5644da23b30c1fa4abb34ee866bacdad6"
+  },
+  {
+   "id": "splitac-dx-elecbb-nooa",
+   "legacy_name": "Residential AC with baseboard electric",
+   "aliases": [
+    "per-zone central AC + electric baseboards"
+   ],
+   "d58_record_sha256": "73c820504daf93f6082e044d63a8d1ca6811019312058ba409b6fc8841e2ce9f"
+  },
+  {
+   "id": "bb-hwbb-district",
+   "legacy_name": "Baseboard district hot water",
+   "aliases": [
+    "hot water baseboards (district heating)"
+   ],
+   "d58_record_sha256": "7c9b9bcf347cf0b54cabfe4cf31ff3bed09c57ef6e180a756a06f90504a5aa9b"
+  },
+  {
+   "id": "pvav-hw-gasboiler",
+   "legacy_name": "PVAV with gas boiler reheat",
+   "aliases": [
+    "built-up VAV with hot water reheat and DX cooling (gas boiler)"
+   ],
+   "d58_record_sha256": "75b64481e558199bc9ca07df6461ba89fc5d23a2dbc224f5bc5f07145512a852"
+  },
+  {
+   "id": "pvav-hw-hwbb-hrv-gasboiler",
+   "legacy_name": "PVAV with gas boiler reheat and plate HRV",
+   "aliases": [
+    "built-up VAV with hot water reheat and DX cooling and plate HRV + hot water baseboards (gas boiler)"
+   ],
+   "d58_record_sha256": "75b64481e558199bc9ca07df6461ba89fc5d23a2dbc224f5bc5f07145512a852"
+  },
+  {
+   "id": "pvav-hw-hwbb-gasboiler",
+   "legacy_name": "PVAV with gas boiler reheat and hot water baseboard",
+   "aliases": [
+    "built-up VAV with hot water reheat and DX cooling + hot water baseboards (gas boiler)"
+   ],
+   "d58_record_sha256": "75b64481e558199bc9ca07df6461ba89fc5d23a2dbc224f5bc5f07145512a852"
+  },
+  {
+   "id": "evap-elecbb",
+   "legacy_name": "Direct evap coolers with baseboard electric",
+   "aliases": [
+    "per-zone direct evaporative coolers + electric baseboards"
+   ],
+   "d58_record_sha256": "a71e8a253f19c5c30dad2ccb8062d50f287a57b785f45c6caccd9e7a464eef60"
+  },
+  {
+   "id": "evap",
+   "legacy_name": "Direct evap coolers with no heat",
+   "aliases": [
+    "per-zone direct evaporative coolers"
+   ],
+   "d58_record_sha256": "1dfafd1fceaf88ee1059ba54757c09dc5dabd09470537549046610b096d00e1a"
+  },
+  {
+   "id": "doas-elec",
+   "legacy_name": "DOAS ventilation only",
+   "aliases": [
+    "DOAS ventilation"
+   ],
+   "d58_record_sha256": "8cd682e8169d58157ab16da31b287e502e36c5cfa2639d73e8032550fa1cacfb"
+  },
+  {
+   "id": "wshp-gasboiler",
+   "legacy_name": "Water source heat pumps",
+   "aliases": [
+    "water-source heat pumps on a fluid cooler loop"
+   ],
+   "d58_record_sha256": "362dad35a7967e0320046ec73b33c04264426f1b5083b8758707275d7fc4c65f"
+  },
+  {
+   "id": "doas-wshp-elec-gasboiler-fluidcooler",
+   "legacy_name": "DOAS with water source heat pumps fluid cooler with boiler",
+   "aliases": [
+    "DOAS ventilation + water-source heat pumps on a fluid cooler loop"
+   ],
+   "d58_record_sha256": "fd296fe1205e6eb9e1fd014c6c2e177936b85838b009904f1d1fddd8c907f942"
+  },
+  {
+   "id": "doas-fc4-elec-gasboiler-scrollchiller",
+   "legacy_name": "DOAS with fan coil chiller with boiler",
+   "aliases": [
+    "DOAS ventilation + four-pipe fan coils (gas boiler, scroll chiller)"
+   ],
+   "d58_record_sha256": "d360db04b44bd51743e028d36d61d0dc500093e0a94ffdc1e2820b7ca6074145"
+  },
+  {
+   "id": "doas-acb-elec-elecbb-acscrollchiller",
+   "legacy_name": "DOAS with active chilled beams and electric baseboards",
+   "aliases": [
+    "DOAS with active chilled beams + electric baseboards (air-cooled scroll chiller)"
+   ],
+   "d58_record_sha256": "d213a609128bebd0712fc3682dadeae71de3f0da6efeb1ef77303e3f2fd26ce3"
+  },
+  {
+   "id": "doas-pcb-elec-elecbb-acscrollchiller",
+   "legacy_name": "DOAS with passive chilled beams and electric baseboards",
+   "aliases": [
+    "DOAS with passive chilled beams + electric baseboards (air-cooled scroll chiller)"
+   ],
+   "d58_record_sha256": "d213a609128bebd0712fc3682dadeae71de3f0da6efeb1ef77303e3f2fd26ce3"
+  },
+  {
+   "id": "ddvav-hw-gasboiler-scrollchiller",
+   "legacy_name": "Dual-duct VAV with gas boiler and water-cooled chiller",
+   "aliases": [
+    "dual-duct VAV with hydronic hot and cold decks (gas boiler, scroll chiller)"
+   ],
+   "d58_record_sha256": "4bc402d088f530d6d739492bdca6f77a8a44267430d3ab8f2fd99c577cc03a68"
+  },
+  {
+   "id": "vrf",
+   "legacy_name": "VRF",
+   "aliases": [
+    "VRF heat recovery system"
+   ],
+   "d58_record_sha256": "112b60ef70391522730ded6b85f6fead70a630cf7814f432fd5ea08861f0d9ba"
+  },
+  {
+   "id": "zone-erv",
+   "legacy_name": "Zone ERVs",
+   "aliases": [
+    "zone energy recovery ventilators"
+   ],
+   "d58_record_sha256": "df09905965614590a80b928cedd2e4be73236970c2f18fc0a94d345b8323fae7"
+  },
+  {
+   "id": "doas-vrf-elec",
+   "legacy_name": "DOAS with VRF",
+   "aliases": [
+    "DOAS ventilation + VRF heat recovery system"
+   ],
+   "d58_record_sha256": "6fbe9caad5b7fac32433934319fa1f80a91c485c921330c5ea2a689c207124d7"
+  },
+  {
+   "id": "doas-wshp-elec-gasboiler-tower",
+   "legacy_name": "DOAS with water source heat pumps cooling tower with boiler",
+   "aliases": [
+    "DOAS ventilation + water-source heat pumps on a cooling tower loop"
+   ],
+   "d58_record_sha256": "fd296fe1205e6eb9e1fd014c6c2e177936b85838b009904f1d1fddd8c907f942"
+  },
+  {
+   "id": "doas-wshp-elec-groundloop",
+   "legacy_name": "DOAS with water source heat pumps with ground source heat pump",
+   "aliases": [
+    "DOAS ventilation + water-source heat pumps on a ground loop"
+   ],
+   "d58_record_sha256": "53ae80135f8489099258aa4bc706678a74e1c0a866bbd1f7794bd9fb6ebe1aa9"
+  },
+  {
+   "id": "doas-fc4-elec-district-scrollchiller",
+   "legacy_name": "DOAS with fan coil chiller with district hot water",
+   "aliases": [
+    "DOAS ventilation + four-pipe fan coils (district heating, scroll chiller)"
+   ],
+   "d58_record_sha256": "210f76cd3d4153177cbe826d17890d5e77f947a6f73cf0e84a1774bc5b302100"
+  },
+  {
+   "id": "doas-fc4-elec-gasboiler-acscrollchiller",
+   "legacy_name": "DOAS with fan coil air-cooled chiller with boiler",
+   "aliases": [
+    "DOAS ventilation + four-pipe fan coils (gas boiler, air-cooled scroll chiller)"
+   ],
+   "d58_record_sha256": "d360db04b44bd51743e028d36d61d0dc500093e0a94ffdc1e2820b7ca6074145"
+  },
+  {
+   "id": "doas-fc4-elec-district-acscrollchiller",
+   "legacy_name": "DOAS with fan coil air-cooled chiller with district hot water",
+   "aliases": [
+    "DOAS ventilation + four-pipe fan coils (district heating, air-cooled scroll chiller)"
+   ],
+   "d58_record_sha256": "210f76cd3d4153177cbe826d17890d5e77f947a6f73cf0e84a1774bc5b302100"
+  },
+  {
+   "id": "doas-fc4-elec-gasboiler-districtchw",
+   "legacy_name": "DOAS with fan coil district chilled water with boiler",
+   "aliases": [
+    "DOAS ventilation + four-pipe fan coils (gas boiler, district cooling)"
+   ],
+   "d58_record_sha256": "0bbfba398e79a06ec74cb2cf579cc83a4b558dc43f8eb3643e123269d27c5808"
+  },
+  {
+   "id": "doas-fc4-elec-district-districtchw",
+   "legacy_name": "DOAS with fan coil district chilled water with district hot water",
+   "aliases": [
+    "DOAS ventilation + four-pipe fan coils (district heating, district cooling)"
+   ],
+   "d58_record_sha256": "0349487595ab4e440812a77dcee340e3188aedd94ce97a4408c9899da7599dae"
+  },
+  {
+   "id": "crah-acscrollchiller",
+   "legacy_name": "Recirculating CRAH chilled water with humidity control",
+   "aliases": [
+    "recirculating cooling-only chilled water computer-room air handler with humidity control (air-cooled scroll chiller)"
+   ],
+   "d58_record_sha256": "d888b1581621ccd2fe8b2a0ef21b2e79f6e0ee837362cb3dc646e293aa449395"
+  },
+  {
+   "id": "bb-hwbb-awhp-gasbu",
+   "legacy_name": "bb-hwbb-awhp-gasbu",
+   "aliases": [],
+   "d58_record_sha256": "087f6dc53f448b7ac087db3928266d55720d1920b6ef76b9db696074a9887314"
+  },
+  {
+   "id": "bb-hwbb-awhp-elecbu",
+   "legacy_name": "bb-hwbb-awhp-elecbu",
+   "aliases": [],
+   "d58_record_sha256": "793aafc2db2cebc0a7bab99bb564510dbed1470ef2a8d4142d0a297c1b5d0047"
+  },
+  {
+   "id": "bb-hwbb-awhp-gasbu-lift",
+   "legacy_name": "bb-hwbb-awhp-gasbu-lift",
+   "aliases": [],
+   "d58_record_sha256": "087f6dc53f448b7ac087db3928266d55720d1920b6ef76b9db696074a9887314"
+  },
+  {
+   "id": "vav-hw-hwbb-awhp-gasbu-scrollchiller",
+   "legacy_name": "vav-hw-hwbb-awhp-gasbu-scrollchiller",
+   "aliases": [],
+   "d58_record_sha256": "aa963fff6286312176aba0599f6366d638293c465c8edb7023fed2eccd8924f4"
+  },
+  {
+   "id": "vav-hw-hwbb-awhp-elecbu-scrollchiller",
+   "legacy_name": "vav-hw-hwbb-awhp-elecbu-scrollchiller",
+   "aliases": [],
+   "d58_record_sha256": "2dcaf37f842a915c7af45e1dc646f1cf1958d23b48741e3d805dbefd31e3511b"
+  },
+  {
+   "id": "pvav-hw-hwbb-awhp-gasbu",
+   "legacy_name": "pvav-hw-hwbb-awhp-gasbu",
+   "aliases": [],
+   "d58_record_sha256": "aa963fff6286312176aba0599f6366d638293c465c8edb7023fed2eccd8924f4"
+  },
+  {
+   "id": "uh-hw-awhp-gasbu",
+   "legacy_name": "uh-hw-awhp-gasbu",
+   "aliases": [],
+   "d58_record_sha256": "04dfe16f6cbcbbe4a76da962a49837804a4e29ec511f2ff002b914c8d1bb9d69"
+  },
+  {
+   "id": "mau-fc4-gas-awhp-gasbu-scrollchiller",
+   "legacy_name": "mau-fc4-gas-awhp-gasbu-scrollchiller",
+   "aliases": [],
+   "d58_record_sha256": "8dceb1061a8d9e0838a3c8c526e9a385aafb83e8c239ffff6d9f864a13bfbb55"
+  },
+  {
+   "id": "mau-fc4-elec-awhp-elecbu-scrollchiller",
+   "legacy_name": "mau-fc4-elec-awhp-elecbu-scrollchiller",
+   "aliases": [],
+   "d58_record_sha256": "063e0173604af54c2123b7a8e5c51d7e99d51ae4981c970da567066bef650de0"
+  },
+  {
+   "id": "psz-hw-hwbb-awhp-gasbu",
+   "legacy_name": "psz-hw-hwbb-awhp-gasbu",
+   "aliases": [],
+   "d58_record_sha256": "daddaf15ed21012636dbf17586cb96a69c6beaff0f73c043fa9168c1c13d5ab7"
+  },
+  {
+   "id": "pvav-hw-hwbb-awhp-elecbu",
+   "legacy_name": "pvav-hw-hwbb-awhp-elecbu",
+   "aliases": [],
+   "d58_record_sha256": "2dcaf37f842a915c7af45e1dc646f1cf1958d23b48741e3d805dbefd31e3511b"
+  },
+  {
+   "id": "uh-hw-awhp-elecbu",
+   "legacy_name": "uh-hw-awhp-elecbu",
+   "aliases": [],
+   "d58_record_sha256": "ad6f86530412eb74919538dd67ef2a949f370b36ddd8300add78d42615dcf1c1"
+  },
+  {
+   "id": "bb-hwbb-awhp-elecbu-lift",
+   "legacy_name": "bb-hwbb-awhp-elecbu-lift",
+   "aliases": [],
+   "d58_record_sha256": "793aafc2db2cebc0a7bab99bb564510dbed1470ef2a8d4142d0a297c1b5d0047"
+  },
+  {
+   "id": "ptac-hwptac-gasboiler",
+   "legacy_name": "ptac-hwptac-gasboiler",
+   "aliases": [],
+   "d58_record_sha256": "e22549c1d478455d2ca08f1ebbdb159c75ede8b8733e4ed5e489c47bbb69eb49"
+  },
+  {
+   "id": "psz-ashp-elecsupp-perzone",
+   "legacy_name": "psz-ashp-elecsupp-perzone",
+   "aliases": [],
+   "d58_record_sha256": "c45d23795ae28c6636bdeeed629654ebf22eda53edb783e2e46ed357db328f5e"
+  },
+  {
+   "id": "pvav-elec-pfp",
+   "legacy_name": "pvav-elec-pfp",
+   "aliases": [],
+   "d58_record_sha256": "419afc0c5ba76a0a54e48ee6bac4d968a35dbee147e1e0247ba1a6173b7ff479"
+  },
+  {
+   "id": "vav-elec-pfp-scrollchiller",
+   "legacy_name": "vav-elec-pfp-scrollchiller",
+   "aliases": [],
+   "d58_record_sha256": "419afc0c5ba76a0a54e48ee6bac4d968a35dbee147e1e0247ba1a6173b7ff479"
+  },
+  {
+   "id": "hv-elec",
+   "legacy_name": "hv-elec",
+   "aliases": [],
+   "d58_record_sha256": "92fca4edb713080abd2ed8475d761058006d7a948f4f86c296abe1022497b556"
+  },
+  {
+   "id": "doas-untempered",
+   "legacy_name": "doas-untempered",
+   "aliases": [],
+   "d58_record_sha256": "a4324e19f19f0932bda6b628d5ebcc00c7f1882798615ec3ddf8ab4a96d40270"
+  },
+  {
+   "id": "psz-gas-100oa-perzone",
+   "legacy_name": "psz-gas-100oa-perzone",
+   "aliases": [],
+   "d58_record_sha256": "7fb2e03ddd817107a07b72f67c690fc1b75eb6e73cf7ea5a122291b3d7b644c2"
+  },
+  {
+   "id": "hv-hw-100oa-gasboiler-shared",
+   "legacy_name": "hv-hw-100oa-gasboiler-shared",
+   "aliases": [],
+   "d58_record_sha256": "4e6aea17c7256a89d8ba7e3ed29043439073ae1ebdafb9d8a3d8badc4fb6db0b"
+  },
+  {
+   "id": "ddvav-gas-dx",
+   "legacy_name": "ddvav-gas-dx",
+   "aliases": [],
+   "d58_record_sha256": "4bc402d088f530d6d739492bdca6f77a8a44267430d3ab8f2fd99c577cc03a68"
+  }
+ ],
+ "presets": [
+  {
+   "base": "vav-elec-elecbb-scrollchiller",
+   "neutral_keys": [
+    "chiller_type"
+   ],
+   "presets": [
+    "vav-elec-elecbb-centrifchiller",
+    "vav-elec-elecbb-screwchiller",
+    "vav-elec-elecbb-recipchiller"
+   ]
+  },
+  {
+   "base": "vav-elec-hwbb-gasboiler-scrollchiller",
+   "neutral_keys": [
+    "chiller_type"
+   ],
+   "presets": [
+    "vav-elec-hwbb-gasboiler-centrifchiller",
+    "vav-elec-hwbb-gasboiler-screwchiller",
+    "vav-elec-hwbb-gasboiler-recipchiller"
+   ]
+  },
+  {
+   "base": "vav-hw-elecbb-gasboiler-scrollchiller",
+   "neutral_keys": [
+    "chiller_type"
+   ],
+   "presets": [
+    "vav-hw-elecbb-gasboiler-centrifchiller",
+    "vav-hw-elecbb-gasboiler-screwchiller",
+    "vav-hw-elecbb-gasboiler-recipchiller"
+   ]
+  },
+  {
+   "base": "vav-hw-hwbb-gasboiler-scrollchiller",
+   "neutral_keys": [
+    "chiller_type"
+   ],
+   "presets": [
+    "vav-hw-hwbb-gasboiler-centrifchiller",
+    "vav-hw-hwbb-gasboiler-screwchiller",
+    "vav-hw-hwbb-gasboiler-recipchiller"
+   ]
+  },
+  {
+   "base": "mau-fc4-gas-gasboiler-scrollchiller",
+   "neutral_keys": [
+    "chiller_type"
+   ],
+   "presets": [
+    "mau-fc4-gas-gasboiler-centrifchiller",
+    "mau-fc4-gas-gasboiler-screwchiller",
+    "mau-fc4-gas-gasboiler-recipchiller"
+   ]
+  },
+  {
+   "base": "mau-fc4-gas-chw-gasboiler-scrollchiller",
+   "neutral_keys": [
+    "chiller_type"
+   ],
+   "presets": [
+    "mau-fc4-gas-chw-gasboiler-centrifchiller",
+    "mau-fc4-gas-chw-gasboiler-screwchiller",
+    "mau-fc4-gas-chw-gasboiler-recipchiller"
+   ]
+  },
+  {
+   "base": "mau-fc2-gas-gasboiler-scrollchiller",
+   "neutral_keys": [
+    "chiller_type"
+   ],
+   "presets": [
+    "mau-fc2-gas-gasboiler-centrifchiller",
+    "mau-fc2-gas-gasboiler-screwchiller",
+    "mau-fc2-gas-gasboiler-recipchiller"
+   ]
+  },
+  {
+   "base": "mau-fc2-gas-chw-gasboiler-scrollchiller",
+   "neutral_keys": [
+    "chiller_type"
+   ],
+   "presets": [
+    "mau-fc2-gas-chw-gasboiler-centrifchiller",
+    "mau-fc2-gas-chw-gasboiler-screwchiller",
+    "mau-fc2-gas-chw-gasboiler-recipchiller"
+   ]
+  }
+ ]
+}
