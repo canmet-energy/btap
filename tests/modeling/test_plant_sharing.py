@@ -24,6 +24,13 @@ HEAT_PUMP_FAN_COILS = 'doas-fc4-hw-chw-awhp-elecboiler'
 #: The GSHP variant: its chilled-water plant holds ChillerElectricEIRs named
 #: without a kind, which the AWHP variant (a plant-loop heat pump) does not.
 GSHP_FAN_COILS = 'doas-fc4-hw-chw-gshp-elecboiler'
+#: Rows built here on an ELECTRIC boiler, which `find_hot_water` would match to
+#: the GSHP row's hot-water plant (a heat pump with a series electric boiler)
+#: were it not reserved. A gas-boiler row is refused on fuel alone, so it cannot
+#: tell whether the reservation works (Fable, re-review of #263).
+ELECTRIC_BOILER_VAV = 'vav-hw-elecbb-gasboiler-scrollchiller'
+ELECTRIC_BOILER_BASEBOARDS = 'bb-hwbb-gasboiler'
+ELECTRIC = {'boiler_fuel': 'Electricity'}
 
 
 def _zones(model):
@@ -44,7 +51,8 @@ def _build_pair(first, second):
     made = {}
     for system, served in ((first, zones[:2]), (second, zones[2:])):
         before = set(_water_coils(model))
-        modeling.build_system(model, system, served)
+        config = ELECTRIC if system in (ELECTRIC_BOILER_VAV, ELECTRIC_BOILER_BASEBOARDS) else None
+        modeling.build_system(model, system, served, config=config)
         made[system] = set(_water_coils(model)) - before
     return model, made
 
@@ -151,7 +159,11 @@ class TestTheHeatPumpFanCoilPlantTakesOnlyItsOwnCoils(unittest.TestCase):
     def test_another_systems_water_coils_stay_on_its_own_plant_in_either_order(self):
         for first, second in ((SCROLL, HEAT_PUMP_FAN_COILS), (HEAT_PUMP_FAN_COILS, SCROLL),
                               (SCROLL, GSHP_FAN_COILS), (GSHP_FAN_COILS, SCROLL),
-                              (CENTRIFUGAL, GSHP_FAN_COILS), (GSHP_FAN_COILS, CENTRIFUGAL)):
+                              (CENTRIFUGAL, GSHP_FAN_COILS), (GSHP_FAN_COILS, CENTRIFUGAL),
+                              (ELECTRIC_BOILER_VAV, GSHP_FAN_COILS),
+                              (GSHP_FAN_COILS, ELECTRIC_BOILER_VAV),
+                              (ELECTRIC_BOILER_BASEBOARDS, GSHP_FAN_COILS),
+                              (GSHP_FAN_COILS, ELECTRIC_BOILER_BASEBOARDS)):
             with self.subTest(first=first, second=second):
                 model, made = _build_pair(first, second)
                 coils = _water_coils(model)

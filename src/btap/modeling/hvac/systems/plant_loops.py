@@ -32,7 +32,11 @@ TEMPERATURE_PROFILE_FEATURE = 'btap_temperature_profile'
 #: one plant. Declared here, read by `chiller_compressor`.
 CHILLER_COMPRESSOR_FEATURE = 'btap_chiller_compressor'
 #: The catalogue id of the system a plant loop belongs to EXCLUSIVELY. No
-#: other system's reuse search adopts a loop carrying it. The heat-pump
+#: other system's reuse search adopts a loop carrying it: every hot-water,
+#: heat-pump hot-water and chilled-water search, and their name fallbacks,
+#: skip it. (The GSHP row's hot-water plant is a water-to-water heat pump with
+#: a series boiler, which `find_hot_water` reads as an ordinary boiler loop, so
+#: a guard that relied on heat-pump detection missed it: Fable, re-review.) The heat-pump
 #: fan-coil rows stamp their plants: the GSHP row's chilled-water loop holds
 #: two ChillerElectricEIRs named without a kind, so a later chiller row read it
 #: as an unreadable user plant and joined it (Fable, review of #263).
@@ -649,7 +653,7 @@ def find_hot_water(model, part_load_curve_class=None, exclude=(), fuel=None,
     blocked = {str(handle) for handle in exclude}
     return next(
         (pl for pl in model.getPlantLoops()
-         if str(pl.handle()) not in blocked
+         if str(pl.handle()) not in blocked and reserved_for(pl) is None
          and _boiler_heated(pl) and not _district_heated(pl)
          and not _heat_pump_heated(pl)
          and boiler_part_load_class(pl) == part_load_curve_class
@@ -893,7 +897,8 @@ def _air_to_water_heat_pump_hot_water(model, backup_fuel, supply, reuse, exclude
     if reuse:
         blocked = {str(handle) for handle in exclude}
         for pl in model.getPlantLoops():
-            if (str(pl.handle()) not in blocked and _heat_pump_heated(pl)
+            if (str(pl.handle()) not in blocked and reserved_for(pl) is None
+                    and _heat_pump_heated(pl)
                     and _feature(pl, HOT_WATER_SOURCE_FEATURE) == 'awhp'
                     and _feature(pl, HOT_WATER_SUPPLY_FEATURE) == supply
                     and boiler_fuels(pl) == [backup_fuel]
@@ -1075,6 +1080,7 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
             blocked = {str(handle) for handle in exclude}
             existing = next((pl for pl in model.getPlantLoops()
                              if str(pl.handle()) not in blocked
+                             and reserved_for(pl) is None
                              and _named_hot_water_loop(pl)
                              and _district_heated(pl) and not _boiler_heated(pl)
                              and _temperature_profile_matches(
@@ -1106,6 +1112,7 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
             existing = next(
                 (pl for pl in model.getPlantLoops()
                  if str(pl.handle()) not in blocked_by_name
+                 and reserved_for(pl) is None
                  and _named_hot_water_loop(pl)
                  and _district_heated(pl) == (source == 'district')
                  and not (source == 'district' and _boiler_heated(pl))
@@ -1414,6 +1421,7 @@ def chilled_water(model, chiller_type='Scroll', reuse=True, source='water_cooled
             existing = next((pl for pl in model.getPlantLoops()
                              if pl.nameString() == 'Chilled Water Loop'
                              and str(pl.handle()) not in blocked
+                             and reserved_for(pl) is None
                              and _cooling_source(pl) in (None, source)
                              and (source == 'district'
                                   or _compressor_admits(pl, chiller_type))
