@@ -1,4 +1,7 @@
-"""True two-deck VAV with hot- and cold-deck hydronic coils."""
+"""True two-deck VAV. By default the hot deck carries a hot-water coil and the
+cold deck a chilled-water coil; `heating_type` and `cooling_type` select a
+direct coil instead (#259): 'Gas' or 'Electric' on the hot deck, 'dx' (a
+two-speed DX coil, as the packaged-VAV rows use) on the cold deck."""
 
 from __future__ import annotations
 
@@ -8,7 +11,7 @@ import openstudio
 
 from btap._compat import sorted_by_name
 from btap.modeling.hvac import naming
-from btap.modeling.hvac.components import schedules
+from btap.modeling.hvac.components import coils, schedules
 from btap.modeling.hvac.systems.base_system import BaseSystem
 
 
@@ -22,13 +25,45 @@ def _finite(config, key):
     return value
 
 
+_HYDRONIC_HEAT = ('Hot Water', 'HotWater')
+_DIRECT_HEAT = ('Gas', 'NaturalGas', 'Electric', 'Electricity')
+
+
 class DualDuctVAV(BaseSystem):
+    def _heating_type(self):
+        return self.config.get('heating_type', 'Hot Water')
+
+    def _dx_cooling(self):
+        return self.config.get('cooling_type', 'chilled_water') == 'dx'
+
     def preflight(self, model, zones, control_zone=None, namer='default',
                   remove_existing=False):
-        if not self.config.get('needs_boiler'):
-            raise ValueError('DualDuctVAV requires needs_boiler=True')
-        if not self.config.get('needs_chiller'):
-            raise ValueError('DualDuctVAV requires needs_chiller=True')
+        heating_type = self._heating_type()
+        if heating_type not in _HYDRONIC_HEAT + _DIRECT_HEAT:
+            raise ValueError(
+                f'DualDuctVAV heating_type {heating_type!r} is not one of '
+                f'{list(_HYDRONIC_HEAT + _DIRECT_HEAT)}')
+        cooling_type = self.config.get('cooling_type', 'chilled_water')
+        if cooling_type not in ('chilled_water', 'dx'):
+            raise ValueError(
+                f"DualDuctVAV cooling_type {cooling_type!r} is not "
+                "'chilled_water' or 'dx'")
+        if heating_type in _HYDRONIC_HEAT and not self.config.get('needs_boiler'):
+            raise ValueError('DualDuctVAV with a hot-water hot deck requires needs_boiler=True')
+        if not self._dx_cooling() and not self.config.get('needs_chiller'):
+            raise ValueError('DualDuctVAV with a chilled-water cold deck requires needs_chiller=True')
+        # ...and the reverse (Fable, review of #260): asking the hot-water /
+        # chilled-water row for gas heat and DX cooling built a boiler and a
+        # chiller that no coil used. A plant the decks do not use is refused.
+        if heating_type not in _HYDRONIC_HEAT and self.config.get('needs_boiler'):
+            raise ValueError(
+                f'DualDuctVAV heating_type {heating_type!r} heats the hot deck directly, '
+                'so its boiler would serve no coil; set needs_boiler=False or use a '
+                'hot-water heating_type')
+        if self._dx_cooling() and self.config.get('needs_chiller'):
+            raise ValueError(
+                "DualDuctVAV cooling_type 'dx' cools the cold deck directly, so its "
+                'chiller would serve no coil; set needs_chiller=False or use chilled water')
         hot = _finite(self.sizing, 'hot_deck_supply_air_temperature')
         cold = _finite(self.sizing, 'cold_deck_supply_air_temperature')
         minimum = _finite(self.sizing, 'zone_minimum_air_flow_fraction')
@@ -42,9 +77,12 @@ class DualDuctVAV(BaseSystem):
 
     def build(self, model, zones, control_zone=None, namer='default',
               hw_loop=None, chw_loop=None):
-        if hw_loop is None or chw_loop is None:
-            raise ValueError(
-                'DualDuctVAV requires hot-water and chilled-water loops')
+        heating_type = self._heating_type()
+        dx_cooling = self._dx_cooling()
+        if heating_type in _HYDRONIC_HEAT and hw_loop is None:
+            raise ValueError('DualDuctVAV requires a hot-water loop for its hot deck')
+        if not dx_cooling and chw_loop is None:
+            raise ValueError('DualDuctVAV requires a chilled-water loop for its cold deck')
 
         always_on = model.alwaysOnDiscreteSchedule()
         air_loop = openstudio.model.AirLoopHVAC(model, True)
@@ -62,14 +100,20 @@ class DualDuctVAV(BaseSystem):
         hot_outlet.setName('Dual-Duct Hot Deck Outlet')
         cold_outlet.setName('Dual-Duct Cold Deck Outlet')
 
-        heating_coil = openstudio.model.CoilHeatingWater(model, always_on)
+        # Through `coils.heating_coil`, which hangs a hot-water coil on
+        # `hw_loop` exactly as this builder did by hand.
+        heating_coil = coils.heating_coil(
+            model, heating_type, always_on, hw_loop=hw_loop,
+            performance_profile=self.performance_profile)
         heating_coil.setName('Dual-Duct Hot Deck Heating Coil')
-        hw_loop.addDemandBranchForComponent(heating_coil)
         heating_coil.addToNode(hot_outlet)
 
-        cooling_coil = openstudio.model.CoilCoolingWater(model, always_on)
+        if dx_cooling:
+            cooling_coil = openstudio.model.CoilCoolingDXTwoSpeed(model)
+        else:
+            cooling_coil = openstudio.model.CoilCoolingWater(model, always_on)
+            chw_loop.addDemandBranchForComponent(cooling_coil)
         cooling_coil.setName('Dual-Duct Cold Deck Cooling Coil')
-        chw_loop.addDemandBranchForComponent(cooling_coil)
         cooling_coil.addToNode(cold_outlet)
 
         hot_setpoint = openstudio.model.SetpointManagerScheduled(
@@ -100,8 +144,8 @@ class DualDuctVAV(BaseSystem):
             sys_oa='mixed',
             parts={
                 'sys_hr': 'none',
-                'sys_htg': 'Hot Water',
-                'sys_clg': 'Chilled Water',
+                'sys_htg': 'Hot Water' if heating_type in _HYDRONIC_HEAT else heating_type,
+                'sys_clg': 'dx' if dx_cooling else 'Chilled Water',
                 'sys_sf': 'vv',
                 'zone_htg': 'none',
                 'zone_clg': 'none',

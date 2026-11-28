@@ -37,6 +37,8 @@ from tests.support import needs_sdk
 #   before #221's three fact fixes   top-1 18   top-5 40
 #   after                            top-1 21   top-5 55
 #   D-113 retired the 8 System 4 twins top-1 21   top-5 52
+#   main before #259 (115 rows)        top-1 35   top-5 71   (floors stale)
+#   #259: 9 rows + their scoring        top-1 50   top-5 80
 #
 # The D-113 drop is not a regression. Measured row by row against main: four
 # of the 55 were twins (now retired), no shared row lost its place, and one
@@ -45,8 +47,13 @@ from tests.support import needs_sdk
 # That delta is what the harness is for. The three fixes were each justified
 # on their own evidence, and this said whether they helped in aggregate
 # instead of leaving it to be assumed.
-TOP_1_FLOOR = 21
-TOP_5_FLOOR = 52
+# #259, measured row by row against main on the 124-row catalogue: no row
+# lost top-1 or top-5. Top-1 gained the nine new rows and six existing ones
+# (the four NECB reference heat-pump rooftop units, now credited for their DX
+# heat pump, and two stand-alone PTAC rows, no longer outranked by a
+# make-up-air row their buildings have no loop for).
+TOP_1_FLOOR = 50
+TOP_5_FLOOR = 80
 
 
 def _recover(name):

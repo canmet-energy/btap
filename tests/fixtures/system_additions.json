@@ -65,6 +65,51 @@
       "id": "bb-hwbb-awhp-elecbu-lift",
       "date": "2026-11-27",
       "pr": "air-to-water heat-pump named entries, second set"
+    },
+    {
+      "id": "ptac-hwptac-gasboiler",
+      "date": "2026-11-28",
+      "pr": "systems the catalogue could not express (#259)"
+    },
+    {
+      "id": "psz-ashp-elecsupp-perzone",
+      "date": "2026-11-28",
+      "pr": "systems the catalogue could not express (#259)"
+    },
+    {
+      "id": "pvav-elec-pfp",
+      "date": "2026-11-28",
+      "pr": "systems the catalogue could not express (#259)"
+    },
+    {
+      "id": "vav-elec-pfp-scrollchiller",
+      "date": "2026-11-28",
+      "pr": "systems the catalogue could not express (#259)"
+    },
+    {
+      "id": "hv-elec",
+      "date": "2026-11-28",
+      "pr": "systems the catalogue could not express (#259)"
+    },
+    {
+      "id": "doas-untempered",
+      "date": "2026-11-28",
+      "pr": "systems the catalogue could not express (#259)"
+    },
+    {
+      "id": "psz-gas-100oa-perzone",
+      "date": "2026-11-28",
+      "pr": "systems the catalogue could not express (#259)"
+    },
+    {
+      "id": "hv-hw-100oa-gasboiler-shared",
+      "date": "2026-11-28",
+      "pr": "systems the catalogue could not express (#259)"
+    },
+    {
+      "id": "ddvav-gas-dx",
+      "date": "2026-11-28",
+      "pr": "systems the catalogue could not express (#259)"
     }
   ]
 }

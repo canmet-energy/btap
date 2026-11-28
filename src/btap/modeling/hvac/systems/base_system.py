@@ -9,6 +9,7 @@ from __future__ import annotations
 import openstudio
 
 from btap.modeling.hvac import performance
+from btap.modeling.hvac import ventilation as _ventilation
 
 
 class BaseSystem:
@@ -209,6 +210,29 @@ class BaseSystem:
         oa_controller.autosizeMinimumOutdoorAirFlowRate()
         oa_controller.controllerMechanicalVentilation().setSystemOutdoorAirMethod('ZoneSum')
         return openstudio.model.AirLoopHVACOutdoorAirSystem(model, oa_controller)
+
+    def run_on_full_outdoor_air(self, model, air_loop, oa_system):
+        """Operate an outdoor-air system at 100% outdoor air, and size the
+        loop for it (#259).
+
+        Sizing a loop as 100% OA (`Sizing:System` all-outdoor-air flags) is
+        not the same thing: those flags change only the DESIGN calculation,
+        and the controller still mixes return air in operation. This fixes the
+        controller's minimum and maximum outdoor-air FRACTION at 1 for every
+        hour — the technique `doas.build_dehumidifying_doas` already uses — so
+        no return air is ever mixed, and asserts no economizer, which has
+        nothing to modulate at a fixed fraction. The sizing flags are set too,
+        so the coils are sized on the outdoor air they will actually see.
+        """
+        always_on = model.alwaysOnDiscreteSchedule()
+        controller = oa_system.getControllerOutdoorAir()
+        controller.setMinimumFractionofOutdoorAirSchedule(always_on)
+        controller.setMaximumFractionofOutdoorAirSchedule(always_on)
+        _ventilation.set_economizer(controller, control_type='NoEconomizer')
+        sizing = air_loop.sizingSystem()
+        sizing.setAllOutdoorAirinCooling(True)
+        sizing.setAllOutdoorAirinHeating(True)
+        return oa_system
 
     def add_oa_system(self, model, supply_inlet_node, *, name=None):
         """Build the OA system, attach it, and add energy recovery if asked.

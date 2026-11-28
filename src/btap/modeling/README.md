@@ -6,7 +6,7 @@ simulates. Four engines: the footprint wizards and the bar engine (verbatim
 ports from openstudio-standards), a 3D viewer (ported from
 canmet-energy/campus) and a per-storey 2D floor-plan renderer — plus, since
 the by-nature refactor (D-77), the **HVAC authoring machinery**: the
-115-system topology catalog, `build_system` / `replace_system`, the system
+124-system topology catalog, `build_system` / `replace_system`, the system
 builders, coil/curve/schedule components, `classify.characterize`,
 teardown, and the envelope authoring pieces (constructions, the
 exposed-surface census).
@@ -16,7 +16,7 @@ exposed-surface census).
 ```
 btap/modeling/
   geometry/   wizards, bar engine, footprints, plans, 3D render
-  hvac/       115-system catalog + builders (systems/, components/, data/)
+  hvac/       124-system catalog + builders (systems/, components/, data/)
   envelope/   constructions + surface census
 ```
 
@@ -55,7 +55,7 @@ the code-neutral efficiency primitive after construction.
 
 ## Finding a system
 
-The HVAC catalogue's 115 systems are organised the way a mechanical engineer
+The HVAC catalogue's 124 systems are organised the way a mechanical engineer
 browses them: **category, then system type, then variants**. Variants within a
 type differ by *facets*: what the air handler heats and cools with, the zone
 terminals, the hot- and chilled-water plant, outdoor air, heat recovery, and
@@ -134,7 +134,10 @@ not a central row stacked on a zonal one.
        hydronic row;
      - `{"boiler_fuel": "Electricity"}`;
      - `{"hw_controls": {...}}` for the loop reset and the backup deadband;
-     - `{"per_zone": True}` for one packaged unit per zone.
+     - `{"per_zone": True}` for one packaged unit per zone;
+     - `{"all_outdoor_air": True}` on a rooftop unit or H&V unit to run it on
+       100% outdoor air (the controller's outdoor-air fraction is fixed at 1,
+       not merely sized for it).
 
      An unknown or contradictory option is refused before anything is
      built.

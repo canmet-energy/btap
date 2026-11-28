@@ -23,7 +23,7 @@ cooling capacity) and by costing of foreign models.
           'resolved_heat_pump_source_unclassified': False,
           'unpaired_cooling_plant_heat_pumps': [
               {'name': 'Cooling HP', 'source': 'air'}],
-          'hydronic_heat_pump': False,
+          'hydronic_heat_pump': False, 'loop_full_outdoor_air': False,
           'terminal_type': 'vav_reheat'|'dual_duct_vav'|'cv_reheat'|'cv'|'none',
           'cooling_plants': ['Chilled Water Loop'],
           'design_cooling_kw': 42.0|None,
@@ -721,12 +721,29 @@ def _base_group(zone_names, air_loop_name):
             # loop with no heat exchanger at all, adding 48.64 GJ/yr of
             # recovery to a building that has none (#214).
             'loop_heat_recovery': False,
+            # Does the loop run on 100% outdoor air in OPERATION (#259)? Not
+            # `ventilation_sized`, which reads the SIZING flags only.
+            'loop_full_outdoor_air': False,
             'packaged_unitary': False, 'ventilation_sized': False,
             'declared_equipment_class': None,
             'cooling_plants': [],
             'design_cooling_kw': 0.0, 'cooling_capacity_complete': True,
             'dcv': False, 'system_outdoor_air_method': None,
             'evidence': []}
+
+
+def _schedule_minimum(schedule):
+    """The lowest value a constant or ruleset schedule takes, or None when it
+    is another kind (a compact or interval schedule is not read here)."""
+    constant = opt(schedule.to_ScheduleConstant())
+    if constant is not None:
+        return constant.value()
+    ruleset = opt(schedule.to_ScheduleRuleset())
+    if ruleset is None:
+        return None
+    days = [ruleset.defaultDaySchedule()] + [r.daySchedule() for r in ruleset.scheduleRules()]
+    values = [v for day in days for v in day.values()]
+    return min(values) if values else None
 
 
 def _outdoor_air_facts(group, air_loop, audit):
@@ -759,6 +776,19 @@ def _outdoor_air_facts(group, air_loop, audit):
             group['evidence'].append(
                 f'heat recovery: {component.nameString()}')
             break
+
+    # Does the loop RUN on 100% outdoor air? #259: a unit whose controller's
+    # minimum outdoor-air FRACTION schedule is 1 every hour mixes no return
+    # air, whatever its sizing says. Read from the schedule's own values, so
+    # a fraction below 1 at any hour of a ruleset is not 100%. Before the
+    # `dcv` early return for the same reason as recovery above.
+    fraction = opt(oa_system.getControllerOutdoorAir().minimumFractionofOutdoorAirSchedule())
+    if fraction is not None and _schedule_minimum(fraction) is not None \
+            and _schedule_minimum(fraction) >= 1.0:
+        group['loop_full_outdoor_air'] = True
+        group['evidence'].append(
+            f'100% outdoor air: minimum outdoor-air fraction schedule '
+            f'{fraction.nameString()} is 1 every hour')
 
     if not group['dcv']:
         return

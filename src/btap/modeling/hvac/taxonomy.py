@@ -104,7 +104,7 @@ FACETS = {
     "outdoor_air": ("mixed", "dedicated", "none"),
     "vent_heat_recovery": ("erv", "hrv", "none"),
     # the zone terminals
-    "terminal": ("none", "diffuser", "vav_reheat", "cv_reheat", "dual_duct",
+    "terminal": ("none", "diffuser", "vav_reheat", "parallel_piu", "cv_reheat", "dual_duct",
                  "ptac", "pthp", "window_ac", "fc4", "fc2", "vrf", "wshp",
                  "active_beam", "passive_beam", "unit_heater", "erv"),
     "terminal_heating": ("gas", "electric", "hot_water", "heat_pump", "none"),
@@ -240,6 +240,13 @@ def _refuse(config, *keys):
 
 # --- per family: what the builder builds -------------------------------------
 
+def _air_handler_oa(c):
+    """base_system.run_on_full_outdoor_air: `all_outdoor_air` runs the unit's
+    controller at 100% outdoor air, which is what "dedicated" names for a MAU
+    or a DOAS; otherwise the unit mixes return air."""
+    return "dedicated" if c.get("all_outdoor_air") else "mixed"
+
+
 def _psz(c):
     heat_type = c.get("heating_coil_type")
     ashp = c.get("heat_source") == "ashp" or heat_type == "DX"   # psz.py: 'DX' alias
@@ -247,7 +254,7 @@ def _psz(c):
         c, "psz",
         ahu_heating="ashp" if ashp else _fuel(heat_type),
         ahu_backup=_fuel(c.get("supp_htg_fuel", "Electric")) if ashp else "none",  # psz.py default
-        ahu_cooling="dx", outdoor_air="mixed", terminal="diffuser",
+        ahu_cooling="dx", outdoor_air=_air_handler_oa(c), terminal="diffuser",
         # psz.py: `per_zone` builds one unit per zone; otherwise ONE unit serves
         # every zone it is given, tracking one control zone.
         scope="per_zone" if c.get("per_zone") else "shared")
@@ -261,7 +268,11 @@ def _vav(c):
         # vav_reheat.py: ONE coil type for the central coil and every reheat coil
         ahu_heating=heat, reheat=heat, terminal_heating=heat,
         ahu_cooling="dx" if dx else "chilled_water", outdoor_air="mixed",
-        terminal="vav_reheat", scope="multizone")
+        # vav_reheat.py `terminal_type`: a VAV reheat box, or a parallel
+        # fan-powered box with the same reheat coil
+        terminal=("parallel_piu" if c.get("terminal_type") == "parallel_piu"
+                  else "vav_reheat"),
+        scope="multizone")
 
 
 def _fan_coils(c, *, in_composite=False):
@@ -323,7 +334,7 @@ def _zone_terminal(c):
 def _furnace(c):
     heats, cools = c.get("heating", True), c.get("cooling", False)
     heat = _fuel(c.get("heating_type", "Gas")) if heats else "none"
-    oa = "mixed" if c.get("ventilation", True) else "none"
+    oa = _air_handler_oa(c) if c.get("ventilation", True) else "none"
     cooling = "dx" if cools else "none"
     changeover = ("simultaneous" if heats and cools
                   else "heating_only" if heats else "cooling_only")
@@ -392,8 +403,10 @@ def _family_facets(c, *, in_composite=False):
             f"{_fuel(c.get('boiler_fuel', 'NaturalGas'))}_boiler"]
         return facets
     if family == "doas":
+        # doas.py: `heating_type: 'None'` and `cooling: False` drop the coils
         return _base(c, "doas", ahu_heating=_fuel(c.get("heating_type", "Electric")),
-                     ahu_cooling="dx", outdoor_air="dedicated", terminal="diffuser",
+                     ahu_cooling="dx" if c.get("cooling", True) else "none",
+                     outdoor_air="dedicated", terminal="diffuser",
                      scope="shared", changeover="ventilation_only")
     if family == "zone_ervs":
         return _base(c, "zone-erv", terminal="erv", terminal_outdoor_air="yes",
@@ -408,7 +421,10 @@ def _family_facets(c, *, in_composite=False):
                      terminal_cooling="chilled_water", humidity_control="yes",
                      scope="multizone")
     if family == "dual_duct":
-        return _base(c, "ddvav", ahu_heating="hot_water", ahu_cooling="chilled_water",
+        # dual_duct.py: hot-water hot deck and chilled-water cold deck unless
+        # `heating_type` / `cooling_type` say otherwise
+        return _base(c, "ddvav", ahu_heating=_fuel(c.get("heating_type", "Hot Water")),
+                     ahu_cooling="dx" if c.get("cooling_type") == "dx" else "chilled_water",
                      outdoor_air="mixed", terminal="dual_duct", scope="multizone")
     if family == "crah":
         # crah.py: ONE air handler at a fixed supply temperature, a diffuser
@@ -599,6 +615,12 @@ def mint_id(config):
             f["ahu_cooling"]])
     if f["reheat"] not in ("none", f["ahu_heating"]):
         tokens.append(f"{_HEAT_TOKEN[f['reheat']]}rh")
+    if f["terminal"] == "parallel_piu":
+        tokens.append("pfp")
+    if t == "doas" and f["ahu_heating"] == "none" and f["ahu_cooling"] == "none":
+        tokens.append("untempered")
+    elif t == "doas" and f["ahu_cooling"] == "none":
+        tokens.append("nocool")
     if t in ("mau-ptac", "ptac") and f["terminal_heating"] != "none":
         tokens.append(f"{_HEAT_TOKEN[f['terminal_heating']]}ptac")
     if t == "uh":
@@ -616,6 +638,8 @@ def mint_id(config):
         tokens.append("nooa")
     if t == "crah" and f["outdoor_air"] != "none":
         tokens.append("oa")
+    if t in ("psz", "furnace", "splitac", "hv", "cvrh") and f["outdoor_air"] == "dedicated":
+        tokens.append("100oa")
     if config.get("hw_source") == "awhp":
         # plant_loops' heat-pump plant: the boiler is a BACKUP, said in fewer
         # characters than a primary boiler's token (ids stay <= 40)
@@ -663,7 +687,8 @@ _TERMINAL_WORDS = {"ptac": "PTACs", "pthp": "packaged terminal heat pumps",
                    "vrf": "VRF terminals", "wshp": "water-source heat pump units",
                    "active_beam": "active chilled beams",
                    "passive_beam": "passive chilled beams",
-                   "unit_heater": "unit heaters", "erv": "one ERV per zone"}
+                   "unit_heater": "unit heaters", "erv": "one ERV per zone",
+                   "parallel_piu": "parallel fan-powered VAV boxes"}
 _PLANT_WORDS = {"gas_boiler": "gas boiler", "electric_boiler": "electric boiler",
                 "district": "district heating", "gshp": "ground-source heat pump",
                 "awhp": "air-to-water heat pump"}
@@ -734,6 +759,10 @@ def display_parts(config):
         ahu.append("no cooling")
     if f["outdoor_air"] == "none" and f["category"] in ("central", "process"):
         ahu.append("no outdoor air")
+    elif f["outdoor_air"] == "dedicated" and f["category"] == "central":
+        ahu.append("100% outdoor air")
+    if t == "doas" and f["ahu_heating"] == "none" and f["ahu_cooling"] == "none":
+        ahu.append("untempered outdoor air")
     if f["vent_heat_recovery"] != "none" and t != "zone-erv":
         ahu.append(f["vent_heat_recovery"].upper())
     if f["category"] == "oa_plus_zone" and ahu:

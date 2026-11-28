@@ -58,6 +58,9 @@ _DESCRIPTIVE = (
     # also set by a DX heat-pump coil on the air loop, which handed a
     # heat-pump hot-water row to a boiler building (Fable, review of #252).
     'hydronic_heat_pump',
+    # Whether the loop RUNS on 100% outdoor air (#259). Two catalogue rows
+    # differ only by this (`psz-gas-perzone` and `psz-gas-100oa-perzone`).
+    'loop_full_outdoor_air',
 )
 
 

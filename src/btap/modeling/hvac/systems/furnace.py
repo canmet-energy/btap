@@ -51,6 +51,10 @@ class Furnace(BaseSystem):
                 f"{self.config['id']!r} sets both 'reheat' and 'per_zone': a "
                 f"per-zone loop already tracks its own zone, so a reheat "
                 f"terminal has nothing to correct")
+        if self.config.get('all_outdoor_air') and not self.config.get('ventilation', True):
+            raise ValueError(
+                f"{self.config['id']!r} sets 'all_outdoor_air' with "
+                "'ventilation': false; a loop with no outdoor air cannot run on 100%")
         return None
 
     def build(self, model, zones, control_zone=None, namer='default',
@@ -100,7 +104,11 @@ class Furnace(BaseSystem):
             clg.setName(f"{air_loop.nameString()} Cooling Coil")
             clg.addToNode(supply_inlet_node)
         if ventilation:
-            self.add_oa_system(model, supply_inlet_node)
+            oa_system = self.add_oa_system(model, supply_inlet_node)
+            if self.config.get('all_outdoor_air'):
+                # #259: a 100%-outdoor-air unit in OPERATION (a make-up air
+                # heater), not merely sized as one.
+                self.run_on_full_outdoor_air(model, air_loop, oa_system)
 
         # A row may DECLARE what its equipment physically is, and that
         # declaration is written into the model rather than consulted from the

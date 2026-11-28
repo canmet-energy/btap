@@ -27,12 +27,16 @@ FAMILY_KEYS = {
                       'doas_supply_air_temperature', 'family', 'id', 'legacy_name', 'aliases',
                       'needs_boiler', 'needs_chiller', 'origin', 'sizing', 'sys_abbr'],
     'composite': ['comment', 'family', 'id', 'legacy_name', 'aliases', 'needs_boiler', 'origin', 'parts'],
-    'doas': ['comment', 'family', 'heating_type', 'id', 'legacy_name', 'aliases', 'needs_boiler', 'origin',
-             'sizing'],
+    # 'cooling' since #259: `cooling: false` builds no DX coil (with
+    # `heating_type: 'None'`, a ventilation-only loop).
+    'doas': ['comment', 'cooling', 'family', 'heating_type', 'id', 'legacy_name', 'aliases', 'needs_boiler',
+             'origin', 'sizing'],
     'doas_pthp': ['comment', 'family', 'id', 'legacy_name', 'aliases', 'needs_boiler', 'origin', 'sizing',
                   'supp_htg_fuel', 'sys_abbr'],
-    'dual_duct': ['boiler_fuel', 'chiller_type', 'comment', 'family', 'id', 'legacy_name', 'aliases',
-                  'needs_boiler', 'needs_chiller', 'origin', 'sizing', 'sys_abbr'],
+    # 'heating_type'/'cooling_type' since #259: a direct-fired hot deck and a
+    # DX cold deck instead of the hydronic coils.
+    'dual_duct': ['boiler_fuel', 'chiller_type', 'comment', 'cooling_type', 'family', 'heating_type', 'id',
+                  'legacy_name', 'aliases', 'needs_boiler', 'needs_chiller', 'origin', 'sizing', 'sys_abbr'],
     'ecm_ashp_baseboard': ['air_eqpt', 'baseboard_type', 'comment', 'family', 'id', 'legacy_name', 'aliases',
                            'needs_boiler', 'origin', 'sizing', 'supp_htg_fuel',
                            'sys_abbr', 'vent_type'],
@@ -45,14 +49,16 @@ FAMILY_KEYS = {
     'fan_coils': ['boiler_fuel', 'chiller_type', 'comment', 'family', 'fan_coil_type', 'hw_controls', 'hw_source',
                   'mau_cooling_type', 'mau_heating_coil_type', 'id', 'legacy_name', 'aliases', 'needs_boiler',
                   'needs_chiller', 'origin', 'sizing', 'sys_abbr'],
-    'furnace': ['comment', 'cooling', 'equipment_class', 'family', 'heating',
+    # 'all_outdoor_air' since #259: the unit RUNS on 100% outdoor air.
+    'furnace': ['all_outdoor_air', 'comment', 'cooling', 'equipment_class', 'family', 'heating',
                 'heating_type', 'id', 'legacy_name', 'aliases', 'needs_boiler', 'origin', 'per_zone',
                 'reheat', 'ventilation'],
     'mau_ptac': ['baseboard_type', 'comment', 'family', 'mau_heating_coil_type', 'id', 'legacy_name', 'aliases',
                  'needs_boiler', 'origin', 'ptac_heating_type', 'reference_hp',
                  'sizing', 'supp_htg_fuel', 'sys_abbr'],
     # 'heat_source' is the reference-ASHP marker (was: heating_coil_type 'DX').
-    'psz': ['baseboard_type', 'boiler_fuel', 'comment', 'family', 'heat_source',
+    # 'all_outdoor_air' since #259: the unit RUNS on 100% outdoor air.
+    'psz': ['all_outdoor_air', 'baseboard_type', 'boiler_fuel', 'comment', 'family', 'heat_source',
             'heating_coil_type', 'hw_source', 'id', 'legacy_name', 'aliases', 'needs_boiler', 'origin', 'per_zone', 'sizing',
             'supp_htg_fuel', 'sys_abbr'],
     'unit_heaters': ['boiler_fuel', 'comment', 'family', 'heating_type', 'hw_source', 'hw_supply', 'id', 'legacy_name',
@@ -73,7 +79,9 @@ FAMILY_KEYS = {
                    'erv_sensible_effectiveness',
                    'erv_supply_air_outlet_temperature_control', 'family',
                    'heating_coil_type', 'id', 'legacy_name', 'aliases', 'needs_boiler', 'needs_chiller',
-                   'needs_erv', 'origin', 'sizing', 'sys_abbr'],
+                   'needs_erv', 'origin', 'sizing', 'sys_abbr',
+                   # #259: 'parallel_piu' builds parallel fan-powered boxes
+                   'terminal_type'],
     'vrf': ['comment', 'family', 'id', 'legacy_name', 'aliases', 'needs_boiler', 'origin', 'zone_ventilation'],
     'wshp': ['boiler_fuel', 'comment', 'family', 'id', 'legacy_name', 'aliases', 'needs_boiler', 'origin',
              'sizing', 'ventilation'],
@@ -94,6 +102,7 @@ FAMILY_KEYS = {
 ENUMS = {
     'family': list(FAMILY_KEYS.keys()),
     'heating_coil_type': ['Gas', 'Electric', 'Hot Water'],  # 'DX' RETIRED -> heat_source
+    'terminal_type': ['vav_reheat', 'parallel_piu'],
     'heat_source': ['ashp'],
     'baseboard_type': ['Hot Water', 'Electric', 'None'],
     'chiller_type': ['Scroll', 'Centrifugal', 'Rotary Screw', 'Reciprocating'],
@@ -216,13 +225,18 @@ class TestCatalogSchema(unittest.TestCase):
 
     def test_reference_ashp_rows_carry_heat_source(self):
         ashp = [r for r in ROWS if r.get('heat_source') == 'ashp']
-        self.assertEqual(4, len(ashp), 'expected the 4 psz reference-ASHP rows (their System 4 '
-                         'twins were retired as duplicates, D-113)')
+        # The 4 NECB reference-ASHP rows (their System 4 twins were retired as
+        # duplicates, D-113), plus the generic per-zone PSZ-HP of #259.
+        self.assertEqual(5, len(ashp), 'expected the 4 psz reference-ASHP rows and the '
+                         'generic per-zone heat pump')
+        self.assertEqual(
+            ['psz-ashp-elecsupp-perzone'],
+            [r['id'] for r in ashp if r['origin'] != 'necb_reference_hp'],
+            'only the #259 per-zone heat pump may carry heat_source without the '
+            'NECB reference-HP origin')
         for row in ashp:
             self.assertEqual('psz', row['family'],
                              f"'{row['id']}': heat_source is a psz-family key")
-            self.assertEqual('necb_reference_hp', row['origin'],
-                             f"'{row['id']}': heat_source rows are reference-HP rows")
             self.assertNotIn(
                 'heating_coil_type', row,
                 f"'{row['id']}': heat_source rows must NOT also carry heating_coil_type")

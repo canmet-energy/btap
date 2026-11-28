@@ -40972,5 +40972,3141 @@
         "blocks": 1
       }
     ]
+  },
+  {
+    "id": "ptac-hwptac-gasboiler",
+    "family": "zone_terminal",
+    "catalog_groups": [
+      {
+        "zones": 1,
+        "family": "zonal_heat_cool",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heat_cool",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heat_cool",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heat_cool",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heat_cool",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      }
+    ],
+    "catalog_general_2storey": [
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "catalog_general_3storey": [
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      }
+    ],
+    "catalog_residential": [
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      },
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      },
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      },
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      },
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      }
+    ],
+    "catalog_data_processing": [
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_groups": [
+      {
+        "zones": 1,
+        "family": "zonal_heat_cool",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heat_cool",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heat_cool",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heat_cool",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      },
+      {
+        "zones": 1,
+        "family": "zonal_heat_cool",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      }
+    ],
+    "scrubbed_general_2storey": [
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_general_3storey": [
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_residential": [
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      },
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      },
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      },
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      },
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      }
+    ],
+    "scrubbed_data_processing": [
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ]
+  },
+  {
+    "id": "psz-ashp-elecsupp-perzone",
+    "family": "psz",
+    "catalog_groups": [
+      {
+        "zones": 1,
+        "family": "psz",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "psz",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "psz",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "psz",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "psz",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      }
+    ],
+    "catalog_general_2storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      }
+    ],
+    "catalog_general_3storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      }
+    ],
+    "catalog_residential": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      }
+    ],
+    "catalog_data_processing": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_groups": [
+      {
+        "zones": 1,
+        "family": "packaged_single_zone",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "packaged_single_zone",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "packaged_single_zone",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "packaged_single_zone",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      },
+      {
+        "zones": 1,
+        "family": "packaged_single_zone",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": true,
+        "hp_sources": [
+          "air"
+        ]
+      }
+    ],
+    "scrubbed_general_2storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_general_3storey": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_residential": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_data_processing": [
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": "hp",
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-ashp-elecsupp-elecbb",
+        "blocks": 1
+      }
+    ]
+  },
+  {
+    "id": "pvav-elec-pfp",
+    "family": "vav_reheat",
+    "catalog_groups": [
+      {
+        "zones": 5,
+        "family": "vav_reheat",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      }
+    ],
+    "catalog_general_2storey": [
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      }
+    ],
+    "catalog_general_3storey": [
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      }
+    ],
+    "catalog_residential": [
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      }
+    ],
+    "catalog_data_processing": [
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_groups": [
+      {
+        "zones": 5,
+        "family": "multizone_vav",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      }
+    ],
+    "scrubbed_general_2storey": [
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_general_3storey": [
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_residential": [
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_data_processing": [
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      }
+    ]
+  },
+  {
+    "id": "vav-elec-pfp-scrollchiller",
+    "family": "vav_reheat",
+    "catalog_groups": [
+      {
+        "zones": 5,
+        "family": "vav_reheat",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      }
+    ],
+    "catalog_general_2storey": [
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      }
+    ],
+    "catalog_general_3storey": [
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      }
+    ],
+    "catalog_residential": [
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      }
+    ],
+    "catalog_data_processing": [
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_groups": [
+      {
+        "zones": 5,
+        "family": "multizone_vav",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      }
+    ],
+    "scrubbed_general_2storey": [
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_general_3storey": [
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_residential": [
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_data_processing": [
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      }
+    ]
+  },
+  {
+    "id": "hv-elec",
+    "family": "furnace",
+    "catalog_groups": [
+      {
+        "zones": 1,
+        "family": "furnace",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [],
+        "hp": false,
+        "hp_sources": []
+      },
+      {
+        "zones": 1,
+        "family": "furnace",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [],
+        "hp": false,
+        "hp_sources": []
+      },
+      {
+        "zones": 1,
+        "family": "furnace",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [],
+        "hp": false,
+        "hp_sources": []
+      },
+      {
+        "zones": 1,
+        "family": "furnace",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [],
+        "hp": false,
+        "hp_sources": []
+      },
+      {
+        "zones": 1,
+        "family": "furnace",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [],
+        "hp": false,
+        "hp_sources": []
+      }
+    ],
+    "catalog_general_2storey": [
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      }
+    ],
+    "catalog_general_3storey": [
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      }
+    ],
+    "catalog_residential": [
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      }
+    ],
+    "catalog_data_processing": [
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_groups": [
+      {
+        "zones": 1,
+        "family": "packaged_single_zone",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [],
+        "hp": false,
+        "hp_sources": []
+      },
+      {
+        "zones": 1,
+        "family": "packaged_single_zone",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [],
+        "hp": false,
+        "hp_sources": []
+      },
+      {
+        "zones": 1,
+        "family": "packaged_single_zone",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [],
+        "hp": false,
+        "hp_sources": []
+      },
+      {
+        "zones": 1,
+        "family": "packaged_single_zone",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [],
+        "hp": false,
+        "hp_sources": []
+      },
+      {
+        "zones": 1,
+        "family": "packaged_single_zone",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "Electricity"
+        ],
+        "cool_fuels": [],
+        "hp": false,
+        "hp_sources": []
+      }
+    ],
+    "scrubbed_general_2storey": [
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "psz-elec-elecbb",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_general_3storey": [
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "vav-elec-elecbb-scrollchiller",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_residential": [
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_data_processing": [
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "electric",
+        "catalog": "mau-ptac-elec-elecbb",
+        "blocks": 1
+      }
+    ]
+  },
+  {
+    "id": "doas-untempered",
+    "family": "doas",
+    "catalog_groups": [
+      {
+        "zones": 5,
+        "family": "doas",
+        "heated": false,
+        "cooled": false,
+        "heat_fuels": [],
+        "cool_fuels": [],
+        "hp": false,
+        "hp_sources": []
+      }
+    ],
+    "catalog_general_2storey": [],
+    "catalog_general_3storey": [],
+    "catalog_residential": [],
+    "catalog_data_processing": [],
+    "scrubbed_groups": [
+      {
+        "zones": 5,
+        "family": "central_doas_or_cv",
+        "heated": false,
+        "cooled": false,
+        "heat_fuels": [],
+        "cool_fuels": [],
+        "hp": false,
+        "hp_sources": []
+      }
+    ],
+    "scrubbed_general_2storey": [],
+    "scrubbed_general_3storey": [],
+    "scrubbed_residential": [],
+    "scrubbed_data_processing": []
+  },
+  {
+    "id": "psz-gas-100oa-perzone",
+    "family": "psz",
+    "catalog_groups": [
+      {
+        "zones": 1,
+        "family": "psz",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      },
+      {
+        "zones": 1,
+        "family": "psz",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      },
+      {
+        "zones": 1,
+        "family": "psz",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      },
+      {
+        "zones": 1,
+        "family": "psz",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      },
+      {
+        "zones": 1,
+        "family": "psz",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      }
+    ],
+    "catalog_general_2storey": [
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "catalog_general_3storey": [
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      }
+    ],
+    "catalog_residential": [
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      },
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      },
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      },
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      },
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      }
+    ],
+    "catalog_data_processing": [
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_groups": [
+      {
+        "zones": 1,
+        "family": "packaged_single_zone",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      },
+      {
+        "zones": 1,
+        "family": "packaged_single_zone",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      },
+      {
+        "zones": 1,
+        "family": "packaged_single_zone",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      },
+      {
+        "zones": 1,
+        "family": "packaged_single_zone",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      },
+      {
+        "zones": 1,
+        "family": "packaged_single_zone",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      }
+    ],
+    "scrubbed_general_2storey": [
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_general_3storey": [
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_residential": [
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      },
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      },
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      },
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      },
+      {
+        "system": null,
+        "action": "copy_proposed",
+        "energy_type": null,
+        "catalog": null,
+        "blocks": 1
+      }
+    ],
+    "scrubbed_data_processing": [
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ]
+  },
+  {
+    "id": "hv-hw-100oa-gasboiler-shared",
+    "family": "furnace",
+    "catalog_groups": [
+      {
+        "zones": 5,
+        "family": "furnace",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": false,
+        "hp_sources": []
+      }
+    ],
+    "catalog_general_2storey": [
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "catalog_general_3storey": [
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      }
+    ],
+    "catalog_residential": [
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "catalog_data_processing": [
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_groups": [
+      {
+        "zones": 5,
+        "family": "central_doas_or_cv",
+        "heated": true,
+        "cooled": false,
+        "heat_fuels": [
+          "NaturalGas"
+        ],
+        "cool_fuels": [],
+        "hp": false,
+        "hp_sources": []
+      }
+    ],
+    "scrubbed_general_2storey": [
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_general_3storey": [
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_residential": [
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_data_processing": [
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ]
+  },
+  {
+    "id": "ddvav-gas-dx",
+    "family": "dual_duct",
+    "catalog_groups": [
+      {
+        "zones": 5,
+        "family": "dual_duct",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      }
+    ],
+    "catalog_general_2storey": [
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "catalog_general_3storey": [
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      }
+    ],
+    "catalog_residential": [
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "catalog_data_processing": [
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_groups": [
+      {
+        "zones": 5,
+        "family": "dual_duct_vav",
+        "heated": true,
+        "cooled": true,
+        "heat_fuels": [
+          "NaturalGas"
+        ],
+        "cool_fuels": [
+          "Electricity"
+        ],
+        "hp": false,
+        "hp_sources": []
+      }
+    ],
+    "scrubbed_general_2storey": [
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 3,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "psz-gas-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_general_3storey": [
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      },
+      {
+        "system": 6,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "vav-hw-hwbb-gasboiler-scrollchiller",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_residential": [
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "through_the_wall",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ],
+    "scrubbed_data_processing": [
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      },
+      {
+        "system": 1,
+        "action": "build",
+        "energy_type": "gas",
+        "catalog": "mau-ptac-hw-hwbb-gasboiler",
+        "blocks": 1
+      }
+    ]
   }
 ]

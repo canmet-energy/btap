@@ -38,8 +38,20 @@ from btap.modeling.hvac.energy_recovery import (  # noqa: E402
 
 
 class VAVReheat(BaseSystem):
+    #: `terminal_type` values. 'vav_reheat' (the default) is a single-duct VAV
+    #: box with reheat; 'parallel_piu' a parallel fan-powered box (#259).
+    TERMINAL_TYPES = ('vav_reheat', 'parallel_piu')
+
+    def _parallel_piu(self):
+        return self.config.get('terminal_type', 'vav_reheat') == 'parallel_piu'
+
     def preflight(self, model, zones, control_zone=None, namer='default',
                   remove_existing=False):
+        terminal_type = self.config.get('terminal_type', 'vav_reheat')
+        if terminal_type not in self.TERMINAL_TYPES:
+            raise ValueError(
+                f"{self.config.get('id')!r}: terminal_type {terminal_type!r} is "
+                f"not one of {list(self.TERMINAL_TYPES)}")
         validate_energy_recovery(self.config)
 
     def build(self, model, zones, control_zone=None, namer='default',
@@ -199,6 +211,7 @@ class VAVReheat(BaseSystem):
             model, schedules.constant_ruleset(model, 'Supply Air Temp', sat))
         spm.addToNode(air_loop.supplyOutletNode())
 
+        parallel_piu = self._parallel_piu()
         for zone in group:
             self.apply_zone_sizing(zone)
             baseboards.add(model, zone, baseboard_type, hw_loop=hw_loop)
@@ -206,6 +219,22 @@ class VAVReheat(BaseSystem):
             reheat_coil = coils.heating_coil(model, heating_coil_type, always_on,
                                              hw_loop=hw_loop,
                                              performance_profile=self.performance_profile)
+            if parallel_piu:
+                # #259: a PARALLEL fan-powered box. Its own constant-volume
+                # fan draws plenum (zone) air beside the primary VAV damper,
+                # and the reheat coil sits downstream of both — the terminal
+                # the SDK's `addSystemType6`/`8` and the pinned gem's
+                # `model_add_vav_pfp_boxes` build. Its primary-air minimum
+                # and fan-on fraction stay autosized: the VAV box's NECB
+                # minimum-flow settings below are VAVReheat fields and have
+                # no counterpart here.
+                piu_fan = openstudio.model.FanConstantVolume(model, always_on)
+                piu_fan.setName(f"{zone.nameString()} PFP Term Fan")
+                terminal = openstudio.model.AirTerminalSingleDuctParallelPIUReheat(
+                    model, always_on, piu_fan, reheat_coil)
+                terminal.setName(f"{zone.nameString()} PFP Term")
+                air_loop.addBranchForZone(zone, terminal.to_StraightComponent())
+                continue
             terminal = openstudio.model.AirTerminalSingleDuctVAVReheat(
                 model, always_on, reheat_coil)
             air_loop.addBranchForZone(zone, terminal.to_StraightComponent())
