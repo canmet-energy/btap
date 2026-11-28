@@ -201,11 +201,15 @@ def _schedule_is_always_on(schedule):
     return None     # not read: neither "always" nor "scheduled" is known
 
 
-def _all_outdoor_air(controller, sizing):
+def _all_outdoor_air(controller, sizing, loop=None, notes=None):
     """Whether an air loop RUNS on 100% outdoor air.
 
     - a minimum outdoor-air fraction that is 1 at every hour; or
-    - minimum and maximum outdoor-air flows fixed and equal; or
+    - minimum and maximum outdoor-air flows fixed, equal to each other AND
+      to the loop's design supply flow (equal flows alone are FIXED outdoor
+      air: Fable, final review, a rooftop unit at 0.2 of 1.0 m3/s was read
+      as 100%); a supply that is autosized cannot be compared and says so
+      in `notes`; or
     - both autosized, with 100% outdoor air declared in sizing AND the supply
       sized on the ventilation requirement: the supply is then sized to the
       outdoor air, so the two autosized flows come out equal. This is how a
@@ -222,14 +226,48 @@ def _all_outdoor_air(controller, sizing):
                 and sizing.typeofLoadtoSizeOn() == 'VentilationRequirement')
     low = opt(controller.minimumOutdoorAirFlowRate())
     high = opt(controller.maximumOutdoorAirFlowRate())
-    return low is not None and high is not None and low > 0 and abs(low - high) <= 1e-9 * max(low, high)
+    if low is None or high is None or low <= 0 or abs(low - high) > 0.01 * max(low, high):
+        return False
+    supply = opt(loop.designSupplyAirFlowRate()) if loop is not None else None
+    if supply is None:
+        if notes is not None:
+            notes.add('100% outdoor air not determined: fixed outdoor-air flows, '
+                      'autosized supply')
+        return False
+    return low >= 0.99 * supply
+
+
+def _schedule_max(schedule):
+    """A schedule's highest value: constant, ruleset (every day schedule) or
+    compact (every numeric field). None when the type is not read."""
+    constant = opt(schedule.to_ScheduleConstant())
+    if constant is not None:
+        return constant.value()
+    ruleset = opt(schedule.to_ScheduleRuleset())
+    if ruleset is not None:
+        days = [ruleset.defaultDaySchedule()] + [r.daySchedule() for r in ruleset.scheduleRules()]
+        values = [v for day in days for v in day.values()]
+        return max(values) if values else None
+    compact = opt(schedule.to_ScheduleCompact())
+    if compact is not None:
+        values = []
+        for i in range(compact.numFields()):
+            text = compact.getString(i)
+            try:
+                values.append(float(text.get() if text.is_initialized() else ''))
+            except ValueError:
+                continue
+        return max(values) if values else None
+    return None
 
 
 def _hottest_setpoint(node):
-    """The highest temperature a node's setpoint managers ask for, C: the
-    cold end of an outdoor-air reset, or a constant schedule's value. None
-    when no manager there states one."""
-    values = []
+    """``(hottest temperature, unread)``: the highest temperature a node's
+    setpoint managers ask for, C, and the kinds of manager that could not be
+    read. Every manager is either read or named: a ruleset-scheduled or
+    outdoor-following boiler-lift loop was read as low-temperature and
+    MATCHED the wrong row silently (Fable, final review)."""
+    values, unread = [], []
     for spm in node.setpointManagers():
         reset = opt(spm.to_SetpointManagerOutdoorAirReset())
         if reset is not None:
@@ -238,10 +276,12 @@ def _hottest_setpoint(node):
             continue
         scheduled = opt(spm.to_SetpointManagerScheduled())
         if scheduled is not None:
-            constant = opt(scheduled.schedule().to_ScheduleConstant())
-            if constant is not None:
-                values.append(constant.value())
-    return max(values) if values else None
+            top = _schedule_max(scheduled.schedule())
+            if top is not None:
+                values.append(top)
+                continue
+        unread.append(_kind(spm))
+    return (max(values) if values else None), unread
 
 
 def _availability(coil):
@@ -320,7 +360,7 @@ class Component:
             return
         self._plants.add(key)
         role = loop.sizingPlant().loopType().lower()
-        heat_pump_tops = []
+        heat_pump_tops, unread_setpoints = [], []
         counts = {}
         for comp in loop.supplyComponents():
             kind = _kind(comp)
@@ -336,7 +376,9 @@ class Component:
                 outlet = opt(w2w.supplyOutletModelObject())
                 node = opt(outlet.to_Node()) if outlet is not None else None
                 if node is not None:
-                    heat_pump_tops.append(_hottest_setpoint(node))
+                    top, unread = _hottest_setpoint(node)
+                    heat_pump_tops.append(top)
+                    unread_setpoints.extend(unread)
             if w2w is not None:
                 for other in (opt(w2w.plantLoop()), opt(w2w.secondaryPlantLoop()),
                               opt(w2w.tertiaryPlantLoop())):
@@ -349,9 +391,13 @@ class Component:
         # hotter than its heat pump's own outlet setpoint, so a boiler lifts
         # what the heat pump cannot reach. Same equipment as a low-temperature
         # plant; measured 39% against 92% heat-pump share.
-        loop_top = _hottest_setpoint(loop.supplyOutletNode())
+        loop_top, unread = _hottest_setpoint(loop.supplyOutletNode())
+        unread_setpoints.extend(unread)
         tops = [h for h in heat_pump_tops if h is not None]
-        if loop_top is not None and tops and loop_top > max(tops) + 0.5:
+        if heat_pump_tops and (unread_setpoints or loop_top is None or not tops):
+            self.notes.add(f'{role} plant: boiler lift not determined; setpoint managers '
+                           f'not read: {sorted(set(unread_setpoints)) or ["none present"]}')
+        elif loop_top is not None and tops and loop_top > max(tops) + 0.5:
             self.identity.add(f'plant:{role}:boiler_lifts_above_heat_pump')
         for spm in loop.supplyOutletNode().setpointManagers():
             self.controls.add(f'plant:{role}:spm:{_kind(spm)}')
@@ -408,6 +454,7 @@ def heating_performance_at_5f(concrete, kind):
     try:
         if kind == 'Coil_Heating_DX_SingleSpeed':
             speeds, cop = 1, concrete.ratedCOP()
+            lockout = concrete.minimumOutdoorDryBulbTemperatureforCompressorOperation()
             cap_curve = concrete.totalHeatingCapacityFunctionofTemperatureCurve()
             eir_curve = concrete.energyInputRatioFunctionofTemperatureCurve()
         elif kind == 'Coil_Heating_DX_VariableSpeed':
@@ -416,6 +463,7 @@ def heating_performance_at_5f(concrete, kind):
                 return None
             top = levels[-1]
             speeds, cop = len(levels), top.referenceUnitGrossRatedHeatingCOP()
+            lockout = concrete.minimumOutdoorDryBulbTemperatureforCompressorOperation()
             cap_curve = top.heatingCapacityFunctionofTemperatureCurve()
             eir_curve = top.energyInputRatioFunctionofTemperatureCurve()
         else:
@@ -426,12 +474,28 @@ def heating_performance_at_5f(concrete, kind):
         return None
     if None in (cap_5, cap_47, eir_5, eir_47) or cap_47 <= 0 or eir_5 <= 0:
         return None
+    if lockout > _5F_C:
+        # the compressor is OFF at 5 F: no capacity, whatever the curve says
+        # (Fable, final review: a flat curve locked out at -5 C was tagged
+        # cold-climate)
+        return speeds, 0.0, 0.0
     return speeds, cop * eir_47 / eir_5, cap_5 / cap_47
 
 
+#: DX HEATING coils the cold-climate test does not read yet: named in notes,
+#: never silently skipped (Fable, final review).
+_COLD_CLIMATE_UNREAD = ('Coil_Heating_DX_MultiSpeed', 'Coil_Heating_DX_VariableRefrigerantFlow',
+                        'Coil_Heating_DX_VariableRefrigerantFlow_FluidTemperatureControl')
+
+
 def _cold_climate(component, prefix, kind, concrete):
+    if kind in _COLD_CLIMATE_UNREAD:
+        component.notes.add(f'cold-climate test not read for {kind}')
+        return
     performance = heating_performance_at_5f(concrete, kind)
     if performance is None:
+        if kind.startswith('Coil_Heating_DX'):
+            component.notes.add(f'cold-climate test not read for {kind}')
         return
     speeds, cop_5f, ratio = performance
     component.controls.add(f'{prefix}:{kind}:at 5F: COP {cop_5f:.2f}, capacity {ratio:.0%}, '
@@ -528,7 +592,7 @@ def zone_components(model, zone, children=None):
                     # System 5 and 7 VAV set them while running on mixed air,
                     # which made every independent VAV model a non-match
                     # (OpenStudio-resources, 2026-11-28).
-                    if _all_outdoor_air(controller, loop.sizingSystem()):
+                    if _all_outdoor_air(controller, loop.sizingSystem(), loop, part.notes):
                         part.identity.add('ahu:all_outdoor_air')
                     for oac in oa.components():
                         okind = _kind(oac)
@@ -609,17 +673,23 @@ def collapse(components):
     """
     seen = {}
     for c in components:
-        key = c.frozen()
-        if key in seen:
-            seen[key][1] += 1
-        else:
-            seen[key] = [c, 1]
+        seen.setdefault(c.frozen(), []).append(c)
     out = []
-    for c, n in seen.values():
-        if n > 1:
+    for group in seen.values():
+        c = group[0]
+        if len(group) > 1:
             merged = Component(c.role)
-            merged.identity, merged.notes = set(c.identity), set(c.notes)
-            merged.controls = set(c.controls) | {f'{c.role}:count={n}'}
+            merged.identity = set(c.identity)
+            # every duplicate's controls and notes: two units identical in
+            # identity may still differ in control (Fable, final review)
+            merged.notes = set().union(*(g.notes for g in group))
+            # name the unit by its own type token (`unit:ZoneHVAC_...`,
+            # `terminal:...`), not by whichever token sorts first
+            own = sorted(x for x in c.identity
+                         if x.split(':')[0] in ('unit', 'terminal') and ':coil:' not in x)
+            what = (own or sorted(c.identity) or [c.role])[0]
+            merged.controls = set().union(*(g.controls for g in group)) | {
+                f'{c.role}:count={len(group)}:{what}'}
             c = merged
         out.append(c)
     return out
@@ -663,6 +733,8 @@ def explain(components, catalogue):
     if not components:
         return {'outcome': 'unserved', 'systems': []}
     components = collapse(components)
+    # rows collapse the same way, or a row {a, a} could never cover (Fable)
+    catalogue = {row_id: collapse(row) for row_id, row in catalogue.items()}
     zone = [c.frozen() for c in components]
     by_signature = {}
     for row_id, row in catalogue.items():
@@ -675,11 +747,14 @@ def explain(components, catalogue):
                 'control_differences': _control_diff(components, row),
                 'notes': sorted(set().union(*(c.notes for c in components)))}
 
-    parts, remaining = _best_cover(zone, catalogue, by_signature)
+    parts, remaining, alternatives = _best_cover(zone, catalogue, by_signature)
     notes = sorted(set().union(*(c.notes for c in components)))
     if parts:
         return {'outcome': 'partial' if remaining else 'composed',
                 'systems': [p['systems'] for p in parts],
+                # other covers exactly as good: reported, not hidden behind
+                # the catalogue's order (Fable, final review)
+                'alternatives': alternatives,
                 'parts': [{'systems': p['systems'], 'covers': [{'role': r, 'identity': list(i)}
                                                                for r, i in p['covers']]}
                           for p in parts],
@@ -700,12 +775,21 @@ def _best_cover(zone, catalogue, by_signature):
     for ids in by_signature.values():
         if _covers(catalogue[ids[0]], zone) is not None:
             fitting.append(sorted(ids))
-    best = ([], list(zone))
+    fitting.sort()
+    best, ties = ([], list(zone)), []
+
+    def score(chosen, remaining):
+        return (len(remaining), len(chosen))
+
+    def name(chosen):
+        return sorted(tuple(p['systems']) for p in chosen)
 
     def search(start, chosen, remaining):
-        nonlocal best
-        if (len(remaining), len(chosen)) < (len(best[1]), len(best[0])):
-            best = (list(chosen), list(remaining))
+        nonlocal best, ties
+        if score(chosen, remaining) < score(*best):
+            best, ties = (list(chosen), list(remaining)), []
+        elif chosen and score(chosen, remaining) == score(*best) and name(chosen) != name(best[0]):
+            ties.append(list(chosen))
         for k in range(start, len(fitting)):
             left = _covers(catalogue[fitting[k][0]], remaining)
             if left is None or len(left) == len(remaining):
@@ -716,7 +800,14 @@ def _best_cover(zone, catalogue, by_signature):
             chosen.pop()
 
     search(0, [], list(zone))
-    return best
+    # the lexically first of the equal covers, the others as alternatives
+    covers = sorted([best[0]] + ties, key=name)
+    chosen = covers[0]
+    remaining = list(zone)
+    for p in chosen:
+        remaining = _covers(catalogue[p['systems'][0]], remaining)
+    alternatives = [[list(s) for s in name(c)] for c in covers[1:] if name(c) != name(chosen)]
+    return chosen, remaining, alternatives
 
 
 def _covered(remaining, left):

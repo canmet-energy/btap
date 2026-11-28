@@ -148,7 +148,8 @@ class TestTheFingerprint(unittest.TestCase):
         result = fingerprint.explain(comps, _catalogue(*ROWS))
         self.assertEqual('match', result['outcome'], result)
         self.assertEqual(['bb-hwbb-gasboiler'], result['systems'])
-        self.assertIn('unit:count=2', result['control_differences']['model_only'])
+        self.assertIn('unit:count=2:unit:ZoneHVAC_Baseboard_Convective_Water',
+                      result['control_differences']['model_only'])
 
     def test_boiler_lift_is_a_different_system(self):
         """phylroy (2026-11-28): boiler lift is identity. Same equipment as a
@@ -180,6 +181,7 @@ class TestTheFingerprint(unittest.TestCase):
                 flat.setMinimumValueofx(-30.0)
                 flat.setMaximumValueofx(30.0)
                 coil.setTotalHeatingCapacityFunctionofTemperatureCurve(flat)
+                coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(-25.0)
 
         plain = _zone(_built('pthp'))
         cold = _zone(_built('pthp', mutate=cold_climate))
@@ -190,6 +192,156 @@ class TestTheFingerprint(unittest.TestCase):
         # ...and the reported facts say why, with NEEP alongside
         self.assertTrue(any('NEEP ccASHP v4.0 not met' in x for c in cold for x in c.controls),
                         'one speed: not variable capacity, whatever the curve')
+
+    def test_outdoor_air_is_read_from_each_operating_rule(self):
+        """Each way a loop runs on 100% outdoor air, and the one that is not:
+        equal FIXED flows below the supply are fixed outdoor air (Fable, final
+        review: 0.2 of 1.0 m3/s was read as 100%)."""
+        import openstudio
+
+        def oa(model):
+            loop = model.getAirLoopHVACs()[0]
+            return loop, loop.airLoopHVACOutdoorAirSystem().get().getControllerOutdoorAir()
+
+        def fixed_partial(model):
+            loop, c = oa(model)
+            loop.setDesignSupplyAirFlowRate(1.0)
+            c.setMinimumOutdoorAirFlowRate(0.2)
+            c.setMaximumOutdoorAirFlowRate(0.2)
+
+        def fixed_full(model):
+            loop, c = oa(model)
+            loop.setDesignSupplyAirFlowRate(0.5)
+            c.setMinimumOutdoorAirFlowRate(0.5)
+            c.setMaximumOutdoorAirFlowRate(0.5)
+
+        def fraction_always(model):
+            _, c = oa(model)
+            always = openstudio.model.ScheduleConstant(model)
+            always.setValue(1.0)
+            c.setMinimumFractionofOutdoorAirSchedule(always)
+
+        def has_all_oa(model):
+            return any('ahu:all_outdoor_air' in c.identity for c in _zone(model))
+        row = 'psz-gas-perzone'
+        self.assertFalse(has_all_oa(_built(row)), 'mixed air as built')
+        self.assertFalse(has_all_oa(_built(row, zones=1, mutate=fixed_partial)), 'fixed outdoor air')
+        self.assertTrue(has_all_oa(_built(row, zones=1, mutate=fixed_full)), 'fixed flows == supply')
+        self.assertTrue(has_all_oa(_built(row, zones=1, mutate=fraction_always)), 'fraction 1 every hour')
+
+    def test_cold_climate_arithmetic(self):
+        """Each half of ENERGY STAR Cold Climate, the EIR normalisation and
+        the compressor lockout decide it on their own (Fable, final review:
+        the COP threshold, the normalisation and the capacity RATIO could all
+        be removed with the suite green)."""
+        import openstudio
+
+        def cubic(model, a, b=0.0):
+            curve = openstudio.model.CurveCubic(model)
+            curve.setCoefficient1Constant(a)
+            curve.setCoefficient2x(b)
+            curve.setCoefficient3xPOW2(0.0)
+            curve.setCoefficient4xPOW3(0.0)
+            curve.setMinimumValueofx(-30.0)
+            curve.setMaximumValueofx(30.0)
+            return curve
+
+        def coil_with(cap=(1.0, 0.0), eir=(1.0, 0.0), cop=5.0, lockout=-25.0):
+            def mutate(model):
+                for coil in model.getCoilHeatingDXSingleSpeeds():
+                    coil.setTotalHeatingCapacityFunctionofTemperatureCurve(cubic(model, *cap))
+                    coil.setEnergyInputRatioFunctionofTemperatureCurve(cubic(model, *eir))
+                    coil.setRatedCOP(cop)
+                    coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(lockout)
+            return mutate
+
+        token = 'unit:Coil_Heating_DX:cold_climate[ENERGY STAR]'
+
+        def cold(**kw):
+            return any(token in c.identity for c in _zone(_built('pthp', zones=1, mutate=coil_with(**kw))))
+        self.assertTrue(cold(), 'flat capacity, COP 5')
+        self.assertFalse(cold(cop=1.5), 'COP below 1.75')
+        # EIR 2.0 everywhere: COP at 5 F is the rated 3.0 (normalised), not 1.5
+        self.assertTrue(cold(eir=(2.0, 0.0), cop=3.0), 'EIR normalised at 47 F')
+        # capacity 1.5 at 47 F and 0.9 at 5 F: a 60% RATIO, though 0.9 >= 0.7
+        self.assertFalse(cold(cap=(1.5 - 0.6 * 8.33 / 23.33, 0.6 / 23.33)), 'capacity ratio 60%')
+        self.assertFalse(cold(lockout=-5.0), 'compressor locked out above 5 F')
+
+    def test_boiler_lift_is_read_from_any_schedule_or_named(self):
+        """Fable, final review: a boiler-lift plant on ruleset-scheduled
+        setpoints silently matched the LOW-TEMPERATURE row. Ruleset schedules
+        are now read; a manager that cannot be read is named in a note."""
+        import openstudio
+
+        def ruleset(model, value):
+            schedule = openstudio.model.ScheduleRuleset(model)
+            schedule.defaultDaySchedule().addValue(openstudio.Time(0, 24, 0, 0), value)
+            return schedule
+
+        def reauthor(follow=False):
+            def mutate(model):
+                for loop in model.getPlantLoops():
+                    for node in loop.supplyComponents(openstudio.model.Node.iddObjectType()):
+                        node = node.to_Node().get()
+                        for spm in node.setpointManagers():
+                            reset = spm.to_SetpointManagerOutdoorAirReset()
+                            scheduled = spm.to_SetpointManagerScheduled()
+                            if reset.is_initialized():
+                                r = reset.get()
+                                top = max(r.setpointatOutdoorLowTemperature(),
+                                          r.setpointatOutdoorHighTemperature())
+                            elif scheduled.is_initialized():
+                                top = scheduled.get().schedule().to_ScheduleConstant().get().value()
+                            else:
+                                continue
+                            spm.remove()
+                            if follow and node == loop.supplyOutletNode():
+                                openstudio.model.SetpointManagerFollowOutdoorAirTemperature(
+                                    model).addToNode(node)
+                            else:
+                                openstudio.model.SetpointManagerScheduled(
+                                    model, ruleset(model, top)).addToNode(node)
+            return mutate
+
+        token = 'plant:heating:boiler_lifts_above_heat_pump'
+        lift = _zone(_built('bb-hwbb-awhp-gasbu-lift', zones=1, mutate=reauthor()))
+        self.assertTrue(any(token in c.identity for c in lift), 'ruleset setpoints are read')
+        unread = _zone(_built('bb-hwbb-awhp-gasbu-lift', zones=1, mutate=reauthor(follow=True)))
+        self.assertFalse(any(token in c.identity for c in unread))
+        self.assertTrue(any('boiler lift not determined' in n for c in unread for n in c.notes))
+
+    def test_collapse_keeps_every_duplicate_and_rows_collapse_too(self):
+        from btap.stock.fingerprint import Component, collapse, explain
+
+        def comp(token, control=None):
+            c = Component('unit')
+            c.identity = {token}
+            if control:
+                c.controls = {control}
+            return c
+        merged = collapse([comp('unit:a', 'fan:OnOff'), comp('unit:a', 'fan:Constant')])
+        self.assertEqual(1, len(merged))
+        self.assertTrue({'fan:OnOff', 'fan:Constant', 'unit:count=2:unit:a'} <= merged[0].controls)
+        # a row with two identical units covers a zone with two (Fable: it
+        # could not, while rows were left uncollapsed)
+        result = explain([comp('unit:a'), comp('unit:a'), comp('unit:b')],
+                         {'aa': [comp('unit:a'), comp('unit:a')], 'b': [comp('unit:b')]})
+        self.assertEqual('composed', result['outcome'], result)
+
+    def test_equal_covers_are_reported_not_left_to_catalogue_order(self):
+        from btap.stock.fingerprint import Component, explain
+
+        def comp(token):
+            c = Component('unit')
+            c.identity = {token}
+            return c
+        rows = {'ab': ['a', 'b'], 'c': ['c'], 'a': ['a'], 'bc': ['b', 'c']}
+        answers = []
+        for order in (list(rows), list(reversed(rows))):
+            catalogue = {k: [comp(t) for t in rows[k]] for k in order}
+            answers.append(explain([comp('a'), comp('b'), comp('c')], catalogue))
+        self.assertEqual(answers[0]['systems'], answers[1]['systems'])
+        self.assertEqual(1, len(answers[0]['alternatives']), answers[0])
 
     def test_a_different_fuel_is_a_different_system(self):
         from btap.stock import fingerprint
