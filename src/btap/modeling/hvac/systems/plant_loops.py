@@ -25,6 +25,17 @@ BOILER_PLANT_ROLE_FEATURE = 'btap_plant_role'
 #: Serialized, normalized temperature/setpoint profile on an explicitly
 #: configured plant. Unstamped loops are the legacy 82/7 C plants.
 TEMPERATURE_PROFILE_FEATURE = 'btap_temperature_profile'
+#: The compressor kind a chiller was BUILT as: 'Scroll', 'Centrifugal',
+#: 'Rotary Screw' or 'Reciprocating' (#261 step 2). It used to travel only in
+#: the chiller's NAME, which a user can change, and plant reuse never looked
+#: at it, so a centrifugal row and a scroll row built into one model shared
+#: one plant. Declared here, read by `chiller_compressor`.
+CHILLER_COMPRESSOR_FEATURE = 'btap_chiller_compressor'
+#: Name fallback for a chiller with no declaration (a model built before the
+#: feature, or a user's own plant), in the order the NECB efficiency pass has
+#: always matched them.
+_COMPRESSOR_NAME_TOKENS = (('reciprocating', 'Reciprocating'), ('scroll', 'Scroll'),
+                           ('centrifugal', 'Centrifugal'), ('screw', 'Rotary Screw'))
 #: Positive margin, in kelvins, applied above the warmest served-zone
 #: dew-point sensor by the chilled-water EMS reset. This is the maximum of
 #: the per-zone margins stored in ``DEWPOINT_ZONE_MARGINS_FEATURE``.
@@ -1184,6 +1195,43 @@ def _chillers(loop):
         openstudio.model.ChillerElectricEIR.iddObjectType())
 
 
+def chiller_compressor(chiller, name=None):
+    """The compressor kind of a `ChillerElectricEIR`, or None when nothing
+    says.
+
+    A kind in the NAME wins, as it always has (`name` overrides the name read,
+    for a caller that knows the pre-suffix name). The declared
+    `CHILLER_COMPRESSOR_FEATURE` is read only when the name carries no kind,
+    which is the case it exists for: a chiller renamed to "Basement Chiller"
+    keeps its kind. Letting the declaration win instead would re-read a
+    chiller whose name names another kind, which moved an NECB efficiency
+    outcome (`test_chiller_erratum_disclosure_is_limited_to_affected_rows`);
+    this order changes no existing result (#261 step 2)."""
+    lowered = (chiller.nameString() if name is None else name).lower()
+    named = next((kind for token, kind in _COMPRESSOR_NAME_TOKENS if token in lowered), None)
+    if named is not None:
+        return named
+    stored = chiller.additionalProperties().getFeatureAsString(CHILLER_COMPRESSOR_FEATURE)
+    return stored.get() if stored.is_initialized() and stored.get() else None
+
+
+def _compressor_admits(loop, chiller_type):
+    """Whether a chiller loop may serve a request for `chiller_type`. It
+    PERMITS reuse and never forces it (Astra, #261): a loop whose chillers'
+    kinds cannot be read is admitted, as before; one whose kinds are known is
+    admitted only when the requested kind is among them."""
+    if chiller_type is None:
+        return True
+    from btap._compat import opt
+    kinds = set()
+    for component in _chillers(loop):
+        chiller = opt(component.to_ChillerElectricEIR())
+        kind = chiller_compressor(chiller) if chiller is not None else None
+        if kind is not None:
+            kinds.add(kind)
+    return not kinds or chiller_type in kinds
+
+
 def _district_cooled(loop):
     return len(loop.supplyComponents(
         openstudio.model.DistrictCooling.iddObjectType())) > 0
@@ -1258,8 +1306,13 @@ def plant_is_hvac_candidate(loop):
                 or chw_name_fallback)
 
 
+def _declare_compressor(chiller, chiller_type):
+    if chiller_type:
+        chiller.additionalProperties().setFeature(CHILLER_COMPRESSOR_FEATURE, chiller_type)
+
+
 def find_chilled_water(model, exclude=(), source=None,
-                       temperature_profile=None):
+                       temperature_profile=None, chiller_type=None):
     """Find an existing chilled-water loop (one with a chiller on the supply side),
     or None.
 
@@ -1272,10 +1325,15 @@ def find_chilled_water(model, exclude=(), source=None,
         'water_cooled', 'air_cooled' or 'district'. A caller asking for
         district cooling must never be handed a chiller loop, and vice versa,
         which is the cooling analogue of the hot-water source guard.
+    :param chiller_type: when given, a loop whose chillers declare (or are
+        named for) other compressor kinds does not match (#261 step 2);
+        a loop whose kinds cannot be read still does.
     """
     blocked = {str(handle) for handle in exclude}
     for loop in model.getPlantLoops():
         if str(loop.handle()) in blocked:
+            continue
+        if not _compressor_admits(loop, chiller_type):
             continue
         if source is None:
             if (len(_chillers(loop)) > 0
@@ -1324,7 +1382,8 @@ def chilled_water(model, chiller_type='Scroll', reuse=True, source='water_cooled
         blocked = {str(handle) for handle in exclude}
         existing = find_chilled_water(
             model, exclude=exclude, source=source,
-            temperature_profile=profile)
+            temperature_profile=profile,
+            chiller_type=None if source == 'district' else chiller_type)
         if existing is None:
             # The name fallback catches a loop with no chiller YET. It honours
             # the exclusion too: on the hot-water side this exact fallback
@@ -1333,6 +1392,8 @@ def chilled_water(model, chiller_type='Scroll', reuse=True, source='water_cooled
                              if pl.nameString() == 'Chilled Water Loop'
                              and str(pl.handle()) not in blocked
                              and _cooling_source(pl) in (None, source)
+                             and (source == 'district'
+                                  or _compressor_admits(pl, chiller_type))
                              and _temperature_profile_matches(
                                  pl, profile, 'chilled_water')), None)
         if existing is not None:
@@ -1361,6 +1422,7 @@ def chilled_water(model, chiller_type='Scroll', reuse=True, source='water_cooled
         chiller1 = openstudio.model.ChillerElectricEIR(model)
         chiller1.setCondenserType('AirCooled')
         chiller1.setName(f"Primary Chiller AirCooled {chiller_type}".strip())
+        _declare_compressor(chiller1, chiller_type)
         chw_loop.addSupplyBranchForComponent(chiller1)
         chiller2 = None
     else:  # water_cooled
@@ -1371,6 +1433,8 @@ def chilled_water(model, chiller_type='Scroll', reuse=True, source='water_cooled
         # Names are load-bearing downstream (NECB chiller efficiency rules match on them).
         chiller1.setName(f"Primary Chiller WaterCooled {chiller_type}".strip())
         chiller2.setName(f"Secondary Chiller WaterCooled {chiller_type}".strip())
+        _declare_compressor(chiller1, chiller_type)
+        _declare_compressor(chiller2, chiller_type)
         chw_loop.addSupplyBranchForComponent(chiller1)
         chw_loop.addSupplyBranchForComponent(chiller2)
     chw_loop.addSupplyBranchForComponent(openstudio.model.PipeAdiabatic(model))

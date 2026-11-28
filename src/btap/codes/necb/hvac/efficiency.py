@@ -30,6 +30,7 @@ from btap.modeling.hvac.components import coils as _coils
 from btap.modeling.hvac.systems.plant_loops import (
     BOILER_PART_LOAD_CLASS_FEATURE,
     BOILER_PLANT_ROLE_FEATURE,
+    chiller_compressor,
 )
 
 
@@ -2813,10 +2814,9 @@ def _apply_chiller(chiller, tables, plant, audit, sizing_follows=False):
     _record_capacity(chiller, capacity_w, capacity_source, chiller_capacity, name)
 
     cooling_type = 'AirCooled' if chiller.condenserType() == 'AirCooled' else 'WaterCooled'
-    compressor = next((t for t in ('Reciprocating', 'Scroll', 'Centrifugal')
-                       if t.lower() in name.lower()), None)
-    if compressor is None and 'screw' in name.lower():
-        compressor = 'Rotary Screw'
+    # Declared on the chiller when btap built it, else read from its name
+    # (#261 step 2): the same kinds, in the same order, as before.
+    compressor = chiller_compressor(chiller, name=name)
     if compressor is None:
         audit.warn('efficiency', 'chiller compressor type not in name — Scroll assumed', target=name)
         compressor = 'Scroll'
