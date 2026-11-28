@@ -20,6 +20,7 @@ explicitly rather than assumed.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import platform
 import subprocess
@@ -75,17 +76,24 @@ def run_checks() -> int:
         assert rules, "necb loads rules are empty"
         from btap.modeling.hvac import catalog
         rows = catalog.rows()
-        # An EXACT count, deliberately: this is a distribution-integrity check
-        # and the count is the tripwire that catches a truncated or stale
-        # `systems.json` in the built wheel, which a `> 0` test would pass.
-        # It MOVES with the catalogue, so adding a system means updating it
-        # here — that is the tax for the tripwire, not an oversight. Adding one
-        # also needs the sizing sweep, the ADJUDICATED D-58 golden, the
-        # catalog-generation names and `tests/stock/`.
-        assert len(rows) == 124, (
-            f"catalog has {len(rows)} systems, expected 124 — if a system was "
-            "added on purpose, update this count and the four other gates")
-    check("packaged data loads (necb rules + the 124-system catalog)", data_loads)
+        # An EXACT id list, deliberately: this is a distribution-integrity
+        # check, the tripwire for a truncated or stale `systems.json` in the
+        # built wheel, which a `> 0` test would pass. It is compared against
+        # the source tree's independent inventory, never against a count
+        # derived from the installed catalogue it checks (#261 step 1), so
+        # adding a system moves it through that one file, which
+        # tests/modeling/test_catalogue_inventory.py also holds the catalogue
+        # and the D-58 golden to.
+        inventory = json.loads(
+            (REPO_ROOT / "tests" / "fixtures" / "catalogue_inventory.json").read_text(encoding="utf-8"))
+        expected = [entry["id"] for entry in inventory["systems"]]
+        installed = [row["id"] for row in rows]
+        assert installed == expected, (
+            f"the wheel's catalog has {len(installed)} systems, the inventory {len(expected)}; "
+            f"missing {sorted(set(expected) - set(installed))[:5]}, "
+            f"unexpected {sorted(set(installed) - set(expected))[:5]}"
+            + ("; same ids in a different ORDER" if sorted(installed) == sorted(expected) else ""))
+    check("packaged data loads (necb rules + the inventoried catalog)", data_loads)
 
     def coverage_reference_loads():
         from btap.codes import coverage
