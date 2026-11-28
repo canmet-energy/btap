@@ -98,6 +98,16 @@ _WRAPPERS = frozenset({
 })
 
 
+#: Supply-air setpoint managers that make a unit follow ONE zone's load. The
+#: humidity ones are not in it: they set a humidity, not the unit's role
+#: (they matched by name prefix before).
+_FOLLOWS_A_ZONE = frozenset({
+    'SetpointManager_SingleZone_Reheat', 'SetpointManager_SingleZone_Heating',
+    'SetpointManager_SingleZone_Cooling', 'SetpointManager_SingleZone_OneStageHeating',
+    'SetpointManager_SingleZone_OneStageCooling',
+})
+
+
 #: Identity fields a type FIXES rather than stores. EnergyPlus 25.2's
 #: `Coil:Heating:Gas:MultiStage` has no fuel field at all (its 20 fields carry
 #: none), so it is natural gas; without this the staged NECB reference build
@@ -140,7 +150,7 @@ def _cast_table():
 def _concrete(obj):
     cast = _cast_table().get(_kind(obj))
     if cast is None:
-        UNCAST.add(_kind(obj))
+        UNCAST.add(_kind(obj))     # explain() reports these as notes
         return obj
     value = opt(cast(obj))
     return value if value is not None else obj
@@ -165,7 +175,20 @@ def _schedule_is_always_on(schedule):
     if ruleset is not None:
         days = [ruleset.defaultDaySchedule()] + [r.daySchedule() for r in ruleset.scheduleRules()]
         return all(all(v == 1.0 for v in day.values()) for day in days)
-    return False
+    compact = opt(schedule.to_ScheduleCompact())
+    if compact is not None:
+        # every numeric field is a value ("Until: 24:00, 1"); the rest are
+        # "Through:", "For:" and "Until:" labels
+        values = []
+        for i in range(compact.numFields()):
+            text = compact.getString(i)
+            text = text.get() if text.is_initialized() else ''
+            try:
+                values.append(float(text))
+            except ValueError:
+                continue
+        return bool(values) and all(v == 1.0 for v in values)
+    return None     # not read: neither "always" nor "scheduled" is known
 
 
 def _availability(coil):
@@ -178,7 +201,10 @@ def _availability(coil):
         return None
     if schedule is None:
         return None
-    return 'always' if _schedule_is_always_on(schedule) else 'scheduled'
+    always = _schedule_is_always_on(schedule)
+    if always is None:
+        return 'unknown'
+    return 'always' if always else 'scheduled'
 
 
 def _token(kind, concrete):
@@ -207,10 +233,16 @@ def _children_by_container(model):
 class Component:
     """One thing serving a zone: identity tokens decide, controls inform."""
 
+    #: How many loops away from a coil the walk follows. Deeper loops are
+    #: not read, and say so in `notes`.
+    MAX_DEPTH = 3
+
     def __init__(self, role):
         self.role = role
         self.identity = set()
         self.controls = set()
+        #: what the reader could NOT read here: absent, never silently skipped
+        self.notes = set()
         self._plants = set()
 
     def plant(self, coil):
@@ -218,13 +250,23 @@ class Component:
         hvac = _hvac(coil)
         loop = opt(hvac.plantLoop()) if hvac is not None else None
         if loop is not None:
-            self._walk(loop, loop.sizingPlant().loopType().lower(), 0)
+            self._walk(loop, 0)
 
-    def _walk(self, loop, role, depth):
+    def _walk(self, loop, depth):
+        # A loop is named by its OWN type (heating, cooling, condenser), never
+        # by the path that first reached it: a condenser loop shared by a
+        # chiller and a heating heat pump was `cooling>condenser` or
+        # `heating>condenser` by whichever coil the walk met first, and that
+        # order is the SDK's hash order (Fable, review of the prototype: 1 of
+        # 30 zones of one row, the transient self-match failure).
         key = str(loop.handle())
-        if key in self._plants or depth > 2:
+        if key in self._plants:
+            return
+        if depth > self.MAX_DEPTH:
+            self.notes.add(f'plant walk stopped {self.MAX_DEPTH} loops from the coil')
             return
         self._plants.add(key)
+        role = loop.sizingPlant().loopType().lower()
         counts = {}
         for comp in loop.supplyComponents():
             kind = _kind(comp)
@@ -234,12 +276,13 @@ class Component:
             counts[kind] = counts.get(kind, 0) + 1
             # whatever this rejects to or draws from: a chiller's condenser
             # loop, a heat exchanger's other side, a heat pump's source
+            # (and a heat-recovery chiller's TERTIARY loop)
             w2w = opt(comp.to_WaterToWaterComponent()) if hasattr(comp, 'to_WaterToWaterComponent') else None
             if w2w is not None:
-                for other in (opt(w2w.secondaryPlantLoop()), opt(w2w.plantLoop())):
+                for other in (opt(w2w.plantLoop()), opt(w2w.secondaryPlantLoop()),
+                              opt(w2w.tertiaryPlantLoop())):
                     if other is not None and str(other.handle()) != key:
-                        self._walk(other, f'{role}>{other.sizingPlant().loopType().lower()}',
-                                   depth + 1)
+                        self._walk(other, depth + 1)
         for kind, n in counts.items():
             if n > 1:
                 self.controls.add(f'plant:{role}:{kind}:count={n}')
@@ -256,12 +299,13 @@ class Component:
 
     def as_dict(self):
         return {'role': self.role, 'identity': sorted(self.identity),
-                'controls': sorted(self.controls)}
+                'controls': sorted(self.controls), 'notes': sorted(self.notes)}
 
     @classmethod
     def from_dict(cls, data):
         c = cls(data['role'])
         c.identity, c.controls = set(data['identity']), set(data['controls'])
+        c.notes = set(data.get('notes', ()))
         return c
 
 
@@ -353,8 +397,13 @@ def zone_components(model, zone, children=None):
                         part.identity.add('ahu:all_outdoor_air')
                     for oac in oa.components():
                         okind = _kind(oac)
-                        if okind not in _PLUMBING and not okind.startswith('Fan'):
-                            part.identity.add(f'ahu:oa:{okind}')
+                        if okind in _PLUMBING or okind.startswith('Fan'):
+                            continue
+                        # a preheat coil here has a fuel and a plant like any
+                        # other (it got a bare type token before)
+                        part.identity.add(f'ahu:oa:{_token(okind, _concrete(oac))}')
+                        if 'Coil' in okind:
+                            part.plant(oac)
                 continue
             if kind in _WRAPPERS:
                 part.controls.add(f'ahu:wrapper:{kind}')
@@ -362,15 +411,19 @@ def zone_components(model, zone, children=None):
                 getter = getattr(concrete, 'controllingZoneorThermostatLocation', None)
                 if callable(getter) and _maybe(getter()) is not None:
                     part.identity.add('ahu:follows_a_zone')
-                for child in children.get(str(comp.handle()), []):
+                stack = list(children.get(str(comp.handle()), []))
+                while stack:
+                    child = stack.pop(0)
                     ckind = _kind(child)
-                    if 'Coil' in ckind:
+                    if 'Coil' in ckind and not ckind.startswith('CoilSystem'):
                         sequence.append(_token(ckind, _concrete(child)))
                         if _family(ckind) != ckind:
                             part.controls.add(f'ahu:component:{ckind}')
                         part.plant(child)
                     elif 'Fan' in ckind:
                         part.controls.add(f'ahu:fan:{ckind}')
+                    # nested: a CoilSystem's own coil (it was lost before)
+                    stack.extend(children.get(str(child.handle()), []))
                 continue
             sequence.append(_token(kind, _concrete(comp)))
             if _family(kind) != kind:
@@ -396,7 +449,7 @@ def zone_components(model, zone, children=None):
             # 100%-outdoor-air rooftop unit (single-zone reheat) were one
             # class without it. The exact manager stays a control: authors
             # pick Warmest or Scheduled for the same VAV.
-            if _kind(spm).startswith('SetpointManager_SingleZone'):
+            if _kind(spm) in _FOLLOWS_A_ZONE:
                 part.identity.add('ahu:follows_a_zone')
         components.append(part)
     return components
@@ -453,30 +506,59 @@ def explain(components, catalogue):
     if exact:
         row = catalogue[exact[0]]
         return {'outcome': 'match', 'systems': sorted(exact),
-                'control_differences': _control_diff(components, row)}
+                'control_differences': _control_diff(components, row),
+                'notes': sorted(set().union(*(c.notes for c in components)))}
 
-    parts, remaining = [], list(zone)
-    while remaining:
-        best = None
-        for ids in by_signature.values():
-            left = _covers(catalogue[ids[0]], remaining)
-            if left is None or len(left) == len(remaining):
-                continue
-            if best is None or len(left) < len(best[1]):
-                best = (sorted(ids), left)
-        if best is None:
-            break
-        parts.append({'systems': best[0],
-                      'covers': [r for r in remaining if r not in best[1]]})
-        remaining = best[1]
+    parts, remaining = _best_cover(zone, catalogue, by_signature)
+    notes = sorted(set().union(*(c.notes for c in components)))
     if parts:
         return {'outcome': 'partial' if remaining else 'composed',
-                'systems': [p['systems'][0] for p in parts],
+                'systems': [p['systems'] for p in parts],
                 'parts': [{'systems': p['systems'], 'covers': [{'role': r, 'identity': list(i)}
                                                                for r, i in p['covers']]}
                           for p in parts],
-                'uncovered': [{'role': r, 'identity': list(i)} for r, i in remaining]}
-    return _nearest(components, catalogue)
+                'uncovered': [{'role': r, 'identity': list(i)} for r, i in remaining],
+                'notes': notes}
+    result = _nearest(components, catalogue)
+    result['notes'] = notes
+    return result
+
+
+def _best_cover(zone, catalogue, by_signature):
+    """The decomposition of `zone` into catalogue classes that covers the
+    MOST components, then uses the FEWEST rows. Exhaustive: a zone has a
+    handful of components and only classes that fit are searched, where a
+    greedy pick reported `partial` for a zone two rows explain exactly
+    (Fable, review of the prototype: {a,b,c} with rows {a,b}, {b,c}, {a})."""
+    fitting = []
+    for ids in by_signature.values():
+        if _covers(catalogue[ids[0]], zone) is not None:
+            fitting.append(sorted(ids))
+    best = ([], list(zone))
+
+    def search(start, chosen, remaining):
+        nonlocal best
+        if (len(remaining), len(chosen)) < (len(best[1]), len(best[0])):
+            best = (list(chosen), list(remaining))
+        for k in range(start, len(fitting)):
+            left = _covers(catalogue[fitting[k][0]], remaining)
+            if left is None or len(left) == len(remaining):
+                continue
+            covered = _covered(remaining, left)
+            chosen.append({'systems': fitting[k], 'covers': covered})
+            search(k, chosen, left)
+            chosen.pop()
+
+    search(0, [], list(zone))
+    return best
+
+
+def _covered(remaining, left):
+    """`remaining` minus `left`, as multisets."""
+    out = list(remaining)
+    for item in left:
+        out.remove(item)
+    return out
 
 
 def _control_diff(components, row):

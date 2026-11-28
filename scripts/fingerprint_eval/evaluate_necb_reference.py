@@ -66,7 +66,10 @@ for path in sorted(glob.glob(sys.argv[2])):
             per_row[a.catalog_name] += 1
             if sig == want:
                 tally["fingerprint == the built row"] += 1
-                if e["outcome"] == "match" and (a.catalog_name in e["systems"] or a.config):
+                # Fable: "or a.config" counted ANY match as naming a config variant.
+                # Named means the exact class of the row+config that was built.
+                named = sorted(r for r, comps_ in rep.items() if fpm.signature(comps_) == want)
+                if named and e["outcome"] == "match" and sorted(e["systems"]) == named:
                     tally["  ...and explain names it"] += 1
                 else:
                     tally["  ...but explain does NOT name it"] += 1

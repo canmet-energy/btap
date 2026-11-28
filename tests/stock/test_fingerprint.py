@@ -128,12 +128,56 @@ class TestTheFingerprint(unittest.TestCase):
         model = _built('psz-gas-perzone', 'uh-hw-gasboiler')
         result = fingerprint.explain(_zone(model), catalogue)
         self.assertEqual('composed', result['outcome'], result)
-        self.assertEqual({'psz-gas-perzone', 'uh-hw-gasboiler'}, set(result['systems']))
+        self.assertEqual({'psz-gas-perzone', 'uh-hw-gasboiler'},
+                         {cls[0] for cls in result['systems']})
         # ...and a row that is not in the catalogue leaves an uncovered part
         partial = fingerprint.explain(_zone(model), _catalogue('psz-gas-perzone', 'uh-gas'))
         self.assertEqual('partial', partial['outcome'], partial)
-        self.assertEqual(['psz-gas-perzone'], partial['systems'])
+        self.assertEqual([['psz-gas-perzone']], partial['systems'])
         self.assertEqual(1, len(partial['uncovered']))
+
+    def test_the_cover_is_exact_not_greedy(self):
+        """Fable, review of the prototype: zone {a, b, c} with rows {a, b},
+        {b, c} and {a}. Greedy took {a, b} first and reported `partial`;
+        {b, c} + {a} builds it exactly."""
+        from btap.stock.fingerprint import Component, explain
+
+        def comp(token):
+            c = Component('unit')
+            c.identity = {token}
+            return c
+        catalogue = {'ab': [comp('a'), comp('b')], 'bc': [comp('b'), comp('c')], 'a': [comp('a')]}
+        result = explain([comp('a'), comp('b'), comp('c')], catalogue)
+        self.assertEqual('composed', result['outcome'], result)
+        self.assertEqual([['a'], ['bc']], sorted(result['systems']))
+
+    def test_the_fingerprint_does_not_depend_on_walk_order(self):
+        """The transient self-match failure: a condenser loop shared by a
+        chiller and a heating heat pump was named by whichever coil the walk
+        reached first, and that is the SDK's hash order. Reversing and
+        shuffling every child list must not change the fingerprint."""
+        import random
+
+        from btap.stock import fingerprint
+        model = _built('doas-fc4-hw-chw-gshp-elecboiler')
+        baseline = [fingerprint.signature(c) for _, c in fingerprint.model_components(model)]
+        original = fingerprint._children_by_container
+        try:
+            for seed in (None, 1, 2, 3):
+                def shuffled(m, seed=seed):
+                    out = original(m)
+                    for kids in out.values():
+                        if seed is None:
+                            kids.reverse()
+                        else:
+                            random.Random(seed).shuffle(kids)
+                    return out
+                fingerprint._children_by_container = shuffled
+                with self.subTest(order='reversed' if seed is None else f'shuffle {seed}'):
+                    self.assertEqual(baseline, [fingerprint.signature(c)
+                                                for _, c in fingerprint.model_components(model)])
+        finally:
+            fingerprint._children_by_container = original
 
     def test_nothing_known_is_NONE_with_the_differences(self):
         from btap.stock import fingerprint

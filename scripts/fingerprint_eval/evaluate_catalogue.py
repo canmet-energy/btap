@@ -9,6 +9,7 @@ argv[1] for the other two scripts.
 
 import collections
 import json
+import random
 import sys
 import time
 import warnings
@@ -41,10 +42,30 @@ def built(row, zones=None, config=None, mutate=None):
 
 
 t0 = time.time()
-cat, inconsistent, errors = {}, [], {}
+cat, inconsistent, errors, order_dependent = {}, [], {}, []
 for r in catalog.rows():
     try:
-        comps = fpm.model_components(built(r["id"]))
+        model = built(r["id"])
+        comps = fpm.model_components(model)
+        # walk-order independence: reversed and shuffled child lists must
+        # give the same fingerprint (the shared-condenser transient)
+        original = fpm._children_by_container
+        for seed in (None, 7):
+            def shuffled(m, seed=seed, original=original):
+                out = original(m)
+                for kids in out.values():
+                    if seed is None:
+                        kids.reverse()
+                    else:
+                        random.Random(seed).shuffle(kids)
+                return out
+            fpm._children_by_container = shuffled
+            try:
+                again = fpm.model_components(model)
+            finally:
+                fpm._children_by_container = original
+            if [fpm.signature(c) for _, c in again] != [fpm.signature(c) for _, c in comps]:
+                order_dependent.append((r["id"], "reversed" if seed is None else f"shuffle {seed}"))
     except Exception as e:
         errors[r["id"]] = f"{type(e).__name__}: {e}"[:160]
         continue
@@ -167,6 +188,7 @@ out = {
     "rows": len(rep),
     "errors": errors,
     "rows_whose_zones_differ": inconsistent,
+    "order_dependent_rows": order_dependent,
     "classes": len(classes),
     "multi_member_classes": sorted(sorted(v) for v in classes.values() if len(v) > 1),
     "self": {"ok": self_ok, "bad": self_bad, "first_failures": self_fail[:8]},
