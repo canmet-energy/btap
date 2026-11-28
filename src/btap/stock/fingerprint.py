@@ -1,9 +1,19 @@
 """Equipment fingerprints: identify a zone's HVAC by what it IS (#256).
 
-PROTOTYPE. `identify.py` scores catalogue rows against `classify`'s coarse
-facts with hand-written expectations of what each row should look like. This
-module reads the equipment itself and matches it against fingerprints made
-by BUILDING every catalogue row, so nothing mirrors a builder by hand.
+`identify.py` scores catalogue rows against `classify`'s coarse facts with
+hand-written expectations of what each row should look like, and put the
+right row first for 35 of 115 catalogue builds. This module reads the
+equipment itself and matches it against fingerprints made by BUILDING every
+catalogue row, so nothing mirrors a builder by hand. Nothing in the package
+calls it yet; wiring it into the stock reader is a separate decision (#256).
+
+Measured (scripts/fingerprint_eval/): every zone of every catalogue row
+self-matches; leaving a row out never yields a wrong match; the NECB
+reference builder's own assignments are named on 665 of 667 zones; and the
+ASHRAE 90.1 Appendix G systems built by the OpenStudio SDK (NREL's
+OpenStudio-resources, an author independent of openstudio-standards) land on
+the rows an engineer would name, or on `none` where the catalogue has no such
+row.
 
 A zone is described as COMPONENTS (Fable's review of the first cut):
 
@@ -642,7 +652,8 @@ def explain(components, catalogue):
 
     - ``match``: one row (or one equivalence class) builds exactly this;
     - ``composed``: several rows build it between them, one per part (a
-      rooftop unit's row plus a unit-heater row), chosen greedily;
+      rooftop unit's row plus a unit-heater row), the exact cover that
+      explains the most components with the fewest rows;
     - ``partial``: rows build some parts; ``uncovered`` lists the rest;
     - ``none``: no row builds any part; the nearest row and the differences;
     - ``unserved``: nothing serves the zone.
