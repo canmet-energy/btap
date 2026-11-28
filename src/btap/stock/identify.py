@@ -104,10 +104,13 @@ _ZONAL_FAMILY = {'unit_heater': 'unit_heaters', 'ptac': 'mau_ptac',
 
 
 #: `zonal_units` kinds that can COOL a zone (`row_facts.ZONAL_UNIT_FAMILY`'s
-#: vocabulary). A baseboard, a unit heater and a unit ventilator heat only; a
-#: radiant panel is counted as cooling because it may.
+#: vocabulary). A baseboard and a unit heater heat only. A radiant panel and a
+#: unit ventilator are counted as cooling because they MAY: EnergyPlus's
+#: `ZoneHVAC:UnitVentilator` takes an optional cooling coil (Fable, review of
+#: #260: calling it heating-only cost `cooling: False` rows 2 points on a
+#: group cooled only by unit ventilators).
 _COOLING_ZONAL_UNITS = frozenset({'evap_cooler', 'fan_coil', 'ptac', 'pthp',
-                                  'radiant', 'vrf_terminal', 'wshp'})
+                                  'radiant', 'unit_ventilator', 'vrf_terminal', 'wshp'})
 
 #: Fuel tokens no catalogue row burns. A group burning one cannot be built
 #: from the catalogue without substituting the fuel, and is told so.

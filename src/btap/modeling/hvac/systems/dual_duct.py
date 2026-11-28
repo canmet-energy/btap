@@ -52,6 +52,18 @@ class DualDuctVAV(BaseSystem):
             raise ValueError('DualDuctVAV with a hot-water hot deck requires needs_boiler=True')
         if not self._dx_cooling() and not self.config.get('needs_chiller'):
             raise ValueError('DualDuctVAV with a chilled-water cold deck requires needs_chiller=True')
+        # ...and the reverse (Fable, review of #260): asking the hot-water /
+        # chilled-water row for gas heat and DX cooling built a boiler and a
+        # chiller that no coil used. A plant the decks do not use is refused.
+        if heating_type not in _HYDRONIC_HEAT and self.config.get('needs_boiler'):
+            raise ValueError(
+                f'DualDuctVAV heating_type {heating_type!r} heats the hot deck directly, '
+                'so its boiler would serve no coil; set needs_boiler=False or use a '
+                'hot-water heating_type')
+        if self._dx_cooling() and self.config.get('needs_chiller'):
+            raise ValueError(
+                "DualDuctVAV cooling_type 'dx' cools the cold deck directly, so its "
+                'chiller would serve no coil; set needs_chiller=False or use chilled water')
         hot = _finite(self.sizing, 'hot_deck_supply_air_temperature')
         cold = _finite(self.sizing, 'cold_deck_supply_air_temperature')
         minimum = _finite(self.sizing, 'zone_minimum_air_flow_fraction')

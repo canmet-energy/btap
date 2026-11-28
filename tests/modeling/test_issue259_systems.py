@@ -123,6 +123,56 @@ class TestFullOutdoorAirInOperation(unittest.TestCase):
                     self.assertTrue(loop.sizingSystem().allOutdoorAirinCooling())
                     self.assertTrue(loop.sizingSystem().allOutdoorAirinHeating())
 
+    def test_run_on_full_outdoor_air_sets_the_sizing_flags_itself(self):
+        """The mixed-air twins already report the all-OA sizing flags as True,
+        so asserting them on the 100oa rows proved nothing (Fable, review of
+        #260). Here the loop starts with both flags FALSE, as a profile like
+        `necb_psz_hp` leaves them, and the call must set them."""
+        import openstudio
+
+        from btap.modeling.hvac.systems.base_system import BaseSystem
+        model = load_fixture()
+        loop = openstudio.model.AirLoopHVAC(model)
+        controller = openstudio.model.ControllerOutdoorAir(model)
+        oa = openstudio.model.AirLoopHVACOutdoorAirSystem(model, controller)
+        oa.addToNode(loop.supplyInletNode())
+        loop.sizingSystem().setAllOutdoorAirinCooling(False)
+        loop.sizingSystem().setAllOutdoorAirinHeating(False)
+        BaseSystem.run_on_full_outdoor_air(None, model, loop, oa)
+        self.assertTrue(loop.sizingSystem().allOutdoorAirinCooling())
+        self.assertTrue(loop.sizingSystem().allOutdoorAirinHeating())
+
+    def test_classify_reads_the_LOWEST_hour_of_the_fraction_schedule(self):
+        """100% outdoor air means 1 at EVERY hour. A ruleset at 0.2 until
+        08:00 and 1.0 after is not; one at 1.0 all day is (Fable, review of
+        #260: `min` -> `max` survived every test, no fixture used a ruleset)."""
+        import openstudio
+
+        from btap.modeling.hvac import classify
+
+        def with_fraction(values):
+            model = _build('psz-gas-perzone')
+            for loop in model.getAirLoopHVACs():
+                controller = loop.airLoopHVACOutdoorAirSystem().get().getControllerOutdoorAir()
+                schedule = openstudio.model.ScheduleRuleset(model)
+                day = schedule.defaultDaySchedule()
+                for hour, value in values:
+                    day.addValue(openstudio.Time(0, hour, 0, 0), value)
+                controller.setMinimumFractionofOutdoorAirSchedule(schedule)
+            return any(g.get('loop_full_outdoor_air')
+                       for g in classify.characterize(model)['zone_groups'])
+        self.assertFalse(with_fraction([(8, 0.2), (24, 1.0)]))
+        self.assertTrue(with_fraction([(24, 1.0)]))
+
+    def test_dual_duct_refuses_a_plant_no_coil_would_use(self):
+        """Fable, review of #260: the hot-water row asked for gas heat and DX
+        cooling built a boiler and a chiller serving nothing."""
+        for config in ({'heating_type': 'Gas', 'cooling_type': 'dx'},
+                       {'heating_type': 'Gas'}, {'cooling_type': 'dx'}):
+            with self.subTest(config=config):
+                with self.assertRaises(ValueError):
+                    _build('ddvav-hw-gasboiler-scrollchiller', config=config)
+
     def test_their_mixed_air_twins_do_not(self):
         for system in ('psz-gas-perzone', 'hv-hw-gasboiler-shared'):
             with self.subTest(system=system):
