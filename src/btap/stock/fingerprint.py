@@ -336,6 +336,9 @@ class Component:
         self.controls = set()
         #: what the reader could NOT read here: absent, never silently skipped
         self.notes = set()
+        #: identity tokens that may or may not hold (an undetermined boiler
+        #: lift): explain() tries the component both ways
+        self.maybe = set()
         self._plants = set()
 
     def plant(self, coil):
@@ -397,6 +400,9 @@ class Component:
         if heat_pump_tops and (unread_setpoints or loop_top is None or not tops):
             self.notes.add(f'{role} plant: boiler lift not determined; setpoint managers '
                            f'not read: {sorted(set(unread_setpoints)) or ["none present"]}')
+            # neither "lift" nor "low temperature" is established: explain()
+            # tries both and names every row either fits (Fable, re-review)
+            self.maybe.add(f'plant:{role}:boiler_lifts_above_heat_pump')
         elif loop_top is not None and tops and loop_top > max(tops) + 0.5:
             self.identity.add(f'plant:{role}:boiler_lifts_above_heat_pump')
         for spm in loop.supplyOutletNode().setpointManagers():
@@ -412,13 +418,15 @@ class Component:
 
     def as_dict(self):
         return {'role': self.role, 'identity': sorted(self.identity),
-                'controls': sorted(self.controls), 'notes': sorted(self.notes)}
+                'controls': sorted(self.controls), 'notes': sorted(self.notes),
+                'maybe': sorted(self.maybe)}
 
     @classmethod
     def from_dict(cls, data):
         c = cls(data['role'])
         c.identity, c.controls = set(data['identity']), set(data['controls'])
         c.notes = set(data.get('notes', ()))
+        c.maybe = set(data.get('maybe', ()))
         return c
 
 
@@ -447,10 +455,19 @@ def _at(curve, outdoor_c):
     return None
 
 
-def heating_performance_at_5f(concrete, kind):
-    """``(speeds, COP at 5 F, capacity at 5 F / capacity at 47 F)`` at
-    maximum capacity, from the coil's own rated values and curves, or None
-    when the coil is not a DX heating coil or a curve is unreadable."""
+def heating_performance_at_5f(concrete, kind, owner_lockout_c=None):
+    """``(speeds, COP at 5 F, capacity at 5 F / capacity at 47 F, lockout C)``
+    at maximum capacity, from the coil's own rated values and curves, or None
+    when the coil is not a DX heating coil or a curve is unreadable.
+
+    COP is what EnergyPlus computes: rated COP / EIR-f(T). EnergyPlus does
+    NOT renormalise the curve to 1 at rating conditions, so neither does this
+    (an earlier `cop * eir_47 / eir_5` disagreed with the simulation whenever
+    a curve was not exactly 1 at 47 F). The capacity RATIO is ENERGY STAR's
+    definition, so it divides by the 47 F value. When the compressor is
+    locked out above 5 F, COP and ratio are None and the lockout says why:
+    the coil delivers nothing there. `owner_lockout_c` is the containing
+    unit's own lockout (a PTHP carries one), the stricter of the two wins."""
     try:
         if kind == 'Coil_Heating_DX_SingleSpeed':
             speeds, cop = 1, concrete.ratedCOP()
@@ -474,12 +491,13 @@ def heating_performance_at_5f(concrete, kind):
         return None
     if None in (cap_5, cap_47, eir_5, eir_47) or cap_47 <= 0 or eir_5 <= 0:
         return None
+    if owner_lockout_c is not None:
+        lockout = max(lockout, owner_lockout_c)
     if lockout > _5F_C:
-        # the compressor is OFF at 5 F: no capacity, whatever the curve says
-        # (Fable, final review: a flat curve locked out at -5 C was tagged
-        # cold-climate)
-        return speeds, 0.0, 0.0
-    return speeds, cop * eir_47 / eir_5, cap_5 / cap_47
+        # the compressor is OFF at 5 F, whatever the curve says (Fable, final
+        # review: a flat curve locked out at -5 C was tagged cold-climate)
+        return speeds, None, None, lockout
+    return speeds, cop / eir_5, cap_5 / cap_47, lockout
 
 
 #: DX HEATING coils the cold-climate test does not read yet: named in notes,
@@ -488,16 +506,32 @@ _COLD_CLIMATE_UNREAD = ('Coil_Heating_DX_MultiSpeed', 'Coil_Heating_DX_VariableR
                         'Coil_Heating_DX_VariableRefrigerantFlow_FluidTemperatureControl')
 
 
-def _cold_climate(component, prefix, kind, concrete):
+def _owner_lockout(owner):
+    """A containing unit's own compressor lockout, C (a PTHP has one)."""
+    if owner is None:
+        return None
+    getter = getattr(_concrete(owner), 'minimumOutdoorDryBulbTemperatureforCompressorOperation', None)
+    if not callable(getter):
+        return None
+    value = _maybe(getter())
+    return float(value) if isinstance(value, (int, float)) else None
+
+
+def _cold_climate(component, prefix, kind, concrete, owner=None):
     if kind in _COLD_CLIMATE_UNREAD:
         component.notes.add(f'cold-climate test not read for {kind}')
         return
-    performance = heating_performance_at_5f(concrete, kind)
+    performance = heating_performance_at_5f(concrete, kind, _owner_lockout(owner))
     if performance is None:
         if kind.startswith('Coil_Heating_DX'):
             component.notes.add(f'cold-climate test not read for {kind}')
         return
-    speeds, cop_5f, ratio = performance
+    speeds, cop_5f, ratio, lockout = performance
+    if cop_5f is None:
+        component.controls.add(f'{prefix}:{kind}:at 5F: compressor locked out below '
+                               f'{lockout:g} C, {speeds} speed(s)')
+        component.controls.add(f'{prefix}:{kind}:NEEP ccASHP v4.0 not met')
+        return
     component.controls.add(f'{prefix}:{kind}:at 5F: COP {cop_5f:.2f}, capacity {ratio:.0%}, '
                            f'{speeds} speed(s)')
     if cop_5f >= COLD_CLIMATE_COP_5F and ratio >= COLD_CLIMATE_CAPACITY_RATIO_5F:
@@ -506,7 +540,7 @@ def _cold_climate(component, prefix, kind, concrete):
     component.controls.add(f'{prefix}:{kind}:NEEP ccASHP v4.0 {"met" if neep else "not met"}')
 
 
-def _add_coil(component, prefix, owner_kind, coil):
+def _add_coil(component, prefix, owner_kind, coil, owner=None):
     kind = _kind(coil)
     concrete = _concrete(coil)
     availability = _availability(concrete)
@@ -518,7 +552,7 @@ def _add_coil(component, prefix, owner_kind, coil):
     component.identity.add(token)
     if _family(kind) != kind:
         component.controls.add(f'{prefix}:coil:{kind}')
-    _cold_climate(component, prefix, kind, concrete)
+    _cold_climate(component, prefix, kind, concrete, owner)
     component.plant(coil)
 
 
@@ -527,7 +561,7 @@ def _inner(component, owner, children, prefix):
     for child in children.get(str(owner.handle()), []):
         kind = _kind(child)
         if 'Coil' in kind:
-            _add_coil(component, prefix, _kind(owner), child)
+            _add_coil(component, prefix, _kind(owner), child, owner)
         elif 'Fan' in kind:
             component.controls.add(f'{prefix}:fan:{kind}')
         _inner(component, child, children, prefix)
@@ -552,7 +586,7 @@ def zone_components(model, zone, children=None):
             # a baseboard's coil is its own, not "contained"
             coil = _maybe(concrete.heatingCoil()) if hasattr(concrete, 'heatingCoil') else None
             if coil is not None:
-                _add_coil(unit, 'unit', kind, coil)
+                _add_coil(unit, 'unit', kind, coil, equipment)
         components.append(unit)
 
     terminal_of = {}
@@ -683,6 +717,7 @@ def collapse(components):
             # every duplicate's controls and notes: two units identical in
             # identity may still differ in control (Fable, final review)
             merged.notes = set().union(*(g.notes for g in group))
+            merged.maybe = set().union(*(g.maybe for g in group))
             # name the unit by its own type token (`unit:ZoneHVAC_...`,
             # `terminal:...`), not by whichever token sorts first
             own = sorted(x for x in c.identity
@@ -741,6 +776,17 @@ def explain(components, catalogue):
         by_signature.setdefault(signature(row), []).append(row_id)
 
     exact = by_signature.get(tuple(sorted(zone)))
+    if any(c.maybe for c in components):
+        # every reading of the undetermined tokens: the rows any of them fit
+        readings = set()
+        for variant in _readings(components):
+            readings |= set(by_signature.get(tuple(sorted(c.frozen() for c in variant)), ()))
+        if readings:
+            row = catalogue[sorted(readings)[0]]
+            return {'outcome': 'match', 'systems': sorted(readings),
+                    'undetermined': sorted(set().union(*(c.maybe for c in components))),
+                    'control_differences': _control_diff(components, row),
+                    'notes': sorted(set().union(*(c.notes for c in components)))}
     if exact:
         row = catalogue[exact[0]]
         return {'outcome': 'match', 'systems': sorted(exact),
@@ -763,6 +809,21 @@ def explain(components, catalogue):
     result = _nearest(components, catalogue)
     result['notes'] = notes
     return result
+
+
+def _readings(components):
+    """Every version of `components` with each undetermined token absent or
+    present (an undetermined boiler lift is either reading)."""
+    variants = [[]]
+    for c in components:
+        options = [c]
+        for token in sorted(c.maybe):
+            with_token = Component(c.role)
+            with_token.identity = set(c.identity) | {token}
+            with_token.controls, with_token.notes = set(c.controls), set(c.notes)
+            options.append(with_token)
+        variants = [v + [o] for v in variants for o in options]
+    return variants
 
 
 def _best_cover(zone, catalogue, by_signature):

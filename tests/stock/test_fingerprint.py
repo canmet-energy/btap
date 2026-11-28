@@ -181,7 +181,11 @@ class TestTheFingerprint(unittest.TestCase):
                 flat.setMinimumValueofx(-30.0)
                 flat.setMaximumValueofx(30.0)
                 coil.setTotalHeatingCapacityFunctionofTemperatureCurve(flat)
-                coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(-25.0)
+                coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(-18.0)
+            # the PTHP unit carries its own lockout (default -8 C, IDD minimum
+            # -20 C), and the stricter of the two governs
+            for unit in model.getZoneHVACPackagedTerminalHeatPumps():
+                assert unit.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(-18.0)
 
         plain = _zone(_built('pthp'))
         cold = _zone(_built('pthp', mutate=cold_climate))
@@ -246,14 +250,21 @@ class TestTheFingerprint(unittest.TestCase):
             curve.setMaximumValueofx(30.0)
             return curve
 
-        def coil_with(cap=(1.0, 0.0), eir=(1.0, 0.0), cop=5.0, lockout=-25.0):
+        def coil_with(cap=(1.0, 0.0), eir=(1.0, 0.0), cop=5.0, lockout=-18.0, unit_lockout=-18.0):
             def mutate(model):
                 for coil in model.getCoilHeatingDXSingleSpeeds():
                     coil.setTotalHeatingCapacityFunctionofTemperatureCurve(cubic(model, *cap))
                     coil.setEnergyInputRatioFunctionofTemperatureCurve(cubic(model, *eir))
                     coil.setRatedCOP(cop)
                     coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(lockout)
+                for unit in model.getZoneHVACPackagedTerminalHeatPumps():
+                    unit.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(unit_lockout)
             return mutate
+
+        def line(at_47, at_5):
+            """A linear curve through (8.33 C, at_47) and (-15 C, at_5)."""
+            slope = (at_47 - at_5) / (8.33 + 15.0)
+            return (at_47 - slope * 8.33, slope)
 
         token = 'unit:Coil_Heating_DX:cold_climate[ENERGY STAR]'
 
@@ -261,11 +272,19 @@ class TestTheFingerprint(unittest.TestCase):
             return any(token in c.identity for c in _zone(_built('pthp', zones=1, mutate=coil_with(**kw))))
         self.assertTrue(cold(), 'flat capacity, COP 5')
         self.assertFalse(cold(cop=1.5), 'COP below 1.75')
-        # EIR 2.0 everywhere: COP at 5 F is the rated 3.0 (normalised), not 1.5
-        self.assertTrue(cold(eir=(2.0, 0.0), cop=3.0), 'EIR normalised at 47 F')
+        # COP at 5 F is what EnergyPlus computes, rated / EIR-f(5 F), with no
+        # renormalisation at 47 F. Each case is decided by that alone: the
+        # first fails if the curve is ignored, the second if it is
+        # renormalised (Fable, re-review: a constant EIR could not tell).
+        self.assertFalse(cold(eir=line(1.0, 2.0), cop=3.0), 'COP 3 / 2 = 1.5')
+        self.assertTrue(cold(eir=line(0.5, 1.0), cop=3.0), 'COP 3 / 1 = 3, not 3 * 0.5 / 1')
         # capacity 1.5 at 47 F and 0.9 at 5 F: a 60% RATIO, though 0.9 >= 0.7
         self.assertFalse(cold(cap=(1.5 - 0.6 * 8.33 / 23.33, 0.6 / 23.33)), 'capacity ratio 60%')
         self.assertFalse(cold(lockout=-5.0), 'compressor locked out above 5 F')
+        self.assertFalse(cold(unit_lockout=-5.0), "the PTHP unit's own lockout counts too")
+        locked = _zone(_built('pthp', zones=1, mutate=coil_with(lockout=-5.0)))
+        self.assertTrue(any('compressor locked out below -5 C' in x for c in locked for x in c.controls),
+                        'a lockout is reported as one, not as a COP of zero')
 
     def test_boiler_lift_is_read_from_any_schedule_or_named(self):
         """Fable, final review: a boiler-lift plant on ruleset-scheduled
@@ -308,7 +327,16 @@ class TestTheFingerprint(unittest.TestCase):
         self.assertTrue(any(token in c.identity for c in lift), 'ruleset setpoints are read')
         unread = _zone(_built('bb-hwbb-awhp-gasbu-lift', zones=1, mutate=reauthor(follow=True)))
         self.assertFalse(any(token in c.identity for c in unread))
-        self.assertTrue(any('boiler lift not determined' in n for c in unread for n in c.notes))
+        self.assertTrue(any('boiler lift not determined' in n
+                            and 'SetpointManager_FollowOutdoorAirTemperature' in n
+                            for c in unread for n in c.notes), 'the unread manager is NAMED')
+        # ...and explain names BOTH rows it cannot tell apart, not one
+        from btap.stock import fingerprint
+        catalogue = {r: _zone(_built(r)) for r in ('bb-hwbb-awhp-gasbu', 'bb-hwbb-awhp-gasbu-lift')}
+        result = fingerprint.explain(unread, catalogue)
+        self.assertEqual('match', result['outcome'], result)
+        self.assertEqual(['bb-hwbb-awhp-gasbu', 'bb-hwbb-awhp-gasbu-lift'], result['systems'])
+        self.assertEqual([token], result['undetermined'])
 
     def test_collapse_keeps_every_duplicate_and_rows_collapse_too(self):
         from btap.stock.fingerprint import Component, collapse, explain
