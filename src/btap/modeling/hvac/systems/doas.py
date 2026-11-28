@@ -114,25 +114,42 @@ class Doas(BaseSystem):
         air_loop = openstudio.model.AirLoopHVAC(model)
         self.apply_system_sizing(air_loop)
 
+        # `heating_type: 'None'` builds no heating coil and `cooling: False`
+        # no cooling coil (#259). With neither, the loop is VENTILATION ONLY:
+        # it delivers untempered outdoor air and the zones' own equipment
+        # carries the whole load. Both default to the coils this family has
+        # always built.
+        heating_type = self.config.get('heating_type', 'Electric')
+        cooling = self.config.get('cooling', True)
+
         fan = openstudio.model.FanConstantVolume(model, always_on)
         fan.setName('DOAS Supply Fan')
-        htg = coils.heating_coil(model, self.config.get('heating_type', 'Electric'),
-                                 always_on, hw_loop=hw_loop,
-                                 performance_profile=self.performance_profile)
-        clg = coils.dx_cooling_single_speed(
-            model, always_on, name='DOAS DX Clg Coil',
-            performance_profile=self.performance_profile)
+        htg = None
+        if heating_type not in ('None', None):
+            htg = coils.heating_coil(model, heating_type,
+                                     always_on, hw_loop=hw_loop,
+                                     performance_profile=self.performance_profile)
+        clg = None
+        if cooling:
+            clg = coils.dx_cooling_single_speed(
+                model, always_on, name='DOAS DX Clg Coil',
+                performance_profile=self.performance_profile)
 
         supply_inlet_node = air_loop.supplyInletNode()
         fan.addToNode(supply_inlet_node)
-        htg.addToNode(supply_inlet_node)
-        clg.addToNode(supply_inlet_node)
+        if htg is not None:
+            htg.addToNode(supply_inlet_node)
+        if clg is not None:
+            clg.addToNode(supply_inlet_node)
         self.add_oa_system(model, supply_inlet_node)
 
-        spm = openstudio.model.SetpointManagerScheduled(
-            model,
-            schedules.constant_ruleset(model, 'DOAS Neutral Supply Air Temp', 20.0))
-        spm.addToNode(air_loop.supplyOutletNode())
+        if htg is not None or clg is not None:
+            # The setpoint is what the coils control to. A loop with no coil
+            # has nothing to control, so it gets no manager.
+            spm = openstudio.model.SetpointManagerScheduled(
+                model,
+                schedules.constant_ruleset(model, 'DOAS Neutral Supply Air Temp', 20.0))
+            spm.addToNode(air_loop.supplyOutletNode())
 
         for zone in zones:
             diffuser = openstudio.model.AirTerminalSingleDuctUncontrolled(model, always_on)
@@ -140,8 +157,8 @@ class Doas(BaseSystem):
 
         naming.apply(namer, air_loop,
                      system_name=self.config['id'], sys_abbr='doas', sys_oa='doas',
-                     parts={'sys_hr': 'none', 'sys_clg': 'dx',
-                            'sys_htg': self.config.get('heating_type', 'Electric'),
+                     parts={'sys_hr': 'none', 'sys_clg': 'dx' if clg is not None else 'none',
+                            'sys_htg': heating_type if htg is not None else 'none',
                             'sys_sf': 'cv', 'zone_htg': 'none', 'zone_clg': 'none',
                             'sys_rf': 'none'},
                      suffix=None)

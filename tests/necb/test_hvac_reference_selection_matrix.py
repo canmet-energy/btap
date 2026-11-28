@@ -89,6 +89,11 @@ SUBSET = [
     'doas-fc4-ashp-elecsupp-awhp-elecboiler', 'evap',
     'uh-gas', 'windowac-elecbb', 'pthp',
     'wshp-gasboiler',
+    # #259 shapes, added 2026-11-28: a parallel fan-powered-box terminal, a
+    # dual-duct loop on direct coils (gas hot deck, DX cold deck), and a
+    # ventilation-only loop whose blocks are neither heated nor cooled, so
+    # they take no reference assignment.
+    'pvav-elec-pfp', 'ddvav-gas-dx', 'doas-untempered',
 ]
 
 #: `blocks` replaced `zones` with D-101. The old key counted the zones of

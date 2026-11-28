@@ -150,6 +150,9 @@ class PSZ(BaseSystem):
         # #217: attach through BaseSystem so energy recovery reaches
         # the OA nodes, which only exist once attached.
         self.attach_oa_system(model, oa_system, supply_inlet_node)
+        if config.get('all_outdoor_air'):
+            # #259: a 100%-outdoor-air unit in OPERATION, not merely sized as one.
+            self.run_on_full_outdoor_air(model, air_loop, oa_system)
 
         # PSZ is "packaged single zone": the catalogue row names factory-made
         # unitary equipment, so the model SAYS so rather than leaving a reader

@@ -144,10 +144,11 @@ FAMILY_CONFIG_KEYS = {
     'crah': frozenset({
         'cooling_type', 'crah_maximum_humidity_ratio',
         'crah_supply_air_temperature', 'sizing', 'sys_abbr', 'ventilation'}) | _CENTRAL_ERV_KEYS,
-    'doas': frozenset({'heating_type', 'sizing'}) | _CENTRAL_ERV_KEYS,
+    'doas': frozenset({'cooling', 'heating_type', 'sizing'}) | _CENTRAL_ERV_KEYS,
     'doas_pthp': frozenset({'sizing', 'supp_htg_fuel', 'sys_abbr'}) | _CENTRAL_ERV_KEYS,
     'dual_duct': frozenset({
-        'needs_boiler', 'needs_chiller', 'sizing', 'sys_abbr'}) | _CENTRAL_ERV_KEYS,
+        'cooling_type', 'heating_type', 'needs_boiler', 'needs_chiller', 'sizing',
+        'sys_abbr'}) | _CENTRAL_ERV_KEYS,
     'ecm_ashp_baseboard': frozenset({
         'air_eqpt', 'baseboard_type', 'sizing', 'supp_htg_fuel', 'sys_abbr',
         'vent_type'}),
@@ -160,18 +161,18 @@ FAMILY_CONFIG_KEYS = {
         'fan_coil_type', 'heating', 'mau', 'mau_cooling_type',
         'mau_heating_coil_type', 'sizing', 'sys_abbr'}) | _CENTRAL_ERV_KEYS,
     'furnace': frozenset({
-        'cooling', 'equipment_class', 'heating', 'heating_type', 'per_zone',
+        'all_outdoor_air', 'cooling', 'equipment_class', 'heating', 'heating_type', 'per_zone',
         'reheat', 'sizing', 'ventilation'}) | _CENTRAL_ERV_KEYS,
     'mau_ptac': frozenset({
         'baseboard_type', 'mau_heating_coil_type', 'ptac_heating_type',
         'reference_hp', 'sizing', 'supp_htg_fuel', 'sys_abbr'}) | _CENTRAL_ERV_KEYS,
     'psz': frozenset({
-        'baseboard_type', 'heat_source', 'heating_coil_type', 'per_zone',
+        'all_outdoor_air', 'baseboard_type', 'heat_source', 'heating_coil_type', 'per_zone',
         'sizing', 'staged_coils', 'supp_htg_fuel', 'sys_abbr'}) | _CENTRAL_ERV_KEYS,
     'unit_heaters': frozenset({'heating_type'}),
     'vav_reheat': frozenset({
         'baseboard_type', 'cooling_type', 'heating_coil_type', 'sizing',
-        'sys_abbr'}) | _CENTRAL_ERV_KEYS,
+        'sys_abbr', 'terminal_type'}) | _CENTRAL_ERV_KEYS,
     'vrf': frozenset({'zone_ventilation'}),
     'wshp': frozenset({'boiler_fuel', 'heat_rejection', 'sizing', 'ventilation'}),
     'zone_ervs': _ERV_FIELD_KEYS,

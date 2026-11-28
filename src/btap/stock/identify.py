@@ -103,6 +103,12 @@ _ZONAL_FAMILY = {'unit_heater': 'unit_heaters', 'ptac': 'mau_ptac',
 
 
 
+#: `zonal_units` kinds that can COOL a zone (`row_facts.ZONAL_UNIT_FAMILY`'s
+#: vocabulary). A baseboard, a unit heater and a unit ventilator heat only; a
+#: radiant panel is counted as cooling because it may.
+_COOLING_ZONAL_UNITS = frozenset({'evap_cooler', 'fan_coil', 'ptac', 'pthp',
+                                  'radiant', 'vrf_terminal', 'wshp'})
+
 #: Fuel tokens no catalogue row burns. A group burning one cannot be built
 #: from the catalogue without substituting the fuel, and is told so.
 _NO_CATALOGUE_FUEL = frozenset({'oil', 'other'})
@@ -411,6 +417,15 @@ def _score(row, group):
         if loop_cools:
             score -= 2.0
             against.append('row does NOT cool but the loop has DX cooling')
+        elif zonal_cools and not zonal & _COOLING_ZONAL_UNITS:
+            # #259: the group is cooled but no zone unit can cool it, so the
+            # cooling is on the loop by a device the coil scan does not call
+            # loop cooling (a direct evaporative cooler). The +2 below then
+            # handed the evaporative-cooler building to the electric H&V row,
+            # which builds no cooling at all.
+            score -= 2.0
+            against.append('row does NOT cool, and the group is cooled by no '
+                           'zone unit, so its cooling is on the loop')
         elif zonal_cools:
             score += 2.0
             matched.append(
@@ -692,6 +707,11 @@ def _score(row, group):
                        'system burns it, so building this row substitutes '
                        'the fuel')
 
+    # #259: four facts the rows added for systems the catalogue could not
+    # express differ by. Each is scored only where the row states the
+    # property, except the PTAC test, which is the shape both families claim.
+    score += _score_259(row, group, zonal, heat, matched, against)
+
     # Provenance, as a TIEBREAK and nothing more. Six rows carry
     # `origin: campus` and were curated from the project these archetypes come
     # from, so they are a better first guess for a campus model — but a
@@ -702,6 +722,103 @@ def _score(row, group):
         matched.append("row origin is 'campus' (tiebreak only)")
 
     return score, matched, against
+
+
+def _group_has_air_loop(group):
+    """An air loop serves the group: it has an outdoor-air system or a
+    terminal on a loop. A zonal-only group has neither."""
+    return (group.get('system_outdoor_air_method') is not None
+            or str(group.get('terminal_type') or 'none') != 'none')
+
+
+def _score_259(row, group, zonal, heat, matched, against):
+    """The scoring the #259 rows need, returned as a score delta.
+
+    - 100% outdoor air (`all_outdoor_air`): scored on the rows that state it,
+      against classify's `loop_full_outdoor_air`. Without it each row TIED its
+      mixed-air twin and the legacy-name tiebreak gave every 100%-OA building
+      to the twin.
+    - A ventilation-only DOAS (`heating_type: 'None'`, `cooling: False`):
+      scored on whether the group's loop has any coil. It tied the electric
+      DOAS on its own building.
+    - The DX heat pump of a `heat_source: 'ashp'` packaged unit: no rule
+      credited it, so an electric-resistance rooftop unit outscored the heat
+      pump on a heat-pump building by the +2 its explicit coil field earns.
+      Its backup fuel is read the same way.
+    - Parallel fan-powered boxes (`terminal_type: 'parallel_piu'`), against
+      classify's `terminal_type`, so a VAV-box building is not handed them.
+    - Stand-alone PTACs (`zone_terminal`) against PTACs behind a make-up air
+      unit (`mau_ptac`): `_ZONAL_FAMILY` credits 'ptac' to `mau_ptac` only,
+      so a building of self-ventilating PTACs with NO air loop picked the
+      make-up air row, which adds a loop the building does not have.
+    """
+    score = 0.0
+    if row.get('all_outdoor_air') and 'loop_full_outdoor_air' in group:
+        if group['loop_full_outdoor_air'] is True:
+            score += 2.5
+            matched.append('the loop runs on 100% outdoor air and so does this row')
+        else:
+            score -= 3.0
+            against.append('this row runs on 100% outdoor air; the loop mixes '
+                           'return air')
+
+    if (row.get('family') == 'doas' and str(row.get('heating_type')) == 'None'
+            and row.get('cooling') is False):
+        loop_coil = (bool(group.get('supply_heating_media'))
+                     or group.get('loop_dx_cooling') is True
+                     or group.get('loop_hydronic_cooling_supply') is True)
+        if _group_has_air_loop(group) and not loop_coil:
+            score += 2.0
+            matched.append('the loop has no heating or cooling coil; this row '
+                           'delivers untempered outdoor air')
+        else:
+            score -= 3.0
+            against.append('this row has no heating or cooling coil; the '
+                           "group's loop tempers its air, or there is no loop")
+
+    if row.get('heat_source') == 'ashp':
+        dx_heat_pump = (group.get('heat_pump') is True
+                        and group.get('hydronic_heat_pump') is not True)
+        if dx_heat_pump:
+            score += 2.5
+            matched.append('the group heats with a DX heat pump and so does this row')
+        else:
+            score -= 3.0
+            against.append('this row heats with a DX heat pump; none is '
+                           'established in the group')
+        # The backup coil is on the LOOP, so the loop's own coil media decide
+        # it where classify recorded them: a gas boiler feeding hot-water
+        # baseboards puts gas in the group's fuels without the loop burning
+        # any. The fuels are the fallback for facts without the media.
+        gas_backup = str(row.get('supp_htg_fuel', 'Electric')) in ('Gas', 'NaturalGas')
+        media = set(group.get('supply_heating_media') or ())
+        loop_burns = 'combustion' in media if media else 'gas' in heat
+        if gas_backup and not loop_burns:
+            score -= 1.5
+            against.append("this row's backup coil burns gas; the loop burns none")
+        elif not gas_backup and loop_burns:
+            score -= 1.5
+            against.append("this row's backup coil is electric; the loop burns gas")
+
+    if row.get('terminal_type') == 'parallel_piu':
+        if facts_terminal(group) == 'parallel_piu_reheat':
+            score += 2.0
+            matched.append('the group has parallel fan-powered boxes and so does this row')
+        else:
+            score -= 2.0
+            against.append('this row builds parallel fan-powered boxes; the '
+                           f'group terminal is {facts_terminal(group)!r}')
+
+    if 'ptac' in zonal and not _group_has_air_loop(group):
+        if row.get('family') == 'zone_terminal' and row.get('unit_type') == 'ptac':
+            score += 3.0
+            matched.append('self-ventilating PTACs and no air loop; this row '
+                           'builds stand-alone PTACs')
+        elif row.get('family') == 'mau_ptac':
+            score -= 2.0
+            against.append('the group has no air loop; this row adds a make-up '
+                           'air unit')
+    return score
 
 
 def identify_candidates(group, *, limit=3):

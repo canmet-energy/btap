@@ -229,7 +229,16 @@ class TestTheCoilMediumIsNotAFuel(unittest.TestCase):
                 ('vav-hw-gasboiler-scrollchiller', 'vav-hw-gasboiler-scrollchiller'),
                 ('vav-hw-hwbb-awhp-elecbu-scrollchiller', 'vav-hw-hwbb-awhp-elecbu-scrollchiller'),
                 ('vav-hw-hwbb-awhp-gasbu-scrollchiller', 'vav-hw-hwbb-awhp-gasbu-scrollchiller'),
-                ('cvrh-ashp-gasrh-hwbb-gasboiler', 'psz-hw-hwbb-gasboiler'),
+                # A DX heat-pump air handler with gas reheat beside hot-water
+                # baseboards. Since #259 credits the DX heat pump of a
+                # `heat_source: ashp` row, a heat-pump rooftop unit with the
+                # same baseboards outranks the hot-water rooftop unit, which
+                # substitutes the loop's heating medium. Its backup is judged
+                # on the LOOP's coils, which burn nothing here (the gas is in
+                # the reheat terminals and the boiler, and the facts do not
+                # separate the two), so the electric-backup row ranks first:
+                # the heat pump is right and the auxiliary fuel is not.
+                ('cvrh-ashp-gasrh-hwbb-gasboiler', 'psz-ashp-elecsupp-hwbb-gasboiler'),
                 ('psz-hw-hwbb-awhp-gasbu', 'psz-hw-hwbb-awhp-gasbu')):
             with self.subTest(built=built):
                 model = load_fixture()
@@ -332,13 +341,15 @@ class TestWhatItFindsOnTheRealSIGNATURES(unittest.TestCase):
         self.assertEqual('uh-hw-gasboiler', candidates[0]['system'])
         self.assertEqual('campus', candidates[0]['origin'])
 
-    def test_a_ptac_group_finds_the_campus_MAU_row(self):
+    def test_a_ptac_group_finds_the_stand_alone_hot_water_PTAC_row(self):
+        """The Office archetypes' PTAC zones have no air loop, so the
+        stand-alone hot-water PTAC row (#259) is the faithful answer; the
+        campus make-up-air row was the closest before it existed."""
         candidates = identify_candidates(_group(
             family_guess='zonal_heat_cool', cooled=True,
             heating_energy_types=['NaturalGas'],
             cooling_energy_types=['Electricity'], zonal_units=['ptac']))
-        self.assertEqual('mau-ptac-hw-hwptac-gasboiler',
-                         candidates[0]['system'])
+        self.assertEqual('ptac-hwptac-gasboiler', candidates[0]['system'])
 
     def test_a_central_cv_group_finds_a_SHARED_hydronic_psz(self):
         """Assert the PROPERTIES, not the name. My earlier version required
@@ -524,12 +535,21 @@ class TestTheTwoFieldVocabularies(unittest.TestCase):
             'terminal_type': 'none', 'zonal_units': ['ptac'],
             'ventilation_sized': False}}
 
-    def test_the_campus_PTAC_row_wins_its_own_case(self):
+    def test_the_campus_PTAC_row_is_reachable_but_not_first_without_a_loop(self):
+        """This group has PTACs and NO air loop, which is what the PTAC groups
+        of the three Office archetypes are (measured, #259: outdoor-air method
+        None, terminal 'none'). The campus row builds a make-up air unit
+        besides, so building it would add a loop the building has not got.
+        Until #259 it was the only hot-water PTAC row and won; the stand-alone
+        hot-water PTAC row now does, and the campus row stays ranked with the
+        objection stated."""
         candidates = identify_candidates(self._ptac_group(), limit=5)
-        top = candidates[0]
-        self.assertEqual('mau-ptac-hw-hwptac-gasboiler',
-                         top['system'])
-        self.assertEqual('campus', top['origin'])
+        self.assertEqual('ptac-hwptac-gasboiler', candidates[0]['system'])
+        campus = next(c for c in candidates
+                      if c['system'] == 'mau-ptac-hw-hwptac-gasboiler')
+        self.assertEqual('campus', campus['origin'])
+        self.assertIn('the group has no air loop; this row adds a make-up air unit',
+                      campus['against'])
 
     def test_a_row_with_NO_baseboard_field_is_not_penalised_for_it(self):
         """The penalty that made the campus rows unreachable. Their baseboards
@@ -844,3 +864,71 @@ class TestTheZonalVocabularyIsComplete(unittest.TestCase):
                 self.assertIn(family, families,
                               f'{kind} maps to {family!r}, which no '
                               'catalogue row has')
+
+
+def _scrubbed_group(system):
+    """The first zone group `hvac_section` records for `system` built on the
+    five-zone fixture with every loop name scrubbed."""
+    from btap.modeling import build_system
+    from btap.stock.hvac import hvac_section
+    from tests.necb.hvac_helpers import load_fixture, sorted_zones
+    model = load_fixture()
+    build_system(model, system, sorted_zones(model))
+    for i, loop in enumerate(model.getAirLoopHVACs()):
+        loop.setName(f'Air System {i + 1}')
+    for i, loop in enumerate(model.getPlantLoops()):
+        loop.setName(f'Plant {i + 1}')
+    return hvac_section(model, audit=None)['zone_groups'][0]
+
+
+@needs_sdk
+class TestTheIssue259RowsAreFoundOnTheirOwnBuildings(unittest.TestCase):
+    """#259 added nine rows for systems the catalogue could not express.
+    Measured over 124 built rows x 124 rows, names scrubbed: before the
+    scoring below, five of the nine lost their own building. The 100%-OA
+    units and the ventilation-only DOAS TIED their twins and lost the
+    legacy-name tiebreak, stand-alone PTACs went to the make-up-air PTAC row,
+    and the per-zone heat pump went to an electric-resistance rooftop unit."""
+
+    def test_each_new_row_ranks_first_on_its_own_building(self):
+        for system in ('ptac-hwptac-gasboiler', 'psz-ashp-elecsupp-perzone',
+                       'pvav-elec-pfp', 'vav-elec-pfp-scrollchiller', 'hv-elec',
+                       'doas-untempered', 'psz-gas-100oa-perzone',
+                       'hv-hw-100oa-gasboiler-shared', 'ddvav-gas-dx'):
+            with self.subTest(system=system):
+                top = identify_candidates(_scrubbed_group(system), limit=1)[0]['system']
+                self.assertEqual(system, top)
+
+    def test_the_twins_outscore_the_new_rows_on_their_own_buildings(self):
+        """The negative controls: each new row's property is scored against
+        the fact, so a mixed-air, VAV-box, tempered or make-up-air building
+        does not rank the new row above its own."""
+        for system, not_this in (
+                ('psz-gas-perzone', 'psz-gas-100oa-perzone'),
+                ('hv-hw-gasboiler-shared', 'hv-hw-100oa-gasboiler-shared'),
+                ('doas-elec', 'doas-untempered'),
+                ('vav-elec-elecbb-scrollchiller', 'vav-elec-pfp-scrollchiller')):
+            with self.subTest(system=system):
+                ranked = identify_candidates(_scrubbed_group(system), limit=200)
+                score = {c['system']: c['score'] for c in ranked}
+                self.assertGreater(score[system], score[not_this])
+
+    def test_a_ptac_group_with_an_air_loop_is_not_credited_as_stand_alone(self):
+        """The stand-alone PTAC credit needs the group to have NO air loop."""
+        facts = dict(family_guess='zonal_heat_cool', cooled=True,
+                     heating_energy_types=['NaturalGas'],
+                     cooling_energy_types=['Electricity'], zonal_units=['ptac'])
+        alone = {c['system']: c for c in identify_candidates(_group(**facts), limit=200)}
+        looped = {c['system']: c for c in identify_candidates(
+            _group(**facts, system_outdoor_air_method='ZoneSum', terminal_type='cv'),
+            limit=200)}
+        self.assertEqual(3.0, alone['ptac-hwptac-gasboiler']['score']
+                         - looped['ptac-hwptac-gasboiler']['score'])
+
+    def test_an_evaporative_cooler_is_not_handed_a_row_that_does_not_cool(self):
+        """`evap-elecbb`'s loop cools evaporatively, which the coil scan does
+        not call loop cooling, so the group looked zonally cooled and every
+        `cooling: False` row took +2. The electric H&V row then outranked the
+        rooftop unit the building had before #259."""
+        top = identify_candidates(_scrubbed_group('evap-elecbb'), limit=1)[0]['system']
+        self.assertEqual('psz-elec-elecbb', top)
