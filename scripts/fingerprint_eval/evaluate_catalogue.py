@@ -51,6 +51,7 @@ for r in catalog.rows():
         # give the same fingerprint (the shared-condenser transient)
         original = fpm._children_by_container
         for seed in (None, 7):
+
             def shuffled(m, seed=seed, original=original):
                 out = original(m)
                 for kids in out.values():
@@ -59,6 +60,7 @@ for r in catalog.rows():
                     else:
                         random.Random(seed).shuffle(kids)
                 return out
+
             fpm._children_by_container = shuffled
             try:
                 again = fpm.model_components(model)
@@ -126,9 +128,15 @@ def scheduled_spm(m):
         node = pl.supplyOutletNode()
         for spm in node.setpointManagers():
             if opt_reset(spm):
+                # the same hottest temperature, a different kind of manager
+                reset = spm.to_SetpointManagerOutdoorAirReset().get()
+                hottest = max(
+                    reset.setpointatOutdoorLowTemperature(),
+                    reset.setpointatOutdoorHighTemperature(),
+                )
                 spm.remove()
                 s = openstudio.model.ScheduleConstant(m)
-                s.setValue(82.0)
+                s.setValue(hottest)
                 openstudio.model.SetpointManagerScheduled(m, s).addToNode(node)
 
 

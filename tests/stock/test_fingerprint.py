@@ -94,9 +94,13 @@ class TestTheFingerprint(unittest.TestCase):
                 node = loop.supplyOutletNode()
                 for spm in node.setpointManagers():
                     if spm.to_SetpointManagerOutdoorAirReset().is_initialized():
+                        # the same hottest temperature, a different kind of manager
+                        reset = spm.to_SetpointManagerOutdoorAirReset().get()
+                        hottest = max(reset.setpointatOutdoorLowTemperature(),
+                                      reset.setpointatOutdoorHighTemperature())
                         spm.remove()
                         schedule = openstudio.model.ScheduleConstant(model)
-                        schedule.setValue(82.0)
+                        schedule.setValue(hottest)
                         openstudio.model.SetpointManagerScheduled(model, schedule).addToNode(node)
 
         catalogue = _catalogue(*ROWS)
