@@ -25,6 +25,7 @@ from btap._compat import sorted_by_name
 from btap.modeling.hvac import naming
 from btap.modeling.hvac.components import curves as curves_mod
 from btap.modeling.hvac.components import ecm_air
+from btap.modeling.hvac.systems import plant_loops
 from btap.modeling.hvac.systems.base_system import BaseSystem
 
 
@@ -73,6 +74,11 @@ class HpPlantFanCoils(BaseSystem):
         for c in sorted_by_name(model.getCoilCoolingWaters()):
             if str(c.handle()) not in prior:
                 hp_chw_loop.addDemandBranchForComponent(c)
+
+        # These plants serve this system's own coils only, so no later system
+        # may adopt them (Fable, review of #263): reuse searches skip them.
+        for loop in (hp_hw_loop, hp_chw_loop):
+            plant_loops.reserve_plant(loop, self.config['id'])
 
         # --- ground loop (hs14 only) ---
         if plant_type == 'gshp':

@@ -31,6 +31,12 @@ TEMPERATURE_PROFILE_FEATURE = 'btap_temperature_profile'
 #: at it, so a centrifugal row and a scroll row built into one model shared
 #: one plant. Declared here, read by `chiller_compressor`.
 CHILLER_COMPRESSOR_FEATURE = 'btap_chiller_compressor'
+#: The catalogue id of the system a plant loop belongs to EXCLUSIVELY. No
+#: other system's reuse search adopts a loop carrying it. The heat-pump
+#: fan-coil rows stamp their plants: the GSHP row's chilled-water loop holds
+#: two ChillerElectricEIRs named without a kind, so a later chiller row read it
+#: as an unreadable user plant and joined it (Fable, review of #263).
+PLANT_RESERVED_FEATURE = 'btap_plant_reserved_for'
 #: Name fallback for a chiller with no declaration (a model built before the
 #: feature, or a user's own plant), in the order the NECB efficiency pass has
 #: always matched them.
@@ -1211,6 +1217,10 @@ def chiller_compressor(chiller, name=None):
     named = next((kind for token, kind in _COMPRESSOR_NAME_TOKENS if token in lowered), None)
     if named is not None:
         return named
+    # `additionalProperties()` CREATES the object when there is none, so a
+    # reuse probe of a user's chiller would otherwise edit the user's model.
+    if not chiller.hasAdditionalProperties():
+        return None
     stored = chiller.additionalProperties().getFeatureAsString(CHILLER_COMPRESSOR_FEATURE)
     return stored.get() if stored.is_initialized() and stored.get() else None
 
@@ -1306,6 +1316,19 @@ def plant_is_hvac_candidate(loop):
                 or chw_name_fallback)
 
 
+def reserve_plant(loop, system_id):
+    """Mark `loop` as belonging to `system_id` alone (`PLANT_RESERVED_FEATURE`)."""
+    loop.additionalProperties().setFeature(PLANT_RESERVED_FEATURE, system_id)
+
+
+def reserved_for(loop):
+    """The system id `loop` is reserved for, or None. Reads without creating."""
+    if not loop.hasAdditionalProperties():
+        return None
+    stored = loop.additionalProperties().getFeatureAsString(PLANT_RESERVED_FEATURE)
+    return stored.get() if stored.is_initialized() and stored.get() else None
+
+
 def _declare_compressor(chiller, chiller_type):
     if chiller_type:
         chiller.additionalProperties().setFeature(CHILLER_COMPRESSOR_FEATURE, chiller_type)
@@ -1331,7 +1354,7 @@ def find_chilled_water(model, exclude=(), source=None,
     """
     blocked = {str(handle) for handle in exclude}
     for loop in model.getPlantLoops():
-        if str(loop.handle()) in blocked:
+        if str(loop.handle()) in blocked or reserved_for(loop) is not None:
             continue
         if not _compressor_admits(loop, chiller_type):
             continue

@@ -21,6 +21,9 @@ from tests.support import load_fixture, needs_sdk
 CENTRIFUGAL = 'vav-hw-hwbb-gasboiler-centrifchiller'
 SCROLL = 'vav-hw-hwbb-gasboiler-scrollchiller'
 HEAT_PUMP_FAN_COILS = 'doas-fc4-hw-chw-awhp-elecboiler'
+#: The GSHP variant: its chilled-water plant holds ChillerElectricEIRs named
+#: without a kind, which the AWHP variant (a plant-loop heat pump) does not.
+GSHP_FAN_COILS = 'doas-fc4-hw-chw-gshp-elecboiler'
 
 
 def _zones(model):
@@ -146,8 +149,10 @@ class TestChillerKindsDoNotShareAPlant(unittest.TestCase):
 class TestTheHeatPumpFanCoilPlantTakesOnlyItsOwnCoils(unittest.TestCase):
 
     def test_another_systems_water_coils_stay_on_its_own_plant_in_either_order(self):
-        for first, second in ((SCROLL, HEAT_PUMP_FAN_COILS), (HEAT_PUMP_FAN_COILS, SCROLL)):
-            with self.subTest(first=first):
+        for first, second in ((SCROLL, HEAT_PUMP_FAN_COILS), (HEAT_PUMP_FAN_COILS, SCROLL),
+                              (SCROLL, GSHP_FAN_COILS), (GSHP_FAN_COILS, SCROLL),
+                              (CENTRIFUGAL, GSHP_FAN_COILS), (GSHP_FAN_COILS, CENTRIFUGAL)):
+            with self.subTest(first=first, second=second):
                 model, made = _build_pair(first, second)
                 coils = _water_coils(model)
                 own = {system: {_loop_handle(coils[h]) for h in handles}
@@ -155,8 +160,20 @@ class TestTheHeatPumpFanCoilPlantTakesOnlyItsOwnCoils(unittest.TestCase):
                 for system, loops in own.items():
                     self.assertNotIn(None, loops, f"{system} has an unattached water coil")
                 # No plant loop serves coils of both systems.
-                self.assertFalse(own[SCROLL] & own[HEAT_PUMP_FAN_COILS],
+                self.assertFalse(own[first] & own[second],
                                  "a plant serves both systems' water coils")
+
+    def test_reading_a_users_chiller_does_not_edit_the_users_model(self):
+        """A reuse probe of a chiller with no kind in its name must not create
+        an AdditionalProperties object on it (Fable, review of #263)."""
+        import openstudio
+
+        from btap.modeling.hvac.systems.plant_loops import chiller_compressor
+        model = openstudio.model.Model()
+        chiller = openstudio.model.ChillerElectricEIR(model)
+        chiller.setName('User Chiller')
+        self.assertIsNone(chiller_compressor(chiller))
+        self.assertFalse(chiller.hasAdditionalProperties())
 
 
 if __name__ == '__main__':
