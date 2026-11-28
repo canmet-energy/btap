@@ -5,16 +5,16 @@
     "energyplus": "EnergyPlus, Version 25.2.0-cf7368216c",
     "mode": "sizing-only (design days from the DDY; no run period)",
     "catalogue": "systems.json",
-    "catalogue_sha256": "61732974b6c16f388dfe98b243edac5b23f87beea322446a4d356bd38302c58a",
+    "catalogue_sha256": "c0946630b19325e0d91053690c8b5dba4d704f6e111b35f16a246c6dd4948341",
     "fixture": "5ZoneNoHVAC.osm",
     "fixture_sha256": "532d43e6fedb08425f4bb0450c7f2bb1219d53f1db74d4ba09f8db6d39c38aed",
     "epw": "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw",
     "epw_sha256": "b062d77fec9ae2cba62909507bab80c83572a2cb2aa9d92e0000d0cb6b2ac4bc",
     "ddy": "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.ddy",
     "ddy_sha256": "39a3a0bbcf759b36d2545d1348afa47f9bbbd74dce02f478cc68052634c75238",
-    "source_revision": "a7d7a4d94c175d1eb81b0d3d1f499e70cbfde431",
+    "source_revision": "aaf6d1b150da940eba43ba733b9a3db5c205f11b",
     "source_dirty": false,
-    "generated_utc": "2026-11-27T19:38:41+00:00"
+    "generated_utc": "2026-11-28T05:12:57+00:00"
   },
   "systems": [
     {
@@ -25,7 +25,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.1
+      "seconds": 4.0
     },
     {
       "id": "bb-hwbb-awhp-elecbu",
@@ -35,7 +35,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.3
+      "seconds": 4.2
     },
     {
       "id": "bb-hwbb-awhp-elecbu-lift",
@@ -55,7 +55,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.3
+      "seconds": 4.4
     },
     {
       "id": "bb-hwbb-awhp-gasbu-lift",
@@ -65,7 +65,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.3
+      "seconds": 4.2
     },
     {
       "id": "bb-hwbb-district",
@@ -85,7 +85,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.3
+      "seconds": 4.2
     },
     {
       "id": "crah-acscrollchiller",
@@ -105,7 +105,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.4
+      "seconds": 4.2
     },
     {
       "id": "cvrh-ashp-elecrh-hwbb-gasboiler",
@@ -125,7 +125,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.2
+      "seconds": 4.3
     },
     {
       "id": "cvrh-ashp-gasrh-hwbb-gasboiler",
@@ -135,7 +135,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.5
+      "seconds": 4.6
     },
     {
       "id": "cvrh-hw-gasboiler",
@@ -145,7 +145,17 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.3
+      "seconds": 4.4
+    },
+    {
+      "id": "ddvav-gas-dx",
+      "legacy_name": "ddvav-gas-dx",
+      "family": "dual_duct",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.2
     },
     {
       "id": "ddvav-hw-gasboiler-scrollchiller",
@@ -155,7 +165,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.5
+      "seconds": 4.6
     },
     {
       "id": "doas-acb-elec-elecbb-acscrollchiller",
@@ -165,7 +175,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.6
+      "seconds": 4.7
     },
     {
       "id": "doas-elec",
@@ -185,7 +195,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.1
+      "seconds": 4.8
     },
     {
       "id": "doas-fc4-elec-district-acscrollchiller",
@@ -205,7 +215,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.8
+      "seconds": 4.9
     },
     {
       "id": "doas-fc4-elec-district-scrollchiller",
@@ -215,7 +225,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.1
+      "seconds": 4.9
     },
     {
       "id": "doas-fc4-elec-gasboiler-acscrollchiller",
@@ -245,7 +255,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.9
+      "seconds": 4.8
     },
     {
       "id": "doas-fc4-hw-chw-awhp-elecboiler",
@@ -295,7 +305,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.4
+      "seconds": 4.5
     },
     {
       "id": "doas-pthp-ashp-elecsupp",
@@ -305,7 +315,17 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.5
+      "seconds": 4.8
+    },
+    {
+      "id": "doas-untempered",
+      "legacy_name": "doas-untempered",
+      "family": "doas",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.2
     },
     {
       "id": "doas-vrf-ashp-elecsupp",
@@ -325,7 +345,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.1
+      "seconds": 5.3
     },
     {
       "id": "doas-vrf-elec",
@@ -335,7 +355,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.9
+      "seconds": 5.1
     },
     {
       "id": "doas-wshp-elec-gasboiler-fluidcooler",
@@ -355,7 +375,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.6
+      "seconds": 4.7
     },
     {
       "id": "doas-wshp-elec-groundloop",
@@ -365,7 +385,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.7
+      "seconds": 4.8
     },
     {
       "id": "evap",
@@ -385,7 +405,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.7
+      "seconds": 4.6
     },
     {
       "id": "furnace-gas",
@@ -408,6 +428,26 @@
       "seconds": 4.2
     },
     {
+      "id": "hv-elec",
+      "legacy_name": "hv-elec",
+      "family": "furnace",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.5
+    },
+    {
+      "id": "hv-hw-100oa-gasboiler-shared",
+      "legacy_name": "hv-hw-100oa-gasboiler-shared",
+      "family": "furnace",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.3
+    },
+    {
       "id": "hv-hw-gasboiler-shared",
       "legacy_name": "Shared hot water heating-only air handler",
       "family": "furnace",
@@ -415,7 +455,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.4
+      "seconds": 4.3
     },
     {
       "id": "mau-fc2-gas-chw-gasboiler-centrifchiller",
@@ -445,7 +485,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.9
+      "seconds": 4.8
     },
     {
       "id": "mau-fc2-gas-chw-gasboiler-scrollchiller",
@@ -455,7 +495,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.9
+      "seconds": 5.0
     },
     {
       "id": "mau-fc2-gas-gasboiler-centrifchiller",
@@ -465,7 +505,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.1
+      "seconds": 4.9
     },
     {
       "id": "mau-fc2-gas-gasboiler-recipchiller",
@@ -475,7 +515,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.8
+      "seconds": 4.9
     },
     {
       "id": "mau-fc2-gas-gasboiler-screwchiller",
@@ -485,7 +525,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.0
+      "seconds": 4.9
     },
     {
       "id": "mau-fc2-gas-gasboiler-scrollchiller",
@@ -555,7 +595,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.0
+      "seconds": 4.9
     },
     {
       "id": "mau-fc4-gas-gasboiler-centrifchiller",
@@ -565,7 +605,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.9
+      "seconds": 5.1
     },
     {
       "id": "mau-fc4-gas-gasboiler-recipchiller",
@@ -575,7 +615,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.0
+      "seconds": 5.1
     },
     {
       "id": "mau-fc4-gas-gasboiler-screwchiller",
@@ -585,7 +625,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 5.1
+      "seconds": 5.0
     },
     {
       "id": "mau-fc4-gas-gasboiler-scrollchiller",
@@ -595,7 +635,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.8
+      "seconds": 4.9
     },
     {
       "id": "mau-ptac-elec-elecbb",
@@ -615,7 +655,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.5
+      "seconds": 5.0
     },
     {
       "id": "mau-ptac-hw-elecbb-gasboiler",
@@ -645,7 +685,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.5
+      "seconds": 4.6
     },
     {
       "id": "psz-ashp-elecsupp-elecbb",
@@ -665,7 +705,17 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.8
+      "seconds": 4.7
+    },
+    {
+      "id": "psz-ashp-elecsupp-perzone",
+      "legacy_name": "psz-ashp-elecsupp-perzone",
+      "family": "psz",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.6
     },
     {
       "id": "psz-ashp-gassupp-elecbb",
@@ -685,7 +735,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.8
+      "seconds": 4.7
     },
     {
       "id": "psz-elec-elecbb",
@@ -725,7 +775,17 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.5
+      "seconds": 4.4
+    },
+    {
+      "id": "psz-gas-100oa-perzone",
+      "legacy_name": "psz-gas-100oa-perzone",
+      "family": "psz",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.4
     },
     {
       "id": "psz-gas-elecbb",
@@ -735,7 +795,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.3
+      "seconds": 4.5
     },
     {
       "id": "psz-gas-hwbb-gasboiler",
@@ -745,7 +805,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 7.6
+      "seconds": 8.0
     },
     {
       "id": "psz-gas-perzone",
@@ -755,7 +815,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.4
+      "seconds": 4.6
     },
     {
       "id": "psz-hw-gasboiler-perzone",
@@ -785,7 +845,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.8
+      "seconds": 4.7
     },
     {
       "id": "ptac-elecbb",
@@ -795,7 +855,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.6
+      "seconds": 4.2
     },
     {
       "id": "ptac-hwbb-gasboiler",
@@ -805,7 +865,17 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.5
+      "seconds": 4.4
+    },
+    {
+      "id": "ptac-hwptac-gasboiler",
+      "legacy_name": "ptac-hwptac-gasboiler",
+      "family": "zone_terminal",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.4
     },
     {
       "id": "pthp",
@@ -815,7 +885,17 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.4
+      "seconds": 4.3
+    },
+    {
+      "id": "pvav-elec-pfp",
+      "legacy_name": "pvav-elec-pfp",
+      "family": "vav_reheat",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.2
     },
     {
       "id": "pvav-hw-gasboiler",
@@ -825,7 +905,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.7
+      "seconds": 4.4
     },
     {
       "id": "pvav-hw-hwbb-awhp-elecbu",
@@ -835,7 +915,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.6
+      "seconds": 4.7
     },
     {
       "id": "pvav-hw-hwbb-awhp-gasbu",
@@ -845,7 +925,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.6
+      "seconds": 4.5
     },
     {
       "id": "pvav-hw-hwbb-gasboiler",
@@ -895,7 +975,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.1
+      "seconds": 4.4
     },
     {
       "id": "uh-hw-awhp-elecbu",
@@ -915,7 +995,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.4
+      "seconds": 4.6
     },
     {
       "id": "uh-hw-gasboiler",
@@ -935,7 +1015,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.6
+      "seconds": 4.5
     },
     {
       "id": "vav-elec-elecbb-recipchiller",
@@ -955,7 +1035,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.5
+      "seconds": 4.4
     },
     {
       "id": "vav-elec-elecbb-scrollchiller",
@@ -975,7 +1055,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.6
+      "seconds": 4.9
     },
     {
       "id": "vav-elec-hwbb-gasboiler-recipchiller",
@@ -985,7 +1065,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.7
+      "seconds": 4.6
     },
     {
       "id": "vav-elec-hwbb-gasboiler-screwchiller",
@@ -995,7 +1075,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.7
+      "seconds": 4.6
     },
     {
       "id": "vav-elec-hwbb-gasboiler-scrollchiller",
@@ -1005,7 +1085,17 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.7
+      "seconds": 4.6
+    },
+    {
+      "id": "vav-elec-pfp-scrollchiller",
+      "legacy_name": "vav-elec-pfp-scrollchiller",
+      "family": "vav_reheat",
+      "status": "ok",
+      "severe": 0,
+      "fatal": 0,
+      "completed": true,
+      "seconds": 4.5
     },
     {
       "id": "vav-hw-elecbb-gasboiler-centrifchiller",
@@ -1015,7 +1105,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.7
+      "seconds": 4.8
     },
     {
       "id": "vav-hw-elecbb-gasboiler-recipchiller",
@@ -1035,7 +1125,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.7
+      "seconds": 4.8
     },
     {
       "id": "vav-hw-elecbb-gasboiler-scrollchiller",
@@ -1045,7 +1135,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.9
+      "seconds": 4.7
     },
     {
       "id": "vav-hw-gasboiler-scrollchiller",
@@ -1055,7 +1145,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.8
+      "seconds": 4.7
     },
     {
       "id": "vav-hw-hwbb-awhp-elecbu-scrollchiller",
@@ -1065,7 +1155,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.8
+      "seconds": 4.7
     },
     {
       "id": "vav-hw-hwbb-awhp-gasbu-scrollchiller",
@@ -1075,7 +1165,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.8
+      "seconds": 4.6
     },
     {
       "id": "vav-hw-hwbb-erv-gasboiler-scrollchiller",
@@ -1085,7 +1175,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.7
+      "seconds": 4.9
     },
     {
       "id": "vav-hw-hwbb-gasboiler-centrifchiller",
@@ -1095,7 +1185,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.9
+      "seconds": 4.7
     },
     {
       "id": "vav-hw-hwbb-gasboiler-recipchiller",
@@ -1105,7 +1195,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.9
+      "seconds": 4.8
     },
     {
       "id": "vav-hw-hwbb-gasboiler-screwchiller",
@@ -1125,7 +1215,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.8
+      "seconds": 4.7
     },
     {
       "id": "vrf",
@@ -1135,7 +1225,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.5
+      "seconds": 4.6
     },
     {
       "id": "windowac-elecbb",
@@ -1155,7 +1245,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.6
+      "seconds": 4.5
     },
     {
       "id": "zone-erv",
@@ -1165,7 +1255,7 @@
       "severe": 0,
       "fatal": 0,
       "completed": true,
-      "seconds": 4.3
+      "seconds": 4.6
     }
   ]
 }
