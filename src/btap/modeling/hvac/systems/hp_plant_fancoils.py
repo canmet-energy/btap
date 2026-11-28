@@ -25,6 +25,7 @@ from btap._compat import sorted_by_name
 from btap.modeling.hvac import naming
 from btap.modeling.hvac.components import curves as curves_mod
 from btap.modeling.hvac.components import ecm_air
+from btap.modeling.hvac.systems import plant_loops
 from btap.modeling.hvac.systems.base_system import BaseSystem
 
 
@@ -35,6 +36,14 @@ class HpPlantFanCoils(BaseSystem):
         # 'hydronic' (coil_hw/chw) or 'ashp' (hs16)
         air_eqpt = self.config.get('air_eqpt', 'hydronic')
         supp = self.config.get('supp_htg_fuel', 'None')
+
+        # Water coils that exist BEFORE this build belong to other systems.
+        # The plants built below attach only the coils this build creates
+        # (#261 step 2): sweeping every coil in the model re-plumbed another
+        # hydronic system's coils onto this heat-pump plant, and which ones
+        # depended on build order.
+        prior = {str(c.handle()) for c in model.getCoilHeatingWaters()}
+        prior |= {str(c.handle()) for c in model.getCoilCoolingWaters()}
 
         # --- DOAS + zone fan coils (coils intentionally unattached until plants exist) ---
         air_loop = ecm_air.assemble(
@@ -57,12 +66,19 @@ class HpPlantFanCoils(BaseSystem):
         # --- heating plant ---
         hp_hw_loop, hw_hp = self._build_hw_plant(model, plant_type, boiler_fuels)
         for c in sorted_by_name(model.getCoilHeatingWaters()):
-            hp_hw_loop.addDemandBranchForComponent(c)
+            if str(c.handle()) not in prior:
+                hp_hw_loop.addDemandBranchForComponent(c)
 
         # --- cooling plant ---
         hp_chw_loop, chw_eqpt = self._build_chw_plant(model, plant_type, hw_hp)
         for c in sorted_by_name(model.getCoilCoolingWaters()):
-            hp_chw_loop.addDemandBranchForComponent(c)
+            if str(c.handle()) not in prior:
+                hp_chw_loop.addDemandBranchForComponent(c)
+
+        # These plants serve this system's own coils only, so no later system
+        # may adopt them (Fable, review of #263): reuse searches skip them.
+        for loop in (hp_hw_loop, hp_chw_loop):
+            plant_loops.reserve_plant(loop, self.config['id'])
 
         # --- ground loop (hs14 only) ---
         if plant_type == 'gshp':
