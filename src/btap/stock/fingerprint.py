@@ -191,6 +191,30 @@ def _schedule_is_always_on(schedule):
     return None     # not read: neither "always" nor "scheduled" is known
 
 
+def _all_outdoor_air(controller, sizing):
+    """Whether an air loop RUNS on 100% outdoor air.
+
+    - a minimum outdoor-air fraction that is 1 at every hour; or
+    - minimum and maximum outdoor-air flows fixed and equal; or
+    - both autosized, with 100% outdoor air declared in sizing AND the supply
+      sized on the ventilation requirement: the supply is then sized to the
+      outdoor air, so the two autosized flows come out equal. This is how a
+      DOAS is usually authored, ours included.
+
+    The sizing flags ALONE are not evidence: the SDK's Appendix G System 5 and
+    7 VAV set them, size on the sensible load, and run on mixed air.
+    """
+    minimum = opt(controller.minimumFractionofOutdoorAirSchedule())
+    if minimum is not None and _schedule_is_always_on(minimum):
+        return True
+    if controller.isMinimumOutdoorAirFlowRateAutosized() and controller.isMaximumOutdoorAirFlowRateAutosized():
+        return (sizing.allOutdoorAirinCooling() and sizing.allOutdoorAirinHeating()
+                and sizing.typeofLoadtoSizeOn() == 'VentilationRequirement')
+    low = opt(controller.minimumOutdoorAirFlowRate())
+    high = opt(controller.maximumOutdoorAirFlowRate())
+    return low is not None and high is not None and low > 0 and abs(low - high) <= 1e-9 * max(low, high)
+
+
 def _availability(coil):
     getter = getattr(coil, 'availabilitySchedule', None)
     if not callable(getter):
@@ -387,13 +411,14 @@ def zone_components(model, zone, children=None):
                     part.controls.add(
                         f'ahu:economizer:{controller.getEconomizerControlType()}')
                     # 100% outdoor air is IDENTITY (a DOAS or make-up air
-                    # unit), not a control: without it `doas-elec` and
-                    # `psz-elec-perzone` were one class. Declared by the
-                    # sizing, or a minimum fraction that is 1 at every hour.
-                    minimum = opt(controller.minimumFractionofOutdoorAirSchedule())
-                    sizing = loop.sizingSystem()
-                    if ((sizing.allOutdoorAirinCooling() and sizing.allOutdoorAirinHeating())
-                            or (minimum is not None and _schedule_is_always_on(minimum))):
+                    # unit), read from how the controller OPERATES: a minimum
+                    # fraction that is 1 at every hour, or minimum and maximum
+                    # flows set and equal. Not the sizing flags: EnergyPlus
+                    # uses those for sizing only, and the SDK's own Appendix G
+                    # System 5 and 7 VAV set them while running on mixed air,
+                    # which made every independent VAV model a non-match
+                    # (OpenStudio-resources, 2026-11-28).
+                    if _all_outdoor_air(controller, loop.sizingSystem()):
                         part.identity.add('ahu:all_outdoor_air')
                     for oac in oa.components():
                         okind = _kind(oac)

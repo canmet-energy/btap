@@ -114,6 +114,25 @@ class TestTheFingerprint(unittest.TestCase):
                     self.assertIn('plant:heating:spm:SetpointManager_Scheduled',
                                   result['control_differences']['model_only'])
 
+    def test_100_percent_outdoor_air_is_read_from_operation_not_sizing(self):
+        """EnergyPlus uses the sizing "100% outdoor air" flags for SIZING only;
+        the SDK's own Appendix G System 5 and 7 VAV set them while running on
+        mixed air, and every independent VAV model failed to match until the
+        controller was read instead (OpenStudio-resources, 2026-11-28)."""
+        from btap.stock import fingerprint
+
+        def sizing_flags(model):
+            for loop in model.getAirLoopHVACs():
+                loop.sizingSystem().setAllOutdoorAirinCooling(True)
+                loop.sizingSystem().setAllOutdoorAirinHeating(True)
+
+        plain = _zone(_built('psz-gas-hwbb-gasboiler'))
+        flagged = _zone(_built('psz-gas-hwbb-gasboiler', mutate=sizing_flags))
+        self.assertEqual(fingerprint.signature(plain), fingerprint.signature(flagged))
+        # ...while a DOAS, whose controller runs on outdoor air only, keeps it
+        doas = _zone(_built('doas-elec'))
+        self.assertTrue(any('ahu:all_outdoor_air' in c.identity for c in doas))
+
     def test_a_different_fuel_is_a_different_system(self):
         from btap.stock import fingerprint
         catalogue = _catalogue(*ROWS)
